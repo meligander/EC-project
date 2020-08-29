@@ -10,6 +10,7 @@ const pdfTemplate = require("../../templates/list");
 const Category = require("../../models/Category");
 const Installment = require("../../models/Installment");
 const Enrollment = require("../../models/Enrollment");
+const { parse } = require("path");
 
 //@route    GET api/category
 //@desc     get all categories
@@ -130,14 +131,16 @@ router.put(
    [
       auth,
       adminAuth,
-      check("month", "El mes de actualización es necesario").not().isEmpty(),
+      check("date", "El mes de actualización es necesario").not().isEmpty(),
    ],
    async (req, res) => {
       //An array of categories
-      const { categories, month } = req.body;
+      const { categories, date } = req.body;
 
-      const date = new Date();
-      const year = date.getFullYear();
+      const dateToday = new Date();
+
+      const month = parseInt(date.substring(5));
+      const year = parseInt(date.substring(0, 4));
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -188,9 +191,9 @@ router.put(
                for (let y = 0; y < enrollments.length; y++) {
                   const installments = await Installment.find({
                      enrollment: enrollments[y]._id,
-                     student: enrollments[y].student,
                      number:
-                        enrollments[y].year === year
+                        enrollments[y].year === year &&
+                        year === dateToday.getFullYear()
                            ? { $gte: month, $ne: 0 }
                            : {
                                 $ne: 0,
