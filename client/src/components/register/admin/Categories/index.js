@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
-import moment from "moment";
 import PropTypes from "prop-types";
 
 import {
@@ -27,27 +26,31 @@ const Categories = ({
    const [otherValues, setOtherValues] = useState({
       min: "",
       max: "",
-      month: "",
+      date: "",
       toggleModal: false,
    });
 
-   const { min, max, month, toggleModal } = otherValues;
+   const { min, max, date, toggleModal } = otherValues;
 
    useEffect(() => {
       const initInput = () => {
          setFormData(categories);
       };
       const monthMinMax = (date, num) => {
-         return date.getMonth() + num > 9
-            ? date.getMonth() + num
-            : "0" + (date.getMonth() + num);
+         if (date.getMonth() + num < 11)
+            return `${date.getFullYear()}-${date.getMonth() + num}`;
+         else {
+            let value = num - (11 - date.getMonth());
+            if (value < 9) value = "0" + value;
+            return `${date.getFullYear() + 1}-${value}`;
+         }
       };
       const setMinMax = () => {
          const date = new Date();
          setOtherValues((prev) => ({
             ...prev,
-            min: date.getFullYear() + "-" + monthMinMax(date, 1),
-            max: date.getFullYear() + "-" + monthMinMax(date, 4),
+            min: monthMinMax(date, 1),
+            max: monthMinMax(date, 4),
          }));
       };
 
@@ -78,17 +81,12 @@ const Categories = ({
    const onChangeMonth = (e) => {
       setOtherValues({
          ...otherValues,
-         month: e.target.value,
+         date: e.target.value,
       });
    };
 
    const onSubmit = () => {
-      const mon = moment(month);
-      updateCategories(
-         { categories: formData, month: mon.month() + 1 },
-         history,
-         userLogged._id
-      );
+      updateCategories({ categories: formData, date }, history, userLogged._id);
    };
 
    const pdfGeneratorSave = () => {
@@ -110,15 +108,15 @@ const Categories = ({
                   <div className="form-group">
                      <input
                         className="form-input"
-                        id="month"
+                        id="date"
                         type="month"
-                        value={month}
-                        name="month"
+                        value={date}
+                        name="date"
                         onChange={onChangeMonth}
                         min={min}
                         max={max}
                      />
-                     <label htmlFor="month" className="form-label show">
+                     <label htmlFor="date" className="form-label show">
                         Seleccione el mes desde el cual correrá el aumento de
                         precio.
                      </label>
@@ -152,7 +150,7 @@ const Categories = ({
                   <div className="btn-right p-2">
                      <button type="submit" className="btn btn-primary">
                         <i className="far fa-save"></i>
-                        <span className="hide-sm">&nsbp; Actualizar</span>
+                        <span className="hide-sm">&nbsp; Actualizar</span>
                      </button>
                      <button
                         className="btn btn-secondary"
