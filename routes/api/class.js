@@ -1,0 +1,402 @@
+const express = require('express');
+const router = express.Router();
+const moment = require('moment');
+const auth = require('../../middleware/auth');
+const adminAuth = require('../../middleware/adminAuth');
+const { check, validationResult } = require('express-validator');
+
+const Class = require('../../models/Class');
+const User = require('../../models/User');
+const Enrollment = require('../../models/Enrollment');
+
+//@route    GET api/class
+//@desc     Get all classes || with filter
+//@access   Private
+router.get('/', [auth], async (req, res) => {
+	try {
+		const date = new Date();
+		let classes;
+		if (Object.entries(req.query).length === 0) {
+			classes = await Class.find({ year: date.getFullYear() })
+				.populate({
+					path: 'category',
+					model: 'category',
+					select: 'name',
+				})
+				.populate({
+					path: 'teacher',
+					model: 'user',
+					select: ['lastname', 'name'],
+				});
+		} else {
+			let filter = {
+				...(req.query.teacher !== undefined && { teacher: req.query.teacher }),
+				...(req.query.category !== undefined && {
+					category: req.query.category,
+				}),
+				year: date.getFullYear(),
+			};
+
+			classes = await Class.find((filter.teacher || filter.category) && filter)
+				.populate({
+					path: 'category',
+					model: 'category',
+					select: 'name',
+				})
+				.populate({
+					path: 'teacher',
+					model: 'user',
+					select: ['lastname', 'name'],
+				});
+		}
+
+		if (classes.length === 0) {
+			return res
+				.status(400)
+				.json({ msg: 'No se encontraron clases con dichas descripciones' });
+		}
+
+		res.json(classes);
+	} catch (err) {
+		console.error(err.message);
+		return res.status(500).send('Server Error');
+	}
+});
+
+//@route    GET api/class/:class_id
+//@desc     Get a class
+//@access   Private
+router.get('/:class_id', auth, async (req, res) => {
+	try {
+		let classinfo = await Class.findOne({ _id: req.params.class_id })
+			.populate('category', ['name'])
+			.populate('teacher', ['name', 'lastname']);
+		if (!classinfo) {
+			return res
+				.status(400)
+				.json({ msg: 'No se encontró una clase con dichas descripciones' });
+		}
+
+		res.json(classinfo);
+	} catch (err) {
+		console.error(err.message);
+		return res.status(500).send('Server Error');
+	}
+});
+
+//@route    GET api/class/user/:id
+//@desc     Get logged user's class
+//@access   Private
+router.get('/user/:id', auth, async (req, res) => {
+	try {
+		const date = new Date();
+		let user = await User.findOne({ _id: req.params.id });
+		let classinfo = await Class.findOne({
+			_id: user.classroom,
+			year: date.getFullYear(),
+		})
+			.populate('category', ['name'])
+			.populate('teacher', ['name', 'lastname']);
+		if (!classinfo) {
+			return res
+				.status(400)
+				.json({ msg: 'No se encontró una clase con dichas descripciones' });
+		}
+
+		res.json(classinfo);
+	} catch (err) {
+		console.error(err.message);
+		return res.status(500).send('Server Error');
+	}
+});
+
+//@route    GET api/class/user/:id
+//@desc     Get active classs
+//@access   Private
+router.get('/year/active', auth, async (req, res) => {
+	try {
+		const date = new Date();
+		const year = date.getFullYear();
+		let classes = await Class.find({ year });
+		res.json(classes.length);
+	} catch (err) {
+		console.error(err.message);
+		return res.status(500).send('Server Error');
+	}
+});
+
+//@route    POST api/class
+//@desc     Register a class
+//@access   Private
+router.post(
+	'/',
+	[
+		auth,
+		adminAuth,
+		check('teacher', 'El profesor es necesario').not().isEmpty(),
+		check('category', 'La categoría es necesaria').not().isEmpty(),
+	],
+	async (req, res) => {
+		let {
+			teacher,
+			classroom,
+			category,
+			day1,
+			day2,
+			hourin1,
+			hourin2,
+			hourout1,
+			hourout2,
+			students,
+		} = req.body;
+
+		const date = new Date();
+		const year = date.getFullYear();
+
+		let errors = validationResult(req);
+		errors = errors.array();
+
+		if (errors.length > 0) {
+			return res.status(400).json({ errors });
+		}
+
+		try {
+			let hours = [hourin1, hourin2, hourout1, hourout2];
+			for (let x = 0; x < hours.length; x++) {
+				if (hours[x] !== undefined) {
+					const date = moment('2000-01-01 ' + hours[x]).format(
+						'YYYY-MM-DD HH:mm'
+					);
+					hours[x] = date;
+				}
+			}
+
+			let data = {
+				teacher,
+				category,
+				...(classroom && { classroom: classroom }),
+				...(day1 && { day1: day1 }),
+				...(day2 && { day2: day2 }),
+				...(hours[0] && { hourin1: hours[0] }),
+				...(hours[1] && { hourin2: hours[1] }),
+				...(hours[2] && { hourout1: hours[2] }),
+				...(hours[3] && { hourout2: hours[3] }),
+				year,
+			};
+
+			teacher = await User.findOne({ _id: teacher });
+			if (!teacher && teacher.type !== 'Profesor')
+				return res
+					.status(400)
+					.json({ errors: [{ msg: 'El usuario no es un profesor' }] });
+
+			const enrollments = await Enrollment.find({ category });
+
+			for (let x = 0; x < students.length; x++) {
+				let enrollment = false;
+				let student = await User.findOne({ _id: students[x]._id });
+				if (student.classroom !== null) {
+					return res.status(400).json({
+						errors: [
+							{
+								msg:
+									'El alumno ' +
+									student.lastname +
+									' ' +
+									student.name +
+									' ya tiene asignada una clase',
+							},
+						],
+					});
+				}
+				for (let y = 0; y < enrollments.length; y++) {
+					if (student.id == enrollments[y].student) enrollment = true;
+				}
+				if (!enrollment) {
+					return res.status(400).json({
+						errors: [
+							{
+								msg:
+									'El alumno ' +
+									student.lastname +
+									' ' +
+									student.name +
+									' no está inscripto a dicha categoría',
+							},
+						],
+					});
+				}
+			}
+
+			let classinfo = new Class(data);
+
+			await classinfo.save();
+
+			for (let x = 0; x < students.length; x++) {
+				await User.findOneAndUpdate(
+					{ _id: students[x]._id },
+					{ classroom: classinfo.id }
+				);
+			}
+
+			res.json(classinfo);
+		} catch (err) {
+			console.error(err.message);
+			return res.status(500).send('Server Error');
+		}
+	}
+);
+
+//@route    PUT api/class/:id
+//@desc     Update a class
+//@access   Private
+router.put(
+	'/:id',
+	[
+		auth,
+		adminAuth,
+		check('teacher', 'El profesor es necesario').not().isEmpty(),
+	],
+	async (req, res) => {
+		let {
+			teacher,
+			classroom,
+			category,
+			day1,
+			day2,
+			hourin1,
+			hourin2,
+			hourout1,
+			hourout2,
+			students,
+		} = req.body;
+
+		let errors = validationResult(req);
+		errors = errors.array();
+
+		try {
+			let hours = [hourin1, hourin2, hourout1, hourout2];
+			for (let x = 0; x < hours.length; x++) {
+				if (hours[x] !== undefined) {
+					const date = moment('2000-01-01 ' + hours[x]).format(
+						'YYYY-MM-DD HH:mm'
+					);
+					hours[x] = date;
+				}
+			}
+
+			let data = {
+				teacher,
+				...(classroom && { classroom: classroom }),
+				...(day1 && { day1: day1 }),
+				...(day2 && { day2: day2 }),
+				...(hours[0] && { hourin1: hours[0] }),
+				...(hours[1] && { hourin2: hours[1] }),
+				...(hours[2] && { hourout1: hours[2] }),
+				...(hours[3] && { hourout2: hours[3] }),
+			};
+
+			teacher = await User.findOne({ _id: teacher });
+			if (!teacher && teacher.type !== 'Profesor')
+				errors.push({ msg: 'El usuario no es un profesor' });
+
+			const enrollments = await Enrollment.find({ category });
+
+			for (let x = 0; x < students.length; x++) {
+				let student = await User.findOne({ _id: students[x]._id });
+				if (student.classroom !== null) {
+					if (student.classroom != req.params.id) {
+						errors.push({
+							msg:
+								'El alumno ' +
+								student.lastname +
+								' ' +
+								student.name +
+								' ya tiene asignada una clase',
+						});
+					}
+				}
+
+				for (let y = 0; y < enrollments.length; y++) {
+					if (student.id == enrollments[y].student) enrollment = true;
+				}
+				if (!enrollment) {
+					return res.status(400).json({
+						errors: [
+							{
+								msg:
+									'El alumno ' +
+									student.lastname +
+									' ' +
+									student.name +
+									' no está inscripto a dicha categoría',
+							},
+						],
+					});
+				}
+			}
+
+			if (errors.length > 0) {
+				return res.status(400).json({ errors });
+			}
+
+			let classinfo = await Class.findOneAndUpdate(
+				{ _id: req.params.id },
+				{ $set: data },
+				{ new: true }
+			);
+
+			const oldStudents = await User.find({ classroom: req.params.id });
+			const toDelte = oldStudents;
+
+			for (let x = 0; x < students.length; x++) {
+				for (const y in oldStudents) {
+					if (students[x]._id === oldStudents[y].id) {
+						toDelte.splice(y, 1);
+					} else {
+						await User.findOneAndUpdate(
+							{ _id: students[x]._id },
+							{ classroom: req.params.id }
+						);
+					}
+				}
+			}
+
+			for (let x = 0; x < toDelte.length; x++) {
+				await User.findOneAndUpdate(
+					{ _id: toDelte[x].id },
+					{ classroom: null }
+				);
+			}
+
+			res.json(classinfo);
+		} catch (err) {
+			console.error(err.message);
+			return res.status(500).send('Server Error');
+		}
+	}
+);
+
+//@route    DELETE api/class/:id
+//@desc     Delete a class
+//@access   Private
+router.delete('/:id', [auth, adminAuth], async (req, res) => {
+	try {
+		//Remove user
+		await Class.findOneAndRemove({ _id: req.params.id });
+
+		//Delete the property classroom form students
+		const students = await User.find({ classroom: req.params.id });
+
+		for (let x = 0; x < students.length; x++) {
+			await User.findOneAndUpdate({ _id: students[x].id }, { classroom: null });
+		}
+
+		res.json({ msg: 'Class deleted' });
+	} catch (err) {
+		console.error(err.message);
+		res.status(500).send('Server error');
+	}
+});
+
+module.exports = router;

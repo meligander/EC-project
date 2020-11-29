@@ -1,0 +1,207 @@
+table {
+	border-collapse: collapse;
+	width: 100%;
+	margin: 0 auto !important;
+	--table-layout: fixed;
+	font-size: $default-font-size;
+
+	&.smaller {
+		width: 80%;
+		font-size: 2.1rem;
+		margin: 3rem auto !important;
+
+		@include respond(phone) {
+			width: 90%;
+		}
+
+		@include respond(small-phone) {
+			width: 100%;
+		}
+
+		th:last-child,
+		td:last-child {
+			width: 25%;
+			font-size: 1.6rem;
+
+			@include respond(small-phone) {
+				width: 20%;
+				.btn-danger {
+					font-size: 1.3rem;
+					padding: 0.5rem 1.3rem;
+				}
+			}
+		}
+
+		&.col-same-size {
+			th:last-child,
+			td:last-child {
+				width: 40%;
+				font-size: inherit;
+			}
+		}
+	}
+
+	&.end-btn {
+		th:last-child,
+		td:last-child {
+			width: 15%;
+		}
+	}
+
+	&.large-pad {
+		th,
+		td {
+			padding: 2rem 1rem;
+		}
+	}
+
+	&.search tr:hover {
+		background-color: lighten($light-color, 15%);
+	}
+
+	&.installments td:hover {
+		background-color: lighten($secondary-color, 25%);
+	}
+
+	.option-input {
+		appearance: none;
+		position: relative;
+		display: inline-block;
+		outline: none;
+		border: none;
+		border-radius: 50%;
+		height: 2.5rem;
+		width: 2.5rem;
+		background: inherit;
+		color: $dark-color;
+		cursor: pointer;
+		z-index: 1000;
+		@include easeOut;
+
+		&:hover {
+			background-color: lighten($light-color, 9%);
+		}
+
+		&:checked {
+			opacity: 0.7;
+
+			&::before {
+				position: absolute;
+				content: '✔';
+				display: inline-block;
+				text-align: center;
+				font-size: 1.8rem;
+				margin-left: 0.4rem;
+			}
+
+			&::after {
+				display: none;
+			}
+		}
+	}
+
+	input[type='number'],
+	input[type='text'],
+	select,
+	textarea {
+		border: none;
+		color: inherit;
+		width: 100%;
+		font-size: inherit;
+		text-align: center;
+		background-color: inherit;
+	}
+
+	select {
+		text-align-last: center;
+		font-size: 1.9rem;
+	}
+
+	textarea {
+		text-align: end;
+	}
+
+	input[type='number']:focus,
+	input[type='text']:focus,
+	select:focus,
+	textarea:focus {
+		outline: none;
+		border-bottom: 2px solid rgba($primary-color, 0.4);
+	}
+
+	th,
+	td {
+		padding: 1rem;
+		text-align: center !important;
+
+		&.paid {
+			color: $success-color;
+		}
+		&.debt {
+			color: $danger-color;
+		}
+
+		@include respond(small-phone) {
+			padding: 0.5rem;
+		}
+	}
+
+	th {
+		background-color: lighten($primary-color, 10%);
+		color: $white-color;
+		opacity: 0.65;
+
+		&.blank {
+			background-color: inherit;
+		}
+	}
+
+	tr:nth-child(odd) {
+		background-color: lighten($secondary-color, 28%);
+	}
+	tr:nth-child(even) {
+		background-color: $white-color;
+	}
+}
+
+.wrapper {
+	position: relative;
+	overflow-x: auto;
+	white-space: nowrap;
+	max-width: 100%;
+
+	&::-webkit-scrollbar {
+		height: 1rem;
+
+		&-track {
+			box-shadow: inset 0 0 5px $secondary-color;
+			border-radius: 10px;
+		}
+
+		&-thumb {
+			background: lighten($light-color, 5%);
+			border-radius: 10px;
+
+			&:hover {
+				background: darken($light-color, 5%);
+			}
+		}
+	}
+	table {
+		&.fit th {
+			width: 4rem !important;
+		}
+
+		&.stick th:first-child,
+		&.stick td:first-child {
+			z-index: 1999;
+			position: sticky;
+			left: 0;
+			top: auto;
+		}
+
+		.btn {
+			padding: 0.2rem 1rem;
+		}
+	}
+}

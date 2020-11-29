@@ -1,0 +1,25 @@
+.contact {
+	background-image: linear-gradient(
+			to right bottom,
+			rgba($light-color, 0.75),
+			rgba($primary-color, 0.75)
+		),
+		url(../img/gallery-5.png);
+	background-size: cover;
+	min-height: 90vh;
+}
+
+.google {
+	padding-bottom: 6rem;
+
+	iframe {
+		width: 70%;
+		height: 40rem;
+		display: block;
+		margin: 0 auto;
+
+		@include respond(phone) {
+			width: 90%;
+		}
+	}
+}
