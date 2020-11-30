@@ -16,6 +16,7 @@
 		"bcryptjs": "^2.4.3",
 		"cloudinary": "^1.22.0",
 		"config": "^3.3.1",
+		"cors": "^2.8.5",
 		"express": "^4.17.1",
 		"express-validator": "^6.4.1",
 		"html-pdf": "^2.2.0",

@@ -3,9 +3,9 @@ const router = express.Router();
 const auth = require('../../middleware/auth');
 const adminAuth = require('../../middleware/adminAuth');
 const { check, validationResult } = require('express-validator');
-const moment = require('moment');
 const pdf = require('html-pdf');
 const pdfTemplate = require('../../documents/enrollments');
+const moment = require('moment');
 
 const Enrollment = require('../../models/Enrollment');
 const Installment = require('../../models/Installment');
@@ -227,23 +227,66 @@ router.post(
 	}
 );
 
-//@route    POST api/enrollment/list
-//@desc     Update the category of the enrollment
+//@route    POST api/enrollment/create-list
+//@desc     Create a pdf of enrollment
 //@access   Private
-router.post('/list', (req, res) => {
-	const date = moment().format().substring(0, 10);
-	const name = 'Inscripciones-' + date + '.pdf';
+router.post('/create-list', (req, res) => {
+	const name = 'Reports/enrollments.pdf';
 
-	const enrollments = req.body;
-	pdf.create(pdfTemplate(enrollments), {}).toFile(name, (err) => {
+	const enrollment = req.body;
+
+	let htmlstring = '';
+
+	for (let x = 0; x < enrollment.length; x++) {
+		htmlstring =
+			htmlstring +
+			'<tr> <td>' +
+			moment(enrollment[x].date).format('DD/MM/YY') +
+			'</td>';
+		htmlstring =
+			htmlstring + '<td>' + enrollment[x].student.studentnumber + '</td>';
+		htmlstring =
+			htmlstring +
+			'<td>' +
+			enrollment[x].student.lastname +
+			' ' +
+			enrollment[x].student.name +
+			'</td>';
+		htmlstring = htmlstring + '<td>' + enrollment[x].category.name + '</td>';
+		htmlstring = htmlstring + '<td>' + enrollment[x].year + '</td> </tr>';
+	}
+
+	//const dirname = __dirname.substring(0, __dirname.indexOf('routes'));
+
+	//const base = 'file:///' + dirname;
+
+	/* const base1 = 'file:///' + req.protocol + '://' + req.get('host');
+
+	console.log(base1); */
+
+	const options = {
+		format: 'A4',
+		//base: base1,
+	};
+
+	pdf.create(pdfTemplate(htmlstring), options).toFile(name, (err) => {
 		if (err) {
 			res.send(Promise.reject());
 		}
-		const dir = __dirname.substring(0, __dirname.indexOf('routes'));
-		console.log(dir + name);
-		res.sendFile(dir + name);
-		//res.send(Promise.resolve());
+
+		res.send(Promise.resolve());
 	});
+});
+
+//@route    GET api/enrollment/fetch-list
+//@desc     Get the pdf of enrollments
+//@access   Private
+router.get('/fetch-list', (req, res) => {
+	const name = 'Reports/enrollments.pdf';
+
+	const dir = __dirname.substring(0, __dirname.indexOf('routes'));
+
+	res.sendFile(dir + name);
 });
 
 //@route    PUT api/enrollment/:id

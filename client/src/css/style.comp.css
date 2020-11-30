@@ -909,14 +909,18 @@ textarea {
   border-radius: 3px;
   box-shadow: 0 1.5rem 4rem rgba(51, 51, 51, 0.15);
   transition: transform 0.2s;
+  word-break: break-all;
   /* &:not(:last-child) {
 		margin-left: $vertical-grid;
 	}
  */ }
+  @media only screen and (max-width: 56.25em) {
+    .contact-box {
+      width: 30%;
+      padding: 3rem; } }
   @media only screen and (max-width: 37.5em) {
     .contact-box {
-      width: 60%;
-      padding: 3rem; }
+      width: 60%; }
       .contact-box:not(:last-child) {
         margin-bottom: 6rem; } }
   @media only screen and (max-width: 25em) {
@@ -1695,9 +1699,11 @@ nav img {
   background-image: linear-gradient(to right bottom, rgba(174, 216, 242, 0.75), rgba(20, 84, 140, 0.75)), url(../img/gallery-5.png);
   background-size: cover;
   min-height: 90vh; }
+  .contact h1 {
+    padding: 6rem 0; }
 
 .google {
-  padding-bottom: 6rem; }
+  padding: 6rem 0; }
   .google iframe {
     width: 70%;
     height: 40rem;

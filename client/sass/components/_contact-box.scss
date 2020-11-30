@@ -5,10 +5,15 @@
 	border-radius: 3px;
 	box-shadow: 0 1.5rem 4rem rgba($black-color, 0.15);
 	transition: transform 0.2s;
+	word-break: break-all;
+
+	@include respond(tab-port) {
+		width: 30%;
+		padding: 3rem;
+	}
 
 	@include respond(phone) {
 		width: 60%;
-		padding: 3rem;
 
 		&:not(:last-child) {
 			margin-bottom: $horizontal-grid;

@@ -8,6 +8,8 @@ import {
 	ENROLLMENT_UPDATED,
 } from './types';
 import axios from 'axios';
+import moment from 'moment';
+import { saveAs } from 'file-saver';
 import { setAlert } from './alert';
 import { updateLoadingSpinner, updateAdminDashLoading } from './mixvalues';
 
@@ -159,19 +161,25 @@ export const deleteEnrollment = (enroll_id) => async (dispatch) => {
 
 export const enrollmentsPDF = (enrollments) => async (dispatch) => {
 	let enrollment = JSON.stringify(enrollments);
-	console.log(enrollments);
-	const config = {
-		headers: {
-			'Content-Type': 'application/json',
-		},
-	};
-	try {
-		await axios.post('/api/enrollment/list', enrollment, config);
 
-		/* dispatch({
-			type: !enroll_id ? ENROLLMENT_REGISTERED : ENROLLMENT_UPDATED,
-			payload: res.data,
-		}); */
+	try {
+		const config = {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		};
+
+		await axios.post('/api/enrollment/create-list', enrollment, config);
+
+		const pdf = await axios.get('/api/enrollment/fetch-list', {
+			responseType: 'blob',
+		});
+
+		const pdfBlob = new Blob([pdf.data], { type: 'application/pdf' });
+
+		const date = moment().format('DD-MM-YYYY');
+
+		saveAs(pdfBlob, `Inscripciones-${date}.pdf`);
 
 		dispatch(setAlert('PDF Generado', 'success', '2'));
 	} catch (err) {
