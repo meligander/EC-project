@@ -7,7 +7,11 @@ import ListButtons from './ListButtons';
 import DateFilter from './DateFilter';
 import Confirm from '../../../modal/Confirm';
 import { updatePageNumber } from '../../../../actions/mixvalues';
-import { loadRegisters, deleteRegister } from '../../../../actions/register';
+import {
+	loadRegisters,
+	deleteRegister,
+	registerPDF,
+} from '../../../../actions/register';
 
 const RegisterList = ({
 	auth: { userLogged },
@@ -16,6 +20,7 @@ const RegisterList = ({
 	loadRegisters,
 	updatePageNumber,
 	deleteRegister,
+	registerPDF,
 }) => {
 	const [filterData, setFilterData] = useState({
 		startDate: '',
@@ -51,6 +56,10 @@ const RegisterList = ({
 
 	const confirm = () => {
 		deleteRegister(registers[0]._id);
+	};
+
+	const pdfGeneratorSave = () => {
+		registerPDF(registers);
 	};
 
 	return (
@@ -104,19 +113,21 @@ const RegisterList = ({
 													<td>
 														<Moment date={register.date} format='DD/MM/YY' />
 													</td>
-													<td>{register.income && register.income}</td>
-													<td>{register.expence && register.expence}</td>
+													<td>{register.income && '$' + register.income}</td>
+													<td>{register.expence && '$' + register.expence}</td>
 													<td>
-														{register.cheatincome && register.cheatincome}
+														{register.cheatincome && '$' + register.cheatincome}
 													</td>
-													<td>{register.withdrawal && register.withdrawal}</td>
-													<td>{register.registermoney}</td>
+													<td>
+														{register.withdrawal && '$' + register.withdrawal}
+													</td>
+													<td>${register.registermoney}</td>
 													<td className={register.negative ? 'debt' : ''}>
 														{register.difference !== 0 &&
 															register.difference &&
 															(register.negative
-																? '-' + register.difference
-																: '+' + register.difference)}
+																? '-$' + register.difference
+																: '+$' + register.difference)}
 													</td>
 													<td>
 														{register.description && register.description}
@@ -143,6 +154,7 @@ const RegisterList = ({
 						items={registers}
 						page={page}
 						changePage={updatePageNumber}
+						pdfGeneratorSave={pdfGeneratorSave}
 					/>
 				</>
 			) : (
@@ -159,6 +171,7 @@ RegisterList.propTypes = {
 	loadRegisters: PropTypes.func.isRequired,
 	updatePageNumber: PropTypes.func.isRequired,
 	deleteRegister: PropTypes.func.isRequired,
+	registerPDF: PropTypes.func.isRequired,
 };
 
 const mapStatetoProps = (state) => ({
@@ -171,4 +184,5 @@ export default connect(mapStatetoProps, {
 	loadRegisters,
 	updatePageNumber,
 	deleteRegister,
+	registerPDF,
 })(RegisterList);

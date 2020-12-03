@@ -177,11 +177,12 @@ export const enrollmentsPDF = (enrollments) => async (dispatch) => {
 
 		const pdfBlob = new Blob([pdf.data], { type: 'application/pdf' });
 
-		const date = moment().format('DD-MM-YYYY');
+		const date = moment().format('DD-MM-YY');
 
-		saveAs(pdfBlob, `Inscripciones-${date}.pdf`);
+		saveAs(pdfBlob, `Inscripciones ${date}.pdf`);
 
 		dispatch(setAlert('PDF Generado', 'success', '2'));
+		window.scroll(500, 0);
 	} catch (err) {
 		console.log(err.response);
 		if (err.response !== null) {

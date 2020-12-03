@@ -3,7 +3,11 @@ import { connect } from 'react-redux';
 import Moment from 'react-moment';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import { loadInvoices, deleteInvoice } from '../../../../actions/invoice';
+import {
+	loadInvoices,
+	deleteInvoice,
+	invoicesPDF,
+} from '../../../../actions/invoice';
 import { updatePageNumber } from '../../../../actions/mixvalues';
 import Loading from '../../../modal/Loading';
 import ListButtons from './ListButtons';
@@ -17,6 +21,7 @@ const IncomeList = ({
 	mixvalues: { page },
 	loadInvoices,
 	updatePageNumber,
+	invoicesPDF,
 	deleteInvoice,
 }) => {
 	const [filterData, setFilterData] = useState({
@@ -61,6 +66,10 @@ const IncomeList = ({
 		loadInvoices(filterData);
 	};
 
+	const pdfGeneratorSave = () => {
+		invoicesPDF(invoices);
+	};
+
 	return (
 		<>
 			{!loadingInvoices ? (
@@ -99,7 +108,7 @@ const IncomeList = ({
 								<thead>
 									<tr>
 										<th>Fecha</th>
-										<th>ID Factura</th>
+										<th>N° Factura</th>
 										<th>Nombre</th>
 										<th>Total</th>
 										<th>&nbsp;</th>
@@ -164,6 +173,7 @@ const IncomeList = ({
 						page={page}
 						items={invoices}
 						changePage={updatePageNumber}
+						pdfGeneratorSave={pdfGeneratorSave}
 					/>
 				</>
 			) : (
@@ -179,6 +189,7 @@ IncomeList.propTypes = {
 	loadInvoices: PropTypes.func.isRequired,
 	updatePageNumber: PropTypes.func.isRequired,
 	deleteInvoice: PropTypes.func.isRequired,
+	invoicesPDF: PropTypes.func.isRequired,
 };
 
 const mapStatetoProps = (state) => ({
@@ -191,4 +202,5 @@ export default connect(mapStatetoProps, {
 	loadInvoices,
 	updatePageNumber,
 	deleteInvoice,
+	invoicesPDF,
 })(IncomeList);

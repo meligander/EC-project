@@ -6,6 +6,8 @@ import {
 } from './types';
 import axios from 'axios';
 import { setAlert } from './alert';
+import moment from 'moment';
+import { saveAs } from 'file-saver';
 import { clearRegister } from './register';
 import { updateLoadingSpinner, updateAdminDashLoading } from './mixvalues';
 
@@ -119,5 +121,47 @@ export const registerInvoice = (formData, history, user_id) => async (
 		dispatch({
 			type: INVOICE_ERROR,
 		});
+	}
+};
+
+export const invoicesPDF = (invoices) => async (dispatch) => {
+	let invoice = JSON.stringify(invoices);
+
+	try {
+		const config = {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		};
+
+		await axios.post('/api/invoice/create-list', invoice, config);
+
+		const pdf = await axios.get('/api/invoice/list/fetch-list', {
+			responseType: 'blob',
+		});
+
+		const pdfBlob = new Blob([pdf.data], { type: 'application/pdf' });
+
+		const date = moment().format('DD-MM-YY');
+
+		saveAs(pdfBlob, `Ingresos ${date}.pdf`);
+
+		dispatch(setAlert('PDF Generado', 'success', '2'));
+		window.scroll(500, 0);
+	} catch (err) {
+		console.log(err.response);
+		if (err.response !== null) {
+			if (err.response.data.msg !== undefined) {
+				dispatch(setAlert(err.response.data.msg, 'danger', '2'));
+			} else {
+				const errors = err.response.data.errors;
+				if (errors.length !== 0) {
+					errors.forEach((error) => {
+						dispatch(setAlert(error.msg, 'danger', '2'));
+					});
+				}
+			}
+			window.scrollTo(500, 0);
+		}
 	}
 };

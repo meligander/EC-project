@@ -1,0 +1,49 @@
+.header {
+  margin-top: -1rem;
+  text-align: end;
+  padding: 0 5rem 0 0;
+}
+.header-img {
+  width: 8rem;
+  height: 8rem;
+}
+.container {
+  margin-top: -6rem;
+  padding: 0 5rem 3rem 5rem;
+  text-align: center;
+}
+.title {
+  font-size: 3rem;
+  font-family: "Courgette", cursive;
+  text-decoration: underline;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 1.5rem;
+}
+table thead {
+  display: table-header-group;
+}
+table th,
+table td {
+  border: 1px solid #333;
+}
+table th {
+  font-weight: bold;
+  padding: 1rem 2rem;
+}
+table td {
+  padding: 0.5rem 1rem;
+}
+.footer {
+  font-family: "Courgette", cursive;
+  font-size: 1.3rem;
+  padding: 1.5rem 2rem 2rem 2rem;
+  width: 100%;
+  color: grey;
+}
+.pages {
+  float: right;
+  margin-right: 4.5rem;
+}

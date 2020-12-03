@@ -7,6 +7,8 @@ import {
 	REGISTER_DELETED,
 } from './types';
 import { setAlert } from './alert';
+import moment from 'moment';
+import { saveAs } from 'file-saver';
 import { updateLoadingSpinner } from './mixvalues';
 import axios from 'axios';
 
@@ -129,6 +131,48 @@ export const deleteRegister = (register_id) => async (dispatch) => {
 			},
 		});
 		dispatch(updateLoadingSpinner(false));
+	}
+};
+
+export const registerPDF = (registers) => async (dispatch) => {
+	let register = JSON.stringify(registers);
+
+	try {
+		const config = {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		};
+
+		await axios.post('/api/register/create-list', register, config);
+
+		const pdf = await axios.get('/api/register/fetch-list', {
+			responseType: 'blob',
+		});
+
+		const pdfBlob = new Blob([pdf.data], { type: 'application/pdf' });
+
+		const date = moment().format('DD-MM-YY');
+
+		saveAs(pdfBlob, `Caja Diaria ${date}.pdf`);
+
+		dispatch(setAlert('PDF Generado', 'success', '2'));
+		window.scroll(500, 0);
+	} catch (err) {
+		console.log(err.response);
+		if (err.response !== null) {
+			if (err.response.data.msg !== undefined) {
+				dispatch(setAlert(err.response.data.msg, 'danger', '2'));
+			} else {
+				const errors = err.response.data.errors;
+				if (errors.length !== 0) {
+					errors.forEach((error) => {
+						dispatch(setAlert(error.msg, 'danger', '2'));
+					});
+				}
+			}
+			window.scrollTo(500, 0);
+		}
 	}
 };
 

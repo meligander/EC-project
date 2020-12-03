@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import { loadDebts } from '../../../../actions/debts';
+import { loadDebts, debtsPDF } from '../../../../actions/debts';
 import { getTotalDebt, updatePageNumber } from '../../../../actions/mixvalues';
 import Loading from '../../../modal/Loading';
 import ListButtons from './ListButtons';
@@ -15,6 +15,7 @@ const DebtList = ({
 	loadDebts,
 	getTotalDebt,
 	updatePageNumber,
+	debtsPDF,
 }) => {
 	const [filterData, setFilterData] = useState({
 		startDate: '',
@@ -67,6 +68,10 @@ const DebtList = ({
 		} else loadDebts(filterData);
 	};
 
+	const pdfGeneratorSave = () => {
+		debtsPDF(debts);
+	};
+
 	return (
 		<>
 			{!loadingDebts ? (
@@ -115,7 +120,7 @@ const DebtList = ({
 													<td>{installments[debt.number]}</td>
 													<td>{debt.year}</td>
 													<td className={debt.expired ? 'debt' : ''}>
-														{debt.value}
+														{'$' + debt.value}
 													</td>
 												</tr>
 											)
@@ -127,6 +132,7 @@ const DebtList = ({
 						page={page}
 						changePage={updatePageNumber}
 						items={debts}
+						pdfGeneratorSave={pdfGeneratorSave}
 					/>
 				</>
 			) : (
@@ -142,6 +148,7 @@ DebtList.propTypes = {
 	loadDebts: PropTypes.func.isRequired,
 	getTotalDebt: PropTypes.func.isRequired,
 	updatePageNumber: PropTypes.func.isRequired,
+	debtsPDF: PropTypes.func.isRequired,
 };
 
 const mapStatetoProps = (state) => ({
@@ -153,4 +160,5 @@ export default connect(mapStatetoProps, {
 	loadDebts,
 	getTotalDebt,
 	updatePageNumber,
+	debtsPDF,
 })(DebtList);

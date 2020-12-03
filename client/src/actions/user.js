@@ -17,6 +17,8 @@ import {
 	TEACHERS_ERROR,
 } from './types';
 import { setAlert } from './alert';
+import moment from 'moment';
+import { saveAs } from 'file-saver';
 import {
 	updateLoadingSpinner,
 	updateAdminDashLoading,
@@ -330,6 +332,54 @@ export const deleteUser = (user_id, history, userLogged_id) => async (
 			},
 		});
 		dispatch(updateLoadingSpinner(false));
+	}
+};
+
+export const userPDF = (users, usersType) => async (dispatch) => {
+	if (users.length === 0) {
+		window.scrollTo(500, 0);
+		dispatch(setAlert('Primero debe realizar una búsqueda', 'danger', '2'));
+	} else {
+		try {
+			const config = {
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			};
+
+			await axios.post('/api/users/create-list', { users, usersType }, config);
+
+			const pdf = await axios.get('/api/users/lista/fetch-list', {
+				responseType: 'blob',
+			});
+
+			const pdfBlob = new Blob([pdf.data], { type: 'application/pdf' });
+
+			const date = moment().format('DD-MM-YY');
+
+			saveAs(
+				pdfBlob,
+				`${usersType === 'Alumno' ? 'Alumnos' : usersType + 'es'} ${date}.pdf`
+			);
+
+			dispatch(setAlert('PDF Generado', 'success', '2'));
+			window.scroll(500, 0);
+		} catch (err) {
+			console.log(err.response);
+			if (err.response !== null) {
+				if (err.response.data.msg !== undefined) {
+					dispatch(setAlert(err.response.data.msg, 'danger', '2'));
+				} else {
+					const errors = err.response.data.errors;
+					if (errors.length !== 0) {
+						errors.forEach((error) => {
+							dispatch(setAlert(error.msg, 'danger', '2'));
+						});
+					}
+				}
+				window.scrollTo(500, 0);
+			}
+		}
 	}
 };
 

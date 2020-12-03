@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { loadCategories } from '../../../actions/category';
-import { loadUsers } from '../../../actions/user';
+import { loadUsers, userPDF } from '../../../actions/user';
 import PropTypes from 'prop-types';
 import StudentTable from '../../tables/StudentTable';
 import RestTable from '../../tables/RestTable';
@@ -13,6 +13,7 @@ const SearchTab = ({
 	loadCategories,
 	loadUsers,
 	typeF,
+	userPDF,
 }) => {
 	const [filterForm, setFilterForm] = useState({
 		name: '',
@@ -51,6 +52,10 @@ const SearchTab = ({
 	const searchUsers = (e) => {
 		e.preventDefault();
 		loadUsers(filterForm, true);
+	};
+
+	const pdfGeneratorSave = () => {
+		userPDF(users, usersType);
 	};
 
 	useEffect(() => {
@@ -144,6 +149,11 @@ const SearchTab = ({
 					usersType={usersType}
 				/>
 			)}
+			<div className='btn-right'>
+				<button className='btn btn-secondary' onClick={pdfGeneratorSave}>
+					<i className='far fa-save'></i>
+				</button>
+			</div>
 		</>
 	);
 };
@@ -153,6 +163,7 @@ SearchTab.propTypes = {
 	categories: PropTypes.object.isRequired,
 	loadUsers: PropTypes.func.isRequired,
 	loadCategories: PropTypes.func.isRequired,
+	userPDF: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -160,6 +171,6 @@ const mapStateToProps = (state) => ({
 	categories: state.categories,
 });
 
-export default connect(mapStateToProps, { loadCategories, loadUsers })(
+export default connect(mapStateToProps, { loadCategories, loadUsers, userPDF })(
 	SearchTab
 );

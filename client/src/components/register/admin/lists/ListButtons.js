@@ -32,9 +32,6 @@ const ListButtons = ({ changePage, items, page, pdfGeneratorSave }) => {
 				<button className='btn btn-secondary' onClick={pdfGeneratorSave}>
 					<i className='far fa-save'></i>
 				</button>
-				<button className='btn btn-secondary'>
-					<i className='fas fa-print'></i>
-				</button>
 			</div>
 		</>
 	);

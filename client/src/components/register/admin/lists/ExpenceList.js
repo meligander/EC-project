@@ -6,6 +6,7 @@ import {
 	loadExpenceTypes,
 	loadExpences,
 	deleteExpence,
+	expencesPDF,
 } from '../../../../actions/expence';
 import { updatePageNumber } from '../../../../actions/mixvalues';
 import Loading from '../../../modal/Loading';
@@ -18,6 +19,7 @@ const ExpenceList = ({
 	loadExpences,
 	updatePageNumber,
 	deleteExpence,
+	expencesPDF,
 	expences: { expences, loadingExpences, expencetypes, loadingET },
 	mixvalues: { page },
 }) => {
@@ -65,6 +67,10 @@ const ExpenceList = ({
 
 	const confirm = () => {
 		deleteExpence(expenceDelete);
+	};
+
+	const pdfGeneratorSave = () => {
+		expencesPDF(expences);
 	};
 
 	return (
@@ -157,6 +163,7 @@ const ExpenceList = ({
 						page={page}
 						items={expences}
 						changePage={updatePageNumber}
+						pdfGeneratorSave={pdfGeneratorSave}
 					/>
 				</div>
 			) : (
@@ -173,6 +180,7 @@ ExpenceList.propTypes = {
 	loadExpences: PropTypes.func.isRequired,
 	updatePageNumber: PropTypes.func.isRequired,
 	deleteExpence: PropTypes.func.isRequired,
+	expencesPDF: PropTypes.func.isRequired,
 };
 
 const mapStatetoProps = (state) => ({
@@ -185,4 +193,5 @@ export default connect(mapStatetoProps, {
 	loadExpences,
 	updatePageNumber,
 	deleteExpence,
+	expencesPDF,
 })(ExpenceList);
