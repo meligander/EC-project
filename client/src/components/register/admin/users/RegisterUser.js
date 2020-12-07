@@ -145,7 +145,7 @@ const RegisterUser = ({
 				isEditing: true,
 			}));
 			if (user.town) loadTownNeighbourhoods(user.town._id);
-			if (user.dob) user.dob = moment.utc(user.dob).format('YYYY-MM-DD');
+			if (user.dob) user.dob = moment(user.dob).format('YYYY-MM-DD');
 			setFormData((prev) => ({
 				...prev,
 				studentnumber: !user.studentnumber ? '' : user.studentnumber,

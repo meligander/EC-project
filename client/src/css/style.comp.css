@@ -444,39 +444,44 @@ textarea {
     background-color: #14548c !important;
     color: #fff !important; }
     .btn.btn-primary:hover, .btn:link.btn-primary:hover, .btn:visited.btn-primary:hover {
-      background: #1a6fb9; }
+      background: #1a6fb9 !important; }
   .btn.btn-dark, .btn:link.btn-dark, .btn:visited.btn-dark {
     background-color: #0a2455 !important;
     color: #fff !important; }
     .btn.btn-dark:hover, .btn:link.btn-dark:hover, .btn:visited.btn-dark:hover {
-      background: #0f3783; }
+      background: #0f3783 !important; }
   .btn.btn-secondary, .btn:link.btn-secondary, .btn:visited.btn-secondary {
     background-color: #a6abab !important;
     color: #333 !important; }
     .btn.btn-secondary:hover, .btn:link.btn-secondary:hover, .btn:visited.btn-secondary:hover {
-      background: #c0c4c4; }
+      background: #c0c4c4 !important; }
   .btn.btn-secondary-2, .btn:link.btn-secondary-2, .btn:visited.btn-secondary-2 {
     background-color: #dadddd !important;
     color: #333 !important; }
     .btn.btn-secondary-2:hover, .btn:link.btn-secondary-2:hover, .btn:visited.btn-secondary-2:hover {
-      background: #daedf9;
-      color: #0a2455; }
+      background: #daedf9 !important;
+      color: #0a2455 !important; }
   .btn.btn-light, .btn:link.btn-light, .btn:visited.btn-light {
     background-color: #aed8f2 !important;
     color: #333 !important; }
     .btn.btn-light:hover, .btn:link.btn-light:hover, .btn:visited.btn-light:hover {
-      background: #e7f4fb;
-      color: #0a2455; }
+      background: #daedf9 !important;
+      color: #0a2455 !important; }
+  .btn.btn-print-blank, .btn:link.btn-print-blank, .btn:visited.btn-print-blank {
+    background-color: #a6abab;
+    color: #ebeae1; }
+    .btn.btn-print-blank:hover, .btn:link.btn-print-blank:hover, .btn:visited.btn-print-blank:hover {
+      background: #c8cbcb; }
   .btn.btn-danger, .btn:link.btn-danger, .btn:visited.btn-danger {
     background-color: #c2010e !important;
     color: #fff !important; }
     .btn.btn-danger:hover, .btn:link.btn-danger:hover, .btn:visited.btn-danger:hover {
-      background: #f50112; }
+      background: #f50112 !important; }
   .btn.btn-success, .btn:link.btn-success, .btn:visited.btn-success {
     background-color: #05a6a6 !important;
     color: #fff !important; }
     .btn.btn-success:hover, .btn:link.btn-success:hover, .btn:visited.btn-success:hover {
-      background: #06d8d8; }
+      background: #06d8d8 !important; }
   .btn.btn-black, .btn:link.btn-black, .btn:visited.btn-black {
     background-color: #333;
     color: #fff;
@@ -1798,6 +1803,44 @@ nav img {
     font-size: 2rem;
     text-align: center;
     background-color: inherit; }
+
+.invoice {
+  border: 1px solid #333;
+  padding: 5rem; }
+  .invoice .row {
+    justify-content: space-between;
+    align-items: flex-end; }
+    @media only screen and (max-width: 37.5em) {
+      .invoice .row {
+        align-items: start; } }
+    .invoice .row .logo img {
+      width: 16rem;
+      height: 16rem; }
+    @media only screen and (max-width: 37.5em) {
+      .invoice .row .logo {
+        order: -1;
+        margin-bottom: 2rem; } }
+    .invoice .row .invoice-info {
+      margin-right: 3rem; }
+      @media only screen and (max-width: 37.5em) {
+        .invoice .row .invoice-info {
+          margin: 2rem 0;
+          order: -1; } }
+  .invoice .details {
+    min-height: 20rem; }
+    .invoice .details table th,
+    .invoice .details table td {
+      border: 1px solid #333; }
+    .invoice .details table tr {
+      background-color: inherit; }
+    .invoice .details table th {
+      background-color: #dadddd;
+      color: #333; }
+  .invoice .value {
+    width: 10rem;
+    text-align: end;
+    border: none;
+    background-color: #fff; }
 
 .register {
   margin-top: 3rem; }

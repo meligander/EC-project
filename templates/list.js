@@ -1,5 +1,5 @@
-module.exports = (css, img, name, table, htmlstring) => {
-  return `
+module.exports = (css, img, name, thead, tbody, small) => {
+   return `
     <!doctype html>
     <html>
        <head> 
@@ -19,14 +19,14 @@ module.exports = (css, img, name, table, htmlstring) => {
             <h2 class='title'>
                Lista de ${name}
             </h2>            
-            <table>
+            <table ${small ? 'class="small"' : ""}>
                <thead>
                   <tr>
-                  ${table}                     
+                  ${thead}                     
                   </tr>
                </thead>
                <tbody>
-                  ${htmlstring}
+                  ${tbody}
                </tbody>
             </table>
           </div>

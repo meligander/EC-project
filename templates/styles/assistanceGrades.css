@@ -1,0 +1,29 @@
+@import "./list.css";
+
+.title {
+   font-size: 4rem;
+}
+
+.subtitle {
+   text-align: start;
+   font-family: "Courgette", cursive;
+}
+
+.teacher {
+   font-size: 2.5rem;
+   margin-top: 4rem;
+}
+.category {
+   font-size: 2rem;
+   margin-top: -1.5rem;
+}
+
+table.attendance th {
+   padding: 1rem;
+}
+
+table.attendance th:not(:first-child),
+table.attendance td:not(:first-child) {
+   font-size: 1.2rem;
+   padding: 0.5rem 0;
+}

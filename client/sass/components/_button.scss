@@ -21,45 +21,53 @@
 		&.btn-primary {
 			@include set-background($primary-color);
 			&:hover {
-				background: lighten($primary-color, 10%);
+				background: lighten($primary-color, 10%) !important;
 			}
 		}
 		&.btn-dark {
 			@include set-background($dark-color);
 			&:hover {
-				background: lighten($dark-color, 10%);
+				background: lighten($dark-color, 10%) !important;
 			}
 		}
 		&.btn-secondary {
 			@include set-background($secondary-color);
 			&:hover {
-				background: lighten($secondary-color, 10%);
+				background: lighten($secondary-color, 10%) !important;
 			}
 		}
 		&.btn-secondary-2 {
 			@include set-background(lighten($secondary-color, 20%));
 			&:hover {
-				background: lighten($light-color, 10%);
-				color: $dark-color;
+				background: lighten($light-color, 10%) !important;
+				color: $dark-color !important;
 			}
 		}
 		&.btn-light {
 			@include set-background($light-color);
 			&:hover {
-				background: lighten($light-color, 13%);
-				color: $dark-color;
+				background: lighten($light-color, 10%) !important;
+				color: $dark-color !important;
+			}
+		}
+		&.btn-print-blank {
+			background-color: $secondary-color;
+			color: #ebeae1;
+
+			&:hover {
+				background: lighten($secondary-color, 13%);
 			}
 		}
 		&.btn-danger {
 			@include set-background($danger-color);
 			&:hover {
-				background: lighten($danger-color, 10%);
+				background: lighten($danger-color, 10%) !important;
 			}
 		}
 		&.btn-success {
 			@include set-background($success-color);
 			&:hover {
-				background: lighten($success-color, 10%);
+				background: lighten($success-color, 10%) !important;
 			}
 		}
 		&.btn-black {
