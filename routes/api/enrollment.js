@@ -138,6 +138,86 @@ router.get("/year", [auth, adminAuth], async (req, res) => {
    }
 });
 
+//@route    POST api/enrollment/create-list
+//@desc     Create a pdf of enrollment
+//@access   Private
+router.post("/create-list", (req, res) => {
+   const name = "reports/enrollments.pdf";
+
+   const enrollment = req.body;
+
+   let tbody = "";
+
+   for (let x = 0; x < enrollment.length; x++) {
+      const date =
+         "<td>" + moment(enrollment[x].date).format("DD/MM/YY") + "</td>";
+      const studentnumber =
+         "<td>" + enrollment[x].student.studentnumber + "</td>";
+      const studentname =
+         "<td>" +
+         enrollment[x].student.lastname +
+         " " +
+         enrollment[x].student.name +
+         "</td>";
+      const category = "<td>" + enrollment[x].category.name + "</td>";
+      const year = "<td>" + enrollment[x].year + "</td>";
+
+      tbody +=
+         "<tr>" +
+         date +
+         studentnumber +
+         studentname +
+         category +
+         year +
+         "</tr>";
+   }
+
+   const thead =
+      "<th>Fecha</th> <th>Legajo</th> <th>Nombre</th> <th>Categoría</th> <th>Año</th>";
+
+   const img = path.join(
+      "file://",
+      __dirname,
+      "../../templates/assets/logo.png"
+   );
+   const css = path.join(
+      "file://",
+      __dirname,
+      "../../templates/list/style.css"
+   );
+
+   const options = {
+      format: "A4",
+      header: {
+         height: "15mm",
+         contents: `<div></div>`,
+      },
+      footer: {
+         height: "17mm",
+         contents:
+            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
+      },
+   };
+
+   pdf.create(
+      pdfTemplate(css, img, "inscripciones", thead, tbody),
+      options
+   ).toFile(name, (err) => {
+      if (err) {
+         res.send(Promise.reject());
+      }
+
+      res.send(Promise.resolve());
+   });
+});
+
+//@route    GET api/enrollment/fetch-list
+//@desc     Get the pdf of enrollments
+//@access   Private
+router.get("/fetch-list", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/enrollments.pdf"));
+});
+
 //@route    POST api/enrollment
 //@desc     Add an enrollment
 //@access   Private
@@ -153,17 +233,21 @@ router.post(
    async (req, res) => {
       const { student, year, category, currentMonth } = req.body;
 
-      let errors = validationResult(req);
-      errors = errors.array();
+      let errors = [];
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
+         return res.status(400).json({ errors });
+      }
+
       let enrollment;
 
       try {
          enrollment = await Enrollment.findOne({ student, year });
          if (enrollment)
-            errors.push({ msg: "El alumno ya está inscripto para dicho año" });
-         if (errors.length > 0) {
-            return res.status(400).json({ errors });
-         }
+            return res
+               .status(400)
+               .json({ msg: "El alumno ya está inscripto para dicho año" });
 
          let data = { student, year, category };
 
@@ -234,86 +318,6 @@ router.post(
    }
 );
 
-//@route    POST api/enrollment/create-list
-//@desc     Create a pdf of enrollment
-//@access   Private
-router.post("/create-list", (req, res) => {
-   const name = "Reports/enrollments.pdf";
-
-   const enrollment = req.body;
-
-   let tbody = "";
-
-   for (let x = 0; x < enrollment.length; x++) {
-      const date =
-         "<td>" + moment(enrollment[x].date).format("DD/MM/YY") + "</td>";
-      const studentnumber =
-         "<td>" + enrollment[x].student.studentnumber + "</td>";
-      const studentname =
-         "<td>" +
-         enrollment[x].student.lastname +
-         " " +
-         enrollment[x].student.name +
-         "</td>";
-      const category = "<td>" + enrollment[x].category.name + "</td>";
-      const year = "<td>" + enrollment[x].year + "</td>";
-
-      tbody +=
-         "<tr>" +
-         date +
-         studentnumber +
-         studentname +
-         category +
-         year +
-         "</tr>";
-   }
-
-   const thead =
-      "<th>Fecha</th> <th>Legajo</th> <th>Nombre</th> <th>Categoría</th> <th>Año</th>";
-
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/styles/list.css"
-   );
-
-   const options = {
-      format: "A4",
-      header: {
-         height: "15mm",
-         contents: `<div></div>`,
-      },
-      footer: {
-         height: "17mm",
-         contents:
-            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
-      },
-   };
-
-   pdf.create(
-      pdfTemplate(css, img, "inscripciones", thead, tbody),
-      options
-   ).toFile(name, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
-
-      res.send(Promise.resolve());
-   });
-});
-
-//@route    GET api/enrollment/fetch-list
-//@desc     Get the pdf of enrollments
-//@access   Private
-router.get("/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../Reports/enrollments.pdf"));
-});
-
 //@route    PUT api/enrollment/:id
 //@desc     Update the category of the enrollment
 //@access   Private
@@ -327,11 +331,13 @@ router.put(
    async (req, res) => {
       const { year, category, currentMonth } = req.body;
 
-      let errors = validationResult(req);
-      if (!errors.isEmpty()) {
-         errors = errors.array();
+      let errors = [];
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
          return res.status(400).json({ errors });
       }
+
       let enrollment;
 
       try {
@@ -340,16 +346,11 @@ router.put(
          if (enrollment._id.toString() !== category) {
             const date = new Date();
 
-            if (date.getFullYear() != year) {
+            if (date.getFullYear() != year)
                return res.status(400).json({
-                  errors: [
-                     {
-                        msg:
-                           "No se puede modificar la categoría de una inscripción que no está en curso. Para ello elimine la anterior y vuelva a crearla",
-                     },
-                  ],
+                  msg:
+                     "No se puede modificar la categoría de una inscripción que no está en curso. Para ello elimine la anterior y vuelva a crearla",
                });
-            }
 
             categoryInstallment = await Category.findOne({ _id: category });
 

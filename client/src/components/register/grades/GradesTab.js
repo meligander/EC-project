@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
+import moment from "moment";
 import { withRouter, Link } from "react-router-dom";
 import { setAlert } from "../../../actions/alert";
 import {
@@ -8,6 +9,7 @@ import {
    updateGrades,
    clearGrades,
    gradesPDF,
+   certificatePDF,
 } from "../../../actions/grade";
 import PropTypes from "prop-types";
 import Confirm from "../../modal/Confirm";
@@ -17,7 +19,11 @@ const GradesTab = ({
    period,
    classes: { classInfo },
    auth: { userLogged },
-   grades: { grades, loading, gradeTypes, loadingGT },
+   grades: {
+      grades: { header, students, periods },
+      loading,
+      gradeTypes,
+   },
    setAlert,
    registerNewGrade,
    deleteGrades,
@@ -25,12 +31,10 @@ const GradesTab = ({
    clearGrades,
    navbar,
    gradesPDF,
+   certificatePDF,
 }) => {
    const [formData, setFormData] = useState({
-      newGrades: {
-         period: "",
-         rows: [],
-      },
+      newGrades: [],
       newGradeType: {
          period,
          classroom: classInfo._id,
@@ -42,41 +46,35 @@ const GradesTab = ({
 
    const [otherValues, setOtherValues] = useState({
       gradePlus: false,
-      className: "",
       gradetypes: [],
+      reload: false,
       toggleModalSave: false,
       toggleModalDelete: false,
+      toggleModalDate: false,
       toDelete: null,
    });
 
    const {
       gradePlus,
-      className,
       gradetypes,
+      reload,
       toggleModalSave,
       toggleModalDelete,
+      toggleModalDate,
       toDelete,
    } = otherValues;
-   const nameHeader = useRef();
 
    useEffect(() => {
       const loadGradeTypes = () => {
          let gradetypes = [];
-         if (grades.header.header1.length === 0) {
+         if (header.length === 0) {
             gradetypes = gradeTypes;
          } else {
-            if (grades.header.header1[period - 1]) {
+            if (header[period - 1]) {
                for (let x = 0; x < gradeTypes.length; x++) {
                   let equal = false;
-                  for (
-                     let y = 0;
-                     y < grades.header.header1[period - 1].length;
-                     y++
-                  ) {
-                     if (
-                        gradeTypes[x].name ===
-                        grades.header.header1[period - 1][y]
-                     )
+                  for (let y = 0; y < header[period - 1].length; y++) {
+                     if (gradeTypes[x].name === header[period - 1][y])
                         equal = true;
                   }
                   if (!equal) gradetypes.push(gradeTypes[x]);
@@ -92,45 +90,24 @@ const GradesTab = ({
          setFormData((prev) => ({
             ...prev,
             newGrades:
-               grades.periods[period - 1] !== undefined
-                  ? grades.periods[period - 1]
-                  : {
-                       period: "",
-                       rows: [],
-                    },
+               periods[period - 1] !== undefined ? periods[period - 1] : [],
          }));
       };
-      if (nameHeader.current && !newGrades.rows[0]) {
-         if (nameHeader.current.offsetWidth < nameHeader.current.scrollWidth) {
-            setOtherValues((prev) => ({
-               ...prev,
-               className: "fit",
-            }));
-         }
-      }
-      if (newGrades.rows[0]) {
-         if (
-            grades.periods[period - 1].rows[0].length !==
-            newGrades.rows[0].length
-         ) {
-            setInput();
-         }
-         if (!loadingGT) {
-            loadGradeTypes();
-         }
-      } else {
-         setInput();
-      }
-   }, [gradeTypes, grades, period, newGrades.rows, loadingGT]);
+
+      if (periods[period - 1] && (newGrades.length === 0 || reload)) setInput();
+      loadGradeTypes();
+
+      // eslint-disable-next-line
+   }, [gradeTypes, period, newGrades, reload, header, periods]);
 
    const onChange = (e, row) => {
       let number = Number(e.target.name.substring(5, e.target.name.length));
-      let changedRows = { ...newGrades };
-      const gradesNumber = newGrades.rows[0].length;
+      let changedRows = [...newGrades];
+      const gradesNumber = newGrades[0].length;
       const rowN = Math.ceil((number + 1) / gradesNumber) - 1;
       const mult = gradesNumber * rowN;
       number = number - mult;
-      changedRows.rows[rowN][number] = {
+      changedRows[rowN][number] = {
          ...row,
          value: e.target.value,
       };
@@ -158,8 +135,22 @@ const GradesTab = ({
    };
 
    const addGradeType = () => {
-      if (newGradeType.gradetype === 0) {
-         setAlert("Primero debe elegir un tipo de nota", "danger", "2");
+      let pass = true;
+      if (period !== 1) {
+         if (!periods[period - 2]) {
+            pass = false;
+         }
+      }
+      if (!pass || newGradeType.gradetype === 0) {
+         if (newGradeType.gradetype === 0) {
+            setAlert("Primero debe elegir un tipo de nota", "danger", "2");
+         } else {
+            setAlert(
+               "Debe agregar por lo menos una nota en los bimestres anteriores",
+               "danger",
+               "2"
+            );
+         }
          window.scroll(0, 0);
       } else {
          registerNewGrade(newGradeType);
@@ -169,12 +160,12 @@ const GradesTab = ({
             gradetypes: gradetypes.filter(
                (gt) => gt._id !== newGradeType.gradetype
             ),
+            reload: true,
          });
       }
    };
 
    const deleteGradeType = () => {
-      deleteGrades(toDelete);
       setOtherValues({
          ...otherValues,
          gradePlus: false,
@@ -182,11 +173,15 @@ const GradesTab = ({
             ...gradetypes,
             ...gradeTypes.filter((gt) => gt._id === toDelete.gradetype._id),
          ],
+         reload: true,
       });
+      deleteGrades(toDelete);
    };
 
    const saveGrades = () => {
-      updateGrades(newGrades.rows, history, classInfo._id);
+      const gradesPeriod = newGrades.filter((grade) => grade[0].student);
+
+      updateGrades(gradesPeriod, history, classInfo._id);
    };
 
    const setToggleSave = (e) => {
@@ -205,17 +200,64 @@ const GradesTab = ({
       });
    };
 
-   const pdfGeneratorSave = () => {
-      const headers = {
-         header1: grades.header.header1[period - 1],
-         header2: grades.header.header2,
-      };
-      gradesPDF(
-         headers,
-         grades.periods[period - 1].rows,
-         period - 1,
-         classInfo
+   const setToggleDate = (e) => {
+      if (e) e.preventDefault();
+      setOtherValues({
+         ...otherValues,
+         toggleModalDate: !toggleModalDate,
+      });
+   };
+
+   const pdfGeneratorSave = (all) => {
+      if (!all) {
+         gradesPDF(
+            header[period - 1],
+            students,
+            periods[period - 1],
+            classInfo,
+            period - 1,
+            all
+         );
+      } else {
+         gradesPDF(header, students, periods, classInfo, null, all);
+      }
+   };
+
+   const certificatePdfGeneratorSave = (date) => {
+      const studentsPeriods = periods[period - 1].filter(
+         (item) => item[0].student
       );
+      let pass = true;
+      for (let x = 0; x < studentsPeriods.length; x++) {
+         for (let y = 0; y < studentsPeriods[x].length; y++) {
+            if (studentsPeriods[x][y].value === "") {
+               pass = false;
+               break;
+            }
+         }
+         if (!pass) break;
+      }
+
+      if (pass) {
+         const number = moment(date).format("DD");
+         const month = moment(date).format("MMMM");
+         const year = moment(date).format("YYYY");
+         certificatePDF(
+            students.filter((student) => student.name !== ""),
+            header[period - 1],
+            classInfo.category.name === "Kinder" ? periods : studentsPeriods,
+            classInfo,
+            number + " de " + month + " de " + year,
+            period
+         );
+      } else {
+         setAlert(
+            "Todos los alumnos deben tener cargadas las notas",
+            "danger",
+            "2"
+         );
+         window.scroll(0, 0);
+      }
    };
 
    return (
@@ -234,24 +276,28 @@ const GradesTab = ({
                   confirm={deleteGradeType}
                   text="¿Está seguro que desea eliminar el tipo de nota?"
                />
-               <table className={!navbar ? `${className} stick` : className}>
+               <Confirm
+                  toggleModal={toggleModalDate}
+                  setToggleModal={setToggleDate}
+                  type="certificate-date"
+                  confirm={certificatePdfGeneratorSave}
+               />
+               <table className={!navbar ? "stick" : ""}>
                   <thead>
                      <tr>
-                        <th ref={nameHeader} className="bg-strong">
-                           &nbsp; Nombre &nbsp;
-                        </th>
-                        {grades.header.header1[period - 1] &&
-                           grades.header.header1[
-                              period - 1
-                           ].map((type, index) => <th key={index}>{type}</th>)}
+                        <th className="bg-strong">&nbsp; Nombre &nbsp;</th>
+                        {header[period - 1] &&
+                           header[period - 1].map((type, index) => (
+                              <th key={index}>{type}</th>
+                           ))}
                      </tr>
                   </thead>
                   <tbody>
-                     {grades.header.header2.map((student, i) => (
+                     {students.map((student, i) => (
                         <tr key={i}>
-                           <td className="bg-white">{student}</td>
-                           {newGrades.rows.length > 0 &&
-                              newGrades.rows[i].map((row, key) => (
+                           <td className="bg-white">{student.name}</td>
+                           {newGrades.length > 0 &&
+                              newGrades[i].map((row, key) => (
                                  <td key={key}>
                                     {row.student !== undefined ? (
                                        <input
@@ -292,11 +338,28 @@ const GradesTab = ({
                <i className="fas fa-plus"></i>
                <span className="hide-md"> Nota</span>
             </button>
-            <button className="btn btn-secondary" onClick={pdfGeneratorSave}>
+            <button
+               className="btn btn-secondary"
+               onClick={() => pdfGeneratorSave(false)}
+            >
                <i className="fas fa-file-pdf"></i>
             </button>
-            {period === 5 && (
-               <button className="btn btn-secondary" onClick={pdfGeneratorSave}>
+            {((classInfo.category.name !== "Kinder" &&
+               period !== 5 &&
+               period !== 6) ||
+               (classInfo.category.name === "Kinder" && period !== 4)) && (
+               <button
+                  className="btn btn-secondary"
+                  onClick={() => pdfGeneratorSave(true)}
+               >
+                  <i className="fas fa-file-pdf"></i> Todas{" "}
+                  <span className="hide-md">las notas</span>
+               </button>
+            )}
+            {(period === 5 ||
+               period === 6 ||
+               (classInfo.category.name === "Kinder" && period === 4)) && (
+               <button className="btn btn-secondary" onClick={setToggleDate}>
                   <i className="fas fa-graduation-cap"></i>
                </button>
             )}
@@ -318,7 +381,6 @@ const GradesTab = ({
                            </option>
                         ))}
                   </select>
-                  {console.log(newGradeType.gradetype)}
                   <label
                      htmlFor="new-category"
                      className={`form-label ${
@@ -367,6 +429,7 @@ GradesTab.propTypes = {
    setAlert: PropTypes.func.isRequired,
    clearGrades: PropTypes.func.isRequired,
    gradesPDF: PropTypes.func.isRequired,
+   certificatePDF: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -383,4 +446,5 @@ export default connect(mapStateToProps, {
    updateGrades,
    clearGrades,
    gradesPDF,
+   certificatePDF,
 })(withRouter(GradesTab));

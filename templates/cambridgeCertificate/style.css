@@ -1,0 +1,113 @@
+.container {
+   margin: 5rem;
+   font-size: 1.7rem;
+   border: 2px solid black;
+   height: 95rem;
+   position: relative;
+}
+
+.text-right {
+   text-align: right;
+}
+
+.text-center {
+   text-align: center;
+}
+
+.text-up {
+   margin-top: -4.1rem;
+}
+
+.lighter {
+   font-weight: lighter;
+}
+
+.capital {
+   text-transform: uppercase;
+   font-weight: bold;
+}
+
+.header {
+   margin-top: 1rem;
+}
+
+.header img {
+   width: 20rem;
+   height: 20rem;
+}
+
+.header h4 {
+   margin-top: -0.5rem;
+}
+
+.body {
+   padding: 0.5rem 1rem;
+}
+
+.student {
+   padding-bottom: 1rem;
+}
+
+.student * {
+   padding: 0.1rem 0;
+}
+
+.grades {
+   margin-top: -3.5rem;
+}
+
+.level {
+   text-transform: uppercase;
+   font-weight: bold;
+   margin-left: 17rem;
+}
+
+table {
+   margin-top: 3rem;
+   width: 100%;
+   border-collapse: collapse;
+   text-align: center;
+}
+
+table td img {
+   width: 6rem;
+   height: 6rem;
+}
+
+table td.name {
+   width: 20%;
+}
+
+table td.percentage {
+   width: 15%;
+}
+
+.average {
+   text-align: right;
+   margin-right: 1.8rem;
+}
+
+.date {
+   font-size: 1.5rem;
+   position: absolute;
+   bottom: 12rem;
+}
+
+.signature {
+   position: absolute;
+   font-size: 1.4rem;
+   bottom: 2rem;
+   left: 35%;
+   text-align: center;
+}
+
+.signature .line {
+   margin-top: 3rem;
+   border-top: 1px solid black;
+   width: 20rem;
+}
+
+.signature * {
+   padding: 0.2rem 0;
+   margin: 0;
+}

@@ -184,7 +184,7 @@ router.get("/month/debts", [auth, adminAuth], async (req, res) => {
 //@desc     Create a pdf of installments
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "Reports/debt.pdf";
+   const name = "reports/debt.pdf";
 
    const debts = req.body;
 
@@ -230,7 +230,7 @@ router.post("/create-list", (req, res) => {
    const css = path.join(
       "file://",
       __dirname,
-      "../../templates/styles/list.css"
+      "../../templates/list/style.css"
    );
 
    const options = {
@@ -246,23 +246,23 @@ router.post("/create-list", (req, res) => {
       },
    };
 
-   pdf.create(
-      pdfTemplate(css, img, "movimientos", thead, tbody),
-      options
-   ).toFile(name, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
+   pdf.create(pdfTemplate(css, img, "deudas", thead, tbody), options).toFile(
+      name,
+      (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
 
-      res.send(Promise.resolve());
-   });
+         res.send(Promise.resolve());
+      }
+   );
 });
 
 //@route    GET api/installment/fetch-list
 //@desc     Get the pdf of installments
 //@access   Private
 router.get("/list/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../Reports/debt.pdf"));
+   res.sendFile(path.join(__dirname, "../../reports/debt.pdf"));
 });
 
 //@route    POST api/installment
@@ -282,8 +282,12 @@ router.post(
       const { number, year, student, value, expired } = req.body;
 
       try {
-         let errors = validationResult(req);
-         errors = errors.array();
+         let errors = [];
+         const errorsResult = validationResult(req);
+         if (!errorsResult.isEmpty()) {
+            errors = errorsResult.array();
+            return res.status(400).json({ errors });
+         }
 
          const enrollment = await Enrollment.findOne({ year, student });
          if (enrollment) {
@@ -294,14 +298,12 @@ router.post(
             });
 
             if (installment) {
-               errors.push({
+               return res.status(400).json({
                   msg: "Ya existe una cuota de ese alumno para dicho año y mes",
                });
             }
          }
-         if (errors.length > 0) {
-            return res.status(400).json({ errors });
-         }
+
          let data = {
             number,
             value,
@@ -344,9 +346,10 @@ router.put(
    async (req, res) => {
       const { value, expired } = req.body;
 
-      let errors = validationResult(req);
-      if (!errors.isEmpty()) {
-         errors = errors.array();
+      let errors = [];
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
          return res.status(400).json({ errors });
       }
 
@@ -366,7 +369,7 @@ router.put(
 );
 
 //@route    PUT api/installment
-//@desc     Update the installments
+//@desc     Update the installment's price when expired
 //@access   Private
 router.put("/", [auth], async (req, res) => {
    try {
@@ -383,8 +386,10 @@ router.put("/", [auth], async (req, res) => {
          model: "user",
          select: "chargeday",
       });
+
       let penalty = await Penalty.find().sort({ $natural: -1 }).limit(1);
       penalty = penalty[0];
+
       for (let x = 0; x < installments.length; x++) {
          if (
             (installments[x].number < month && !installments[x].expired) ||
@@ -472,45 +477,16 @@ function buildTable(array) {
 function sortArray(array) {
    array.sort((a, b) => {
       if (a.student.lastname > b.student.lastname) return 1;
-      if (
-         a.student.lastname === b.student.lastname &&
-         a.student.name > b.student.name
-      )
-         return 1;
-      if (
-         a.student.lastname === b.student.lastname &&
-         a.student.name === b.student.name &&
-         a.year > b.year
-      )
-         return 1;
-      if (
-         a.student.lastname === b.student.lastname &&
-         a.student.name === b.student.name &&
-         a.year === b.year &&
-         a.number > b.number
-      )
-         return 1;
-
       if (a.student.lastname < b.student.lastname) return -1;
-      if (
-         a.student.lastname === b.student.lastname &&
-         a.student.name < b.student.name
-      )
-         return -1;
-      if (
-         a.student.lastname === b.student.lastname &&
-         a.student.name === b.student.name &&
-         a.year < b.year
-      )
-         return -1;
-      if (
-         a.student.lastname === b.student.lastname &&
-         a.student.name === b.student.name &&
-         a.year === b.year &&
-         a.number < b.number
-      )
-         return -1;
-      return 0;
+
+      if (a.student.name > b.student.name) return 1;
+      if (a.student.name < b.student.name) return -1;
+
+      if (a.student.year > b.student.year) return 1;
+      if (a.student.year < b.student.year) return -1;
+
+      if (a.student.number > b.student.number) return 1;
+      if (a.student.number < b.student.number) return -1;
    });
 
    return array;

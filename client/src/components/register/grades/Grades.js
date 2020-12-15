@@ -15,7 +15,7 @@ import Tabs from "../../Tabs";
 const Grades = ({
    match,
    classes,
-   grades: { grades, gradeTypes, loading },
+   grades: { gradeTypes, loading, error },
    loadGradesByClass,
    loadGradeTypesByCategory,
    loadClass,
@@ -27,7 +27,7 @@ const Grades = ({
          loadClass(match.params.id, false);
          setOneLoad(false);
       } else {
-         if (gradeTypes.length === 0 && !classes.loading) {
+         if (gradeTypes.length === 0 && !classes.loading && !error.type) {
             loadGradeTypesByCategory(classes.classInfo.category._id);
          }
       }
@@ -40,7 +40,69 @@ const Grades = ({
       loadGradesByClass,
       match.params.id,
       gradeTypes,
+      error.type,
    ]);
+
+   const tabs = (className) => {
+      switch (className) {
+         case "Kinder":
+            return (
+               <Tabs
+                  tablist={[
+                     "1° Bimestre",
+                     "2° Bimestre",
+                     "3° Bimestre",
+                     "4° Bimestre",
+                  ]}
+                  panellist={[GradesTab, GradesTab, GradesTab, GradesTab]}
+               />
+            );
+         case "Infantil A":
+         case "Preparatorio":
+         case "Junior":
+            return (
+               <div className="few-tabs">
+                  <Tabs
+                     tablist={[
+                        "1° Bimestre",
+                        "2° Bimestre",
+                        "3° Bimestre",
+                        "4° Bimestre",
+                        "Final",
+                        "Cambridge",
+                     ]}
+                     panellist={[
+                        GradesTab,
+                        GradesTab,
+                        GradesTab,
+                        GradesTab,
+                        GradesTab,
+                        GradesTab,
+                     ]}
+                  />
+               </div>
+            );
+         default:
+            return (
+               <Tabs
+                  tablist={[
+                     "1° Bimestre",
+                     "2° Bimestre",
+                     "3° Bimestre",
+                     "4° Bimestre",
+                     "Final",
+                  ]}
+                  panellist={[
+                     GradesTab,
+                     GradesTab,
+                     GradesTab,
+                     GradesTab,
+                     GradesTab,
+                  ]}
+               />
+            );
+      }
+   };
 
    return (
       <>
@@ -50,27 +112,8 @@ const Grades = ({
 
                <ClassInfo classInfo={classes.classInfo} />
                <div className="few-tabs">
-                  <Tabs
-                     tablist={[
-                        "1° Bimestre",
-                        "2° Bimestre",
-                        "3° Bimestre",
-                        "4° Bimestre",
-                        "Final",
-                     ]}
-                     panellist={[
-                        GradesTab,
-                        GradesTab,
-                        GradesTab,
-                        GradesTab,
-                        GradesTab,
-                     ]}
-                  />
+                  {tabs(classes.classInfo.category.name)}
                </div>
-               <button className="btn btn-secondary">
-                  <i className="fas fa-file-pdf"></i> Todas{" "}
-                  <span className="hide-md">las notas</span>
-               </button>
             </>
          ) : (
             <Loading />

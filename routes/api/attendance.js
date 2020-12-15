@@ -31,11 +31,6 @@ router.get("/:class_id", [auth], async (req, res) => {
          })
          .sort({ date: 1 });
 
-      if (attendances.length === 0) {
-         return res.status(400).json({
-            msg: "No se encontraron ausencias con dichas descripciones",
-         });
-      }
       const attendancesTable = await buildTable(
          attendances,
          req.params.class_id,
@@ -82,9 +77,9 @@ router.get("/user/:id", [auth], async (req, res) => {
 //@desc     Create a pdf of the class attendances
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "Reports/attendances.pdf";
+   const name = "reports/attendances.pdf";
 
-   const { headers, attendances, period, classInfo } = req.body;
+   const { header, students, attendances, period, classInfo } = req.body;
 
    const periodName = [
       "1° Bimestre",
@@ -99,15 +94,15 @@ router.post("/create-list", (req, res) => {
 
    const title = "Asistencias de " + periodName[period];
 
-   for (let x = 0; x < headers.header1.length; x++) {
-      thead += "<th>" + headers.header1[x] + "</th>";
+   for (let x = 0; x < header.length; x++) {
+      thead += "<th>" + header[x] + "</th>";
    }
 
    thead += "</tr>";
 
-   for (let x = 0; x < headers.header2.length; x++) {
-      if (headers.header2[x] !== "") {
-         tbody += "<tr> <td>" + headers.header2[x] + "</td>";
+   for (let x = 0; x < students.length; x++) {
+      if (students[x] !== "") {
+         tbody += "<tr> <td>" + students[x] + "</td>";
 
          for (let y = 0; y < attendances[x].length; y++) {
             tbody +=
@@ -128,7 +123,7 @@ router.post("/create-list", (req, res) => {
    const css = path.join(
       "file://",
       __dirname,
-      "../../templates/styles/assistanceGrades.css"
+      "../../templates/assistanceGrades/style.css"
    );
 
    const options = {
@@ -161,7 +156,7 @@ router.post("/create-list", (req, res) => {
 //@desc     Get the pdf of the class attendances
 //@access   Private
 router.get("/list/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../Reports/attendances.pdf"));
+   res.sendFile(path.join(__dirname, "../../reports/attendances.pdf"));
 });
 
 //@route    POST api/attendance
@@ -212,47 +207,35 @@ router.post("/", auth, async (req, res) => {
 //@access   Private
 router.post("/period", auth, async (req, res) => {
    const attendances = req.body;
-   let data;
+
    const classroom = attendances[0][0].classroom;
-   let toDelte = [];
    const period = attendances[0][0].period;
+
    try {
-      const oldAttendances = await Attendance.find({
-         classroom,
-         period,
-      });
       for (let x = 0; x < attendances.length; x++) {
          for (let y = 0; y < attendances[x].length; y++) {
             if (attendances[x][y].inassistance) {
-               attendace = await Attendance.findOne({
-                  user: attendances[x][y].user,
-                  date: attendances[x][y].date,
-               });
-
                if (attendances[x][y]._id === "") {
-                  data = {
+                  const data = {
                      user: attendances[x][y].user,
                      date: attendances[x][y].date,
                      period,
                      classroom,
                   };
-                  let attendance = new Attendance(data);
+                  const attendance = new Attendance(data);
                   await attendance.save();
-               } else {
-                  for (let x = 0; x < oldAttendances.length; x++) {
-                     if (oldAttendances[x].id === attendace.id) {
-                        oldAttendances.splice(x, 1);
-                        break;
-                     }
-                  }
+               }
+            } else {
+               if (attendances[x][y]._id !== "") {
+                  await Attendance.findOneAndDelete({
+                     user: attendances[x][y].user,
+                     date: attendances[x][y].date,
+                     period,
+                     classroom,
+                  });
                }
             }
          }
-      }
-
-      for (let x = 0; x < toDelte.length; x++) {
-         if (oldAttendances[x].user !== undefined)
-            await Attendance.findOneAndDelete({ _id: oldAttendances[x] });
       }
 
       res.json({ msg: "Attendances Updated" });
@@ -330,37 +313,50 @@ async function buildTable(attendances, class_id, res) {
       console.error(err.message);
       res.status(500).send("Server error");
    }
+   let header = [];
+   let periods = [];
 
-   let header1 = [];
-   let header2 = users.map((user) => {
-      return user.lastname + " " + user.name;
+   //Get the student's header
+   let students = users.map((user) => {
+      return user.lastname + ", " + user.name;
    });
-   header2 = [...header2, ""];
 
-   let rowsP = [];
-   let periods = attendances.reduce((res, curr) => {
+   //Add last row for the eliminate button
+   students = [...students, ""];
+
+   //Divide all the periods in different objects between '{}'
+   let allPeriods = attendances.reduce((res, curr) => {
       if (res[curr.period]) res[curr.period].push(curr);
       else Object.assign(res, { [curr.period]: [curr] });
 
       return res;
    }, {});
 
-   for (const x in periods) {
+   //this for works only for objects
+   for (const x in allPeriods) {
       let period = [];
       let count = 0;
-      let days = periods[x].reduce((res, curr) => {
+
+      //Get all the days for each period
+      let days = allPeriods[x].reduce((res, curr) => {
          if (res[curr.date]) res[curr.date].push(curr);
          else Object.assign(res, { [curr.date]: [curr] });
 
          return res;
       }, {});
+
       let daysHeader = Object.getOwnPropertyNames(days);
+
+      //Change the format of the date
       daysHeader = daysHeader.map((day) => {
          const date = new Date(day);
          return moment(date).utc().format("DD/MM");
       });
-      header1.push(daysHeader);
-      let students = periods[x].reduce((res, curr) => {
+
+      header.push(daysHeader);
+
+      //Divide all grades per student in this particular period
+      let classStudents = allPeriods[x].reduce((res, curr) => {
          if (curr.user !== undefined) {
             if (res[curr.user._id]) res[curr.user._id].push(curr);
             else Object.assign(res, { [curr.user._id]: [curr] });
@@ -368,74 +364,79 @@ async function buildTable(attendances, class_id, res) {
          return res;
       }, {});
 
+      //Amount of dates for this period
       const daysNumber = Object.keys(days).length;
 
-      let studentsArray = Object.keys(students).map((i) => students[i]);
+      //Generates an array from every object
+      let studentsArray = Object.keys(classStudents).map(
+         (i) => classStudents[i]
+      );
 
+      //Sort them in the same order as users
       studentsArray = studentsArray.sort((a, b) => {
          if (a[0].user.lastname > b[0].user.lastname) return 1;
-         if (
-            a[0].user.lastname === b[0].user.lastname &&
-            a[0].user.name > b[0].user.name
-         )
-            return 1;
          if (a[0].user.lastname < b[0].user.lastname) return -1;
-         if (
-            a[0].user.lastname === b[0].user.lastname &&
-            a[0].user.name < b[0].user.name
-         )
-            return -1;
-         return 0;
+
+         if (a[0].user.name > b[0].user.name) return 1;
+         if (a[0].user.name < b[0].user.name) return -1;
       });
 
-      let rows = [];
       let studentNumber = 0;
-      for (let z = 0; z < users.length + 1; z++) {
+      for (let z = 0; z < students.length; z++) {
          let rowNumber = 0;
 
+         //create an array with the amount of dates for the cells in the row
+         //every item in the array goes with that basic info
          let row = Array.from(Array(daysNumber), () => ({
             _id: "",
             classroom: class_id,
             period: x,
             inassistance: false,
          }));
+
+         //Add or modify the info that is in every item in the array row
          for (const index in days) {
             row[rowNumber].date = new Date(index);
             row[rowNumber].name = "input" + count;
-            if (users[z] !== undefined) {
-               row[rowNumber].user = users[z]._id;
-               let added = false;
-               if (studentsArray[studentNumber] !== undefined) {
-                  if (
-                     studentsArray[studentNumber][0].user._id.toString() ===
-                     users[z]._id.toString()
+
+            //For the items that are buttons (doesnt have a user related)
+            if (users[z] === undefined) {
+               count++;
+               rowNumber++;
+               continue;
+            }
+
+            row[rowNumber].user = users[z]._id;
+
+            let added = false;
+
+            if (studentsArray[studentNumber] !== undefined) {
+               if (
+                  studentsArray[studentNumber][0].user._id.toString() ===
+                  users[z]._id.toString()
+               ) {
+                  for (
+                     let y = 0;
+                     y < studentsArray[studentNumber].length;
+                     y++
                   ) {
-                     for (
-                        let y = 0;
-                        y < studentsArray[studentNumber].length;
-                        y++
+                     if (
+                        studentsArray[studentNumber][y].date.toString() ===
+                        new Date(index).toString()
                      ) {
-                        if (
-                           studentsArray[studentNumber][y].date.toString() ===
-                           new Date(index).toString()
-                        ) {
-                           row[rowNumber] = {
-                              ...row[rowNumber],
-                              inassistance: true,
-                              _id: studentsArray[studentNumber][y]._id,
-                           };
-                           period.push(studentsArray[studentNumber][y]);
-                           count++;
-                           added = true;
-                           break;
-                        }
+                        row[rowNumber].inassistance = true;
+                        row[rowNumber]._id =
+                           studentsArray[studentNumber][y]._id;
+
+                        count++;
+                        added = true;
+                        break;
                      }
                   }
                }
-               if (!added) {
-                  period.push(row[rowNumber]);
-                  count++;
-               }
+            }
+            if (!added) {
+               count++;
             }
             rowNumber++;
          }
@@ -451,11 +452,11 @@ async function buildTable(attendances, class_id, res) {
                studentNumber++;
             }
          }
-         rows.push(row);
+         period.push(row);
       }
-      rowsP.push({ period: x, rows });
+      periods.push(period);
    }
-   return { header: { header1, header2 }, periods: rowsP };
+   return { header, students, periods };
 }
 
 module.exports = router;

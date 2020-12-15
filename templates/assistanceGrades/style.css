@@ -1,4 +1,4 @@
-@import "./list.css";
+@import "../list/style.css";
 
 .title {
    font-size: 4rem;
@@ -26,4 +26,26 @@ table.attendance th:not(:first-child),
 table.attendance td:not(:first-child) {
    font-size: 1.2rem;
    padding: 0.5rem 0;
+}
+
+table.all-grades th,
+table.all-grades td:not(:first-child) {
+   padding: 0.7rem;
+}
+
+.border {
+   border: 3px solid #333;
+   border-bottom: 2px solid #333;
+}
+
+.border-right {
+   border-right: 3px solid #333 !important;
+}
+
+.border-bottom {
+   border-bottom: 3px solid #333;
+}
+
+.no-border {
+   border: none;
 }

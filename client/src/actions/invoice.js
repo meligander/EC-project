@@ -96,6 +96,8 @@ export const deleteInvoice = (invoice_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scroll(0, 0);
       dispatch(updateLoadingSpinner(false));
    }
 };
@@ -130,29 +132,36 @@ export const registerInvoice = (formData, history, user_id) => async (
       window.scrollTo(500, 0);
       history.push(`/dashboard/${user_id}`);
    } catch (err) {
-      if (err.response !== null) {
-         if (err.response.data.msg !== undefined) {
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else {
-            const errors = err.response.data.errors;
-            if (errors.length !== 0) {
-               errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "2"));
-               });
-            }
-         }
-         window.scrollTo(500, 0);
+      if (err.response.data.erros) {
+         const errors = err.response.data.errors;
+         errors.forEach((error) => {
+            dispatch(setAlert(error.msg, "danger", "2"));
+         });
+         dispatch({
+            type: INVOICE_ERROR,
+            payload: errors,
+         });
+      } else {
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         dispatch({
+            type: INVOICE_ERROR,
+            payload: {
+               type: err.response.statusText,
+               status: err.response.status,
+               msg: err.response.data.msg,
+            },
+         });
       }
-      dispatch(updateLoadingSpinner(false));
 
-      dispatch({
-         type: INVOICE_ERROR,
-      });
+      window.scrollTo(500, 0);
+      dispatch(updateLoadingSpinner(false));
    }
 };
 
 export const invoicesPDF = (invoices) => async (dispatch) => {
    let invoice = JSON.stringify(invoices);
+
+   dispatch(updateLoadingSpinner(true));
 
    try {
       const config = {
@@ -173,23 +182,22 @@ export const invoicesPDF = (invoices) => async (dispatch) => {
 
       saveAs(pdfBlob, `Ingresos ${date}.pdf`);
 
+      dispatch(updateLoadingSpinner(false));
+
       dispatch(setAlert("PDF Generado", "success", "2"));
       window.scroll(500, 0);
    } catch (err) {
-      console.log(err.response);
-      if (err.response !== null) {
-         if (err.response.data.msg !== undefined) {
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else {
-            const errors = err.response.data.errors;
-            if (errors.length !== 0) {
-               errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "2"));
-               });
-            }
-         }
-         window.scrollTo(500, 0);
-      }
+      dispatch({
+         type: INVOICE_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scroll(0, 0);
+      dispatch(updateLoadingSpinner(false));
    }
 };
 
@@ -199,6 +207,8 @@ export const invoicePDF = (invoice, remaining) => async (dispatch) => {
    const name = invoice.lastname
       ? `${invoice.lastname} ${invoice.name}`
       : `${invoice.user.lastname} ${invoice.user.name}`;
+
+   dispatch(updateLoadingSpinner(true));
 
    try {
       const config = {
@@ -219,22 +229,21 @@ export const invoicePDF = (invoice, remaining) => async (dispatch) => {
 
       saveAs(pdfBlob, `Factura ${name}  ${date}.pdf`);
 
+      dispatch(updateLoadingSpinner(false));
+
       dispatch(setAlert("PDF Generado", "success", "2"));
       window.scroll(500, 0);
    } catch (err) {
-      console.log(err.response);
-      if (err.response !== null) {
-         if (err.response.data.msg !== undefined) {
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else {
-            const errors = err.response.data.errors;
-            if (errors.length !== 0) {
-               errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "2"));
-               });
-            }
-         }
-         window.scrollTo(500, 0);
-      }
+      dispatch({
+         type: INVOICE_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scroll(0, 0);
+      dispatch(updateLoadingSpinner(false));
    }
 };

@@ -72,7 +72,7 @@ router.get("/last", [auth, adminAuth], async (req, res) => {
 //@desc     Create a pdf of expences
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "Reports/registers.pdf";
+   const name = "reports/registers.pdf";
 
    const register = req.body;
 
@@ -136,7 +136,7 @@ router.post("/create-list", (req, res) => {
    const css = path.join(
       "file://",
       __dirname,
-      "../../templates/styles/list.css"
+      "../../templates/list/style.css"
    );
 
    const options = {
@@ -153,23 +153,23 @@ router.post("/create-list", (req, res) => {
       },
    };
 
-   pdf.create(
-      pdfTemplate(css, img, "movimientos", thead, tbody),
-      options
-   ).toFile(name, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
+   pdf.create(pdfTemplate(css, img, "caja", thead, tbody), options).toFile(
+      name,
+      (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
 
-      res.send(Promise.resolve());
-   });
+         res.send(Promise.resolve());
+      }
+   );
 });
 
 //@route    GET api/expence/fetch-list
 //@desc     Get the pdf of expences
 //@access   Private
 router.get("/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../Reports/registers.pdf"));
+   res.sendFile(path.join(__dirname, "../../reports/registers.pdf"));
 });
 
 //@route    POST api/register

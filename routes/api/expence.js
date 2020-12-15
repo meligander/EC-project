@@ -64,7 +64,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 //@desc     Create a pdf of expences
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "Reports/expences.pdf";
+   const name = "reports/expences.pdf";
 
    const expences = req.body;
 
@@ -94,7 +94,7 @@ router.post("/create-list", (req, res) => {
    const css = path.join(
       "file://",
       __dirname,
-      "../../templates/styles/list.css"
+      "../../templates/list/style.css"
    );
 
    const options = {
@@ -126,7 +126,7 @@ router.post("/create-list", (req, res) => {
 //@desc     Get the pdf of expences
 //@access   Private
 router.get("/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../Reports/expences.pdf"));
+   res.sendFile(path.join(__dirname, "../../reports/expences.pdf"));
 });
 
 //@route    POST api/expence
@@ -143,47 +143,36 @@ router.post(
    async (req, res) => {
       let { value, expencetype, description } = req.body;
 
+      let errors = [];
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
+         return res.status(400).json({ errors });
+      }
+
       try {
-         let errors = validationResult(req);
-         errors = errors.array();
-
-         if (errors.length > 0) {
-            return res.status(400).json({ errors });
-         }
-
          const expencetypeinfo = await ExpenceType.findOne({
             _id: expencetype,
          });
 
          let last = await Register.find().sort({ $natural: -1 }).limit(1);
          last = last[0];
-         if (last === undefined) {
+         if (last === undefined)
             return res.status(400).json({
-               errors: [
-                  {
-                     msg:
-                        "Primero debe ingresar dinero a la caja antes de hacer cualquier transacción",
-                  },
-               ],
-            });
-         }
-         if (last.registermoney === 0) {
-            const error = {
                msg:
                   "Primero debe ingresar dinero a la caja antes de hacer cualquier transacción",
-            };
-            errors.push(error);
-         }
-         if (expencetypeinfo.type !== "Ingreso" && last.registermoney < value) {
-            const error = {
-               msg: "No se puede utilizar más dinero del que hay en caja",
-            };
-            errors.push(error);
-         }
+            });
 
-         if (errors.length > 0) {
-            return res.status(400).json({ errors });
-         }
+         if (last.registermoney === 0)
+            return res.status(400).json({
+               msg:
+                  "Primero debe ingresar dinero a la caja antes de hacer cualquier transacción",
+            });
+
+         if (expencetypeinfo.type !== "Ingreso" && last.registermoney < value)
+            return res.status(400).json({
+               msg: "No se puede utilizar más dinero del que hay en caja",
+            });
 
          let data = { value, expencetype, description };
 

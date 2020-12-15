@@ -137,7 +137,7 @@ router.get("/year/active", auth, async (req, res) => {
 //@desc     Create a pdf of classes
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "Reports/classes.pdf";
+   const name = "reports/classes.pdf";
 
    const classes = req.body;
 
@@ -202,7 +202,7 @@ router.post("/create-list", (req, res) => {
    const css = path.join(
       "file://",
       __dirname,
-      "../../templates/styles/list.css"
+      "../../templates/list/style.css"
    );
 
    const options = {
@@ -235,14 +235,14 @@ router.post("/create-list", (req, res) => {
 //@desc     Get the pdf of classes
 //@access   Private
 router.get("/list/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../Reports/classes.pdf"));
+   res.sendFile(path.join(__dirname, "../../reports/classes.pdf"));
 });
 
 //@route    POST api/class/oneclass/create-list
 //@desc     Create a pdf of a class
 //@access   Private
 router.post("/oneclass/create-list", (req, res) => {
-   const name = "Reports/class.pdf";
+   const name = "reports/class.pdf";
 
    const classInfo = req.body;
 
@@ -279,7 +279,7 @@ router.post("/oneclass/create-list", (req, res) => {
    const css = path.join(
       "file://",
       __dirname,
-      "../../templates/styles/classInfo.css"
+      "../../templates/classInfo/style.css"
    );
 
    const options = {
@@ -311,14 +311,14 @@ router.post("/oneclass/create-list", (req, res) => {
 //@desc     Get the pdf of a class
 //@access   Private
 router.get("/oneclass/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../Reports/class.pdf"));
+   res.sendFile(path.join(__dirname, "../../reports/class.pdf"));
 });
 
 //@route    POST api/class/blank/create-list
 //@desc     Create a pdf of the class  for attendances and grades
 //@access   Private
 router.post("/blank/create-list", (req, res) => {
-   const name = "Reports/blank.pdf";
+   const name = "reports/blank.pdf";
 
    const classInfo = req.body;
 
@@ -356,7 +356,7 @@ router.post("/blank/create-list", (req, res) => {
    const css = path.join(
       "file://",
       __dirname,
-      "../../templates/styles/classInfo.css"
+      "../../templates/classInfo/style.css"
    );
 
    const options = {
@@ -389,7 +389,7 @@ router.post("/blank/create-list", (req, res) => {
 //@desc     Get the pdf of the class  for attendances and grades
 //@access   Private
 router.get("/blank/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../Reports/blank.pdf"));
+   res.sendFile(path.join(__dirname, "../../reports/blank.pdf"));
 });
 
 //@route    POST api/class
@@ -420,10 +420,10 @@ router.post(
       const date = new Date();
       const year = date.getFullYear();
 
-      let errors = validationResult(req);
-      errors = errors.array();
-
-      if (errors.length > 0) {
+      let errors = [];
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
          return res.status(400).json({ errors });
       }
 
@@ -455,7 +455,7 @@ router.post(
          if (!teacher && teacher.type !== "Profesor")
             return res
                .status(400)
-               .json({ errors: [{ msg: "El usuario no es un profesor" }] });
+               .json({ msg: "El usuario no es un profesor" });
 
          const enrollments = await Enrollment.find({ category });
 
@@ -464,16 +464,12 @@ router.post(
             let student = await User.findOne({ _id: students[x]._id });
             if (student.classroom !== null) {
                return res.status(400).json({
-                  errors: [
-                     {
-                        msg:
-                           "El alumno " +
-                           student.lastname +
-                           " " +
-                           student.name +
-                           " ya tiene asignada una clase",
-                     },
-                  ],
+                  msg:
+                     "El alumno " +
+                     student.lastname +
+                     " " +
+                     student.name +
+                     " ya tiene asignada una clase",
                });
             }
             for (let y = 0; y < enrollments.length; y++) {
@@ -481,16 +477,12 @@ router.post(
             }
             if (!enrollment) {
                return res.status(400).json({
-                  errors: [
-                     {
-                        msg:
-                           "El alumno " +
-                           student.lastname +
-                           " " +
-                           student.name +
-                           " no está inscripto a dicha categoría",
-                     },
-                  ],
+                  msg:
+                     "El alumno " +
+                     student.lastname +
+                     " " +
+                     student.name +
+                     " no está inscripto a dicha categoría",
                });
             }
          }
@@ -538,8 +530,12 @@ router.put(
          students,
       } = req.body;
 
-      let errors = validationResult(req);
-      errors = errors.array();
+      let errors = [];
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
+         return res.status(400).json({ errors });
+      }
 
       try {
          let hours = [hourin1, hourin2, hourout1, hourout2];
@@ -565,7 +561,9 @@ router.put(
 
          teacher = await User.findOne({ _id: teacher });
          if (!teacher && teacher.type !== "Profesor")
-            errors.push({ msg: "El usuario no es un profesor" });
+            return res
+               .status(400)
+               .json({ msg: "El usuario no es un profesor" });
 
          const enrollments = await Enrollment.find({ category });
 
@@ -573,7 +571,7 @@ router.put(
             let student = await User.findOne({ _id: students[x]._id });
             if (student.classroom !== null) {
                if (student.classroom != req.params.id) {
-                  errors.push({
+                  return res.status(400).json({
                      msg:
                         "El alumno " +
                         student.lastname +
@@ -589,22 +587,14 @@ router.put(
             }
             if (!enrollment) {
                return res.status(400).json({
-                  errors: [
-                     {
-                        msg:
-                           "El alumno " +
-                           student.lastname +
-                           " " +
-                           student.name +
-                           " no está inscripto a dicha categoría",
-                     },
-                  ],
+                  msg:
+                     "El alumno " +
+                     student.lastname +
+                     " " +
+                     student.name +
+                     " no está inscripto a dicha categoría",
                });
             }
-         }
-
-         if (errors.length > 0) {
-            return res.status(400).json({ errors });
          }
 
          let classinfo = await Class.findOneAndUpdate(

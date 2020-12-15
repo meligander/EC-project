@@ -1,0 +1,142 @@
+.container {
+   margin: 5rem;
+   font-size: 1.7rem;
+   border: 2px solid black;
+   height: 95rem;
+   position: relative;
+}
+
+.text-right {
+   text-align: right;
+}
+
+.text-center {
+   text-align: center;
+}
+
+.lighter {
+   font-weight: lighter;
+}
+
+table {
+   border-collapse: collapse;
+   text-align: center;
+}
+
+table.header {
+   width: 100%;
+}
+
+table.header td {
+   border-bottom: 2px solid black;
+}
+
+table.header .logo {
+   width: 35%;
+   border-right: 2px solid black;
+}
+
+table.header .logo img {
+   width: 20rem;
+   height: 20rem;
+}
+
+.body {
+   padding: 5rem 1rem 2rem 1rem;
+}
+
+.body .capital {
+   text-transform: uppercase;
+   font-weight: bold;
+}
+
+.student {
+   padding-bottom: 1rem;
+}
+
+.student * {
+   padding: 0.8rem 0;
+}
+
+.student h3 {
+   font-size: 2rem;
+}
+
+.grades p.category {
+   text-transform: uppercase;
+   font-weight: bold;
+   text-align: right;
+   margin: -3.7rem 1rem -1rem 0;
+}
+
+.grades .mention {
+   text-transform: uppercase;
+   font-weight: bold;
+   text-align: right;
+   font-size: 2.5rem;
+   margin: 10rem 2rem 0 0;
+}
+
+.grades .mention .title {
+   font-size: 2.1rem;
+   font-weight: lighter;
+}
+
+.grades .not-passed {
+   margin-top: 10rem;
+   text-align: center;
+   font-size: 3rem;
+}
+
+.grades .table {
+   margin: 4rem 0 6rem 0;
+}
+
+.grades .subtitle p {
+   margin: 0.5rem;
+}
+
+.grades .grades-table {
+   margin: 0 0 0 auto;
+   width: 75%;
+   table-layout: fixed;
+}
+
+.grades .grades-table.no-border-top th {
+   border-top: none;
+}
+
+.grades .full {
+   width: 100% !important;
+}
+
+.grades .grades-table th,
+.grades .grades-table td {
+   border: 2px solid black;
+   padding: 0.5rem 0;
+}
+
+.date {
+   font-size: 1.5rem;
+   position: absolute;
+   bottom: 12rem;
+}
+
+.signature {
+   position: absolute;
+   font-size: 1.4rem;
+   bottom: 2rem;
+   left: 35%;
+   text-align: center;
+}
+
+.signature .line {
+   margin-top: 3rem;
+   border-top: 1px solid black;
+   width: 20rem;
+}
+
+.signature * {
+   padding: 0.2rem 0;
+   margin: 0;
+}

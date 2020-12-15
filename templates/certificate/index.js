@@ -1,14 +1,10 @@
-module.exports = (css, img, student) => {
+module.exports = (css, img, student, body, date) => {
    return `
         <!doctype html>
         <html>
             <head> 
                 <meta charset="utf-8">
                 <link href=${css} rel="stylesheet" />
-                <link
-                    href="https://fonts.googleapis.com/css2?family=Courgette&family=Dancing+Script:wght@700&display=swap"
-                    rel="stylesheet"
-                />
                 <title>Certificado fin de año</title>          
             </head>
             <body>
@@ -21,7 +17,7 @@ module.exports = (css, img, student) => {
                                 </td>
                                 <td>
                                     <h4>
-                                        De Lilia Cristina Anderlini
+                                        De Lilia Cristina Anderlini 
                                     </h4>
                                     <p>Profesora de inglés</p>
                                     <p>Universidad Nacional de Córdoba</p>
@@ -31,11 +27,20 @@ module.exports = (css, img, student) => {
                             </tr>                            
                         </tbody>
                     </table>
-                    <div>
-                        <p>Se extiende el presente CERTIFICADO a favor de:</p>
-                        <p className="text-center">${student.lastname}, ${student.name}</p>
-                        <p className="text-right">DNI: ${student.dni} </p>
-                    </div>
+                    <div class="body">
+                        <div class='student'>
+                            <p>Se extiende el presente CERTIFICADO a favor de:</p>
+                            <h2 class="text-center capital">${student.name}</h2>
+                            <h3 class="text-right"><span class="lighter">DNI:</span>&nbsp;  ${student.dni} </h3>
+                        </div>
+                        <div class='grades'>${body}</div>
+                        <p class='date'>Villa de Merlo, SL, ${date}</p>
+                        <div class='signature'>
+                            <p class="line"></p>
+                            <p>Directora</p>
+                            <p>Lilia Cristina Anderlini</p>
+                        </div>
+                    </div>                    
                 </div>
             </body>
         </html>

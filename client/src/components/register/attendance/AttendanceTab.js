@@ -14,7 +14,10 @@ import Confirm from "../../modal/Confirm";
 const AttendanceTab = ({
    history,
    classes: { classInfo },
-   attendance: { attendances, loading },
+   attendance: {
+      attendances: { header, students, periods },
+      loading,
+   },
    period,
    setAlert,
    registerNewDate,
@@ -24,10 +27,7 @@ const AttendanceTab = ({
    attendancesPDF,
 }) => {
    const [formData, setFormData] = useState({
-      newAttendances: {
-         period: "",
-         rows: [],
-      },
+      newAttendances: [],
       newDay: {
          date: "",
          period,
@@ -39,6 +39,7 @@ const AttendanceTab = ({
       toggleModalSave: false,
       toggleModalDelete: false,
       toDelete: null,
+      reload: false,
    });
 
    const {
@@ -46,6 +47,7 @@ const AttendanceTab = ({
       toggleModalDelete,
       toggleModalSave,
       toDelete,
+      reload,
    } = otherValues;
    const { newAttendances, newDay } = formData;
 
@@ -54,36 +56,22 @@ const AttendanceTab = ({
          setFormData((prev) => ({
             ...prev,
             newAttendances:
-               attendances.periods[period - 1] !== undefined
-                  ? attendances.periods[period - 1]
-                  : {
-                       period: "",
-                       rows: [],
-                    },
+               periods[period - 1] !== undefined ? periods[period - 1] : [],
          }));
       };
 
-      if (newAttendances.rows[0]) {
-         if (
-            attendances.periods[period - 1].rows[0].length !==
-            newAttendances.rows[0].length
-         ) {
-            setInput();
-         }
-      } else {
+      if (periods[period - 1] && (newAttendances.length === 0 || reload))
          setInput();
-      }
-      // eslint-disable-next-line
-   }, [period, attendances]);
+   }, [period, periods, newAttendances, reload]);
 
    const onChange = (e, row) => {
       let number = Number(e.target.name.substring(5, e.target.name.length));
-      let changedRows = { ...newAttendances };
-      const daysNumber = newAttendances.rows[0].length;
+      let changedRows = [...newAttendances];
+      const daysNumber = newAttendances[0].length;
       const rowN = Math.ceil((number + 1) / daysNumber) - 1;
       const mult = daysNumber * rowN;
       number = number - mult;
-      changedRows.rows[rowN][number] = {
+      changedRows[rowN][number] = {
          ...row,
          inassistance: !row.inassistance,
       };
@@ -110,7 +98,7 @@ const AttendanceTab = ({
          window.scroll(0, 0);
       } else {
          registerNewDate(newDay);
-         setOtherValues({ ...otherValues, dayPlus: !dayPlus });
+         setOtherValues({ ...otherValues, dayPlus: !dayPlus, reload: true });
       }
    };
 
@@ -120,11 +108,12 @@ const AttendanceTab = ({
 
    const deleteDateAc = () => {
       deleteDate(toDelete.date);
-      setOtherValues({ ...otherValues, dayPlus: false });
+      setOtherValues({ ...otherValues, dayPlus: false, reload: true });
    };
 
    const saveAttendances = () => {
-      updateAttendances(newAttendances.rows, history, classInfo._id);
+      const AttendancePeriod = newAttendances.filter((grade) => grade[0].user);
+      updateAttendances(AttendancePeriod, history, classInfo._id);
    };
 
    const setToggleSave = (e) => {
@@ -144,13 +133,10 @@ const AttendanceTab = ({
    };
 
    const pdfGeneratorSave = () => {
-      const headers = {
-         header1: attendances.header.header1[period - 1],
-         header2: attendances.header.header2,
-      };
       attendancesPDF(
-         headers,
-         attendances.periods[period - 1].rows,
+         header[period - 1],
+         students,
+         periods[period - 1],
          period - 1,
          classInfo
       );
@@ -176,18 +162,18 @@ const AttendanceTab = ({
                   <thead>
                      <tr>
                         <th className="bg-strong">Nombre</th>
-                        {attendances.header.header1[period - 1] &&
-                           attendances.header.header1[
-                              period - 1
-                           ].map((day, index) => <th key={index}>{day}</th>)}
+                        {header[period - 1] &&
+                           header[period - 1].map((day, index) => (
+                              <th key={index}>{day}</th>
+                           ))}
                      </tr>
                   </thead>
                   <tbody>
-                     {attendances.header.header2.map((student, i) => (
+                     {students.map((student, i) => (
                         <tr key={i}>
                            <td className="bg-white">{student}</td>
-                           {newAttendances.rows.length > 0 &&
-                              newAttendances.rows[i].map((row, key) => (
+                           {newAttendances.length > 0 &&
+                              newAttendances[i].map((row, key) => (
                                  <td key={key}>
                                     {row.user !== undefined ? (
                                        <input
@@ -229,7 +215,7 @@ const AttendanceTab = ({
                <span className="hide-md"> Día</span>
             </button>
             <button className="btn btn-secondary" onClick={pdfGeneratorSave}>
-               <i className="far fa-save"></i>
+               <i className="fas fa-file-pdf"></i>
             </button>
          </div>
          {dayPlus && (

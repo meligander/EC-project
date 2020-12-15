@@ -207,7 +207,7 @@ router.get("/:id", [auth, adminAuth], async (req, res) => {
 //@desc     Create a pdf of income
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "Reports/invoices.pdf";
+   const name = "reports/invoices.pdf";
 
    const invoices = req.body;
 
@@ -245,7 +245,7 @@ router.post("/create-list", (req, res) => {
    const css = path.join(
       "file://",
       __dirname,
-      "../../templates/styles/list.css"
+      "../../templates/list/style.css"
    );
 
    const options = {
@@ -277,14 +277,14 @@ router.post("/create-list", (req, res) => {
 //@desc     Get the pdf of income
 //@access   Private
 router.get("/list/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../Reports/invoices.pdf"));
+   res.sendFile(path.join(__dirname, "../../reports/invoices.pdf"));
 });
 
 //@route    POST api/invoice/create-invoice
 //@desc     Create a pdf of an invoice
 //@access   Private
 router.post("/create-invoice", (req, res) => {
-   const name = "Reports/invoice.pdf";
+   const name = "reports/invoice.pdf";
 
    const { invoice, remaining } = req.body;
 
@@ -347,7 +347,7 @@ router.post("/create-invoice", (req, res) => {
    const css = path.join(
       "file://",
       __dirname,
-      "../../templates/styles/invoice.css"
+      "../../templates/invoice/style.css"
    );
 
    const options = {
@@ -370,7 +370,7 @@ router.post("/create-invoice", (req, res) => {
 //@desc     Get the pdf of an invoice
 //@access   Private
 router.get("/for-print/fetch-invoice", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../Reports/invoice.pdf"));
+   res.sendFile(path.join(__dirname, "../../reports/invoice.pdf"));
 });
 
 //@route    POST api/invoice
@@ -392,48 +392,40 @@ router.post(
       } = req.body;
       total = Number(total);
 
-      let errors = validationResult(req);
-      errors = errors.array();
+      let errors = [];
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
+         return res.status(400).json({ errors });
+      }
+
       let newDetails = [];
       try {
          let installment;
          for (let x = 0; x < details.length; x++) {
-            if (details[x].payment === undefined) {
-               errors.push({ msg: "El pago es necesario" });
-               break;
-            }
+            if (details[x].payment === undefined)
+               return res.status(400).json({ msg: "El pago es necesario" });
             installment = await Installment.findOne({
                _id: details[x].item._id,
             });
 
-            if (installment.value === 0) {
-               errors.push({
-                  msg: "Dicha cuota ya está paga",
-               });
-               break;
-            }
+            if (installment.value === 0)
+               return res.status(400).json({ msg: "Dicha cuota ya está paga" });
 
-            if (installment.value < details[x].payment) {
-               errors.push({
+            if (installment.value < details[x].payment)
+               return res.status(400).json({
                   msg: "El importe a pagar debe ser menor al valor de la cuota",
                });
-               break;
-            }
          }
 
          let last = await Register.find().sort({ $natural: -1 }).limit(1);
          last = last[0];
 
-         if (!last) {
-            errors.push({
+         if (!last)
+            return res.status(400).json({
                msg:
                   "Antes de realizar cualquier transacción debe ingresar dinero en la caja",
             });
-         }
-
-         if (errors.length > 0) {
-            return res.status(400).json({ errors });
-         }
 
          for (let x = 0; x < details.length; x++) {
             newDetails.push({

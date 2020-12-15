@@ -29,6 +29,8 @@ export const loadStudentAttendance = (user_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scroll(0, 0);
    }
 };
 
@@ -50,6 +52,8 @@ export const loadAttendances = (class_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scroll(0, 0);
       dispatch(updateLoadingSpinner(false));
    }
 };
@@ -58,6 +62,7 @@ export const updateAttendances = (formData, history, class_id) => async (
    dispatch
 ) => {
    try {
+      dispatch(updateLoadingSpinner(true));
       let attendances = [];
       attendances = JSON.stringify(formData);
 
@@ -76,22 +81,21 @@ export const updateAttendances = (formData, history, class_id) => async (
          payload: res.data,
       });
       history.push(`/class/${class_id}`);
+      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("Inasistencias Modificadas", "success", "2"));
       window.scrollTo(500, 0);
    } catch (err) {
-      if (err.response !== null) {
-         if (err.response.data.msg !== undefined) {
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else {
-            const errors = err.response.data.errors;
-            if (errors.length !== 0) {
-               errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "2"));
-               });
-            }
-         }
-         window.scrollTo(500, 0);
-      }
+      dispatch({
+         type: ATTENDANCES_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scroll(0, 0);
+      dispatch(updateLoadingSpinner(false));
    }
 };
 
@@ -115,19 +119,16 @@ export const registerNewDate = (newDate) => async (dispatch) => {
       dispatch(setAlert("Día Agregado", "success", "2"));
       window.scrollTo(500, 0);
    } catch (err) {
-      if (err.response !== null) {
-         if (err.response.data.msg !== undefined) {
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else {
-            const errors = err.response.data.errors;
-            if (errors.length !== 0) {
-               errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "2"));
-               });
-            }
-         }
-         window.scrollTo(500, 0);
-      }
+      dispatch({
+         type: ATTENDANCES_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scroll(0, 0);
       dispatch(updateLoadingSpinner(false));
    }
 };
@@ -154,24 +155,29 @@ export const deleteDate = (date) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scroll(0, 0);
       dispatch(updateLoadingSpinner(false));
    }
 };
 
 export const attendancesPDF = (
-   headers,
+   header,
+   students,
    attendances,
    period,
    classInfo
 ) => async (dispatch) => {
    let tableInfo = JSON.stringify({
-      headers,
+      header,
+      students,
       attendances,
       period,
       classInfo,
    });
 
    try {
+      dispatch(updateLoadingSpinner(true));
       const config = {
          headers: {
             "Content-Type": "application/json",
@@ -195,23 +201,21 @@ export const attendancesPDF = (
          }  ${date}.pdf`
       );
 
+      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("PDF Generado", "success", "2"));
       window.scroll(500, 0);
    } catch (err) {
-      console.log(err.response);
-      if (err.response !== null) {
-         if (err.response.data.msg !== undefined) {
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else {
-            const errors = err.response.data.errors;
-            if (errors.length !== 0) {
-               errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "2"));
-               });
-            }
-         }
-         window.scrollTo(500, 0);
-      }
+      dispatch({
+         type: ATTENDANCES_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scroll(0, 0);
+      dispatch(updateLoadingSpinner(false));
    }
 };
 

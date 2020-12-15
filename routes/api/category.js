@@ -35,7 +35,7 @@ router.get("/", [auth], async (req, res) => {
 //@desc     Create a pdf of categories
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "Reports/categories.pdf";
+   const name = "reports/categories.pdf";
 
    const category = req.body;
 
@@ -58,7 +58,7 @@ router.post("/create-list", (req, res) => {
    const css = path.join(
       "file://",
       __dirname,
-      "../../templates/styles/list.css"
+      "../../templates/list/style.css"
    );
 
    const options = {
@@ -90,7 +90,7 @@ router.post("/create-list", (req, res) => {
 //@desc     Get the pdf of categories
 //@access   Private
 router.get("/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../Reports/categories.pdf"));
+   res.sendFile(path.join(__dirname, "../../reports/categories.pdf"));
 });
 
 //@route    POST api/category
@@ -102,9 +102,10 @@ router.post(
    async (req, res) => {
       const { name, value } = req.body;
 
-      let errors = validationResult(req);
-      if (!errors.isEmpty()) {
-         errors = errors.array();
+      let errors = [];
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
          return res.status(400).json({ errors });
       }
 
@@ -160,9 +161,10 @@ router.put(
       const year = date.getFullYear();
       let newCategories = [];
 
-      let errors = validationResult(req);
-      if (!errors.isEmpty()) {
-         errors = errors.array();
+      let errors = [];
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
          return res.status(400).json({ errors });
       }
       try {

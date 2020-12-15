@@ -32,6 +32,8 @@ export const loadUsersGrades = (user_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
    }
 };
 
@@ -53,6 +55,8 @@ export const loadGradesByClass = (class_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
       dispatch(updateLoadingSpinner(false));
    }
 };
@@ -73,6 +77,8 @@ export const loadGradeTypesByCategory = (category_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
    }
 };
 
@@ -92,6 +98,8 @@ export const loadGradeTypes = () => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
    }
 };
 
@@ -114,19 +122,17 @@ export const registerNewGrade = (newGrade) => async (dispatch) => {
       dispatch(setAlert("Nuevo Tipo de Nota Agregado", "success", "2"));
       window.scrollTo(500, 0);
    } catch (err) {
-      if (err.response !== null) {
-         if (err.response.data.msg !== undefined) {
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else {
-            const errors = err.response.data.errors;
-            if (errors.length !== 0) {
-               errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "2"));
-               });
-            }
-         }
-         window.scrollTo(500, 0);
-      }
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch({
+         type: GRADES_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+
+      window.scrollTo(500, 0);
       dispatch(updateLoadingSpinner(false));
    }
 };
@@ -155,6 +161,8 @@ export const deleteGrades = (grade) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
       dispatch(updateLoadingSpinner(false));
    }
 };
@@ -163,6 +171,7 @@ export const updateGrades = (formData, history, class_id) => async (
    dispatch
 ) => {
    try {
+      dispatch(updateLoadingSpinner(true));
       let grades = JSON.stringify(formData);
 
       const config = {
@@ -180,22 +189,22 @@ export const updateGrades = (formData, history, class_id) => async (
       dispatch({
          type: GRADES_CLEARED,
       });
+
+      dispatch(updateLoadingSpinner(false));
       history.push(`/class/${class_id}`);
       window.scrollTo(500, 0);
    } catch (err) {
-      if (err.response !== null) {
-         if (err.response.data.msg !== undefined) {
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else {
-            const errors = err.response.data.errors;
-            if (errors !== 0) {
-               errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "2"));
-               });
-            }
-         }
-         window.scrollTo(500, 0);
-      }
+      dispatch({
+         type: GRADES_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
+      dispatch(updateLoadingSpinner(false));
    }
 };
 
@@ -219,33 +228,37 @@ export const updateGradeTypes = (formData) => async (dispatch) => {
       dispatch(setAlert("Tipos de Notas Modificados", "success", "2"));
       dispatch(updateLoadingSpinner(false));
    } catch (err) {
-      if (err.response !== null) {
-         if (err.response.data.msg !== undefined) {
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else {
-            const errors = err.response.data.errors;
-            if (errors.length !== 0) {
-               errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "2"));
-               });
-            }
-         }
-         window.scrollTo(500, 0);
-      }
+      dispatch({
+         type: GRADETYPE_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
       dispatch(updateLoadingSpinner(false));
    }
 };
 
-export const gradesPDF = (headers, grades, period, classInfo) => async (
-   dispatch
-) => {
+export const gradesPDF = (
+   header,
+   students,
+   periods,
+   classInfo,
+   period,
+   all
+) => async (dispatch) => {
    let tableInfo = JSON.stringify({
-      headers,
-      grades,
-      period,
+      students,
+      header,
+      periods,
       classInfo,
+      period,
    });
 
+   dispatch(updateLoadingSpinner(true));
    try {
       const config = {
          headers: {
@@ -253,7 +266,9 @@ export const gradesPDF = (headers, grades, period, classInfo) => async (
          },
       };
 
-      await axios.post("/api/grade/create-list", tableInfo, config);
+      if (all)
+         await axios.post("/api/grade/all/create-list", tableInfo, config);
+      else await axios.post("/api/grade/create-list", tableInfo, config);
 
       const pdf = await axios.get("/api/grade/list/fetch-list", {
          responseType: "blob",
@@ -266,39 +281,36 @@ export const gradesPDF = (headers, grades, period, classInfo) => async (
       saveAs(
          pdfBlob,
          `Notas de ${classInfo.category.name} de ${
-            classInfo.teacher.lastname + " " + classInfo.teacher.name
+            classInfo.teacher.lastname + ", " + classInfo.teacher.name
          }  ${date}.pdf`
       );
-
+      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("PDF Generado", "success", "2"));
       window.scroll(500, 0);
    } catch (err) {
-      console.log(err.response);
-      if (err.response !== null) {
-         if (err.response.data.msg !== undefined) {
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else {
-            const errors = err.response.data.errors;
-            if (errors.length !== 0) {
-               errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "2"));
-               });
-            }
-         }
-         window.scrollTo(500, 0);
-      }
+      dispatch({
+         type: GRADES_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
+      dispatch(updateLoadingSpinner(false));
    }
 };
 
-export const certificatePDF = (headers, grades, period, classInfo) => async (
-   dispatch
-) => {
-   let tableInfo = JSON.stringify({
-      headers,
-      grades,
-      period,
-      classInfo,
-   });
+export const certificatePDF = (
+   students,
+   header,
+   periods,
+   classInfo,
+   certificateDate,
+   periodNumber
+) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
 
    try {
       const config = {
@@ -307,40 +319,68 @@ export const certificatePDF = (headers, grades, period, classInfo) => async (
          },
       };
 
-      await axios.post("/api/grade/create-list", tableInfo, config);
+      for (let x = 0; x < students.length; x++) {
+         let period = [];
+         if (classInfo.category.name === "Kinder") {
+            period = periods.map((period) =>
+               period.filter((item) => item[0].student)
+            );
+            period.push(x);
+         } else period = periods[x];
+         const student = students[x];
 
-      const pdf = await axios.get("/api/grade/list/fetch-list", {
-         responseType: "blob",
-      });
+         const info = JSON.stringify({
+            student,
+            header,
+            period,
+            classInfo,
+            certificateDate,
+         });
 
-      const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
+         if (periodNumber === 6) {
+            await axios.post(
+               "/api/grade/certificate-cambridge/create-list",
+               info,
+               config
+            );
+         } else {
+            await axios.post(
+               "/api/grade/certificate/create-list",
+               info,
+               config
+            );
+         }
 
-      const date = moment().format("DD-MM-YY");
+         const pdf = await axios.get("/api/grade/certificate/fetch-list", {
+            responseType: "blob",
+         });
 
-      saveAs(
-         pdfBlob,
-         `Notas de ${classInfo.category.name} de ${
-            classInfo.teacher.lastname + " " + classInfo.teacher.name
-         }  ${date}.pdf`
-      );
+         const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-      dispatch(setAlert("PDF Generado", "success", "2"));
+         saveAs(
+            pdfBlob,
+            `Certificado ${classInfo.category.name} ${
+               periodNumber === 6 && "Cambridge"
+            }  ${student.name}.pdf`
+         );
+      }
+
+      dispatch(setAlert("Certificados Generados", "success", "2"));
+
+      dispatch(updateLoadingSpinner(false));
       window.scroll(500, 0);
    } catch (err) {
-      console.log(err.response);
-      if (err.response !== null) {
-         if (err.response.data.msg !== undefined) {
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else {
-            const errors = err.response.data.errors;
-            if (errors.length !== 0) {
-               errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "2"));
-               });
-            }
-         }
-         window.scrollTo(500, 0);
-      }
+      dispatch({
+         type: GRADES_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
+      dispatch(updateLoadingSpinner(false));
    }
 };
 

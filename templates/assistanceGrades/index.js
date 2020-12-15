@@ -1,4 +1,13 @@
-module.exports = (css, img, title, thead, tbody, classInfo, attendance) => {
+module.exports = (
+   css,
+   img,
+   title,
+   thead,
+   tbody,
+   classInfo,
+   attendance,
+   allGrades
+) => {
    return `
       <!doctype html>
       <html>
@@ -27,7 +36,13 @@ module.exports = (css, img, title, thead, tbody, classInfo, attendance) => {
                 </h3>                 
                 <h4 class='category'>${classInfo.category.name}</h4>
               </div>
-              <table ${attendance ? "class='attendance'" : ""} >
+              <table ${
+                 attendance
+                    ? "class='attendance'"
+                    : allGrades
+                    ? "class='all-grades'"
+                    : ""
+              } >
                  <thead>
                   ${thead}
                  </thead>

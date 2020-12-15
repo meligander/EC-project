@@ -1,4 +1,5 @@
-@import "./list.css";
+@import "../list/style.css";
+
 .class-info,
 .teacher {
    font-family: "Courgette", cursive;

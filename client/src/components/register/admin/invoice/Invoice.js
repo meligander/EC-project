@@ -5,7 +5,7 @@ import Moment from "react-moment";
 import PropTypes from "prop-types";
 import { withRouter } from "react-router-dom";
 import Loading from "../../../modal/Loading";
-import logo from "../../../../img/logoSinFondo2.png";
+import logo from "../../../../img/fondoBlanco.png";
 
 const Invoice = ({
    loadInvoice,

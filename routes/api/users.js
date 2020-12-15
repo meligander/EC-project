@@ -91,7 +91,6 @@ router.get("/", auth, async (req, res) => {
                         .populate({
                            path: "category",
                            select: "name",
-                           options: { sort: { lastname: -1, name: -1 } },
                         });
 
                      for (let x = 0; x < enrollments.length; x++) {
@@ -331,7 +330,7 @@ router.get("/active/:type", [auth, adminAuth], async (req, res) => {
 //@desc     Create a pdf of users
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const nameReport = "Reports/users.pdf";
+   const nameReport = "reports/users.pdf";
 
    const { users, usersType } = req.body;
 
@@ -412,7 +411,7 @@ router.post("/create-list", (req, res) => {
    const css = path.join(
       "file://",
       __dirname,
-      "../../templates/styles/list.css"
+      "../../templates/list/style.css"
    );
 
    const options = {
@@ -450,7 +449,7 @@ router.post("/create-list", (req, res) => {
 //@desc     Get the pdf of users
 //@access   Private
 router.get("/lista/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../Reports/users.pdf"));
+   res.sendFile(path.join(__dirname, "../../reports/users.pdf"));
 });
 
 //@route    POST api/users
@@ -492,34 +491,31 @@ router.post(
          active,
       } = req.body;
 
-      const errorInit = validationResult(req);
       let errors = [];
-      var regex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
-      if (!errorInit.isEmpty()) {
-         errors = errorInit.array();
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
+         return res.status(400).json({ errors });
       }
-      if (email !== undefined && !regex.test(email)) {
-         const error = {
+
+      var regex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
+      if (email !== undefined && !regex.test(email))
+         return res.status(400).json({
             value: email,
             msg: "El mail es inválido",
             params: "email",
             location: "body",
-         };
-         errors.push(error);
-      }
+         });
 
       try {
          //See if users exists
          if (email !== undefined) {
             user = await User.findOne({ email });
 
-            if (user) {
-               errors.push({ msg: "Ya existe un usuario con ese mail" });
-            }
-         }
-
-         if (errors.length > 0) {
-            return res.status(400).json({ errors });
+            if (user)
+               return res
+                  .status(400)
+                  .json({ msg: "Ya existe un usuario con ese mail" });
          }
 
          const number = await User.find({ type: "Alumno" })
@@ -620,11 +616,13 @@ router.put(
          img,
       } = req.body;
 
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-         errors = errorInit.array();
+      let errors = [];
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
          return res.status(400).json({ errors });
       }
+
       let user;
       let imgurl = "";
       try {
@@ -713,29 +711,23 @@ router.put(
 router.put("/credentials/:id", [auth, adminAuth], async (req, res) => {
    const { password, email } = req.body;
 
-   let errors = [];
    var regex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
-   if (email !== undefined && !regex.test(email)) {
-      const error = {
+   if (email !== undefined && !regex.test(email))
+      return res.status(400).json({
          value: email,
          msg: "El mail es inválido",
          params: "email",
          location: "body",
-      };
-      errors.push(error);
-   }
+      });
 
    try {
       //See if users exists
       if (email !== undefined) {
          user = await User.findOne({ email });
-         if (user && user.id !== req.user.id && user.email !== email) {
-            errors.push({ msg: "Ya existe un usuario con ese mail" });
-         }
-      }
-
-      if (errors.length > 0) {
-         return res.status(400).json({ errors });
+         if (user && user.id !== req.user.id && user.email !== email)
+            return res
+               .status(400)
+               .json({ msg: "Ya existe un usuario con ese mail" });
       }
 
       let data = {

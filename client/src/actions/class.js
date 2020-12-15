@@ -32,6 +32,8 @@ export const loadUsersClass = (user_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
    }
 };
 
@@ -53,6 +55,8 @@ export const loadClass = (class_id, loading = true) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
       dispatch(updateLoadingSpinner(false));
    }
 };
@@ -76,6 +80,8 @@ export const loadClassStudents = (class_id, loading) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
       if (loading) dispatch(updateLoadingSpinner(false));
    }
 };
@@ -107,6 +113,8 @@ export const loadClasses = (filterData) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
       dispatch(updateLoadingSpinner(false));
    }
 };
@@ -152,24 +160,29 @@ export const registerUpdateClass = (formData, history, class_id = 0) => async (
       dispatch(updateAdminDashLoading());
       dispatch(updateLoadingSpinner(false));
    } catch (err) {
-      if (err.response !== null) {
-         if (err.response.data.msg !== undefined) {
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else {
-            const errors = err.response.data.errors;
-            if (errors.length !== 0) {
-               errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "2"));
-               });
-            }
-         }
-         window.scrollTo(500, 0);
+      if (err.response.data.erros) {
+         const errors = err.response.data.errors;
+         errors.forEach((error) => {
+            dispatch(setAlert(error.msg, "danger", "2"));
+         });
+         dispatch({
+            type: CLASS_ERROR,
+            payload: errors,
+         });
+      } else {
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         dispatch({
+            type: CLASS_ERROR,
+            payload: {
+               type: err.response.statusText,
+               status: err.response.status,
+               msg: err.response.data.msg,
+            },
+         });
       }
-      dispatch(updateLoadingSpinner(false));
 
-      dispatch({
-         type: CLASS_ERROR,
-      });
+      window.scrollTo(500, 0);
+      dispatch(updateLoadingSpinner(false));
    }
 };
 
@@ -179,6 +192,7 @@ export const updateClass = (classInfo) => (dispatch) => {
 
 export const deleteClass = (class_id, history) => async (dispatch) => {
    try {
+      dispatch(updateLoadingSpinner(true));
       await axios.delete(`/api/class/${class_id}`);
 
       dispatch({
@@ -189,6 +203,7 @@ export const deleteClass = (class_id, history) => async (dispatch) => {
       dispatch(setAlert("Curso Eliminado", "success", "2"));
       dispatch(updateAdminDashLoading());
       history.push("/classes");
+      dispatch(updateLoadingSpinner(false));
       window.scroll(500, 0);
    } catch (err) {
       dispatch({
@@ -199,12 +214,15 @@ export const deleteClass = (class_id, history) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
+      dispatch(updateLoadingSpinner(false));
    }
 };
 
 export const classesPDF = (classes1) => async (dispatch) => {
    let classes = JSON.stringify(classes1);
-
+   dispatch(updateLoadingSpinner(true));
    try {
       const config = {
          headers: {
@@ -226,27 +244,25 @@ export const classesPDF = (classes1) => async (dispatch) => {
 
       dispatch(setAlert("PDF Generado", "success", "2"));
       window.scroll(500, 0);
+      dispatch(updateLoadingSpinner(false));
    } catch (err) {
-      console.log(err.response);
-      if (err.response !== null) {
-         if (err.response.data.msg !== undefined) {
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else {
-            const errors = err.response.data.errors;
-            if (errors.length !== 0) {
-               errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "2"));
-               });
-            }
-         }
-         window.scrollTo(500, 0);
-      }
+      dispatch({
+         type: CLASS_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
+      dispatch(updateLoadingSpinner(false));
    }
 };
 
 export const classPDF = (class1) => async (dispatch) => {
    let classInfo = JSON.stringify(class1);
-
+   dispatch(updateLoadingSpinner(true));
    try {
       const config = {
          headers: {
@@ -271,29 +287,27 @@ export const classPDF = (class1) => async (dispatch) => {
          } ${date}.pdf`
       );
 
+      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("PDF Generado", "success", "2"));
       window.scroll(500, 0);
    } catch (err) {
-      console.log(err.response);
-      if (err.response !== null) {
-         if (err.response.data.msg !== undefined) {
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else {
-            const errors = err.response.data.errors;
-            if (errors.length !== 0) {
-               errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "2"));
-               });
-            }
-         }
-         window.scrollTo(500, 0);
-      }
+      dispatch({
+         type: CLASS_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
+      dispatch(updateLoadingSpinner(false));
    }
 };
 
 export const blankPDF = (classInfo) => async (dispatch) => {
    let tableInfo = JSON.stringify(classInfo);
-
+   dispatch(updateLoadingSpinner(true));
    try {
       const config = {
          headers: {
@@ -318,23 +332,21 @@ export const blankPDF = (classInfo) => async (dispatch) => {
          }  ${date}.pdf`
       );
 
+      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("PDF Generado", "success", "2"));
       window.scroll(500, 0);
    } catch (err) {
-      console.log(err.response);
-      if (err.response !== null) {
-         if (err.response.data.msg !== undefined) {
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else {
-            const errors = err.response.data.errors;
-            if (errors.length !== 0) {
-               errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "2"));
-               });
-            }
-         }
-         window.scrollTo(500, 0);
-      }
+      dispatch({
+         type: CLASS_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(500, 0);
+      dispatch(updateLoadingSpinner(false));
    }
 };
 
