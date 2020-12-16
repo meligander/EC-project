@@ -35,6 +35,7 @@ import IncomeList from "../register/admin/lists/IncomeList";
 import ExpenceList from "../register/admin/lists/ExpenceList";
 import DebtList from "../register/admin/lists/DebtList";
 import RegisterList from "../register/admin/lists/RegisterList";
+import MentionList from "../register/admin/lists/MentionList";
 
 const Routes = () => {
    return (
@@ -236,6 +237,12 @@ const Routes = () => {
                types={["Administrador", "Secretaria", "Admin/Profesor"]}
                path="/register-list"
                component={RegisterList}
+            />
+            <PrivateRoutes
+               exact
+               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               path="/mention-list"
+               component={MentionList}
             />
          </Switch>
       </section>

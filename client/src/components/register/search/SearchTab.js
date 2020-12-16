@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { loadCategories } from "../../../actions/category";
 import { loadUsers, userPDF } from "../../../actions/user";
+import { setAlert } from "../../../actions/alert";
 import PropTypes from "prop-types";
 import StudentTable from "../../tables/StudentTable";
 import RestTable from "../../tables/RestTable";
@@ -14,6 +15,7 @@ const SearchTab = ({
    loadUsers,
    typeF,
    userPDF,
+   setAlert,
 }) => {
    const [filterForm, setFilterForm] = useState({
       name: "",
@@ -55,7 +57,12 @@ const SearchTab = ({
    };
 
    const pdfGeneratorSave = () => {
-      userPDF(users, usersType);
+      if (users.length === 0) {
+         setAlert("Primero debe realizar una búsqueda", "danger", "2");
+         window.scrollTo(500, 0);
+      } else {
+         userPDF(users, usersType);
+      }
    };
 
    useEffect(() => {
@@ -166,6 +173,7 @@ SearchTab.propTypes = {
    loadUsers: PropTypes.func.isRequired,
    loadCategories: PropTypes.func.isRequired,
    userPDF: PropTypes.func.isRequired,
+   setAlert: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -173,6 +181,9 @@ const mapStateToProps = (state) => ({
    categories: state.categories,
 });
 
-export default connect(mapStateToProps, { loadCategories, loadUsers, userPDF })(
-   SearchTab
-);
+export default connect(mapStateToProps, {
+   loadCategories,
+   loadUsers,
+   userPDF,
+   setAlert,
+})(SearchTab);

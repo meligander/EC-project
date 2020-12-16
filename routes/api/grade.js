@@ -8,6 +8,7 @@ const pdfTemplate1 = require("../../templates/certificate");
 const pdfTemplate2 = require("../../templates/cambridgeCertificate");
 
 const Grade = require("../../models/Grade");
+const Enrollment = require("../../models/Enrollment");
 const User = require("../../models/User");
 
 //@route    GET api/grade/:class_id
@@ -298,12 +299,15 @@ router.post("/all/create-list", (req, res) => {
 //@route    POST api/grade/certificate/create-list
 //@desc     Create all certificate pdfs of the class
 //@access   Private
-router.post("/certificate/create-list", (req, res) => {
+router.post("/certificate/create-list", async (req, res) => {
    const name = "reports/certificate.pdf";
 
    let { student, header, period, classInfo, certificateDate } = req.body;
 
    student.dni = student.dni.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+   const date = new Date();
+   const year = date.getFullYear();
 
    let certificateInfo = "";
    let finalGrades = " <tr>";
@@ -313,30 +317,44 @@ router.post("/certificate/create-list", (req, res) => {
    let highCertificate = false;
    let pass = true;
    let average = 0;
-   let count = 0;
+
+   const high =
+      classInfo.category.name === "6° Año" ||
+      classInfo.category.name === "CAE" ||
+      classInfo.category.name === "Proficency";
+
+   let enrollment;
+
+   if (high || classInfo.category.name === "Kinder") {
+      try {
+         enrollment = await Enrollment.findOne({
+            year,
+            student: student._id,
+         });
+      } catch (err) {
+         console.error(err.message);
+         res.status(500).send("Server error");
+      }
+   }
+
+   if (high) {
+      if (enrollment.periodAverage[4] < 6) {
+         pass = false;
+      } else {
+         highCertificate = true;
+      }
+   }
 
    for (let x = 0; x < period.length; x++) {
-      if (
-         classInfo.category.name === "6° Año" ||
-         classInfo.category.name === "CAE" ||
-         classInfo.category.name === "Proficency"
-      ) {
-         average += period[x].value;
-         if (x + 1 === period.length) {
-            average = average / period.length;
-            if (average < 6) {
-               pass = false;
-               break;
-            } else {
-               highCertificate = true;
-            }
-         }
+      if (high) {
          finalGrade += `<td>${period[x].value * 10}%</td>`;
          finalHeader += `<th>${header[x]}</th>`;
+
          if ((x + 1) % 3 === 0 || x + 1 === period.length) {
             if (x + 1 === period.length) {
+               average = enrollment.periodAverage[4] * 10;
                average = Math.round((average + Number.EPSILON) * 100) / 100;
-               average = average * 10;
+
                finalGrade += `<td>${average}%</td>`;
                finalHeader += "<th>Promedio</th>";
                finalGrades +=
@@ -356,18 +374,7 @@ router.post("/certificate/create-list", (req, res) => {
          }
       } else {
          if (classInfo.category.name === "Kinder") {
-            if (x === period.length - 1) break;
-            for (let y = 0; y < period[x][period[4]].length; y++) {
-               average += period[x][period[4]][y].value;
-               count++;
-               if (
-                  x === period.length - 2 &&
-                  y === period[x][period[4]].length - 1
-               ) {
-                  average = average / count;
-                  average = Math.round((average + Number.EPSILON) * 100) / 100;
-               }
-            }
+            average = enrollment.average;
          } else {
             if (period[x].value < 6) {
                pass = false;
@@ -412,7 +419,7 @@ router.post("/certificate/create-list", (req, res) => {
          }
          certificateInfo =
             "<div class='subtitle'><p>Quien ha culminado el curso de inglés conforme al plan de estudios, </p>";
-         certificateInfo += `<p>correspondiente a <span class="capital"> &nbsp; ${classInfo.category.name}</span> a nivel <span class="capital">&nbsp;${certificate}</span> </p>`;
+         certificateInfo += `<p>correspondiente a <span class="capital"> &nbsp; ${classInfo.category.name} &nbsp;</span> a nivel <span class="capital">&nbsp;${certificate}</span> </p>`;
          certificateInfo +=
             "<p>con las siguientes calificaciones:</p> </div>" +
             '<div class="table"> <table class="grades-table full">';
@@ -547,9 +554,7 @@ router.post("/certificate-cambridge/create-list", (req, res) => {
       let value = period[x].value * 10;
       if (x === period.length - 1) {
          average = average / period.length;
-         average = (Math.round((average + Number.EPSILON) * 100) / 100).toFixed(
-            2
-         );
+         average = Math.round((average + Number.EPSILON) * 100) / 100;
       }
       body += `<tr> <td class='name'>${header[x]}</td>`;
 
@@ -673,31 +678,48 @@ router.post("/", auth, async (req, res) => {
 router.post("/period", auth, async (req, res) => {
    const periodRows = req.body;
 
+   const date = new Date();
+   const year = date.getFullYear();
+
    try {
+      const period = periodRows[0][0].period;
+      const classroom = periodRows[0][0].classroom;
+
       for (let x = 0; x < periodRows.length; x++) {
+         let average = 0;
+         let count = 0;
+         const student = periodRows[x][0].student;
+
          for (let y = 0; y < periodRows[x].length; y++) {
             const filter = {
-               student: periodRows[x][y].student,
+               student,
                gradetype: periodRows[x][y].gradetype,
-               classroom: periodRows[x][y].classroom,
-               period: periodRows[x][y].period,
+               classroom,
+               period,
             };
 
-            if (periodRows[x][y].value !== 0 && periodRows[x][y].value !== "") {
-               if (periodRows[x][y].value > 10 || periodRows[x][y].value < 0) {
+            let value = periodRows[x][y].value;
+
+            if (value !== 0 && value !== "") {
+               value = parseFloat(value);
+
+               if (value > 10 || value < 0) {
                   return res.status(400).json({
                      errors: [{ msg: "La nota debe ser entre 0 y 10" }],
                   });
                }
 
+               average += value;
+               count++;
+
                const grade = await Grade.findOneAndUpdate(filter, {
-                  value: periodRows[x][y].value,
+                  value: value,
                });
 
                if (!grade) {
                   const data = {
                      ...filter,
-                     value: periodRows[x][y].value,
+                     value: value,
                   };
                   const newGrade = new Grade(data);
 
@@ -707,6 +729,38 @@ router.post("/period", auth, async (req, res) => {
                await Grade.findOneAndRemove(filter);
             }
          }
+
+         average = average / count;
+         average = Math.round((average + Number.EPSILON) * 100) / 100;
+
+         const filter2 = { year, student };
+
+         const enrollment = await Enrollment.findOne(filter2);
+
+         let periodAverage = [];
+         let allAverage = 0;
+
+         if (enrollment.periodAverage.length === 0)
+            periodAverage = new Array(6).fill(0);
+         else periodAverage = [...enrollment.periodAverage];
+
+         periodAverage[period - 1] = parseFloat(average);
+
+         let full = 0;
+         for (let y = 0; y < 5; y++) {
+            if (periodAverage[y] !== 0) {
+               allAverage += periodAverage[y];
+               full++;
+            }
+         }
+
+         allAverage = allAverage / full;
+         allAverage = Math.round((allAverage + Number.EPSILON) * 100) / 100;
+
+         await Enrollment.findOneAndUpdate(
+            { _id: enrollment._id },
+            { periodAverage, average: allAverage }
+         );
       }
 
       res.json({ msg: "Grades Updated" });
@@ -788,7 +842,11 @@ async function buildTable(grades, class_id, res) {
 
    //Get the student's header
    let students = users.map((user) => {
-      return { name: user.lastname + ", " + user.name, dni: user.dni };
+      return {
+         _id: user._id,
+         name: user.lastname + ", " + user.name,
+         dni: user.dni,
+      };
    });
 
    //Add last row for the eliminate button

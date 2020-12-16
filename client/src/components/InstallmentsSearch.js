@@ -43,7 +43,7 @@ const InstallmentsSearch = ({
    const selectStudent = (user) => {
       setSelectedStudent({
          ...selectedStudent,
-         name: user.lastname + " " + user.name,
+         name: user.lastname + ", " + user.name,
          _id: user._id,
       });
       clearInstallments();

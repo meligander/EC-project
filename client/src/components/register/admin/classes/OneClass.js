@@ -5,7 +5,6 @@ import {
    clearClass,
    deleteClass,
    classPDF,
-   blankPDF,
 } from "../../../../actions/class";
 import { clearAttendances } from "../../../../actions/attendance";
 import { clearGrades } from "../../../../actions/grade";
@@ -27,7 +26,6 @@ const OneClass = ({
    clearAttendances,
    clearGrades,
    classPDF,
-   blankPDF,
 }) => {
    const [toggleModal, setToggleModal] = useState(false);
 
@@ -45,11 +43,11 @@ const OneClass = ({
    };
 
    const pdfGeneratorSave = () => {
-      classPDF(classInfo);
+      classPDF(classInfo, "class");
    };
 
    const blankPdfGenerator = () => {
-      blankPDF(classInfo);
+      classPDF(classInfo, "blank");
    };
 
    return (
@@ -79,7 +77,7 @@ const OneClass = ({
                         {classInfo.students.map((user) => (
                            <tr key={user._id}>
                               <td>{user.studentnumber}</td>
-                              <td>{user.lastname + " " + user.name}</td>
+                              <td>{user.lastname + ", " + user.name}</td>
                               <td>
                                  {user.dob && (
                                     <Moment format="DD/MM/YY" date={user.dob} />
@@ -206,7 +204,6 @@ OneClass.propTypes = {
    clearAttendances: PropTypes.func.isRequired,
    clearGrades: PropTypes.func.isRequired,
    classPDF: PropTypes.func.isRequired,
-   blankPDF: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -221,5 +218,4 @@ export default connect(mapStateToProps, {
    clearGrades,
    clearAttendances,
    classPDF,
-   blankPDF,
 })(withRouter(OneClass));

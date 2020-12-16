@@ -7,6 +7,7 @@ const pdf = require("html-pdf");
 const pdfTemplate = require("../../templates/assistanceGrades");
 
 const Attendance = require("../../models/Attendance");
+const Enrollment = require("../../models/Enrollment");
 const User = require("../../models/User");
 
 //@route    GET api/attendance/:class_id
@@ -211,8 +212,14 @@ router.post("/period", auth, async (req, res) => {
    const classroom = attendances[0][0].classroom;
    const period = attendances[0][0].period;
 
+   const date = new Date();
+   const year = date.getFullYear();
+
    try {
       for (let x = 0; x < attendances.length; x++) {
+         let count = 0;
+         const student = attendances[x][0].user;
+
          for (let y = 0; y < attendances[x].length; y++) {
             if (attendances[x][y].inassistance) {
                if (attendances[x][y]._id === "") {
@@ -225,6 +232,7 @@ router.post("/period", auth, async (req, res) => {
                   const attendance = new Attendance(data);
                   await attendance.save();
                }
+               count++;
             } else {
                if (attendances[x][y]._id !== "") {
                   await Attendance.findOneAndDelete({
@@ -236,6 +244,27 @@ router.post("/period", auth, async (req, res) => {
                }
             }
          }
+         const filter2 = { year, student };
+
+         const enrollment = await Enrollment.findOne(filter2);
+
+         let periodAbsence = [];
+         let allAbsence = 0;
+
+         if (enrollment.periodAbsence.length === 0)
+            periodAbsence = new Array(4).fill(0);
+         else periodAbsence = [...enrollment.periodAbsence];
+
+         periodAbsence[period - 1] = parseFloat(count);
+
+         for (let y = 0; y < 4; y++) {
+            allAbsence += periodAbsence[y];
+         }
+
+         await Enrollment.findOneAndUpdate(
+            { _id: enrollment._id },
+            { periodAbsence, absence: allAbsence }
+         );
       }
 
       res.json({ msg: "Attendances Updated" });

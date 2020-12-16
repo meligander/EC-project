@@ -234,7 +234,7 @@ const InvoiceTab = ({
                      <input
                         className="form-input"
                         type="text"
-                        value={selectedUser.lastname + " " + selectedUser.name}
+                        value={selectedUser.lastname + ", " + selectedUser.name}
                         placeholder="Alumno"
                         disabled
                         id="full-name"
@@ -287,7 +287,7 @@ const InvoiceTab = ({
                            <tr key={index}>
                               <td>
                                  {invoice.item.student.lastname +
-                                    " " +
+                                    ", " +
                                     invoice.item.student.name}
                               </td>
                               <td>{installment[invoice.item.number]}</td>

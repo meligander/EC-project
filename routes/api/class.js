@@ -147,7 +147,7 @@ router.post("/create-list", (req, res) => {
       const teacher =
          "<td>" +
          classes[x].teacher.lastname +
-         " " +
+         ", " +
          classes[x].teacher.name +
          "</td>";
       const category = "<td>" + classes[x].category.name + "</td>";
@@ -254,7 +254,7 @@ router.post("/oneclass/create-list", (req, res) => {
       const studentname =
          "<td>" +
          classInfo.students[x].lastname +
-         " " +
+         ", " +
          classInfo.students[x].name +
          "</td>";
       const dob =
@@ -337,7 +337,7 @@ router.post("/blank/create-list", (req, res) => {
       tbody +=
          "<tr> <td class='name'>" +
          classInfo.students[x].lastname +
-         " " +
+         ", " +
          classInfo.students[x].name +
          "</td>";
 
@@ -467,7 +467,7 @@ router.post(
                   msg:
                      "El alumno " +
                      student.lastname +
-                     " " +
+                     ", " +
                      student.name +
                      " ya tiene asignada una clase",
                });
@@ -480,7 +480,7 @@ router.post(
                   msg:
                      "El alumno " +
                      student.lastname +
-                     " " +
+                     ", " +
                      student.name +
                      " no está inscripto a dicha categoría",
                });
@@ -575,7 +575,7 @@ router.put(
                      msg:
                         "El alumno " +
                         student.lastname +
-                        " " +
+                        ", " +
                         student.name +
                         " ya tiene asignada una clase",
                   });
@@ -590,7 +590,7 @@ router.put(
                   msg:
                      "El alumno " +
                      student.lastname +
-                     " " +
+                     ", " +
                      student.name +
                      " no está inscripto a dicha categoría",
                });

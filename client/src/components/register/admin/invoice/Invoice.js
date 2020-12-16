@@ -70,8 +70,8 @@ const Invoice = ({
                         <p className="paragraph text-dark">Cliente:</p>
                         <p className="paragraph">
                            {invoice.user
-                              ? invoice.user.lastname + " " + invoice.user.name
-                              : invoice.lastname + " " + invoice.name}
+                              ? invoice.user.lastname + ", " + invoice.user.name
+                              : invoice.lastname + ", " + invoice.name}
                         </p>
                         <p className="paragraph">
                            {!invoice.email
@@ -114,7 +114,7 @@ const Invoice = ({
                                  <tr key={index}>
                                     <td>
                                        {invoice.installment.student.lastname +
-                                          " " +
+                                          ", " +
                                           invoice.installment.student.name}
                                     </td>
                                     <td>

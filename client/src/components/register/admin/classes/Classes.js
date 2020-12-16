@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { loadClasses, classesPDF } from "../../../../actions/class";
+import { loadClasses, classPDF } from "../../../../actions/class";
 import { loadCategories } from "../../../../actions/category";
 import { loadUsers } from "../../../../actions/user";
 import PropTypes from "prop-types";
@@ -16,7 +16,7 @@ const Classes = ({
    loadClasses,
    loadUsers,
    loadCategories,
-   classesPDF,
+   classPDF,
 }) => {
    const [filterForm, setfilterForm] = useState({
       teacher: "",
@@ -50,7 +50,7 @@ const Classes = ({
    };
 
    const pdfGeneratorSave = () => {
-      classesPDF(classes);
+      classPDF(classes, "classes");
    };
 
    return (
@@ -162,7 +162,7 @@ Classes.propTypes = {
    loadClasses: PropTypes.func.isRequired,
    loadUsers: PropTypes.func.isRequired,
    loadCategories: PropTypes.func.isRequired,
-   classesPDF: PropTypes.func.isRequired,
+   classPDF: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -176,5 +176,5 @@ export default connect(mapStateToProps, {
    loadClasses,
    loadCategories,
    loadUsers,
-   classesPDF,
+   classPDF,
 })(Classes);

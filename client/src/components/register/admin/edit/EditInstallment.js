@@ -152,8 +152,8 @@ const EditInstallment = ({
                      <span className="text-dark">Alumno:</span>
                      &nbsp;&nbsp;&nbsp;
                      {match.params.year !== undefined
-                        ? users.user.lastname + " " + users.user.name
-                        : student.lastname + " " + student.name}
+                        ? users.user.lastname + ", " + users.user.name
+                        : student.lastname + ", " + student.name}
                   </p>
                   <div className="form-group">
                      <select

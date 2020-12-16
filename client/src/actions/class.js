@@ -220,92 +220,7 @@ export const deleteClass = (class_id, history) => async (dispatch) => {
    }
 };
 
-export const classesPDF = (classes1) => async (dispatch) => {
-   let classes = JSON.stringify(classes1);
-   dispatch(updateLoadingSpinner(true));
-   try {
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
-      await axios.post("/api/class/create-list", classes, config);
-
-      const pdf = await axios.get("/api/class/list/fetch-list", {
-         responseType: "blob",
-      });
-
-      const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
-
-      const date = moment().format("DD-MM-YY");
-
-      saveAs(pdfBlob, `Cursos ${date}.pdf`);
-
-      dispatch(setAlert("PDF Generado", "success", "2"));
-      window.scroll(500, 0);
-      dispatch(updateLoadingSpinner(false));
-   } catch (err) {
-      dispatch({
-         type: CLASS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
-   }
-};
-
-export const classPDF = (class1) => async (dispatch) => {
-   let classInfo = JSON.stringify(class1);
-   dispatch(updateLoadingSpinner(true));
-   try {
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
-      await axios.post("/api/class/oneclass/create-list", classInfo, config);
-
-      const pdf = await axios.get("/api/class/oneclass/fetch-list", {
-         responseType: "blob",
-      });
-
-      const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
-
-      const date = moment().format("DD-MM-YY");
-
-      saveAs(
-         pdfBlob,
-         `Curso ${class1.teacher.lastname + " " + class1.teacher.name} ${
-            class1.category.name
-         } ${date}.pdf`
-      );
-
-      dispatch(updateLoadingSpinner(false));
-      dispatch(setAlert("PDF Generado", "success", "2"));
-      window.scroll(500, 0);
-   } catch (err) {
-      dispatch({
-         type: CLASS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
-   }
-};
-
-export const blankPDF = (classInfo) => async (dispatch) => {
+export const classPDF = (classInfo, type) => async (dispatch) => {
    let tableInfo = JSON.stringify(classInfo);
    dispatch(updateLoadingSpinner(true));
    try {
@@ -314,27 +229,55 @@ export const blankPDF = (classInfo) => async (dispatch) => {
             "Content-Type": "application/json",
          },
       };
+      let pdf;
+      let name = "";
 
-      await axios.post("/api/class/blank/create-list", tableInfo, config);
+      switch (type) {
+         case "classes":
+            await axios.post("/api/class/create-list", tableInfo, config);
 
-      const pdf = await axios.get("/api/class/blank/fetch-list", {
-         responseType: "blob",
-      });
+            pdf = await axios.get("/api/class/list/fetch-list", {
+               responseType: "blob",
+            });
+            name = "Cursos";
+            break;
+         case "class":
+            await axios.post(
+               "/api/class/oneclass/create-list",
+               classInfo,
+               config
+            );
+
+            pdf = await axios.get("/api/class/oneclass/fetch-list", {
+               responseType: "blob",
+            });
+            name = `Curso ${
+               classInfo.teacher.lastname + ", " + classInfo.teacher.name
+            } ${classInfo.category.name} `;
+            break;
+         case "blank":
+            await axios.post("/api/class/blank/create-list", tableInfo, config);
+
+            pdf = await axios.get("/api/class/blank/fetch-list", {
+               responseType: "blob",
+            });
+            name = `${classInfo.category.name} de ${
+               classInfo.teacher.lastname + ", " + classInfo.teacher.name
+            } blanco`;
+            break;
+         default:
+            break;
+      }
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
       const date = moment().format("DD-MM-YY");
 
-      saveAs(
-         pdfBlob,
-         `${classInfo.category.name} de ${
-            classInfo.teacher.lastname + " " + classInfo.teacher.name
-         }  ${date}.pdf`
-      );
+      saveAs(pdfBlob, `${name} ${date}.pdf`);
 
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("PDF Generado", "success", "2"));
       window.scroll(500, 0);
+      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: CLASS_ERROR,

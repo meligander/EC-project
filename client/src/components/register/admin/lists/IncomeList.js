@@ -135,10 +135,10 @@ const IncomeList = ({
                                           <td>
                                              {invoice.user
                                                 ? invoice.user.lastname +
-                                                  " " +
+                                                  ", " +
                                                   invoice.user.name
                                                 : invoice.lastname +
-                                                  " " +
+                                                  ", " +
                                                   invoice.name}
                                           </td>
                                           <td>{invoice.total}</td>

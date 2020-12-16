@@ -1,17 +1,18 @@
 import React from "react";
-import { connect } from "react-redux";
-import PropTypes from "prop-types";
+import Tabs from "../../../Tabs";
+import Average from "./AverageTab";
+import Attendance from "./AttendanceTab";
 
-const MentionList = ({ enrollments: { enrollments, loadingEnrollments } }) => {
-   return <div></div>;
+const MentionList = () => {
+   return (
+      <>
+         <h2>Menciones fin de año</h2>
+         <Tabs
+            tablist={["Promedio", "Asistencia"]}
+            panellist={[Average, Attendance]}
+         />
+      </>
+   );
 };
 
-MentionList.propTypes = {
-   enrollments: PropTypes.array.isRequired,
-};
-
-const mapStateToProps = (state) => ({
-   enrollments: state.enrollments,
-});
-
-export default connect()(MentionList);
+export default MentionList;

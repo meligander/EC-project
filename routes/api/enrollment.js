@@ -82,6 +82,87 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
+//@route    GET api/enrollment/average
+//@desc     get all student's average
+//@access   Private
+router.get("/average", [auth, adminAuth], async (req, res) => {
+   try {
+      let date = new Date();
+
+      let enrollments;
+      const filter = req.query;
+
+      enrollments = await Enrollment.find({
+         category: filter.category
+            ? filter.category
+            : { $ne: "5ebb3498397c2d2610a4eab8" },
+         average: { $exists: true },
+         year: date.getFullYear(),
+      })
+         .populate({
+            path: "student",
+            model: "user",
+            select: ["name", "lastname", "studentnumber"],
+         })
+         .populate({
+            path: "category",
+            model: "category",
+         })
+         .sort({ average: -1 })
+         .limit(filter.amount ? parseInt(filter.amount) : 50);
+
+      if (enrollments.length === 0) {
+         return res.status(400).json({
+            msg: "No se encontraron alumnos con dichas descripciones",
+         });
+      }
+
+      res.json(enrollments);
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server Error");
+   }
+});
+
+//@route    GET api/enrollment/absences
+//@desc     get all student's absences
+//@access   Private
+router.get("/absences", [auth, adminAuth], async (req, res) => {
+   try {
+      let date = new Date();
+
+      let enrollments;
+      const filter = req.query;
+
+      enrollments = await Enrollment.find({
+         ...(filter.category && { category: filter.category }),
+         ...(filter.absence && { absence: { $lte: filter.absence } }),
+         year: date.getFullYear(),
+      })
+         .populate({
+            path: "student",
+            model: "user",
+            select: ["name", "lastname", "studentnumber"],
+         })
+         .populate({
+            path: "category",
+            model: "category",
+         })
+         .sort({ absence: 1 });
+
+      if (enrollments.length === 0) {
+         return res.status(400).json({
+            msg: "No se encontraron alumnos con dichas descripciones",
+         });
+      }
+
+      res.json(enrollments);
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server Error");
+   }
+});
+
 //@route    GET api/enrollment/year
 //@desc     get one enrollment
 //@access   Private
@@ -156,7 +237,7 @@ router.post("/create-list", (req, res) => {
       const studentname =
          "<td>" +
          enrollment[x].student.lastname +
-         " " +
+         ", " +
          enrollment[x].student.name +
          "</td>";
       const category = "<td>" + enrollment[x].category.name + "</td>";
@@ -216,6 +297,173 @@ router.post("/create-list", (req, res) => {
 //@access   Private
 router.get("/fetch-list", (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/enrollments.pdf"));
+});
+
+//@route    POST api/enrollment/averages/create-list
+//@desc     Create a pdf of the students' averages
+//@access   Private
+router.post("/averages/create-list", (req, res) => {
+   const name = "reports/averages.pdf";
+
+   const enrollment = req.body;
+
+   let tbody = "";
+
+   for (let x = 0; x < enrollment.length; x++) {
+      const studentnumber =
+         "<td>" + enrollment[x].student.studentnumber + "</td>";
+      const studentname =
+         "<td>" +
+         enrollment[x].student.lastname +
+         ", " +
+         enrollment[x].student.name +
+         "</td>";
+      const category = "<td>" + enrollment[x].category.name + "</td>";
+      const average = "<td>" + enrollment[x].average + "</td>";
+
+      tbody +=
+         "<tr>" + studentnumber + studentname + category + average + "</tr>";
+   }
+
+   const thead =
+      "<th>Legajo</th> <th>Nombre</th> <th>Categoría</th> <th>Promedio</th>";
+
+   const img = path.join(
+      "file://",
+      __dirname,
+      "../../templates/assets/logo.png"
+   );
+   const css = path.join(
+      "file://",
+      __dirname,
+      "../../templates/list/style.css"
+   );
+
+   const options = {
+      format: "A4",
+      header: {
+         height: "15mm",
+         contents: `<div></div>`,
+      },
+      footer: {
+         height: "17mm",
+         contents:
+            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
+      },
+   };
+
+   pdf.create(
+      pdfTemplate(css, img, "Mejores Promedios", thead, tbody),
+      options
+   ).toFile(name, (err) => {
+      if (err) {
+         res.send(Promise.reject());
+      }
+
+      res.send(Promise.resolve());
+   });
+});
+
+//@route    GET api/enrollment/averages/fetch-list
+//@desc     Get the pdf of enrollments
+//@access   Private
+router.get("/averages/fetch-list", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/averages.pdf"));
+});
+
+//@route    POST api/enrollment/absences/create-list
+//@desc     Create a pdf of the students' absences
+//@access   Private
+router.post("/absences/create-list", (req, res) => {
+   const name = "reports/absences.pdf";
+
+   const enrollment = req.body;
+
+   let tbody = "";
+
+   for (let x = 0; x < enrollment.length; x++) {
+      const studentnumber =
+         "<td>" + enrollment[x].student.studentnumber + "</td>";
+      const studentname =
+         "<td>" +
+         enrollment[x].student.lastname +
+         ", " +
+         enrollment[x].student.name +
+         "</td>";
+      const category = "<td>" + enrollment[x].category.name + "</td>";
+
+      let type;
+
+      switch (enrollment[x].absence) {
+         case 0:
+            type = "Perfecta";
+            break;
+         case 1:
+         case 2:
+            type = "Casi Perfecta";
+            break;
+         default:
+            type = "Regular";
+            break;
+      }
+
+      type = "<td>" + type + "</td>";
+      const absence = "<td>" + enrollment[x].absence + "</td>";
+
+      tbody +=
+         "<tr>" +
+         studentnumber +
+         studentname +
+         category +
+         type +
+         absence +
+         "</tr>";
+   }
+
+   const thead =
+      "<th>Legajo</th> <th>Nombre</th> <th>Categoría</th> <th>Tipo</th> <th>Faltas</th>";
+
+   const img = path.join(
+      "file://",
+      __dirname,
+      "../../templates/assets/logo.png"
+   );
+   const css = path.join(
+      "file://",
+      __dirname,
+      "../../templates/list/style.css"
+   );
+
+   const options = {
+      format: "A4",
+      header: {
+         height: "15mm",
+         contents: `<div></div>`,
+      },
+      footer: {
+         height: "17mm",
+         contents:
+            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
+      },
+   };
+
+   pdf.create(
+      pdfTemplate(css, img, "Mejores Asistencias", thead, tbody),
+      options
+   ).toFile(name, (err) => {
+      if (err) {
+         res.send(Promise.reject());
+      }
+
+      res.send(Promise.resolve());
+   });
+});
+
+//@route    GET api/enrollment/absences/fetch-list
+//@desc     Get the pdf of enrollments
+//@access   Private
+router.get("/absences/fetch-list", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/absences.pdf"));
 });
 
 //@route    POST api/enrollment

@@ -221,12 +221,12 @@ router.post("/create-list", (req, res) => {
 
       if (invoices[x].user === undefined) {
          name =
-            "<td>" + invoices[x].lastname + " " + invoices[x].name + "</td>";
+            "<td>" + invoices[x].lastname + ", " + invoices[x].name + "</td>";
       } else {
          name =
             "<td>" +
             invoices[x].user.lastname +
-            " " +
+            ", " +
             invoices[x].user.name +
             "</td>";
       }
@@ -310,12 +310,12 @@ router.post("/create-invoice", (req, res) => {
       let userName = "";
       let instName = "";
       if (invoice.details[x].installment) {
-         userName = `<td> ${invoice.details[x].installment.student.lastname} ${invoice.details[x].installment.student.name} </td>`;
+         userName = `<td> ${invoice.details[x].installment.student.lastname}, ${invoice.details[x].installment.student.name} </td>`;
          instName = `<td> ${
             installment[invoice.details[x].installment.number]
          }</td>`;
       } else {
-         userName = `<td> ${invoice.details[x].item.student.lastname} ${invoice.details[x].item.student.name} </td>`;
+         userName = `<td> ${invoice.details[x].item.student.lastname}, ${invoice.details[x].item.student.name} </td>`;
          instName = `<td> ${installment[invoice.details[x].item.number]}</td>`;
       }
       const value = `<td> $${invoice.details[x].value} </td>`;
@@ -325,8 +325,8 @@ router.post("/create-invoice", (req, res) => {
 
    let invoiceDetails = {
       user: invoice.lastname
-         ? `${invoice.lastname} ${invoice.name}`
-         : `${invoice.user.lastname} ${invoice.user.name}`,
+         ? `${invoice.lastname}, ${invoice.name}`
+         : `${invoice.user.lastname}, ${invoice.user.name}`,
       email: invoice.user
          ? invoice.user.email
          : invoice.email

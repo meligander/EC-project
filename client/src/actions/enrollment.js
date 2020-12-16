@@ -29,7 +29,79 @@ export const loadEnrollments = (filterData) => async (dispatch) => {
       const res = await axios.get(`/api/enrollment?${filter}`);
       dispatch({
          type: ENROLLMENTS_LOADED,
-         payload: res.data,
+         payload: { enrollments: res.data, type: "enrollments" },
+      });
+      dispatch(updateLoadingSpinner(false));
+   } catch (err) {
+      dispatch({
+         type: ENROLLMENT_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scroll(0, 0);
+
+      dispatch(updateLoadingSpinner(false));
+   }
+};
+
+export const loadStudentAttendance = (filterData) => async (dispatch) => {
+   try {
+      dispatch(updateLoadingSpinner(true));
+      let filter = "";
+
+      const filternames = Object.keys(filterData);
+      for (let x = 0; x < filternames.length; x++) {
+         const name = filternames[x];
+         if (filterData[name] !== "") {
+            if (filter !== "") filter = filter + "&";
+            filter = filter + filternames[x] + "=" + filterData[name];
+         }
+      }
+
+      const res = await axios.get(`/api/enrollment/absences?${filter}`);
+      dispatch({
+         type: ENROLLMENTS_LOADED,
+         payload: { enrollments: res.data, type: "attendance" },
+      });
+      dispatch(updateLoadingSpinner(false));
+   } catch (err) {
+      dispatch({
+         type: ENROLLMENT_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scroll(0, 0);
+
+      dispatch(updateLoadingSpinner(false));
+   }
+};
+
+export const loadStudentAverage = (filterData) => async (dispatch) => {
+   try {
+      dispatch(updateLoadingSpinner(true));
+      let filter = "";
+
+      const filternames = Object.keys(filterData);
+      for (let x = 0; x < filternames.length; x++) {
+         const name = filternames[x];
+         if (filterData[name] !== "") {
+            if (filter !== "") filter = filter + "&";
+            filter = filter + filternames[x] + "=" + filterData[name];
+         }
+      }
+
+      const res = await axios.get(`/api/enrollment/average?${filter}`);
+      dispatch({
+         type: ENROLLMENTS_LOADED,
+         payload: { enrollments: res.data, type: "average" },
       });
       dispatch(updateLoadingSpinner(false));
    } catch (err) {
@@ -174,7 +246,7 @@ export const deleteEnrollment = (enroll_id) => async (dispatch) => {
    }
 };
 
-export const enrollmentsPDF = (enrollments) => async (dispatch) => {
+export const enrollmentsPDF = (enrollments, average) => async (dispatch) => {
    let enrollment = JSON.stringify(enrollments);
    dispatch(updateLoadingSpinner(true));
    try {
@@ -184,17 +256,51 @@ export const enrollmentsPDF = (enrollments) => async (dispatch) => {
          },
       };
 
-      await axios.post("/api/enrollment/create-list", enrollment, config);
+      let pdf;
+      let name;
 
-      const pdf = await axios.get("/api/enrollment/fetch-list", {
-         responseType: "blob",
-      });
+      switch (average) {
+         case "enrollments":
+            await axios.post("/api/enrollment/create-list", enrollment, config);
+
+            pdf = await axios.get("/api/enrollment/fetch-list", {
+               responseType: "blob",
+            });
+            name = "Inscripciones";
+            break;
+         case "averages":
+            await axios.post(
+               "/api/enrollment/averages/create-list",
+               enrollment,
+               config
+            );
+
+            pdf = await axios.get("/api/enrollment/averages/fetch-list", {
+               responseType: "blob",
+            });
+            name = "Mejores Promedios";
+            break;
+         case "attendances":
+            await axios.post(
+               "/api/enrollment/absences/create-list",
+               enrollment,
+               config
+            );
+
+            pdf = await axios.get("/api/enrollment/absences/fetch-list", {
+               responseType: "blob",
+            });
+            name = "Mejores Asistencias";
+            break;
+         default:
+            break;
+      }
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
       const date = moment().format("DD-MM-YY");
 
-      saveAs(pdfBlob, `Inscripciones ${date}.pdf`);
+      saveAs(pdfBlob, `${name} ${date}.pdf`);
 
       dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("PDF Generado", "success", "2"));

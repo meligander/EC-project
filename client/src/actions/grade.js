@@ -320,13 +320,7 @@ export const certificatePDF = (
       };
 
       for (let x = 0; x < students.length; x++) {
-         let period = [];
-         if (classInfo.category.name === "Kinder") {
-            period = periods.map((period) =>
-               period.filter((item) => item[0].student)
-            );
-            period.push(x);
-         } else period = periods[x];
+         const period = periods[x];
          const student = students[x];
 
          const info = JSON.stringify({

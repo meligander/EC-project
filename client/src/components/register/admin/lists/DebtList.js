@@ -120,7 +120,7 @@ const DebtList = ({
                                     <tr key={debt._id}>
                                        <td>
                                           {debt.student.lastname +
-                                             " " +
+                                             ", " +
                                              debt.student.name}
                                        </td>
                                        <td>{installments[debt.number]}</td>

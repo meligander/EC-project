@@ -210,7 +210,7 @@ router.post("/create-list", (req, res) => {
       const studentname =
          "<td>" +
          debts[x].student.lastname +
-         " " +
+         ", " +
          debts[x].student.name +
          "</td>";
       const installment = "<td>" + installments[debts[x].number] + "</td>";

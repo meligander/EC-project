@@ -360,7 +360,7 @@ router.post("/create-list", (req, res) => {
    let cel = "";
 
    for (let x = 0; x < users.length; x++) {
-      name = "<td>" + users[x].lastname + " " + users[x].name + "</td>";
+      name = "<td>" + users[x].lastname + ", " + users[x].name + "</td>";
       cel = "<td>" + (users[x].cel ? users[x].cel : "") + "</td>";
 
       if (usersType === "Alumno") {
@@ -383,7 +383,7 @@ router.post("/create-list", (req, res) => {
                "<td>" +
                (users[x].children.length > 0
                   ? users[x].children[0].user.lastname +
-                    " " +
+                    ", " +
                     users[x].children[0].user.name
                   : "") +
                "</td>";

@@ -166,16 +166,25 @@ const GradesTab = ({
    };
 
    const deleteGradeType = () => {
-      setOtherValues({
-         ...otherValues,
-         gradePlus: false,
-         gradetypes: [
-            ...gradetypes,
-            ...gradeTypes.filter((gt) => gt._id === toDelete.gradetype._id),
-         ],
-         reload: true,
-      });
-      deleteGrades(toDelete);
+      if (periods[period] && gradeTypes.length === gradetypes.length + 1) {
+         setAlert(
+            "No puede eliminar la última nota del bimestre",
+            "danger",
+            "2"
+         );
+         window.scroll(0, 0);
+      } else {
+         setOtherValues({
+            ...otherValues,
+            gradePlus: false,
+            gradetypes: [
+               ...gradetypes,
+               ...gradeTypes.filter((gt) => gt._id === toDelete.gradetype._id),
+            ],
+            reload: true,
+         });
+         deleteGrades(toDelete);
+      }
    };
 
    const saveGrades = () => {
@@ -245,7 +254,7 @@ const GradesTab = ({
          certificatePDF(
             students.filter((student) => student.name !== ""),
             header[period - 1],
-            classInfo.category.name === "Kinder" ? periods : studentsPeriods,
+            studentsPeriods,
             classInfo,
             number + " de " + month + " de " + year,
             period

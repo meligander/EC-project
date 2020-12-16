@@ -143,6 +143,16 @@ const DashboardAdmin = ({
                               <span className="hide-sm"> Categorías</span>
                            </Link>
                         </li>
+                        <li className="side-nav-item">
+                           <Link
+                              to="/mention-list"
+                              onClick={() => window.scroll(0, 0)}
+                              className="side-nav-link"
+                           >
+                              <i className="fas fa-graduation-cap side-nav-icon"></i>
+                              <span className="hide-sm"> Menciones</span>
+                           </Link>
+                        </li>
                      </ul>
                   </div>
                   <div className="info p-3">

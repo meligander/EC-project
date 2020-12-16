@@ -79,7 +79,7 @@ const EnrollmentList = ({
    };
 
    const pdfGeneratorSave = () => {
-      enrollmentsPDF(enrollments);
+      enrollmentsPDF(enrollments, "enrollments");
    };
 
    const setToggle = (e, enroll_id) => {
@@ -197,7 +197,7 @@ const EnrollmentList = ({
                                        <td>{enroll.student.studentnumber}</td>
                                        <td>
                                           {enroll.student.lastname +
-                                             " " +
+                                             ", " +
                                              enroll.student.name}
                                        </td>
                                        <td>{enroll.category.name}</td>
