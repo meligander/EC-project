@@ -18,11 +18,6 @@ router.get("/class/:class_id", auth, async (req, res) => {
          })
          .populate({ path: "user", model: "user", select: "-password" });
 
-      if (posts.length === 0)
-         return res.status(400).json({
-            msg: "Todavía no se ha realizado ningúna publicación en esta clase",
-         });
-
       return res.json(posts);
    } catch (err) {
       console.error(err.message);

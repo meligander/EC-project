@@ -1,26 +1,26 @@
-import { MENU_TOGGLED, PAGE_CHANGED } from './types';
-import { logout } from './auth';
+import { MENU_TOGGLED, PAGE_CHANGED } from "./types";
+import { logOut } from "./auth";
 
 export const toggleMenu = () => (dispatch) => {
-	dispatch({
-		type: MENU_TOGGLED,
-	});
+   dispatch({
+      type: MENU_TOGGLED,
+   });
 };
 
 export const changePageAndMenu = (page) => (dispatch) => {
-	dispatch(toggleMenu());
-	dispatch(changePage(page));
-	window.scroll(0, 0);
+   dispatch(toggleMenu());
+   dispatch(changePage(page));
+   window.scroll(0, 0);
 };
 
 export const changePage = (page) => (dispatch) => {
-	dispatch({
-		type: PAGE_CHANGED,
-		payload: page,
-	});
+   dispatch({
+      type: PAGE_CHANGED,
+      payload: page,
+   });
 };
 
-export const logoutAndToggle = () => (dispatch) => {
-	dispatch(changePageAndMenu('login'));
-	dispatch(logout());
+export const logOutAndToggle = () => (dispatch) => {
+   dispatch(changePageAndMenu("login"));
+   dispatch(logOut());
 };

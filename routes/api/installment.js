@@ -128,8 +128,9 @@ router.get("/:id", [auth, adminAuth], async (req, res) => {
 //@access   Private
 router.get("/student/:id/:admin", auth, async (req, res) => {
    try {
+      const student = req.params.id;
       let installments = await Installment.find({
-         student: req.params.id,
+         student,
       })
          .sort({ year: 1, number: 1 })
          .populate({
@@ -137,10 +138,9 @@ router.get("/student/:id/:admin", auth, async (req, res) => {
             model: "user",
             select: ["name", "lastname", "studentnumber"],
          });
-      if (installments.length === 0)
-         return res.status(400).json({ msg: "No se encontraron cuotas" });
+      if (installments.length === 0) return [];
 
-      installments = buildTable(installments);
+      installments = buildTable(installments, req.params.admin === "true");
 
       res.json(installments);
    } catch (err) {
@@ -431,7 +431,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-function buildTable(array) {
+function buildTable(array, admin) {
    let rows = [];
 
    let obj = array.reduce((res, curr) => {
@@ -462,7 +462,7 @@ function buildTable(array) {
       if (valid) {
          rows.push(row);
       } else {
-         if (req.params.admin) {
+         if (admin) {
             rows.push(row);
          } else {
             const yearOut = years[x];

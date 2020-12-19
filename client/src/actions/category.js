@@ -22,14 +22,13 @@ export const loadCategories = () => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
+      window.scrollTo(0, 0);
    }
 };
 
 export const updateCategories = (formData, history, user_id) => async (
    dispatch
 ) => {
-   dispatch(updateLoadingSpinner(true));
    let categories = JSON.stringify(formData);
 
    const config = {
@@ -37,15 +36,16 @@ export const updateCategories = (formData, history, user_id) => async (
          "Content-Type": "application/json",
       },
    };
+
    try {
       const res = await axios.put("/api/category", categories, config);
+
       dispatch({
          type: CATEGORIES_UPDATED,
          payload: res.data,
       });
+
       dispatch(setAlert("Precios de categorias actualizados", "success", "1"));
-      dispatch(updateLoadingSpinner(false));
-      window.scrollTo(500, 0);
       history.push(`/dashboard/${user_id}`);
    } catch (err) {
       if (err.response.data.errors) {
@@ -68,13 +68,14 @@ export const updateCategories = (formData, history, user_id) => async (
          });
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       }
-
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
 };
 
 export const categoriesPDF = (categories) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
    let category = JSON.stringify(categories);
 
    try {
@@ -97,7 +98,6 @@ export const categoriesPDF = (categories) => async (dispatch) => {
       saveAs(pdfBlob, `Categorías ${date}.pdf`);
 
       dispatch(setAlert("PDF Generado", "success", "2"));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: CATEGORY_ERROR,
@@ -108,6 +108,8 @@ export const categoriesPDF = (categories) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(true));
 };

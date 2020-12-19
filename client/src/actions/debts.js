@@ -4,11 +4,13 @@ import {
    INSTALLMENT_LOADED,
    INSTALLMENTS_CLEARED,
    INSTALLMENT_CLEARED,
+   USER_INSTALLMENTS_CLEARED,
    INSTALLMENT_UPDATED,
    INSTALLMENT_REGISTERED,
    INSTALLMENT_DELETED,
    USERS_INSTALLMENTS_LOADED,
    INVOICE_DETAIL_ADDED,
+   INVOICE_DETAIL_REMOVED,
    INSTALLMENTS_UPDATED,
 } from "./types";
 import axios from "axios";
@@ -20,8 +22,8 @@ import { updateLoadingSpinner } from "./mixvalues";
 export const loadStudentDebts = (user_id, admin = false) => async (
    dispatch
 ) => {
+   if (admin) dispatch(updateLoadingSpinner(true));
    try {
-      dispatch(updateLoadingSpinner(true));
       const res = await axios.get(
          `/api/installment/student/${user_id}/${admin}`
       );
@@ -29,7 +31,6 @@ export const loadStudentDebts = (user_id, admin = false) => async (
          type: USERS_INSTALLMENTS_LOADED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: INSTALLMENTS_ERROR,
@@ -39,15 +40,16 @@ export const loadStudentDebts = (user_id, admin = false) => async (
             msg: err.response.data.msg,
          },
       });
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
       window.scroll(0, 0);
    }
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const loadDebts = (filterData) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
    try {
-      dispatch(updateLoadingSpinner(true));
       let filter = "";
 
       const filternames = Object.keys(filterData);
@@ -63,7 +65,6 @@ export const loadDebts = (filterData) => async (dispatch) => {
          type: INSTALLMENTS_LOADED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: INSTALLMENTS_ERROR,
@@ -75,8 +76,9 @@ export const loadDebts = (filterData) => async (dispatch) => {
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
       window.scroll(0, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const loadDebt = (debt_id) => async (dispatch) => {
@@ -101,10 +103,12 @@ export const loadDebt = (debt_id) => async (dispatch) => {
 };
 
 export const addInstallment = (installment) => (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
    dispatch({
       type: INVOICE_DETAIL_ADDED,
       payload: installment,
    });
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const updateIntallment = (
@@ -115,6 +119,7 @@ export const updateIntallment = (
    user_id
 ) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+
    let installment = {};
    for (const prop in formData) {
       if (formData[prop] && formData[prop] !== 1)
@@ -147,9 +152,7 @@ export const updateIntallment = (
       dispatch(
          setAlert(edit ? "Cuota modificada" : "Cuota creada", "success", "2")
       );
-      history.push(`/installments/${user_id}`);
-      dispatch(updateLoadingSpinner(false));
-      window.scrollTo(500, 0);
+      dispatch(clearInstallments());
       history.push(`/installments/${user_id}`);
    } catch (err) {
       if (err.response.data.erros) {
@@ -172,15 +175,16 @@ export const updateIntallment = (
             },
          });
       }
-
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
 };
 
 export const deleteInstallment = (inst_id, history, user_id) => async (
    dispatch
 ) => {
+   dispatch(updateLoadingSpinner(true));
+
    try {
       await axios.delete(`/api/installment/${inst_id}`);
 
@@ -190,8 +194,8 @@ export const deleteInstallment = (inst_id, history, user_id) => async (
       });
 
       dispatch(setAlert("Cuota eliminada", "success", "2"));
+      dispatch(clearInstallments());
       history.push(`/installments/${user_id}`);
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: INSTALLMENTS_ERROR,
@@ -202,19 +206,19 @@ export const deleteInstallment = (inst_id, history, user_id) => async (
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
    }
+
+   window.scroll(0, 0);
 };
 
 export const removeInstallmentFromList = (inst_id) => async (dispatch) => {
    try {
       dispatch({
-         type: INSTALLMENT_DELETED,
+         type: INVOICE_DETAIL_REMOVED,
          payload: inst_id,
       });
 
-      dispatch(setAlert("Cuota eliminada", "success", "2"));
-      window.scroll(500, 0);
+      dispatch(setAlert("Cuota eliminada", "success", "5"));
    } catch (err) {
       dispatch({
          type: INSTALLMENTS_ERROR,
@@ -251,8 +255,9 @@ export const updateExpiredIntallments = () => async (dispatch) => {
 };
 
 export const debtsPDF = (debts) => async (dispatch) => {
-   let debt = JSON.stringify(debts);
    dispatch(updateLoadingSpinner(true));
+
+   let debt = JSON.stringify(debts);
    try {
       const config = {
          headers: {
@@ -272,9 +277,7 @@ export const debtsPDF = (debts) => async (dispatch) => {
 
       saveAs(pdfBlob, `Deudas ${date}.pdf`);
 
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("PDF Generado", "success", "2"));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: INSTALLMENTS_ERROR,
@@ -285,14 +288,21 @@ export const debtsPDF = (debts) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scroll(0, 0);
+   dispatch(updateLoadingSpinner(true));
 };
 
 export const clearInstallments = () => (dispatch) => {
    dispatch({
       type: INSTALLMENTS_CLEARED,
+   });
+};
+
+export const clearUserInstallments = () => (dispatch) => {
+   dispatch({
+      type: USER_INSTALLMENTS_CLEARED,
    });
 };
 

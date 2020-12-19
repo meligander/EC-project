@@ -6,6 +6,7 @@ import {
 } from "./types";
 import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
+import { clearNeighbourhoods } from "./neighbourhood";
 import axios from "axios";
 
 export const loadTowns = () => async (dispatch) => {
@@ -25,15 +26,14 @@ export const loadTowns = () => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
+      window.scrollTo(0, 0);
    }
 };
 
 export const updateTowns = (formData) => async (dispatch) => {
-   try {
-      dispatch(updateLoadingSpinner(true));
-      window.scrollTo(500, 0);
+   dispatch(updateLoadingSpinner(true));
 
+   try {
       let towns = JSON.stringify(formData);
       const config = {
          headers: {
@@ -45,8 +45,9 @@ export const updateTowns = (formData) => async (dispatch) => {
          type: TOWNS_UPDATED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("Localidades Modificadas", "success", "2"));
+      dispatch(clearTowns());
+      dispatch(clearNeighbourhoods());
    } catch (err) {
       dispatch({
          type: TOWNS_ERROR,
@@ -57,9 +58,10 @@ export const updateTowns = (formData) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const clearTowns = () => (dispatch) => {

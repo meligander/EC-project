@@ -1,0 +1,90 @@
+@import "../../../style/abstract.scss";
+
+.contact {
+   margin-top: 5.4rem;
+   background-image: linear-gradient(
+         to right bottom,
+         rgba($light-color, 0.75),
+         rgba($primary-color, 0.75)
+      ),
+      url(../../../img/gallery-5.png);
+   background-size: cover;
+   min-height: 90vh;
+
+   h1 {
+      padding: 6rem 0;
+   }
+
+   .contact-box {
+      background-color: rgba($white-color, 0.65);
+      padding: 4rem;
+      text-align: center;
+      border-radius: 3px;
+      box-shadow: 0 1.5rem 4rem rgba($black-color, 0.15);
+      transition: transform 0.2s;
+      word-break: break-all;
+
+      @include respond(tab-port) {
+         width: 30%;
+         padding: 3rem;
+      }
+
+      @include respond(phone) {
+         width: 60%;
+
+         &:not(:last-child) {
+            margin-bottom: $horizontal-grid;
+         }
+      }
+
+      @include respond(small-phone) {
+         width: 80%;
+      }
+
+      /* &:not(:last-child) {
+		margin-left: $vertical-grid;
+	}
+ */
+      &-icon {
+         font-size: 6rem;
+         margin-bottom: 3rem;
+         background-image: linear-gradient(to right, $light-color, $dark-color);
+         color: transparent;
+         -webkit-background-clip: text;
+         background-clip: text;
+         display: inline-block;
+
+         &:not(:last-child) {
+            font-size: 5rem;
+            margin-bottom: 2rem;
+         }
+      }
+
+      &-text {
+         margin: 6rem 0 4rem 0;
+
+         @include respond(phone) {
+            margin: 3rem 0 2rem 0;
+         }
+      }
+
+      &:hover {
+         transform: translateY(-1.5rem) scale(1.03);
+      }
+   }
+}
+
+.google {
+   padding: 6rem 0;
+
+   iframe {
+      width: 70%;
+      height: 40rem;
+      display: block;
+      margin: 0 auto;
+
+      @include respond(phone) {
+         width: 90%;
+      }
+   }
+}

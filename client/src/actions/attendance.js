@@ -36,13 +36,11 @@ export const loadStudentAttendance = (user_id) => async (dispatch) => {
 
 export const loadAttendances = (class_id) => async (dispatch) => {
    try {
-      dispatch(updateLoadingSpinner(true));
       const res = await axios.get(`/api/attendance/${class_id}`);
       dispatch({
          type: ATTENDANCES_LOADED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: ATTENDANCES_ERROR,
@@ -54,7 +52,6 @@ export const loadAttendances = (class_id) => async (dispatch) => {
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
       window.scroll(0, 0);
-      dispatch(updateLoadingSpinner(false));
    }
 };
 
@@ -62,7 +59,6 @@ export const updateAttendances = (formData, history, class_id) => async (
    dispatch
 ) => {
    try {
-      dispatch(updateLoadingSpinner(true));
       let attendances = [];
       attendances = JSON.stringify(formData);
 
@@ -80,10 +76,9 @@ export const updateAttendances = (formData, history, class_id) => async (
          type: ATTENDANCES_UPDATED,
          payload: res.data,
       });
+
       history.push(`/class/${class_id}`);
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("Inasistencias Modificadas", "success", "2"));
-      window.scrollTo(500, 0);
    } catch (err) {
       dispatch({
          type: ATTENDANCES_ERROR,
@@ -94,14 +89,14 @@ export const updateAttendances = (formData, history, class_id) => async (
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scroll(0, 0);
 };
 
 export const registerNewDate = (newDate) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
    try {
-      dispatch(updateLoadingSpinner(true));
       let date = {};
       date = JSON.stringify(newDate);
 
@@ -115,9 +110,8 @@ export const registerNewDate = (newDate) => async (dispatch) => {
          type: NEW_DATE_REGISTERED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
+
       dispatch(setAlert("Día Agregado", "success", "2"));
-      window.scrollTo(500, 0);
    } catch (err) {
       dispatch({
          type: ATTENDANCES_ERROR,
@@ -128,14 +122,15 @@ export const registerNewDate = (newDate) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scroll(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const deleteDate = (date) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
    try {
-      dispatch(updateLoadingSpinner(true));
       const res = await axios.delete(`/api/attendance/date/${date}`);
 
       dispatch({
@@ -144,8 +139,6 @@ export const deleteDate = (date) => async (dispatch) => {
       });
 
       dispatch(setAlert("Fecha eliminada", "success", "2"));
-      dispatch(updateLoadingSpinner(false));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: ATTENDANCES_ERROR,
@@ -156,9 +149,10 @@ export const deleteDate = (date) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scroll(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const attendancesPDF = (
@@ -168,6 +162,7 @@ export const attendancesPDF = (
    period,
    classInfo
 ) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
    let tableInfo = JSON.stringify({
       header,
       students,
@@ -177,7 +172,6 @@ export const attendancesPDF = (
    });
 
    try {
-      dispatch(updateLoadingSpinner(true));
       const config = {
          headers: {
             "Content-Type": "application/json",
@@ -201,9 +195,7 @@ export const attendancesPDF = (
          }  ${date}.pdf`
       );
 
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("PDF Generado", "success", "2"));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: ATTENDANCES_ERROR,
@@ -214,9 +206,10 @@ export const attendancesPDF = (
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scroll(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const clearAttendances = () => (dispatch) => {

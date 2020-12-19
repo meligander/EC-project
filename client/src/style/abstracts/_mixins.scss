@@ -1,0 +1,76 @@
+//Media Query Manager
+/*
+0 		-	600px 		Phone
+600px	-	900px		Tablet portrait
+900px	-	1200px		Tablet landscape
+[1200-1800] 	is where our normal styles apply
+1800px 	+				Big Desktop
+
+$breakpoint argument choices:
+- small-phone
+- phone
+- tab-port
+- tab-land
+
+ORDER: Base + typography > general layout + grid > page layout > components
+*/
+
+//en media queries usamos em not rem o px === 1em=16px(browser's default)
+//only screen and usamos para que no aplique cuando se imprime la pagina, solo en pantalla
+@mixin respond($breakpoint) {
+   @if $breakpoint == small-phone {
+      @media only screen and (max-width: 25em) {
+         //400px - iphone
+         @content;
+      }
+   }
+   @if $breakpoint == phone {
+      @media only screen and (max-width: 37.5em) {
+         //600px
+         @content;
+      }
+   }
+   @if $breakpoint == tab-port {
+      @media only screen and (max-width: 56.25em) {
+         //900px
+         @content;
+      }
+   }
+   @if $breakpoint == tab-land {
+      @media only screen and (max-width: 75em) {
+         //1200px
+         @content;
+      }
+   }
+}
+
+@mixin easeOut {
+   transition: all 0.5s ease-out;
+}
+
+@mixin shortTrans {
+   transition: all 0.2s ease-out;
+}
+
+@mixin background($color) {
+   background-color: $color;
+   color: set-text-color($color);
+}
+
+@mixin background-hover($color) {
+   background-color: $color;
+   color: set-text-color($color);
+   &:hover {
+      background: lighten($color, 10%);
+      color: set-text-color((lighten($color, 10%)));
+   }
+}
+
+//Set Text Color
+@function set-text-color($color) {
+   @if (lightness($color) > 60) {
+      @return $black-color;
+   } @else {
+      @return $white-color;
+   }
+}

@@ -15,6 +15,7 @@ import { updateLoadingSpinner } from "./mixvalues";
 
 //Get all posts
 export const loadPosts = (class_id) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
    try {
       const res = await axios.get(`/api/posts/class/${class_id}`);
       dispatch({
@@ -31,8 +32,10 @@ export const loadPosts = (class_id) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
+      window.scrollTo(0, 0);
    }
+
+   dispatch(updateLoadingSpinner(false));
 };
 
 //Get a post by ID
@@ -54,21 +57,20 @@ export const loadPostById = (post_id) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
+      window.scrollTo(0, 0);
    }
 };
 
 //Add like
 export const addLike = (post_id) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
    try {
-      dispatch(updateLoadingSpinner(true));
       const res = await axios.put(`/api/posts/like/${post_id}`);
 
       dispatch({
          type: LIKES_UPDATED,
          payload: { post_id, likes: res.data },
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: POST_ERROR,
@@ -79,22 +81,21 @@ export const addLike = (post_id) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
+      window.scrollTo(0, 0);
    }
+   dispatch(updateLoadingSpinner(false));
 };
 
 //Remove like
 export const removeLike = (post_id) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
    try {
-      dispatch(updateLoadingSpinner(true));
       const res = await axios.put(`/api/posts/unlike/${post_id}`);
 
       dispatch({
          type: LIKES_UPDATED,
          payload: { post_id, likes: res.data },
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: POST_ERROR,
@@ -105,15 +106,16 @@ export const removeLike = (post_id) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
+      window.scrollTo(0, 0);
    }
+   dispatch(updateLoadingSpinner(false));
 };
 
 //Delete a post
 export const deletePost = (post_id) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
    try {
-      dispatch(updateLoadingSpinner(true));
       await axios.delete(`/api/posts/${post_id}`);
 
       dispatch({
@@ -121,9 +123,7 @@ export const deletePost = (post_id) => async (dispatch) => {
          payload: post_id,
       });
 
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("Posteo Eliminado", "success", "2"));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: POST_ERROR,
@@ -134,19 +134,21 @@ export const deletePost = (post_id) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 //Add a post
 export const addPost = (formData, class_id) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
    const config = {
       headers: {
          "Content-Type": "application/json",
       },
    };
-   dispatch(updateLoadingSpinner(true));
    try {
       const res = await axios.post(`/api/posts/${class_id}`, formData, config);
 
@@ -156,8 +158,6 @@ export const addPost = (formData, class_id) => async (dispatch) => {
       });
 
       dispatch(setAlert("Posteo Creado", "success", "2"));
-      dispatch(updateLoadingSpinner(false));
-      window.scroll(500, 0);
    } catch (err) {
       if (err.response.data.erros) {
          const errors = err.response.data.errors;
@@ -179,19 +179,20 @@ export const addPost = (formData, class_id) => async (dispatch) => {
             },
          });
       }
-
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 // Add comment
 export const addComment = (post_id, formData) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
    const config = {
       headers: {
          "Content-Type": "application/json",
       },
    };
-   dispatch(updateLoadingSpinner(true));
    try {
       const res = await axios.post(
          `/api/posts/comment/${post_id}`,
@@ -203,8 +204,6 @@ export const addComment = (post_id, formData) => async (dispatch) => {
          type: COMMENT_ADDED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
-      window.scroll(0, 0);
       dispatch(setAlert("Comentario Agregado", "success", "2"));
    } catch (err) {
       if (err.response.data.erros) {
@@ -227,16 +226,17 @@ export const addComment = (post_id, formData) => async (dispatch) => {
             },
          });
       }
-
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 //Delete a comment
 export const deleteComment = (post_id, comment_id) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
    try {
-      dispatch(updateLoadingSpinner(true));
       await axios.delete(`/api/posts/comment/${post_id}/${comment_id}`);
 
       dispatch({
@@ -245,8 +245,6 @@ export const deleteComment = (post_id, comment_id) => async (dispatch) => {
       });
 
       dispatch(setAlert("Comentario Eliminado", "success", "2"));
-      dispatch(updateLoadingSpinner(false));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: POST_ERROR,
@@ -256,10 +254,11 @@ export const deleteComment = (post_id, comment_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const clearPosts = () => (dispatch) => {

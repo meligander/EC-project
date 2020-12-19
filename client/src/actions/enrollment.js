@@ -14,8 +14,9 @@ import { setAlert } from "./alert";
 import { updateLoadingSpinner, updateAdminDashLoading } from "./mixvalues";
 
 export const loadEnrollments = (filterData) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
    try {
-      dispatch(updateLoadingSpinner(true));
       let filter = "";
 
       const filternames = Object.keys(filterData);
@@ -31,7 +32,6 @@ export const loadEnrollments = (filterData) => async (dispatch) => {
          type: ENROLLMENTS_LOADED,
          payload: { enrollments: res.data, type: "enrollments" },
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: ENROLLMENT_ERROR,
@@ -43,14 +43,13 @@ export const loadEnrollments = (filterData) => async (dispatch) => {
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
       window.scroll(0, 0);
-
-      dispatch(updateLoadingSpinner(false));
    }
+
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const loadStudentAttendance = (filterData) => async (dispatch) => {
    try {
-      dispatch(updateLoadingSpinner(true));
       let filter = "";
 
       const filternames = Object.keys(filterData);
@@ -67,7 +66,6 @@ export const loadStudentAttendance = (filterData) => async (dispatch) => {
          type: ENROLLMENTS_LOADED,
          payload: { enrollments: res.data, type: "attendance" },
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: ENROLLMENT_ERROR,
@@ -79,14 +77,11 @@ export const loadStudentAttendance = (filterData) => async (dispatch) => {
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
       window.scroll(0, 0);
-
-      dispatch(updateLoadingSpinner(false));
    }
 };
 
 export const loadStudentAverage = (filterData) => async (dispatch) => {
    try {
-      dispatch(updateLoadingSpinner(true));
       let filter = "";
 
       const filternames = Object.keys(filterData);
@@ -103,7 +98,6 @@ export const loadStudentAverage = (filterData) => async (dispatch) => {
          type: ENROLLMENTS_LOADED,
          payload: { enrollments: res.data, type: "average" },
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: ENROLLMENT_ERROR,
@@ -115,8 +109,6 @@ export const loadStudentAverage = (filterData) => async (dispatch) => {
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
       window.scroll(0, 0);
-
-      dispatch(updateLoadingSpinner(false));
    }
 };
 
@@ -148,6 +140,7 @@ export const registerEnrollment = (
    enroll_id = 0
 ) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+
    let enrollment = {};
    for (const prop in formData) {
       if (formData[prop]) enrollment[prop] = formData[prop];
@@ -176,8 +169,7 @@ export const registerEnrollment = (
          type: !enroll_id ? ENROLLMENT_REGISTERED : ENROLLMENT_UPDATED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
-      dispatch(updateAdminDashLoading());
+
       dispatch(
          setAlert(
             `Inscripción ${!enroll_id ? "Registrada" : "Modificada"}`,
@@ -185,11 +177,14 @@ export const registerEnrollment = (
             "1"
          )
       );
-      window.scrollTo(500, 0);
+
+      dispatch(updateAdminDashLoading());
+
       if (!enroll_id) {
          history.push(`/dashboard/${user_id}`);
       } else {
          history.push("/enrollment-list");
+         dispatch(clearEnrollment());
       }
    } catch (err) {
       if (err.response.data.erros) {
@@ -212,15 +207,15 @@ export const registerEnrollment = (
             },
          });
       }
-
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
 };
 
 export const deleteEnrollment = (enroll_id) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
    try {
-      dispatch(updateLoadingSpinner(true));
       await axios.delete(`/api/enrollment/${enroll_id}`);
 
       dispatch({
@@ -228,9 +223,7 @@ export const deleteEnrollment = (enroll_id) => async (dispatch) => {
          payload: enroll_id,
       });
       dispatch(updateAdminDashLoading());
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("Inscripción Eliminada", "success", "2"));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: ENROLLMENT_ERROR,
@@ -241,14 +234,16 @@ export const deleteEnrollment = (enroll_id) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const enrollmentsPDF = (enrollments, average) => async (dispatch) => {
-   let enrollment = JSON.stringify(enrollments);
    dispatch(updateLoadingSpinner(true));
+
+   let enrollment = JSON.stringify(enrollments);
    try {
       const config = {
          headers: {
@@ -302,9 +297,7 @@ export const enrollmentsPDF = (enrollments, average) => async (dispatch) => {
 
       saveAs(pdfBlob, `${name} ${date}.pdf`);
 
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("PDF Generado", "success", "2"));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: ENROLLMENT_ERROR,
@@ -315,9 +308,10 @@ export const enrollmentsPDF = (enrollments, average) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const clearEnrollment = () => (dispatch) => {

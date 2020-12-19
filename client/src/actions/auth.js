@@ -38,7 +38,6 @@ export const loginUser = (formData) => async (dispatch) => {
          payload: res.data,
       });
       dispatch(loadUser());
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       if (err.response.data.erros) {
          const errors = err.response.data.errors;
@@ -60,12 +59,12 @@ export const loginUser = (formData) => async (dispatch) => {
             },
          });
       }
-      dispatch(updateLoadingSpinner(false));
-      window.scrollTo(500, 0);
+
+      window.scrollTo(0, 0);
    }
 };
 
-export const logout = () => (dispatch) => {
+export const logOut = () => (dispatch) => {
    dispatch({
       type: LOGOUT,
    });

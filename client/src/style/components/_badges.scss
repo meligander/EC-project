@@ -1,0 +1,25 @@
+.badge {
+   font-size: $default-font-size;
+   padding: 0.3rem 0.5rem;
+   text-align: center;
+   border-radius: 50%;
+   margin-left: 0.5rem;
+   backface-visibility: hidden;
+   @include background($light-color);
+
+   &.badge-primary {
+      @include background($primary-color);
+   }
+   &.badge-dark {
+      @include background($dark-color);
+   }
+   &.badge-secondary {
+      @include background($secondary-color);
+   }
+   &.badge-success {
+      @include background($success-color);
+   }
+   &.badge-danger {
+      @include background($danger-color);
+   }
+}

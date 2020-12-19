@@ -1,0 +1,11 @@
+@import "../../../style/abstract.scss";
+
+.footer {
+   opacity: 0.9;
+   padding: 0.7rem 2rem;
+   font-size: $default-font-size;
+
+   @include respond(phone) {
+      font-size: 2rem;
+   }
+}

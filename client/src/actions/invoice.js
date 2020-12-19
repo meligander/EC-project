@@ -13,8 +13,8 @@ import { clearRegister } from "./register";
 import { updateLoadingSpinner, updateAdminDashLoading } from "./mixvalues";
 
 export const loadInvoices = (filterData) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
    try {
-      dispatch(updateLoadingSpinner(true));
       let filter = "";
 
       const filternames = Object.keys(filterData);
@@ -30,7 +30,6 @@ export const loadInvoices = (filterData) => async (dispatch) => {
          type: INVOICES_LOADED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: INVOICE_ERROR,
@@ -40,23 +39,20 @@ export const loadInvoices = (filterData) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
       window.scroll(0, 0);
    }
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const loadInvoice = (invoice_id) => async (dispatch) => {
    try {
-      dispatch(updateLoadingSpinner(true));
-
       const res = await axios.get(`/api/invoice/${invoice_id}`);
 
       dispatch({
          type: INVOICE_LOADED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: INVOICE_ERROR,
@@ -66,27 +62,25 @@ export const loadInvoice = (invoice_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
       window.scroll(0, 0);
    }
 };
 
 export const deleteInvoice = (invoice_id) => async (dispatch) => {
-   try {
-      dispatch(updateLoadingSpinner(true));
+   dispatch(updateLoadingSpinner(true));
 
+   try {
       await axios.delete(`/api/invoice/${invoice_id}`);
 
       dispatch({
          type: INVOICE_DELETED,
          payload: invoice_id,
       });
-      dispatch(updateLoadingSpinner(false));
+
       dispatch(updateAdminDashLoading());
       dispatch(clearRegister());
       dispatch(setAlert("Factura Eliminada", "success", "2"));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: INVOICE_ERROR,
@@ -97,15 +91,20 @@ export const deleteInvoice = (invoice_id) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scroll(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
-export const registerInvoice = (formData, history, user_id) => async (
-   dispatch
-) => {
+export const registerInvoice = (
+   formData,
+   remaining,
+   history,
+   user_id
+) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+
    let invoice = {};
    for (const prop in formData) {
       if (formData[prop]) invoice[prop] = formData[prop];
@@ -125,11 +124,13 @@ export const registerInvoice = (formData, history, user_id) => async (
          type: INVOICE_REGISTERED,
          payload: res.data,
       });
-      dispatch(setAlert("Factura Registrada", "success", "1"));
-      dispatch(updateLoadingSpinner(false));
+
+      dispatch(invoicePDF(formData, remaining));
+
       dispatch(updateAdminDashLoading());
       dispatch(clearRegister());
-      window.scrollTo(500, 0);
+
+      dispatch(setAlert("Factura Registrada", "success", "1", 10000));
       history.push(`/dashboard/${user_id}`);
    } catch (err) {
       if (err.response.data.erros) {
@@ -142,7 +143,7 @@ export const registerInvoice = (formData, history, user_id) => async (
             payload: errors,
          });
       } else {
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         dispatch(setAlert(err.response.data.msg, "danger", "2", 10000));
          dispatch({
             type: INVOICE_ERROR,
             payload: {
@@ -152,16 +153,15 @@ export const registerInvoice = (formData, history, user_id) => async (
             },
          });
       }
-
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   dispatch(updateLoadingSpinner(false));
+   window.scrollTo(0, 0);
 };
 
 export const invoicesPDF = (invoices) => async (dispatch) => {
-   let invoice = JSON.stringify(invoices);
-
    dispatch(updateLoadingSpinner(true));
+   let invoice = JSON.stringify(invoices);
 
    try {
       const config = {
@@ -182,10 +182,7 @@ export const invoicesPDF = (invoices) => async (dispatch) => {
 
       saveAs(pdfBlob, `Ingresos ${date}.pdf`);
 
-      dispatch(updateLoadingSpinner(false));
-
       dispatch(setAlert("PDF Generado", "success", "2"));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: INVOICE_ERROR,
@@ -196,19 +193,21 @@ export const invoicesPDF = (invoices) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scroll(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const invoicePDF = (invoice, remaining) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
    let invoiceDetails = JSON.stringify({ invoice, remaining });
 
-   const name = invoice.lastname
-      ? `${invoice.lastname} ${invoice.name}`
-      : `${invoice.user.lastname} ${invoice.user.name}`;
-
-   dispatch(updateLoadingSpinner(true));
+   const name =
+      !invoice.lastname || invoice.lastname === ""
+         ? `${invoice.user.lastname}, ${invoice.user.name}`
+         : `${invoice.lastname}, ${invoice.name}`;
 
    try {
       const config = {
@@ -225,14 +224,16 @@ export const invoicePDF = (invoice, remaining) => async (dispatch) => {
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-      const date = moment().format("DD-MM-YY");
+      let date;
+      if (invoice.date) {
+         date = moment(invoice.date).format("DD-MM-YY");
+      } else {
+         date = moment().format("DD-MM-YY");
+      }
 
       saveAs(pdfBlob, `Factura ${name}  ${date}.pdf`);
 
-      dispatch(updateLoadingSpinner(false));
-
       dispatch(setAlert("PDF Generado", "success", "2"));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: INVOICE_ERROR,
@@ -243,7 +244,8 @@ export const invoicePDF = (invoice, remaining) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scroll(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };

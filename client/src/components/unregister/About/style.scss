@@ -1,0 +1,175 @@
+@import "../../../style/abstract.scss";
+
+.header {
+   height: 85vh;
+   display: flex;
+   margin-top: 5.4rem;
+   justify-content: center;
+   align-items: center;
+   text-align: center;
+   background-image: linear-gradient(
+         to right bottom,
+         rgba($primary-color, 0.75),
+         rgba($dark-color, 0.75)
+      ),
+      url(../../../img/claseAfuer.jpg);
+   background-size: cover;
+   background-position: center;
+   -webkit-clip-path: polygon(0 0, 100% 0, 100% 75vh, 0 100%);
+   clip-path: polygon(0 0, 100% 0, 100% 75vh, 0 100%);
+
+   @include respond(tab-land) {
+      margin-top: 5.4rem;
+   }
+
+   @include respond(tab-port) {
+      margin-top: 6.4rem;
+   }
+
+   h2,
+   p {
+      padding: 0 1rem;
+   }
+
+   h2 {
+      animation: moveInLeft 1s ease-out;
+   }
+   p {
+      animation: moveInRight 1s ease-out;
+   }
+}
+
+.history {
+   &-container {
+      background-image: linear-gradient(
+            105deg,
+            $white-color 0%,
+            $white-color 50%,
+            transparent 50%
+         ),
+         url(../../../img/viejo.jpg);
+      background-size: contain;
+      background-position: right top;
+      border-radius: 3px;
+      box-shadow: 0 1.5rem 4rem rgba($black-color, 0.5);
+
+      @include respond(phone) {
+         background-position: 50% 50%;
+         background-repeat: no-repeat;
+         background-image: linear-gradient(
+               to right,
+               rgba($white-color, 0.9) 0%,
+               rgba($white-color, 0.9) 100%
+            ),
+            url(../../../img/viejo.jpg);
+      }
+   }
+
+   &-text {
+      padding: 6rem;
+      width: 50%;
+
+      @include respond(phone) {
+         padding: 5rem;
+         width: 100%;
+
+         .text-moved-right {
+            margin: 0 !important;
+         }
+      }
+   }
+}
+
+.section {
+   &-history {
+      padding: 10rem 0;
+   }
+
+   &-cambridge {
+      margin-top: 4.5rem;
+      padding: 15rem 4rem;
+      background-image: linear-gradient(
+            to right bottom,
+            rgba($primary-color, 0.75),
+            rgba($dark-color, 0.75)
+         ),
+         url(../../../img/cambr2.jpg);
+      background-size: cover;
+      transform: skewY(-4deg);
+
+      @include respond(phone) {
+         padding: 8rem 4rem;
+      }
+
+      & > * {
+         transform: skewY(4deg);
+      }
+
+      .cmb-img {
+         width: 40rem;
+
+         @include respond(phone) {
+            order: 2;
+            width: 30rem;
+         }
+      }
+
+      .cmb-text {
+         text-align: right;
+         padding-left: 4rem;
+
+         @include respond(phone) {
+            text-align: left;
+            margin-bottom: 3rem;
+            padding: 2rem;
+         }
+      }
+   }
+
+   &-canada {
+      padding: 8rem 3rem 5rem 3rem;
+
+      h2 {
+         padding-bottom: 7rem;
+      }
+
+      & > .row {
+         justify-content: space-around;
+         height: 30rem;
+
+         @include respond(phone) {
+            height: 100%;
+         }
+      }
+
+      &-text {
+         width: 40%;
+         align-self: center;
+
+         @include respond(phone) {
+            width: 100%;
+         }
+      }
+   }
+
+   &-team {
+      padding: 10rem 1rem 15rem 1rem;
+      position: relative;
+
+      @include respond(phone) {
+         padding: 6rem 1rem 3rem 1rem;
+
+         .btns {
+            order: 2;
+            display: flex;
+            width: 50%;
+            justify-content: space-around;
+            margin-top: 2rem;
+         }
+      }
+
+      & .row {
+         justify-content: space-evenly;
+      }
+   }
+}

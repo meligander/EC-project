@@ -1,0 +1,32 @@
+@import "../../../../../style/abstract.scss";
+
+.class {
+   text-align: center;
+   font-size: $default-font-size;
+   justify-content: space-around;
+
+   & > * {
+      padding: 4rem;
+   }
+
+   .title {
+      width: 40%;
+      @include respond(phone) {
+         width: 100%;
+      }
+   }
+   .description {
+      width: 60%;
+      @include respond(phone) {
+         width: 90%;
+         margin-bottom: 3rem;
+      }
+   }
+}
+
+.absence {
+   display: flex;
+   flex-wrap: wrap;
+   text-align: center;
+   padding: 0 2rem;
+}

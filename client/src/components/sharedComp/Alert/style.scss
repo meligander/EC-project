@@ -1,0 +1,24 @@
+@import "../../../style/abstract.scss";
+
+.alert {
+   text-align: center;
+   padding: 0.8rem;
+   font-size: $default-font-size;
+   margin-bottom: 4rem;
+   opacity: 0.8;
+   background: $light-color;
+   color: $black-color;
+
+   &.alert-primary {
+      @include background($primary-color);
+   }
+   &.alert-secondary {
+      @include background($secondary-color);
+   }
+   &.alert-danger {
+      @include background($danger-color);
+   }
+   &.alert-success {
+      @include background($success-color);
+   }
+}

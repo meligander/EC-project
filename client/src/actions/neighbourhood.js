@@ -51,10 +51,9 @@ export const loadNeighbourhoods = () => async (dispatch) => {
 };
 
 export const updateNeighbourhoods = (formData) => async (dispatch) => {
-   try {
-      dispatch(updateLoadingSpinner(true));
-      window.scrollTo(500, 0);
+   dispatch(updateLoadingSpinner(true));
 
+   try {
       let neighbourhoods = JSON.stringify(formData);
 
       const config = {
@@ -71,8 +70,9 @@ export const updateNeighbourhoods = (formData) => async (dispatch) => {
          type: NEIGHBOURHOODS_UPDATED,
          payload: res.data,
       });
+
       dispatch(setAlert("Barrios Modificados", "success", "2"));
-      dispatch(updateLoadingSpinner(false));
+      dispatch(clearNeighbourhoods());
    } catch (err) {
       dispatch({
          type: NEIGHBOURHOODS_ERROR,
@@ -83,9 +83,10 @@ export const updateNeighbourhoods = (formData) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scroll(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const clearNeighbourhoods = () => (dispatch) => {

@@ -33,19 +33,17 @@ export const loadUsersGrades = (user_id) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
+      window.scrollTo(0, 0);
    }
 };
 
 export const loadGradesByClass = (class_id) => async (dispatch) => {
    try {
-      dispatch(updateLoadingSpinner(true));
       const res = await axios.get(`/api/grade/${class_id}`);
       dispatch({
          type: GRADES_LOADED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: GRADES_ERROR,
@@ -56,8 +54,7 @@ export const loadGradesByClass = (class_id) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
+      window.scrollTo(0, 0);
    }
 };
 
@@ -78,7 +75,7 @@ export const loadGradeTypesByCategory = (category_id) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
+      window.scrollTo(0, 0);
    }
 };
 
@@ -99,13 +96,13 @@ export const loadGradeTypes = () => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
+      window.scrollTo(0, 0);
    }
 };
 
 export const registerNewGrade = (newGrade) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
    try {
-      dispatch(updateLoadingSpinner(true));
       let grade = JSON.stringify(newGrade);
 
       const config = {
@@ -118,9 +115,7 @@ export const registerNewGrade = (newGrade) => async (dispatch) => {
          type: NEW_GRADE_REGISTERED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("Nuevo Tipo de Nota Agregado", "success", "2"));
-      window.scrollTo(500, 0);
    } catch (err) {
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
       dispatch({
@@ -131,15 +126,16 @@ export const registerNewGrade = (newGrade) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const deleteGrades = (grade) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
    try {
-      dispatch(updateLoadingSpinner(true));
       const res = await axios.delete(
          `/api/grade/${grade.gradetype}/${grade.classroom}/${grade.period}`
       );
@@ -150,8 +146,6 @@ export const deleteGrades = (grade) => async (dispatch) => {
       });
 
       dispatch(setAlert("Tipo de Nota Eliminado", "success", "2"));
-      dispatch(updateLoadingSpinner(false));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: GRADES_ERROR,
@@ -162,16 +156,17 @@ export const deleteGrades = (grade) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const updateGrades = (formData, history, class_id) => async (
    dispatch
 ) => {
+   dispatch(updateLoadingSpinner(true));
    try {
-      dispatch(updateLoadingSpinner(true));
       let grades = JSON.stringify(formData);
 
       const config = {
@@ -190,9 +185,7 @@ export const updateGrades = (formData, history, class_id) => async (
          type: GRADES_CLEARED,
       });
 
-      dispatch(updateLoadingSpinner(false));
       history.push(`/class/${class_id}`);
-      window.scrollTo(500, 0);
    } catch (err) {
       dispatch({
          type: GRADES_ERROR,
@@ -203,16 +196,15 @@ export const updateGrades = (formData, history, class_id) => async (
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
 };
 
 export const updateGradeTypes = (formData) => async (dispatch) => {
-   try {
-      dispatch(updateLoadingSpinner(true));
-      window.scrollTo(500, 0);
+   dispatch(updateLoadingSpinner(true));
 
+   try {
       let gradetypes = JSON.stringify(formData);
 
       const config = {
@@ -226,7 +218,6 @@ export const updateGradeTypes = (formData) => async (dispatch) => {
          payload: res.data,
       });
       dispatch(setAlert("Tipos de Notas Modificados", "success", "2"));
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: GRADETYPE_ERROR,
@@ -237,9 +228,10 @@ export const updateGradeTypes = (formData) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const gradesPDF = (
@@ -250,6 +242,8 @@ export const gradesPDF = (
    period,
    all
 ) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
    let tableInfo = JSON.stringify({
       students,
       header,
@@ -258,7 +252,6 @@ export const gradesPDF = (
       period,
    });
 
-   dispatch(updateLoadingSpinner(true));
    try {
       const config = {
          headers: {
@@ -284,9 +277,7 @@ export const gradesPDF = (
             classInfo.teacher.lastname + ", " + classInfo.teacher.name
          }  ${date}.pdf`
       );
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("PDF Generado", "success", "2"));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: GRADES_ERROR,
@@ -297,9 +288,10 @@ export const gradesPDF = (
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(true));
 };
 
 export const certificatePDF = (
@@ -360,9 +352,6 @@ export const certificatePDF = (
       }
 
       dispatch(setAlert("Certificados Generados", "success", "2"));
-
-      dispatch(updateLoadingSpinner(false));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: GRADES_ERROR,
@@ -373,9 +362,10 @@ export const certificatePDF = (
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const clearGrades = () => (dispatch) => {

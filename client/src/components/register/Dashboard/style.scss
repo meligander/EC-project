@@ -1,0 +1,62 @@
+@import "../../../style/abstract.scss";
+
+.profile-top {
+   display: flex;
+
+   @include respond(small-phone) {
+      flex-direction: column;
+      align-items: center;
+   }
+
+   & > * {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      @include respond(small-phone) {
+         width: 100% !important;
+      }
+   }
+
+   .img-about {
+      width: 40%;
+      align-items: center;
+
+      @include respond(small-phone) {
+         padding-bottom: 1rem;
+         border-bottom: 1px solid $dark-color;
+      }
+   }
+
+   .about {
+      width: 60%;
+
+      @include respond(small-phone) {
+         margin-top: 2rem;
+      }
+
+      p {
+         font-size: $default-font-size;
+
+         span {
+            font-size: 2.5rem;
+         }
+      }
+
+      &-btn {
+         margin-top: 4rem;
+         text-align: right;
+         height: 10%;
+
+         > button {
+            margin-right: 2rem;
+         }
+      }
+      &-info {
+         height: 90%;
+         display: flex;
+         flex-direction: column;
+         justify-content: center;
+      }
+   }
+}

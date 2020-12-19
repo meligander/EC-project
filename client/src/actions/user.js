@@ -24,6 +24,7 @@ import {
    updateAdminDashLoading,
    clearValues,
 } from "./mixvalues";
+import { logOutAndToggle } from "./navbar";
 import axios from "axios";
 import { clearInstallments } from "./debts";
 import { clearClass } from "./class";
@@ -39,7 +40,6 @@ export const loadUser = (user_id) => async (dispatch) => {
          type: USER_LOADED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: USER_ERROR,
@@ -50,15 +50,13 @@ export const loadUser = (user_id) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
+      window.scrollTo(0, 0);
    }
 };
 
 //Load Relatives
 export const loadRelatives = (user_id, tutor) => async (dispatch) => {
    try {
-      dispatch(updateLoadingSpinner(true));
       let res;
       if (tutor) {
          res = await axios.get(`/api/users/tutor/${user_id}`);
@@ -70,7 +68,6 @@ export const loadRelatives = (user_id, tutor) => async (dispatch) => {
          type: RELATIVES_LOADED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: USERS_ERROR,
@@ -81,22 +78,18 @@ export const loadRelatives = (user_id, tutor) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
+      window.scrollTo(0, 0);
    }
 };
 
 export const loadTeachers = () => async (dispatch) => {
    try {
-      dispatch(updateLoadingSpinner(true));
-
       let res = await axios.get("/api/users?type=Profesor");
 
       dispatch({
          type: TEACHERS_LOADED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: TEACHERS_ERROR,
@@ -107,7 +100,7 @@ export const loadTeachers = () => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
+      window.scrollTo(0, 0);
    }
 };
 
@@ -116,10 +109,10 @@ export const loadUsers = (
    filterData,
    search = false,
    studentRelation = false,
-   alert = true,
-   loading = true
+   alert = true
 ) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+
    try {
       let filter = "";
 
@@ -142,7 +135,6 @@ export const loadUsers = (
          type: USERS_LOADED,
          payload: res.data,
       });
-      if (loading) dispatch(updateLoadingSpinner(false));
    } catch (err) {
       if (alert)
          dispatch(
@@ -152,7 +144,6 @@ export const loadUsers = (
                studentRelation ? "3" : "2"
             )
          );
-      window.scrollTo(500, 0);
       dispatch({
          type: USERS_ERROR,
          payload: {
@@ -161,10 +152,10 @@ export const loadUsers = (
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      if (loading) dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 //Load team for about page
@@ -186,7 +177,7 @@ export const loadTeam = () => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
+      window.scrollTo(0, 0);
    }
 };
 
@@ -198,6 +189,7 @@ export const registerUser = (
    user_id
 ) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+
    let user = {};
    for (const prop in formData) {
       if (formData[prop]) {
@@ -239,9 +231,7 @@ export const registerUser = (
       );
       dispatch(updateAdminDashLoading());
       dispatch(clearProfile());
-      dispatch(updateLoadingSpinner(false));
       dispatch(clearValues());
-      window.scrollTo(500, 0);
       history.push(`/dashboard/${res.data._id}`);
    } catch (err) {
       if (err.response.data.erros) {
@@ -264,10 +254,9 @@ export const registerUser = (
             },
          });
       }
-
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
 };
 
 //Update user's credentials
@@ -275,6 +264,7 @@ export const updateCredentials = (formData, history, user_id) => async (
    dispatch
 ) => {
    dispatch(updateLoadingSpinner(true));
+
    let user = {};
    for (const prop in formData) {
       if (formData[prop]) user[prop] = formData[prop];
@@ -301,9 +291,7 @@ export const updateCredentials = (formData, history, user_id) => async (
       });
       dispatch(clearProfile());
       dispatch(setAlert("Credenciales modificadas", "success", "1"));
-      window.scrollTo(500, 0);
       history.push(`/dashboard/${res.data._id}`);
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: USERS_ERROR,
@@ -314,26 +302,27 @@ export const updateCredentials = (formData, history, user_id) => async (
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
 };
 
 export const deleteUser = (user_id, history, userLogged_id) => async (
    dispatch
 ) => {
+   dispatch(updateLoadingSpinner(true));
+
    try {
-      dispatch(updateLoadingSpinner(true));
-      history.push(`/dashboard/${userLogged_id}`);
       await axios.delete(`/api/users/${user_id}`);
+
+      if (user_id === userLogged_id) dispatch(logOutAndToggle());
+      else history.push(`/dashboard/${userLogged_id}`);
 
       dispatch({
          type: USER_DELETED,
       });
       dispatch(setAlert("Usuario Eliminado", "success", "1"));
-      dispatch(updateLoadingSpinner(false));
       dispatch(updateAdminDashLoading());
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: USER_ERROR,
@@ -344,13 +333,15 @@ export const deleteUser = (user_id, history, userLogged_id) => async (
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   if (user_id === userLogged_id) dispatch(updateLoadingSpinner(false));
 };
 
 export const userPDF = (users, usersType) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+
    try {
       const config = {
          headers: {
@@ -374,8 +365,6 @@ export const userPDF = (users, usersType) => async (dispatch) => {
       );
 
       dispatch(setAlert("PDF Generado", "success", "2"));
-      window.scroll(500, 0);
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: USER_ERROR,
@@ -386,9 +375,10 @@ export const userPDF = (users, usersType) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(true));
 };
 
 export const addUser = (user) => (dispatch) => {

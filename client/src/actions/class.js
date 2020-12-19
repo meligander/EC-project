@@ -10,7 +10,7 @@ import {
    CLASSSTUDENTS_ERROR,
    CLASSES_DELETED,
 } from "./types";
-import { updateLoadingSpinner, updateAdminDashLoading } from "./mixvalues";
+import { updateAdminDashLoading, updateLoadingSpinner } from "./mixvalues";
 import { setAlert } from "./alert";
 import moment from "moment";
 import { saveAs } from "file-saver";
@@ -33,19 +33,27 @@ export const loadUsersClass = (user_id) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
+      window.scrollTo(0, 0);
    }
 };
 
-export const loadClass = (class_id, loading = true) => async (dispatch) => {
+export const loadClass = (class_id, post = false) => async (dispatch) => {
+   if (post) dispatch(updateLoadingSpinner(true));
+
    try {
-      if (loading) dispatch(updateLoadingSpinner(true));
-      const res = await axios.get(`/api/class/${class_id}`);
-      dispatch({
-         type: CLASS_LOADED,
-         payload: res.data,
-      });
-      dispatch(loadClassStudents(class_id, loading));
+      if (class_id === "0") {
+         dispatch({
+            type: CLASS_LOADED,
+            payload: null,
+         });
+      } else {
+         const res = await axios.get(`/api/class/${class_id}`);
+         dispatch({
+            type: CLASS_LOADED,
+            payload: res.data,
+         });
+         if (!post) dispatch(loadClassStudents(class_id));
+      }
    } catch (err) {
       dispatch({
          type: CLASS_ERROR,
@@ -56,12 +64,11 @@ export const loadClass = (class_id, loading = true) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
+      window.scrollTo(0, 0);
    }
 };
 
-export const loadClassStudents = (class_id, loading) => async (dispatch) => {
+export const loadClassStudents = (class_id) => async (dispatch) => {
    try {
       const res = await axios.get(
          `/api/users?type=Alumno&classroom=${class_id}`
@@ -70,7 +77,6 @@ export const loadClassStudents = (class_id, loading) => async (dispatch) => {
          type: CLASSSTUDENTS_LOADED,
          payload: res.data,
       });
-      if (loading) dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: CLASSSTUDENTS_ERROR,
@@ -81,13 +87,13 @@ export const loadClassStudents = (class_id, loading) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      if (loading) dispatch(updateLoadingSpinner(false));
+      window.scrollTo(0, 0);
    }
 };
 
 export const loadClasses = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+
    let filter = "";
    const filternames = Object.keys(filterData);
    for (let x = 0; x < filternames.length; x++) {
@@ -103,7 +109,6 @@ export const loadClasses = (filterData) => async (dispatch) => {
          type: CLASSES_LOADED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: CLASS_ERROR,
@@ -114,15 +119,17 @@ export const loadClasses = (filterData) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
+      window.scrollTo(0, 0);
    }
+
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const registerUpdateClass = (formData, history, class_id = 0) => async (
    dispatch
 ) => {
    dispatch(updateLoadingSpinner(true));
+
    let newClass = {};
    for (const prop in formData) {
       if (formData[prop]) newClass[prop] = formData[prop];
@@ -148,6 +155,7 @@ export const registerUpdateClass = (formData, history, class_id = 0) => async (
          type: class_id === 0 ? CLASS_REGISTERED : CLASSES_UPDATED,
          payload: res.data,
       });
+
       dispatch(
          setAlert(
             class_id === 0 ? "Nueva Clase Creada" : "Clase Modificada",
@@ -155,10 +163,9 @@ export const registerUpdateClass = (formData, history, class_id = 0) => async (
             "2"
          )
       );
-      window.scrollTo(500, 0);
+
       history.push("/classes");
       dispatch(updateAdminDashLoading());
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       if (err.response.data.erros) {
          const errors = err.response.data.errors;
@@ -180,10 +187,10 @@ export const registerUpdateClass = (formData, history, class_id = 0) => async (
             },
          });
       }
-
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const updateClass = (classInfo) => (dispatch) => {
@@ -191,8 +198,9 @@ export const updateClass = (classInfo) => (dispatch) => {
 };
 
 export const deleteClass = (class_id, history) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
    try {
-      dispatch(updateLoadingSpinner(true));
       await axios.delete(`/api/class/${class_id}`);
 
       dispatch({
@@ -203,8 +211,6 @@ export const deleteClass = (class_id, history) => async (dispatch) => {
       dispatch(setAlert("Curso Eliminado", "success", "2"));
       dispatch(updateAdminDashLoading());
       history.push("/classes");
-      dispatch(updateLoadingSpinner(false));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: CLASS_ERROR,
@@ -215,14 +221,16 @@ export const deleteClass = (class_id, history) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const classPDF = (classInfo, type) => async (dispatch) => {
-   let tableInfo = JSON.stringify(classInfo);
    dispatch(updateLoadingSpinner(true));
+
+   let tableInfo = JSON.stringify(classInfo);
    try {
       const config = {
          headers: {
@@ -276,8 +284,6 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
       saveAs(pdfBlob, `${name} ${date}.pdf`);
 
       dispatch(setAlert("PDF Generado", "success", "2"));
-      window.scroll(500, 0);
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: CLASS_ERROR,
@@ -288,9 +294,10 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const clearClass = () => (dispatch) => {

@@ -206,7 +206,6 @@ router.get("/", auth, async (req, res) => {
             msg: "No se encontraron usuarios con dichas descripciones",
          });
       }
-
       res.json(users);
    } catch (err) {
       console.error(err.message);

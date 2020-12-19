@@ -1,0 +1,23 @@
+@include respond(small-phone) {
+   .hide-sm {
+      display: none !important;
+   }
+}
+
+@include respond(phone) {
+   .hide-md {
+      display: none;
+   }
+}
+
+@media only screen and (min-width: 38em) {
+   .show-md {
+      display: none;
+   }
+}
+
+@media only screen and (min-width: 26em) {
+   .show-sm {
+      display: none;
+   }
+}

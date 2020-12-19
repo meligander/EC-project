@@ -1,0 +1,31 @@
+*,
+*::after,
+*::before {
+   margin: 0;
+   padding: 0;
+   box-sizing: inherit;
+}
+
+html {
+   //This defines what 1rem is
+   //y por eso se puede cambiar el tamano de todo lo que este definido con rem
+   font-size: 62.5%; //1rem = 10px ==> 10px/16px = 62.5%
+
+   //los media queries se declaran desde el mas grande al mas chico
+   @include respond(phone) {
+      //width < 600
+      font-size: 50%; //1rem = 8px ==> 8px/16px = 50%
+   }
+}
+
+body {
+   box-sizing: border-box;
+
+   a {
+      text-decoration: none;
+   }
+
+   ul li {
+      list-style: none;
+   }
+}

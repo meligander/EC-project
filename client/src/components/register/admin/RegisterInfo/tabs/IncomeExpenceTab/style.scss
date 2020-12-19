@@ -1,0 +1,19 @@
+@import "../../../../../../style/abstract.scss";
+
+.income-tab {
+   table td {
+      padding: 2rem 3rem;
+
+      @include respond(small-phone) {
+         padding: 1rem 1.5rem;
+      }
+
+      &:last-child {
+         text-align: right !important;
+
+         input {
+            text-align: right !important;
+         }
+      }
+   }
+}

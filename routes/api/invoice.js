@@ -327,11 +327,7 @@ router.post("/create-invoice", (req, res) => {
       user: invoice.lastname
          ? `${invoice.lastname}, ${invoice.name}`
          : `${invoice.user.lastname}, ${invoice.user.name}`,
-      email: invoice.user
-         ? invoice.user.email
-         : invoice.email
-         ? invoice.email
-         : "",
+      email: invoice.user.email ? invoice.user.email : invoice.email,
       cel: invoice.user ? (invoice.user.cel ? invoice.user.cel : "") : "",
       invoiceid: invoice.invoiceid,
       date: moment(invoice.date).format("DD/MM/YY"),
@@ -403,7 +399,7 @@ router.post(
       try {
          let installment;
          for (let x = 0; x < details.length; x++) {
-            if (details[x].payment === undefined)
+            if (details[x].payment === "")
                return res.status(400).json({ msg: "El pago es necesario" });
             installment = await Installment.findOne({
                _id: details[x].item._id,
@@ -412,10 +408,16 @@ router.post(
             if (installment.value === 0)
                return res.status(400).json({ msg: "Dicha cuota ya está paga" });
 
-            if (installment.value < details[x].payment)
+            if (installment.value < parseFloat(details[x].payment))
                return res.status(400).json({
                   msg: "El importe a pagar debe ser menor al valor de la cuota",
                });
+         }
+
+         if ((lastname === "" || name === "") && user._id === "") {
+            return res.status(400).json({
+               msg: "La factura debe estar a nombre de alguien",
+            });
          }
 
          let last = await Register.find().sort({ $natural: -1 }).limit(1);
@@ -446,10 +448,10 @@ router.post(
 
          let data = {
             invoiceid,
-            user,
-            name,
-            lastname,
-            email,
+            ...(user._id !== "" && { user: user._id }),
+            ...(name !== "" && { name }),
+            ...(lastname !== "" && { lastname }),
+            ...(email !== "" && { email }),
             total,
             details: newDetails,
             remaining,

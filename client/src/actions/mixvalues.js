@@ -9,6 +9,7 @@ import {
    VALUES_ERROR,
    SEARCH_PAGE_CHANGED,
    LOADING_ADMINDASH_UPDATED,
+   INVOICE_NUMBER_UPDATED,
 } from "./types";
 import { setAlert } from "./alert";
 
@@ -56,8 +57,8 @@ export const getTotalDebt = () => async (dispatch) => {
 };
 
 export const getAdminDash = () => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
    try {
-      dispatch(updateLoadingSpinner(true));
       let payload = {};
       let res = await axios.get("/api/installment/month/debts");
       payload.totalDebt = res.data;
@@ -74,7 +75,6 @@ export const getAdminDash = () => async (dispatch) => {
          type: ADMIN_DASH_LOADED,
          payload,
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: VALUES_ERROR,
@@ -86,8 +86,9 @@ export const getAdminDash = () => async (dispatch) => {
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
       window.scroll(0, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const getInvoiceNumber = () => async (dispatch) => {
@@ -114,6 +115,12 @@ export const getInvoiceNumber = () => async (dispatch) => {
 export const clearValues = () => (dispatch) => {
    dispatch({
       type: VALUES_CLEARED,
+   });
+};
+
+export const updateInvoiceNumber = () => (dispatch) => {
+   dispatch({
+      type: INVOICE_NUMBER_UPDATED,
    });
 };
 

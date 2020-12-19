@@ -29,13 +29,14 @@ export const loadRegister = () => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
+      window.scrollTo(0, 0);
    }
 };
 
 export const loadRegisters = (filterData) => async (dispatch) => {
-   let filter = "";
    dispatch(updateLoadingSpinner(true));
+
+   let filter = "";
    const filternames = Object.keys(filterData);
    for (let x = 0; x < filternames.length; x++) {
       const name = filternames[x];
@@ -50,7 +51,6 @@ export const loadRegisters = (filterData) => async (dispatch) => {
          type: REGISTERS_LOADED,
          payload: res.data,
       });
-      dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: REGISTER_ERROR,
@@ -61,17 +61,18 @@ export const loadRegisters = (filterData) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
+      window.scrollTo(0, 0);
    }
+
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const closeRegister = (formData, user_id, history) => async (
    dispatch
 ) => {
+   dispatch(updateLoadingSpinner(true));
+
    try {
-      dispatch(updateLoadingSpinner(true));
-      window.scrollTo(500, 0);
       let register = {};
       for (const prop in formData) {
          if (formData[prop]) register[prop] = formData[prop];
@@ -89,10 +90,10 @@ export const closeRegister = (formData, user_id, history) => async (
          type: REGISTER_CLOSED,
          payload: res.data,
       });
+
       history.push(`/dashboard/${user_id}`);
-      dispatch(updateLoadingSpinner(false));
+      dispatch(clearRegister());
       dispatch(setAlert("Caja del día Cerrada", "success", "1"));
-      dispatch({ type: REGISTER_CLEARED });
    } catch (err) {
       dispatch({
          type: REGISTER_ERROR,
@@ -103,24 +104,22 @@ export const closeRegister = (formData, user_id, history) => async (
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
 };
 
 export const deleteRegister = (register_id) => async (dispatch) => {
-   try {
-      dispatch(updateLoadingSpinner(true));
+   dispatch(updateLoadingSpinner(true));
 
+   try {
       await axios.delete(`/api/register/${register_id}`);
 
       dispatch({
          type: REGISTER_DELETED,
          payload: register_id,
       });
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("Cierre de Caja Eliminado", "success", "2"));
-      window.scroll(500, 0);
       dispatch({ type: REGISTER_CLEARED });
    } catch (err) {
       dispatch({
@@ -132,15 +131,17 @@ export const deleteRegister = (register_id) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const registerPDF = (registers) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
    let register = JSON.stringify(registers);
 
-   dispatch(updateLoadingSpinner(true));
    try {
       const config = {
          headers: {
@@ -160,9 +161,7 @@ export const registerPDF = (registers) => async (dispatch) => {
 
       saveAs(pdfBlob, `Caja Diaria ${date}.pdf`);
 
-      dispatch(updateLoadingSpinner(false));
       dispatch(setAlert("PDF Generado", "success", "2"));
-      window.scroll(500, 0);
    } catch (err) {
       dispatch({
          type: REGISTER_ERROR,
@@ -173,9 +172,10 @@ export const registerPDF = (registers) => async (dispatch) => {
          },
       });
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(500, 0);
-      dispatch(updateLoadingSpinner(false));
    }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const clearRegister = () => (dispatch) => {
