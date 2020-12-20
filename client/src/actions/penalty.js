@@ -1,7 +1,14 @@
-import { PENALTY_REGISTERED, PENALTY_ERROR, PENALTY_LOADED } from "./types";
+import axios from "axios";
+
 import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
-import axios from "axios";
+
+import {
+   PENALTY_REGISTERED,
+   PENALTY_ERROR,
+   PENALTY_LOADED,
+   PENALTY_CLEARED,
+} from "./types";
 
 export const loadPenalty = () => async (dispatch) => {
    try {
@@ -64,4 +71,10 @@ export const updatePenalty = (formData) => async (dispatch) => {
 
    window.scrollTo(0, 0);
    dispatch(updateLoadingSpinner(false));
+};
+
+export const clearPenalty = () => (dispatch) => {
+   dispatch({
+      type: PENALTY_CLEARED,
+   });
 };

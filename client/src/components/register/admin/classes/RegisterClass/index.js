@@ -11,7 +11,7 @@ import NewClass from "./tabs/NewClassTab";
 const RegisterClass = ({ location, match, loadClass }) => {
    useEffect(() => {
       if (location.pathname !== "/register-class") {
-         loadClass(match.params.id, true);
+         loadClass(match.params.id);
       }
    }, [loadClass, location.pathname, match.params.id]);
    return (

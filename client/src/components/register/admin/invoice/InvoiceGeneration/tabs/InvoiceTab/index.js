@@ -6,15 +6,9 @@ import PropTypes from "prop-types";
 
 import { clearSearch } from "../../../../../../../actions/user";
 import { registerInvoice } from "../../../../../../../actions/invoice";
-import {
-   clearInstallments,
-   removeInstallmentFromList,
-} from "../../../../../../../actions/debts";
+import { removeInstallmentFromList } from "../../../../../../../actions/installment";
 import { setAlert } from "../../../../../../../actions/alert";
-import {
-   getInvoiceNumber,
-   updateInvoiceNumber,
-} from "../../../../../../../actions/mixvalues";
+import { getInvoiceNumber } from "../../../../../../../actions/mixvalues";
 
 import Alert from "../../../../../../sharedComp/Alert";
 import StudentSearch from "../../../../../../sharedComp/search/StudentSearch";
@@ -24,15 +18,13 @@ import "./style.scss";
 
 const InvoiceTab = ({
    history,
-   debt: { debts },
+   installment: { installments },
    auth: { userLogged },
    mixvalues: { invoiceNumber },
    clearSearch,
    setAlert,
    getInvoiceNumber,
    registerInvoice,
-   updateInvoiceNumber,
-   clearInstallments,
    removeInstallmentFromList,
 }) => {
    const [adminValues, setAdminValues] = useState({
@@ -95,21 +87,28 @@ const InvoiceTab = ({
             }));
       }
       const initInput = () => {
-         if (debts.length > details.length) {
+         if (installments.length > details.length) {
             const newItem = {
-               item: debts[debts.length - 1],
+               item: installments[installments.length - 1],
                payment: "",
             };
 
             setInvoice((prev) => ({
                ...prev,
                details: [...prev.details, newItem],
-               remaining: prev.remaining + debts[debts.length - 1].value,
+               remaining:
+                  prev.remaining + installments[installments.length - 1].value,
             }));
          }
       };
-      if (debts.length > 0) initInput();
-   }, [debts, getInvoiceNumber, invoiceNumber, invoiceid, details.length]);
+      if (installments.length > 0) initInput();
+   }, [
+      installments,
+      getInvoiceNumber,
+      invoiceNumber,
+      invoiceid,
+      details.length,
+   ]);
 
    const selectUser = (user) => {
       setAdminValues({
@@ -182,8 +181,6 @@ const InvoiceTab = ({
 
    const confirm = () => {
       registerInvoice(invoice, remaining, history, userLogged._id);
-      updateInvoiceNumber();
-      clearInstallments();
    };
 
    return (
@@ -397,19 +394,17 @@ const InvoiceTab = ({
 };
 
 InvoiceTab.propTypes = {
-   debt: PropTypes.object.isRequired,
+   installment: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
    clearSearch: PropTypes.func.isRequired,
    getInvoiceNumber: PropTypes.func.isRequired,
    registerInvoice: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
    removeInstallmentFromList: PropTypes.func.isRequired,
-   updateInvoiceNumber: PropTypes.func.isRequired,
-   clearInstallments: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
-   debt: state.debt,
+   installment: state.installment,
    auth: state.auth,
    mixvalues: state.mixvalues,
 });
@@ -420,6 +415,4 @@ export default connect(mapStateToProps, {
    getInvoiceNumber,
    registerInvoice,
    removeInstallmentFromList,
-   updateInvoiceNumber,
-   clearInstallments,
 })(withRouter(InvoiceTab));

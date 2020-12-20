@@ -8,6 +8,7 @@ import { loadCategories } from "../../../../actions/category";
 import {
    registerEnrollment,
    loadEnrollment,
+   clearEnrollments,
 } from "../../../../actions/enrollment";
 
 import StudentSearch from "../../../sharedComp/search/StudentSearch";
@@ -21,6 +22,7 @@ const Enrollment = ({
    loadCategories,
    registerEnrollment,
    loadEnrollment,
+   clearEnrollments,
    categories,
    auth: { userLogged },
    enrollments: { enrollment, loading },
@@ -132,7 +134,7 @@ const Enrollment = ({
       <>
          {!loading || !isEdit ? (
             <>
-               <h1>{isEdit && "Editar "}Inscripción</h1>
+               {!isEdit ? <h1>Inscripción</h1> : <h2>Editar inscripción</h2>}
                <Confirm
                   toggleModal={toggleModal}
                   setToggleModal={setToggle}
@@ -145,7 +147,14 @@ const Enrollment = ({
                />
                {!isEdit && (
                   <div className="btn-right">
-                     <Link to="/enrollment-list" className="btn btn-light">
+                     <Link
+                        to="/enrollment-list"
+                        onClick={() => {
+                           window.scroll(0, 0);
+                           clearEnrollments();
+                        }}
+                        className="btn btn-light"
+                     >
                         Ver Listado
                      </Link>
                   </div>
@@ -287,6 +296,7 @@ Enrollment.propTypes = {
    loadCategories: PropTypes.func.isRequired,
    registerEnrollment: PropTypes.func.isRequired,
    loadEnrollment: PropTypes.func.isRequired,
+   clearEnrollments: PropTypes.func.isRequired,
    categories: PropTypes.object.isRequired,
    enrollments: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
@@ -302,4 +312,5 @@ export default connect(mapStateToProps, {
    loadCategories,
    registerEnrollment,
    loadEnrollment,
+   clearEnrollments,
 })(withRouter(Enrollment));

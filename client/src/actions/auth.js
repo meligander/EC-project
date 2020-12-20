@@ -1,3 +1,8 @@
+import axios from "axios";
+
+import { setAlert } from "./alert";
+import { updateLoadingSpinner } from "./mixvalues";
+
 import {
    USERAUTH_LOADED,
    AUTH_ERROR,
@@ -5,9 +10,6 @@ import {
    LOGIN_FAIL,
    LOGOUT,
 } from "./types";
-import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
-import axios from "axios";
 
 export const loadUser = () => async (dispatch) => {
    try {

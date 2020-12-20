@@ -2,15 +2,19 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { updateNeighbourhoods } from "../../../../../../actions/neighbourhood";
+import {
+   clearNeighbourhoods,
+   updateNeighbourhoods,
+} from "../../../../../../../actions/neighbourhood";
 
-import Confirm from "../../../../../modal/Confirm";
-import EditButtons from "../../sharedComp/EditButtons";
+import Confirm from "../../../../../../modal/Confirm";
+import EditButtons from "../../../sharedComp/EditButtons";
 
 const NeighbourhoodTab = ({
    neighbourhoods: { neighbourhoods, loading, error },
    towns,
    updateNeighbourhoods,
+   clearNeighbourhoods,
 }) => {
    const [newValues, setNewValues] = useState([]);
    const [otherValues, setOtherValues] = useState({
@@ -59,6 +63,7 @@ const NeighbourhoodTab = ({
 
    const saveNeighbourhoods = () => {
       updateNeighbourhoods(newValues);
+      clearNeighbourhoods();
    };
 
    const setToggleDelete = (neighbourhood_index) => {
@@ -157,6 +162,7 @@ NeighbourhoodTab.propTypes = {
    neighbourhoods: PropTypes.object.isRequired,
    towns: PropTypes.object.isRequired,
    updateNeighbourhoods: PropTypes.func.isRequired,
+   clearNeighbourhoods: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -164,6 +170,7 @@ const mapStateToProps = (state) => ({
    towns: state.towns,
 });
 
-export default connect(mapStateToProps, { updateNeighbourhoods })(
-   NeighbourhoodTab
-);
+export default connect(mapStateToProps, {
+   updateNeighbourhoods,
+   clearNeighbourhoods,
+})(NeighbourhoodTab);

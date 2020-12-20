@@ -1,3 +1,10 @@
+import moment from "moment";
+import axios from "axios";
+import { saveAs } from "file-saver";
+
+import { setAlert } from "./alert";
+import { updateLoadingSpinner } from "./mixvalues";
+
 import {
    USER_GRADES_LOADED,
    GRADES_ERROR,
@@ -9,12 +16,8 @@ import {
    GRADES_UPDATED,
    GRADETYPE_ERROR,
    GRADETYPES_UPDATED,
+   GRADETYPES_CLEARED,
 } from "./types";
-import { setAlert } from "./alert";
-import moment from "moment";
-import { saveAs } from "file-saver";
-import { updateLoadingSpinner } from "./mixvalues";
-import axios from "axios";
 
 export const loadUsersGrades = (user_id) => async (dispatch) => {
    try {
@@ -371,5 +374,11 @@ export const certificatePDF = (
 export const clearGrades = () => (dispatch) => {
    dispatch({
       type: GRADES_CLEARED,
+   });
+};
+
+export const clearGradeTypes = () => (dispatch) => {
+   dispatch({
+      type: GRADETYPES_CLEARED,
    });
 };

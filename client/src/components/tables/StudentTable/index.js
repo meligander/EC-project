@@ -3,7 +3,14 @@ import { Link } from "react-router-dom";
 import moment from "moment";
 import PropTypes from "prop-types";
 
-const StudentTable = ({ type, loadingUsers, users, search, addChild }) => {
+const StudentTable = ({
+   type,
+   loadingUsers,
+   users,
+   search,
+   addChild,
+   clearProfile,
+}) => {
    return (
       <table>
          <thead>
@@ -46,6 +53,10 @@ const StudentTable = ({ type, loadingUsers, users, search, addChild }) => {
                               <Link
                                  className="btn-text"
                                  to={`/dashboard/${user._id}`}
+                                 onClick={() => {
+                                    window.scroll(0, 0);
+                                    clearProfile();
+                                 }}
                               >
                                  Más Info &rarr;
                               </Link>
@@ -70,11 +81,12 @@ const StudentTable = ({ type, loadingUsers, users, search, addChild }) => {
 };
 
 StudentTable.propTypes = {
-   users: PropTypes.array.isRequired,
-   loadingUsers: PropTypes.bool.isRequired,
+   users: PropTypes.array,
+   loadingUsers: PropTypes.bool,
    addChild: PropTypes.func,
    search: PropTypes.bool.isRequired,
    type: PropTypes.string.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 export default StudentTable;

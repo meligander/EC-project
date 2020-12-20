@@ -1,3 +1,8 @@
+import axios from "axios";
+
+import { setAlert } from "./alert";
+import { updateLoadingSpinner } from "./mixvalues";
+
 import {
    POST_LOADED,
    POST_ERROR,
@@ -8,10 +13,8 @@ import {
    COMMENT_ADDED,
    COMMENT_DELETED,
    POSTS_CLEARED,
+   POST_CLEARED,
 } from "./types";
-import axios from "axios";
-import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
 
 //Get all posts
 export const loadPosts = (class_id) => async (dispatch) => {
@@ -259,6 +262,10 @@ export const deleteComment = (post_id, comment_id) => async (dispatch) => {
 
    window.scrollTo(0, 0);
    dispatch(updateLoadingSpinner(false));
+};
+
+export const clearPost = () => (dispatch) => {
+   dispatch({ type: POST_CLEARED });
 };
 
 export const clearPosts = () => (dispatch) => {

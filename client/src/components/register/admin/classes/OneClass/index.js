@@ -8,6 +8,7 @@ import { loadClass, deleteClass, classPDF } from "../../../../../actions/class";
 import { clearAttendances } from "../../../../../actions/attendance";
 import { clearPosts } from "../../../../../actions/post";
 import { clearGrades } from "../../../../../actions/grade";
+import { clearProfile } from "../../../../../actions/user";
 
 import Loading from "../../../../modal/Loading";
 import ClassInfo from "../../../../sharedComp/ClassInfo";
@@ -23,6 +24,7 @@ const OneClass = ({
    clearAttendances,
    clearGrades,
    clearPosts,
+   clearProfile,
    classPDF,
 }) => {
    const [toggleModal, setToggleModal] = useState(false);
@@ -57,7 +59,7 @@ const OneClass = ({
                   text="¿Está seguro que desea eliminar el curso?"
                   confirm={confirm}
                />
-               <h1 className="pt-3 text-center light-font">Curso</h1>
+               <h1 className="pt-3 text-center light-font">Clase</h1>
                <ClassInfo classInfo={classInfo} />
                {classInfo.students.length > 0 && (
                   <table>
@@ -85,6 +87,10 @@ const OneClass = ({
                                  <Link
                                     to={`/dashboard/${user._id}`}
                                     className="btn-text"
+                                    onClick={() => {
+                                       window.scroll(0, 0);
+                                       clearProfile();
+                                    }}
                                  >
                                     Info &rarr;
                                  </Link>
@@ -113,7 +119,10 @@ const OneClass = ({
                                  ? "btn btn-primary"
                                  : "btn btn-black"
                            }
-                           onClick={clearGrades}
+                           onClick={() => {
+                              clearGrades();
+                              window.scroll(0, 0);
+                           }}
                         >
                            <i className="fas fa-marker"></i>{" "}
                            <span className="hide-sm">Notas</span>
@@ -129,7 +138,10 @@ const OneClass = ({
                                  ? "btn btn-primary"
                                  : "btn btn-black"
                            }
-                           onClick={clearAttendances}
+                           onClick={() => {
+                              clearAttendances();
+                              window.scroll(0, 0);
+                           }}
                         >
                            <i className="fas fa-check-circle"></i>{" "}
                            <span className="hide-sm">Inasistencias</span>
@@ -147,7 +159,10 @@ const OneClass = ({
                            ? "btn btn-primary"
                            : "btn btn-black"
                      }
-                     onClick={clearPosts}
+                     onClick={() => {
+                        clearPosts();
+                        window.scroll(0, 0);
+                     }}
                   >
                      <i className="far fa-comments"></i>{" "}
                      <span className="hide-sm">Chat</span>
@@ -200,6 +215,7 @@ OneClass.propTypes = {
    deleteClass: PropTypes.func.isRequired,
    clearAttendances: PropTypes.func.isRequired,
    clearGrades: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
    clearPosts: PropTypes.func.isRequired,
    classPDF: PropTypes.func.isRequired,
 };
@@ -215,5 +231,6 @@ export default connect(mapStateToProps, {
    clearGrades,
    clearAttendances,
    clearPosts,
+   clearProfile,
    classPDF,
 })(withRouter(OneClass));

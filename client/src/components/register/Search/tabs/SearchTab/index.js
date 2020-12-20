@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
 import { loadCategories } from "../../../../../actions/category";
-import { loadUsers, userPDF } from "../../../../../actions/user";
+import { clearProfile, loadUsers, userPDF } from "../../../../../actions/user";
 import { setAlert } from "../../../../../actions/alert";
 
 import StudentTable from "../../../../tables/StudentTable";
@@ -15,6 +15,7 @@ const SearchTab = ({
    categories,
    loadCategories,
    loadUsers,
+   clearProfile,
    typeF,
    userPDF,
    setAlert,
@@ -61,7 +62,7 @@ const SearchTab = ({
    const pdfGeneratorSave = () => {
       if (users.length === 0) {
          setAlert("Primero debe realizar una búsqueda", "danger", "2");
-         window.scrollTo(500, 0);
+         window.scrollTo(0, 0);
       } else {
          userPDF(users, usersType);
       }
@@ -145,21 +146,25 @@ const SearchTab = ({
                </button>
             </div>
          </form>
-         {type === "Alumno" ? (
-            <StudentTable
-               search={true}
-               type={usersType}
-               loadingUsers={loadingUsers}
-               users={users}
-            />
-         ) : (
-            <RestTable
-               loadingUsers={loadingUsers}
-               users={users}
-               type={type}
-               usersType={usersType}
-            />
-         )}
+         <div className="mt-2">
+            {type === "Alumno" ? (
+               <StudentTable
+                  clearProfile={clearProfile}
+                  search={true}
+                  type={usersType}
+                  loadingUsers={loadingUsers}
+                  users={users}
+               />
+            ) : (
+               <RestTable
+                  clearProfile={clearProfile}
+                  loadingUsers={loadingUsers}
+                  users={users}
+                  type={type}
+                  usersType={usersType}
+               />
+            )}
+         </div>
          <div className="btn-right">
             <button className="btn btn-secondary" onClick={pdfGeneratorSave}>
                <i className="fas fa-file-pdf"></i>
@@ -176,6 +181,7 @@ SearchTab.propTypes = {
    loadCategories: PropTypes.func.isRequired,
    userPDF: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -188,4 +194,5 @@ export default connect(mapStateToProps, {
    loadUsers,
    userPDF,
    setAlert,
+   clearProfile,
 })(SearchTab);

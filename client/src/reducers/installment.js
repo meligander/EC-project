@@ -16,14 +16,14 @@ import {
 
 const initialState = {
    loading: true,
-   debts: [],
-   usersDebts: {
+   installments: [],
+   usersInstallments: {
       years: [],
       rows: [],
    },
-   loadingUsersDebts: true,
-   debt: null,
-   loadingDebts: true,
+   loadingUsersInstallments: true,
+   installment: null,
+   loadingInstallments: true,
    error: {},
 };
 
@@ -33,63 +33,67 @@ export default function (state = initialState, action) {
       case INVOICE_DETAIL_ADDED:
          return {
             ...state,
-            debts: [...state.debts, payload],
-            loadingDebts: false,
+            installments: [...state.installments, payload],
+            loadingInstallments: false,
          };
       case INVOICE_DETAIL_REMOVED:
          return {
             ...state,
-            debts: state.debts.filter((debt) => debt._id !== payload),
-            loadingDebts: false,
+            installments: state.installments.filter(
+               (installment) => installment._id !== payload
+            ),
+            loadingInstallments: false,
          };
       case USERS_INSTALLMENTS_LOADED:
          return {
             ...state,
-            usersDebts: payload,
-            loadingUsersDebts: false,
+            usersInstallments: payload,
+            loadingUsersInstallments: false,
          };
       case INSTALLMENTS_LOADED:
          return {
             ...state,
-            debts: payload,
-            loadingDebts: false,
+            installments: payload,
+            loadingInstallments: false,
             error: {},
          };
       case INSTALLMENT_LOADED:
          return {
             ...state,
-            debt: payload,
+            installment: payload,
             loading: false,
             error: {},
          };
       case INSTALLMENT_UPDATED:
          return {
             ...state,
-            loadingUsersDebts: false,
-            usersDebts: {
-               ...state.usersDebts,
-               rows: state.usersDebts.rows.map((row) =>
-                  row.map((debt) => (debt._id === payload._id ? payload : debt))
+            loadingUsersInstallments: false,
+            usersInstallments: {
+               ...state.usersInstallments,
+               rows: state.usersInstallments.rows.map((row) =>
+                  row.map((installment) =>
+                     installment._id === payload._id ? payload : installment
+                  )
                ),
             },
          };
       case INSTALLMENT_REGISTERED:
          return {
             ...state,
-            loadingUsersDebts: false,
-            usersDebts: payload,
+            loadingUsersInstallments: false,
+            usersInstallments: payload,
          };
       case INSTALLMENT_DELETED:
          return {
             ...state,
-            loadingUsersDebts: false,
-            usersDebts: {
-               ...state.usersDebts,
-               rows: state.usersDebts.rows.map((row) =>
-                  row.map((debt) =>
-                     debt._id === payload
+            loadingUsersInstallments: false,
+            usersInstallments: {
+               ...state.usersInstallments,
+               rows: state.usersInstallments.rows.map((row) =>
+                  row.map((installment) =>
+                     installment._id === payload
                         ? { _id: "", expired: false, value: "" }
-                        : debt
+                        : installment
                   )
                ),
             },
@@ -97,31 +101,31 @@ export default function (state = initialState, action) {
       case INSTALLMENTS_ERROR:
          return {
             ...state,
-            debt: null,
-            debts: [],
-            usersDebts: {
+            installment: null,
+            installments: [],
+            usersInstallments: {
                years: [],
                rows: [],
             },
             loading: false,
-            loadingDebts: false,
-            loadingUsersDebts: false,
+            loadingInstallments: false,
+            loadingUsersInstallments: false,
             error: payload,
          };
       case INSTALLMENT_CLEARED:
          return {
             ...state,
-            debt: null,
+            installment: null,
             loading: true,
          };
       case USER_INSTALLMENTS_CLEARED:
          return {
             ...state,
-            usersDebts: {
+            usersInstallments: {
                years: [],
                rows: [],
             },
-            loadingUsersDebts: true,
+            loadingUsersInstallments: true,
          };
       case INSTALLMENTS_UPDATED:
          return state;

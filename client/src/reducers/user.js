@@ -4,6 +4,7 @@ import {
    USER_UPDATED,
    USERS_LOADED,
    USERS_CLEARED,
+   USER_CLEARED,
    SEARCH_CLEARED,
    USERS_ERROR,
    USER_ERROR,
@@ -93,6 +94,13 @@ export default function (state = initialState, action) {
          };
       case USERS_CLEARED:
          return initialState;
+      case USER_CLEARED:
+         return {
+            loading: true,
+            user: null,
+            relatives: [],
+            relativesLoading: true,
+         };
       case USER_DELETED:
          return {
             ...state,

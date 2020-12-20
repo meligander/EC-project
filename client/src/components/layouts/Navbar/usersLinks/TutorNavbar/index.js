@@ -8,6 +8,7 @@ import {
    changePageAndMenu,
    changePage,
 } from "../../../../../actions/navbar";
+import { clearProfile } from "../../../../../actions/user";
 
 const TutorNavbar = ({
    location,
@@ -52,7 +53,10 @@ const TutorNavbar = ({
             <Link
                className="nav-link"
                to={`/dashboard/${userLogged._id}`}
-               onClick={() => changePageAndMenu("index")}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  changePageAndMenu("index");
+               }}
             >
                <i className="fas fa-home"></i>
                <span className="hide-md">&nbsp; Página Principal</span>
@@ -73,7 +77,11 @@ const TutorNavbar = ({
                   <Link
                      className="nav-link"
                      to={`/dashboard/${child.user._id}`}
-                     onClick={() => changePageAndMenu(`dashboard${index}`)}
+                     onClick={() => {
+                        window.scroll(0, 0);
+                        clearProfile();
+                        changePageAndMenu(`dashboard${index}`);
+                     }}
                   >
                      <i
                         className={`${
@@ -90,7 +98,10 @@ const TutorNavbar = ({
             <Link
                className="nav-link"
                to="/login"
-               onClick={() => logOutAndToggle()}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  logOutAndToggle();
+               }}
             >
                <i className="fas fa-sign-out-alt"></i>
                <span className="hide-md"> &nbsp; Cerrar Sesión</span>

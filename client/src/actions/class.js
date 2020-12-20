@@ -1,20 +1,23 @@
+import moment from "moment";
+import axios from "axios";
+import { saveAs } from "file-saver";
+
+import { updateAdminDashLoading, updateLoadingSpinner } from "./mixvalues";
+import { setAlert } from "./alert";
+
 import {
    CLASS_ERROR,
    CLASS_LOADED,
    CLASSES_LOADED,
    CLASS_CLEARED,
-   CLASS_UPDATED,
+   CLASS_CATEGORY_UPDATED,
    CLASS_REGISTERED,
    CLASSES_UPDATED,
    CLASSSTUDENTS_LOADED,
    CLASSSTUDENTS_ERROR,
    CLASSES_DELETED,
+   CLASSES_CLEARED,
 } from "./types";
-import { updateAdminDashLoading, updateLoadingSpinner } from "./mixvalues";
-import { setAlert } from "./alert";
-import moment from "moment";
-import { saveAs } from "file-saver";
-import axios from "axios";
 
 export const loadUsersClass = (user_id) => async (dispatch) => {
    try {
@@ -89,6 +92,7 @@ export const loadClassStudents = (class_id) => async (dispatch) => {
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
       window.scrollTo(0, 0);
    }
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const loadClasses = (filterData) => async (dispatch) => {
@@ -193,8 +197,8 @@ export const registerUpdateClass = (formData, history, class_id = 0) => async (
    dispatch(updateLoadingSpinner(false));
 };
 
-export const updateClass = (classInfo) => (dispatch) => {
-   dispatch({ type: CLASS_UPDATED, payload: classInfo });
+export const updateClassCategory = (classInfo) => (dispatch) => {
+   dispatch({ type: CLASS_CATEGORY_UPDATED, payload: classInfo });
 };
 
 export const deleteClass = (class_id, history) => async (dispatch) => {
@@ -303,5 +307,11 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
 export const clearClass = () => (dispatch) => {
    dispatch({
       type: CLASS_CLEARED,
+   });
+};
+
+export const clearClasses = () => (dispatch) => {
+   dispatch({
+      type: CLASSES_CLEARED,
    });
 };

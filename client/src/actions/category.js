@@ -1,11 +1,19 @@
-import { CATEGORY_ERROR, CATEGORIES_LOADED, CATEGORIES_UPDATED } from "./types";
+import moment from "moment";
+import axios from "axios";
+import { saveAs } from "file-saver";
+
 import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
-import moment from "moment";
-import { saveAs } from "file-saver";
-import axios from "axios";
 
-export const loadCategories = () => async (dispatch) => {
+import {
+   CATEGORY_ERROR,
+   CATEGORIES_LOADED,
+   CATEGORIES_UPDATED,
+   CATEGORIES_CLEARED,
+} from "./types";
+
+export const loadCategories = (editClass = false) => async (dispatch) => {
+   if (editClass) dispatch(updateLoadingSpinner(true));
    try {
       const res = await axios.get("/api/category");
       dispatch({
@@ -112,4 +120,8 @@ export const categoriesPDF = (categories) => async (dispatch) => {
 
    window.scrollTo(0, 0);
    dispatch(updateLoadingSpinner(true));
+};
+
+export const clearCategories = () => (dispatch) => {
+   dispatch({ type: CATEGORIES_CLEARED });
 };

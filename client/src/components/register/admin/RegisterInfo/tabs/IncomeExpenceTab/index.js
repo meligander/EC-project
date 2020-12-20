@@ -4,6 +4,7 @@ import { Link, withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import {
+   clearExpenceTypes,
    loadExpenceTypes,
    registerExpence,
 } from "../../../../../../actions/expence";
@@ -18,6 +19,7 @@ const IncomeExpenceTab = ({
    registers: { register, loading },
    expences,
    users,
+   clearExpenceTypes,
    loadExpenceTypes,
    loadUsers,
    registerExpence,
@@ -61,7 +63,7 @@ const IncomeExpenceTab = ({
             ...otherValues,
             show: true,
          });
-         loadUsers({ type: "Profesor", active: true }, false);
+         loadUsers({ type: "Profesor", active: true });
       } else
          setOtherValues({
             ...otherValues,
@@ -222,7 +224,14 @@ const IncomeExpenceTab = ({
 
             {(userLogged.type === "Administrador" ||
                userLogged.type === "Admin/Profesor") && (
-               <Link to="/edit-expencetypes" className="btn btn-light">
+               <Link
+                  to="/edit-expencetypes"
+                  onClick={() => {
+                     window.scroll(0, 0);
+                     clearExpenceTypes();
+                  }}
+                  className="btn btn-light"
+               >
                   <i className="fas fa-edit"></i>
                   <span className="hide-sm"> Tipo Movimiento</span>
                </Link>
@@ -240,6 +249,7 @@ IncomeExpenceTab.propTypes = {
    loadExpenceTypes: PropTypes.func.isRequired,
    loadUsers: PropTypes.func.isRequired,
    registerExpence: PropTypes.func.isRequired,
+   clearExpenceTypes: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -253,4 +263,5 @@ export default connect(mapStateToProps, {
    loadExpenceTypes,
    registerExpence,
    loadUsers,
+   clearExpenceTypes,
 })(withRouter(IncomeExpenceTab));

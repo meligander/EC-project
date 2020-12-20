@@ -1,3 +1,10 @@
+import moment from "moment";
+import axios from "axios";
+import { saveAs } from "file-saver";
+
+import { setAlert } from "./alert";
+import { updateLoadingSpinner, updateAdminDashLoading } from "./mixvalues";
+
 import {
    ENROLLMENT_LOADED,
    ENROLLMENT_REGISTERED,
@@ -6,12 +13,8 @@ import {
    ENROLLMENT_DELETED,
    ENROLLMENT_CLEARED,
    ENROLLMENT_UPDATED,
+   ENROLLMENTS_CLEARED,
 } from "./types";
-import axios from "axios";
-import moment from "moment";
-import { saveAs } from "file-saver";
-import { setAlert } from "./alert";
-import { updateLoadingSpinner, updateAdminDashLoading } from "./mixvalues";
 
 export const loadEnrollments = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
@@ -316,4 +319,8 @@ export const enrollmentsPDF = (enrollments, average) => async (dispatch) => {
 
 export const clearEnrollment = () => (dispatch) => {
    dispatch({ type: ENROLLMENT_CLEARED });
+};
+
+export const clearEnrollments = () => (dispatch) => {
+   dispatch({ type: ENROLLMENTS_CLEARED });
 };

@@ -1,3 +1,10 @@
+import moment from "moment";
+import axios from "axios";
+import { saveAs } from "file-saver";
+
+import { setAlert } from "./alert";
+import { updateLoadingSpinner } from "./mixvalues";
+
 import {
    ATTENDANCES_ERROR,
    USER_ATTENDANCES_LOADED,
@@ -7,11 +14,6 @@ import {
    ATTENDANCES_UPDATED,
    ATTENDANCES_CLEARED,
 } from "./types";
-import { setAlert } from "./alert";
-import moment from "moment";
-import { saveAs } from "file-saver";
-import { updateLoadingSpinner } from "./mixvalues";
-import axios from "axios";
 
 export const loadStudentAttendance = (user_id) => async (dispatch) => {
    try {

@@ -3,105 +3,57 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { updateClass, clearClass } from "../../../../../../actions/class";
-import { loadCategories } from "../../../../../../actions/category";
-import { loadUsers, removeUser } from "../../../../../../actions/user";
-import { setAlert } from "../../../../../../actions/alert";
+import { updateClassCategory } from "../../../../../../../actions/class";
+import { loadCategories } from "../../../../../../../actions/category";
+import { loadUsers, removeUser } from "../../../../../../../actions/user";
+import { setAlert } from "../../../../../../../actions/alert";
 
-import StudentTable from "../../../../../tables/StudentTable";
-import Alert from "../../../../../sharedComp/Alert";
+import StudentTable from "../../../../../../tables/StudentTable";
+import Alert from "../../../../../../sharedComp/Alert";
 
 const FilterClassTab = ({
    location,
    loadCategories,
    setAlert,
    loadUsers,
-   updateClass,
+   updateClassCategory,
    removeUser,
-   clearClass,
    categories,
    classes: { classInfo, loading },
    users: { users, loadingUsers },
 }) => {
-   const [otherValues, setOtherValues] = useState({
-      firstClear: true,
-      register: location.pathname === "/register-class",
-      oneLoad: true,
-   });
+   const register = location.pathname === "/register-class";
 
-   const [newCategory, setCategory] = useState({
+   const [category, setCategory] = useState({
       _id: "",
       name: "",
    });
 
-   const { firstClear, oneLoad, register } = otherValues;
-
    useEffect(() => {
-      if (firstClear) {
-         clearClass();
-         setOtherValues((prev) => ({
-            ...prev,
-            firstClear: false,
-         }));
-      }
-      if (!register && !loading && oneLoad) {
+      if (!register && !loading) {
          setCategory({
             _id: classInfo.category._id,
             name: classInfo.category.name,
          });
-         loadUsers(
-            {
-               type: "Alumno",
-               active: true,
-               category: classInfo.category._id,
-               classroom: "null",
-            },
-            false,
-            null,
-            false,
-            !register ? false : true
-         );
-         setOtherValues((prev) => ({
-            ...prev,
-            oneLoad: false,
-         }));
       }
-      if (categories.loading && oneLoad) {
-         loadCategories();
-         if (register)
-            setOtherValues((prev) => ({
-               ...prev,
-               oneLoad: false,
-            }));
+      if (categories.loading) {
+         loadCategories(true);
       }
-   }, [
-      categories.loading,
-      loadCategories,
-      classInfo,
-      loading,
-      clearClass,
-      loadUsers,
-      firstClear,
-      register,
-      oneLoad,
-   ]);
+   }, [categories.loading, loadCategories, classInfo, loading, register]);
 
    const filterStudents = (e) => {
       e.preventDefault();
-      if (newCategory.name === "") {
+      if (category.name === "") {
          setAlert("Seleccione una categoría", "danger", "2");
          window.scroll(0, 0);
       } else {
-         loadUsers(
-            {
-               type: "Alumno",
-               active: true,
-               category: newCategory._id,
-               classroom: "null",
-            },
-            false
-         );
-         updateClass({ ...classInfo, category: newCategory, students: [] });
+         loadUsers({
+            type: "Alumno",
+            active: true,
+            category: category._id,
+            classroom: "null",
+         });
+         updateClassCategory({ ...classInfo, category });
       }
    };
 
@@ -119,7 +71,7 @@ const FilterClassTab = ({
          if (classInfo.students[x]._id === studentInfo._id) exist = true;
       }
       if (!exist) {
-         updateClass({
+         updateClassCategory({
             ...classInfo,
             students: [...classInfo.students, studentInfo],
          });
@@ -140,7 +92,7 @@ const FilterClassTab = ({
                   disabled={!register}
                   id="new-category"
                   onChange={onChange}
-                  value={newCategory._id}
+                  value={category._id}
                >
                   <option value="">* Seleccione Categoría</option>
                   {!categories.loading &&
@@ -156,9 +108,7 @@ const FilterClassTab = ({
                </select>
                <label
                   htmlFor="new-category"
-                  className={`form-label ${
-                     newCategory._id === "" ? "lbl" : ""
-                  }`}
+                  className={`form-label ${category._id === "" ? "lbl" : ""}`}
                >
                   Categoría
                </label>
@@ -192,9 +142,8 @@ FilterClassTab.propTypes = {
    users: PropTypes.object.isRequired,
    loadCategories: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
-   updateClass: PropTypes.func.isRequired,
+   updateClassCategory: PropTypes.func.isRequired,
    loadUsers: PropTypes.func.isRequired,
-   clearClass: PropTypes.func.isRequired,
    removeUser: PropTypes.func.isRequired,
 };
 
@@ -208,7 +157,6 @@ export default connect(mapStateToProps, {
    loadCategories,
    setAlert,
    loadUsers,
-   updateClass,
-   clearClass,
+   updateClassCategory,
    removeUser,
 })(withRouter(FilterClassTab));

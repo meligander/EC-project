@@ -17,6 +17,8 @@ import DateFilter from "../sharedComp/DateFilter";
 import Confirm from "../../../../modal/Confirm";
 import NameField from "../../../../sharedComp/NameField";
 
+import "./style.scss";
+
 const IncomeList = ({
    auth: { userLogged },
    invoices: { loadingInvoices, invoices },

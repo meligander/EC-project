@@ -1,16 +1,20 @@
+import axios from "axios";
+import moment from "moment";
+import { saveAs } from "file-saver";
+
+import { setAlert } from "./alert";
+import { clearRegisters } from "./register";
+import { updateLoadingSpinner, updateAdminDashLoading } from "./mixvalues";
+
 import {
    INVOICES_LOADED,
    INVOICE_LOADED,
    INVOICE_REGISTERED,
    INVOICE_ERROR,
    INVOICE_DELETED,
+   INVOICE_CLEARED,
+   INVOICES_CLEARED,
 } from "./types";
-import axios from "axios";
-import { setAlert } from "./alert";
-import moment from "moment";
-import { saveAs } from "file-saver";
-import { clearRegister } from "./register";
-import { updateLoadingSpinner, updateAdminDashLoading } from "./mixvalues";
 
 export const loadInvoices = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
@@ -79,7 +83,7 @@ export const deleteInvoice = (invoice_id) => async (dispatch) => {
       });
 
       dispatch(updateAdminDashLoading());
-      dispatch(clearRegister());
+      dispatch(clearRegisters());
       dispatch(setAlert("Factura Eliminada", "success", "2"));
    } catch (err) {
       dispatch({
@@ -128,7 +132,7 @@ export const registerInvoice = (
       dispatch(invoicePDF(formData, remaining));
 
       dispatch(updateAdminDashLoading());
-      dispatch(clearRegister());
+      dispatch(clearRegisters());
 
       dispatch(setAlert("Factura Registrada", "success", "1", 10000));
       history.push(`/dashboard/${user_id}`);
@@ -248,4 +252,12 @@ export const invoicePDF = (invoice, remaining) => async (dispatch) => {
 
    window.scroll(0, 0);
    dispatch(updateLoadingSpinner(false));
+};
+
+export const clearInvoice = () => (dispatch) => {
+   dispatch({ type: INVOICE_CLEARED });
+};
+
+export const clearInvoices = () => (dispatch) => {
+   dispatch({ type: INVOICES_CLEARED });
 };

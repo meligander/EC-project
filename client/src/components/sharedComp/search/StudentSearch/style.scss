@@ -1,8 +1,5 @@
 @import "../../../../style/abstract.scss";
 
-.form .border {
-   border: 1px $secondary-color solid;
-   padding: 1.6rem;
-
-   margin: 3rem auto;
+table tr.selected {
+   background-color: $light-color !important;
 }

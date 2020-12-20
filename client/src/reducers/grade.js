@@ -9,6 +9,7 @@ import {
    GRADES_UPDATED,
    GRADETYPE_ERROR,
    GRADETYPES_UPDATED,
+   GRADETYPES_CLEARED,
 } from "../actions/types";
 
 const initialState = {
@@ -76,6 +77,8 @@ export default function (state = initialState, action) {
          };
       case GRADES_CLEARED:
          return initialState;
+      case GRADETYPES_CLEARED:
+         return { ...state, gradeTypes: [], loadingGT: true };
       default:
          return state;
    }

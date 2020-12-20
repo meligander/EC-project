@@ -8,10 +8,11 @@ table.installments {
 
       &.blank {
          background-color: $white-color;
+         opacity: 1;
       }
    }
 
-   td {
+   &.modify td {
       &:hover {
          background-color: lighten($secondary-color, 25%);
       }

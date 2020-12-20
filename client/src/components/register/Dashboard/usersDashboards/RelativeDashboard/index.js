@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { loadRelatives } from "../../../../../actions/user";
+import { clearProfile, loadRelatives } from "../../../../../actions/user";
 
 import "./style.scss";
 
@@ -11,6 +11,7 @@ const RelativeDashboard = ({
    loadRelatives,
    users: { user, relatives, relativesLoading },
    tutor,
+   clearProfile,
 }) => {
    useEffect(() => {
       loadRelatives(user._id, tutor);
@@ -33,6 +34,10 @@ const RelativeDashboard = ({
                            <Link
                               className="btn-text"
                               to={`/dashboard/${relative._id}`}
+                              onClick={() => {
+                                 window.scroll(0, 0);
+                                 clearProfile();
+                              }}
                            >
                               Ver Info
                            </Link>
@@ -51,13 +56,16 @@ const RelativeDashboard = ({
 };
 
 RelativeDashboard.propTypes = {
-   loadRelatives: PropTypes.func.isRequired,
    users: PropTypes.object.isRequired,
    tutor: PropTypes.bool.isRequired,
+   loadRelatives: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    users: state.users,
 });
 
-export default connect(mapStateToProps, { loadRelatives })(RelativeDashboard);
+export default connect(mapStateToProps, { loadRelatives, clearProfile })(
+   RelativeDashboard
+);

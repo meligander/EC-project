@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { loadGradeTypes, updateGradeTypes } from "../../../../../actions/grade";
+import {
+   clearGradeTypes,
+   loadGradeTypes,
+   updateGradeTypes,
+} from "../../../../../actions/grade";
 import { loadCategories } from "../../../../../actions/category";
 
 import Loading from "../../../../modal/Loading";
@@ -13,6 +17,7 @@ const EditGradeType = ({
    loadGradeTypes,
    loadCategories,
    updateGradeTypes,
+   clearGradeTypes,
    categories: { categories, loading },
    grades: { gradeTypes, loadingGT },
 }) => {
@@ -110,6 +115,7 @@ const EditGradeType = ({
 
    const saveGradeTypes = () => {
       updateGradeTypes(rows);
+      clearGradeTypes();
    };
 
    const setToggleSave = () => {
@@ -218,6 +224,7 @@ EditGradeType.propTypes = {
    loadGradeTypes: PropTypes.func.isRequired,
    loadCategories: PropTypes.func.isRequired,
    updateGradeTypes: PropTypes.func.isRequired,
+   clearGradeTypes: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -229,4 +236,5 @@ export default connect(mapStateToProps, {
    loadGradeTypes,
    updateGradeTypes,
    loadCategories,
+   clearGradeTypes,
 })(EditGradeType);

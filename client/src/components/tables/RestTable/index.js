@@ -1,9 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import moment from "moment";
+import Moment from "react-moment";
 import PropTypes from "prop-types";
 
-const RestTable = ({ loadingUsers, users, type, usersType }) => {
+import "./style.scss";
+
+const RestTable = ({ loadingUsers, users, type, usersType, clearProfile }) => {
    return (
       <table>
          <thead>
@@ -23,15 +25,6 @@ const RestTable = ({ loadingUsers, users, type, usersType }) => {
             {!loadingUsers &&
                type === usersType &&
                users.map((user) => {
-                  const dob = moment(user.dob).format("DD/MM/YY");
-                  const username = user.email.substring(
-                     0,
-                     user.email.indexOf("@")
-                  );
-                  const email = user.email.substring(
-                     user.email.indexOf("@"),
-                     user.email.length
-                  );
                   let name;
                   if (usersType === "Tutor") {
                      for (let x = 0; x < user.children.length; x++) {
@@ -49,12 +42,20 @@ const RestTable = ({ loadingUsers, users, type, usersType }) => {
                         <td>
                            {user.lastname}, {user.name}
                         </td>
-                        <td className="hide-sm">
-                           {user.email && username + " " + email}
+                        <td className="hide-sm email">
+                           {user.email && user.email}
                         </td>
                         <td>{user.cel}</td>
                         {usersType !== "Tutor" && (
-                           <td className="hide-sm">{user.dob && dob}</td>
+                           <td className="hide-sm">
+                              {user.dob && (
+                                 <Moment
+                                    date={user.dob}
+                                    format={"DD/MM/YY"}
+                                    utc
+                                 />
+                              )}
+                           </td>
                         )}
                         {usersType === "Administrador" && <td>{user.type}</td>}
                         {usersType === "Tutor" && <td>{name}</td>}
@@ -62,6 +63,10 @@ const RestTable = ({ loadingUsers, users, type, usersType }) => {
                            <Link
                               className="btn-text"
                               to={`/dashboard/${user._id}`}
+                              onClick={() => {
+                                 window.scroll(0, 0);
+                                 clearProfile();
+                              }}
                            >
                               Más Info &rarr;
                            </Link>
@@ -75,9 +80,10 @@ const RestTable = ({ loadingUsers, users, type, usersType }) => {
 };
 
 RestTable.propTypes = {
-   users: PropTypes.array.isRequired,
-   loadingUsers: PropTypes.bool.isRequired,
+   users: PropTypes.array,
+   loadingUsers: PropTypes.bool,
    type: PropTypes.string.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 export default RestTable;

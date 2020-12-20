@@ -585,7 +585,6 @@ router.put(
    "/:id",
    [
       auth,
-      adminAuth,
       check("name", "El nombre es necesario").not().isEmpty(),
       check("lastname", "El apellido es necesario").not().isEmpty(),
    ],
@@ -707,7 +706,7 @@ router.put(
 //@route    PUT api/users/credentials/:id
 //@desc     Update another user's credentials
 //@access   Private
-router.put("/credentials/:id", [auth, adminAuth], async (req, res) => {
+router.put("/credentials/:id", [auth], async (req, res) => {
    const { password, email } = req.body;
 
    var regex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;

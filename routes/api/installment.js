@@ -132,12 +132,13 @@ router.get("/student/:id/:admin", auth, async (req, res) => {
       let installments = await Installment.find({
          student,
       })
-         .sort({ year: 1, number: 1 })
+         .sort({ year: -1, number: 1 })
          .populate({
             path: "student",
             model: "user",
             select: ["name", "lastname", "studentnumber"],
          });
+
       if (installments.length === 0) return [];
 
       installments = buildTable(installments, req.params.admin === "true");
@@ -317,19 +318,7 @@ router.post(
 
          await installment.save();
 
-         let installments = await Installment.find({
-            student: installment.student,
-         })
-            .sort({ year: 1, number: 1 })
-            .populate({
-               path: "student",
-               model: "user",
-               select: ["name", "lastname", "studentnumber"],
-            });
-
-         installments = buildTable(installments);
-
-         res.json(installments);
+         res.json({ msg: "Cuota Agregada" });
       } catch (err) {
          console.error(err.message);
          return res.status(500).send("Server Error");
@@ -354,13 +343,13 @@ router.put(
       }
 
       try {
-         installment = await Installment.findOneAndUpdate(
+         await Installment.findOneAndUpdate(
             { _id: req.params.id },
             { $set: { value, expired } },
             { new: true }
          );
 
-         res.json(installment);
+         res.json({ msg: "Cuota Modificada" });
       } catch (err) {
          console.error(err.message);
          return res.status(500).send("Server Error");
@@ -431,34 +420,54 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-function buildTable(array, admin) {
+function buildTable(installments, admin) {
    let rows = [];
+   let years = [];
 
-   let obj = array.reduce((res, curr) => {
-      if (res[curr.year]) res[curr.year].push(curr);
-      else Object.assign(res, { [curr.year]: [curr] });
+   //Divide the installments by years
+   let installmentsByYear = [];
 
-      return res;
-   }, {});
+   let count = 0;
+   let sameYear = 0;
 
-   let years = Object.getOwnPropertyNames(obj);
+   for (let x = 0; x < installments.length; x++) {
+      if (installments[x].year === sameYear) {
+         installmentsByYear[count].push(installments[x]);
+      } else {
+         if (x !== 0) count++;
+         sameYear = installments[x].year;
+         years.push(installments[x].year);
+         installmentsByYear[count] = [];
+         installmentsByYear[count].push(installments[x]);
+      }
+   }
+
    let newYears = [];
 
-   for (const x in obj) {
-      const dividedDebts = obj[x];
+   for (let x = 0; x < installmentsByYear.length; x++) {
+      //get all the installments for that year
+      const dividedInstallments = installmentsByYear[x];
+
+      //Create a row with all the items in the table
       let row = Array.from(Array(11), () => ({
          _id: "",
          expired: false,
          value: "",
          year: x,
       }));
+
       let valid = false;
-      for (let x = 0; x < dividedDebts.length; x++) {
-         valid = dividedDebts[x].value !== 0 && true;
+
+      for (let x = 0; x < dividedInstallments.length; x++) {
+         valid = dividedInstallments[x].value !== 0;
          const number =
-            dividedDebts[x].number !== 0 ? dividedDebts[x].number - 2 : 0;
-         row[number] = dividedDebts[x];
+            dividedInstallments[x].number !== 0
+               ? dividedInstallments[x].number - 2
+               : 0;
+
+         row[number] = dividedInstallments[x];
       }
+
       if (valid) {
          rows.push(row);
       } else {
@@ -474,8 +483,8 @@ function buildTable(array, admin) {
    return { years, rows };
 }
 
-function sortArray(array) {
-   array.sort((a, b) => {
+function sortArray(installments) {
+   installments.sort((a, b) => {
       if (a.student.lastname > b.student.lastname) return 1;
       if (a.student.lastname < b.student.lastname) return -1;
 
@@ -489,7 +498,7 @@ function sortArray(array) {
       if (a.student.number < b.student.number) return -1;
    });
 
-   return array;
+   return installments;
 }
 
 module.exports = router;

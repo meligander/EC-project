@@ -1,6 +1,5 @@
 import React, { Fragment, useEffect } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import Routes from "./components/routing/Routes";
 
 //Redux
 import store from "./store";
@@ -8,7 +7,7 @@ import { Provider } from "react-redux";
 import setAuthToken from "./utils/setAuthToken";
 //actions
 import { loadUser } from "./actions/auth";
-import { updateExpiredIntallments } from "./actions/debts";
+import { updateExpiredIntallments } from "./actions/installment";
 
 //Unregister Pages
 import About from "./components/unregister/About";
@@ -18,6 +17,9 @@ import Contact from "./components/unregister/Contact";
 //Layout Items
 import Navbar from "./components/layouts/Navbar";
 import Footer from "./components/layouts/Footer";
+
+import PublicRoutes from "./components/routing/PublicRoutes";
+import Routes from "./components/routing/Routes";
 
 import "./style/main.scss";
 
@@ -35,9 +37,9 @@ const App = () => {
             <Fragment>
                <Navbar />
                <Switch>
-                  <Route exact path="/" component={Landing} />
-                  <Route exact path="/about" component={About} />
-                  <Route exact path="/contact" component={Contact} />
+                  <PublicRoutes exact path="/" component={Landing} />
+                  <PublicRoutes exact path="/about" component={About} />
+                  <PublicRoutes exact path="/contact" component={Contact} />
                   <Route component={Routes} />
                </Switch>
                <Footer />

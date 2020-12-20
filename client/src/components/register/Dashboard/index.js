@@ -4,7 +4,7 @@ import Moment from "react-moment";
 import { withRouter, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { loadUser, clearProfile, deleteUser } from "../../../actions/user";
+import { loadUser, deleteUser, clearUser } from "../../../actions/user";
 
 import Confirm from "../../modal/Confirm";
 import GoBack from "../../sharedComp/GoBack";
@@ -23,34 +23,23 @@ const Dashboard = ({
    users: { user, loading },
    mixvalues: { loadingSpinner },
    loadUser,
-   clearProfile,
+   clearUser,
 }) => {
    const [otherValues, setOtherValues] = useState({
       toggleModal: false,
-      userAdmin: false,
    });
 
-   const { toggleModal, userAdmin } = otherValues;
+   const { toggleModal } = otherValues;
 
    const isAdmin =
       userLogged.type === "Administrador" ||
       userLogged.type === "Admin/Profesor";
 
    useEffect(() => {
-      if (loading || user._id !== match.params.id) {
-         if (user) {
-            clearProfile();
-         } else {
-            loadUser(match.params.id);
-         }
-      } else {
-         setOtherValues((prev) => ({
-            ...prev,
-            userAdmin:
-               user.type === "Administrador" || user.type === "Admin/Profesor",
-         }));
+      if (loading) {
+         loadUser(match.params.id);
       }
-   }, [loadUser, match.params.id, clearProfile, loading, user]);
+   }, [loadUser, match.params.id, loading, user]);
 
    const type = () => {
       switch (user.type) {
@@ -68,13 +57,7 @@ const Dashboard = ({
          case "Secretaria":
          case "Administrador":
          case "Admin/Profesor":
-            return (
-               <>
-                  {(userLogged.type === "Secretaria" || userAdmin) && (
-                     <AdminDashboard />
-                  )}
-               </>
-            );
+            return <>{userLogged._id === user._id && <AdminDashboard />}</>;
          default:
             return <h1>Dashboard</h1>;
       }
@@ -100,7 +83,7 @@ const Dashboard = ({
                   text="¿Está seguro que desea eliminar el usuario?"
                />
                {user._id !== userLogged._id && <GoBack />}
-               <div className="my-1">
+               <div className="mt-2">
                   <div className="profile-top bg-primary p-3">
                      <div className="img-about m-1">
                         <img
@@ -111,7 +94,7 @@ const Dashboard = ({
                         <h3 className="heading-secondary text-center text-secondary light-font my-1">
                            {user.name + " " + user.lastname}
                         </h3>
-                        {user.type === "Alumno" && (
+                        {user.studentnumber && (
                            <p className="heading-tertiary">
                               <span className="text-dark">Legajo: </span>
                               {user.studentnumber}
@@ -127,12 +110,17 @@ const Dashboard = ({
                            <h4 className="heading-tertiary">
                               Info {user.type}:
                            </h4>
-                           {user.type !== "Tutor" && !userAdmin && (
+                           {user.dni && (
                               <p>
                                  <span className="text-dark">DNI: </span>
                                  {user.dni}
                               </p>
                            )}
+
+                           <p>
+                              <span className="text-dark">Sexo: </span>
+                              {user.sex}
+                           </p>
                            <p>
                               <span className="text-dark">Email: </span>
                               {user.email}
@@ -147,24 +135,27 @@ const Dashboard = ({
                            </p>
                            <p>
                               <span className="text-dark">Dirección: </span>
-                              {user.address},{" "}
-                              {user.neighbourhood !== undefined &&
-                              user.neighbourhood !== null
+                              {user.address ? user.address + ", " : ""}
+                              {user.neighbourhood
                                  ? user.neighbourhood.name + ", "
                                  : ""}
-                              {user.town !== undefined &&
-                                 user.town !== null &&
-                                 user.town.name}
+                              {user.town && user.town.name}
                            </p>
-                           {user.type !== "Tutor" && !userAdmin && (
+
+                           {user.dob && (
                               <p>
                                  <span className="text-dark">
                                     Fecha de Nacimiento:{" "}
                                  </span>
-                                 <Moment format="DD/MM/YYYY" date={user.dob} />
+                                 <Moment
+                                    format="DD/MM/YYYY"
+                                    utc
+                                    date={user.dob}
+                                 />
                               </p>
                            )}
-                           {user.type !== "Tutor" && !userAdmin && (
+
+                           {user.birthtown && user.birthprov && (
                               <p>
                                  <span className="text-dark">
                                     Lugar de Nacimiento:{" "}
@@ -186,18 +177,14 @@ const Dashboard = ({
                                  </p>
                               </>
                            )}
-                           {isAdmin && user.salary !== undefined && (
+                           {isAdmin && user.salary && (
                               <p>
                                  <span className="text-dark">Salario: </span>
                                  {user.salary}
                               </p>
                            )}
-                           <p>
-                              <span className="text-dark">Sexo: </span>
-                              {user.sex}
-                           </p>
 
-                           {user.type !== "Tutor" && type !== "Alumno" && (
+                           {user.description && (
                               <p>
                                  <span className="text-dark">
                                     Descripción:{" "}
@@ -206,50 +193,48 @@ const Dashboard = ({
                               </p>
                            )}
 
-                           {/* <!-- Solo para secretaria y admin --> */}
-                           {user.type === "Alumno" && (
-                              <>
-                                 {(isAdmin ||
-                                    userLogged.type === "Secretaria") && (
+                           {user.type === "Alumno" &&
+                              (isAdmin || userLogged.type === "Secretaria") && (
+                                 <>
                                     <p>
                                        <span className="text-dark">
                                           Descuento:{" "}
                                        </span>
                                        {user.discount}
                                     </p>
-                                 )}
-                                 {(isAdmin ||
-                                    userLogged.type === "Secretaria") && (
                                     <p>
                                        <span className="text-dark">
                                           Dia recargo:{" "}
                                        </span>
                                        {user.chargeday}
                                     </p>
+                                 </>
+                              )}
+                        </div>
+                        <div className="btn-right">
+                           {(isAdmin || userLogged._id === user._id) && (
+                              <>
+                                 <Link
+                                    to={`/edit-user/${user._id}`}
+                                    className="btn btn-light"
+                                    onClick={() => {
+                                       window.scroll(0, 0);
+                                       clearUser();
+                                    }}
+                                 >
+                                    <i className="far fa-edit"></i>{" "}
+                                    <span className="hide-md">Editar</span>
+                                 </Link>
+                                 {isAdmin && (
+                                    <button
+                                       className="btn btn-danger"
+                                       onClick={setToggle}
+                                    >
+                                       <i className="fas fa-user-minus"></i>{" "}
+                                       <span className="hide-md">Eliminar</span>
+                                    </button>
                                  )}
                               </>
-                           )}
-                        </div>
-                        <div className="about-btn">
-                           {(isAdmin || userLogged.type === "Secretaria") && (
-                              <button
-                                 className="btn btn-danger"
-                                 onClick={setToggle}
-                              >
-                                 <i className="fas fa-user-minus"></i>{" "}
-                                 <span className="hide-md">Eliminar</span>
-                              </button>
-                           )}
-                           {(isAdmin ||
-                              userLogged.type === "Secretaria" ||
-                              userLogged._id === user._id) && (
-                              <Link
-                                 to={`/edit-user/${user._id}`}
-                                 className="btn btn-light"
-                              >
-                                 <i className="far fa-edit"></i>{" "}
-                                 <span className="hide-md">Editar</span>
-                              </Link>
                            )}
                         </div>
                      </div>
@@ -270,6 +255,7 @@ Dashboard.prototypes = {
    mixvalues: PropTypes.object.isRequired,
    loadUser: PropTypes.func.isRequired,
    deleteUser: PropTypes.func.isRequired,
+   clearUser: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -280,5 +266,5 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    loadUser,
-   clearProfile,
+   clearUser,
 })(withRouter(Dashboard));

@@ -8,6 +8,11 @@ import {
    changePage,
    changePageAndMenu,
 } from "../../../../../actions/navbar";
+import { clearInvoiceNumber } from "../../../../../actions/mixvalues";
+import { clearInstallments } from "../../../../../actions/installment";
+import { clearRegisters } from "../../../../../actions/register";
+import { clearProfile, clearSearch } from "../../../../../actions/user";
+import { clearClasses } from "../../../../../actions/class";
 
 const AdminNavbar = ({
    location,
@@ -16,6 +21,12 @@ const AdminNavbar = ({
    logOutAndToggle,
    changePage,
    changePageAndMenu,
+   clearInstallments,
+   clearInvoiceNumber,
+   clearRegisters,
+   clearSearch,
+   clearClasses,
+   clearProfile,
 }) => {
    useEffect(() => {
       const string = location.pathname.substring(1, location.pathname.length);
@@ -88,7 +99,11 @@ const AdminNavbar = ({
             <Link
                className="nav-link"
                to={`/dashboard/${userLogged._id}`}
-               onClick={() => changePageAndMenu("index")}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  clearProfile();
+                  changePageAndMenu("index");
+               }}
             >
                <i className="fas fa-home"></i>
                <span className="hide-md">&nbsp; Página Principal</span>
@@ -106,7 +121,11 @@ const AdminNavbar = ({
             <Link
                className="nav-link"
                to="/search"
-               onClick={() => changePageAndMenu("search")}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  clearSearch();
+                  changePageAndMenu("search");
+               }}
             >
                <i className="fas fa-search"></i>
                <span className="hide-md"> &nbsp; Búsqueda</span>
@@ -124,7 +143,11 @@ const AdminNavbar = ({
             <Link
                className="nav-link"
                to="/classes"
-               onClick={() => changePageAndMenu("classes")}
+               onClick={() => {
+                  clearClasses();
+                  window.scroll(0, 0);
+                  changePageAndMenu("classes");
+               }}
             >
                <i className="fas fa-chalkboard"></i>
                <span className="hide-md">&nbsp; Cursos</span>
@@ -142,7 +165,11 @@ const AdminNavbar = ({
             <Link
                className="nav-link"
                to="/enrollment"
-               onClick={() => changePageAndMenu("enrollment")}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  clearSearch();
+                  changePageAndMenu("enrollment");
+               }}
             >
                <i className="fas fa-user-edit"></i>
                <span className="hide-md">&nbsp; Inscripción</span>
@@ -160,7 +187,13 @@ const AdminNavbar = ({
             <Link
                className="nav-link"
                to="/invoice-generation"
-               onClick={() => changePageAndMenu("invoice")}
+               onClick={() => {
+                  changePageAndMenu("invoice");
+                  window.scroll(0, 0);
+                  clearInstallments();
+                  clearInvoiceNumber();
+                  clearSearch();
+               }}
             >
                <i className="fas fa-hand-holding-usd"></i>
                <span className="hide-md">&nbsp; Facturación</span>
@@ -178,7 +211,11 @@ const AdminNavbar = ({
             <Link
                className="nav-link"
                to="/cashregister-info"
-               onClick={() => changePageAndMenu("register")}
+               onClick={() => {
+                  changePageAndMenu("register");
+                  window.scroll(0, 0);
+                  clearRegisters();
+               }}
             >
                <i className="fas fa-cash-register"></i>
                <span className="hide-md">&nbsp; Caja</span>
@@ -206,6 +243,12 @@ AdminNavbar.propTypes = {
    logOutAndToggle: PropTypes.func.isRequired,
    changePage: PropTypes.func.isRequired,
    changePageAndMenu: PropTypes.func.isRequired,
+   clearInvoiceNumber: PropTypes.func.isRequired,
+   clearInstallments: PropTypes.func.isRequired,
+   clearRegisters: PropTypes.func.isRequired,
+   clearSearch: PropTypes.func.isRequired,
+   clearClasses: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -217,4 +260,10 @@ export default connect(mapStateToProps, {
    logOutAndToggle,
    changePage,
    changePageAndMenu,
+   clearInstallments,
+   clearInvoiceNumber,
+   clearRegisters,
+   clearSearch,
+   clearClasses,
+   clearProfile,
 })(withRouter(AdminNavbar));

@@ -5,6 +5,7 @@ import {
    ENROLLMENT_ERROR,
    ENROLLMENT_DELETED,
    ENROLLMENT_CLEARED,
+   ENROLLMENTS_CLEARED,
    ENROLLMENT_UPDATED,
 } from "../actions/types";
 
@@ -67,6 +68,8 @@ export default function (state = initialState, action) {
             enrollment: null,
             loading: true,
          };
+      case ENROLLMENTS_CLEARED:
+         return initialState;
       default:
          return state;
    }

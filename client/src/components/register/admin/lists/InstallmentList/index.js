@@ -3,7 +3,10 @@ import { connect } from "react-redux";
 import moment from "moment";
 import PropTypes from "prop-types";
 
-import { loadDebts, debtsPDF } from "../../../../../actions/debts";
+import {
+   loadInstallments,
+   installmentsPDF,
+} from "../../../../../actions/installment";
 import {
    getTotalDebt,
    updatePageNumber,
@@ -14,13 +17,13 @@ import ListButtons from "../sharedComp/DateFilter";
 import DateFilter from "../sharedComp/DateFilter";
 import NameField from "../../../../sharedComp/NameField";
 
-const DebtList = ({
-   debt: { debts, loadingDebts },
+const InstallmentList = ({
+   installment: { installments, loadingInstallments },
    mixvalues: { totalDebt, page },
-   loadDebts,
+   loadInstallments,
    getTotalDebt,
    updatePageNumber,
-   debtsPDF,
+   installmentsPDF,
 }) => {
    const [filterData, setFilterData] = useState({
       startDate: "",
@@ -29,7 +32,7 @@ const DebtList = ({
       lastname: "",
    });
 
-   const [installments] = useState([
+   const [installmentName] = useState([
       "Inscripción",
       "",
       "",
@@ -52,12 +55,17 @@ const DebtList = ({
    const { startDate, endDate, name, lastname } = filterData;
 
    useEffect(() => {
-      if (loadingDebts) {
+      if (loadingInstallments) {
          updatePageNumber(0);
-         loadDebts({ startDate: "", endDate: "", name: "", lastname: "" });
+         loadInstallments({
+            startDate: "",
+            endDate: "",
+            name: "",
+            lastname: "",
+         });
          getTotalDebt();
       }
-   }, [loadingDebts, loadDebts, getTotalDebt, updatePageNumber]);
+   }, [loadingInstallments, loadInstallments, getTotalDebt, updatePageNumber]);
 
    const onChange = (e) => {
       setFilterData({
@@ -69,17 +77,20 @@ const DebtList = ({
    const search = (e) => {
       e.preventDefault();
       if (endDate === "") {
-         loadDebts({ ...filterData, endDate: date.format("YYYY-MM-DD") });
-      } else loadDebts(filterData);
+         loadInstallments({
+            ...filterData,
+            endDate: date.format("YYYY-MM-DD"),
+         });
+      } else loadInstallments(filterData);
    };
 
    const pdfGeneratorSave = () => {
-      debtsPDF(debts);
+      installmentsPDF(installments);
    };
 
    return (
       <>
-         {!loadingDebts ? (
+         {!loadingInstallments ? (
             <>
                <h2 className="p-1">Lista de Deudas</h2>
                <p className="heading-tertiary text-moved-right">
@@ -116,24 +127,30 @@ const DebtList = ({
                         </tr>
                      </thead>
                      <tbody>
-                        {!loadingDebts &&
-                           debts.length > 0 &&
-                           debts.map(
-                              (debt, i) =>
+                        {!loadingInstallments &&
+                           installments.length > 0 &&
+                           installments.map(
+                              (installment, i) =>
                                  i >= page * 10 &&
                                  i < (page + 1) * 10 && (
-                                    <tr key={debt._id}>
+                                    <tr key={installment._id}>
                                        <td>
-                                          {debt.student.lastname +
+                                          {installment.student.lastname +
                                              ", " +
-                                             debt.student.name}
+                                             installment.student.name}
                                        </td>
-                                       <td>{installments[debt.number]}</td>
-                                       <td>{debt.year}</td>
+                                       <td>
+                                          {installmentName[installment.number]}
+                                       </td>
+                                       <td>{installment.year}</td>
                                        <td
-                                          className={debt.expired ? "debt" : ""}
+                                          className={
+                                             installment.expired
+                                                ? "installment"
+                                                : ""
+                                          }
                                        >
-                                          {"$" + debt.value}
+                                          {"$" + installment.value}
                                        </td>
                                     </tr>
                                  )
@@ -144,7 +161,7 @@ const DebtList = ({
                <ListButtons
                   page={page}
                   changePage={updatePageNumber}
-                  items={debts}
+                  items={installments}
                   pdfGeneratorSave={pdfGeneratorSave}
                />
             </>
@@ -155,23 +172,23 @@ const DebtList = ({
    );
 };
 
-DebtList.propTypes = {
-   debt: PropTypes.object.isRequired,
+InstallmentList.propTypes = {
+   installment: PropTypes.object.isRequired,
    mixvalues: PropTypes.object.isRequired,
-   loadDebts: PropTypes.func.isRequired,
+   loadInstallments: PropTypes.func.isRequired,
    getTotalDebt: PropTypes.func.isRequired,
    updatePageNumber: PropTypes.func.isRequired,
-   debtsPDF: PropTypes.func.isRequired,
+   installmentsPDF: PropTypes.func.isRequired,
 };
 
 const mapStatetoProps = (state) => ({
-   debt: state.debt,
+   installment: state.installment,
    mixvalues: state.mixvalues,
 });
 
 export default connect(mapStatetoProps, {
-   loadDebts,
+   loadInstallments,
    getTotalDebt,
    updatePageNumber,
-   debtsPDF,
-})(DebtList);
+   installmentsPDF,
+})(InstallmentList);

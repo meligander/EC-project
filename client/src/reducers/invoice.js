@@ -4,6 +4,8 @@ import {
    INVOICE_LOADED,
    INVOICE_REGISTERED,
    INVOICE_DELETED,
+   INVOICES_CLEARED,
+   INVOICE_CLEARED,
 } from "../actions/types";
 
 const initialState = {
@@ -53,6 +55,14 @@ export default function (state = initialState, action) {
             loading: false,
             loadingInvoices: false,
             error: payload,
+         };
+      case INVOICES_CLEARED:
+         return initialState;
+      case INVOICE_CLEARED:
+         return {
+            ...state,
+            loading: true,
+            invoice: null,
          };
       default:
          return state;

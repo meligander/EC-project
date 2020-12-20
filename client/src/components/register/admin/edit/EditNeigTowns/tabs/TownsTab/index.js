@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 
-import { updateTowns } from "../../../../../../actions/town";
+import { clearTowns, updateTowns } from "../../../../../../../actions/town";
 import { connect } from "react-redux";
 
-import Confirm from "../../../../../modal/Confirm";
-import EditButtons from "../../sharedComp/EditButtons";
+import Confirm from "../../../../../../modal/Confirm";
+import EditButtons from "../../../sharedComp/EditButtons";
 
-const TownsTab = ({ updateTowns, towns: { towns, loading, error } }) => {
+const TownsTab = ({
+   updateTowns,
+   clearTowns,
+   towns: { towns, loading, error },
+}) => {
    const [newValues, setNewValues] = useState([]);
    const [otherValues, setOtherValues] = useState({
       toggleModalDelete: false,
@@ -51,6 +55,7 @@ const TownsTab = ({ updateTowns, towns: { towns, loading, error } }) => {
 
    const saveTowns = () => {
       updateTowns(newValues);
+      clearTowns();
    };
 
    const setToggleDelete = (town_index) => {
@@ -129,10 +134,11 @@ const TownsTab = ({ updateTowns, towns: { towns, loading, error } }) => {
 TownsTab.propTypes = {
    updateTowns: PropTypes.func.isRequired,
    towns: PropTypes.object.isRequired,
+   clearTowns: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    towns: state.towns,
 });
 
-export default connect(mapStateToProps, { updateTowns })(TownsTab);
+export default connect(mapStateToProps, { updateTowns, clearTowns })(TownsTab);

@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import Moment from "react-moment";
 import PropTypes from "prop-types";
 
-import { updatePenalty, loadPenalty } from "../../../actions/penalty";
+import { loadPenalty } from "../../../actions/penalty";
 
 import Alert from "../../sharedComp/Alert";
 
@@ -17,7 +17,6 @@ const Confirm = ({
    text,
    type,
    penalty: { loading, penalty },
-   updatePenalty,
    loadPenalty,
 }) => {
    const [formData, setFormData] = useState({
@@ -30,11 +29,6 @@ const Confirm = ({
    useEffect(() => {
       if (type === "penalty") loadPenalty();
    }, [loadPenalty, type]);
-
-   const penaltyConfirm = () => {
-      updatePenalty(formData.percentage);
-      setFormData({ ...formData, percentage: "" });
-   };
 
    const onChange = (e) => {
       setFormData({
@@ -112,10 +106,12 @@ const Confirm = ({
                      e.preventDefault();
                      switch (type) {
                         case "penalty":
-                           penaltyConfirm();
+                           confirm(percentage);
+                           setFormData({ ...formData, percentage: "" });
                            break;
                         case "certificate-date":
                            confirm(date);
+                           setFormData({ ...formData, date: "" });
                            break;
                         default:
                            confirm();
@@ -145,7 +141,6 @@ Confirm.propTypes = {
    toggleModal: PropTypes.bool.isRequired,
    setToggleModal: PropTypes.func.isRequired,
    penalty: PropTypes.object.isRequired,
-   updatePenalty: PropTypes.func.isRequired,
    loadPenalty: PropTypes.func.isRequired,
    type: PropTypes.string,
 };
@@ -154,6 +149,4 @@ const mapStateToProps = (state) => ({
    penalty: state.penalty,
 });
 
-export default connect(mapStateToProps, { updatePenalty, loadPenalty })(
-   Confirm
-);
+export default connect(mapStateToProps, { loadPenalty })(Confirm);

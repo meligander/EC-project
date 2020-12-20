@@ -4,14 +4,15 @@ import { Link } from "react-router-dom";
 import Moment from "react-moment";
 import PropTypes from "prop-types";
 
-import { loadUsersClass } from "../../../../../actions/class";
+import { clearClass, loadUsersClass } from "../../../../../actions/class";
 import { loadUsersGrades } from "../../../../../actions/grade";
 import { loadStudentAttendance } from "../../../../../actions/attendance";
-import { loadStudentDebts } from "../../../../../actions/debts";
+import { loadStudentInstallments } from "../../../../../actions/installment";
+import { clearProfile } from "../../../../../actions/user";
 
 import RelativeDashboard from "../RelativeDashboard";
 import StudentGradesTable from "../../../../tables/StudentGradesTable";
-import DebtsTable from "../../../../tables/DebtsTable";
+import InstallmentsTable from "../../../../tables/InstallmentsTable";
 
 import "./style.scss";
 
@@ -19,12 +20,14 @@ const StudentDashboard = ({
    loadUsersClass,
    loadUsersGrades,
    loadStudentAttendance,
-   loadStudentDebts,
+   loadStudentInstallments,
+   clearClass,
+   clearProfile,
    auth: { userLogged },
    classes: { classInfo, loading },
    users: { user },
    attendance,
-   debt: { usersDebts, loadingUsersDebts },
+   installment: { usersInstallments, loadingUsersInstallments },
    grades: { usersGrades, loadingUsersGrades },
 }) => {
    const [pass, setPass] = useState(false);
@@ -38,21 +41,21 @@ const StudentDashboard = ({
             }
          }
       }
-      if (loading) loadUsersClass(user._id);
-      if (loadingUsersGrades) loadUsersGrades(user._id);
-      if (attendance.loading) loadStudentAttendance(user._id);
-      if (loadingUsersDebts) loadStudentDebts(user._id, false);
+
+      if (loading) {
+         loadUsersClass(user._id);
+         loadUsersGrades(user._id);
+         loadStudentAttendance(user._id);
+         loadStudentInstallments(user._id, false);
+      }
    }, [
       userLogged,
       user,
       loading,
-      loadingUsersGrades,
-      loadingUsersDebts,
-      attendance.loading,
       loadUsersClass,
       loadUsersGrades,
       loadStudentAttendance,
-      loadStudentDebts,
+      loadStudentInstallments,
    ]);
 
    return (
@@ -67,7 +70,14 @@ const StudentDashboard = ({
                      <p className="heading-tertiary text-dark m-1">
                         Categoría: <small>{classInfo.category.name}</small>
                      </p>
-                     <Link className="btn-text" to={`/class/${classInfo._id}`}>
+                     <Link
+                        className="btn-text"
+                        onClick={() => {
+                           window.scroll(0, 0);
+                           clearClass();
+                        }}
+                        to={`/class/${classInfo._id}`}
+                     >
                         Ver Info
                      </Link>
                   </div>
@@ -83,6 +93,10 @@ const StudentDashboard = ({
                         <Link
                            className="btn-text"
                            to={`/dashboard/${classInfo.teacher._id}`}
+                           onClick={() => {
+                              window.scroll(0, 0);
+                              clearProfile();
+                           }}
                         >
                            Ver Info
                         </Link>
@@ -210,14 +224,14 @@ const StudentDashboard = ({
                </div>
                {/* Installments */}
                <div className="bg-lightest-secondary p-2">
-                  {!loadingUsersDebts && (
+                  {!loadingUsersInstallments && (
                      <>
                         <h3 className="heading-tertiary text-primary p-1">
                            Cuotas
                         </h3>
                         <div className="pb-2">
-                           {usersDebts.rows.length > 0 ? (
-                              <DebtsTable forAdmin={false} />
+                           {usersInstallments.rows.length > 0 ? (
+                              <InstallmentsTable forAdmin={false} />
                            ) : (
                               <p className="heading-tertiary text-center">
                                  No hay ninguna cuota registrada
@@ -238,12 +252,14 @@ StudentDashboard.prototypes = {
    classes: PropTypes.object.isRequired,
    grades: PropTypes.object.isRequired,
    attendance: PropTypes.object.isRequired,
-   debt: PropTypes.object.isRequired,
+   installment: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
    loadUsersClass: PropTypes.func.isRequired,
    loadUsersGrades: PropTypes.func.isRequired,
    loadStudentAttendance: PropTypes.func.isRequired,
-   loadStudentDebts: PropTypes.func.isRequired,
+   loadStudentInstallments: PropTypes.func.isRequired,
+   clearClass: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -252,12 +268,14 @@ const mapStateToProps = (state) => ({
    attendance: state.attendance,
    grades: state.grades,
    auth: state.auth,
-   debt: state.debt,
+   installment: state.installment,
 });
 
 export default connect(mapStateToProps, {
    loadUsersClass,
    loadUsersGrades,
    loadStudentAttendance,
-   loadStudentDebts,
+   loadStudentInstallments,
+   clearClass,
+   clearProfile,
 })(StudentDashboard);

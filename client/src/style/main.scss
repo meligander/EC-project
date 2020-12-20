@@ -1,14 +1,15 @@
 @import "abstracts/mixins";
 @import "abstracts/variables";
 
+@import "base/animations";
 @import "base/base";
+@import "base/responsive";
 @import "base/typography";
 @import "base/utilities";
-@import "base/responsive";
-@import "base/animations";
 
-@import "components/container";
+@import "components/badges";
 @import "components/button";
+@import "components/container";
 @import "components/form";
 @import "components/table";
-@import "components/badges";
+@import "components/wrapper";

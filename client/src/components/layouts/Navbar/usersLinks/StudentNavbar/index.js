@@ -8,6 +8,8 @@ import {
    changePage,
    changePageAndMenu,
 } from "../../../../../actions/navbar";
+import { clearProfile, clearSearch } from "../../../../../actions/user";
+import { clearPosts } from "../../../../../actions/post";
 
 const StudentNavbar = ({
    navbar: { showMenu, currentNav },
@@ -15,6 +17,9 @@ const StudentNavbar = ({
    auth: { userLogged },
    changePage,
    changePageAndMenu,
+   clearPosts,
+   clearSearch,
+   clearProfile,
    location,
 }) => {
    useEffect(() => {
@@ -59,7 +64,11 @@ const StudentNavbar = ({
             <Link
                className="nav-link"
                to={`/dashboard/${userLogged._id}`}
-               onClick={() => changePageAndMenu("index")}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  clearProfile();
+                  changePageAndMenu("index");
+               }}
             >
                <i className="fas fa-home"></i>
                <span className="hide-md">&nbsp; Página Principal</span>
@@ -77,7 +86,11 @@ const StudentNavbar = ({
                to={`/chat/${
                   userLogged.classroom !== null ? userLogged.classroom : 0
                }`}
-               onClick={() => changePageAndMenu("chat")}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  clearPosts();
+                  changePageAndMenu("chat");
+               }}
             >
                <i className="far fa-comments"></i>
                <span className="hide-md">&nbsp; Posteo Grupal</span>
@@ -97,17 +110,24 @@ const StudentNavbar = ({
                to={`/class/${
                   userLogged.classroom !== null ? userLogged.classroom : 0
                }`}
-               onClick={() => changePageAndMenu("classmates")}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  clearSearch();
+                  changePageAndMenu("classmates");
+               }}
             >
                <i className="fas fa-address-book"></i>
-               <span className="hide-md"> &nbsp; Compañeros</span>
+               <span className="hide-md"> &nbsp; Clase</span>
             </Link>
          </li>
          <li className={!showMenu ? "nav-item" : "nav-item show"}>
             <Link
                className="nav-link"
                to="/login"
-               onClick={() => logOutAndToggle()}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  logOutAndToggle();
+               }}
             >
                <i className="fas fa-sign-out-alt"></i>
                <span className="hide-md"> &nbsp; Cerrar Sesión</span>
@@ -123,6 +143,9 @@ StudentNavbar.propTypes = {
    logOutAndToggle: PropTypes.func.isRequired,
    changePage: PropTypes.func.isRequired,
    changePageAndMenu: PropTypes.func.isRequired,
+   clearSearch: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
+   clearPosts: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -134,4 +157,7 @@ export default connect(mapStateToProps, {
    logOutAndToggle,
    changePage,
    changePageAndMenu,
+   clearProfile,
+   clearPosts,
+   clearSearch,
 })(withRouter(StudentNavbar));

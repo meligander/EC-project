@@ -9,9 +9,9 @@ import {
    registerNewGrade,
    deleteGrades,
    updateGrades,
-   clearGrades,
    gradesPDF,
    certificatePDF,
+   clearGradeTypes,
 } from "../../../../../actions/grade";
 
 import Confirm from "../../../../modal/Confirm";
@@ -30,7 +30,7 @@ const GradesTab = ({
    registerNewGrade,
    deleteGrades,
    updateGrades,
-   clearGrades,
+   clearGradeTypes,
    navbar,
    gradesPDF,
    certificatePDF,
@@ -412,7 +412,10 @@ const GradesTab = ({
                      userLogged.type === "Admin/Profesor") && (
                      <Link
                         to="/edit-gradetypes"
-                        onClick={clearGrades}
+                        onClick={() => {
+                           window.scroll(0, 0);
+                           clearGradeTypes();
+                        }}
                         className="btn btn-light"
                      >
                         <i className="fas fa-edit"></i>
@@ -436,9 +439,9 @@ GradesTab.propTypes = {
    deleteGrades: PropTypes.func.isRequired,
    updateGrades: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
-   clearGrades: PropTypes.func.isRequired,
    gradesPDF: PropTypes.func.isRequired,
    certificatePDF: PropTypes.func.isRequired,
+   clearGradeTypes: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -453,7 +456,7 @@ export default connect(mapStateToProps, {
    registerNewGrade,
    deleteGrades,
    updateGrades,
-   clearGrades,
    gradesPDF,
    certificatePDF,
+   clearGradeTypes,
 })(withRouter(GradesTab));

@@ -3,11 +3,23 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
+import {
+   clearInstallments,
+   clearInstallment,
+} from "../../../../actions/installment";
+
 import InstallmentsSearch from "../../../sharedComp/search/InstallmentsSearch";
-
 import Confirm from "../../../modal/Confirm";
+import { clearPenalty, updatePenalty } from "../../../../actions/penalty";
 
-const Installments = ({ debt: { usersDebts }, auth: { userLogged } }) => {
+const Installments = ({
+   installment: { usersInstallments },
+   auth: { userLogged },
+   clearInstallments,
+   clearInstallment,
+   clearPenalty,
+   updatePenalty,
+}) => {
    const [otherValues, setOtherValues] = useState({
       student: "",
       toggleModal: false,
@@ -16,21 +28,26 @@ const Installments = ({ debt: { usersDebts }, auth: { userLogged } }) => {
    const { student, toggleModal } = otherValues;
 
    useEffect(() => {
-      if (usersDebts.rows.length > 0) {
-         for (let x = 0; x < usersDebts.rows[0].length; x++) {
-            if (usersDebts.rows[0][x].student) {
+      if (usersInstallments.rows.length > 0) {
+         for (let x = 0; x < usersInstallments.rows[0].length; x++) {
+            if (usersInstallments.rows[0][x].student) {
                setOtherValues((prev) => ({
                   ...prev,
-                  student: usersDebts.rows[0][x].student._id,
+                  student: usersInstallments.rows[0][x].student._id,
                }));
                break;
             }
          }
       }
-   }, [usersDebts.rows.length, usersDebts.rows]);
+   }, [usersInstallments.rows.length, usersInstallments.rows]);
 
    const setToggle = () => {
       setOtherValues({ ...otherValues, toggleModal: !toggleModal });
+   };
+
+   const confirm = (percentage) => {
+      updatePenalty(percentage);
+      clearPenalty();
    };
 
    return (
@@ -41,6 +58,7 @@ const Installments = ({ debt: { usersDebts }, auth: { userLogged } }) => {
                toggleModal={toggleModal}
                setToggleModal={setToggle}
                type="penalty"
+               confirm={confirm}
             />
             <div className="btn-right my-3">
                {userLogged.type === "Administrador" ||
@@ -48,7 +66,14 @@ const Installments = ({ debt: { usersDebts }, auth: { userLogged } }) => {
                <button className="btn btn-secondary" onClick={setToggle}>
                   <i className="fas fa-dollar-sign"></i> Recargo
                </button>
-               <Link to="/debt-list" className="btn btn-light">
+               <Link
+                  to="/installment-list"
+                  onClick={() => {
+                     window.scroll(0, 0);
+                     clearInstallments();
+                  }}
+                  className="btn btn-light"
+               >
                   Ver Listado Deudas
                </Link>
             </div>
@@ -56,13 +81,19 @@ const Installments = ({ debt: { usersDebts }, auth: { userLogged } }) => {
             <div className="btn-right">
                <Link
                   className={`btn ${
-                     usersDebts.rows.length > 0 ? "btn-primary" : "btn-black"
+                     usersInstallments.rows.length > 0
+                        ? "btn-primary"
+                        : "btn-black"
                   }`}
                   to={
-                     usersDebts.rows.length > 0
+                     usersInstallments.rows.length > 0
                         ? `/edit-installment/${student}/0/0`
                         : "#"
                   }
+                  onClick={() => {
+                     window.scroll(0, 0);
+                     clearInstallment();
+                  }}
                >
                   <i className="fas fa-plus-circle"></i> &nbsp; Agregar una
                   cuota
@@ -74,13 +105,22 @@ const Installments = ({ debt: { usersDebts }, auth: { userLogged } }) => {
 };
 
 Installments.propTypes = {
-   debt: PropTypes.object.isRequired,
+   installment: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
+   clearInstallments: PropTypes.func.isRequired,
+   clearInstallment: PropTypes.func.isRequired,
+   clearPenalty: PropTypes.func.isRequired,
+   updatePenalty: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
-   debt: state.debt,
+   installment: state.installment,
    auth: state.auth,
 });
 
-export default connect(mapStateToProps)(Installments);
+export default connect(mapStateToProps, {
+   clearInstallments,
+   clearInstallment,
+   clearPenalty,
+   updatePenalty,
+})(Installments);

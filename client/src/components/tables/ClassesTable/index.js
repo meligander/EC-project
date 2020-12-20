@@ -57,7 +57,10 @@ const ClassesTable = ({ classes, clearClass, all = true }) => {
                            </td>
                            <td>
                               <Link
-                                 onClick={clearClass}
+                                 onClick={() => {
+                                    clearClass();
+                                    window.scroll(0, 0);
+                                 }}
                                  to={`/class/${classItem._id}`}
                                  className="btn-text"
                               >

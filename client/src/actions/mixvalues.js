@@ -1,4 +1,7 @@
 import axios from "axios";
+
+import { setAlert } from "./alert";
+
 import {
    ADMIN_DASH_LOADED,
    INVOICENUMBER_LOADED,
@@ -9,9 +12,9 @@ import {
    VALUES_ERROR,
    SEARCH_PAGE_CHANGED,
    LOADING_ADMINDASH_UPDATED,
-   INVOICE_NUMBER_UPDATED,
+   INVOICENUMBER_CLEARED,
+   STUDENTNUMBER_CLEARED,
 } from "./types";
-import { setAlert } from "./alert";
 
 export const getStudentNumber = () => async (dispatch) => {
    try {
@@ -118,9 +121,15 @@ export const clearValues = () => (dispatch) => {
    });
 };
 
-export const updateInvoiceNumber = () => (dispatch) => {
+export const clearInvoiceNumber = () => (dispatch) => {
    dispatch({
-      type: INVOICE_NUMBER_UPDATED,
+      type: INVOICENUMBER_CLEARED,
+   });
+};
+
+export const clearStudentNumber = () => (dispatch) => {
+   dispatch({
+      type: STUDENTNUMBER_CLEARED,
    });
 };
 

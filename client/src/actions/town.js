@@ -1,13 +1,15 @@
+import axios from "axios";
+
+import { setAlert } from "./alert";
+import { updateLoadingSpinner } from "./mixvalues";
+import { clearNeighbourhoods } from "./neighbourhood";
+
 import {
    TOWNS_ERROR,
    TOWNS_LOADED,
    TOWNS_UPDATED,
    TOWNS_CLEARED,
 } from "./types";
-import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
-import { clearNeighbourhoods } from "./neighbourhood";
-import axios from "axios";
 
 export const loadTowns = () => async (dispatch) => {
    try {

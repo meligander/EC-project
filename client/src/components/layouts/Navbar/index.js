@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
 import { toggleMenu } from "../../../actions/navbar";
+import { clearProfile } from "../../../actions/user";
 
 import GuestNavbar from "./usersLinks/GuestNavbar";
 import AdminNavbar from "./usersLinks/AdminNavbar";
@@ -19,6 +20,7 @@ const Navbar = ({
    auth: { userLogged, loading, isAuthenticated, visitor },
    navbar: { showMenu },
    toggleMenu,
+   clearProfile,
 }) => {
    const type = () => {
       if (isAuthenticated) {
@@ -46,6 +48,10 @@ const Navbar = ({
          <Link
             className="navbar-home-btn"
             to={isAuthenticated ? `/dashboard/${userLogged._id}` : "/"}
+            onClick={() => {
+               window.scroll(0, 0);
+               clearProfile();
+            }}
          >
             <div className="navbar-logo">
                <img src={onlyLogo} alt="Logo English Center" />
@@ -111,6 +117,7 @@ Navbar.prototypes = {
    auth: PropTypes.object.isRequired,
    navbar: PropTypes.object.isRequired,
    toggleMenu: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -118,4 +125,4 @@ const mapStateToProps = (state) => ({
    navbar: state.navbar,
 });
 
-export default connect(mapStateToProps, { toggleMenu })(Navbar);
+export default connect(mapStateToProps, { toggleMenu, clearProfile })(Navbar);

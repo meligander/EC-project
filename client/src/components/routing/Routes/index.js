@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Switch } from "react-router-dom";
+import { Switch } from "react-router-dom";
 
 //Unregister Pages
 import Login from "../../unregister/Login";
@@ -31,19 +31,18 @@ import EditGradeType from "../../register/admin/edit/EditGradeType";
 import EnrollmentList from "../../register/admin/lists/EnrollmentList";
 import IncomeList from "../../register/admin/lists/IncomeList";
 import ExpenceList from "../../register/admin/lists/ExpenceList";
-import DebtList from "../../register/admin/lists/DebtList";
+import InstallmentList from "../../register/admin/lists/InstallmentList";
 import RegisterList from "../../register/admin/lists/RegisterList";
 import MentionList from "../../register/admin/lists/MentionList";
 
 import PrivateRoutes from "../PrivateRoutes";
-import Alert from "../../sharedComp/Alert";
+import PublicRoutes from "../PublicRoutes";
 
 const Routes = () => {
    return (
       <section className="container">
-         <Alert type="1" />
          <Switch>
-            <Route exact path="/login" component={Login} />
+            <PublicRoutes exact path="/login" component={Login} />
             <PrivateRoutes
                exact
                types={[]}
@@ -230,8 +229,8 @@ const Routes = () => {
             <PrivateRoutes
                exact
                types={["Administrador", "Secretaria", "Admin/Profesor"]}
-               path="/debt-list"
-               component={DebtList}
+               path="/installment-list"
+               component={InstallmentList}
             />
             <PrivateRoutes
                exact

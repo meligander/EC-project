@@ -1,16 +1,18 @@
+import moment from "moment";
+import axios from "axios";
+import { saveAs } from "file-saver";
+
+import { setAlert } from "./alert";
+import { updateLoadingSpinner } from "./mixvalues";
+
 import {
    REGISTER_ERROR,
    REGISTER_LOADED,
    REGISTERS_LOADED,
    REGISTER_CLOSED,
-   REGISTER_CLEARED,
+   REGISTERS_CLEARED,
    REGISTER_DELETED,
 } from "./types";
-import { setAlert } from "./alert";
-import moment from "moment";
-import { saveAs } from "file-saver";
-import { updateLoadingSpinner } from "./mixvalues";
-import axios from "axios";
 
 export const loadRegister = () => async (dispatch) => {
    try {
@@ -92,7 +94,7 @@ export const closeRegister = (formData, user_id, history) => async (
       });
 
       history.push(`/dashboard/${user_id}`);
-      dispatch(clearRegister());
+      dispatch(clearRegisters());
       dispatch(setAlert("Caja del día Cerrada", "success", "1"));
    } catch (err) {
       dispatch({
@@ -120,7 +122,7 @@ export const deleteRegister = (register_id) => async (dispatch) => {
          payload: register_id,
       });
       dispatch(setAlert("Cierre de Caja Eliminado", "success", "2"));
-      dispatch({ type: REGISTER_CLEARED });
+      dispatch({ type: REGISTERS_CLEARED });
    } catch (err) {
       dispatch({
          type: REGISTER_ERROR,
@@ -178,6 +180,6 @@ export const registerPDF = (registers) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const clearRegister = () => (dispatch) => {
-   dispatch({ type: REGISTER_CLEARED });
+export const clearRegisters = () => (dispatch) => {
+   dispatch({ type: REGISTERS_CLEARED });
 };

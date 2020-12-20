@@ -8,6 +8,8 @@ import {
    changePage,
    changePageAndMenu,
 } from "../../../../../actions/navbar";
+import { clearClasses } from "../../../../../actions/class";
+import { clearProfile, clearSearch } from "../../../../../actions/user";
 
 const TeacherNavbar = ({
    location,
@@ -16,6 +18,9 @@ const TeacherNavbar = ({
    logOutAndToggle,
    changePage,
    changePageAndMenu,
+   clearClasses,
+   clearSearch,
+   clearProfile,
 }) => {
    useEffect(() => {
       const string = location.pathname.substring(1, location.pathname.length);
@@ -62,7 +67,11 @@ const TeacherNavbar = ({
             <Link
                className="nav-link"
                to={`/dashboard/${userLogged._id}`}
-               onClick={() => changePageAndMenu("index")}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  clearProfile();
+                  changePageAndMenu("index");
+               }}
             >
                <i className="fas fa-home"></i>
                <span className="hide-md">&nbsp; Página Principal</span>
@@ -78,7 +87,11 @@ const TeacherNavbar = ({
             <Link
                className="nav-link"
                to="/classes"
-               onClick={() => changePageAndMenu("classes")}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  clearClasses();
+                  changePageAndMenu("classes");
+               }}
             >
                <i className="fas fa-chalkboard-teacher"></i>
                <span className="hide-md"> &nbsp; Cursos</span>
@@ -94,7 +107,11 @@ const TeacherNavbar = ({
             <Link
                className="nav-link"
                to="/search"
-               onClick={() => changePageAndMenu("search")}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  clearSearch();
+                  changePageAndMenu("search");
+               }}
             >
                <i className="fas fa-search"></i>
                <span className="hide-md"> &nbsp; Búsqueda</span>
@@ -104,7 +121,10 @@ const TeacherNavbar = ({
             <Link
                className="nav-link"
                to="/login"
-               onClick={() => logOutAndToggle()}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  logOutAndToggle();
+               }}
             >
                <i className="fas fa-sign-out-alt"></i>
                <span className="hide-md"> &nbsp; Cerrar Sesión</span>
@@ -120,6 +140,9 @@ TeacherNavbar.propTypes = {
    logOutAndToggle: PropTypes.func.isRequired,
    changePage: PropTypes.func.isRequired,
    changePageAndMenu: PropTypes.func.isRequired,
+   clearClasses: PropTypes.func.isRequired,
+   clearSearch: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -131,4 +154,7 @@ export default connect(mapStateToProps, {
    logOutAndToggle,
    changePage,
    changePageAndMenu,
+   clearClasses,
+   clearSearch,
+   clearProfile,
 })(withRouter(TeacherNavbar));

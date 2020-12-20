@@ -146,7 +146,14 @@ const Classes = ({
 
                <div className="btn-right">
                   {userLogged.type !== "Profesor" && (
-                     <Link to="/register-class" className="btn btn-primary">
+                     <Link
+                        to="/register-class"
+                        onClick={() => {
+                           window.scroll(0, 0);
+                           clearClass();
+                        }}
+                        className="btn btn-primary"
+                     >
                         <i className="fas fa-plus"></i> Curso
                      </Link>
                   )}

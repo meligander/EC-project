@@ -40,7 +40,10 @@ const GuestNavbar = ({
             <Link
                className="nav-link"
                to="/"
-               onClick={() => changePageAndMenu("index")}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  changePageAndMenu("index");
+               }}
             >
                <i className="fas fa-home"></i> &nbsp;
                <span className="hide-md">Página Principal</span>
@@ -56,7 +59,10 @@ const GuestNavbar = ({
             <Link
                className="nav-link"
                to="/about"
-               onClick={() => changePageAndMenu("about")}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  changePageAndMenu("about");
+               }}
             >
                <i className="fas fa-info-circle"></i> &nbsp;
                <span className="hide-md">Acerca de Nosotros</span>
@@ -72,7 +78,10 @@ const GuestNavbar = ({
             <Link
                className="nav-link"
                to="/contact"
-               onClick={() => changePageAndMenu("contact")}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  changePageAndMenu("contact");
+               }}
             >
                <i className="fas fa-address-book"></i> &nbsp;
                <span className="hide-md">Contáctanos</span>
@@ -88,7 +97,10 @@ const GuestNavbar = ({
             <Link
                className="nav-link"
                to="/login"
-               onClick={() => changePageAndMenu("login")}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  changePageAndMenu("login");
+               }}
             >
                <i className="fas fa-sign-in-alt"></i> &nbsp;
                <span className="hide-md">Iniciar Sesión</span>

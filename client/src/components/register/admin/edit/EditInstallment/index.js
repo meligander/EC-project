@@ -5,10 +5,10 @@ import moment from "moment";
 import PropTypes from "prop-types";
 
 import {
-   loadDebt,
+   loadInstallment,
    updateIntallment,
    deleteInstallment,
-} from "../../../../../actions/debts";
+} from "../../../../../actions/installment";
 import { loadUser } from "../../../../../actions/user";
 
 import Loading from "../../../../modal/Loading";
@@ -18,11 +18,11 @@ const EditInstallment = ({
    match,
    history,
    users,
-   loadDebt,
+   loadInstallment,
    loadUser,
    updateIntallment,
    deleteInstallment,
-   debt: { debt, loading },
+   installment: { installment, loading },
 }) => {
    const [formData, setformData] = useState({
       year: "0",
@@ -48,11 +48,11 @@ const EditInstallment = ({
    useEffect(() => {
       const loadEditData = () => {
          setformData({
-            year: debt.year,
-            number: debt.number,
-            value: debt.value,
-            expired: debt.expired,
-            student: debt.student,
+            year: installment.year,
+            number: installment.number,
+            value: installment.value,
+            expired: installment.expired,
+            student: installment.student,
          });
       };
       const loadNewData = () => {
@@ -65,13 +65,13 @@ const EditInstallment = ({
          });
       };
       if (match.params.year === undefined) {
-         if (loading) loadDebt(match.params.id);
+         if (loading) loadInstallment(match.params.id);
          else loadEditData();
       } else {
          loadUser(match.params.id);
          if (match.params.year !== "0") loadNewData();
       }
-   }, [loadDebt, loadUser, loading, match.params, debt]);
+   }, [loadInstallment, loadUser, loading, match.params, installment]);
 
    const onChange = (e) => {
       setformData({
@@ -266,10 +266,10 @@ const EditInstallment = ({
 };
 
 EditInstallment.propTypes = {
-   debt_id: PropTypes.string,
+   installment_id: PropTypes.string,
    users: PropTypes.object.isRequired,
-   debt: PropTypes.object.isRequired,
-   loadDebt: PropTypes.func.isRequired,
+   installment: PropTypes.object.isRequired,
+   loadInstallment: PropTypes.func.isRequired,
    loadUser: PropTypes.func.isRequired,
    deleteInstallment: PropTypes.func.isRequired,
    updateIntallment: PropTypes.func.isRequired,
@@ -277,11 +277,11 @@ EditInstallment.propTypes = {
 
 const mapStateToProps = (state) => ({
    users: state.users,
-   debt: state.debt,
+   installment: state.installment,
 });
 
 export default connect(mapStateToProps, {
-   loadDebt,
+   loadInstallment,
    loadUser,
    deleteInstallment,
    updateIntallment,

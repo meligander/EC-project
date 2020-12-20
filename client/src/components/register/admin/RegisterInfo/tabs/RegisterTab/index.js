@@ -1,8 +1,14 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
 import { Link, withRouter } from "react-router-dom";
-import { closeRegister } from "../../../../../../actions/register";
 import PropTypes from "prop-types";
+
+import {
+   clearRegisters,
+   closeRegister,
+} from "../../../../../../actions/register";
+import { clearInvoices } from "../../../../../../actions/invoice";
+import { clearExpences } from "../../../../../../actions/expence";
 
 import Confirm from "../../../../../modal/Confirm";
 
@@ -12,6 +18,9 @@ const RegisterTab = ({
    history,
    register,
    closeRegister,
+   clearInvoices,
+   clearExpences,
+   clearRegisters,
    auth: { userLogged },
 }) => {
    const [formData, setFormData] = useState({
@@ -65,7 +74,14 @@ const RegisterTab = ({
                         : 0}
                   </td>
                   <td>
-                     <Link className="btn btn-light" to="/income-list">
+                     <Link
+                        className="btn btn-light"
+                        onClick={() => {
+                           window.scroll(0, 0);
+                           clearInvoices();
+                        }}
+                        to="/income-list"
+                     >
                         <span className="hide-sm">Ver </span>Listado
                      </Link>
                   </td>
@@ -79,7 +95,14 @@ const RegisterTab = ({
                         : 0}
                   </td>
                   <td>
-                     <Link className="btn btn-light" to="/expence-list">
+                     <Link
+                        className="btn btn-light"
+                        onClick={() => {
+                           window.scroll(0, 0);
+                           clearExpences();
+                        }}
+                        to="/expence-list"
+                     >
                         <span className="hide-sm">Ver </span>Listado
                      </Link>
                   </td>
@@ -108,7 +131,14 @@ const RegisterTab = ({
                   <td>Plata Caja</td>
                   <td>${register.registermoney}</td>
                   <td>
-                     <Link to="/register-list" className="btn btn-light">
+                     <Link
+                        to="/register-list"
+                        onClick={() => {
+                           window.scroll(0, 0);
+                           clearRegisters();
+                        }}
+                        className="btn btn-light"
+                     >
                         <span className="hide-sm">Ver </span>Cierres
                      </Link>
                   </td>
@@ -179,6 +209,9 @@ RegisterTab.propTypes = {
    register: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
    closeRegister: PropTypes.func.isRequired,
+   clearInvoices: PropTypes.func.isRequired,
+   clearExpences: PropTypes.func.isRequired,
+   clearRegisters: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -186,6 +219,9 @@ const mapStateToProps = (state) => ({
    auth: state.auth,
 });
 
-export default connect(mapStateToProps, { closeRegister })(
-   withRouter(RegisterTab)
-);
+export default connect(mapStateToProps, {
+   closeRegister,
+   clearInvoices,
+   clearExpences,
+   clearRegisters,
+})(withRouter(RegisterTab));

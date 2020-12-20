@@ -1,3 +1,19 @@
+import moment from "moment";
+import { saveAs } from "file-saver";
+import axios from "axios";
+
+import { setAlert } from "./alert";
+import {
+   updateLoadingSpinner,
+   updateAdminDashLoading,
+   clearValues,
+} from "./mixvalues";
+import { logOutAndToggle } from "./navbar";
+import { clearInstallments } from "./installment";
+import { clearClass } from "./class";
+import { clearAttendances } from "./attendance";
+import { clearGrades } from "./grade";
+
 import {
    USER_ERROR,
    USERS_ERROR,
@@ -7,6 +23,7 @@ import {
    USER_UPDATED,
    RELATIVES_LOADED,
    USERS_CLEARED,
+   USER_CLEARED,
    USERS_TYPE_CHANGED,
    SEARCH_CLEARED,
    USER_DELETED,
@@ -16,25 +33,11 @@ import {
    TEACHERS_LOADED,
    TEACHERS_ERROR,
 } from "./types";
-import { setAlert } from "./alert";
-import moment from "moment";
-import { saveAs } from "file-saver";
-import {
-   updateLoadingSpinner,
-   updateAdminDashLoading,
-   clearValues,
-} from "./mixvalues";
-import { logOutAndToggle } from "./navbar";
-import axios from "axios";
-import { clearInstallments } from "./debts";
-import { clearClass } from "./class";
-import { clearAttendances } from "./attendance";
-import { clearGrades } from "./grade";
 
 //Load User
 export const loadUser = (user_id) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
    try {
-      dispatch(updateLoadingSpinner(true));
       const res = await axios.get(`/api/users/${user_id}`);
       dispatch({
          type: USER_LOADED,
@@ -52,10 +55,12 @@ export const loadUser = (user_id) => async (dispatch) => {
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
       window.scrollTo(0, 0);
    }
+   dispatch(updateLoadingSpinner(false));
 };
 
 //Load Relatives
 export const loadRelatives = (user_id, tutor) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
    try {
       let res;
       if (tutor) {
@@ -80,6 +85,7 @@ export const loadRelatives = (user_id, tutor) => async (dispatch) => {
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
       window.scrollTo(0, 0);
    }
+   if (!tutor) dispatch(updateLoadingSpinner(false));
 };
 
 export const loadTeachers = () => async (dispatch) => {
@@ -107,12 +113,14 @@ export const loadTeachers = () => async (dispatch) => {
 //LoadUsers
 export const loadUsers = (
    filterData,
-   search = false,
-   studentRelation = false,
-   alert = true
+   search = false
+   /* studentRelation = false,
+   alert = true */
 ) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
+   ///Seeeeeee why all those booleans
+   ////
    try {
       let filter = "";
 
@@ -136,14 +144,15 @@ export const loadUsers = (
          payload: res.data,
       });
    } catch (err) {
-      if (alert)
+      /* if (alert)
          dispatch(
             setAlert(
                err.response.data.msg,
                "danger",
                studentRelation ? "3" : "2"
             )
-         );
+         ); */
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
       dispatch({
          type: USERS_ERROR,
          payload: {
@@ -152,9 +161,9 @@ export const loadUsers = (
             msg: err.response.data.msg,
          },
       });
+      window.scrollTo(0, 0);
    }
 
-   window.scrollTo(0, 0);
    dispatch(updateLoadingSpinner(false));
 };
 
@@ -254,6 +263,7 @@ export const registerUser = (
             },
          });
       }
+      dispatch(updateLoadingSpinner(false));
    }
 
    window.scrollTo(0, 0);
@@ -397,12 +407,24 @@ export const removeUser = (user_id) => (dispatch) => {
 
 export const clearProfile = () => (dispatch) => {
    dispatch({
-      type: USERS_CLEARED,
+      type: USER_CLEARED,
    });
    dispatch(clearGrades());
    dispatch(clearInstallments());
    dispatch(clearAttendances);
    dispatch(clearClass());
+};
+
+export const clearUser = () => (dispatch) => {
+   dispatch({
+      type: USER_CLEARED,
+   });
+};
+
+export const clearUsers = () => (dispatch) => {
+   dispatch({
+      type: USERS_CLEARED,
+   });
 };
 
 export const clearSearch = () => (dispatch) => {

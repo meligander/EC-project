@@ -4,19 +4,19 @@ import { withRouter } from "react-router-dom";
 import moment from "moment";
 import PropTypes from "prop-types";
 
-import { clearInstallment, addInstallment } from "../../../actions/debts";
+import { clearInstallment, addInstallment } from "../../../actions/installment";
 import { setAlert } from "../../../actions/alert";
 
 import Alert from "../../sharedComp/Alert";
 
 import "./style.scss";
 
-const DebtsTable = ({
+const InstallmentsTable = ({
    location,
    history,
-   debt: {
-      debts,
-      usersDebts: { years, rows },
+   installment: {
+      installments,
+      usersInstallments: { years, rows },
    },
    clearInstallment,
    addInstallment,
@@ -49,11 +49,12 @@ const DebtsTable = ({
       }
    }, [rows]);
 
-   const seeDebtInfo = (debt_id, edit, year, month) => {
+   const seeInstallmentInfo = (installment_id, edit, year, month) => {
       let number = month !== 0 ? month + 2 : month;
       clearInstallment();
-      if (edit) history.push(`/edit-installment/${debt_id}`);
-      else history.push(`/edit-installment/${debt_id}/${year}/${number}`);
+      if (edit) history.push(`/edit-installment/${installment_id}`);
+      else
+         history.push(`/edit-installment/${installment_id}/${year}/${number}`);
    };
 
    const selectItem = (item) => {
@@ -66,7 +67,9 @@ const DebtsTable = ({
       if (selectedItem._id === 0) {
          setAlert("No se ha seleccionado ninguna cuota", "danger", "4");
       } else {
-         const pass = debts.every((item) => item._id !== selectedItem._id);
+         const pass = installments.every(
+            (item) => item._id !== selectedItem._id
+         );
          if (pass) {
             setAlert("Cuota agregada correctamente", "success", "4");
             addInstallment(selectedItem);
@@ -81,7 +84,11 @@ const DebtsTable = ({
       <>
          <Alert type="4" />
          <div className="wrapper">
-            <table className={`${forAdmin ? "installments" : ""}`}>
+            <table
+               className={`${
+                  forAdmin ? "modify installments" : "installments"
+               }`}
+            >
                <thead>
                   <tr>
                      <th className={`${forAdmin ? "blank" : "inherit"}`}>
@@ -153,7 +160,7 @@ const DebtsTable = ({
                                        onDoubleClick={
                                           !invoice
                                              ? () =>
-                                                  seeDebtInfo(
+                                                  seeInstallmentInfo(
                                                      item._id !== ""
                                                         ? item._id
                                                         : student,
@@ -172,7 +179,7 @@ const DebtsTable = ({
                                        onDoubleClick={
                                           !invoice
                                              ? () =>
-                                                  seeDebtInfo(
+                                                  seeInstallmentInfo(
                                                      item._id !== ""
                                                         ? item._id
                                                         : rows[0][0].student
@@ -216,8 +223,8 @@ const DebtsTable = ({
    );
 };
 
-DebtsTable.prototypes = {
-   debt: PropTypes.object.isRequired,
+InstallmentsTable.prototypes = {
+   installment: PropTypes.object.isRequired,
    forAdmin: PropTypes.bool.isRequired,
    clearInstallment: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
@@ -225,11 +232,11 @@ DebtsTable.prototypes = {
 };
 
 const mapStateToProps = (state) => ({
-   debt: state.debt,
+   installment: state.installment,
 });
 
 export default connect(mapStateToProps, {
    clearInstallment,
    addInstallment,
    setAlert,
-})(withRouter(DebtsTable));
+})(withRouter(InstallmentsTable));

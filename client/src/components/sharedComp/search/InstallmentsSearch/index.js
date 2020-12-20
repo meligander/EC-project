@@ -5,41 +5,29 @@ import PropTypes from "prop-types";
 
 import { setAlert } from "../../../../actions/alert";
 import {
-   loadStudentDebts,
-   clearInstallments,
+   loadStudentInstallments,
    clearUserInstallments,
-} from "../../../../actions/debts";
-import { clearSearch } from "../../../../actions/user";
+} from "../../../../actions/installment";
 
 import StudentSearch from "../StudentSearch";
-import DebtsTable from "../../../tables/DebtsTable";
+import InstallmentsTable from "../../../tables/InstallmentsTable";
 
 const InstallmentsSearch = ({
    match,
    location,
-   debt: { usersDebts, loadingUsersDebts },
-   loadStudentDebts,
-   clearSearch,
-   clearInstallments,
+   installment: { usersInstallments, loadingUsersInstallments },
+   loadStudentInstallments,
    clearUserInstallments,
    setAlert,
 }) => {
    useEffect(() => {
-      if (match.params.studentid === "0" || location.pathname === "/invoice") {
-         clearInstallments();
-         clearSearch();
-      } else {
+      if (match.params.studentid !== "0") {
          setSelectedStudent((prev) => ({
             ...prev,
             _id: match.params.studentid,
          }));
       }
-   }, [
-      clearSearch,
-      clearInstallments,
-      match.params.studentid,
-      location.pathname,
-   ]);
+   }, [match.params.studentid]);
 
    const [selectedStudent, setSelectedStudent] = useState({
       _id: "",
@@ -61,8 +49,7 @@ const InstallmentsSearch = ({
       if (!selectedStudent._id)
          setAlert("Debe seleccionar un usuario primero", "danger", "3");
       else {
-         if (invoice) clearSearch();
-         loadStudentDebts(selectedStudent._id, true);
+         loadStudentInstallments(selectedStudent._id, true);
       }
    };
    return (
@@ -72,7 +59,7 @@ const InstallmentsSearch = ({
                selectedStudent={selectedStudent}
                addToList={searchInstallments}
                selectStudent={selectStudent}
-               studentDebt={true}
+               studentInstallment={true}
                student={true}
             />
          </div>
@@ -82,12 +69,12 @@ const InstallmentsSearch = ({
                {selectedStudent.name}
             </p>
          )}
-         {!loadingUsersDebts && usersDebts.rows.length > 0 ? (
-            <DebtsTable forAdmin={true} />
+         {!loadingUsersInstallments && usersInstallments.rows.length > 0 ? (
+            <InstallmentsTable forAdmin={true} />
          ) : (
-            !loadingUsersDebts &&
-            usersDebts.rows.length === 0 && (
-               <p className="heading-tertiary">
+            !loadingUsersInstallments &&
+            usersInstallments.rows.length === 0 && (
+               <p className="heading-tertiary text-center my-4">
                   El alumno no tiene deudas hasta el momento
                </p>
             )
@@ -97,22 +84,18 @@ const InstallmentsSearch = ({
 };
 
 InstallmentsSearch.propTypes = {
-   debt: PropTypes.object.isRequired,
-   loadStudentDebts: PropTypes.func.isRequired,
-   clearSearch: PropTypes.func.isRequired,
-   clearInstallments: PropTypes.func.isRequired,
-   clearUserInstallments: PropTypes.func.isRequired,
+   installment: PropTypes.object.isRequired,
+   loadStudentInstallments: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
+   clearUserInstallments: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
-   debt: state.debt,
+   installment: state.installment,
 });
 
 export default connect(mapStateToProps, {
-   loadStudentDebts,
-   clearSearch,
-   clearInstallments,
+   loadStudentInstallments,
    setAlert,
    clearUserInstallments,
 })(withRouter(InstallmentsSearch));

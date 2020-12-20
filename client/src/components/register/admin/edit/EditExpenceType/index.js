@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
 import {
+   clearExpenceTypes,
    loadExpenceTypes,
    updateExpenceTypes,
 } from "../../../../../actions/expence";
@@ -15,6 +16,7 @@ const EditExpenceType = ({
    expences: { expencetypes, loadingET },
    loadExpenceTypes,
    updateExpenceTypes,
+   clearExpenceTypes,
 }) => {
    const [formData, setFormData] = useState([]);
 
@@ -61,6 +63,7 @@ const EditExpenceType = ({
 
    const saveExpenceTypes = () => {
       updateExpenceTypes(formData);
+      clearExpenceTypes();
    };
 
    const setToggleSave = () => {
@@ -159,6 +162,7 @@ EditExpenceType.propTypes = {
    expences: PropTypes.object.isRequired,
    loadExpenceTypes: PropTypes.func.isRequired,
    updateExpenceTypes: PropTypes.func.isRequired,
+   clearExpenceTypes: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -168,4 +172,5 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    loadExpenceTypes,
    updateExpenceTypes,
+   clearExpenceTypes,
 })(EditExpenceType);

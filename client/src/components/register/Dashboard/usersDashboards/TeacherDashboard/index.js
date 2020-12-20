@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { loadClasses } from "../../../../../actions/class";
+import { clearClasses, loadClasses } from "../../../../../actions/class";
 
 import ClassesTable from "../../../../tables/ClassesTable";
 
@@ -10,6 +10,7 @@ const TeacherDashboard = ({
    loadClasses,
    classes: { classes, loadingClasses },
    users: { user },
+   clearClasses,
 }) => {
    useEffect(() => {
       loadClasses({ teacher: user._id });
@@ -20,7 +21,11 @@ const TeacherDashboard = ({
             <>
                <h3 className="heading-secondary text-dark p-1">Cursos</h3>
                {classes.length > 0 ? (
-                  <ClassesTable classes={classes} all={false} />
+                  <ClassesTable
+                     classes={classes}
+                     all={false}
+                     clearClass={clearClasses}
+                  />
                ) : (
                   <p className="heading-tertiary text-center">
                      No hay classes registradas
@@ -36,6 +41,7 @@ TeacherDashboard.propTypes = {
    classes: PropTypes.object.isRequired,
    users: PropTypes.object.isRequired,
    loadClasses: PropTypes.func.isRequired,
+   clearClasses: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -43,4 +49,6 @@ const mapStateToProps = (state) => ({
    users: state.users,
 });
 
-export default connect(mapStateToProps, { loadClasses })(TeacherDashboard);
+export default connect(mapStateToProps, { loadClasses, clearClasses })(
+   TeacherDashboard
+);

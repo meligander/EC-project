@@ -4,19 +4,19 @@ import moment from "moment";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { loadTeachers, addUser } from "../../../../../../actions/user";
+import { loadTeachers, addUser } from "../../../../../../../actions/user";
 import {
-   updateClass,
+   updateClassCategory,
    registerUpdateClass,
-} from "../../../../../../actions/class";
+} from "../../../../../../../actions/class";
 
-import ChosenChildrenTable from "../../../../../tables/ChosenChildrenTable";
-import Confirm from "../../../../../modal/Confirm";
+import ChosenChildrenTable from "../../../../../../tables/ChosenChildrenTable";
+import Confirm from "../../../../../../modal/Confirm";
 
 const NewClassTab = ({
    history,
    location,
-   updateClass,
+   updateClassCategory,
    registerUpdateClass,
    loadTeachers,
    addUser,
@@ -101,7 +101,7 @@ const NewClassTab = ({
          (student) => student._id !== studentToDelete._id
       );
       addUser(studentToDelete);
-      updateClass({ ...classInfo, students: newStudents });
+      updateClassCategory({ ...classInfo, students: newStudents });
    };
 
    const setToggle = (e) => {
@@ -315,7 +315,7 @@ const NewClassTab = ({
 NewClassTab.propTypes = {
    users: PropTypes.object.isRequired,
    classes: PropTypes.object.isRequired,
-   updateClass: PropTypes.func.isRequired,
+   updateClassCategory: PropTypes.func.isRequired,
    loadTeachers: PropTypes.func.isRequired,
    registerUpdateClass: PropTypes.func.isRequired,
    addUser: PropTypes.func.isRequired,
@@ -328,7 +328,7 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    loadTeachers,
-   updateClass,
+   updateClassCategory,
    registerUpdateClass,
    addUser,
 })(withRouter(NewClassTab));

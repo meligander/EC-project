@@ -8,8 +8,8 @@ import PropTypes from "prop-types";
 import {
    loadEnrollments,
    deleteEnrollment,
-   clearEnrollment,
    enrollmentsPDF,
+   clearEnrollment,
 } from "../../../../../actions/enrollment";
 import { loadCategories } from "../../../../../actions/category";
 import { updatePageNumber } from "../../../../../actions/mixvalues";
@@ -27,7 +27,6 @@ const EnrollmentList = ({
    deleteEnrollment,
    loadCategories,
    updatePageNumber,
-   clearEnrollment,
    enrollmentsPDF,
 }) => {
    const day = moment();
@@ -49,7 +48,6 @@ const EnrollmentList = ({
    const { startDate, endDate, category, year } = filterData;
 
    useEffect(() => {
-      clearEnrollment();
       if (loadingEnrollments) {
          updatePageNumber(0);
          loadEnrollments({
@@ -60,13 +58,7 @@ const EnrollmentList = ({
          });
          loadCategories();
       }
-   }, [
-      loadingEnrollments,
-      loadEnrollments,
-      loadCategories,
-      updatePageNumber,
-      clearEnrollment,
-   ]);
+   }, [loadingEnrollments, loadEnrollments, loadCategories, updatePageNumber]);
 
    const onChange = (e) => {
       setFilterData({
@@ -208,6 +200,10 @@ const EnrollmentList = ({
                                           <Link
                                              to={`/edit-enrollment/${enroll._id}`}
                                              className="btn-text"
+                                             onClick={() => {
+                                                window.scroll(0, 0);
+                                                clearEnrollment();
+                                             }}
                                           >
                                              <i className="far fa-edit"></i>
                                           </Link>

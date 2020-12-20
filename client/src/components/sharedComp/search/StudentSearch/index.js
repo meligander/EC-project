@@ -16,7 +16,7 @@ const StudentSearch = ({
    selectStudent,
    selectedStudent,
    loadUsers,
-   studentDebt = false,
+   studentInstallment = false,
    student = true,
    enrollment = false,
 }) => {
@@ -38,7 +38,7 @@ const StudentSearch = ({
    };
 
    return (
-      <div className="form-group">
+      <div className="my-2">
          <h3>{`Búsqueda de ${student ? "Alumnos" : "Usuarios"}`}</h3>
          <div className="border my-2">
             <Alert type="3" />
@@ -100,7 +100,7 @@ const StudentSearch = ({
                <div className="btn-right">
                   {!enrollment && (
                      <button className="btn" onClick={addToList}>
-                        {!studentDebt ? (
+                        {!studentInstallment ? (
                            <>
                               <i className="fas fa-user-plus"></i>
                               <span className="hide-md"> Agregar</span>

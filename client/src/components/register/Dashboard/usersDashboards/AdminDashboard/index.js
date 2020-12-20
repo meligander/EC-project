@@ -6,8 +6,13 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { loadRegister } from "../../../../../actions/register";
+import { loadRegister, clearRegisters } from "../../../../../actions/register";
+import { clearInvoiceNumber } from "../../../../../actions/mixvalues";
+import { clearInstallments } from "../../../../../actions/installment";
 import { getAdminDash } from "../../../../../actions/mixvalues";
+import { clearSearch } from "../../../../../actions/user";
+import { clearClasses } from "../../../../../actions/class";
+import { clearCategories } from "../../../../../actions/category";
 
 import "./style.scss";
 
@@ -23,6 +28,12 @@ const AdminDashboard = ({
    registers: { register, loading },
    loadRegister,
    getAdminDash,
+   clearInvoiceNumber,
+   clearInstallments,
+   clearRegisters,
+   clearSearch,
+   clearClasses,
+   clearCategories,
 }) => {
    const [adminData, setAdminData] = useState({
       dateR: moment(),
@@ -68,7 +79,12 @@ const AdminDashboard = ({
                            <Link
                               to="/invoice-generation"
                               className="side-nav-link"
-                              onClick={() => window.scroll(0, 0)}
+                              onClick={() => {
+                                 clearInstallments();
+                                 clearInvoiceNumber();
+                                 clearSearch();
+                                 window.scroll(0, 0);
+                              }}
                            >
                               <i className="fas fa-hand-holding-usd side-nav-icon"></i>{" "}
                               <span className="hide-sm">Facturación</span>
@@ -78,7 +94,10 @@ const AdminDashboard = ({
                            <Link
                               className="side-nav-link"
                               to="/cashregister-info"
-                              onClick={() => window.scroll(0, 0)}
+                              onClick={() => {
+                                 clearRegisters();
+                                 window.scroll(0, 0);
+                              }}
                            >
                               <i className="fas fa-cash-register side-nav-icon"></i>{" "}
                               <span className="hide-sm">Caja</span>
@@ -113,7 +132,10 @@ const AdminDashboard = ({
                         <li className="side-nav-item">
                            <Link
                               to="/search"
-                              onClick={() => window.scroll(0, 0)}
+                              onClick={() => {
+                                 clearSearch();
+                                 window.scroll(0, 0);
+                              }}
                               className="side-nav-link"
                            >
                               <i className="fas fa-search side-nav-icon"></i>
@@ -123,7 +145,11 @@ const AdminDashboard = ({
                         <li className="side-nav-item">
                            <Link
                               to="/installments/0"
-                              onClick={() => window.scroll(0, 0)}
+                              onClick={() => {
+                                 clearSearch();
+                                 clearInstallments();
+                                 window.scroll(0, 0);
+                              }}
                               className="side-nav-link"
                            >
                               <i className="far fa-calendar-alt side-nav-icon"></i>
@@ -133,7 +159,10 @@ const AdminDashboard = ({
                         <li className="side-nav-item">
                            <Link
                               to="/classes"
-                              onClick={() => window.scroll(0, 0)}
+                              onClick={() => {
+                                 clearClasses();
+                                 window.scroll(0, 0);
+                              }}
                               className="side-nav-link"
                            >
                               <i className="fas fa-chalkboard side-nav-icon"></i>
@@ -143,7 +172,10 @@ const AdminDashboard = ({
                         <li className="side-nav-item">
                            <Link
                               to="/enrollment"
-                              onClick={() => window.scroll(0, 0)}
+                              onClick={() => {
+                                 clearSearch();
+                                 window.scroll(0, 0);
+                              }}
                               className="side-nav-link"
                            >
                               <i className="fas fa-user-edit side-nav-icon"></i>
@@ -153,7 +185,10 @@ const AdminDashboard = ({
                         <li className="side-nav-item">
                            <Link
                               to="/categories"
-                              onClick={() => window.scroll(0, 0)}
+                              onClick={() => {
+                                 clearCategories();
+                                 window.scroll(0, 0);
+                              }}
                               className="side-nav-link"
                            >
                               <i className="fas fa-layer-group side-nav-icon"></i>
@@ -163,7 +198,10 @@ const AdminDashboard = ({
                         <li className="side-nav-item">
                            <Link
                               to="/mention-list"
-                              onClick={() => window.scroll(0, 0)}
+                              onClick={() => {
+                                 clearSearch();
+                                 window.scroll(0, 0);
+                              }}
                               className="side-nav-link"
                            >
                               <i className="fas fa-graduation-cap side-nav-icon"></i>
@@ -217,6 +255,12 @@ AdminDashboard.propTypes = {
    mixvalues: PropTypes.object.isRequired,
    loadRegister: PropTypes.func.isRequired,
    getAdminDash: PropTypes.func.isRequired,
+   clearInvoiceNumber: PropTypes.func.isRequired,
+   clearInstallments: PropTypes.func.isRequired,
+   clearRegisters: PropTypes.func.isRequired,
+   clearSearch: PropTypes.func.isRequired,
+   clearClasses: PropTypes.func.isRequired,
+   clearCategories: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -224,6 +268,13 @@ const mapStateToProps = (state) => ({
    registers: state.registers,
 });
 
-export default connect(mapStateToProps, { getAdminDash, loadRegister })(
-   AdminDashboard
-);
+export default connect(mapStateToProps, {
+   getAdminDash,
+   loadRegister,
+   clearInstallments,
+   clearInvoiceNumber,
+   clearRegisters,
+   clearSearch,
+   clearClasses,
+   clearCategories,
+})(AdminDashboard);

@@ -4,7 +4,8 @@ import { connect } from "react-redux";
 import Moment from "react-moment";
 import PropTypes from "prop-types";
 
-import { addLike, removeLike } from "../../../../../actions/post";
+import { addLike, clearPost, removeLike } from "../../../../../actions/post";
+import { clearProfile } from "../../../../../actions/user";
 
 import "./style.scss";
 
@@ -15,6 +16,8 @@ const Post = ({
    auth: { userLogged },
    showActions,
    isComment,
+   clearPost,
+   clearProfile,
    setToggle,
 }) => {
    return (
@@ -30,7 +33,13 @@ const Post = ({
                </button>
             )}
          </div>
-         <Link to={`/dashboards/${post.user}`}>
+         <Link
+            to={`/dashboards/${post.user}`}
+            onClick={() => {
+               window.scroll(0, 0);
+               clearProfile();
+            }}
+         >
             <figure className="post-shape">
                <img
                   className="post-img"
@@ -89,6 +98,9 @@ const Post = ({
                      <Link
                         to={`/chat/post/${post._id}`}
                         className="btn btn-light"
+                        onClick={() => {
+                           clearPost();
+                        }}
                      >
                         <i className="far fa-comments"></i>
                         {post.comments.length > 0 && (
@@ -112,10 +124,17 @@ Post.propTypes = {
    auth: PropTypes.object.isRequired,
    showActions: PropTypes.bool,
    isComment: PropTypes.bool,
+   clearProfile: PropTypes.func.isRequired,
+   clearPost: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    auth: state.auth,
 });
 
-export default connect(mapStateToProps, { addLike, removeLike })(Post);
+export default connect(mapStateToProps, {
+   addLike,
+   removeLike,
+   clearPost,
+   clearProfile,
+})(Post);

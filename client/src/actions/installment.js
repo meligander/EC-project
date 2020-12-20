@@ -1,3 +1,10 @@
+import moment from "moment";
+import axios from "axios";
+import { saveAs } from "file-saver";
+
+import { setAlert } from "./alert";
+import { updateLoadingSpinner } from "./mixvalues";
+
 import {
    INSTALLMENTS_ERROR,
    INSTALLMENTS_LOADED,
@@ -13,13 +20,8 @@ import {
    INVOICE_DETAIL_REMOVED,
    INSTALLMENTS_UPDATED,
 } from "./types";
-import axios from "axios";
-import moment from "moment";
-import { saveAs } from "file-saver";
-import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
 
-export const loadStudentDebts = (user_id, admin = false) => async (
+export const loadStudentInstallments = (user_id, admin = false) => async (
    dispatch
 ) => {
    if (admin) dispatch(updateLoadingSpinner(true));
@@ -46,7 +48,7 @@ export const loadStudentDebts = (user_id, admin = false) => async (
    dispatch(updateLoadingSpinner(false));
 };
 
-export const loadDebts = (filterData) => async (dispatch) => {
+export const loadInstallments = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
@@ -81,9 +83,9 @@ export const loadDebts = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const loadDebt = (debt_id) => async (dispatch) => {
+export const loadInstallment = (installment_id) => async (dispatch) => {
    try {
-      const res = await axios.get(`/api/installment/${debt_id}`);
+      const res = await axios.get(`/api/installment/${installment_id}`);
       dispatch({
          type: INSTALLMENT_LOADED,
          payload: res.data,
@@ -147,11 +149,8 @@ export const updateIntallment = (
       }
       dispatch({
          type: edit ? INSTALLMENT_UPDATED : INSTALLMENT_REGISTERED,
-         payload: res.data,
       });
-      dispatch(
-         setAlert(edit ? "Cuota modificada" : "Cuota creada", "success", "2")
-      );
+      dispatch(setAlert(res.msg, "success", "2"));
       dispatch(clearInstallments());
       history.push(`/installments/${user_id}`);
    } catch (err) {
@@ -254,10 +253,10 @@ export const updateExpiredIntallments = () => async (dispatch) => {
    }
 };
 
-export const debtsPDF = (debts) => async (dispatch) => {
+export const installmentsPDF = (installments) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
-   let debt = JSON.stringify(debts);
+   let installment = JSON.stringify(installments);
    try {
       const config = {
          headers: {
@@ -265,7 +264,7 @@ export const debtsPDF = (debts) => async (dispatch) => {
          },
       };
 
-      await axios.post("/api/installment/create-list", debt, config);
+      await axios.post("/api/installment/create-list", installment, config);
 
       const pdf = await axios.get("/api/installment/list/fetch-list", {
          responseType: "blob",

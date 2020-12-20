@@ -1,5 +1,6 @@
-import { MENU_TOGGLED, PAGE_CHANGED } from "./types";
 import { logOut } from "./auth";
+
+import { MENU_TOGGLED, PAGE_CHANGED } from "./types";
 
 export const toggleMenu = () => (dispatch) => {
    dispatch({

@@ -2,13 +2,14 @@ import {
    ADMIN_DASH_LOADED,
    STUDENTNUMBER_LOADED,
    INVOICENUMBER_LOADED,
+   INVOICENUMBER_CLEARED,
    LOADING_SPINNER_UPDATED,
    VALUES_CLEARED,
-   INVOICE_NUMBER_UPDATED,
    VALUES_ERROR,
    SEARCH_PAGE_CHANGED,
    TOTAL_DEBT_LOADED,
    LOADING_ADMINDASH_UPDATED,
+   STUDENTNUMBER_CLEARED,
 } from "../actions/types";
 
 const initialState = {
@@ -85,12 +86,15 @@ export default function (state = initialState, action) {
          };
       case VALUES_CLEARED:
          return initialState;
-      case INVOICE_NUMBER_UPDATED:
-         const newNumber = state.invoiceNumber + 1;
-         console.log(newNumber);
+      case INVOICENUMBER_CLEARED:
          return {
             ...state,
-            invoiceNumber: newNumber,
+            invoiceNumber: "",
+         };
+      case STUDENTNUMBER_CLEARED:
+         return {
+            ...state,
+            studentNumber: "",
          };
       default:
          return state;

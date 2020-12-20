@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { loadRelatives, clearSearch } from "../../../../../../actions/user";
-import { setAlert } from "../../../../../../actions/alert";
+import { loadRelatives, clearSearch } from "../../../../../../../actions/user";
+import { setAlert } from "../../../../../../../actions/alert";
 
-import ChosenChildrenTable from "../../../../../tables/ChosenChildrenTable";
-import StudentSearch from "../../../../../sharedComp/search/StudentSearch";
+import ChosenChildrenTable from "../../../../../../tables/ChosenChildrenTable";
+import StudentSearch from "../../../../../../sharedComp/search/StudentSearch";
 
-const RelatedStudents = ({
+const TutorInfo = ({
    setChildrenForm,
    isEditing,
    user_id,
@@ -25,7 +25,6 @@ const RelatedStudents = ({
    const [children, setchildren] = useState([]);
 
    useEffect(() => {
-      clearSearch();
       if (isEditing) {
          loadRelatives(user_id, false);
          let child = {};
@@ -39,7 +38,7 @@ const RelatedStudents = ({
          }
       }
       // eslint-disable-next-line
-   }, [relativesLoading, isEditing, user_id, clearSearch]);
+   }, [relativesLoading, isEditing, user_id]);
 
    const selectStudent = (user) => {
       setSelectedStudent({
@@ -62,6 +61,7 @@ const RelatedStudents = ({
             name: "",
             _id: "",
          });
+         clearSearch();
       } else {
          setAlert("El alumno ya ha sido agregado", "danger", "3");
       }
@@ -73,7 +73,7 @@ const RelatedStudents = ({
       setChildrenForm(childToDelete._id, false);
    };
    return (
-      <>
+      <div className="my-4">
          {isAdmin && (
             <StudentSearch
                addToList={addToList}
@@ -90,11 +90,11 @@ const RelatedStudents = ({
                deleteChild={deleteChild}
             />
          )}
-      </>
+      </div>
    );
 };
 
-RelatedStudents.propTypes = {
+TutorInfo.propTypes = {
    users: PropTypes.object.isRequired,
    loadRelatives: PropTypes.func.isRequired,
    setChildrenForm: PropTypes.func.isRequired,
@@ -110,4 +110,4 @@ export default connect(mapStateToProps, {
    loadRelatives,
    setAlert,
    clearSearch,
-})(RelatedStudents);
+})(TutorInfo);

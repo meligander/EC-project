@@ -1,18 +1,22 @@
+import moment from "moment";
+import axios from "axios";
+import { saveAs } from "file-saver";
+
+import { updateLoadingSpinner } from "./mixvalues";
+import { clearRegisters } from "./register";
+import { setAlert } from "./alert";
+
 import {
    EXPENCETYPES_LOADED,
+   EXPENCETYPES_CLEARED,
    EXPENCE_REGISTERED,
    EXPENCE_ERROR,
    EXPENCES_LOADED,
    EXPENCETYPES_UPDATED,
    EXPENCETYPE_ERROR,
    EXPENCE_DELETED,
+   EXPENCES_CLEARED,
 } from "./types";
-import axios from "axios";
-import moment from "moment";
-import { saveAs } from "file-saver";
-import { updateLoadingSpinner } from "./mixvalues";
-import { clearRegister } from "./register";
-import { setAlert } from "./alert";
 
 export const loadExpences = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
@@ -92,7 +96,7 @@ export const registerExpence = (formData, history, user_id) => async (
       });
       dispatch(setAlert("Gasto/Ingreso Registrado", "success", "1"));
       history.push(`/dashboard/${user_id}`);
-      dispatch(clearRegister());
+      dispatch(clearRegisters());
    } catch (err) {
       if (err.response.data.erros) {
          const errors = err.response.data.errors;
@@ -132,7 +136,7 @@ export const deleteExpence = (expence_id) => async (dispatch) => {
       });
 
       dispatch(setAlert("Movimiento Eliminado", "success", "2"));
-      dispatch(clearRegister());
+      dispatch(clearRegisters());
    } catch (err) {
       dispatch({
          type: EXPENCE_ERROR,
@@ -220,4 +224,12 @@ export const expencesPDF = (expences) => async (dispatch) => {
 
    window.scrollTo(0, 0);
    dispatch(updateLoadingSpinner(true));
+};
+
+export const clearExpenceTypes = () => (dispatch) => {
+   dispatch({ type: EXPENCETYPES_CLEARED });
+};
+
+export const clearExpences = () => (dispatch) => {
+   dispatch({ type: EXPENCES_CLEARED });
 };
