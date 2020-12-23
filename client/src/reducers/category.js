@@ -1,8 +1,8 @@
 import {
    CATEGORIES_LOADED,
-   CATEGORY_ERROR,
    CATEGORIES_UPDATED,
    CATEGORIES_CLEARED,
+   CATEGORY_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -15,22 +15,22 @@ export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
       case CATEGORIES_LOADED:
-      case CATEGORIES_UPDATED:
          return {
             ...state,
             categories: payload,
             loading: false,
             error: {},
          };
+      case CATEGORIES_UPDATED:
+         return state;
+      case CATEGORIES_CLEARED:
+         return initialState;
       case CATEGORY_ERROR:
          return {
             ...state,
-            categories: [],
             loading: false,
             error: payload,
          };
-      case CATEGORIES_CLEARED:
-         return initialState;
       default:
          return state;
    }

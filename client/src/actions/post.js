@@ -5,15 +5,15 @@ import { updateLoadingSpinner } from "./mixvalues";
 
 import {
    POST_LOADED,
-   POST_ERROR,
    POSTS_LOADED,
-   LIKES_UPDATED,
-   POST_DELETED,
    POST_ADDED,
+   POST_DELETED,
+   LIKES_UPDATED,
    COMMENT_ADDED,
    COMMENT_DELETED,
    POSTS_CLEARED,
    POST_CLEARED,
+   POST_ERROR,
 } from "./types";
 
 //Get all posts

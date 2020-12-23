@@ -16,6 +16,8 @@ import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
 import Confirm from "../../../../modal/Confirm";
 
+import "./style.scss";
+
 const ExpenceList = ({
    loadExpenceTypes,
    loadExpences,
@@ -126,8 +128,8 @@ const ExpenceList = ({
                      </button>
                   </div>
                </form>
-               <div className="wrapper">
-                  <table className="my-2">
+               <div className="wrapper my-2">
+                  <table className="expences">
                      <thead>
                         <tr>
                            <th>Fecha</th>
@@ -144,7 +146,17 @@ const ExpenceList = ({
                               (expence, i) =>
                                  i >= page * 10 &&
                                  i < (page + 1) * 10 && (
-                                    <tr key={expence._id}>
+                                    <tr
+                                       key={expence._id}
+                                       className={
+                                          expence.expencetype.type === "Gasto"
+                                             ? "bg-expence"
+                                             : expence.expencetype.type ===
+                                               "Ingreso"
+                                             ? "bg-income"
+                                             : "bg-withdrawal"
+                                       }
+                                    >
                                        <td>
                                           <Moment
                                              date={expence.date}

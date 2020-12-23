@@ -35,7 +35,7 @@ const Categories = ({
 
    useEffect(() => {
       const initInput = () => {
-         setFormData([...categories]);
+         setFormData(categories);
       };
       const monthMinMax = (date, num) => {
          return date.getMonth() + num > 9

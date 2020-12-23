@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
 import {
+   clearGradeTypes,
    loadGradesByClass,
    loadGradeTypesByCategory,
 } from "../../../actions/grade";
@@ -17,32 +18,36 @@ import Tabs from "../../sharedComp/Tabs";
 const Grades = ({
    match,
    classes,
-   grades: { gradeTypes, loading, error },
+   grades: { loadingGT, loading },
    loadGradesByClass,
    loadGradeTypesByCategory,
    loadClass,
+   clearGradeTypes,
 }) => {
    const [oneLoad, setOneLoad] = useState(true);
+
    useEffect(() => {
       if (oneLoad) {
-         loadGradesByClass(match.params.id);
-         loadClass(match.params.id);
+         if (loading) loadGradesByClass(match.params.id);
+         if (classes.loading) loadClass(match.params.id);
+         clearGradeTypes();
          setOneLoad(false);
       } else {
-         if (gradeTypes.length === 0 && !classes.loading && !error.type) {
+         if (loadingGT && !classes.loading) {
             loadGradeTypesByCategory(classes.classInfo.category._id);
          }
       }
    }, [
+      loading,
+      loadingGT,
       classes.loading,
       oneLoad,
       loadGradeTypesByCategory,
       classes.classInfo,
       loadClass,
       loadGradesByClass,
+      clearGradeTypes,
       match.params.id,
-      gradeTypes,
-      error.type,
    ]);
 
    const tabs = (className) => {
@@ -130,6 +135,7 @@ Grades.propTypes = {
    loadGradesByClass: PropTypes.func.isRequired,
    loadGradeTypesByCategory: PropTypes.func.isRequired,
    loadClass: PropTypes.func.isRequired,
+   clearGradeTypes: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -141,4 +147,5 @@ export default connect(mapStateToProps, {
    loadGradesByClass,
    loadClass,
    loadGradeTypesByCategory,
+   clearGradeTypes,
 })(withRouter(Grades));

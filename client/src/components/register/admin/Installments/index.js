@@ -1,45 +1,43 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import {
    clearInstallments,
    clearInstallment,
+   loadStudentInstallments,
 } from "../../../../actions/installment";
+import { updatePreviousPage } from "../../../../actions/mixvalues";
+import { clearPenalty, updatePenalty } from "../../../../actions/penalty";
 
 import InstallmentsSearch from "../../../sharedComp/search/InstallmentsSearch";
 import Confirm from "../../../modal/Confirm";
-import { clearPenalty, updatePenalty } from "../../../../actions/penalty";
 
 const Installments = ({
-   installment: { usersInstallments },
+   location,
+   match,
+   installment: { usersInstallments, loadingUsersInstallments },
    auth: { userLogged },
    clearInstallments,
    clearInstallment,
    clearPenalty,
    updatePenalty,
+   loadStudentInstallments,
+   updatePreviousPage,
 }) => {
    const [otherValues, setOtherValues] = useState({
-      student: "",
       toggleModal: false,
    });
 
-   const { student, toggleModal } = otherValues;
+   const _id = match.params.studentid;
+
+   const { toggleModal } = otherValues;
 
    useEffect(() => {
-      if (usersInstallments.rows.length > 0) {
-         for (let x = 0; x < usersInstallments.rows[0].length; x++) {
-            if (usersInstallments.rows[0][x].student) {
-               setOtherValues((prev) => ({
-                  ...prev,
-                  student: usersInstallments.rows[0][x].student._id,
-               }));
-               break;
-            }
-         }
-      }
-   }, [usersInstallments.rows.length, usersInstallments.rows]);
+      if (_id !== "0" && loadingUsersInstallments)
+         loadStudentInstallments(_id, true);
+   }, [_id, loadStudentInstallments, loadingUsersInstallments]);
 
    const setToggle = () => {
       setOtherValues({ ...otherValues, toggleModal: !toggleModal });
@@ -71,6 +69,7 @@ const Installments = ({
                   onClick={() => {
                      window.scroll(0, 0);
                      clearInstallments();
+                     updatePreviousPage(location.pathname);
                   }}
                   className="btn btn-light"
                >
@@ -87,11 +86,12 @@ const Installments = ({
                   }`}
                   to={
                      usersInstallments.rows.length > 0
-                        ? `/edit-installment/${student}/0/0`
+                        ? `/edit-installment/${_id}/0/0`
                         : "#"
                   }
                   onClick={() => {
                      window.scroll(0, 0);
+                     updatePreviousPage(location.pathname);
                      clearInstallment();
                   }}
                >
@@ -111,6 +111,8 @@ Installments.propTypes = {
    clearInstallment: PropTypes.func.isRequired,
    clearPenalty: PropTypes.func.isRequired,
    updatePenalty: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
+   loadStudentInstallments: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -123,4 +125,6 @@ export default connect(mapStateToProps, {
    clearInstallment,
    clearPenalty,
    updatePenalty,
-})(Installments);
+   updatePreviousPage,
+   loadStudentInstallments,
+})(withRouter(Installments));

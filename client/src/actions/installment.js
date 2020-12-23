@@ -6,31 +6,32 @@ import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
 
 import {
-   INSTALLMENTS_ERROR,
-   INSTALLMENTS_LOADED,
    INSTALLMENT_LOADED,
-   INSTALLMENTS_CLEARED,
-   INSTALLMENT_CLEARED,
-   USER_INSTALLMENTS_CLEARED,
+   INSTALLMENTS_LOADED,
+   USER_INSTALLMENTS_LOADED,
    INSTALLMENT_UPDATED,
    INSTALLMENT_REGISTERED,
    INSTALLMENT_DELETED,
-   USERS_INSTALLMENTS_LOADED,
    INVOICE_DETAIL_ADDED,
    INVOICE_DETAIL_REMOVED,
-   INSTALLMENTS_UPDATED,
+   EXPIRED_INSTALLMENTS_UPDATED,
+   INSTALLMENT_CLEARED,
+   INSTALLMENTS_CLEARED,
+   USER_INSTALLMENTS_CLEARED,
+   INSTALLMENTS_ERROR,
 } from "./types";
 
 export const loadStudentInstallments = (user_id, admin = false) => async (
    dispatch
 ) => {
+   //admin: if is for the dashboard, dont start it... only when is the admin loading the installments
    if (admin) dispatch(updateLoadingSpinner(true));
    try {
       const res = await axios.get(
          `/api/installment/student/${user_id}/${admin}`
       );
       dispatch({
-         type: USERS_INSTALLMENTS_LOADED,
+         type: USER_INSTALLMENTS_LOADED,
          payload: res.data,
       });
    } catch (err) {
@@ -113,13 +114,9 @@ export const addInstallment = (installment) => (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const updateIntallment = (
-   formData,
-   history,
-   edit = false,
-   inst_id,
-   user_id
-) => async (dispatch) => {
+export const updateIntallment = (formData, history, user_id, inst_id) => async (
+   dispatch
+) => {
    dispatch(updateLoadingSpinner(true));
 
    let installment = {};
@@ -137,7 +134,7 @@ export const updateIntallment = (
    };
    try {
       let res;
-      if (!edit) {
+      if (!inst_id) {
          res = await axios.post("/api/installment", installment, config);
       } else {
          //Update installment
@@ -148,9 +145,9 @@ export const updateIntallment = (
          );
       }
       dispatch({
-         type: edit ? INSTALLMENT_UPDATED : INSTALLMENT_REGISTERED,
+         type: inst_id ? INSTALLMENT_UPDATED : INSTALLMENT_REGISTERED,
       });
-      dispatch(setAlert(res.msg, "success", "2"));
+      dispatch(setAlert(res.data.msg, "success", "2"));
       dispatch(clearInstallments());
       history.push(`/installments/${user_id}`);
    } catch (err) {
@@ -177,6 +174,7 @@ export const updateIntallment = (
    }
 
    window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const deleteInstallment = (inst_id, history, user_id) => async (
@@ -208,6 +206,7 @@ export const deleteInstallment = (inst_id, history, user_id) => async (
    }
 
    window.scroll(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const removeInstallmentFromList = (inst_id) => async (dispatch) => {
@@ -237,7 +236,7 @@ export const updateExpiredIntallments = () => async (dispatch) => {
       await axios.put("/api/installment");
 
       dispatch({
-         type: INSTALLMENTS_UPDATED,
+         type: EXPIRED_INSTALLMENTS_UPDATED,
       });
    } catch (err) {
       dispatch({

@@ -6,13 +6,14 @@ import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
 
 import {
-   CATEGORY_ERROR,
    CATEGORIES_LOADED,
    CATEGORIES_UPDATED,
    CATEGORIES_CLEARED,
+   CATEGORY_ERROR,
 } from "./types";
 
 export const loadCategories = (editClass = false) => async (dispatch) => {
+   //editClass is to start the spinner when we get to register class // edit class
    if (editClass) dispatch(updateLoadingSpinner(true));
    try {
       const res = await axios.get("/api/category");
@@ -37,6 +38,7 @@ export const loadCategories = (editClass = false) => async (dispatch) => {
 export const updateCategories = (formData, history, user_id) => async (
    dispatch
 ) => {
+   dispatch(updateLoadingSpinner(true));
    let categories = JSON.stringify(formData);
 
    const config = {
@@ -46,14 +48,15 @@ export const updateCategories = (formData, history, user_id) => async (
    };
 
    try {
-      const res = await axios.put("/api/category", categories, config);
+      await axios.put("/api/category", categories, config);
 
       dispatch({
          type: CATEGORIES_UPDATED,
-         payload: res.data,
       });
 
-      dispatch(setAlert("Precios de categorias actualizados", "success", "1"));
+      dispatch(
+         setAlert("Precios de Categorías Modificados", "success", "1", 10000)
+      );
       history.push(`/dashboard/${user_id}`);
    } catch (err) {
       if (err.response.data.errors) {
@@ -79,6 +82,7 @@ export const updateCategories = (formData, history, user_id) => async (
    }
 
    window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const categoriesPDF = (categories) => async (dispatch) => {

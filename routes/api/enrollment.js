@@ -103,6 +103,7 @@ router.get("/average", [auth, adminAuth], async (req, res) => {
             path: "student",
             model: "user",
             select: ["name", "lastname", "studentnumber"],
+            match: { active: true },
          })
          .populate({
             path: "category",
@@ -143,6 +144,7 @@ router.get("/absences", [auth, adminAuth], async (req, res) => {
             path: "student",
             model: "user",
             select: ["name", "lastname", "studentnumber"],
+            match: { active: true },
          })
          .populate({
             path: "category",
@@ -558,7 +560,7 @@ router.post(
             await installment.save();
          }
 
-         res.json(enrollment);
+         res.json({ msg: "Enrollment Registered" });
       } catch (err) {
          console.error(err.message);
          return res.status(500).send("Server Error");
@@ -634,10 +636,7 @@ router.put(
 
             let value = categoryInstallment.value;
 
-            if (
-               studentfound.discount !== undefined &&
-               studentfound.discount !== 0
-            ) {
+            if (studentfound.discount && studentfound.discount !== 0) {
                const disc =
                   (categoryInstallment.value * studentfound.discount) / 100;
                value = Math.round((value - disc) / 10) * 10;

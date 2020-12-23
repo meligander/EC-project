@@ -4,10 +4,10 @@ import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
 
 import {
-   PENALTY_REGISTERED,
-   PENALTY_ERROR,
    PENALTY_LOADED,
+   PENALTY_REGISTERED,
    PENALTY_CLEARED,
+   PENALTY_ERROR,
 } from "./types";
 
 export const loadPenalty = () => async (dispatch) => {
@@ -40,10 +40,9 @@ export const updatePenalty = (formData) => async (dispatch) => {
             "Content-Type": "application/json",
          },
       };
-      const res = await axios.post("/api/penalty", penalty, config);
+      await axios.post("/api/penalty", penalty, config);
       dispatch({
          type: PENALTY_REGISTERED,
-         payload: res.data,
       });
       dispatch(setAlert("Recargo Modificado", "success", "4"));
    } catch (err) {

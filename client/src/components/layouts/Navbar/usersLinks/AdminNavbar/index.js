@@ -8,7 +8,10 @@ import {
    changePage,
    changePageAndMenu,
 } from "../../../../../actions/navbar";
-import { clearInvoiceNumber } from "../../../../../actions/mixvalues";
+import {
+   clearInvoiceNumber,
+   updatePreviousPage,
+} from "../../../../../actions/mixvalues";
 import { clearInstallments } from "../../../../../actions/installment";
 import { clearRegisters } from "../../../../../actions/register";
 import { clearProfile, clearSearch } from "../../../../../actions/user";
@@ -21,6 +24,7 @@ const AdminNavbar = ({
    logOutAndToggle,
    changePage,
    changePageAndMenu,
+   updatePreviousPage,
    clearInstallments,
    clearInvoiceNumber,
    clearRegisters,
@@ -125,6 +129,7 @@ const AdminNavbar = ({
                   window.scroll(0, 0);
                   clearSearch();
                   changePageAndMenu("search");
+                  updatePreviousPage(location.pathname);
                }}
             >
                <i className="fas fa-search"></i>
@@ -147,6 +152,7 @@ const AdminNavbar = ({
                   clearClasses();
                   window.scroll(0, 0);
                   changePageAndMenu("classes");
+                  updatePreviousPage(location.pathname);
                }}
             >
                <i className="fas fa-chalkboard"></i>
@@ -169,6 +175,7 @@ const AdminNavbar = ({
                   window.scroll(0, 0);
                   clearSearch();
                   changePageAndMenu("enrollment");
+                  updatePreviousPage(location.pathname);
                }}
             >
                <i className="fas fa-user-edit"></i>
@@ -189,6 +196,7 @@ const AdminNavbar = ({
                to="/invoice-generation"
                onClick={() => {
                   changePageAndMenu("invoice");
+                  updatePreviousPage(location.pathname);
                   window.scroll(0, 0);
                   clearInstallments();
                   clearInvoiceNumber();
@@ -213,8 +221,10 @@ const AdminNavbar = ({
                to="/cashregister-info"
                onClick={() => {
                   changePageAndMenu("register");
+                  updatePreviousPage(location.pathname);
                   window.scroll(0, 0);
                   clearRegisters();
+                  clearSearch();
                }}
             >
                <i className="fas fa-cash-register"></i>
@@ -249,6 +259,7 @@ AdminNavbar.propTypes = {
    clearSearch: PropTypes.func.isRequired,
    clearClasses: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -260,6 +271,7 @@ export default connect(mapStateToProps, {
    logOutAndToggle,
    changePage,
    changePageAndMenu,
+   updatePreviousPage,
    clearInstallments,
    clearInvoiceNumber,
    clearRegisters,

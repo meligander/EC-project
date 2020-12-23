@@ -5,9 +5,9 @@ import PropTypes from "prop-types";
 
 import Loading from "../../modal/Loading";
 
-const GoBack = ({ history, mixvalues: { loadingSpinner } }) => {
+const GoBack = ({ history, mixvalues: { loadingSpinner, prevPage } }) => {
    const goBack = () => {
-      history.goBack();
+      history.push(prevPage);
    };
 
    return (

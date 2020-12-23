@@ -108,8 +108,7 @@ router.put(
       try {
          let neighbourhood = await Neighbourhood.findOneAndUpdate(
             { _id: req.params.id_neighbourhood },
-            { $set: { name, town } },
-            { new: true }
+            { $set: { name, town } }
          );
 
          res.json(neighbourhood);
@@ -124,10 +123,9 @@ router.put(
 //@desc     Update all neighbourhoods
 //@access   Private
 router.post("/", [auth, adminAuth], async (req, res) => {
-   //An array of neighbourhoods
    const neighbourhoods = req.body;
-   let newNeighbourhoods = [];
    let neighbourhood = {};
+   let newNeighbourhoods = [];
 
    try {
       for (let x = 0; x < neighbourhoods.length; x++) {
@@ -136,20 +134,16 @@ router.post("/", [auth, adminAuth], async (req, res) => {
                .status(400)
                .json({ msg: "El nombre debe estar definido" });
          if (neighbourhoods[x].town === 0)
-            if (neighbourhoods[x].name === "")
-               return res
-                  .status(400)
-                  .json({ msg: "La localidad debe estar definida" });
-      }
-      let oldNeighbourhoods = await Neighbourhood.find();
+            return res
+               .status(400)
+               .json({ msg: "La localidad debe estar definida" });
 
-      for (let x = 0; x < neighbourhoods.length; x++) {
          let name = neighbourhoods[x].name;
          let town = neighbourhoods[x].town;
          let id = neighbourhoods[x]._id;
+
          if (id === "") {
             neighbourhood = new Neighbourhood({ name, town });
-
             await neighbourhood.save();
          } else {
             neighbourhood = await Neighbourhood.findOneAndUpdate(
@@ -157,19 +151,8 @@ router.post("/", [auth, adminAuth], async (req, res) => {
                { $set: { name, town } },
                { new: true }
             );
-            for (let y = 0; y < oldNeighbourhoods.length; y++) {
-               if (oldNeighbourhoods[y]._id.toString() === id) {
-                  oldNeighbourhoods.splice(y, 1);
-                  break;
-               }
-            }
          }
          newNeighbourhoods.push(neighbourhood);
-      }
-      for (let x = 0; x < oldNeighbourhoods.length; x++) {
-         await Neighbourhood.findOneAndRemove({
-            _id: oldNeighbourhoods[x]._id,
-         });
       }
 
       res.json(newNeighbourhoods);
@@ -187,7 +170,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       //Remove neighbourhood
       await Neighbourhood.findOneAndRemove({ _id: req.params.id });
 
-      res.json({ msg: "Neighbourhood deleted" });
+      res.json({ msg: "Neighbourhood Deleted" });
    } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");

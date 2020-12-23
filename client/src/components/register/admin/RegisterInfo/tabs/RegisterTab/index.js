@@ -9,6 +9,7 @@ import {
 } from "../../../../../../actions/register";
 import { clearInvoices } from "../../../../../../actions/invoice";
 import { clearExpences } from "../../../../../../actions/expence";
+import { updatePreviousPage } from "../../../../../../actions/mixvalues";
 
 import Confirm from "../../../../../modal/Confirm";
 
@@ -16,8 +17,10 @@ import "./style.scss";
 
 const RegisterTab = ({
    history,
+   location,
    register,
    closeRegister,
+   updatePreviousPage,
    clearInvoices,
    clearExpences,
    clearRegisters,
@@ -79,6 +82,7 @@ const RegisterTab = ({
                         onClick={() => {
                            window.scroll(0, 0);
                            clearInvoices();
+                           updatePreviousPage(location.pathname);
                         }}
                         to="/income-list"
                      >
@@ -100,6 +104,7 @@ const RegisterTab = ({
                         onClick={() => {
                            window.scroll(0, 0);
                            clearExpences();
+                           updatePreviousPage(location.pathname);
                         }}
                         to="/expence-list"
                      >
@@ -136,6 +141,7 @@ const RegisterTab = ({
                         onClick={() => {
                            window.scroll(0, 0);
                            clearRegisters();
+                           updatePreviousPage(location.pathname);
                         }}
                         className="btn btn-light"
                      >
@@ -209,6 +215,7 @@ RegisterTab.propTypes = {
    register: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
    closeRegister: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
    clearInvoices: PropTypes.func.isRequired,
    clearExpences: PropTypes.func.isRequired,
    clearRegisters: PropTypes.func.isRequired,
@@ -224,4 +231,5 @@ export default connect(mapStateToProps, {
    clearInvoices,
    clearExpences,
    clearRegisters,
+   updatePreviousPage,
 })(withRouter(RegisterTab));

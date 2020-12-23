@@ -72,7 +72,7 @@ router.post(
 
          await penalty.save();
 
-         res.json(penalty);
+         res.json({ msg: "Penalty Registered" });
       } catch (err) {
          console.error(err.message);
          return res.status(500).send("Server Error");

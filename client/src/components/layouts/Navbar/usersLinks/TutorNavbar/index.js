@@ -9,6 +9,7 @@ import {
    changePage,
 } from "../../../../../actions/navbar";
 import { clearProfile } from "../../../../../actions/user";
+import { updatePreviousPage } from "../../../../../actions/mixvalues";
 
 const TutorNavbar = ({
    location,
@@ -18,6 +19,7 @@ const TutorNavbar = ({
    logOutAndToggle,
    changePage,
    changePageAndMenu,
+   updatePreviousPage,
 }) => {
    useEffect(() => {
       const string = location.pathname.substring(1, location.pathname.length);
@@ -81,6 +83,7 @@ const TutorNavbar = ({
                         window.scroll(0, 0);
                         clearProfile();
                         changePageAndMenu(`dashboard${index}`);
+                        updatePreviousPage(location.pathname);
                      }}
                   >
                      <i
@@ -118,6 +121,7 @@ TutorNavbar.propTypes = {
    logOutAndToggle: PropTypes.func.isRequired,
    changePageAndMenu: PropTypes.func.isRequired,
    changePage: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -130,4 +134,5 @@ export default connect(mapStateToProps, {
    logOutAndToggle,
    changePageAndMenu,
    changePage,
+   updatePreviousPage,
 })(withRouter(TutorNavbar));

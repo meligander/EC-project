@@ -11,9 +11,9 @@ import {
    VALUES_CLEARED,
    VALUES_ERROR,
    SEARCH_PAGE_CHANGED,
-   LOADING_ADMINDASH_UPDATED,
    INVOICENUMBER_CLEARED,
    STUDENTNUMBER_CLEARED,
+   PREVPAGE_UPDATED,
 } from "./types";
 
 export const getStudentNumber = () => async (dispatch) => {
@@ -147,8 +147,9 @@ export const updatePageNumber = (page) => (dispatch) => {
    });
 };
 
-export const updateAdminDashLoading = () => (dispatch) => {
+export const updatePreviousPage = (page) => (dispatch) => {
    dispatch({
-      type: LOADING_ADMINDASH_UPDATED,
+      type: PREVPAGE_UPDATED,
+      payload: page,
    });
 };

@@ -236,11 +236,9 @@ router.put("/", [auth, adminAuth], async (req, res) => {
          dateclose: date,
       };
 
-      let register = await Register.findOneAndUpdate({ _id: last.id }, data, {
-         new: true,
-      });
+      await Register.findOneAndUpdate({ _id: last.id }, data);
 
-      res.json(register);
+      res.json({ msg: "Register Closed" });
    } catch (err) {
       console.error(err.message);
       return res.status(500).send("Server Error");

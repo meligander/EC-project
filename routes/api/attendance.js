@@ -161,7 +161,7 @@ router.get("/list/fetch-list", (req, res) => {
 });
 
 //@route    POST api/attendance
-//@desc     Add an attendance
+//@desc     Add a date
 //@access   Private
 router.post("/", auth, async (req, res) => {
    const { user, period, date, classroom } = req.body;
@@ -174,7 +174,13 @@ router.post("/", auth, async (req, res) => {
    };
 
    try {
-      let attendance = new Attendance(data);
+      let attendance = await Attendance.findOne(data);
+
+      if (attendance) {
+         return res.status(400).json({ msg: "Ya se ha agregado dicha fecha" });
+      }
+
+      attendance = new Attendance(data);
       await attendance.save();
 
       const date = new Date();

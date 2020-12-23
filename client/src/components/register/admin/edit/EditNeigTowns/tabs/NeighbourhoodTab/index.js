@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
 import {
-   clearNeighbourhoods,
+   deleteNeighbourhood,
    updateNeighbourhoods,
 } from "../../../../../../../actions/neighbourhood";
 
@@ -14,63 +14,53 @@ const NeighbourhoodTab = ({
    neighbourhoods: { neighbourhoods, loading, error },
    towns,
    updateNeighbourhoods,
-   clearNeighbourhoods,
+   deleteNeighbourhood,
 }) => {
-   const [newValues, setNewValues] = useState([]);
+   const [newNB, setNewNB] = useState([]);
    const [otherValues, setOtherValues] = useState({
       toggleModalDelete: false,
       toggleModalSave: false,
-      neighbourhoodDelete: "",
+      toDelete: "",
    });
 
-   const {
-      toggleModalDelete,
-      toggleModalSave,
-      neighbourhoodDelete,
-   } = otherValues;
+   const { toggleModalDelete, toggleModalSave, toDelete } = otherValues;
 
    useEffect(() => {
-      const init = () => {
-         setNewValues([...neighbourhoods]);
-      };
-      if (!loading) init();
+      if (!loading) setNewNB(neighbourhoods);
    }, [loading, neighbourhoods]);
 
    const onChange = (e, index) => {
-      let newValue = [...newValues];
+      let newValue = [...newNB];
       newValue[index] = {
          ...newValue[index],
          [e.target.name]: e.target.value,
       };
-      setNewValues(newValue);
+      setNewNB(newValue);
    };
 
    const addNeighbourhood = () => {
-      let newValue = [...newValues];
+      let newValue = [...newNB];
       newValue.push({
          _id: "",
          name: "",
          town: 0,
       });
-      setNewValues(newValue);
+      setNewNB(newValue);
    };
 
-   const deleteNeighbourhood = () => {
-      let newValue = [...newValues];
-      newValue.splice(neighbourhoodDelete, 1);
-      setNewValues(newValue);
+   const deleteNeighbourhoodConfirm = () => {
+      deleteNeighbourhood(toDelete._id);
    };
 
    const saveNeighbourhoods = () => {
-      updateNeighbourhoods(newValues);
-      clearNeighbourhoods();
+      updateNeighbourhoods(newNB);
    };
 
-   const setToggleDelete = (neighbourhood_index) => {
+   const setToggleDelete = (nB) => {
       setOtherValues({
          ...otherValues,
          toggleModalDelete: !toggleModalDelete,
-         neighbourhoodDelete: neighbourhood_index,
+         toDelete: nB,
       });
    };
 
@@ -85,7 +75,7 @@ const NeighbourhoodTab = ({
       <div className="mt-3">
          <Confirm
             toggleModal={toggleModalDelete}
-            confirm={deleteNeighbourhood}
+            confirm={deleteNeighbourhoodConfirm}
             setToggleModal={setToggleDelete}
             text="¿Está seguro que desea eliminar el barrio?"
          />
@@ -104,8 +94,9 @@ const NeighbourhoodTab = ({
                </tr>
             </thead>
             <tbody>
-               {newValues.length > 0 &&
-                  newValues.map((item, i) => (
+               {newNB &&
+                  newNB.length > 0 &&
+                  newNB.map((item, i) => (
                      <tr key={i}>
                         <td>
                            <input
@@ -120,9 +111,9 @@ const NeighbourhoodTab = ({
                            <select
                               name="town"
                               onChange={(e) => onChange(e, i)}
-                              value={newValues[i].town}
+                              value={newNB[i].town}
                            >
-                              <option value="0">
+                              <option value={0}>
                                  *Seleccione la localidad a la que pertenece
                               </option>
                               {!towns.loading &&
@@ -136,7 +127,7 @@ const NeighbourhoodTab = ({
                         </td>
                         <td>
                            <button
-                              onClick={() => setToggleDelete(i)}
+                              onClick={() => setToggleDelete(item)}
                               className="btn btn-danger"
                            >
                               <i className="fas fa-trash"></i>
@@ -146,8 +137,10 @@ const NeighbourhoodTab = ({
                   ))}
             </tbody>
          </table>
-         {newValues.length === 0 && (
-            <p className="lead text-dark text-center mt-1">{error.msg}</p>
+         {newNB.length === 0 && (
+            <p className="heading-tertiary text-dark text-center mt-1">
+               {error.msg}
+            </p>
          )}
          <EditButtons
             add={addNeighbourhood}
@@ -162,7 +155,7 @@ NeighbourhoodTab.propTypes = {
    neighbourhoods: PropTypes.object.isRequired,
    towns: PropTypes.object.isRequired,
    updateNeighbourhoods: PropTypes.func.isRequired,
-   clearNeighbourhoods: PropTypes.func.isRequired,
+   deleteNeighbourhood: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -172,5 +165,5 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    updateNeighbourhoods,
-   clearNeighbourhoods,
+   deleteNeighbourhood,
 })(NeighbourhoodTab);

@@ -1,13 +1,14 @@
 import {
    EXPENCES_LOADED,
    EXPENCETYPES_LOADED,
+   EXPENCE_REGISTERED,
+   EXPENCE_DELETED,
+   EXPENCETYPES_UPDATED,
+   EXPENCETYPE_DELETED,
+   EXPENCES_CLEARED,
    EXPENCETYPES_CLEARED,
    EXPENCE_ERROR,
    EXPENCETYPE_ERROR,
-   EXPENCETYPES_UPDATED,
-   EXPENCE_REGISTERED,
-   EXPENCE_DELETED,
-   EXPENCES_CLEARED,
 } from "../actions/types";
 
 const initialState = {
@@ -23,20 +24,44 @@ const initialState = {
 export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
-      case EXPENCETYPES_UPDATED:
-      case EXPENCETYPES_LOADED:
-         return {
-            ...state,
-            expencetypes: payload,
-            loadingET: false,
-            error: {},
-         };
       case EXPENCES_LOADED:
          return {
             ...state,
             expences: payload,
             loadingExpences: false,
             error: {},
+         };
+      case EXPENCETYPES_LOADED:
+      case EXPENCETYPES_UPDATED:
+         return {
+            ...state,
+            expencetypes: payload,
+            loadingET: false,
+            error: {},
+         };
+      case EXPENCE_REGISTERED:
+         return state;
+      case EXPENCE_DELETED:
+         return {
+            ...state,
+            expences: state.expence.map((expence) => expence._id !== payload),
+            loadingExpences: false,
+         };
+      case EXPENCETYPE_DELETED:
+         return {
+            ...state,
+            expencetypes: state.expence.map(
+               (expencetypes) => expencetypes._id !== payload
+            ),
+            loadingET: false,
+         };
+      case EXPENCES_CLEARED:
+         return initialState;
+      case EXPENCETYPES_CLEARED:
+         return {
+            ...state,
+            expencetypes: [],
+            loadingET: true,
          };
       case EXPENCE_ERROR:
          return {
@@ -47,35 +72,12 @@ export default function (state = initialState, action) {
             loadingExpences: false,
             error: payload,
          };
-      case EXPENCE_DELETED:
-         return {
-            ...state,
-            expences: state.expences.filter(
-               (expence) => expence._id !== payload
-            ),
-         };
       case EXPENCETYPE_ERROR:
          return {
             ...state,
-            expencetypes: [],
             loadingET: false,
             error: payload,
          };
-      case EXPENCE_REGISTERED:
-         return {
-            ...state,
-            expences:
-               state.expences.length > 0 ? [payload, ...state.expences] : [],
-            loadingExpences: state.expences.length > 0 ? false : true,
-         };
-      case EXPENCETYPES_CLEARED:
-         return {
-            ...state,
-            expencetypes: [],
-            loadingET: true,
-         };
-      case EXPENCES_CLEARED:
-         return initialState;
       default:
          return state;
    }

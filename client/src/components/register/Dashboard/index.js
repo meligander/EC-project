@@ -5,6 +5,9 @@ import { withRouter, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import { loadUser, deleteUser, clearUser } from "../../../actions/user";
+import { clearTowns } from "../../../actions/town";
+import { updatePreviousPage } from "../../../actions/mixvalues";
+import { updateExpiredIntallments } from "../../../actions/installment";
 
 import Confirm from "../../modal/Confirm";
 import GoBack from "../../sharedComp/GoBack";
@@ -19,11 +22,15 @@ import "./style.scss";
 const Dashboard = ({
    match,
    history,
+   location,
    auth: { userLogged },
    users: { user, loading },
    mixvalues: { loadingSpinner },
    loadUser,
    clearUser,
+   clearTowns,
+   updateExpiredIntallments,
+   updatePreviousPage,
 }) => {
    const [otherValues, setOtherValues] = useState({
       toggleModal: false,
@@ -38,8 +45,9 @@ const Dashboard = ({
    useEffect(() => {
       if (loading) {
          loadUser(match.params.id);
+         updateExpiredIntallments();
       }
-   }, [loadUser, match.params.id, loading, user]);
+   }, [loadUser, match.params.id, loading, user, updateExpiredIntallments]);
 
    const type = () => {
       switch (user.type) {
@@ -53,7 +61,7 @@ const Dashboard = ({
                </>
             );
          case "Tutor":
-            return <RelativeDashboard tutor={false} />;
+            return <RelativeDashboard />;
          case "Secretaria":
          case "Administrador":
          case "Admin/Profesor":
@@ -220,6 +228,8 @@ const Dashboard = ({
                                     onClick={() => {
                                        window.scroll(0, 0);
                                        clearUser();
+                                       clearTowns();
+                                       updatePreviousPage(location.pathname);
                                     }}
                                  >
                                     <i className="far fa-edit"></i>{" "}
@@ -256,6 +266,9 @@ Dashboard.prototypes = {
    loadUser: PropTypes.func.isRequired,
    deleteUser: PropTypes.func.isRequired,
    clearUser: PropTypes.func.isRequired,
+   clearTowns: PropTypes.func.isRequired,
+   updateExpiredIntallments: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -267,4 +280,7 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    loadUser,
    clearUser,
+   clearTowns,
+   updateExpiredIntallments,
+   updatePreviousPage,
 })(withRouter(Dashboard));

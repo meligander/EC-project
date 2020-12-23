@@ -2,21 +2,22 @@ import moment from "moment";
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-import { updateAdminDashLoading, updateLoadingSpinner } from "./mixvalues";
+import { clearValues, updateLoadingSpinner } from "./mixvalues";
+import { loadClassStudents, addUserToList, removeUserFromList } from "./user";
 import { setAlert } from "./alert";
 
 import {
-   CLASS_ERROR,
    CLASS_LOADED,
    CLASSES_LOADED,
-   CLASS_CLEARED,
-   CLASS_CATEGORY_UPDATED,
    CLASS_REGISTERED,
-   CLASSES_UPDATED,
-   CLASSSTUDENTS_LOADED,
-   CLASSSTUDENTS_ERROR,
-   CLASSES_DELETED,
+   CLASS_UPDATED,
+   CLASS_DELETED,
+   CLASSCATEGORY_UPDATED,
+   CLASS_CLEARED,
    CLASSES_CLEARED,
+   CLASS_ERROR,
+   CLASSSTUDENT_ADDED,
+   CLASSSTUDENT_REMOVED,
 } from "./types";
 
 export const loadUsersClass = (user_id) => async (dispatch) => {
@@ -41,6 +42,7 @@ export const loadUsersClass = (user_id) => async (dispatch) => {
 };
 
 export const loadClass = (class_id, post = false) => async (dispatch) => {
+   //post: to start the spinner when we get to the chat, and finish it when the posts are loaded
    if (post) dispatch(updateLoadingSpinner(true));
 
    try {
@@ -71,30 +73,6 @@ export const loadClass = (class_id, post = false) => async (dispatch) => {
    }
 };
 
-export const loadClassStudents = (class_id) => async (dispatch) => {
-   try {
-      const res = await axios.get(
-         `/api/users?type=Alumno&classroom=${class_id}`
-      );
-      dispatch({
-         type: CLASSSTUDENTS_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      dispatch({
-         type: CLASSSTUDENTS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(0, 0);
-   }
-   dispatch(updateLoadingSpinner(false));
-};
-
 export const loadClasses = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
@@ -107,8 +85,10 @@ export const loadClasses = (filterData) => async (dispatch) => {
          filter = filter + filternames[x] + "=" + filterData[name];
       }
    }
+
    try {
       const res = await axios.get(`/api/class?${filter}`);
+
       dispatch({
          type: CLASSES_LOADED,
          payload: res.data,
@@ -148,7 +128,7 @@ export const registerUpdateClass = (formData, history, class_id = 0) => async (
    };
 
    try {
-      let res;
+      let res = {};
       if (class_id === 0) {
          res = await axios.post("/api/class", newClass, config);
       } else {
@@ -156,7 +136,7 @@ export const registerUpdateClass = (formData, history, class_id = 0) => async (
       }
 
       dispatch({
-         type: class_id === 0 ? CLASS_REGISTERED : CLASSES_UPDATED,
+         type: class_id === 0 ? CLASS_REGISTERED : CLASS_UPDATED,
          payload: res.data,
       });
 
@@ -169,7 +149,8 @@ export const registerUpdateClass = (formData, history, class_id = 0) => async (
       );
 
       history.push("/classes");
-      dispatch(updateAdminDashLoading());
+      dispatch(clearValues());
+      dispatch(clearClasses());
    } catch (err) {
       if (err.response.data.erros) {
          const errors = err.response.data.errors;
@@ -198,7 +179,7 @@ export const registerUpdateClass = (formData, history, class_id = 0) => async (
 };
 
 export const updateClassCategory = (classInfo) => (dispatch) => {
-   dispatch({ type: CLASS_CATEGORY_UPDATED, payload: classInfo });
+   dispatch({ type: CLASSCATEGORY_UPDATED, payload: classInfo });
 };
 
 export const deleteClass = (class_id, history) => async (dispatch) => {
@@ -208,12 +189,12 @@ export const deleteClass = (class_id, history) => async (dispatch) => {
       await axios.delete(`/api/class/${class_id}`);
 
       dispatch({
-         type: CLASSES_DELETED,
+         type: CLASS_DELETED,
          payload: class_id,
       });
 
       dispatch(setAlert("Curso Eliminado", "success", "2"));
-      dispatch(updateAdminDashLoading());
+      dispatch(clearValues());
       history.push("/classes");
    } catch (err) {
       dispatch({
@@ -302,6 +283,22 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
 
    window.scrollTo(0, 0);
    dispatch(updateLoadingSpinner(false));
+};
+
+export const addStudent = (student) => (dispatch) => {
+   dispatch({
+      type: CLASSSTUDENT_ADDED,
+      payload: student,
+   });
+   dispatch(removeUserFromList(student._id));
+};
+
+export const removeStudent = (student) => (dispatch) => {
+   dispatch({
+      type: CLASSSTUDENT_REMOVED,
+      payload: student._id,
+   });
+   dispatch(addUserToList(student));
 };
 
 export const clearClass = () => (dispatch) => {

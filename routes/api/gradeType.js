@@ -51,33 +51,8 @@ router.get("/category/:id", [auth], async (req, res) => {
    }
 });
 
-//@route    GET api/grade-type/:id
-//@desc     get a grade type and category info
-//@access   Private
-router.get("/:id", [auth, adminAuth], async (req, res) => {
-   try {
-      const gradetype = await GradeType.findOne({
-         _id: req.params.id,
-      }).populate({
-         path: "categories.category",
-         model: "category",
-      });
-
-      if (!gradetype) {
-         return res.status(400).json({
-            msg: "No se encontró un tipo de notas con esas características",
-         });
-      }
-
-      res.json(gradetype);
-   } catch (err) {
-      console.error(err.message);
-      return res.status(500).send("Server Error");
-   }
-});
-
 //@route    POST api/grade-type/one
-//@desc     Add a grade type
+//@desc     Add a grade type to the list of grades in a class
 //@access   Private
 router.post(
    "/one",
@@ -113,72 +88,60 @@ router.post(
 router.post("/", [auth, adminAuth], async (req, res) => {
    //An array of expence types
    const gradeTypes = req.body;
+
    let gradeType;
    let newGradeTypes = [];
-   let rebuiltGradeTypes = [];
-
-   for (let x = 0; x < gradeTypes.length; x++) {
-      gradeType = {
-         _id: "",
-         name: "",
-         categories: [],
-      };
-      for (let y = 0; y < gradeTypes[x].length; y++) {
-         if (y === 0) {
-            if (gradeTypes[x][y].name === "")
-               return res
-                  .status(400)
-                  .json({ msg: "El nombre debe estar definido" });
-            else {
-               gradeType._id = gradeTypes[x][y]._id;
-               gradeType.name = gradeTypes[x][y].name;
-            }
-         } else {
-            if (gradeTypes[x][y].checks) {
-               gradeType.categories.push({
-                  category: gradeTypes[x][y].category,
-               });
-            }
-         }
-      }
-      rebuiltGradeTypes.push(gradeType);
-   }
 
    try {
-      let oldGradeTypes = await GradeType.find();
-
-      for (let x = 0; x < rebuiltGradeTypes.length; x++) {
-         let id = rebuiltGradeTypes[x]._id;
-         let name = rebuiltGradeTypes[x].name;
-         let categories = rebuiltGradeTypes[x].categories;
-
-         if (id === "") {
-            gradeType = new GradeType({ name, categories });
-
-            await gradeType.save();
-         } else {
-            gradeType = await GradeType.findOneAndUpdate(
-               { _id: id },
-               { $set: { name, categories } },
-               { new: true }
-            );
-            for (let y = 0; y < oldGradeTypes.length; y++) {
-               if (oldGradeTypes[y]._id.toString() === id) {
-                  oldGradeTypes.splice(y, 1);
-                  break;
+      for (let x = 0; x < gradeTypes.length; x++) {
+         gradeType = {
+            _id: "",
+            name: "",
+            categories: [],
+         };
+         for (let y = 0; y < gradeTypes[x].length; y++) {
+            if (y === 0) {
+               if (gradeTypes[x][y].name === "")
+                  return res
+                     .status(400)
+                     .json({ msg: "El nombre debe estar definido" });
+               else {
+                  gradeType._id = gradeTypes[x][y]._id;
+                  gradeType.name = gradeTypes[x][y].name;
+               }
+            } else {
+               if (gradeTypes[x][y].checks) {
+                  gradeType.categories.push({
+                     category: gradeTypes[x][y].category,
+                  });
                }
             }
          }
-         newGradeTypes.push(gradeType);
+         let gType;
+         if (gradeType._id === "") {
+            gType = new GradeType({
+               name: gradeType.name,
+               categories: gradeType.categories,
+            });
+            await gType.save();
+         } else {
+            gType = await GradeType.findOneAndUpdate(
+               { _id: gradeType._id },
+               {
+                  $set: {
+                     name: gradeType.name,
+                     categories: gradeType.categories,
+                  },
+               },
+               { new: true }
+            );
+         }
+         newGradeTypes.push(gType);
       }
 
-      for (let x = 0; x < oldGradeTypes.length; x++) {
-         await GradeType.findOneAndRemove({ _id: oldGradeTypes[x]._id });
-      }
+      newGradeTypes = buildTable(newGradeTypes);
 
-      const tableGrades = await buildTable(newGradeTypes);
-
-      res.json(tableGrades);
+      res.json(newGradeTypes);
    } catch (err) {
       console.error(err.message);
       return res.status(500).send("Server Error");
@@ -193,7 +156,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       //Remove Town
       await GradeType.findOneAndRemove({ _id: req.params.id });
 
-      res.json({ msg: "Grade Type deleted" });
+      res.json({ msg: "Grade Type Deleted" });
    } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");
@@ -202,6 +165,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
 
 async function buildTable(gradetypes) {
    let categories = [];
+
    try {
       categories = await Category.find();
    } catch (err) {
@@ -227,32 +191,40 @@ async function buildTable(gradetypes) {
    ];
 
    let rows = [];
+   let newRow = [];
 
-   for (let x = 0; x < gradetypes.length; x++) {
+   for (let x = 0; x < gradetypes.length + 1; x++) {
       let row = new Array(categories.length);
-      row[0] = { _id: gradetypes[x]._id, name: gradetypes[x].name };
+      if (x === gradetypes.length) row[0] = { _id: "", name: "" };
+      else row[0] = { _id: gradetypes[x]._id, name: gradetypes[x].name };
 
       let gradetypeNumber = 0;
+
       for (let y = 1; y < categories.length; y++) {
          let obj = {
             category: categories[y]._id,
             checks: false,
          };
 
-         if (gradetypes[x].categories[gradetypeNumber]) {
-            if (
-               gradetypes[x].categories[gradetypeNumber].category.toString() ===
-               categories[y]._id.toString()
-            ) {
-               obj.checks = true;
-               gradetypeNumber++;
+         if (x !== gradetypes.length) {
+            if (gradetypes[x].categories[gradetypeNumber]) {
+               if (
+                  gradetypes[x].categories[
+                     gradetypeNumber
+                  ].category.toString() === categories[y]._id.toString()
+               ) {
+                  obj.checks = true;
+                  gradetypeNumber++;
+               }
             }
          }
          row[y] = obj;
       }
-      rows.push(row);
+
+      if (x !== gradetypes.length) rows.push(row);
+      else newRow = row;
    }
-   return { header, rows };
+   return { header, rows, newRow };
 }
 
 module.exports = router;

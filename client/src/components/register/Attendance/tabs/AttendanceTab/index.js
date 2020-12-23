@@ -25,7 +25,6 @@ const AttendanceTab = ({
    registerNewDate,
    deleteDate,
    updateAttendances,
-   navbar,
    attendancesPDF,
 }) => {
    const [formData, setFormData] = useState({
@@ -41,7 +40,6 @@ const AttendanceTab = ({
       toggleModalSave: false,
       toggleModalDelete: false,
       toDelete: null,
-      reload: false,
    });
 
    const {
@@ -49,7 +47,6 @@ const AttendanceTab = ({
       toggleModalDelete,
       toggleModalSave,
       toDelete,
-      reload,
    } = otherValues;
    const { newAttendances, newDay } = formData;
 
@@ -57,14 +54,12 @@ const AttendanceTab = ({
       const setInput = () => {
          setFormData((prev) => ({
             ...prev,
-            newAttendances:
-               periods[period - 1] !== undefined ? periods[period - 1] : [],
+            newAttendances: periods[period - 1] ? periods[period - 1] : [],
          }));
       };
 
-      if (periods[period - 1] && (newAttendances.length === 0 || reload))
-         setInput();
-   }, [period, periods, newAttendances, reload]);
+      setInput();
+   }, [period, periods]);
 
    const onChange = (e, row) => {
       let number = Number(e.target.name.substring(5, e.target.name.length));
@@ -95,12 +90,31 @@ const AttendanceTab = ({
    };
 
    const addDate = () => {
-      if (newDay.date === "") {
-         setAlert("Primero debe elegir una fecha", "danger", "2");
+      let pass = true;
+      if (period !== 1) {
+         if (!periods[period - 2]) {
+            pass = false;
+         }
+      }
+      if (!pass || newDay.date === "") {
+         if (newDay.date === "") {
+            setAlert("Primero debe elegir una fecha", "danger", "2");
+            window.scroll(0, 0);
+         } else {
+            setAlert(
+               "Debe agregar por lo menos una fecha en los bimestres anteriores",
+               "danger",
+               "2"
+            );
+         }
          window.scroll(0, 0);
       } else {
          registerNewDate(newDay);
-         setOtherValues({ ...otherValues, dayPlus: !dayPlus, reload: true });
+         setOtherValues({ ...otherValues, dayPlus: !dayPlus });
+         setFormData({
+            ...formData,
+            newAttendances: periods[period - 1],
+         });
       }
    };
 
@@ -109,8 +123,21 @@ const AttendanceTab = ({
    };
 
    const deleteDateAc = () => {
-      deleteDate(toDelete.date);
-      setOtherValues({ ...otherValues, dayPlus: false, reload: true });
+      if (periods[period] && header[period - 1].length === 1) {
+         setAlert(
+            "No puede eliminar la última fecha del bimestre",
+            "danger",
+            "2"
+         );
+         window.scroll(0, 0);
+      } else {
+         deleteDate(toDelete.date);
+         setOtherValues({ ...otherValues, dayPlus: false });
+         setFormData({
+            ...formData,
+            newAttendances: periods[period - 1] ? periods[period - 1] : [],
+         });
+      }
    };
 
    const saveAttendances = () => {
@@ -147,7 +174,7 @@ const AttendanceTab = ({
    return (
       <>
          {!loading && (
-            <div className="wrapper">
+            <div className="wrapper both">
                <Confirm
                   toggleModal={toggleModalSave}
                   setToggleModal={setToggleSave}
@@ -160,10 +187,10 @@ const AttendanceTab = ({
                   confirm={deleteDateAc}
                   text="¿Está seguro que desea eliminar la fecha?"
                />
-               <table className={!navbar ? "stick" : ""}>
+               <table className="stick">
                   <thead>
                      <tr>
-                        <th className="bg-strong">Nombre</th>
+                        <th>Nombre</th>
                         {header[period - 1] &&
                            header[period - 1].map((day, index) => (
                               <th key={index}>{day}</th>
@@ -173,8 +200,9 @@ const AttendanceTab = ({
                   <tbody>
                      {students.map((student, i) => (
                         <tr key={i}>
-                           <td className="bg-white">{student}</td>
-                           {newAttendances.length > 0 &&
+                           <td>{student}</td>
+                           {newAttendances &&
+                              newAttendances.length > 0 &&
                               newAttendances[i].map((row, key) => (
                                  <td key={key}>
                                     {row.user !== undefined ? (
@@ -222,24 +250,26 @@ const AttendanceTab = ({
          </div>
          {dayPlus && (
             <div className="form smaller pt-5">
-               <div className="form-group">
-                  <input
-                     className="form-input center"
-                     id="date"
-                     type="date"
-                     name="newDate"
-                     onChange={onChangeDate}
-                     value={newDay.day}
-                  />
-                  <label htmlFor="date" className="form-label show">
-                     Nuevo día
-                  </label>
-               </div>
-               <div className="btn-ctr">
-                  <button className="btn btn-light" onClick={addDate}>
-                     <i className="fas fa-plus"></i>
-                     <span className="hide-sm"> Agregar</span>
-                  </button>
+               <div className="border">
+                  <div className="form-group">
+                     <input
+                        className="form-input center"
+                        id="date"
+                        type="date"
+                        name="newDate"
+                        onChange={onChangeDate}
+                        value={newDay.day}
+                     />
+                     <label htmlFor="date" className="form-label show">
+                        Nuevo día
+                     </label>
+                  </div>
+                  <div className="btn-ctr">
+                     <button className="btn btn-dark" onClick={addDate}>
+                        <i className="fas fa-plus"></i>
+                        <span className="hide-sm"> Agregar</span>
+                     </button>
+                  </div>
                </div>
             </div>
          )}
@@ -250,7 +280,6 @@ const AttendanceTab = ({
 AttendanceTab.propTypes = {
    classes: PropTypes.object.isRequired,
    attendance: PropTypes.object.isRequired,
-   navbar: PropTypes.bool.isRequired,
    registerNewDate: PropTypes.func.isRequired,
    updateAttendances: PropTypes.func.isRequired,
    deleteDate: PropTypes.func.isRequired,
@@ -262,7 +291,6 @@ AttendanceTab.propTypes = {
 const mapStateToProps = (state) => ({
    classes: state.classes,
    attendance: state.attendance,
-   navbar: state.navbar.showMenu,
 });
 
 export default connect(mapStateToProps, {

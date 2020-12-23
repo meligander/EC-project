@@ -5,6 +5,7 @@ const adminAuth = require("../../middleware/adminAuth");
 const { check, validationResult } = require("express-validator");
 
 const Town = require("../../models/Town");
+const Neighbourhood = require("../../models/Neighbourhood");
 
 //@route    GET api/town
 //@desc     get all towns
@@ -93,39 +94,28 @@ router.post("/", [auth, adminAuth], async (req, res) => {
    const towns = req.body;
    let town = {};
    let newTowns = [];
+
    try {
       for (let x = 0; x < towns.length; x++) {
          if (towns[x].name === "")
             return res
                .status(400)
                .json({ msg: "El nombre debe estar definidor" });
-      }
-      let oldTowns = await Town.find();
-      for (let x = 0; x < towns.length; x++) {
+
          let name = towns[x].name;
          let id = towns[x]._id;
 
          if (id === "") {
             town = new Town({ name });
-            town.save();
+            await town.save();
          } else {
             town = await Town.findOneAndUpdate(
                { _id: id },
                { $set: { name } },
                { new: true }
             );
-
-            for (let y = 0; y < oldTowns.length; y++) {
-               if (oldTowns[y]._id.toString() === id) {
-                  oldTowns.splice(y, 1);
-                  break;
-               }
-            }
          }
          newTowns.push(town);
-      }
-      for (let x = 0; x < oldTowns.length; x++) {
-         await Town.findOneAndRemove({ _id: oldTowns[x]._id });
       }
 
       res.json(newTowns);
@@ -142,6 +132,12 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
    try {
       //Remove Town
       await Town.findOneAndRemove({ _id: req.params.id });
+
+      const neighbh = await Neighbourhood.find({ town: req.params.id });
+
+      for (let x = 0; x < neighbh.length; x++) {
+         await Neighbourhood.findOneAndRemove({ _id: neighbh[x]._id });
+      }
 
       res.json({ msg: "Town deleted" });
    } catch (err) {

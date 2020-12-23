@@ -4,16 +4,16 @@ import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
 import { clearRegisters } from "./register";
-import { updateLoadingSpinner, updateAdminDashLoading } from "./mixvalues";
+import { updateLoadingSpinner, clearValues } from "./mixvalues";
 
 import {
-   INVOICES_LOADED,
    INVOICE_LOADED,
+   INVOICES_LOADED,
    INVOICE_REGISTERED,
-   INVOICE_ERROR,
    INVOICE_DELETED,
    INVOICE_CLEARED,
    INVOICES_CLEARED,
+   INVOICE_ERROR,
 } from "./types";
 
 export const loadInvoices = (filterData) => async (dispatch) => {
@@ -82,7 +82,7 @@ export const deleteInvoice = (invoice_id) => async (dispatch) => {
          payload: invoice_id,
       });
 
-      dispatch(updateAdminDashLoading());
+      dispatch(clearValues());
       dispatch(clearRegisters());
       dispatch(setAlert("Factura Eliminada", "success", "2"));
    } catch (err) {
@@ -122,19 +122,18 @@ export const registerInvoice = (
       },
    };
    try {
-      const res = await axios.post("/api/invoice", invoice, config);
+      await axios.post("/api/invoice", invoice, config);
 
       dispatch({
          type: INVOICE_REGISTERED,
-         payload: res.data,
       });
 
       dispatch(invoicePDF(formData, remaining));
 
-      dispatch(updateAdminDashLoading());
+      dispatch(clearValues());
       dispatch(clearRegisters());
 
-      dispatch(setAlert("Factura Registrada", "success", "1", 10000));
+      dispatch(setAlert("Factura Registrada", "success", "1", 7000));
       history.push(`/dashboard/${user_id}`);
    } catch (err) {
       if (err.response.data.erros) {
@@ -147,7 +146,7 @@ export const registerInvoice = (
             payload: errors,
          });
       } else {
-         dispatch(setAlert(err.response.data.msg, "danger", "2", 10000));
+         dispatch(setAlert(err.response.data.msg, "danger", "2", 7000));
          dispatch({
             type: INVOICE_ERROR,
             payload: {

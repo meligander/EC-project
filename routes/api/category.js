@@ -157,9 +157,9 @@ router.put(
    async (req, res) => {
       //An array of categories
       const { categories, month } = req.body;
+
       const date = new Date();
       const year = date.getFullYear();
-      let newCategories = [];
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -167,15 +167,22 @@ router.put(
          errors = errorsResult.array();
          return res.status(400).json({ errors });
       }
+
+      for (let x = 0; x < categories.length; x++) {
+         if (categories[x].value === 0 || categories[x].value === "")
+            return res
+               .status(400)
+               .json({ msg: "El valor debe estar definido y ser mayor a 0" });
+      }
+
       try {
          for (let x = 0; x < categories.length; x++) {
-            let value = categories[x].value;
-            let category = await Category.findOneAndUpdate(
+            let value = parseFloat(categories[x].value);
+
+            await Category.findOneAndUpdate(
                { _id: categories[x]._id },
-               { value },
-               { new: true }
+               { value }
             );
-            newCategories.push(category);
 
             const enrollments = await Enrollment.find({
                year: { $in: [year, year + 1] },
@@ -191,8 +198,9 @@ router.put(
                   year,
                }).populate({ path: "student", select: "-password" });
                for (let z = 0; z < installments.length; z++) {
-                  let newValue =
-                     value - (value * installments[z].student.discount) / 100;
+                  let newValue = installments[z].student.discount
+                     ? value - (value * installments[z].student.discount) / 100
+                     : value;
                   await Installment.findOneAndUpdate(
                      { _id: installments[z]._id },
                      { value: installments[z].number === 0 ? value : newValue }
@@ -201,7 +209,7 @@ router.put(
             }
          }
 
-         res.json(newCategories);
+         res.json({ msg: "Category Prices Updated" });
       } catch (err) {
          console.error(err.message);
          return res.status(500).send("Server Error");
@@ -217,7 +225,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       //Remove Category
       await Category.findOneAndRemove({ _id: req.params.id });
 
-      res.json({ msg: "Category deleted" });
+      res.json({ msg: "Category Deleted" });
    } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");

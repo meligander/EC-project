@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
 import {
-   clearExpenceTypes,
+   deleteExpenceType,
    loadExpenceTypes,
    updateExpenceTypes,
 } from "../../../../../actions/expence";
@@ -16,9 +16,9 @@ const EditExpenceType = ({
    expences: { expencetypes, loadingET },
    loadExpenceTypes,
    updateExpenceTypes,
-   clearExpenceTypes,
+   deleteExpenceType,
 }) => {
-   const [formData, setFormData] = useState([]);
+   const [newET, setNewET] = useState([]);
 
    const [otherValues, setOtherValues] = useState({
       toggleModalSave: false,
@@ -29,41 +29,35 @@ const EditExpenceType = ({
    const { toggleModalSave, toggleModalDelete, toDelete } = otherValues;
 
    useEffect(() => {
-      const init = () => {
-         setFormData([...expencetypes]);
-      };
       if (loadingET) loadExpenceTypes();
-      else init();
+      else setNewET(expencetypes);
    }, [loadingET, loadExpenceTypes, expencetypes]);
 
    const onChange = (e, index) => {
-      let newValue = [...formData];
+      let newValue = [...newET];
       newValue[index] = {
          ...newValue[index],
          [e.target.name]: e.target.value,
       };
-      setFormData(newValue);
+      setNewET(newValue);
    };
 
    const addExpenceType = () => {
-      let newValue = [...formData];
+      let newValue = [...newET];
       newValue.push({
          _id: "",
          name: "",
          type: 0,
       });
-      setFormData(newValue);
+      setNewET(newValue);
    };
 
-   const deleteExpenceType = () => {
-      let newValue = [...formData];
-      newValue.splice(toDelete, 1);
-      setFormData(newValue);
+   const deleteExpenceTypeConfirm = () => {
+      deleteExpenceType(toDelete._id);
    };
 
    const saveExpenceTypes = () => {
-      updateExpenceTypes(formData);
-      clearExpenceTypes();
+      updateExpenceTypes(newET);
    };
 
    const setToggleSave = () => {
@@ -73,10 +67,10 @@ const EditExpenceType = ({
       });
    };
 
-   const setToggleDelete = (index) => {
+   const setToggleDelete = (exptyp) => {
       setOtherValues({
          ...otherValues,
-         ...(index && { toDelete: index }),
+         ...(exptyp && { toDelete: exptyp }),
          toggleModalDelete: !toggleModalDelete,
       });
    };
@@ -95,7 +89,7 @@ const EditExpenceType = ({
                <Confirm
                   toggleModal={toggleModalDelete}
                   setToggleModal={setToggleDelete}
-                  confirm={deleteExpenceType}
+                  confirm={deleteExpenceTypeConfirm}
                   text="¿Está seguro que desea eliminar el tipo de movimiento?"
                />
                <table className="smaller">
@@ -107,8 +101,9 @@ const EditExpenceType = ({
                      </tr>
                   </thead>
                   <tbody>
-                     {formData.length > 0 &&
-                        formData.map((exptyp, index) => (
+                     {newET &&
+                        newET.length > 0 &&
+                        newET.map((exptyp, index) => (
                            <tr key={index}>
                               <td>
                                  <input
@@ -135,7 +130,7 @@ const EditExpenceType = ({
                               </td>
                               <td>
                                  <button
-                                    onClick={() => setToggleDelete(index)}
+                                    onClick={() => setToggleDelete(exptyp)}
                                     className="btn btn-danger"
                                  >
                                     <i className="fas fa-trash"></i>
@@ -162,7 +157,7 @@ EditExpenceType.propTypes = {
    expences: PropTypes.object.isRequired,
    loadExpenceTypes: PropTypes.func.isRequired,
    updateExpenceTypes: PropTypes.func.isRequired,
-   clearExpenceTypes: PropTypes.func.isRequired,
+   deleteExpenceType: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -172,5 +167,5 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    loadExpenceTypes,
    updateExpenceTypes,
-   clearExpenceTypes,
+   deleteExpenceType,
 })(EditExpenceType);

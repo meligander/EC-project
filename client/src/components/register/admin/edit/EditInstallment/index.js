@@ -25,8 +25,8 @@ const EditInstallment = ({
    installment: { installment, loading },
 }) => {
    const [formData, setformData] = useState({
-      year: "0",
-      number: "1",
+      year: 0,
+      number: 1,
       value: "",
       expired: false,
       student: "",
@@ -41,7 +41,11 @@ const EditInstallment = ({
 
    const { year, number, value, expired, student } = formData;
 
-   const edit = match.params.year !== "0";
+   const _id = match.params.id;
+   const yearParams = match.params.year;
+
+   const edit = yearParams !== "0";
+
    const day = moment();
    const thisYear = day.year();
 
@@ -59,19 +63,28 @@ const EditInstallment = ({
          setformData({
             value: "",
             expired: false,
-            student: "",
+            student: users.user,
             number: match.params.number,
-            year: match.params.year,
+            year: yearParams,
          });
       };
-      if (match.params.year === undefined) {
-         if (loading) loadInstallment(match.params.id);
+      if (!yearParams) {
+         if (loading) loadInstallment(_id);
          else loadEditData();
       } else {
-         loadUser(match.params.id);
-         if (match.params.year !== "0") loadNewData();
+         if (users.loading) loadUser(_id);
+         else if (yearParams !== "0") loadNewData();
       }
-   }, [loadInstallment, loadUser, loading, match.params, installment]);
+   }, [
+      loadInstallment,
+      loadUser,
+      loading,
+      match.params,
+      installment,
+      users,
+      _id,
+      yearParams,
+   ]);
 
    const onChange = (e) => {
       setformData({
@@ -88,28 +101,8 @@ const EditInstallment = ({
    };
 
    const onSubmit = () => {
-      if (match.params.year !== undefined)
-         updateIntallment(
-            {
-               year,
-               number,
-               value,
-               expired,
-               student: users.user._id,
-            },
-            history,
-            false,
-            null,
-            users.user._id
-         );
-      else
-         updateIntallment(
-            formData,
-            history,
-            true,
-            match.params.id,
-            student._id
-         );
+      if (yearParams) updateIntallment(formData, history, student._id);
+      else updateIntallment(formData, history, student._id, _id);
    };
 
    const setToggleDelete = (e) => {
@@ -129,12 +122,12 @@ const EditInstallment = ({
    };
 
    const onDelete = () => {
-      deleteInstallment(match.params.id, history, student._id);
+      deleteInstallment(_id, history, student._id);
    };
 
    return (
       <>
-         {!loading || (match.params.year !== undefined && !users.loading) ? (
+         {!loading || (yearParams && !users.loading) ? (
             <>
                <Confirm
                   text="¿Está seguro que desea eliminar la cuota?"
@@ -153,9 +146,7 @@ const EditInstallment = ({
                   <p className="heading-tertiary">
                      <span className="text-dark">Alumno:</span>
                      &nbsp;&nbsp;&nbsp;
-                     {match.params.year !== undefined
-                        ? users.user.lastname + ", " + users.user.name
-                        : student.lastname + ", " + student.name}
+                     {student.lastname + ", " + student.name}
                   </p>
                   <div className="form-group">
                      <select
@@ -246,7 +237,7 @@ const EditInstallment = ({
                      >
                         <i className="far fa-save"></i>&nbsp; Guardar
                      </button>
-                     {match.params.year === undefined && (
+                     {!yearParams && (
                         <button
                            type="submit"
                            onClick={setToggleDelete}

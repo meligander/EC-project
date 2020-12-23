@@ -1,11 +1,11 @@
 import {
    USER_ATTENDANCES_LOADED,
    ATTENDANCES_LOADED,
-   ATTENDANCES_ERROR,
-   ATTENDANCES_CLEARED,
-   NEW_DATE_REGISTERED,
    ATTENDANCES_UPDATED,
+   NEW_DATE_REGISTERED,
    DATES_DELETED,
+   ATTENDANCES_CLEARED,
+   ATTENDANCES_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -21,28 +21,25 @@ const initialState = {
 export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
-      case ATTENDANCES_UPDATED:
-         return state;
-      case DATES_DELETED:
-      case NEW_DATE_REGISTERED:
-      case USER_ATTENDANCES_LOADED:
       case ATTENDANCES_LOADED:
+      case USER_ATTENDANCES_LOADED:
+      case NEW_DATE_REGISTERED:
+      case DATES_DELETED:
          return {
             ...state,
             attendances: payload,
             loading: false,
             error: {},
          };
+      case ATTENDANCES_UPDATED:
+         return state;
+      case ATTENDANCES_CLEARED:
+         return initialState;
       case ATTENDANCES_ERROR:
          return {
             ...state,
-            userAttendances: [],
-            attendances: [],
-            loading: false,
             error: payload,
          };
-      case ATTENDANCES_CLEARED:
-         return initialState;
       default:
          return state;
    }

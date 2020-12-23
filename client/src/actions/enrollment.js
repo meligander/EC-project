@@ -3,17 +3,17 @@ import axios from "axios";
 import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, updateAdminDashLoading } from "./mixvalues";
+import { updateLoadingSpinner, clearValues } from "./mixvalues";
 
 import {
    ENROLLMENT_LOADED,
-   ENROLLMENT_REGISTERED,
    ENROLLMENTS_LOADED,
-   ENROLLMENT_ERROR,
+   ENROLLMENT_REGISTERED,
+   ENROLLMENT_UPDATED,
    ENROLLMENT_DELETED,
    ENROLLMENT_CLEARED,
-   ENROLLMENT_UPDATED,
    ENROLLMENTS_CLEARED,
+   ENROLLMENT_ERROR,
 } from "./types";
 
 export const loadEnrollments = (filterData) => async (dispatch) => {
@@ -140,7 +140,7 @@ export const registerEnrollment = (
    formData,
    history,
    user_id,
-   enroll_id = 0
+   enroll_id
 ) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
@@ -170,7 +170,7 @@ export const registerEnrollment = (
 
       dispatch({
          type: !enroll_id ? ENROLLMENT_REGISTERED : ENROLLMENT_UPDATED,
-         payload: res.data,
+         ...(enroll_id && { payload: res.data }),
       });
 
       dispatch(
@@ -181,7 +181,7 @@ export const registerEnrollment = (
          )
       );
 
-      dispatch(updateAdminDashLoading());
+      dispatch(clearValues());
 
       if (!enroll_id) {
          history.push(`/dashboard/${user_id}`);
@@ -225,7 +225,7 @@ export const deleteEnrollment = (enroll_id) => async (dispatch) => {
          type: ENROLLMENT_DELETED,
          payload: enroll_id,
       });
-      dispatch(updateAdminDashLoading());
+      dispatch(clearValues());
       dispatch(setAlert("Inscripción Eliminada", "success", "2"));
    } catch (err) {
       dispatch({

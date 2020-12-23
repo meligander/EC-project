@@ -180,6 +180,7 @@ router.post(
 
          await expence.save();
 
+         //search for the last expence
          let expences = await Expence.find()
             .populate("expencetype")
             .sort({ $natural: -1 })
@@ -242,7 +243,7 @@ router.post(
             await register.save();
          }
 
-         res.json(expence);
+         res.json({ msg: "Expence Register" });
       } catch (err) {
          console.error(err.message);
          return res.status(500).send("Server Error");

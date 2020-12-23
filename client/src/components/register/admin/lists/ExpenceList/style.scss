@@ -1,0 +1,19 @@
+@import "../../../../../style/abstract.scss";
+
+table.expences {
+   tr td {
+      border-bottom: 1px solid lighten($secondary-color, 15%);
+   }
+
+   .bg {
+      &-income {
+         background-color: lighten($success-color, 62%) !important;
+      }
+      &-expence {
+         background-color: lighten($danger-color, 58%) !important;
+      }
+      &-withdrawal {
+         background-color: lighten($secondary-color, 30%) !important;
+      }
+   }
+}

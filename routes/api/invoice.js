@@ -370,7 +370,7 @@ router.get("/for-print/fetch-invoice", (req, res) => {
 });
 
 //@route    POST api/invoice
-//@desc     Add an invoice
+//@desc     Register an invoice
 //@access   Private
 router.post(
    "/",
@@ -485,7 +485,7 @@ router.post(
             await register.save();
          }
 
-         res.json(invoice);
+         res.json({ msg: "Invoice Registered" });
       } catch (err) {
          console.error(err.message);
          return res.status(500).send("Server Error");

@@ -1,15 +1,15 @@
 import {
-   CLASSES_LOADED,
-   CLASS_ERROR,
    CLASS_LOADED,
+   CLASSES_LOADED,
+   CLASS_REGISTERED,
+   CLASS_UPDATED,
+   CLASS_DELETED,
+   CLASSCATEGORY_UPDATED,
+   CLASSSTUDENT_ADDED,
+   CLASSSTUDENT_REMOVED,
    CLASS_CLEARED,
    CLASSES_CLEARED,
-   CLASSES_UPDATED,
-   CLASS_REGISTERED,
-   CLASS_CATEGORY_UPDATED,
-   CLASSSTUDENTS_LOADED,
-   CLASSSTUDENTS_ERROR,
-   CLASSES_DELETED,
+   CLASS_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -25,35 +25,11 @@ export default function (state = initialState, action) {
 
    switch (type) {
       case CLASS_LOADED:
-      case CLASS_CATEGORY_UPDATED:
          return {
             ...state,
             classInfo: payload,
             loading: false,
             error: {},
-         };
-      case CLASSSTUDENTS_LOADED:
-         return {
-            ...state,
-            classInfo: {
-               ...state.classInfo,
-               students: payload,
-            },
-            loading: false,
-         };
-      case CLASSES_DELETED:
-         return {
-            ...state,
-            classes: state.classes.filter((item) => item !== payload),
-            loadingClasses: false,
-         };
-      case CLASSES_UPDATED:
-         return {
-            ...state,
-            classes: state.classes.map((oneclass) =>
-               oneclass._id === payload._id ? payload : oneclass
-            ),
-            loadingClasses: false,
          };
       case CLASSES_LOADED:
          return {
@@ -67,23 +43,44 @@ export default function (state = initialState, action) {
             classes: state.classes.length > 0 && [...state.classes, payload],
             loadingClasses: false,
          };
-      case CLASSSTUDENTS_ERROR:
+      case CLASS_UPDATED:
+         return {
+            ...state,
+            classes: state.classes.map((oneclass) =>
+               oneclass._id === payload._id ? payload : oneclass
+            ),
+            loadingClasses: false,
+         };
+      case CLASS_DELETED:
+         return {
+            ...state,
+            classes: state.classes.filter((item) => item !== payload),
+            loadingClasses: false,
+         };
+      case CLASSCATEGORY_UPDATED:
+         return {
+            ...state,
+            classInfo: { ...payload, students: [] },
+            loading: false,
+         };
+      case CLASSSTUDENT_ADDED:
          return {
             ...state,
             classInfo: {
                ...state.classInfo,
-               students: [],
+               students: [...state.classInfo.students, payload],
             },
             loading: false,
          };
-      case CLASS_ERROR:
+      case CLASSSTUDENT_REMOVED:
          return {
             ...state,
-            classInfo: null,
-            classes: [],
-            loading: false,
-            loadingClasses: false,
-            error: payload,
+            classInfo: {
+               ...state.classInfo,
+               students: state.classInfo.students.filter(
+                  (student) => student._id !== payload
+               ),
+            },
          };
       case CLASS_CLEARED:
          return {
@@ -93,6 +90,15 @@ export default function (state = initialState, action) {
          };
       case CLASSES_CLEARED:
          return initialState;
+      case CLASS_ERROR:
+         return {
+            ...state,
+            classInfo: null,
+            classes: [],
+            loading: false,
+            loadingClasses: false,
+            error: payload,
+         };
       default:
          return state;
    }

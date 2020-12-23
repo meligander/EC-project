@@ -1,8 +1,8 @@
 import {
    PENALTY_LOADED,
-   PENALTY_ERROR,
    PENALTY_REGISTERED,
    PENALTY_CLEARED,
+   PENALTY_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -14,21 +14,23 @@ const initialState = {
 export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
-      case PENALTY_REGISTERED:
       case PENALTY_LOADED:
          return {
             ...state,
             loading: false,
             penalty: payload,
          };
+      case PENALTY_REGISTERED:
+         return state;
+      case PENALTY_CLEARED:
+         return initialState;
       case PENALTY_ERROR:
          return {
             ...state,
             loading: false,
             error: payload,
          };
-      case PENALTY_CLEARED:
-         return initialState;
+
       default:
          return state;
    }

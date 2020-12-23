@@ -7,15 +7,16 @@ import { clearRegisters } from "./register";
 import { setAlert } from "./alert";
 
 import {
-   EXPENCETYPES_LOADED,
-   EXPENCETYPES_CLEARED,
-   EXPENCE_REGISTERED,
-   EXPENCE_ERROR,
    EXPENCES_LOADED,
-   EXPENCETYPES_UPDATED,
-   EXPENCETYPE_ERROR,
+   EXPENCETYPES_LOADED,
+   EXPENCE_REGISTERED,
    EXPENCE_DELETED,
+   EXPENCETYPES_UPDATED,
+   EXPENCETYPE_DELETED,
    EXPENCES_CLEARED,
+   EXPENCETYPES_CLEARED,
+   EXPENCE_ERROR,
+   EXPENCETYPE_ERROR,
 } from "./types";
 
 export const loadExpences = (filterData) => async (dispatch) => {
@@ -88,11 +89,10 @@ export const registerExpence = (formData, history, user_id) => async (
    try {
       let expence = JSON.stringify(formData);
 
-      const res = await axios.post("/api/expence", expence, config);
+      await axios.post("/api/expence", expence, config);
 
       dispatch({
          type: EXPENCE_REGISTERED,
-         payload: res.data,
       });
       dispatch(setAlert("Gasto/Ingreso Registrado", "success", "1"));
       history.push(`/dashboard/${user_id}`);
@@ -164,7 +164,9 @@ export const updateExpenceTypes = (formData) => async (dispatch) => {
             "Content-Type": "application/json",
          },
       };
+
       const res = await axios.post("/api/expence-type", expencetypes, config);
+
       dispatch({
          type: EXPENCETYPES_UPDATED,
          payload: res.data,
@@ -181,6 +183,34 @@ export const updateExpenceTypes = (formData) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+   }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
+};
+
+export const deleteExpenceType = (toDelete) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
+   try {
+      await axios.delete(`/api/expence-type/${toDelete}`);
+
+      dispatch({
+         type: EXPENCETYPE_DELETED,
+         payload: toDelete,
+      });
+
+      dispatch(setAlert("Tipo de Gasto Eliminado", "success", "2"));
+   } catch (err) {
+      dispatch({
+         type: EXPENCETYPE_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
    }
 
    window.scrollTo(0, 0);

@@ -1,17 +1,17 @@
 import {
-   INSTALLMENTS_LOADED,
    INSTALLMENT_LOADED,
-   INSTALLMENTS_ERROR,
+   INSTALLMENTS_LOADED,
+   USER_INSTALLMENTS_LOADED,
    INSTALLMENT_UPDATED,
    INSTALLMENT_REGISTERED,
-   INSTALLMENTS_CLEARED,
-   USER_INSTALLMENTS_CLEARED,
-   INSTALLMENT_CLEARED,
    INSTALLMENT_DELETED,
-   INSTALLMENTS_UPDATED,
-   USERS_INSTALLMENTS_LOADED,
    INVOICE_DETAIL_ADDED,
    INVOICE_DETAIL_REMOVED,
+   EXPIRED_INSTALLMENTS_UPDATED,
+   INSTALLMENT_CLEARED,
+   INSTALLMENTS_CLEARED,
+   USER_INSTALLMENTS_CLEARED,
+   INSTALLMENTS_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -30,6 +30,26 @@ const initialState = {
 export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
+      case INSTALLMENT_LOADED:
+         return {
+            ...state,
+            installment: payload,
+            loading: false,
+            error: {},
+         };
+      case INSTALLMENTS_LOADED:
+         return {
+            ...state,
+            installments: payload,
+            loadingInstallments: false,
+            error: {},
+         };
+      case USER_INSTALLMENTS_LOADED:
+         return {
+            ...state,
+            usersInstallments: payload,
+            loadingUsersInstallments: false,
+         };
       case INVOICE_DETAIL_ADDED:
          return {
             ...state,
@@ -44,59 +64,27 @@ export default function (state = initialState, action) {
             ),
             loadingInstallments: false,
          };
-      case USERS_INSTALLMENTS_LOADED:
-         return {
-            ...state,
-            usersInstallments: payload,
-            loadingUsersInstallments: false,
-         };
-      case INSTALLMENTS_LOADED:
-         return {
-            ...state,
-            installments: payload,
-            loadingInstallments: false,
-            error: {},
-         };
-      case INSTALLMENT_LOADED:
-         return {
-            ...state,
-            installment: payload,
-            loading: false,
-            error: {},
-         };
       case INSTALLMENT_UPDATED:
-         return {
-            ...state,
-            loadingUsersInstallments: false,
-            usersInstallments: {
-               ...state.usersInstallments,
-               rows: state.usersInstallments.rows.map((row) =>
-                  row.map((installment) =>
-                     installment._id === payload._id ? payload : installment
-                  )
-               ),
-            },
-         };
       case INSTALLMENT_REGISTERED:
-         return {
-            ...state,
-            loadingUsersInstallments: false,
-            usersInstallments: payload,
-         };
       case INSTALLMENT_DELETED:
+      case EXPIRED_INSTALLMENTS_UPDATED:
+         return state;
+      case INSTALLMENT_CLEARED:
          return {
             ...state,
-            loadingUsersInstallments: false,
+            installment: null,
+            loading: true,
+         };
+      case INSTALLMENTS_CLEARED:
+         return initialState;
+      case USER_INSTALLMENTS_CLEARED:
+         return {
+            ...state,
             usersInstallments: {
-               ...state.usersInstallments,
-               rows: state.usersInstallments.rows.map((row) =>
-                  row.map((installment) =>
-                     installment._id === payload
-                        ? { _id: "", expired: false, value: "" }
-                        : installment
-                  )
-               ),
+               years: [],
+               rows: [],
             },
+            loadingUsersInstallments: true,
          };
       case INSTALLMENTS_ERROR:
          return {
@@ -112,25 +100,6 @@ export default function (state = initialState, action) {
             loadingUsersInstallments: false,
             error: payload,
          };
-      case INSTALLMENT_CLEARED:
-         return {
-            ...state,
-            installment: null,
-            loading: true,
-         };
-      case USER_INSTALLMENTS_CLEARED:
-         return {
-            ...state,
-            usersInstallments: {
-               years: [],
-               rows: [],
-            },
-            loadingUsersInstallments: true,
-         };
-      case INSTALLMENTS_UPDATED:
-         return state;
-      case INSTALLMENTS_CLEARED:
-         return initialState;
       default:
          return state;
    }

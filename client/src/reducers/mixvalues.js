@@ -8,8 +8,8 @@ import {
    VALUES_ERROR,
    SEARCH_PAGE_CHANGED,
    TOTAL_DEBT_LOADED,
-   LOADING_ADMINDASH_UPDATED,
    STUDENTNUMBER_CLEARED,
+   PREVPAGE_UPDATED,
 } from "../actions/types";
 
 const initialState = {
@@ -26,12 +26,18 @@ const initialState = {
    },
    totalDebt: "",
    page: 0,
+   prevPage: "",
    error: {},
 };
 
 export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
+      case PREVPAGE_UPDATED:
+         return {
+            ...state,
+            prevPage: payload,
+         };
       case SEARCH_PAGE_CHANGED:
          return {
             ...state,
@@ -47,11 +53,6 @@ export default function (state = initialState, action) {
          return {
             ...state,
             loadingSpinner: payload,
-         };
-      case LOADING_ADMINDASH_UPDATED:
-         return {
-            ...state,
-            loadingAdminDash: true,
          };
       case ADMIN_DASH_LOADED:
          return {

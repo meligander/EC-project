@@ -1,12 +1,12 @@
 import {
+   ENROLLMENT_LOADED,
    ENROLLMENTS_LOADED,
    ENROLLMENT_REGISTERED,
-   ENROLLMENT_LOADED,
-   ENROLLMENT_ERROR,
+   ENROLLMENT_UPDATED,
    ENROLLMENT_DELETED,
    ENROLLMENT_CLEARED,
    ENROLLMENTS_CLEARED,
-   ENROLLMENT_UPDATED,
+   ENROLLMENT_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -21,6 +21,13 @@ const initialState = {
 export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
+      case ENROLLMENT_LOADED:
+         return {
+            ...state,
+            enrollment: payload,
+            loading: false,
+            error: {},
+         };
       case ENROLLMENTS_LOADED:
          return {
             ...state,
@@ -30,12 +37,14 @@ export default function (state = initialState, action) {
             error: {},
          };
       case ENROLLMENT_REGISTERED:
-      case ENROLLMENT_LOADED:
+         return state;
+      case ENROLLMENT_UPDATED:
          return {
             ...state,
-            enrollment: payload,
-            loading: false,
-            error: {},
+            enrollments: state.enrollments.map((enrollment) =>
+               enrollment._id === payload._id ? payload : enrollment
+            ),
+            loadingEnrollments: false,
          };
       case ENROLLMENT_DELETED:
          return {
@@ -45,14 +54,14 @@ export default function (state = initialState, action) {
             ),
             loadingEnrollments: false,
          };
-      case ENROLLMENT_UPDATED:
+      case ENROLLMENT_CLEARED:
          return {
             ...state,
-            enrollments: state.enrollments.map((enrollment) =>
-               enrollment._id === payload._id ? payload : enrollment
-            ),
-            loadingEnrollments: false,
+            enrollment: null,
+            loading: true,
          };
+      case ENROLLMENTS_CLEARED:
+         return initialState;
       case ENROLLMENT_ERROR:
          return {
             ...state,
@@ -62,14 +71,6 @@ export default function (state = initialState, action) {
             loadingEnrollments: false,
             error: payload,
          };
-      case ENROLLMENT_CLEARED:
-         return {
-            ...state,
-            enrollment: null,
-            loading: true,
-         };
-      case ENROLLMENTS_CLEARED:
-         return initialState;
       default:
          return state;
    }

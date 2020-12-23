@@ -5,6 +5,7 @@ import moment from "moment";
 import PropTypes from "prop-types";
 
 import { clearInstallment, addInstallment } from "../../../actions/installment";
+import { updatePreviousPage } from "../../../actions/mixvalues";
 import { setAlert } from "../../../actions/alert";
 
 import Alert from "../../sharedComp/Alert";
@@ -19,6 +20,7 @@ const InstallmentsTable = ({
       usersInstallments: { years, rows },
    },
    clearInstallment,
+   updatePreviousPage,
    addInstallment,
    setAlert,
    forAdmin,
@@ -50,8 +52,9 @@ const InstallmentsTable = ({
    }, [rows]);
 
    const seeInstallmentInfo = (installment_id, edit, year, month) => {
-      let number = month !== 0 ? month + 2 : month;
+      updatePreviousPage(location.pathname);
       clearInstallment();
+      let number = month !== 0 ? month + 2 : month;
       if (edit) history.push(`/edit-installment/${installment_id}`);
       else
          history.push(`/edit-installment/${installment_id}/${year}/${number}`);
@@ -229,6 +232,7 @@ InstallmentsTable.prototypes = {
    clearInstallment: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
    addInstallment: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -239,4 +243,5 @@ export default connect(mapStateToProps, {
    clearInstallment,
    addInstallment,
    setAlert,
+   updatePreviousPage,
 })(withRouter(InstallmentsTable));

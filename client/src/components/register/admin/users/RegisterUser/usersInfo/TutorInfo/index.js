@@ -1,19 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { loadRelatives, clearSearch } from "../../../../../../../actions/user";
+import { clearSearch } from "../../../../../../../actions/user";
 import { setAlert } from "../../../../../../../actions/alert";
 
 import ChosenChildrenTable from "../../../../../../tables/ChosenChildrenTable";
 import StudentSearch from "../../../../../../sharedComp/search/StudentSearch";
 
 const TutorInfo = ({
-   setChildrenForm,
-   isEditing,
-   user_id,
-   users: { relatives, relativesLoading },
-   loadRelatives,
+   setChildren,
+   children,
    setAlert,
    clearSearch,
    isAdmin,
@@ -22,29 +19,12 @@ const TutorInfo = ({
       _id: "",
       name: "",
    });
-   const [children, setchildren] = useState([]);
-
-   useEffect(() => {
-      if (isEditing) {
-         loadRelatives(user_id, false);
-         let child = {};
-         for (let x = 0; x < relatives.length; x++) {
-            child = {
-               _id: relatives[x]._id,
-               name: relatives[x].lastname + ", " + relatives[x].name,
-            };
-            children.push(child);
-            setChildrenForm(child._id);
-         }
-      }
-      // eslint-disable-next-line
-   }, [relativesLoading, isEditing, user_id]);
 
    const selectStudent = (user) => {
       setSelectedStudent({
          ...selectedStudent,
-         name: user.lastname + " " + user.name,
          _id: user._id,
+         name: user.lastname + " " + user.name,
       });
    };
 
@@ -55,11 +35,10 @@ const TutorInfo = ({
          if (children[x]._id === selectedStudent._id) exist = true;
       }
       if (!exist) {
-         setchildren([...children, selectedStudent]);
-         setChildrenForm(selectedStudent._id);
+         setChildren(selectedStudent, true);
          setSelectedStudent({
-            name: "",
             _id: "",
+            name: "",
          });
          clearSearch();
       } else {
@@ -69,14 +48,13 @@ const TutorInfo = ({
 
    const deleteChild = (e, childToDelete) => {
       e.preventDefault();
-      setchildren(children.filter((child) => child._id !== childToDelete._id));
-      setChildrenForm(childToDelete._id, false);
+      setChildren(childToDelete, false);
    };
    return (
       <div className="my-4">
          {isAdmin && (
             <StudentSearch
-               addToList={addToList}
+               actionForSelected={addToList}
                selectedStudent={selectedStudent}
                selectStudent={selectStudent}
             />
@@ -95,19 +73,13 @@ const TutorInfo = ({
 };
 
 TutorInfo.propTypes = {
-   users: PropTypes.object.isRequired,
-   loadRelatives: PropTypes.func.isRequired,
-   setChildrenForm: PropTypes.func.isRequired,
+   children: PropTypes.array.isRequired,
+   setChildren: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = (state) => ({
-   users: state.users,
-});
-
-export default connect(mapStateToProps, {
-   loadRelatives,
+export default connect(null, {
    setAlert,
    clearSearch,
 })(TutorInfo);

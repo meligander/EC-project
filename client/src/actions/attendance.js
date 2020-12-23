@@ -6,13 +6,13 @@ import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
 
 import {
-   ATTENDANCES_ERROR,
+   ATTENDANCES_LOADED,
    USER_ATTENDANCES_LOADED,
    NEW_DATE_REGISTERED,
-   DATES_DELETED,
-   ATTENDANCES_LOADED,
    ATTENDANCES_UPDATED,
+   DATES_DELETED,
    ATTENDANCES_CLEARED,
+   ATTENDANCES_ERROR,
 } from "./types";
 
 export const loadStudentAttendance = (user_id) => async (dispatch) => {
@@ -108,6 +108,7 @@ export const registerNewDate = (newDate) => async (dispatch) => {
          },
       };
       const res = await axios.post("/api/attendance", date, config);
+
       dispatch({
          type: NEW_DATE_REGISTERED,
          payload: res.data,

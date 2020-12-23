@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import { Link, withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import {
    clearExpenceTypes,
-   loadExpenceTypes,
    registerExpence,
 } from "../../../../../../actions/expence";
-import { loadUsers } from "../../../../../../actions/user";
+import { updatePreviousPage } from "../../../../../../actions/mixvalues";
+import { loadEmployees } from "../../../../../../actions/user";
 
 import Confirm from "../../../../../modal/Confirm";
 
@@ -20,10 +20,11 @@ const IncomeExpenceTab = ({
    expences,
    users,
    clearExpenceTypes,
-   loadExpenceTypes,
-   loadUsers,
+   loadEmployees,
    registerExpence,
+   updatePreviousPage,
    history,
+   location,
 }) => {
    const [otherValues, setOtherValues] = useState({
       show: false,
@@ -46,10 +47,6 @@ const IncomeExpenceTab = ({
 
    const { show, toggleModal } = otherValues;
 
-   useEffect(() => {
-      loadExpenceTypes();
-   }, [loadExpenceTypes]);
-
    const onChange = (e) => {
       setFormData({
          ...formData,
@@ -63,12 +60,17 @@ const IncomeExpenceTab = ({
             ...otherValues,
             show: true,
          });
-         loadUsers({ type: "Profesor", active: true });
-      } else
-         setOtherValues({
-            ...otherValues,
-            show: false,
-         });
+         loadEmployees();
+      } else {
+         if (
+            e.target.value !== "5ebb3804958b15468012db7a" &&
+            e.target.name === "expencetype"
+         )
+            setOtherValues({
+               ...otherValues,
+               show: false,
+            });
+      }
    };
 
    const onChangeTeacher = (e) => {
@@ -150,7 +152,7 @@ const IncomeExpenceTab = ({
                {show && (
                   <>
                      <tr>
-                        <td>Profesor</td>
+                        <td>Empleado</td>
                         <td>
                            <select
                               name="teacher"
@@ -158,12 +160,16 @@ const IncomeExpenceTab = ({
                               onChange={onChangeTeacher}
                               id="select"
                            >
-                              <option value="0">* Profesor</option>
+                              <option value={0}>* Empleado</option>
                               {!users.loadingUsers &&
                                  users.users.map((user) => (
-                                    <option key={user._id} value={user._id}>
-                                       {user.lastname}, {user.name}
-                                    </option>
+                                    <React.Fragment key={user._id}>
+                                       {user.type !== "Admin/Profesor" && (
+                                          <option value={user._id}>
+                                             {user.lastname}, {user.name}
+                                          </option>
+                                       )}
+                                    </React.Fragment>
                                  ))}
                            </select>
                         </td>
@@ -229,8 +235,9 @@ const IncomeExpenceTab = ({
                   onClick={() => {
                      window.scroll(0, 0);
                      clearExpenceTypes();
+                     updatePreviousPage(location.pathname);
                   }}
-                  className="btn btn-light"
+                  className="btn btn-mix-secondary"
                >
                   <i className="fas fa-edit"></i>
                   <span className="hide-sm"> Tipo Movimiento</span>
@@ -246,9 +253,9 @@ IncomeExpenceTab.propTypes = {
    registers: PropTypes.object.isRequired,
    expences: PropTypes.object.isRequired,
    users: PropTypes.object.isRequired,
-   loadExpenceTypes: PropTypes.func.isRequired,
-   loadUsers: PropTypes.func.isRequired,
+   loadEmployees: PropTypes.func.isRequired,
    registerExpence: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
    clearExpenceTypes: PropTypes.func.isRequired,
 };
 
@@ -260,8 +267,8 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps, {
-   loadExpenceTypes,
    registerExpence,
-   loadUsers,
+   loadEmployees,
    clearExpenceTypes,
+   updatePreviousPage,
 })(withRouter(IncomeExpenceTab));

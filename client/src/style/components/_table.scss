@@ -128,6 +128,10 @@ table {
       }
    }
 
+   td:first-child input {
+      min-width: 17rem;
+   }
+
    tr:nth-child(odd) {
       background-color: lighten($secondary-color, 28%);
    }

@@ -7,8 +7,9 @@ import PropTypes from "prop-types";
 import { loadClass, deleteClass, classPDF } from "../../../../../actions/class";
 import { clearAttendances } from "../../../../../actions/attendance";
 import { clearPosts } from "../../../../../actions/post";
-import { clearGrades } from "../../../../../actions/grade";
-import { clearProfile } from "../../../../../actions/user";
+import { clearGrades, clearGradeTypes } from "../../../../../actions/grade";
+import { clearProfile, clearSearch } from "../../../../../actions/user";
+import { updatePreviousPage } from "../../../../../actions/mixvalues";
 
 import Loading from "../../../../modal/Loading";
 import ClassInfo from "../../../../sharedComp/ClassInfo";
@@ -17,21 +18,26 @@ import Confirm from "../../../../modal/Confirm";
 const OneClass = ({
    history,
    match,
+   location,
    classes: { classInfo, loading },
+   users: { users, loadingUsers },
    auth: { userLogged },
    loadClass,
    deleteClass,
+   updatePreviousPage,
    clearAttendances,
    clearGrades,
+   clearGradeTypes,
    clearPosts,
+   clearSearch,
    clearProfile,
    classPDF,
 }) => {
    const [toggleModal, setToggleModal] = useState(false);
 
    useEffect(() => {
-      loadClass(match.params.id);
-   }, [loadClass, match.params.id]);
+      if (loading) loadClass(match.params.id);
+   }, [loadClass, match.params.id, loading]);
 
    const setToggle = () => {
       setToggleModal(!toggleModal);
@@ -51,7 +57,7 @@ const OneClass = ({
 
    return (
       <>
-         {!loading && classInfo.students ? (
+         {!loading && !loadingUsers ? (
             <>
                <Confirm
                   toggleModal={toggleModal}
@@ -61,7 +67,7 @@ const OneClass = ({
                />
                <h1 className="pt-3 text-center light-font">Clase</h1>
                <ClassInfo classInfo={classInfo} />
-               {classInfo.students.length > 0 && (
+               {users.length !== 0 ? (
                   <table>
                      <thead>
                         <tr>
@@ -73,34 +79,38 @@ const OneClass = ({
                         </tr>
                      </thead>
                      <tbody>
-                        {classInfo.students.map((user) => (
-                           <tr key={user._id}>
-                              <td>{user.studentnumber}</td>
-                              <td>{user.lastname + ", " + user.name}</td>
-                              <td>
-                                 {user.dob && (
-                                    <Moment format="DD/MM/YY" date={user.dob} />
-                                 )}
-                              </td>
-                              <td>{user.cel && user.cel}</td>
-                              <td>
-                                 <Link
-                                    to={`/dashboard/${user._id}`}
-                                    className="btn-text"
-                                    onClick={() => {
-                                       window.scroll(0, 0);
-                                       clearProfile();
-                                    }}
-                                 >
-                                    Info &rarr;
-                                 </Link>
-                              </td>
-                           </tr>
-                        ))}
+                        {users.length > 0 &&
+                           users.map((user) => (
+                              <tr key={user._id}>
+                                 <td>{user.studentnumber}</td>
+                                 <td>{user.lastname + ", " + user.name}</td>
+                                 <td>
+                                    {user.dob && (
+                                       <Moment
+                                          format="DD/MM/YY"
+                                          date={user.dob}
+                                       />
+                                    )}
+                                 </td>
+                                 <td>{user.cel && user.cel}</td>
+                                 <td>
+                                    <Link
+                                       to={`/dashboard/${user._id}`}
+                                       className="btn-text"
+                                       onClick={() => {
+                                          window.scroll(0, 0);
+                                          clearProfile();
+                                          updatePreviousPage(location.pathname);
+                                       }}
+                                    >
+                                       Info &rarr;
+                                    </Link>
+                                 </td>
+                              </tr>
+                           ))}
                      </tbody>
                   </table>
-               )}
-               {classInfo.students.length === 0 && (
+               ) : (
                   <p className="heading-tertiary text-secondary my-5 text-center">
                      No hay ningun alumno anotado en esta clase
                   </p>
@@ -110,17 +120,19 @@ const OneClass = ({
                      <>
                         <Link
                            to={
-                              classInfo.students.length > 0
+                              users.length > 0
                                  ? `/grades/${classInfo._id}`
                                  : "!#"
                            }
                            className={
-                              classInfo.students.length > 0
+                              users.length > 0
                                  ? "btn btn-primary"
                                  : "btn btn-black"
                            }
                            onClick={() => {
                               clearGrades();
+                              clearGradeTypes();
+                              updatePreviousPage(location.pathname);
                               window.scroll(0, 0);
                            }}
                         >
@@ -129,17 +141,18 @@ const OneClass = ({
                         </Link>
                         <Link
                            to={
-                              classInfo.students.length > 0
+                              users.length > 0
                                  ? `/attendance/${classInfo._id}`
                                  : "!#"
                            }
                            className={
-                              classInfo.students.length > 0
+                              users.length > 0
                                  ? "btn btn-primary"
                                  : "btn btn-black"
                            }
                            onClick={() => {
                               clearAttendances();
+                              updatePreviousPage(location.pathname);
                               window.scroll(0, 0);
                            }}
                         >
@@ -149,18 +162,13 @@ const OneClass = ({
                      </>
                   )}
                   <Link
-                     to={
-                        classInfo.students.length > 0
-                           ? `/chat/${classInfo._id}`
-                           : "!#"
-                     }
+                     to={users.length > 0 ? `/chat/${classInfo._id}` : "!#"}
                      className={
-                        classInfo.students.length > 0
-                           ? "btn btn-primary"
-                           : "btn btn-black"
+                        users.length > 0 ? "btn btn-primary" : "btn btn-black"
                      }
                      onClick={() => {
                         clearPosts();
+                        updatePreviousPage(location.pathname);
                         window.scroll(0, 0);
                      }}
                   >
@@ -186,6 +194,11 @@ const OneClass = ({
                      <Link
                         to={`/edit-class/${classInfo._id}`}
                         className="btn btn-light"
+                        onClick={() => {
+                           window.scroll(0, 0);
+                           clearSearch();
+                           updatePreviousPage(location.pathname);
+                        }}
                      >
                         <i className="far fa-edit"></i>
                      </Link>
@@ -211,17 +224,22 @@ const OneClass = ({
 
 OneClass.propTypes = {
    classes: PropTypes.object.isRequired,
+   users: PropTypes.object.isRequired,
    loadClass: PropTypes.func.isRequired,
    deleteClass: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
    clearAttendances: PropTypes.func.isRequired,
    clearGrades: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
+   clearGradeTypes: PropTypes.func.isRequired,
    clearPosts: PropTypes.func.isRequired,
+   clearSearch: PropTypes.func.isRequired,
    classPDF: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    classes: state.classes,
+   users: state.users,
    auth: state.auth,
 });
 
@@ -232,5 +250,8 @@ export default connect(mapStateToProps, {
    clearAttendances,
    clearPosts,
    clearProfile,
+   clearSearch,
+   clearGradeTypes,
    classPDF,
+   updatePreviousPage,
 })(withRouter(OneClass));

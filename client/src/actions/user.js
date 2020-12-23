@@ -3,11 +3,7 @@ import { saveAs } from "file-saver";
 import axios from "axios";
 
 import { setAlert } from "./alert";
-import {
-   updateLoadingSpinner,
-   updateAdminDashLoading,
-   clearValues,
-} from "./mixvalues";
+import { updateLoadingSpinner, clearValues } from "./mixvalues";
 import { logOutAndToggle } from "./navbar";
 import { clearInstallments } from "./installment";
 import { clearClass } from "./class";
@@ -15,23 +11,20 @@ import { clearAttendances } from "./attendance";
 import { clearGrades } from "./grade";
 
 import {
-   USER_ERROR,
-   USERS_ERROR,
    USER_LOADED,
    USERS_LOADED,
-   TEAM_LOADED,
-   USER_UPDATED,
-   RELATIVES_LOADED,
-   USERS_CLEARED,
-   USER_CLEARED,
+   USERSBK_LOADED,
    USERS_TYPE_CHANGED,
+   REGISTER_SUCCESS,
+   USER_UPDATED,
    SEARCH_CLEARED,
    USER_DELETED,
-   REGISTER_SUCCESS,
-   USER_ADDED,
-   USER_REMOVED,
-   TEACHERS_LOADED,
-   TEACHERS_ERROR,
+   USERFORLIST_ADDED,
+   USERFROMLIST_REMOVED,
+   USERS_CLEARED,
+   USER_CLEARED,
+   USER_ERROR,
+   USERS_ERROR,
 } from "./types";
 
 //Load User
@@ -59,46 +52,18 @@ export const loadUser = (user_id) => async (dispatch) => {
 };
 
 //Load Relatives
-export const loadRelatives = (user_id, tutor) => async (dispatch) => {
+export const loadRelatives = (user_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      let res;
-      if (tutor) {
-         res = await axios.get(`/api/users/tutor/${user_id}`);
-      } else {
-         res = await axios.get(`/api/users/students/${user_id}`);
-      }
+      let res = await axios.get(`/api/users/tutor/${user_id}`);
 
       dispatch({
-         type: RELATIVES_LOADED,
+         type: USERS_LOADED,
          payload: res.data,
       });
    } catch (err) {
       dispatch({
          type: USERS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(0, 0);
-   }
-   if (!tutor) dispatch(updateLoadingSpinner(false));
-};
-
-export const loadTeachers = () => async (dispatch) => {
-   try {
-      let res = await axios.get("/api/users?type=Profesor");
-
-      dispatch({
-         type: TEACHERS_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      dispatch({
-         type: TEACHERS_ERROR,
          payload: {
             type: err.response.statusText,
             status: err.response.status,
@@ -113,14 +78,14 @@ export const loadTeachers = () => async (dispatch) => {
 //LoadUsers
 export const loadUsers = (
    filterData,
+   primary = true,
+   studentSearch = false,
    search = false
-   /* studentRelation = false,
-   alert = true */
 ) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
-
-   ///Seeeeeee why all those booleans
-   ////
+   //primary: to load it in main list or back up
+   //StudentSearch: to have the alert coming in the square of 'Busqueda de Alumnos'
+   //Search: to determine the type for the tabs in the search page
    try {
       let filter = "";
 
@@ -132,27 +97,24 @@ export const loadUsers = (
             filter = filter + filternames[x] + "=" + filterData[name];
          }
       }
+
+      let res = await axios.get(`/api/users?${filter}`);
+
+      dispatch({
+         type: primary ? USERS_LOADED : USERSBK_LOADED,
+         payload: res.data,
+      });
+
       if (search) {
          dispatch({
             type: USERS_TYPE_CHANGED,
             payload: filterData.type,
          });
       }
-      let res = await axios.get(`/api/users?${filter}`);
-      dispatch({
-         type: USERS_LOADED,
-         payload: res.data,
-      });
    } catch (err) {
-      /* if (alert)
-         dispatch(
-            setAlert(
-               err.response.data.msg,
-               "danger",
-               studentRelation ? "3" : "2"
-            )
-         ); */
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(
+         setAlert(err.response.data.msg, "danger", studentSearch ? "3" : "2")
+      );
       dispatch({
          type: USERS_ERROR,
          payload: {
@@ -161,19 +123,18 @@ export const loadUsers = (
             msg: err.response.data.msg,
          },
       });
-      window.scrollTo(0, 0);
+      if (!studentSearch) window.scrollTo(0, 0);
    }
 
    dispatch(updateLoadingSpinner(false));
 };
 
-//Load team for about page
-export const loadTeam = () => async (dispatch) => {
+export const loadEmployees = () => async (dispatch) => {
    try {
       let res = await axios.get("/api/users/team");
 
       dispatch({
-         type: TEAM_LOADED,
+         type: USERS_LOADED,
          payload: res.data,
       });
    } catch (err) {
@@ -190,13 +151,34 @@ export const loadTeam = () => async (dispatch) => {
    }
 };
 
+export const loadClassStudents = (class_id) => async (dispatch) => {
+   try {
+      const res = await axios.get(
+         `/api/users?type=Alumno&classroom=${class_id}`
+      );
+      dispatch({
+         type: USERS_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      dispatch({
+         type: USERS_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      window.scrollTo(0, 0);
+   }
+   dispatch(updateLoadingSpinner(false));
+};
+
 //Update or register a user
-export const registerUser = (
-   formData,
-   history,
-   edit = false,
-   user_id
-) => async (dispatch) => {
+export const registerUser = (formData, history, user_id) => async (
+   dispatch
+) => {
    dispatch(updateLoadingSpinner(true));
 
    let user = {};
@@ -214,32 +196,25 @@ export const registerUser = (
    };
    try {
       let res;
-      if (!edit) {
+      if (!user_id) {
          res = await axios.post("/api/users", user, config);
-
-         dispatch({
-            type: REGISTER_SUCCESS,
-            payload: res.data,
-         });
       } else {
          //Update user
          res = await axios.put(`/api/users/${user_id}`, user, config);
-
-         dispatch({
-            type: USER_UPDATED,
-            payload: res.data,
-         });
       }
+
+      dispatch({
+         type: !user_id ? REGISTER_SUCCESS : USER_UPDATED,
+         payload: res.data,
+      });
 
       dispatch(
          setAlert(
-            edit ? "Usuario modificado" : "Usuario registrado",
+            user_id ? "Usuario modificado" : "Usuario registrado",
             "success",
             "1"
          )
       );
-      dispatch(updateAdminDashLoading());
-      dispatch(clearProfile());
       dispatch(clearValues());
       history.push(`/dashboard/${res.data._id}`);
    } catch (err) {
@@ -301,7 +276,7 @@ export const updateCredentials = (formData, history, user_id) => async (
       });
       dispatch(clearProfile());
       dispatch(setAlert("Credenciales modificadas", "success", "1"));
-      history.push(`/dashboard/${res.data._id}`);
+      history.push(`/dashboard/${user_id}`);
    } catch (err) {
       dispatch({
          type: USERS_ERROR,
@@ -332,7 +307,7 @@ export const deleteUser = (user_id, history, userLogged_id) => async (
          type: USER_DELETED,
       });
       dispatch(setAlert("Usuario Eliminado", "success", "1"));
-      dispatch(updateAdminDashLoading());
+      dispatch(clearValues());
    } catch (err) {
       dispatch({
          type: USER_ERROR,
@@ -352,6 +327,8 @@ export const deleteUser = (user_id, history, userLogged_id) => async (
 export const userPDF = (users, usersType) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
+   let user = JSON.stringify({ users, usersType });
+
    try {
       const config = {
          headers: {
@@ -359,7 +336,7 @@ export const userPDF = (users, usersType) => async (dispatch) => {
          },
       };
 
-      await axios.post("/api/users/create-list", { users, usersType }, config);
+      await axios.post("/api/users/create-list", user, config);
 
       const pdf = await axios.get("/api/users/lista/fetch-list", {
          responseType: "blob",
@@ -391,16 +368,16 @@ export const userPDF = (users, usersType) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 };
 
-export const addUser = (user) => (dispatch) => {
+export const addUserToList = (user) => (dispatch) => {
    dispatch({
-      type: USER_ADDED,
+      type: USERFORLIST_ADDED,
       payload: user,
    });
 };
 
-export const removeUser = (user_id) => (dispatch) => {
+export const removeUserFromList = (user_id) => (dispatch) => {
    dispatch({
-      type: USER_REMOVED,
+      type: USERFROMLIST_REMOVED,
       payload: user_id,
    });
 };

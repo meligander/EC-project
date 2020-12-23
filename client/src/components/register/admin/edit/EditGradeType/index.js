@@ -3,80 +3,43 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
 import {
-   clearGradeTypes,
    loadGradeTypes,
    updateGradeTypes,
+   deleteGradeType,
 } from "../../../../../actions/grade";
-import { loadCategories } from "../../../../../actions/category";
 
 import Loading from "../../../../modal/Loading";
 import EditButtons from "../sharedComp/EditButtons";
 import Confirm from "../../../../modal/Confirm";
+import { setAlert } from "../../../../../actions/alert";
 
 const EditGradeType = ({
    loadGradeTypes,
-   loadCategories,
    updateGradeTypes,
-   clearGradeTypes,
-   categories: { categories, loading },
+   deleteGradeType,
    grades: { gradeTypes, loadingGT },
+   setAlert,
 }) => {
    const [otherValues, setOtherValues] = useState({
-      newRow: [],
       toggleModalDelete: false,
       toggleModalSave: false,
-      oneLoad: true,
       toDelete: "",
    });
 
    const [formData, setFormData] = useState({
       header: [],
       rows: [],
+      newRow: [],
    });
 
-   const {
-      newRow,
-      toggleModalDelete,
-      toggleModalSave,
-      oneLoad,
-      toDelete,
-   } = otherValues;
-   const { header, rows } = formData;
+   const { header, rows, newRow } = formData;
+
+   const { toggleModalDelete, toggleModalSave, toDelete } = otherValues;
 
    useEffect(() => {
-      const createNewRow = () => {
-         let row = new Array(categories.length);
-         row[0] = { _id: "", name: "" };
-         for (let x = 1; x < categories.length; x++) {
-            row[x] = {
-               category: categories[x]._id,
-               checks: false,
-            };
-         }
-         setOtherValues((prev) => ({
-            ...prev,
-            newRow: row,
-            oneLoad: false,
-         }));
-      };
-      if (loadingGT && loading) {
-         loadCategories();
-         loadGradeTypes();
-      } else {
-         if (!loadingGT && oneLoad) {
-            setFormData(gradeTypes);
-            createNewRow();
-         }
-      }
-   }, [
-      loadGradeTypes,
-      loadCategories,
-      loadingGT,
-      loading,
-      oneLoad,
-      gradeTypes,
-      categories,
-   ]);
+      if (loadingGT) loadGradeTypes();
+      else setFormData(gradeTypes);
+   }, [loadGradeTypes, loadingGT, gradeTypes]);
 
    const onChange = (e, index, i) => {
       let newValue = [...rows];
@@ -89,6 +52,7 @@ const EditGradeType = ({
             checks: e.target.checked,
          };
       }
+
       setFormData({
          ...formData,
          rows: newValue,
@@ -96,26 +60,24 @@ const EditGradeType = ({
    };
 
    const addGradeType = () => {
-      let newValue = [...rows];
-      newValue.push(newRow);
-      setFormData({
-         ...formData,
-         rows: newValue,
-      });
+      if (rows[rows.length - 1][0]._id === "") {
+         setAlert("Agregue un tipo de nota por vez", "danger", "2");
+         window.scroll(0, 0);
+      } else {
+         let newValue = [...rows, newRow];
+         setFormData({
+            ...formData,
+            rows: newValue,
+         });
+      }
    };
 
-   const deleteGradeType = () => {
-      let newValue = [...rows];
-      newValue.splice(toDelete, 1);
-      setFormData({
-         ...formData,
-         rows: newValue,
-      });
+   const deleteGradeTypeConfirm = () => {
+      deleteGradeType(toDelete[0]._id);
    };
 
    const saveGradeTypes = () => {
       updateGradeTypes(rows);
-      clearGradeTypes();
    };
 
    const setToggleSave = () => {
@@ -125,10 +87,10 @@ const EditGradeType = ({
       });
    };
 
-   const setToggleDelete = (index) => {
+   const setToggleDelete = (row) => {
       setOtherValues({
          ...otherValues,
-         ...(index && { toDelete: index }),
+         ...(row && { toDelete: row }),
          toggleModalDelete: !toggleModalDelete,
       });
    };
@@ -146,16 +108,16 @@ const EditGradeType = ({
                <Confirm
                   toggleModal={toggleModalDelete}
                   setToggleModal={setToggleDelete}
-                  confirm={deleteGradeType}
+                  confirm={deleteGradeTypeConfirm}
                   text="¿Está seguro que desea eliminar el tipo de nota?"
                />
                <h2>Editar tipo de notas</h2>
-               <div className="wrapper">
-                  <table>
+               <div className="wrapper both">
+                  <table className="stick">
                      <thead>
                         <tr>
                            <th>Nombre</th>
-                           {header &&
+                           {header.length > 0 &&
                               header.map((header, index) => (
                                  <th key={index}>{header}</th>
                               ))}
@@ -163,7 +125,7 @@ const EditGradeType = ({
                         </tr>
                      </thead>
                      <tbody>
-                        {rows &&
+                        {rows.length > 0 &&
                            rows.map((row, index) => (
                               <tr key={index}>
                                  {row.map((item, i) =>
@@ -194,7 +156,7 @@ const EditGradeType = ({
                                  )}
                                  <td>
                                     <button
-                                       onClick={() => setToggleDelete(index)}
+                                       onClick={() => setToggleDelete(row)}
                                        className="btn btn-danger"
                                     >
                                        <i className="fas fa-times"></i>
@@ -220,21 +182,19 @@ const EditGradeType = ({
 
 EditGradeType.propTypes = {
    grades: PropTypes.object.isRequired,
-   categories: PropTypes.object.isRequired,
    loadGradeTypes: PropTypes.func.isRequired,
-   loadCategories: PropTypes.func.isRequired,
    updateGradeTypes: PropTypes.func.isRequired,
-   clearGradeTypes: PropTypes.func.isRequired,
+   deleteGradeType: PropTypes.func.isRequired,
+   setAlert: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    grades: state.grades,
-   categories: state.categories,
 });
 
 export default connect(mapStateToProps, {
    loadGradeTypes,
    updateGradeTypes,
-   loadCategories,
-   clearGradeTypes,
+   deleteGradeType,
+   setAlert,
 })(EditGradeType);

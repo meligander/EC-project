@@ -1,15 +1,17 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import moment from "moment";
 import PropTypes from "prop-types";
 
 const StudentTable = ({
+   location,
    type,
    loadingUsers,
    users,
    search,
    addChild,
    clearProfile,
+   updatePreviousPage,
 }) => {
    return (
       <table>
@@ -56,6 +58,7 @@ const StudentTable = ({
                                  onClick={() => {
                                     window.scroll(0, 0);
                                     clearProfile();
+                                    updatePreviousPage(location.pathname);
                                  }}
                               >
                                  Más Info &rarr;
@@ -86,7 +89,8 @@ StudentTable.propTypes = {
    addChild: PropTypes.func,
    search: PropTypes.bool.isRequired,
    type: PropTypes.string.isRequired,
-   clearProfile: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func,
+   updatePreviousPage: PropTypes.func,
 };
 
-export default StudentTable;
+export default withRouter(StudentTable);

@@ -5,10 +5,11 @@ import { updateLoadingSpinner } from "./mixvalues";
 import { clearNeighbourhoods } from "./neighbourhood";
 
 import {
-   TOWNS_ERROR,
    TOWNS_LOADED,
    TOWNS_UPDATED,
+   TOWN_DELETED,
    TOWNS_CLEARED,
+   TOWNS_ERROR,
 } from "./types";
 
 export const loadTowns = () => async (dispatch) => {
@@ -42,14 +43,49 @@ export const updateTowns = (formData) => async (dispatch) => {
             "Content-Type": "application/json",
          },
       };
+
       const res = await axios.post("/api/town", towns, config);
+
       dispatch({
          type: TOWNS_UPDATED,
          payload: res.data,
       });
-      dispatch(setAlert("Localidades Modificadas", "success", "2"));
-      dispatch(clearTowns());
+
       dispatch(clearNeighbourhoods());
+
+      dispatch(setAlert("Localidades Modificadas", "success", "2"));
+   } catch (err) {
+      dispatch({
+         type: TOWNS_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+   }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
+};
+
+export const deleteTown = (toDelete) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
+   try {
+      await axios.delete(`/api/town/${toDelete}`);
+
+      dispatch(clearNeighbourhoods());
+
+      dispatch({
+         type: TOWN_DELETED,
+         payload: toDelete,
+      });
+
+      dispatch(
+         setAlert("Localidad y Barrios Relacionados Eliminados", "success", "2")
+      );
    } catch (err) {
       dispatch({
          type: TOWNS_ERROR,

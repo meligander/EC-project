@@ -2,19 +2,19 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { loadTeam } from "../../../../actions/user";
+import { loadEmployees } from "../../../../actions/user";
 
 import video from "../../../../img/entrance.mp4";
 import "./style.scss";
 
-const Team = ({ users: { loadingUsers, users }, loadTeam }) => {
+const Team = ({ users: { loadingUsers, users }, loadEmployees }) => {
    const [teamNumber, setTeamNumber] = useState(0);
 
    useEffect(() => {
       if (loadingUsers) {
-         loadTeam();
+         loadEmployees();
       }
-   }, [loadingUsers, loadTeam]);
+   }, [loadingUsers, loadEmployees]);
 
    const moveUp = () => {
       if (teamNumber < users.length - 1) {
@@ -119,11 +119,11 @@ const Team = ({ users: { loadingUsers, users }, loadTeam }) => {
 
 Team.prototypes = {
    users: PropTypes.object.isRequired,
-   loadTeam: PropTypes.func.isRequired,
+   loadEmployees: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    users: state.users,
 });
 
-export default connect(mapStateToProps, { loadTeam })(Team);
+export default connect(mapStateToProps, { loadEmployees })(Team);

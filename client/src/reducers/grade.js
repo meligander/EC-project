@@ -1,15 +1,16 @@
 import {
-   USER_GRADES_LOADED,
    GRADES_LOADED,
-   GRADES_ERROR,
-   GRADES_CLEARED,
-   GRADES_DELETED,
-   NEW_GRADE_REGISTERED,
+   USER_GRADES_LOADED,
    GRADETYPES_LOADED,
    GRADES_UPDATED,
-   GRADETYPE_ERROR,
+   NEW_GRADE_REGISTERED,
+   GRADES_DELETED,
    GRADETYPES_UPDATED,
+   GRADETYPE_DELETED,
+   GRADES_CLEARED,
    GRADETYPES_CLEARED,
+   GRADES_ERROR,
+   GRADETYPE_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -32,14 +33,6 @@ const initialState = {
 export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
-      case USER_GRADES_LOADED:
-         return {
-            ...state,
-            usersGrades: payload,
-            loadingUsersGrades: false,
-         };
-      case GRADES_UPDATED:
-         return state;
       case GRADES_DELETED:
       case NEW_GRADE_REGISTERED:
       case GRADES_LOADED:
@@ -49,13 +42,34 @@ export default function (state = initialState, action) {
             loading: false,
             error: {},
          };
-      case GRADETYPES_UPDATED:
+      case USER_GRADES_LOADED:
+         return {
+            ...state,
+            usersGrades: payload,
+            loadingUsersGrades: false,
+         };
       case GRADETYPES_LOADED:
+      case GRADETYPES_UPDATED:
          return {
             ...state,
             gradeTypes: payload,
             loadingGT: false,
          };
+
+      case GRADES_UPDATED:
+         return state;
+      case GRADETYPE_DELETED:
+         return {
+            ...state,
+            gradeTypes: state.gradeTypes.map(
+               (gradeType) => gradeType._id !== payload
+            ),
+            loadingGT: false,
+         };
+      case GRADES_CLEARED:
+         return initialState;
+      case GRADETYPES_CLEARED:
+         return { ...state, gradeTypes: [], loadingGT: true };
       case GRADES_ERROR:
          return {
             ...state,
@@ -71,14 +85,9 @@ export default function (state = initialState, action) {
       case GRADETYPE_ERROR:
          return {
             ...state,
-            gradeTypes: [],
             loadingGT: false,
             error: payload,
          };
-      case GRADES_CLEARED:
-         return initialState;
-      case GRADETYPES_CLEARED:
-         return { ...state, gradeTypes: [], loadingGT: true };
       default:
          return state;
    }

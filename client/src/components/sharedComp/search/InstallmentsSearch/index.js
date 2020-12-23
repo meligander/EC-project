@@ -14,26 +14,29 @@ import InstallmentsTable from "../../../tables/InstallmentsTable";
 
 const InstallmentsSearch = ({
    match,
-   location,
    installment: { usersInstallments, loadingUsersInstallments },
    loadStudentInstallments,
    clearUserInstallments,
    setAlert,
 }) => {
+   const _id = match.params.studentid;
    useEffect(() => {
-      if (match.params.studentid !== "0") {
+      if (_id !== "0" && !loadingUsersInstallments) {
          setSelectedStudent((prev) => ({
             ...prev,
-            _id: match.params.studentid,
+            _id: _id,
+            name:
+               usersInstallments.rows[0][0].student.lastname +
+               ", " +
+               usersInstallments.rows[0][0].student.name,
          }));
       }
-   }, [match.params.studentid]);
+   }, [_id, usersInstallments, loadingUsersInstallments]);
 
    const [selectedStudent, setSelectedStudent] = useState({
       _id: "",
       name: "",
    });
-   const invoice = location.pathname === "/invoice-generation";
 
    const selectStudent = (user) => {
       setSelectedStudent({
@@ -57,18 +60,16 @@ const InstallmentsSearch = ({
          <div className="form">
             <StudentSearch
                selectedStudent={selectedStudent}
-               addToList={searchInstallments}
+               actionForSelected={searchInstallments}
                selectStudent={selectStudent}
                studentInstallment={true}
                student={true}
             />
          </div>
-         {invoice && (
-            <p className="mb-3 paragraph">
-               <span className="text-dark heading-tertiary">Alumno: </span>
-               {selectedStudent.name}
-            </p>
-         )}
+         <p className="mb-3 paragraph">
+            <span className="text-dark heading-tertiary">Alumno: </span>
+            {selectedStudent.name}
+         </p>
          {!loadingUsersInstallments && usersInstallments.rows.length > 0 ? (
             <InstallmentsTable forAdmin={true} />
          ) : (

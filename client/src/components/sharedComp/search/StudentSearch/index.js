@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import moment from "moment";
 
@@ -12,12 +13,15 @@ import "./style.scss";
 
 const StudentSearch = ({
    users: { users },
-   addToList,
+   actionForSelected,
    selectStudent,
    selectedStudent,
    loadUsers,
-   studentInstallment = false,
+   //To load Installments after selecting a student
+   seeInstallment = false,
+   //it could search only students or students and tutors (invoice)
    student = true,
+   //
    enrollment = false,
 }) => {
    const [filterForm, setFilterForm] = useState({
@@ -34,7 +38,7 @@ const StudentSearch = ({
    };
    const searchStudents = (e) => {
       e.preventDefault();
-      loadUsers(filterForm);
+      loadUsers(filterForm, true, true);
    };
 
    return (
@@ -69,7 +73,8 @@ const StudentSearch = ({
                   </tr>
                </thead>
                <tbody>
-                  {users.length > 0 &&
+                  {users &&
+                     users.length > 0 &&
                      users.map((user) => (
                         <tr
                            key={user._id}
@@ -85,9 +90,7 @@ const StudentSearch = ({
                            <td>{user.lastname + ", " + user.name}</td>
                            {!student && <td>{user.type}</td>}
                            {student && !enrollment && (
-                              <td>
-                                 {user.category !== undefined && user.category}
-                              </td>
+                              <td>{user.category && user.category}</td>
                            )}
                            {enrollment && (
                               <td>{moment().diff(user.dob, "years", false)}</td>
@@ -99,8 +102,8 @@ const StudentSearch = ({
             {student && (
                <div className="btn-right">
                   {!enrollment && (
-                     <button className="btn" onClick={addToList}>
-                        {!studentInstallment ? (
+                     <button className="btn" onClick={actionForSelected}>
+                        {!seeInstallment ? (
                            <>
                               <i className="fas fa-user-plus"></i>
                               <span className="hide-md"> Agregar</span>
@@ -120,7 +123,7 @@ const StudentSearch = ({
 StudentSearch.propTypes = {
    users: PropTypes.object.isRequired,
    loadUsers: PropTypes.func.isRequired,
-   addToList: PropTypes.func,
+   actionForSelected: PropTypes.func,
    selectStudent: PropTypes.func.isRequired,
    student: PropTypes.bool,
    enrollment: PropTypes.bool,
@@ -130,4 +133,6 @@ const mapStateToProps = (state) => ({
    users: state.users,
 });
 
-export default connect(mapStateToProps, { loadUsers })(StudentSearch);
+export default connect(mapStateToProps, { loadUsers })(
+   withRouter(StudentSearch)
+);

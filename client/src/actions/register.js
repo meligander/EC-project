@@ -6,12 +6,12 @@ import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
 
 import {
-   REGISTER_ERROR,
    REGISTER_LOADED,
    REGISTERS_LOADED,
    REGISTER_CLOSED,
-   REGISTERS_CLEARED,
    REGISTER_DELETED,
+   REGISTERS_CLEARED,
+   REGISTER_ERROR,
 } from "./types";
 
 export const loadRegister = () => async (dispatch) => {
@@ -87,10 +87,11 @@ export const closeRegister = (formData, user_id, history) => async (
             "Content-Type": "application/json",
          },
       };
-      const res = await axios.put("/api/register", register, config);
+
+      await axios.put("/api/register", register, config);
+
       dispatch({
          type: REGISTER_CLOSED,
-         payload: res.data,
       });
 
       history.push(`/dashboard/${user_id}`);
@@ -109,6 +110,7 @@ export const closeRegister = (formData, user_id, history) => async (
    }
 
    window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const deleteRegister = (register_id) => async (dispatch) => {

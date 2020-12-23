@@ -1,10 +1,10 @@
 import {
    REGISTER_LOADED,
    REGISTERS_LOADED,
-   REGISTER_ERROR,
-   REGISTERS_CLEARED,
    REGISTER_CLOSED,
    REGISTER_DELETED,
+   REGISTERS_CLEARED,
+   REGISTER_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -32,6 +32,8 @@ export default function (state = initialState, action) {
             registers: payload,
             loadingRegisters: false,
          };
+      case REGISTER_CLOSED:
+         return state;
       case REGISTER_DELETED:
          return {
             ...state,
@@ -39,13 +41,8 @@ export default function (state = initialState, action) {
                (register) => register._id !== payload
             ),
          };
-      case REGISTER_CLOSED:
-         return {
-            ...state,
-            registers:
-               state.registers.lenght > 0 ? [payload, ...state.registers] : [],
-            loadingRegisters: state.register.length > 0 ? false : true,
-         };
+      case REGISTERS_CLEARED:
+         return initialState;
       case REGISTER_ERROR:
          return {
             ...state,
@@ -55,9 +52,6 @@ export default function (state = initialState, action) {
             loadingRegisters: false,
             error: payload,
          };
-
-      case REGISTERS_CLEARED:
-         return initialState;
       default:
          return state;
    }

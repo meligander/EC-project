@@ -76,50 +76,15 @@ router.post(
    }
 );
 
-//@route    PUT api/expence-type/:id
-//@desc     Update an expence-type
-//@access   Private
-router.put(
-   "/:id",
-   [
-      auth,
-      adminAuth,
-      check("name", "El nombre es necesario").not().isEmpty(),
-      check("type", "El tipo es necesario").not().isEmpty(),
-   ],
-   async (req, res) => {
-      const { name, type } = req.body;
-
-      let errors = [];
-      const errorsResult = validationResult(req);
-      if (!errorsResult.isEmpty()) {
-         errors = errorsResult.array();
-         return res.status(400).json({ errors });
-      }
-
-      try {
-         let expenceType = await ExpenceType.findOneAndUpdate(
-            { _id: req.params.id },
-            { $set: { name, type } },
-            { new: true }
-         );
-
-         res.json(expenceType);
-      } catch (err) {
-         console.error(err.message);
-         return res.status(500).send("Server Error");
-      }
-   }
-);
-
 //@route    POST api/expence-type
 //@desc     Update all expence types
 //@access   Private
 router.post("/", [auth, adminAuth], async (req, res) => {
    //An array of expence types
+
    const expenceTypes = req.body;
-   let expenceType;
-   let newExpenceTypes = [];
+   let newExpeceTypes = [];
+   let expenceType = {};
 
    try {
       for (let x = 0; x < expenceTypes.length; x++) {
@@ -130,37 +95,28 @@ router.post("/", [auth, adminAuth], async (req, res) => {
          if (expenceTypes[x].type === 0)
             return res.status(400).json({ msg: "El tipo debe estar definido" });
       }
-      let oldExpenceTypes = await ExpenceType.find();
-      for (let x = 0; x < expenceTypes.length; x++) {
-         let name = expenceTypes[x].name;
-         let id = expenceTypes[x]._id;
-         let type = expenceTypes[x].type;
 
-         if (id === "") {
-            expenceType = new ExpenceType({ name, type });
+      for (let x = 0; x < expenceTypes.length; x++) {
+         expenceType = {
+            name: expenceTypes[x].name,
+            type: expenceTypes[x].type,
+         };
+
+         if (expenceTypes[x]._id === "") {
+            expenceType = new ExpenceType(expenceType);
 
             await expenceType.save();
          } else {
             expenceType = await ExpenceType.findOneAndUpdate(
-               { _id: id },
-               { $set: { name, type } },
+               { _id: expenceTypes[x]._id },
+               { $set: expenceType },
                { new: true }
             );
-            for (let y = 0; y < oldExpenceTypes.length; y++) {
-               if (oldExpenceTypes[y]._id.toString() === id) {
-                  oldExpenceTypes.splice(y, 1);
-                  break;
-               }
-            }
          }
-         newExpenceTypes.push(expenceType);
+         newExpeceTypes.push(expenceType);
       }
 
-      for (let x = 0; x < oldExpenceTypes.length; x++) {
-         await ExpenceType.findOneAndRemove({ _id: oldExpenceTypes[x]._id });
-      }
-
-      res.json(newExpenceTypes);
+      res.json(newExpeceTypes);
    } catch (err) {
       console.error(err.message);
       return res.status(500).send("Server Error");
@@ -175,7 +131,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       //Remove expencetype
       await ExpenceType.findOneAndRemove({ _id: req.params.id });
 
-      res.json({ msg: "Expence type deleted" });
+      res.json({ msg: "Expence Type Deleted" });
    } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");

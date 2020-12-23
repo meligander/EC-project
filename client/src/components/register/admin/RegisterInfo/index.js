@@ -4,6 +4,7 @@ import Moment from "react-moment";
 import PropTypes from "prop-types";
 
 import { loadRegister } from "../../../../actions/register";
+import { loadExpenceTypes } from "../../../../actions/expence";
 
 import Loading from "../../../modal/Loading";
 import Tabs from "../../../sharedComp/Tabs";
@@ -12,19 +13,21 @@ import IncomeExpenceTab from "./tabs/IncomeExpenceTab";
 
 import "./style.scss";
 
-const RegisterInfo = ({ loadRegister, registers: { register, loading } }) => {
+const RegisterInfo = ({
+   loadRegister,
+   loadExpenceTypes,
+   registers: { register, loading },
+}) => {
    const [date, setDate] = useState(new Date());
 
    useEffect(() => {
-      const changeDate = () => {
-         if (register.temporary) setDate(register.date);
-      };
       if (!loading) {
-         changeDate();
+         if (register.temporary) setDate(register.date);
       } else {
          loadRegister();
+         loadExpenceTypes();
       }
-   }, [loadRegister, loading, register]);
+   }, [loadRegister, loadExpenceTypes, loading, register]);
 
    return (
       <>
@@ -50,10 +53,13 @@ const RegisterInfo = ({ loadRegister, registers: { register, loading } }) => {
 RegisterInfo.propTypes = {
    registers: PropTypes.object.isRequired,
    loadRegister: PropTypes.func.isRequired,
+   loadExpenceTypes: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    registers: state.registers,
 });
 
-export default connect(mapStateToProps, { loadRegister })(RegisterInfo);
+export default connect(mapStateToProps, { loadRegister, loadExpenceTypes })(
+   RegisterInfo
+);

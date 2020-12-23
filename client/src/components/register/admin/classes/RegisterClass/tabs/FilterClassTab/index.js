@@ -3,9 +3,11 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { updateClassCategory } from "../../../../../../../actions/class";
-import { loadCategories } from "../../../../../../../actions/category";
-import { loadUsers, removeUser } from "../../../../../../../actions/user";
+import {
+   updateClassCategory,
+   addStudent,
+} from "../../../../../../../actions/class";
+import { loadUsers } from "../../../../../../../actions/user";
 import { setAlert } from "../../../../../../../actions/alert";
 
 import StudentTable from "../../../../../../tables/StudentTable";
@@ -13,16 +15,15 @@ import Alert from "../../../../../../sharedComp/Alert";
 
 const FilterClassTab = ({
    location,
-   loadCategories,
    setAlert,
    loadUsers,
    updateClassCategory,
-   removeUser,
+   addStudent,
    categories,
    classes: { classInfo, loading },
    users: { users, loadingUsers },
 }) => {
-   const register = location.pathname === "/register-class";
+   const registerClass = location.pathname === "/register-class";
 
    const [category, setCategory] = useState({
       _id: "",
@@ -30,16 +31,13 @@ const FilterClassTab = ({
    });
 
    useEffect(() => {
-      if (!register && !loading) {
+      if (!registerClass && !loading) {
          setCategory({
             _id: classInfo.category._id,
             name: classInfo.category.name,
          });
       }
-      if (categories.loading) {
-         loadCategories(true);
-      }
-   }, [categories.loading, loadCategories, classInfo, loading, register]);
+   }, [classInfo, registerClass, loading]);
 
    const filterStudents = (e) => {
       e.preventDefault();
@@ -53,7 +51,7 @@ const FilterClassTab = ({
             category: category._id,
             classroom: "null",
          });
-         updateClassCategory({ ...classInfo, category });
+         updateClassCategory({ ...(classInfo && { ...classInfo }), category });
       }
    };
 
@@ -70,12 +68,9 @@ const FilterClassTab = ({
       for (let x = 0; x < classInfo.students.length; x++) {
          if (classInfo.students[x]._id === studentInfo._id) exist = true;
       }
+
       if (!exist) {
-         updateClassCategory({
-            ...classInfo,
-            students: [...classInfo.students, studentInfo],
-         });
-         removeUser(studentInfo._id);
+         addStudent(studentInfo);
          setAlert("El alumno se ha agregado correctamente", "success", "3");
       } else {
          setAlert("El alumno ya ha sido agregado", "danger", "3");
@@ -89,7 +84,7 @@ const FilterClassTab = ({
                <select
                   className="form-input"
                   name="new-category"
-                  disabled={!register}
+                  disabled={!registerClass}
                   id="new-category"
                   onChange={onChange}
                   value={category._id}
@@ -140,11 +135,10 @@ FilterClassTab.propTypes = {
    categories: PropTypes.object.isRequired,
    classes: PropTypes.object.isRequired,
    users: PropTypes.object.isRequired,
-   loadCategories: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
    updateClassCategory: PropTypes.func.isRequired,
    loadUsers: PropTypes.func.isRequired,
-   removeUser: PropTypes.func.isRequired,
+   addStudent: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -154,9 +148,8 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps, {
-   loadCategories,
    setAlert,
    loadUsers,
    updateClassCategory,
-   removeUser,
+   addStudent,
 })(withRouter(FilterClassTab));

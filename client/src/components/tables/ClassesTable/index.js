@@ -1,9 +1,16 @@
 import React from "react";
 import Moment from "react-moment";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 
-const ClassesTable = ({ classes, clearClass, all = true }) => {
+const ClassesTable = ({
+   location,
+   classes,
+   clearClass,
+   clearSearch,
+   updatePreviousPage,
+   all = true,
+}) => {
    return (
       <div className="wrapper">
          <table>
@@ -59,6 +66,8 @@ const ClassesTable = ({ classes, clearClass, all = true }) => {
                               <Link
                                  onClick={() => {
                                     clearClass();
+                                    clearSearch();
+                                    updatePreviousPage(location.pathname);
                                     window.scroll(0, 0);
                                  }}
                                  to={`/class/${classItem._id}`}
@@ -85,6 +94,8 @@ ClassesTable.propTypes = {
    classes: PropTypes.array.isRequired,
    all: PropTypes.bool,
    clearClass: PropTypes.func.isRequired,
+   clearSearch: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
 };
 
-export default ClassesTable;
+export default withRouter(ClassesTable);

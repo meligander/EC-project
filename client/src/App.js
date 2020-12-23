@@ -7,7 +7,6 @@ import { Provider } from "react-redux";
 import setAuthToken from "./utils/setAuthToken";
 //actions
 import { loadUser } from "./actions/auth";
-import { updateExpiredIntallments } from "./actions/installment";
 
 //Unregister Pages
 import About from "./components/unregister/About";
@@ -28,7 +27,6 @@ const App = () => {
       if (localStorage.token) {
          setAuthToken(localStorage.token);
          store.dispatch(loadUser());
-         store.dispatch(updateExpiredIntallments());
       }
    }, []);
    return (

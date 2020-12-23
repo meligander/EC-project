@@ -95,18 +95,23 @@ router.get("/", auth, async (req, res) => {
 
                      for (let x = 0; x < enrollments.length; x++) {
                         let user = {};
-                        if (enrollments[x].student !== null) {
-                           user.type = req.query.type;
-                           user._id = enrollments[x].student._id;
-                           user.name = enrollments[x].student.name;
-                           user.lastname = enrollments[x].student.lastname;
-                           user.studentnumber =
-                              enrollments[x].student.studentnumber;
-                           user.category = enrollments[x].category.name;
-                           if (enrollments[x].student.cel !== undefined)
-                              user.cel = enrollments[x].student.cel;
-                           if (enrollments[x].student.dob !== undefined)
-                              user.dob = enrollments[x].student.dob;
+                        if (enrollments[x].student) {
+                           user = {
+                              _id: enrollments[x].student._id,
+                              type: req.query.type,
+                              dni: enrollments[x].student.dni,
+                              name: enrollments[x].student.name,
+                              lastname: enrollments[x].student.lastname,
+                              studentnumber:
+                                 enrollments[x].student.studentnumber,
+                              category: enrollments[x].category.name,
+                              ...(enrollments[x].student.cel && {
+                                 cel: enrollments[x].student.cel,
+                              }),
+                              ...(enrollments[x].student.dob && {
+                                 dob: enrollments[x].student.dob,
+                              }),
+                           };
                            users.push(user);
                         }
                      }
@@ -114,25 +119,29 @@ router.get("/", auth, async (req, res) => {
                      const students = await User.find(filter)
                         .select("-password")
                         .sort({ lastname: 1, name: 1 });
+
                      for (let x = 0; x < students.length; x++) {
                         let user = {};
                         const date = new Date();
+
                         const enrollment = await Enrollment.findOne({
                            student: students[x]._id,
                            year: date.getFullYear(),
                         }).populate({ path: "category", select: "name" });
-                        user.type = req.query.type;
-                        user._id = students[x]._id;
-                        user.name = students[x].name;
-                        user.lastname = students[x].lastname;
-                        user.studentnumber = students[x].studentnumber;
-                        user.dni = students[x].dni;
-                        if (students[x].cel !== undefined)
-                           user.cel = students[x].cel;
-                        if (students[x].dob !== undefined)
-                           user.dob = students[x].dob;
-                        if (enrollment)
-                           user.category = enrollment.category.name;
+
+                        user = {
+                           _id: students[x]._id,
+                           type: req.query.type,
+                           dni: students[x].dni,
+                           name: students[x].name,
+                           lastname: students[x].lastname,
+                           studentnumber: students[x].studentnumber,
+                           ...(enrollment && {
+                              category: enrollment.category.name,
+                           }),
+                           ...(students[x].cel && { cel: students[x].cel }),
+                           ...(students[x].dob && { dob: students[x].dob }),
+                        };
                         users.push(user);
                      }
                   }
@@ -155,7 +164,7 @@ router.get("/", auth, async (req, res) => {
 
                      const allusers = await User.find(filter)
                         .populate({
-                           path: "children.user",
+                           path: "children",
                            model: "user",
                            select: ["name", "lastname"],
                            match: filter2,
@@ -194,7 +203,7 @@ router.get("/", auth, async (req, res) => {
             users = await User.find(filter)
                .select("-password")
                .populate({
-                  path: "children.user",
+                  path: "children",
                   model: "user",
                   select: ["name", "lastname"],
                })
@@ -213,35 +222,6 @@ router.get("/", auth, async (req, res) => {
    }
 });
 
-//@route    GET api/users/students/:id
-//@desc     Get a tutor's students
-//@access   Private
-router.get("/students/:id", auth, async (req, res) => {
-   try {
-      const user = await User.findOne({ _id: req.params.id }).select(
-         "-password"
-      );
-
-      let students = [];
-      for (let x = 0; x < user.children.length; x++) {
-         const student = await User.findOne({
-            _id: user.children[x].user,
-         }).select("-password");
-         students.push(student);
-      }
-
-      if (students.length === 0) {
-         return res.status(400).json({
-            msg: "No se pudieron encontrar alumnos con dichas descripciones",
-         });
-      }
-      res.json(students);
-   } catch (err) {
-      console.error(err.message);
-      return res.status(500).send("Server Error");
-   }
-});
-
 //@route    GET api/users/:id
 //@desc     Get a user
 //@access   Private
@@ -250,13 +230,15 @@ router.get("/:id", auth, async (req, res) => {
       const user = await User.findOne({ _id: req.params.id })
          .select("-password")
          .populate({ path: "town", select: "name" })
-         .populate({ path: "neighbourhood", select: "name" });
+         .populate({ path: "neighbourhood", select: "name" })
+         .populate({ path: "children", select: "-password" });
 
       if (!user) {
          return res
             .status(400)
             .json({ msg: "No se pudo encontrar el usuario" });
       }
+
       res.json(user);
    } catch (err) {
       console.error(err.message);
@@ -269,7 +251,7 @@ router.get("/:id", auth, async (req, res) => {
 //@access   Private
 router.get("/tutor/:id", auth, async (req, res) => {
    try {
-      const users = await User.find({ "children.user": req.params.id }).select(
+      const users = await User.find({ children: req.params.id }).select(
          "-password"
       );
 
@@ -546,7 +528,6 @@ router.post(
             degree,
             school,
             salary,
-            children,
             description,
             active,
          };
@@ -556,6 +537,17 @@ router.post(
                ...data,
                studentnumber,
                classroom: null,
+            };
+         }
+         if (type === "Tutor") {
+            let childrenList = [];
+            for (let x = 0; x < children.length; x++) {
+               childrenList.push(children[x]._id);
+            }
+            console.log(childrenList);
+            data = {
+               ...data,
+               children: childrenList,
             };
          }
 
@@ -568,7 +560,11 @@ router.post(
 
          await user.save();
 
-         user.password = null;
+         user = await User.findOne({ _id: req.params.id })
+            .select("-password")
+            .populate({ path: "town", select: "name" })
+            .populate({ path: "neighbourhood", select: "name" })
+            .populate({ path: "children", select: "-password" });
 
          res.json(user);
       } catch (err) {
@@ -634,26 +630,26 @@ router.put(
          let data = {
             name,
             lastname,
-            ...(tel !== undefined && { tel }),
-            ...(cel !== undefined && { cel }),
-            ...(type !== undefined && { type }),
-            ...(dni !== undefined && { dni }),
-            ...(town !== undefined && { town }),
-            ...(neighbourhood !== undefined && { neighbourhood }),
-            ...(address !== undefined && { address }),
-            ...(dob !== undefined && { dob }),
-            ...(discount !== undefined && { discount }),
-            ...(chargeday !== undefined && { chargeday }),
-            ...(birthprov !== undefined && { birthprov }),
-            ...(birthtown !== undefined && { birthtown }),
-            ...(sex !== undefined && { sex }),
-            ...(degree !== undefined && { degree }),
-            ...(school !== undefined && { school }),
-            ...(salary !== undefined && { salary }),
-            ...(children !== undefined && { children }),
-            ...(description !== undefined && { description }),
-            ...(active !== undefined && { active }),
-            ...(img !== undefined && { img: imgurl }),
+            ...(tel && { tel }),
+            ...(cel && { cel }),
+            ...(type && { type }),
+            ...(dni && { dni }),
+            ...(town && { town }),
+            ...(neighbourhood && { neighbourhood }),
+            ...(address && { address }),
+            ...(dob && { dob }),
+            ...(discount && { discount }),
+            ...(chargeday && { chargeday }),
+            ...(birthprov && { birthprov }),
+            ...(birthtown && { birthtown }),
+            ...(sex && { sex }),
+            ...(degree && { degree }),
+            ...(school && { school }),
+            ...(salary && { salary }),
+            ...(children && { children }),
+            ...(description && { description }),
+            ...(active && { active }),
+            ...(img && { img: imgurl }),
          };
          user = await User.findOne({ _id: req.params.id });
 
@@ -693,7 +689,11 @@ router.put(
             { _id: req.params.id },
             { $set: data },
             { new: true }
-         ).select("-password");
+         )
+            .select("-password")
+            .populate({ path: "town", select: "name" })
+            .populate({ path: "neighbourhood", select: "name" })
+            .populate({ path: "children", select: "-password" });
 
          res.json(user);
       } catch (err) {
@@ -744,7 +744,11 @@ router.put("/credentials/:id", [auth], async (req, res) => {
          { _id: req.params.id },
          { $set: data },
          { new: true }
-      ).select("-password");
+      )
+         .select("-password")
+         .populate({ path: "town", select: "name" })
+         .populate({ path: "neighbourhood", select: "name" })
+         .populate({ path: "children", select: "-password" });
 
       res.json(user);
    } catch (err) {

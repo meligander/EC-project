@@ -1,14 +1,14 @@
 import {
    POST_LOADED,
    POSTS_LOADED,
-   POST_ERROR,
-   LIKES_UPDATED,
-   POST_DELETED,
    POST_ADDED,
+   POST_DELETED,
+   LIKES_UPDATED,
    COMMENT_ADDED,
    COMMENT_DELETED,
    POSTS_CLEARED,
    POST_CLEARED,
+   POST_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -21,16 +21,16 @@ const initialState = {
 export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
-      case POSTS_LOADED:
-         return {
-            ...state,
-            posts: payload,
-            loading: false,
-         };
       case POST_LOADED:
          return {
             ...state,
             post: payload,
+            loading: false,
+         };
+      case POSTS_LOADED:
+         return {
+            ...state,
+            posts: payload,
             loading: false,
          };
       case POST_ADDED:
@@ -39,19 +39,10 @@ export default function (state = initialState, action) {
             posts: [payload, ...state.posts],
             loding: false,
          };
-      case POST_ERROR:
+      case POST_DELETED:
          return {
             ...state,
-            error: payload,
-            loading: false,
-         };
-      case COMMENT_ADDED:
-         return {
-            ...state,
-            post: {
-               ...state.post,
-               comments: payload,
-            },
+            posts: state.posts.filter((post) => post._id !== payload),
             loading: false,
          };
       case LIKES_UPDATED:
@@ -62,6 +53,15 @@ export default function (state = initialState, action) {
                   ? { ...post, likes: payload.likes }
                   : post
             ),
+            loading: false,
+         };
+      case COMMENT_ADDED:
+         return {
+            ...state,
+            post: {
+               ...state.post,
+               comments: payload,
+            },
             loading: false,
          };
       case COMMENT_DELETED:
@@ -75,19 +75,19 @@ export default function (state = initialState, action) {
             },
             loading: false,
          };
-      case POST_DELETED:
-         return {
-            ...state,
-            posts: state.posts.filter((post) => post._id !== payload),
-            loading: false,
-         };
-      case POSTS_CLEARED:
-         return initialState;
       case POST_CLEARED:
          return {
             ...state,
             post: null,
             loading: true,
+         };
+      case POSTS_CLEARED:
+         return initialState;
+      case POST_ERROR:
+         return {
+            ...state,
+            error: payload,
+            loading: false,
          };
       default:
          return state;

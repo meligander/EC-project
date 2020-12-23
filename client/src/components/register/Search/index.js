@@ -1,14 +1,22 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { clearStudentNumber } from "../../../actions/mixvalues";
+import {
+   clearStudentNumber,
+   updatePreviousPage,
+} from "../../../actions/mixvalues";
 
 import Tabs from "../../sharedComp/Tabs";
 import SearchTab from "./tabs/SearchTab";
 
-const Search = ({ auth: { userLogged, loading }, clearStudentNumber }) => {
+const Search = ({
+   location,
+   auth: { userLogged, loading },
+   clearStudentNumber,
+   updatePreviousPage,
+}) => {
    return (
       <>
          {!loading && (
@@ -26,6 +34,7 @@ const Search = ({ auth: { userLogged, loading }, clearStudentNumber }) => {
                         onClick={() => {
                            window.scroll(0, 0);
                            clearStudentNumber();
+                           updatePreviousPage(location.pathname);
                         }}
                      >
                         <i className="fas fa-user-plus"></i>
@@ -53,10 +62,14 @@ const Search = ({ auth: { userLogged, loading }, clearStudentNumber }) => {
 Search.propTypes = {
    auth: PropTypes.object.isRequired,
    clearStudentNumber: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    auth: state.auth,
 });
 
-export default connect(mapStateToProps, { clearStudentNumber })(Search);
+export default connect(mapStateToProps, {
+   clearStudentNumber,
+   updatePreviousPage,
+})(withRouter(Search));

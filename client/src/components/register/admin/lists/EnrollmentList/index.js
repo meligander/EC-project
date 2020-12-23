@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import moment from "moment";
 import Moment from "react-moment";
 import PropTypes from "prop-types";
@@ -12,7 +12,10 @@ import {
    clearEnrollment,
 } from "../../../../../actions/enrollment";
 import { loadCategories } from "../../../../../actions/category";
-import { updatePageNumber } from "../../../../../actions/mixvalues";
+import {
+   updatePageNumber,
+   updatePreviousPage,
+} from "../../../../../actions/mixvalues";
 
 import Loading from "../../../../modal/Loading";
 import ListButtons from "../sharedComp/ListButtons";
@@ -20,6 +23,7 @@ import DateFilter from "../sharedComp/DateFilter";
 import Confirm from "../../../../modal/Confirm";
 
 const EnrollmentList = ({
+   location,
    mixvalues: { page },
    enrollments: { enrollments, loadingEnrollments },
    categories: { categories, loading },
@@ -27,6 +31,7 @@ const EnrollmentList = ({
    deleteEnrollment,
    loadCategories,
    updatePageNumber,
+   updatePreviousPage,
    enrollmentsPDF,
 }) => {
    const day = moment();
@@ -203,6 +208,9 @@ const EnrollmentList = ({
                                              onClick={() => {
                                                 window.scroll(0, 0);
                                                 clearEnrollment();
+                                                updatePreviousPage(
+                                                   location.pathname
+                                                );
                                              }}
                                           >
                                              <i className="far fa-edit"></i>
@@ -248,6 +256,7 @@ EnrollmentList.propTypes = {
    deleteEnrollment: PropTypes.func.isRequired,
    clearEnrollment: PropTypes.func.isRequired,
    enrollmentsPDF: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStatetoProps = (state) => ({
@@ -263,4 +272,5 @@ export default connect(mapStatetoProps, {
    deleteEnrollment,
    clearEnrollment,
    enrollmentsPDF,
-})(EnrollmentList);
+   updatePreviousPage,
+})(withRouter(EnrollmentList));

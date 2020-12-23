@@ -1,21 +1,18 @@
 import {
-   REGISTER_SUCCESS,
    USER_LOADED,
-   USER_UPDATED,
    USERS_LOADED,
+   USERSBK_LOADED,
+   USERS_TYPE_CHANGED,
+   REGISTER_SUCCESS,
+   USER_UPDATED,
+   USER_DELETED,
    USERS_CLEARED,
    USER_CLEARED,
    SEARCH_CLEARED,
    USERS_ERROR,
    USER_ERROR,
-   RELATIVES_LOADED,
-   USERS_TYPE_CHANGED,
-   USER_DELETED,
-   USER_REMOVED,
-   USER_ADDED,
-   TEACHERS_LOADED,
-   TEAM_LOADED,
-   TEACHERS_ERROR,
+   USERFORLIST_ADDED,
+   USERFROMLIST_REMOVED,
 } from "../actions/types";
 
 const initialState = {
@@ -24,10 +21,8 @@ const initialState = {
    user: null,
    users: [],
    usersType: "",
-   relatives: [],
-   teachers: [],
-   loadingTeachers: true,
-   relativesLoading: true,
+   usersBK: [],
+   loadingUsersBK: true,
    error: {},
 };
 
@@ -35,71 +30,30 @@ export default function (state = initialState, action) {
    const { type, payload } = action;
 
    switch (type) {
+      case USER_LOADED:
       case REGISTER_SUCCESS:
       case USER_UPDATED:
-      case USER_LOADED:
          return {
             ...state,
             loading: false,
             user: payload,
          };
-      case TEAM_LOADED:
       case USERS_LOADED:
          return {
             ...state,
             loadingUsers: false,
             users: payload,
          };
-      case TEACHERS_LOADED:
+      case USERSBK_LOADED:
          return {
             ...state,
-            loadingTeachers: false,
-            teachers: payload,
-         };
-      case USER_REMOVED:
-         return {
-            ...state,
-            users: state.users.filter((user) => user._id !== payload),
-         };
-      case USER_ADDED:
-         return {
-            ...state,
-            users: [...state.users, payload],
+            loadingUsersBK: false,
+            usersBK: payload,
          };
       case USERS_TYPE_CHANGED:
          return {
             ...state,
             usersType: payload,
-         };
-      case RELATIVES_LOADED:
-         return {
-            ...state,
-            relatives: payload,
-            relativesLoading: false,
-         };
-      case USERS_ERROR:
-         return {
-            ...state,
-            users: [],
-            error: payload,
-            loadingUsers: false,
-            relativesLoading: false,
-            relatives: [],
-         };
-      case TEACHERS_ERROR:
-         return {
-            ...state,
-            teachers: [],
-            error: payload,
-         };
-      case USERS_CLEARED:
-         return initialState;
-      case USER_CLEARED:
-         return {
-            loading: true,
-            user: null,
-            relatives: [],
-            relativesLoading: true,
          };
       case USER_DELETED:
          return {
@@ -107,26 +61,56 @@ export default function (state = initialState, action) {
             user: null,
             loading: true,
          };
+      case USERFORLIST_ADDED:
+         return {
+            ...state,
+            users: [...state.users, payload],
+            loading: false,
+         };
+      case USERFROMLIST_REMOVED:
+         return {
+            ...state,
+            users: state.users.filter((user) => user._id !== payload),
+         };
+      case USER_CLEARED:
+         return {
+            ...state,
+            loading: true,
+            user: null,
+            usersBK: [],
+            loadingUsersBK: true,
+         };
+      case USERS_CLEARED:
+         return initialState;
       case SEARCH_CLEARED:
          return {
             ...state,
             users: [],
             loadingUsers: true,
+            usersBK: [],
+            loadingUsersBK: true,
             usersType: "",
          };
       case USER_ERROR:
          return {
             ...state,
-            loading: false,
-            relativesLoading: false,
-            teachers: [],
-            loadingTeachers: false,
-            relatives: [],
+            loading: true,
+            loadingUsers: true,
+            user: null,
             users: [],
             usersType: "",
+            usersBK: [],
+            loadingUsersBK: true,
+            error: {},
+         };
+      case USERS_ERROR:
+         return {
+            ...state,
+            users: [],
             loadingUsers: false,
+            usersBK: [],
+            loadingUsersBK: true,
             error: payload,
-            user: null,
          };
       default:
          return state;

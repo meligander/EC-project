@@ -1,15 +1,17 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import Moment from "react-moment";
 import PropTypes from "prop-types";
 
 import { addLike, clearPost, removeLike } from "../../../../../actions/post";
 import { clearProfile } from "../../../../../actions/user";
+import { updatePreviousPage } from "../../../../../actions/mixvalues";
 
 import "./style.scss";
 
 const Post = ({
+   location,
    post,
    addLike,
    removeLike,
@@ -18,6 +20,7 @@ const Post = ({
    isComment,
    clearPost,
    clearProfile,
+   updatePreviousPage,
    setToggle,
 }) => {
    return (
@@ -38,6 +41,7 @@ const Post = ({
             onClick={() => {
                window.scroll(0, 0);
                clearProfile();
+               updatePreviousPage(location.pathname);
             }}
          >
             <figure className="post-shape">
@@ -100,6 +104,8 @@ const Post = ({
                         className="btn btn-light"
                         onClick={() => {
                            clearPost();
+                           window.scroll(0, 0);
+                           updatePreviousPage(location.pathname);
                         }}
                      >
                         <i className="far fa-comments"></i>
@@ -126,6 +132,7 @@ Post.propTypes = {
    isComment: PropTypes.bool,
    clearProfile: PropTypes.func.isRequired,
    clearPost: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -137,4 +144,5 @@ export default connect(mapStateToProps, {
    removeLike,
    clearPost,
    clearProfile,
-})(Post);
+   updatePreviousPage,
+})(withRouter(Post));

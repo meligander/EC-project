@@ -27,7 +27,7 @@ const EditNeigTowns = ({
 
    return (
       <>
-         {!towns.towns.loading ? (
+         {towns.towns && !towns.towns.loading ? (
             <Fragment>
                <h2>Localidades y Barrios</h2>
 

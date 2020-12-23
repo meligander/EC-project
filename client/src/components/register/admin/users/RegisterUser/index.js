@@ -155,11 +155,11 @@ const RegisterUser = ({
       }
 
       if (location.pathname !== "/register") {
-         if (!loading) {
+         if (!loading && !isEditing) {
             load();
          } else {
             if (towns.loading) {
-               loadUser(match.params.id);
+               loadUser(match.params.id, true);
             }
          }
       } else {
@@ -181,6 +181,7 @@ const RegisterUser = ({
       user,
       loadTownNeighbourhoods,
       loadTowns,
+      isEditing,
       loadUser,
    ]);
 
@@ -223,11 +224,11 @@ const RegisterUser = ({
 
    const setChildren = (student, add = true) => {
       if (add) {
-         children.push({ user: student });
+         children.push(student);
       } else {
          setFormData({
             ...formData,
-            children: children.filter((child) => child.user !== student),
+            children: children.filter((child) => child._id !== student._id),
          });
       }
    };
@@ -243,8 +244,7 @@ const RegisterUser = ({
             ...(selectedFile && { img: previewSource }),
          },
          history,
-         isEditing,
-         user ? user._id : null
+         user && user._id
       );
    };
 
@@ -280,9 +280,8 @@ const RegisterUser = ({
          case "Tutor":
             return (
                <TutorInfo
-                  user_id={user !== null && user._id}
-                  isEditing={isEditing}
-                  setChildrenForm={setChildren}
+                  setChildren={setChildren}
+                  children={children}
                   isAdmin={isAdmin}
                />
             );
@@ -643,7 +642,7 @@ const RegisterUser = ({
                            <div className="btn-right">
                               <Link
                                  to="/edit-towns-neighbourhoods"
-                                 className="btn"
+                                 className="btn btn-mix-secondary"
                                  onClick={() => {
                                     window.scroll(0, 0);
                                     clearNeighbourhoods();

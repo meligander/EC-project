@@ -4,10 +4,9 @@ import moment from "moment";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { loadTeachers, addUser } from "../../../../../../../actions/user";
 import {
-   updateClassCategory,
    registerUpdateClass,
+   removeStudent,
 } from "../../../../../../../actions/class";
 
 import ChosenChildrenTable from "../../../../../../tables/ChosenChildrenTable";
@@ -16,19 +15,17 @@ import Confirm from "../../../../../../modal/Confirm";
 const NewClassTab = ({
    history,
    location,
-   updateClassCategory,
    registerUpdateClass,
-   loadTeachers,
-   addUser,
-   users: { teachers, loadingTeachers },
+   removeStudent,
+   users: { usersBK, loadingUsersBK },
    classes: { classInfo, loading },
 }) => {
-   const register = location.pathname === "/register-class";
+   const registerClass = location.pathname === "/register-class";
+
    const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 
    const [otherValues, setOtherValues] = useState({
       toggleModal: false,
-      oneLoad: true,
    });
 
    const [formData, setFormData] = useState({
@@ -42,7 +39,7 @@ const NewClassTab = ({
       hourout2: "",
    });
 
-   const { toggleModal, oneLoad } = otherValues;
+   const { toggleModal } = otherValues;
 
    const {
       teacher,
@@ -56,37 +53,20 @@ const NewClassTab = ({
    } = formData;
 
    useEffect(() => {
-      if (oneLoad) {
-         if (loadingTeachers) {
-            loadTeachers();
-         }
-         if (!register && !loading) {
-            setFormData((prev) => ({
-               ...prev,
-               teacher: classInfo.teacher._id,
-               classroom: classInfo.classroom,
-               day1: classInfo.day1,
-               day2: classInfo.day2,
-               hourin1: moment(classInfo.hourin1).format("HH:mm"),
-               hourin2: moment(classInfo.hourin2).format("HH:mm"),
-               hourout1: moment(classInfo.hourout1).format("HH:mm"),
-               hourout2: moment(classInfo.hourout2).format("HH:mm"),
-            }));
-            setOtherValues((prev) => ({
-               ...prev,
-               oneLoad: false,
-            }));
-         }
+      if (!registerClass && !loading) {
+         setFormData((prev) => ({
+            ...prev,
+            teacher: classInfo.teacher._id,
+            classroom: classInfo.classroom,
+            day1: classInfo.day1,
+            day2: classInfo.day2,
+            hourin1: moment(classInfo.hourin1).format("HH:mm"),
+            hourin2: moment(classInfo.hourin2).format("HH:mm"),
+            hourout1: moment(classInfo.hourout1).format("HH:mm"),
+            hourout2: moment(classInfo.hourout2).format("HH:mm"),
+         }));
       }
-   }, [
-      loadTeachers,
-      teachers,
-      loadingTeachers,
-      classInfo,
-      loading,
-      register,
-      oneLoad,
-   ]);
+   }, [usersBK, loadingUsersBK, classInfo, loading, registerClass]);
 
    const onChange = (e) => {
       setFormData({
@@ -97,11 +77,7 @@ const NewClassTab = ({
 
    const deleteChild = (e, studentToDelete) => {
       e.preventDefault();
-      let newStudents = classInfo.students.filter(
-         (student) => student._id !== studentToDelete._id
-      );
-      addUser(studentToDelete);
-      updateClassCategory({ ...classInfo, students: newStudents });
+      removeStudent(studentToDelete);
    };
 
    const setToggle = (e) => {
@@ -110,7 +86,7 @@ const NewClassTab = ({
    };
 
    const onSubmit = () => {
-      if (register) {
+      if (registerClass) {
          registerUpdateClass(
             {
                ...formData,
@@ -153,9 +129,9 @@ const NewClassTab = ({
                   value={teacher}
                >
                   <option value="">* Seleccione Profesor</option>
-                  {!loadingTeachers &&
-                     teachers.length > 0 &&
-                     teachers.map((teacher) => (
+                  {!loadingUsersBK &&
+                     usersBK.length > 0 &&
+                     usersBK.map((teacher) => (
                         <option key={teacher._id} value={teacher._id}>
                            {teacher.lastname + ", " + teacher.name}
                         </option>
@@ -305,7 +281,7 @@ const NewClassTab = ({
                className="btn btn-primary"
                onClick={setToggle}
                type="submit"
-               value={register ? "Registrar" : "Guardar Cambios"}
+               value={registerClass ? "Registrar" : "Guardar Cambios"}
             />
          </div>
       </>
@@ -315,10 +291,8 @@ const NewClassTab = ({
 NewClassTab.propTypes = {
    users: PropTypes.object.isRequired,
    classes: PropTypes.object.isRequired,
-   updateClassCategory: PropTypes.func.isRequired,
-   loadTeachers: PropTypes.func.isRequired,
    registerUpdateClass: PropTypes.func.isRequired,
-   addUser: PropTypes.func.isRequired,
+   removeStudent: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -327,8 +301,6 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps, {
-   loadTeachers,
-   updateClassCategory,
    registerUpdateClass,
-   addUser,
+   removeStudent,
 })(withRouter(NewClassTab));

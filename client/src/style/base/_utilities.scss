@@ -82,19 +82,6 @@
    &-white {
       @include background($white-color);
    }
-
-   /* &-border {
-      border: 2px $secondary-color solid;
-   }
-
-   &-income {
-      @include set-background(lighten($success-color, 5%));
-      opacity: 0.5;
-   }
-
-   &-strong {
-      opacity: 1;
-   } */
 }
 
 .round-img {

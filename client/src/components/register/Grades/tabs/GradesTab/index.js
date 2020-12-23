@@ -5,6 +5,7 @@ import { withRouter, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import { setAlert } from "../../../../../actions/alert";
+import { updatePreviousPage } from "../../../../../actions/mixvalues";
 import {
    registerNewGrade,
    deleteGrades,
@@ -18,6 +19,7 @@ import Confirm from "../../../../modal/Confirm";
 
 const GradesTab = ({
    history,
+   location,
    period,
    classes: { classInfo },
    auth: { userLogged },
@@ -30,8 +32,8 @@ const GradesTab = ({
    registerNewGrade,
    deleteGrades,
    updateGrades,
+   updatePreviousPage,
    clearGradeTypes,
-   navbar,
    gradesPDF,
    certificatePDF,
 }) => {
@@ -49,7 +51,6 @@ const GradesTab = ({
    const [otherValues, setOtherValues] = useState({
       gradePlus: false,
       gradetypes: [],
-      reload: false,
       toggleModalSave: false,
       toggleModalDelete: false,
       toggleModalDate: false,
@@ -59,7 +60,6 @@ const GradesTab = ({
    const {
       gradePlus,
       gradetypes,
-      reload,
       toggleModalSave,
       toggleModalDelete,
       toggleModalDate,
@@ -91,16 +91,14 @@ const GradesTab = ({
       const setInput = () => {
          setFormData((prev) => ({
             ...prev,
-            newGrades:
-               periods[period - 1] !== undefined ? periods[period - 1] : [],
+            newGrades: periods[period - 1] ? periods[period - 1] : [],
          }));
+         setOtherValues((prev) => ({ ...prev, loaded: true }));
       };
 
-      if (periods[period - 1] && (newGrades.length === 0 || reload)) setInput();
+      setInput();
       loadGradeTypes();
-
-      // eslint-disable-next-line
-   }, [gradeTypes, period, newGrades, reload, header, periods]);
+   }, [gradeTypes, period, header, periods]);
 
    const onChange = (e, row) => {
       let number = Number(e.target.name.substring(5, e.target.name.length));
@@ -162,7 +160,10 @@ const GradesTab = ({
             gradetypes: gradetypes.filter(
                (gt) => gt._id !== newGradeType.gradetype
             ),
-            reload: true,
+         });
+         setFormData({
+            ...formData,
+            newGrades: periods[period - 1],
          });
       }
    };
@@ -183,9 +184,12 @@ const GradesTab = ({
                ...gradetypes,
                ...gradeTypes.filter((gt) => gt._id === toDelete.gradetype._id),
             ],
-            reload: true,
          });
          deleteGrades(toDelete);
+         setFormData({
+            ...formData,
+            newGrades: periods[period - 1] ? periods[period - 1] : [],
+         });
       }
    };
 
@@ -272,7 +276,7 @@ const GradesTab = ({
    return (
       <>
          {!loading && (
-            <div className="wrapper">
+            <div className="wrapper both">
                <Confirm
                   toggleModal={toggleModalSave}
                   setToggleModal={setToggleSave}
@@ -291,10 +295,10 @@ const GradesTab = ({
                   type="certificate-date"
                   confirm={certificatePdfGeneratorSave}
                />
-               <table className={!navbar ? "stick" : ""}>
+               <table className="stick">
                   <thead>
                      <tr>
-                        <th className="bg-strong">&nbsp; Nombre &nbsp;</th>
+                        <th>&nbsp; Nombre &nbsp;</th>
                         {header[period - 1] &&
                            header[period - 1].map((type, index) => (
                               <th key={index}>{type}</th>
@@ -304,8 +308,9 @@ const GradesTab = ({
                   <tbody>
                      {students.map((student, i) => (
                         <tr key={i}>
-                           <td className="bg-white">{student.name}</td>
-                           {newGrades.length > 0 &&
+                           <td>{student.name}</td>
+                           {newGrades &&
+                              newGrades.length > 0 &&
                               newGrades[i].map((row, key) => (
                                  <td key={key}>
                                     {row.student !== undefined ? (
@@ -375,53 +380,56 @@ const GradesTab = ({
          </div>
          {gradePlus && (
             <div className="form smaller pt-5">
-               <div className="form-group">
-                  <select
-                     className="form-input center"
-                     id="gradetype"
-                     value={newGradeType.gradetype}
-                     onChange={onChangeGradeTypes}
-                  >
-                     <option value="">*Seleccione un tipo de nota</option>
-                     {gradetypes.length > 0 &&
-                        gradetypes.map((gradetype) => (
-                           <option key={gradetype._id} value={gradetype._id}>
-                              {gradetype.name}
-                           </option>
-                        ))}
-                  </select>
-                  <label
-                     htmlFor="new-category"
-                     className={`form-label ${
-                        newGradeType.gradetype === "" ? "lbl" : ""
-                     }`}
-                  >
-                     Tipo de nota
-                  </label>
-               </div>
-               <div className="btn-ctr mt-1">
-                  <button
-                     type="submit"
-                     onClick={addGradeType}
-                     className="btn btn-primary"
-                  >
-                     <i className="fas fa-plus"></i>
-                     <span className="hide-md"> Agregar</span>
-                  </button>
-                  {(userLogged.type === "Administrador" ||
-                     userLogged.type === "Admin/Profesor") && (
-                     <Link
-                        to="/edit-gradetypes"
-                        onClick={() => {
-                           window.scroll(0, 0);
-                           clearGradeTypes();
-                        }}
-                        className="btn btn-light"
+               <div className="border">
+                  <div className="form-group">
+                     <select
+                        className="form-input center"
+                        id="gradetype"
+                        value={newGradeType.gradetype}
+                        onChange={onChangeGradeTypes}
                      >
-                        <i className="fas fa-edit"></i>
-                        <span className="hide-md"> Tipo Nota</span>
-                     </Link>
-                  )}
+                        <option value="">*Seleccione un tipo de nota</option>
+                        {gradetypes.length > 0 &&
+                           gradetypes.map((gradetype) => (
+                              <option key={gradetype._id} value={gradetype._id}>
+                                 {gradetype.name}
+                              </option>
+                           ))}
+                     </select>
+                     <label
+                        htmlFor="new-category"
+                        className={`form-label ${
+                           newGradeType.gradetype === "" ? "lbl" : ""
+                        }`}
+                     >
+                        Tipo de nota
+                     </label>
+                  </div>
+                  <div className="btn-ctr mt-1">
+                     <button
+                        type="submit"
+                        onClick={addGradeType}
+                        className="btn btn-dark"
+                     >
+                        <i className="fas fa-plus"></i>
+                        <span className="hide-md"> Agregar</span>
+                     </button>
+                     {(userLogged.type === "Administrador" ||
+                        userLogged.type === "Admin/Profesor") && (
+                        <Link
+                           to="/edit-gradetypes"
+                           onClick={() => {
+                              window.scroll(0, 0);
+                              clearGradeTypes();
+                              updatePreviousPage(location.pathname);
+                           }}
+                           className="btn btn-mix-secondary"
+                        >
+                           <i className="fas fa-edit"></i>
+                           <span className="hide-md"> Tipo Nota</span>
+                        </Link>
+                     )}
+                  </div>
                </div>
             </div>
          )}
@@ -433,7 +441,6 @@ GradesTab.propTypes = {
    auth: PropTypes.object.isRequired,
    grades: PropTypes.object.isRequired,
    classes: PropTypes.object.isRequired,
-   navbar: PropTypes.bool.isRequired,
    period: PropTypes.number.isRequired,
    registerNewGrade: PropTypes.func.isRequired,
    deleteGrades: PropTypes.func.isRequired,
@@ -442,13 +449,13 @@ GradesTab.propTypes = {
    gradesPDF: PropTypes.func.isRequired,
    certificatePDF: PropTypes.func.isRequired,
    clearGradeTypes: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    classes: state.classes,
    grades: state.grades,
    auth: state.auth,
-   navbar: state.navbar.showMenu,
 });
 
 export default connect(mapStateToProps, {
@@ -456,6 +463,7 @@ export default connect(mapStateToProps, {
    registerNewGrade,
    deleteGrades,
    updateGrades,
+   updatePreviousPage,
    gradesPDF,
    certificatePDF,
    clearGradeTypes,

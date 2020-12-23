@@ -5,6 +5,7 @@ import moment from "moment";
 import PropTypes from "prop-types";
 
 import { loadCategories } from "../../../../actions/category";
+import { updatePreviousPage } from "../../../../actions/mixvalues";
 import {
    registerEnrollment,
    loadEnrollment,
@@ -21,6 +22,7 @@ const Enrollment = ({
    location,
    loadCategories,
    registerEnrollment,
+   updatePreviousPage,
    loadEnrollment,
    clearEnrollments,
    categories,
@@ -152,6 +154,7 @@ const Enrollment = ({
                         onClick={() => {
                            window.scroll(0, 0);
                            clearEnrollments();
+                           updatePreviousPage(location.pathname);
                         }}
                         className="btn btn-light"
                      >
@@ -295,6 +298,7 @@ const Enrollment = ({
 Enrollment.propTypes = {
    loadCategories: PropTypes.func.isRequired,
    registerEnrollment: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
    loadEnrollment: PropTypes.func.isRequired,
    clearEnrollments: PropTypes.func.isRequired,
    categories: PropTypes.object.isRequired,
@@ -313,4 +317,5 @@ export default connect(mapStateToProps, {
    registerEnrollment,
    loadEnrollment,
    clearEnrollments,
+   updatePreviousPage,
 })(withRouter(Enrollment));
