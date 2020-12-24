@@ -5,8 +5,8 @@ import moment from "moment";
 import PropTypes from "prop-types";
 
 import { clearInstallment, addInstallment } from "../../../actions/installment";
-import { updatePreviousPage } from "../../../actions/mixvalues";
 import { setAlert } from "../../../actions/alert";
+import { updatePreviousPage } from "../../../actions/mixvalues";
 
 import Alert from "../../sharedComp/Alert";
 
@@ -52,7 +52,7 @@ const InstallmentsTable = ({
    }, [rows]);
 
    const seeInstallmentInfo = (installment_id, edit, year, month) => {
-      updatePreviousPage(location.pathname);
+      updatePreviousPage("");
       clearInstallment();
       let number = month !== 0 ? month + 2 : month;
       if (edit) history.push(`/edit-installment/${installment_id}`);

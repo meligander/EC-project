@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
+import Moment from "react-moment";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
-import Moment from "react-moment";
 
 import { updatePageNumber } from "../../../../../actions/mixvalues";
 import {

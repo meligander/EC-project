@@ -6,7 +6,6 @@ import { clearClasses, loadClasses } from "../../../../../actions/class";
 import { clearSearch } from "../../../../../actions/user";
 
 import ClassesTable from "../../../../tables/ClassesTable";
-import { updatePreviousPage } from "../../../../../actions/mixvalues";
 
 const TeacherDashboard = ({
    loadClasses,
@@ -14,7 +13,6 @@ const TeacherDashboard = ({
    users: { user },
    clearClasses,
    clearSearch,
-   updatePreviousPage,
 }) => {
    useEffect(() => {
       loadClasses({ teacher: user._id });
@@ -30,7 +28,6 @@ const TeacherDashboard = ({
                      all={false}
                      clearClass={clearClasses}
                      clearSearch={clearSearch}
-                     updatePreviousPage={updatePreviousPage}
                   />
                ) : (
                   <p className="heading-tertiary text-center">
@@ -49,7 +46,6 @@ TeacherDashboard.propTypes = {
    loadClasses: PropTypes.func.isRequired,
    clearClasses: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -61,5 +57,4 @@ export default connect(mapStateToProps, {
    loadClasses,
    clearClasses,
    clearSearch,
-   updatePreviousPage,
 })(TeacherDashboard);

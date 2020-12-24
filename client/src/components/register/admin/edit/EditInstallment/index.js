@@ -100,7 +100,7 @@ const EditInstallment = ({
       });
    };
 
-   const onSubmit = () => {
+   const confirm = () => {
       if (yearParams) updateIntallment(formData, history, student._id);
       else updateIntallment(formData, history, student._id, _id);
    };
@@ -137,7 +137,7 @@ const EditInstallment = ({
                />
                <Confirm
                   text="¿Está seguro que desea guardar los cambios?"
-                  confirm={onSubmit}
+                  confirm={confirm}
                   setToggleModal={setToggleSave}
                   toggleModal={toggleModalSave}
                />

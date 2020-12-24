@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { Link, withRouter } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Moment from "react-moment";
 import PropTypes from "prop-types";
 
@@ -9,7 +9,6 @@ import { loadUsersGrades } from "../../../../../actions/grade";
 import { loadStudentAttendance } from "../../../../../actions/attendance";
 import { loadStudentInstallments } from "../../../../../actions/installment";
 import { clearProfile } from "../../../../../actions/user";
-import { updatePreviousPage } from "../../../../../actions/mixvalues";
 
 import RelativeDashboard from "../RelativeDashboard";
 import StudentGradesTable from "../../../../tables/StudentGradesTable";
@@ -22,10 +21,8 @@ const StudentDashboard = ({
    loadUsersGrades,
    loadStudentAttendance,
    loadStudentInstallments,
-   updatePreviousPage,
    clearClass,
    clearProfile,
-   location,
    auth: { userLogged },
    classes: { classInfo, loading },
    users: { user },
@@ -78,7 +75,6 @@ const StudentDashboard = ({
                         onClick={() => {
                            window.scroll(0, 0);
                            clearClass();
-                           updatePreviousPage(location.pathname);
                         }}
                         to={`/class/${classInfo._id}`}
                      >
@@ -100,7 +96,6 @@ const StudentDashboard = ({
                            onClick={() => {
                               window.scroll(0, 0);
                               clearProfile();
-                              updatePreviousPage(location.pathname);
                            }}
                         >
                            Ver Info
@@ -263,7 +258,6 @@ StudentDashboard.prototypes = {
    loadUsersGrades: PropTypes.func.isRequired,
    loadStudentAttendance: PropTypes.func.isRequired,
    loadStudentInstallments: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
    clearClass: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
 };
@@ -282,7 +276,6 @@ export default connect(mapStateToProps, {
    loadUsersGrades,
    loadStudentAttendance,
    loadStudentInstallments,
-   updatePreviousPage,
    clearClass,
    clearProfile,
-})(withRouter(StudentDashboard));
+})(StudentDashboard);

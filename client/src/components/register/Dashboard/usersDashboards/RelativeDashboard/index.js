@@ -1,18 +1,15 @@
 import React, { useEffect } from "react";
-import { Link, withRouter } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
 import { clearProfile, loadRelatives } from "../../../../../actions/user";
-import { updatePreviousPage } from "../../../../../actions/mixvalues";
 
 import "./style.scss";
 
 const RelativeDashboard = ({
-   location,
    loadRelatives,
    users: { user, users, usersLoading },
-   updatePreviousPage,
    clearProfile,
 }) => {
    const student = user.studentnumber;
@@ -33,7 +30,6 @@ const RelativeDashboard = ({
                onClick={() => {
                   window.scroll(0, 0);
                   clearProfile();
-                  updatePreviousPage(location.pathname);
                }}
             >
                Ver Info
@@ -78,7 +74,6 @@ RelativeDashboard.propTypes = {
    users: PropTypes.object.isRequired,
    loadRelatives: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -88,5 +83,4 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    loadRelatives,
    clearProfile,
-   updatePreviousPage,
-})(withRouter(RelativeDashboard));
+})(RelativeDashboard);

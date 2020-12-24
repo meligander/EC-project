@@ -5,7 +5,6 @@ import PropTypes from "prop-types";
 import { loadCategories } from "../../../../../actions/category";
 import { clearProfile, loadUsers, userPDF } from "../../../../../actions/user";
 import { setAlert } from "../../../../../actions/alert";
-import { updatePreviousPage } from "../../../../../actions/mixvalues";
 
 import StudentTable from "../../../../tables/StudentTable";
 import RestTable from "../../../../tables/RestTable";
@@ -16,7 +15,6 @@ const SearchTab = ({
    categories,
    loadCategories,
    loadUsers,
-   updatePreviousPage,
    clearProfile,
    typeF,
    userPDF,
@@ -155,7 +153,6 @@ const SearchTab = ({
                   search={true}
                   type={usersType}
                   loadingUsers={loadingUsers}
-                  updatePreviousPage={updatePreviousPage}
                   users={users}
                />
             ) : (
@@ -165,7 +162,6 @@ const SearchTab = ({
                   users={users}
                   type={type}
                   usersType={usersType}
-                  updatePreviousPage={updatePreviousPage}
                />
             )}
          </div>
@@ -186,7 +182,6 @@ SearchTab.propTypes = {
    userPDF: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -200,5 +195,4 @@ export default connect(mapStateToProps, {
    userPDF,
    setAlert,
    clearProfile,
-   updatePreviousPage,
 })(SearchTab);

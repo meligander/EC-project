@@ -3,7 +3,7 @@ import axios from "axios";
 import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
+import { updateLoadingSpinner, updatePreviousPage } from "./mixvalues";
 
 import {
    GRADES_LOADED,
@@ -185,6 +185,8 @@ export const updateGrades = (formData, history, class_id) => async (
          payload: res.data,
       });
 
+      dispatch(updatePreviousPage("/classes"));
+
       dispatch(setAlert("Calificaciones Modificadas", "success", "2"));
       dispatch({
          type: GRADES_CLEARED,
@@ -203,6 +205,7 @@ export const updateGrades = (formData, history, class_id) => async (
       dispatch(setAlert(err.response.data.msg, "danger", "2"));
    }
 
+   dispatch(updateLoadingSpinner(false));
    window.scrollTo(0, 0);
 };
 

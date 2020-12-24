@@ -8,7 +8,6 @@ import { clearSearch } from "../../../../../../../actions/user";
 import { registerInvoice } from "../../../../../../../actions/invoice";
 import { removeInstallmentFromList } from "../../../../../../../actions/installment";
 import { setAlert } from "../../../../../../../actions/alert";
-import { getInvoiceNumber } from "../../../../../../../actions/mixvalues";
 
 import Alert from "../../../../../../sharedComp/Alert";
 import StudentSearch from "../../../../../../sharedComp/search/StudentSearch";
@@ -23,16 +22,21 @@ const InvoiceTab = ({
    mixvalues: { invoiceNumber },
    clearSearch,
    setAlert,
-   getInvoiceNumber,
    registerInvoice,
    removeInstallmentFromList,
 }) => {
-   const [adminValues, setAdminValues] = useState({
+   const [otherValues, setOtherValues] = useState({
       day: moment().format("DD/MM/YYYY"),
-      selectedUser: {},
+      selectedUser: {
+         _id: "",
+         lastname: "",
+         name: "",
+         email: "",
+      },
       registerUser: false,
       toggleModal: false,
    });
+
    const [invoice, setInvoice] = useState({
       name: "",
       lastname: "",
@@ -75,17 +79,10 @@ const InvoiceTab = ({
       total,
       remaining,
    } = invoice;
-   const { day, selectedUser, registerUser, toggleModal } = adminValues;
+
+   const { day, selectedUser, registerUser, toggleModal } = otherValues;
 
    useEffect(() => {
-      if (invoiceNumber === "") getInvoiceNumber();
-      else {
-         if (invoiceid === "")
-            setInvoice((prev) => ({
-               ...prev,
-               invoiceid: invoiceNumber,
-            }));
-      }
       const initInput = () => {
          if (installments.length > details.length) {
             const newItem = {
@@ -101,28 +98,31 @@ const InvoiceTab = ({
             }));
          }
       };
+
       if (installments.length > 0) initInput();
-   }, [
-      installments,
-      getInvoiceNumber,
-      invoiceNumber,
-      invoiceid,
-      details.length,
-   ]);
+   }, [installments, invoiceid, details.length]);
 
    const selectUser = (user) => {
-      setAdminValues({
-         ...adminValues,
+      setOtherValues({
+         ...otherValues,
          selectedUser: user,
+      });
+   };
+
+   const addUser = (e) => {
+      e.preventDefault();
+      setOtherValues({
+         ...otherValues,
          registerUser: true,
       });
+
       setInvoice({
          ...invoice,
          user: {
-            _id: user._id,
-            lastname: user.lastname,
-            name: user.name,
-            email: user.email,
+            _id: selectedUser._id,
+            lastname: selectedUser.lastname,
+            name: selectedUser.name,
+            email: selectedUser.email,
          },
       });
       clearSearch();
@@ -156,7 +156,7 @@ const InvoiceTab = ({
          total: totalAmount,
          remaining: totalRemaining,
       });
-      setAdminValues({ ...adminValues });
+      setOtherValues({ ...otherValues });
    };
 
    const removeItem = (item) => {
@@ -169,22 +169,27 @@ const InvoiceTab = ({
    };
 
    const setToggle = () => {
-      setAdminValues({ ...adminValues, toggleModal: !toggleModal });
+      setOtherValues({ ...otherValues, toggleModal: !toggleModal });
    };
 
    const beforeToggle = () => {
       if (total === 0) {
          setAlert("Debe registrar el pago de una cuota primero", "danger", "2");
          window.scroll(0, 0);
-      } else setAdminValues({ ...adminValues, toggleModal: !toggleModal });
+      } else setOtherValues({ ...otherValues, toggleModal: !toggleModal });
    };
 
    const confirm = () => {
-      registerInvoice(invoice, remaining, history, userLogged._id);
+      registerInvoice(
+         { ...invoice, invoiceid: invoiceNumber },
+         remaining,
+         history,
+         userLogged._id
+      );
    };
 
    return (
-      <>
+      <div className="invoice-tab">
          <Confirm
             toggleModal={toggleModal}
             setToggleModal={setToggle}
@@ -198,7 +203,7 @@ const InvoiceTab = ({
                      className="form-input"
                      type="number"
                      name="invoiceid"
-                     value={invoiceid}
+                     value={invoiceNumber}
                      disabled
                   />
                   <input
@@ -271,16 +276,32 @@ const InvoiceTab = ({
                ) : (
                   <>
                      <div className="form-group">
-                        <input
-                           className="form-input"
-                           type="text"
-                           value={
-                              selectedUser.lastname + ", " + selectedUser.name
-                           }
-                           placeholder="Alumno"
-                           disabled
-                           id="full-name"
-                        />
+                        <div className="end-btn">
+                           <input
+                              className="form-input"
+                              type="text"
+                              value={
+                                 selectedUser.lastname +
+                                 ", " +
+                                 selectedUser.name
+                              }
+                              placeholder="Alumno"
+                              disabled
+                              id="full-name"
+                           />
+                           <button
+                              onClick={(e) => {
+                                 e.preventDefault();
+                                 setOtherValues({
+                                    ...otherValues,
+                                    registerUser: !registerUser,
+                                 });
+                              }}
+                              className="btn-cancel"
+                           >
+                              <i className="fas fa-times"></i>
+                           </button>
+                        </div>
                         <label htmlFor="full-name" className="form-label">
                            Nombre Completo
                         </label>
@@ -303,10 +324,10 @@ const InvoiceTab = ({
                )}
             </div>
             <StudentSearch
-               studentDebt={true}
                selectStudent={selectUser}
                selectedStudent={selectedUser}
-               student={false}
+               actionForSelected={addUser}
+               typeSearch="Tutor/Student"
             />
          </form>
          <h3 className="text-primary heading-tertiary">Detalle de Factura</h3>
@@ -389,7 +410,7 @@ const InvoiceTab = ({
                <i className="fas fa-file-invoice-dollar"></i> Pagar
             </button>
          </div>
-      </>
+      </div>
    );
 };
 
@@ -397,7 +418,6 @@ InvoiceTab.propTypes = {
    installment: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
    clearSearch: PropTypes.func.isRequired,
-   getInvoiceNumber: PropTypes.func.isRequired,
    registerInvoice: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
    removeInstallmentFromList: PropTypes.func.isRequired,
@@ -412,7 +432,6 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    clearSearch,
    setAlert,
-   getInvoiceNumber,
    registerInvoice,
    removeInstallmentFromList,
 })(withRouter(InvoiceTab));

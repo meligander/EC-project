@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
@@ -6,7 +6,6 @@ import {
    loadStudentAttendance,
    enrollmentsPDF,
 } from "../../../../../../../actions/enrollment";
-import { loadCategories } from "../../../../../../../actions/category";
 import { updatePageNumber } from "../../../../../../../actions/mixvalues";
 import { setAlert } from "../../../../../../../actions/alert";
 
@@ -17,7 +16,6 @@ function AttendanceTab({
    enrollments: { enrollments, loadingEnrollments, type },
    categories: { categories, loading },
    loadStudentAttendance,
-   loadCategories,
    updatePageNumber,
    enrollmentsPDF,
    setAlert,
@@ -28,10 +26,6 @@ function AttendanceTab({
    });
 
    const { absence, category } = filterData;
-
-   useEffect(() => {
-      if (loading) loadCategories();
-   }, [loading, loadCategories]);
 
    const onChange = (e) => {
       setFilterData({
@@ -164,7 +158,6 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    loadStudentAttendance,
-   loadCategories,
    updatePageNumber,
    enrollmentsPDF,
    setAlert,

@@ -1,0 +1,118 @@
+@import "../../../../../style/abstract.scss";
+
+.comments {
+   margin-top: 3rem;
+   padding: 1rem;
+
+   @include respond(small-phone) {
+      width: 100%;
+      margin-top: 2rem;
+      padding: 0;
+   }
+
+   .comment {
+      display: flex;
+      padding: 1.5rem;
+      border-radius: 1rem;
+
+      @include respond(small-phone) {
+         padding: 1rem;
+      }
+
+      &-img {
+         align-self: start;
+         justify-self: start;
+         width: 8rem !important;
+         height: 8rem !important;
+
+         @include respond(small-phone) {
+            display: none;
+         }
+      }
+
+      &-text {
+         width: 100%;
+         margin-left: 2rem;
+
+         @include respond(small-phone) {
+            margin-left: 0;
+         }
+
+         p {
+            margin-top: 0.2rem;
+            margin-left: 0.5rem;
+         }
+
+         .posted-date {
+            padding-bottom: 0;
+         }
+      }
+
+      .btn-close {
+         width: auto;
+         margin-left: -3rem;
+
+         @include respond(small-phone) {
+            .btn-danger {
+               margin: 0;
+               padding: 0 0.7rem;
+            }
+         }
+      }
+   }
+
+   .form {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+
+      .form-input {
+         border-radius: 4rem;
+         width: 93%;
+         margin-right: -4.5rem;
+         padding-left: 2rem;
+         padding-right: 5rem;
+         z-index: 0;
+         @include easeOut;
+
+         @include respond(small-phone) {
+            width: 100%;
+            margin-left: -2rem;
+         }
+
+         &:focus {
+            transform: scale(1.01);
+         }
+
+         &:focus + .btn-comment {
+            transform: scale(1.1);
+            color: $success-color;
+         }
+      }
+
+      .btn-comment {
+         border: none;
+         font-size: 1.8rem;
+         padding: 0.1rem 0.5rem;
+         border-radius: 50%;
+         background-color: inherit;
+         z-index: 10;
+         color: $black-color;
+         @include easeOut;
+
+         &:hover {
+            background-color: lighten($primary-color, 45%);
+            color: $white-color !important;
+            transform: scale(1.2);
+         }
+
+         &:active,
+         &:focus {
+            outline: none;
+            transform: translateY(-0.1rem);
+            box-shadow: 0 0rem 1rem rgba($black-color, 0.2);
+         }
+      }
+   }
+}

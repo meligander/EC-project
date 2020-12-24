@@ -10,7 +10,6 @@ import {
 } from "../../../../../actions/navbar";
 import { clearProfile, clearSearch } from "../../../../../actions/user";
 import { clearPosts } from "../../../../../actions/post";
-import { updatePreviousPage } from "../../../../../actions/mixvalues";
 
 const StudentNavbar = ({
    navbar: { showMenu, currentNav },
@@ -22,7 +21,6 @@ const StudentNavbar = ({
    clearSearch,
    clearProfile,
    location,
-   updatePreviousPage,
 }) => {
    useEffect(() => {
       const string = location.pathname.substring(1, location.pathname.length);
@@ -92,7 +90,6 @@ const StudentNavbar = ({
                   window.scroll(0, 0);
                   clearPosts();
                   changePageAndMenu("chat");
-                  updatePreviousPage(location.pathname);
                }}
             >
                <i className="far fa-comments"></i>
@@ -117,7 +114,6 @@ const StudentNavbar = ({
                   window.scroll(0, 0);
                   clearSearch();
                   changePageAndMenu("classmates");
-                  updatePreviousPage(location.pathname);
                }}
             >
                <i className="fas fa-address-book"></i>
@@ -150,7 +146,6 @@ StudentNavbar.propTypes = {
    clearSearch: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
    clearPosts: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -165,5 +160,4 @@ export default connect(mapStateToProps, {
    clearProfile,
    clearPosts,
    clearSearch,
-   updatePreviousPage,
 })(withRouter(StudentNavbar));

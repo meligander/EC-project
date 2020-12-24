@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { addPost, addComment } from "../../../../../actions/post";
+import { addPost } from "../../../../../actions/post";
 
-const PostForm = ({ addPost, class_id, post_id, isPost, addComment }) => {
+const PostForm = ({ addPost, class_id }) => {
    const [postForm, setPostForm] = useState({
       text: "",
    });
@@ -20,17 +20,14 @@ const PostForm = ({ addPost, class_id, post_id, isPost, addComment }) => {
          text: "",
       });
       e.preventDefault();
-      if (isPost) addPost(postForm, class_id);
-      else addComment(post_id, postForm);
+      addPost(postForm, class_id);
    };
 
    return (
       <div>
          <div className="paragraph bg-primary my-1">
             <h3 className="p-1">
-               {isPost
-                  ? "Realiza un comentario para que lo vea la clase"
-                  : "Comenta la publicación"}
+               Realiza un comentario para que lo vea la clase
             </h3>
          </div>
          <form className="paragraph">
@@ -58,10 +55,7 @@ const PostForm = ({ addPost, class_id, post_id, isPost, addComment }) => {
 
 PostForm.propTypes = {
    addPost: PropTypes.func.isRequired,
-   addComment: PropTypes.func.isRequired,
    class_id: PropTypes.string,
-   post_id: PropTypes.string,
-   isPost: PropTypes.bool.isRequired,
 };
 
-export default connect(null, { addPost, addComment })(PostForm);
+export default connect(null, { addPost })(PostForm);

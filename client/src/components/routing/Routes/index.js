@@ -8,7 +8,6 @@ import Login from "../../unregister/Login";
 import Dashboard from "../../register/Dashboard";
 import ChangeCredentials from "../../register/admin/users/ChangeCredentials";
 import Chat from "../../register/groupchat/Chat";
-import PostForComment from "../../register/groupchat/PostForComment";
 import OneClass from "../../register/admin/classes/OneClass";
 import Attendance from "../../register/Attendance";
 import Grades from "../../register/Grades";
@@ -91,12 +90,6 @@ const Routes = () => {
                component={Categories}
             />
             <PrivateRoutes exact types={[]} path="/chat/:id" component={Chat} />
-            <PrivateRoutes
-               exact
-               types={[]}
-               path="/chat/post/:id"
-               component={PostForComment}
-            />
             <PrivateRoutes
                exact
                types={[]}

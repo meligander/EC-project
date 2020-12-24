@@ -1,19 +1,11 @@
 import React from "react";
-import { Link, withRouter } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Moment from "react-moment";
 import PropTypes from "prop-types";
 
 import "./style.scss";
 
-const RestTable = ({
-   location,
-   loadingUsers,
-   users,
-   type,
-   usersType,
-   clearProfile,
-   updatePreviousPage,
-}) => {
+const RestTable = ({ loadingUsers, users, type, usersType, clearProfile }) => {
    return (
       <table>
          <thead>
@@ -74,7 +66,6 @@ const RestTable = ({
                               onClick={() => {
                                  window.scroll(0, 0);
                                  clearProfile();
-                                 updatePreviousPage(location.pathname);
                               }}
                            >
                               Más Info &rarr;
@@ -95,4 +86,4 @@ RestTable.propTypes = {
    clearProfile: PropTypes.func.isRequired,
 };
 
-export default withRouter(RestTable);
+export default RestTable;

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
@@ -13,36 +12,32 @@ import StudentSearch from "../StudentSearch";
 import InstallmentsTable from "../../../tables/InstallmentsTable";
 
 const InstallmentsSearch = ({
-   match,
    installment: { usersInstallments, loadingUsersInstallments },
    loadStudentInstallments,
    clearUserInstallments,
+   student,
    setAlert,
 }) => {
-   const _id = match.params.studentid;
-   useEffect(() => {
-      if (_id !== "0" && !loadingUsersInstallments) {
-         setSelectedStudent((prev) => ({
-            ...prev,
-            _id: _id,
-            name:
-               usersInstallments.rows[0][0].student.lastname +
-               ", " +
-               usersInstallments.rows[0][0].student.name,
-         }));
-      }
-   }, [_id, usersInstallments, loadingUsersInstallments]);
-
    const [selectedStudent, setSelectedStudent] = useState({
       _id: "",
       name: "",
    });
 
+   useEffect(() => {
+      if (student) {
+         setSelectedStudent((prev) => ({
+            ...prev,
+            _id: student._id,
+            name: student.name,
+         }));
+      }
+   }, [student]);
+
    const selectStudent = (user) => {
       setSelectedStudent({
          ...selectedStudent,
-         name: user.lastname + ", " + user.name,
          _id: user._id,
+         name: user.lastname + ", " + user.name,
       });
       clearUserInstallments();
    };
@@ -62,8 +57,7 @@ const InstallmentsSearch = ({
                selectedStudent={selectedStudent}
                actionForSelected={searchInstallments}
                selectStudent={selectStudent}
-               studentInstallment={true}
-               student={true}
+               typeSearch={"Installment"}
             />
          </div>
          <p className="mb-3 paragraph">
@@ -86,6 +80,7 @@ const InstallmentsSearch = ({
 
 InstallmentsSearch.propTypes = {
    installment: PropTypes.object.isRequired,
+   student: PropTypes.object,
    loadStudentInstallments: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
    clearUserInstallments: PropTypes.func.isRequired,
@@ -99,4 +94,4 @@ export default connect(mapStateToProps, {
    loadStudentInstallments,
    setAlert,
    clearUserInstallments,
-})(withRouter(InstallmentsSearch));
+})(InstallmentsSearch);

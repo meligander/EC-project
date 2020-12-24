@@ -38,14 +38,11 @@ const RegisterUser = ({
    clearNeighbourhoods,
    clearTowns,
 }) => {
-   const isAdmin =
-      auth.userLogged.type === "Administrador" ||
-      auth.userLogged.type === "Secretaria" ||
-      auth.userLogged.type === "Admin/Profesor";
-
    const isOwner =
       auth.userLogged.type === "Administrador" ||
       auth.userLogged.type === "Admin/Profesor";
+
+   const isAdmin = auth.userLogged.type === "Secretaria" || isOwner;
 
    const [otherValues, setOtherValues] = useState({
       isEditing: false,
@@ -144,6 +141,7 @@ const RegisterUser = ({
             degree: !user.degree ? "" : user.degree,
             school: !user.school ? "" : user.school,
             salary: !user.salary ? "" : user.salary,
+            children: user.children,
             description: !user.description ? "" : user.description,
             discount: user.discount === undefined ? "" : user.discount,
             chargeday: !user.chargeday ? "" : user.chargeday,
@@ -308,8 +306,13 @@ const RegisterUser = ({
                   <h2 className="mb-2">
                      <i
                         className={`fas fa-user-${isEditing ? "edit" : "plus"}`}
-                     ></i>{" "}
-                     {isEditing ? "Editar" : "Registrar nuevo"} usuario
+                     ></i>
+                     &nbsp;
+                     {isAdmin
+                        ? isEditing
+                           ? "Editar Usuario"
+                           : "Registrar Usuario Nuevo"
+                        : "Editar Imágen"}
                   </h2>
 
                   {isEditing && (
@@ -339,80 +342,88 @@ const RegisterUser = ({
                      <h3 className="heading-tertiary text-lighter-primary">
                         Datos:
                      </h3>
-                     <div className="form-group">
-                        <select
-                           className="form-input"
-                           name="type"
-                           id="type"
-                           disabled={!isAdmin}
-                           value={type}
-                           onChange={(e) => onChange(e)}
-                        >
-                           <option value="">
-                              * Seleccione el tipo de usuario
-                           </option>
-                           <option value="Alumno">Alumno</option>
-                           <option value="Tutor">Tutor</option>
-                           <option value="Profesor">Profesor</option>
-                           <option value="Secretaria">Secretaria</option>
-                           {(auth.userLogged.type === "Administrador" ||
-                              auth.userLogged.type === "Admin/Profesor") && (
-                              <>
-                                 <option value="Administrador">
-                                    Administrador
-                                 </option>
-                                 <option value="Admin/Profesor">
-                                    Admin/Profesor
-                                 </option>
-                              </>
-                           )}
-                        </select>
-                        <label
-                           htmlFor="type"
-                           className={`form-label ${type === "" ? "lbl" : ""}`}
-                        >
-                           Tipo de usuario
-                        </label>
-                     </div>
-
-                     {type === "Alumno" && (
-                        <div className="form-group">
-                           <input
-                              className="form-input"
-                              type="number"
-                              value={studentnumber}
-                              name="registerNumber"
-                              id="registerNumber"
-                              disabled
-                           />
-                           <label
-                              htmlFor="registerNumber"
-                              className="form-label"
-                           >
-                              Legajo
-                           </label>
-                        </div>
-                     )}
-
-                     {type !== "Administrador" &&
-                        type !== "Admin/Profesor" &&
-                        type !== "Tutor" && (
+                     {isAdmin && (
+                        <>
                            <div className="form-group">
-                              <input
+                              <select
                                  className="form-input"
-                                 type="number"
-                                 value={dni}
+                                 name="type"
+                                 id="type"
                                  disabled={!isAdmin}
+                                 value={type}
                                  onChange={(e) => onChange(e)}
-                                 name="dni"
-                                 id="dni"
-                                 placeholder="DNI"
-                              />
-                              <label htmlFor="dni" className="form-label">
-                                 DNI
+                              >
+                                 <option value="">
+                                    * Seleccione el tipo de usuario
+                                 </option>
+                                 <option value="Alumno">Alumno</option>
+                                 <option value="Tutor">Tutor</option>
+                                 <option value="Profesor">Profesor</option>
+                                 <option value="Secretaria">Secretaria</option>
+                                 {(auth.userLogged.type === "Administrador" ||
+                                    auth.userLogged.type ===
+                                       "Admin/Profesor") && (
+                                    <>
+                                       <option value="Administrador">
+                                          Administrador
+                                       </option>
+                                       <option value="Admin/Profesor">
+                                          Admin/Profesor
+                                       </option>
+                                    </>
+                                 )}
+                              </select>
+                              <label
+                                 htmlFor="type"
+                                 className={`form-label ${
+                                    type === "" ? "lbl" : ""
+                                 }`}
+                              >
+                                 Tipo de usuario
                               </label>
                            </div>
-                        )}
+
+                           {type === "Alumno" && (
+                              <div className="form-group">
+                                 <input
+                                    className="form-input"
+                                    type="number"
+                                    value={studentnumber}
+                                    name="registerNumber"
+                                    id="registerNumber"
+                                    disabled
+                                 />
+                                 <label
+                                    htmlFor="registerNumber"
+                                    className="form-label"
+                                 >
+                                    Legajo
+                                 </label>
+                              </div>
+                           )}
+
+                           {type !== "Administrador" &&
+                              type !== "Admin/Profesor" &&
+                              type !== "Tutor" && (
+                                 <div className="form-group">
+                                    <input
+                                       className="form-input"
+                                       type="number"
+                                       value={dni}
+                                       disabled={!isAdmin}
+                                       onChange={(e) => onChange(e)}
+                                       name="dni"
+                                       id="dni"
+                                       placeholder="DNI"
+                                    />
+                                    <label htmlFor="dni" className="form-label">
+                                       DNI
+                                    </label>
+                                 </div>
+                              )}
+                        </>
+                     )}
+
                      <div className="form-group">
                         <input
                            type="text"
@@ -459,233 +470,241 @@ const RegisterUser = ({
                            </label>
                         </div>
                      )}
-                     <div className="form-group">
-                        <input
-                           className="form-input"
-                           type="text"
-                           name="tel"
-                           id="tel"
-                           disabled={!isAdmin}
-                           value={tel}
-                           onChange={(e) => onChange(e)}
-                           placeholder="Teléfono"
-                        />
-                        <label htmlFor="tel" className="form-label">
-                           Teléfono
-                        </label>
-                     </div>
-                     <div className="form-group">
-                        <input
-                           className="form-input"
-                           type="text"
-                           name="cel"
-                           id="cel"
-                           disabled={!isAdmin}
-                           value={cel}
-                           onChange={(e) => onChange(e)}
-                           placeholder="Celular"
-                        />
-                        <label htmlFor="cel" className="form-label">
-                           Celular
-                        </label>
-                     </div>
-                     <div className="form-group my-3">
-                        <div className="radio-group" id="radio-group">
-                           <input
-                              className="form-radio"
-                              type="radio"
-                              value="Femenino"
-                              onChange={(e) => onChange(e)}
-                              checked={sex === "Femenino"}
-                              disabled={!isAdmin}
-                              name="sex"
-                              id="rbf"
-                           />
-                           <label className="radio-lbl" htmlFor="rbf">
-                              Femenino
-                           </label>
-                           <input
-                              className="form-radio"
-                              type="radio"
-                              value="Masculino"
-                              onChange={(e) => onChange(e)}
-                              disabled={!isAdmin}
-                              name="sex"
-                              checked={sex === "Masculino"}
-                              id="rbm"
-                           />
-                           <label className="radio-lbl" htmlFor="rbm">
-                              Masculino
-                           </label>
-                        </div>
-                        <label
-                           htmlFor="radio-group"
-                           className="form-label-show"
-                        >
-                           Seleccione el sexo
-                        </label>
-                     </div>
-                     {type !== "Tutor" && type !== "" && (
-                        <div className="form-group">
-                           <input
-                              className="form-input"
-                              type="date"
-                              value={dob}
-                              disabled={!isAdmin}
-                              onChange={(e) => onChange(e)}
-                              name="dob"
-                              id="dob"
-                           />
-                           <label htmlFor="dob" className="form-label-show">
-                              Fecha de nacimiento
-                           </label>
-                        </div>
-                     )}
-                     <div className="form-group">
-                        <input
-                           className="form-input"
-                           type="text"
-                           value={address}
-                           disabled={!isAdmin}
-                           onChange={(e) => onChange(e)}
-                           name="address"
-                           id="address"
-                           placeholder="Dirección"
-                        />
-                        <label htmlFor="address" className="form-label">
-                           Dirección
-                        </label>
-                     </div>
-                     <div className={`${isAdmin && "border"}`}>
-                        <div className="form-group">
-                           <select
-                              className="form-input"
-                              name="town"
-                              id="town"
-                              disabled={!isAdmin}
-                              value={town}
-                              onChange={(e) => onChange(e)}
-                           >
-                              <option value="0">
-                                 * Seleccione localidad donde vive
-                              </option>
-                              {!towns.loading &&
-                                 towns.towns.map((town) => (
-                                    <option key={town._id} value={town._id}>
-                                       {town.name}
+                     {isAdmin && (
+                        <>
+                           <div className="form-group">
+                              <input
+                                 className="form-input"
+                                 type="text"
+                                 name="tel"
+                                 id="tel"
+                                 value={tel}
+                                 onChange={(e) => onChange(e)}
+                                 placeholder="Teléfono"
+                              />
+                              <label htmlFor="tel" className="form-label">
+                                 Teléfono
+                              </label>
+                           </div>
+                           <div className="form-group">
+                              <input
+                                 className="form-input"
+                                 type="text"
+                                 name="cel"
+                                 id="cel"
+                                 value={cel}
+                                 onChange={(e) => onChange(e)}
+                                 placeholder="Celular"
+                              />
+                              <label htmlFor="cel" className="form-label">
+                                 Celular
+                              </label>
+                           </div>
+                           <div className="form-group my-3">
+                              <div className="radio-group" id="radio-group">
+                                 <input
+                                    className="form-radio"
+                                    type="radio"
+                                    value="Femenino"
+                                    onChange={(e) => onChange(e)}
+                                    checked={sex === "Femenino"}
+                                    name="sex"
+                                    id="rbf"
+                                 />
+                                 <label className="radio-lbl" htmlFor="rbf">
+                                    Femenino
+                                 </label>
+                                 <input
+                                    className="form-radio"
+                                    type="radio"
+                                    value="Masculino"
+                                    onChange={(e) => onChange(e)}
+                                    name="sex"
+                                    checked={sex === "Masculino"}
+                                    id="rbm"
+                                 />
+                                 <label className="radio-lbl" htmlFor="rbm">
+                                    Masculino
+                                 </label>
+                              </div>
+                              <label
+                                 htmlFor="radio-group"
+                                 className="form-label-show"
+                              >
+                                 Seleccione el sexo
+                              </label>
+                           </div>
+                           {type !== "Tutor" && type !== "" && (
+                              <div className="form-group">
+                                 <input
+                                    className="form-input"
+                                    type="date"
+                                    value={dob}
+                                    onChange={(e) => onChange(e)}
+                                    name="dob"
+                                    id="dob"
+                                 />
+                                 <label
+                                    htmlFor="dob"
+                                    className="form-label-show"
+                                 >
+                                    Fecha de nacimiento
+                                 </label>
+                              </div>
+                           )}
+                           <div className="form-group">
+                              <input
+                                 className="form-input"
+                                 type="text"
+                                 value={address}
+                                 onChange={(e) => onChange(e)}
+                                 name="address"
+                                 id="address"
+                                 placeholder="Dirección"
+                              />
+                              <label htmlFor="address" className="form-label">
+                                 Dirección
+                              </label>
+                           </div>
+                           <div className="border">
+                              <div className="form-group">
+                                 <select
+                                    className="form-input"
+                                    name="town"
+                                    id="town"
+                                    value={town}
+                                    onChange={(e) => onChange(e)}
+                                 >
+                                    <option value="0">
+                                       * Seleccione localidad donde vive
                                     </option>
-                                 ))}
-                           </select>
-                           <label
-                              htmlFor="town"
-                              className={`form-label ${
-                                 town === "" || town === 0 ? "lbl" : ""
-                              }`}
-                           >
-                              Localidad donde vive
-                           </label>
-                        </div>
-                        <div className="form-group">
-                           <select
-                              className="form-input"
-                              name="neighbourhood"
-                              id="neighbourhood"
-                              value={neighbourhood}
-                              disabled={!isAdmin}
-                              onChange={(e) => onChange(e)}
-                           >
-                              {!neighbourhoods.loading ? (
-                                 <>
-                                    {neighbourhoods.neighbourhoods.length ===
-                                    0 ? (
-                                       <option value="0">
-                                          Dicha localidad no tiene barrios
-                                          adheridos
-                                       </option>
-                                    ) : (
-                                       <>
-                                          <option value="0">
-                                             * Seleccione barrio donde vive
+                                    {!towns.loading &&
+                                       towns.towns.map((town) => (
+                                          <option
+                                             key={town._id}
+                                             value={town._id}
+                                          >
+                                             {town.name}
                                           </option>
-                                          {neighbourhoods.neighbourhoods.map(
-                                             (neighbourhood) => (
-                                                <option
-                                                   key={neighbourhood._id}
-                                                   value={neighbourhood._id}
-                                                >
-                                                   {neighbourhood.name}
+                                       ))}
+                                 </select>
+                                 <label
+                                    htmlFor="town"
+                                    className={`form-label ${
+                                       town === "" || town === 0 ? "lbl" : ""
+                                    }`}
+                                 >
+                                    Localidad donde vive
+                                 </label>
+                              </div>
+                              <div className="form-group">
+                                 <select
+                                    className="form-input"
+                                    name="neighbourhood"
+                                    id="neighbourhood"
+                                    value={neighbourhood}
+                                    onChange={(e) => onChange(e)}
+                                 >
+                                    {!neighbourhoods.loading ? (
+                                       <>
+                                          {neighbourhoods.neighbourhoods
+                                             .length === 0 ? (
+                                             <option value="0">
+                                                Dicha localidad no tiene barrios
+                                                adheridos
+                                             </option>
+                                          ) : (
+                                             <>
+                                                <option value="0">
+                                                   * Seleccione barrio donde
+                                                   vive
                                                 </option>
-                                             )
+                                                {neighbourhoods.neighbourhoods.map(
+                                                   (neighbourhood) => (
+                                                      <option
+                                                         key={neighbourhood._id}
+                                                         value={
+                                                            neighbourhood._id
+                                                         }
+                                                      >
+                                                         {neighbourhood.name}
+                                                      </option>
+                                                   )
+                                                )}
+                                             </>
                                           )}
                                        </>
+                                    ) : (
+                                       <option value="0">
+                                          Seleccione primero una localidad
+                                       </option>
                                     )}
-                                 </>
-                              ) : (
-                                 <option value="0">
-                                    Seleccione primero una localidad
-                                 </option>
+                                 </select>
+                                 <label
+                                    htmlFor="neighbourhood"
+                                    className={`form-label ${
+                                       neighbourhood === "" ||
+                                       neighbourhood === 0
+                                          ? "lbl"
+                                          : ""
+                                    }`}
+                                 >
+                                    Barrio donde vive
+                                 </label>
+                              </div>
+                              {(auth.userLogged.type === "Administrador" ||
+                                 auth.userLogged.type === "Admin/Profesor") && (
+                                 <div className="btn-right">
+                                    <Link
+                                       to="/edit-towns-neighbourhoods"
+                                       className="btn btn-mix-secondary"
+                                       onClick={() => {
+                                          window.scroll(0, 0);
+                                          clearNeighbourhoods();
+                                          clearTowns();
+                                       }}
+                                    >
+                                       <i className="far fa-edit"></i> Editar
+                                    </Link>
+                                 </div>
                               )}
-                           </select>
-                           <label
-                              htmlFor="neighbourhood"
-                              className={`form-label ${
-                                 neighbourhood === "" || neighbourhood === 0
-                                    ? "lbl"
-                                    : ""
-                              }`}
-                           >
-                              Barrio donde vive
-                           </label>
-                        </div>
-                        {(auth.userLogged.type === "Administrador" ||
-                           auth.userLogged.type === "Admin/Profesor") && (
-                           <div className="btn-right">
-                              <Link
-                                 to="/edit-towns-neighbourhoods"
-                                 className="btn btn-mix-secondary"
-                                 onClick={() => {
-                                    window.scroll(0, 0);
-                                    clearNeighbourhoods();
-                                    clearTowns();
-                                 }}
-                              >
-                                 <i className="far fa-edit"></i> Editar
-                              </Link>
                            </div>
-                        )}
-                     </div>
 
-                     {type === "Admin/Profesor" && (
-                        <div className="form-group">
-                           <textarea
-                              className="form-input"
-                              name="description"
-                              id="description"
-                              rows="4"
-                              onChange={(e) => onChange(e)}
-                              value={description}
-                              placeholder="Descripción"
-                           ></textarea>
-                           <label htmlFor="description" className="form-label">
-                              Descripción
-                           </label>
-                        </div>
+                           {type === "Admin/Profesor" && (
+                              <div className="form-group">
+                                 <textarea
+                                    className="form-input"
+                                    name="description"
+                                    id="description"
+                                    rows="4"
+                                    onChange={(e) => onChange(e)}
+                                    value={description}
+                                    placeholder="Descripción"
+                                 ></textarea>
+                                 <label
+                                    htmlFor="description"
+                                    className="form-label"
+                                 >
+                                    Descripción
+                                 </label>
+                              </div>
+                           )}
+                           {changeType()}
+                           <div className="form-group my-3">
+                              <input
+                                 className="form-checkbox"
+                                 onChange={(e) => onChangeCheckbox(e)}
+                                 type="checkbox"
+                                 checked={active}
+                                 name="active"
+                                 id="active"
+                              />
+                              <label className="checkbox-lbl" htmlFor="active">
+                                 {active ? "Activo" : "Inactivo"}
+                              </label>
+                           </div>
+                        </>
                      )}
-                     {changeType()}
-                     <div className="form-group my-3">
-                        <input
-                           className="form-checkbox"
-                           onChange={(e) => onChangeCheckbox(e)}
-                           type="checkbox"
-                           disabled={!isAdmin}
-                           checked={active}
-                           name="active"
-                           id="active"
-                        />
-                        <label className="checkbox-lbl" htmlFor="active">
-                           {active ? "Activo" : "Inactivo"}
-                        </label>
-                     </div>
 
                      {previewSource && (
                         <div className="text-center mt-3">

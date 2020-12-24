@@ -13,21 +13,16 @@ import "./style.scss";
 
 const StudentSearch = ({
    users: { users },
+   loadUsers,
    actionForSelected,
    selectStudent,
    selectedStudent,
-   loadUsers,
-   //To load Installments after selecting a student
-   seeInstallment = false,
-   //it could search only students or students and tutors (invoice)
-   student = true,
-   //
-   enrollment = false,
+   typeSearch,
 }) => {
    const [filterForm, setFilterForm] = useState({
       name: "",
       lastname: "",
-      type: student ? "Alumno" : "Alumno y Tutor",
+      type: typeSearch === "Tutor/Student" ? "Alumno y Tutor" : "Alumno",
    });
 
    const onChangeFilter = (e) => {
@@ -43,7 +38,9 @@ const StudentSearch = ({
 
    return (
       <div className="my-2">
-         <h3>{`Búsqueda de ${student ? "Alumnos" : "Usuarios"}`}</h3>
+         <h3>{`Búsqueda de ${
+            typeSearch === "Tutor" ? "Usuarios" : "Alumnos"
+         }`}</h3>
          <div className="border my-2">
             <Alert type="3" />
             <NameField
@@ -65,11 +62,13 @@ const StudentSearch = ({
             <table className="search">
                <thead>
                   <tr>
-                     {student && <th>Legajo</th>}
+                     {(typeSearch === "Installment" ||
+                        typeSearch === "Student") && <th>Legajo</th>}
                      <th>Nombre</th>
-                     {!student && <th>Tipo</th>}
-                     {student && !enrollment && <th>Categoría</th>}
-                     {enrollment && <th>Edad</th>}
+                     {typeSearch === "Tutor/Student" && <th>Tipo</th>}
+                     {(typeSearch === "Installment" ||
+                        typeSearch === "Student") && <th>Categoría</th>}
+                     {typeSearch === "Enrollment" && <th>Edad</th>}
                   </tr>
                </thead>
                <tbody>
@@ -86,35 +85,47 @@ const StudentSearch = ({
                                  : ""
                            }
                         >
-                           {student && <td>{user.studentnumber}</td>}
+                           {(typeSearch === "Installment" ||
+                              typeSearch === "Student") && (
+                              <td>{user.studentnumber}</td>
+                           )}
                            <td>{user.lastname + ", " + user.name}</td>
-                           {!student && <td>{user.type}</td>}
-                           {student && !enrollment && (
+                           {typeSearch === "Tutor/Student" && (
+                              <td>{user.type}</td>
+                           )}
+                           {(typeSearch === "Installment" ||
+                              typeSearch === "Student") && (
                               <td>{user.category && user.category}</td>
                            )}
-                           {enrollment && (
+                           {typeSearch === "Enrollment" && (
                               <td>{moment().diff(user.dob, "years", false)}</td>
                            )}
                         </tr>
                      ))}
                </tbody>
             </table>
-            {student && (
-               <div className="btn-right">
-                  {!enrollment && (
-                     <button className="btn" onClick={actionForSelected}>
-                        {!seeInstallment ? (
-                           <>
-                              <i className="fas fa-user-plus"></i>
-                              <span className="hide-md"> Agregar</span>
-                           </>
-                        ) : (
-                           "Ver Cuotas"
-                        )}
-                     </button>
+            <div className="btn-right">
+               <button
+                  className="btn"
+                  onClick={(e) => {
+                     setFilterForm({
+                        ...filterForm,
+                        name: "",
+                        lastname: "",
+                     });
+                     actionForSelected(e);
+                  }}
+               >
+                  {typeSearch !== "Installment" ? (
+                     <>
+                        <i className="fas fa-plus-circle"></i>
+                        <span className="hide-md"> Agregar</span>
+                     </>
+                  ) : (
+                     "Ver Cuotas"
                   )}
-               </div>
-            )}
+               </button>
+            </div>
          </div>
       </div>
    );
@@ -122,11 +133,11 @@ const StudentSearch = ({
 
 StudentSearch.propTypes = {
    users: PropTypes.object.isRequired,
+   selectedStudent: PropTypes.object.isRequired,
    loadUsers: PropTypes.func.isRequired,
-   actionForSelected: PropTypes.func,
+   actionForSelected: PropTypes.func.isRequired,
    selectStudent: PropTypes.func.isRequired,
-   student: PropTypes.bool,
-   enrollment: PropTypes.bool,
+   typeSearch: PropTypes.string.isRequired,
 };
 
 const mapStateToProps = (state) => ({

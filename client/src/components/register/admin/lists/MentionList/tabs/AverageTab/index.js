@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { loadCategories } from "../../../../../../../actions/category";
 import { updatePageNumber } from "../../../../../../../actions/mixvalues";
 import { setAlert } from "../../../../../../../actions/alert";
 import {
@@ -17,7 +16,6 @@ function AverageTab({
    enrollments: { enrollments, loadingEnrollments, type },
    categories: { categories, loading },
    loadStudentAverage,
-   loadCategories,
    updatePageNumber,
    enrollmentsPDF,
    setAlert,
@@ -28,10 +26,6 @@ function AverageTab({
    });
 
    const { amount, category } = filterData;
-
-   useEffect(() => {
-      if (loading) loadCategories();
-   }, [loading, loadCategories]);
 
    const onChange = (e) => {
       setFilterData({
@@ -164,7 +158,6 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    loadStudentAverage,
-   loadCategories,
    updatePageNumber,
    enrollmentsPDF,
    setAlert,

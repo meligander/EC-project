@@ -1,10 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { connect } from "react-redux";
+import PropTypes from "prop-types";
+
+import { getInvoiceNumber } from "../../../../../actions/mixvalues";
 
 import Tabs from "../../../../sharedComp/Tabs";
 import InstallmentsSearch from "../../../../sharedComp/search/InstallmentsSearch";
 import InvoiceTab from "./tabs/InvoiceTab";
 
-const InvoiceGeneration = () => {
+const InvoiceGeneration = ({ getInvoiceNumber }) => {
+   useEffect(() => {
+      getInvoiceNumber();
+   }, [getInvoiceNumber]);
    return (
       <>
          <h1>Facturación</h1>
@@ -16,4 +23,8 @@ const InvoiceGeneration = () => {
    );
 };
 
-export default InvoiceGeneration;
+InvoiceGeneration.propTypes = {
+   getInvoiceNumber: PropTypes.func.isRequired,
+};
+
+export default connect(null, { getInvoiceNumber })(InvoiceGeneration);

@@ -4,7 +4,7 @@ import Moment from "react-moment";
 import { withRouter, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { loadUser, deleteUser, clearUser } from "../../../actions/user";
+import { loadUser, deleteUser, clearUsers } from "../../../actions/user";
 import { clearTowns } from "../../../actions/town";
 import { updatePreviousPage } from "../../../actions/mixvalues";
 import { updateExpiredIntallments } from "../../../actions/installment";
@@ -27,7 +27,7 @@ const Dashboard = ({
    users: { user, loading },
    mixvalues: { loadingSpinner },
    loadUser,
-   clearUser,
+   clearUsers,
    clearTowns,
    updateExpiredIntallments,
    updatePreviousPage,
@@ -38,9 +38,11 @@ const Dashboard = ({
 
    const { toggleModal } = otherValues;
 
-   const isAdmin =
+   const isOwner =
       userLogged.type === "Administrador" ||
       userLogged.type === "Admin/Profesor";
+
+   const isAdmin = userLogged.type === "Secretaria" || isOwner;
 
    useEffect(() => {
       if (loading) {
@@ -95,7 +97,7 @@ const Dashboard = ({
                   <div className="profile-top bg-primary p-3">
                      <div className="img-about m-1">
                         <img
-                           src={user.img}
+                           src={user.noImg !== "" ? user.noImg : user.img.url}
                            alt="Perfil Alumno"
                            className="round-img p-1"
                         />
@@ -185,7 +187,7 @@ const Dashboard = ({
                                  </p>
                               </>
                            )}
-                           {isAdmin && user.salary && (
+                           {isOwner && user.salary && (
                               <p>
                                  <span className="text-dark">Salario: </span>
                                  {user.salary}
@@ -227,7 +229,7 @@ const Dashboard = ({
                                     className="btn btn-light"
                                     onClick={() => {
                                        window.scroll(0, 0);
-                                       clearUser();
+                                       clearUsers();
                                        clearTowns();
                                        updatePreviousPage(location.pathname);
                                     }}
@@ -265,7 +267,7 @@ Dashboard.prototypes = {
    mixvalues: PropTypes.object.isRequired,
    loadUser: PropTypes.func.isRequired,
    deleteUser: PropTypes.func.isRequired,
-   clearUser: PropTypes.func.isRequired,
+   clearUsers: PropTypes.func.isRequired,
    clearTowns: PropTypes.func.isRequired,
    updateExpiredIntallments: PropTypes.func.isRequired,
    updatePreviousPage: PropTypes.func.isRequired,
@@ -279,7 +281,7 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    loadUser,
-   clearUser,
+   clearUsers,
    clearTowns,
    updateExpiredIntallments,
    updatePreviousPage,

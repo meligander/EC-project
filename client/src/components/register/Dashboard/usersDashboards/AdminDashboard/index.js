@@ -3,14 +3,11 @@ import Moment from "react-moment";
 import moment from "moment";
 import "moment/locale/es";
 import { connect } from "react-redux";
-import { Link, withRouter } from "react-router-dom";
+import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import { loadRegister, clearRegisters } from "../../../../../actions/register";
-import {
-   clearInvoiceNumber,
-   updatePreviousPage,
-} from "../../../../../actions/mixvalues";
+import { clearInvoiceNumber } from "../../../../../actions/mixvalues";
 import { clearInstallments } from "../../../../../actions/installment";
 import { getAdminDash } from "../../../../../actions/mixvalues";
 import { clearSearch } from "../../../../../actions/user";
@@ -29,10 +26,8 @@ const AdminDashboard = ({
       totalDebt,
    },
    registers: { register, loading },
-   location,
    loadRegister,
    getAdminDash,
-   updatePreviousPage,
    clearInvoiceNumber,
    clearInstallments,
    clearRegisters,
@@ -88,7 +83,6 @@ const AdminDashboard = ({
                                  clearInstallments();
                                  clearInvoiceNumber();
                                  clearSearch();
-                                 updatePreviousPage(location.pathname);
                                  window.scroll(0, 0);
                               }}
                            >
@@ -103,7 +97,6 @@ const AdminDashboard = ({
                               onClick={() => {
                                  clearRegisters();
                                  clearSearch();
-                                 updatePreviousPage(location.pathname);
                                  window.scroll(0, 0);
                               }}
                            >
@@ -142,7 +135,6 @@ const AdminDashboard = ({
                               to="/search"
                               onClick={() => {
                                  clearSearch();
-                                 updatePreviousPage(location.pathname);
                                  window.scroll(0, 0);
                               }}
                               className="side-nav-link"
@@ -157,7 +149,6 @@ const AdminDashboard = ({
                               onClick={() => {
                                  clearSearch();
                                  clearInstallments();
-                                 updatePreviousPage(location.pathname);
                                  window.scroll(0, 0);
                               }}
                               className="side-nav-link"
@@ -171,7 +162,6 @@ const AdminDashboard = ({
                               to="/classes"
                               onClick={() => {
                                  clearClasses();
-                                 updatePreviousPage(location.pathname);
                                  window.scroll(0, 0);
                               }}
                               className="side-nav-link"
@@ -185,7 +175,6 @@ const AdminDashboard = ({
                               to="/enrollment"
                               onClick={() => {
                                  clearSearch();
-                                 updatePreviousPage(location.pathname);
                                  window.scroll(0, 0);
                               }}
                               className="side-nav-link"
@@ -199,7 +188,6 @@ const AdminDashboard = ({
                               to="/categories"
                               onClick={() => {
                                  clearCategories();
-                                 updatePreviousPage(location.pathname);
                                  window.scroll(0, 0);
                               }}
                               className="side-nav-link"
@@ -213,7 +201,6 @@ const AdminDashboard = ({
                               to="/mention-list"
                               onClick={() => {
                                  clearSearch();
-                                 updatePreviousPage(location.pathname);
                                  window.scroll(0, 0);
                               }}
                               className="side-nav-link"
@@ -269,7 +256,6 @@ AdminDashboard.propTypes = {
    mixvalues: PropTypes.object.isRequired,
    loadRegister: PropTypes.func.isRequired,
    getAdminDash: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
    clearInvoiceNumber: PropTypes.func.isRequired,
    clearInstallments: PropTypes.func.isRequired,
    clearRegisters: PropTypes.func.isRequired,
@@ -286,11 +272,10 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    getAdminDash,
    loadRegister,
-   updatePreviousPage,
    clearInstallments,
    clearInvoiceNumber,
    clearRegisters,
    clearSearch,
    clearClasses,
    clearCategories,
-})(withRouter(AdminDashboard));
+})(AdminDashboard);

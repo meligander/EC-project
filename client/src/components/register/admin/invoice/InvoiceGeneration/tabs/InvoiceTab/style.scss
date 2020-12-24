@@ -1,16 +1,55 @@
 @import "../../../../../../../style/abstract.scss";
 
-.invoice-detail {
-   color: $black-color;
+.invoice-tab {
+   .end-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
 
-   label {
-      font-size: 2.4rem;
-      margin-right: 2rem;
+      .form-input {
+         margin-right: -3.5rem;
+         z-index: 1;
+      }
+
+      .btn-cancel {
+         border: none;
+         padding: 0 0.7rem;
+         margin-right: 1rem;
+         color: $secondary-color;
+         font-size: 1.7rem;
+         border-radius: 50%;
+         background-color: inherit;
+         z-index: 10;
+         @include easeOut;
+
+         &:hover {
+            background-color: lighten($secondary-color, 20%);
+            color: $black-color;
+            transform: scale(1.2);
+         }
+
+         &:active,
+         &:focus {
+            outline: none;
+            transform: translateY(-0.1rem);
+            box-shadow: 0 0rem 1rem rgba($black-color, 0.2);
+         }
+      }
    }
 
-   input {
-      font-size: 2rem;
-      text-align: center;
-      background-color: inherit;
+   .invoice-detail {
+      color: $black-color;
+
+      label {
+         font-size: 2.4rem;
+         margin-right: 2rem;
+      }
+
+      input {
+         font-size: 2rem;
+         text-align: center;
+         background-color: inherit;
+      }
    }
 }

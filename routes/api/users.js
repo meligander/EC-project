@@ -4,7 +4,9 @@ const bcrypt = require("bcryptjs");
 const auth = require("../../middleware/auth");
 const adminAuth = require("../../middleware/adminAuth");
 const { check, validationResult } = require("express-validator");
-const cloudinary = require("../../config/imageUploading");
+const cloudinary = require("cloudinary");
+const cloudinaryUploader = require("../../config/imageUploading");
+
 const path = require("path");
 const pdf = require("html-pdf");
 const pdfTemplate = require("../../templates/list");
@@ -490,7 +492,7 @@ router.post(
 
       try {
          //See if users exists
-         if (email !== undefined) {
+         if (email) {
             user = await User.findOne({ email });
 
             if (user)
@@ -503,7 +505,7 @@ router.post(
             .sort({ $natural: -1 })
             .limit(1);
 
-         if (number[0] !== undefined) {
+         if (number[0]) {
             studentnumber = Number(number[0].studentnumber) + 1;
          }
 
@@ -544,7 +546,6 @@ router.post(
             for (let x = 0; x < children.length; x++) {
                childrenList.push(children[x]._id);
             }
-            console.log(childrenList);
             data = {
                ...data,
                children: childrenList,
@@ -618,13 +619,21 @@ router.put(
       }
 
       let user;
-      let imgurl = "";
       try {
+         let imgObject;
+
          if (img) {
-            const uploadResponse = await cloudinary.uploader.upload(img, {
-               upload_preset: "english-center",
-            });
-            imgurl = uploadResponse.url;
+            const user = await User.findOne({ _id: req.params.id });
+
+            if (user.noImg === "") deletePictures(user.img);
+
+            const uploadResponse = await cloudinaryUploader.uploader.upload(
+               img,
+               {
+                  upload_preset: "english-center",
+               }
+            );
+            imgObject = uploadResponse;
          }
 
          let data = {
@@ -649,7 +658,7 @@ router.put(
             ...(children && { children }),
             ...(description && { description }),
             ...(active && { active }),
-            ...(img && { img: imgurl }),
+            ...(img && { img: imgObject, noImg: "" }),
          };
          user = await User.findOne({ _id: req.params.id });
 
@@ -793,5 +802,14 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       res.status(500).send("Server error");
    }
 });
+
+function deletePictures(img) {
+   cloudinary.v2.uploader.destroy(img.public_id, function (error, result) {
+      if (error) {
+         return result.status(400).json(error);
+      }
+      console.log(result);
+   });
+}
 
 module.exports = router;

@@ -16,7 +16,12 @@ router.get("/class/:class_id", auth, async (req, res) => {
          .sort({
             date: -1,
          })
-         .populate({ path: "user", model: "user", select: "-password" });
+         .populate({ path: "user", model: "user", select: "-password" })
+         .populate({
+            path: "comments.user",
+            model: "user",
+            select: "-password",
+         });
 
       return res.json(posts);
    } catch (err) {
@@ -220,7 +225,7 @@ router.post(
                select: "-password",
             });
 
-         return res.json(post.comments);
+         return res.json(post);
       } catch (err) {
          console.error(err.message);
          res.status(500).send("Server error");
@@ -233,7 +238,17 @@ router.post(
 //@access   Private
 router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
    try {
-      const post = await Post.findById(req.params.id);
+      const post = await Post.findById(req.params.id)
+         .populate({
+            path: "user",
+            select: "-password",
+            model: "user",
+         })
+         .populate({
+            path: "comments.user",
+            model: "user",
+            select: "-password",
+         });
 
       //Pull out comment
       const comment = post.comments.find(
@@ -244,10 +259,6 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
       if (!comment)
          return res.status(404).json({ msg: "El comentario no existe" });
 
-      //Check user
-      if (comment.user.toString() !== req.user.id)
-         return res.status(401).json({ msg: "Usuario no autorizado" });
-
       //Get remove index
       const removeIndex = post.comments
          .map((comment) => comment.id.toString())
@@ -257,7 +268,7 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
 
       await post.save();
 
-      res.json(post.comments);
+      res.json(post);
    } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");

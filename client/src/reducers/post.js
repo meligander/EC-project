@@ -56,23 +56,13 @@ export default function (state = initialState, action) {
             loading: false,
          };
       case COMMENT_ADDED:
-         return {
-            ...state,
-            post: {
-               ...state.post,
-               comments: payload,
-            },
-            loading: false,
-         };
       case COMMENT_DELETED:
          return {
             ...state,
-            post: {
-               ...state.post,
-               comments: state.post.comments.filter(
-                  (comment) => comment._id !== payload
-               ),
-            },
+            posts: state.posts.map((post) => {
+               if (payload._id === post._id) return payload;
+               else return post;
+            }),
             loading: false,
          };
       case POST_CLEARED:

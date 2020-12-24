@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { Link, withRouter } from "react-router-dom";
+import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import {
@@ -10,7 +10,6 @@ import {
 } from "../../../../../actions/class";
 import { loadCategories } from "../../../../../actions/category";
 import { loadUsers, clearSearch } from "../../../../../actions/user";
-import { updatePreviousPage } from "../../../../../actions/mixvalues";
 
 import ClassesTable from "../../../../tables/ClassesTable";
 import Loading from "../../../../modal/Loading";
@@ -26,8 +25,6 @@ const Classes = ({
    classPDF,
    clearClass,
    clearSearch,
-   location,
-   updatePreviousPage,
 }) => {
    const [filterForm, setfilterForm] = useState({
       teacher: "",
@@ -145,7 +142,6 @@ const Classes = ({
                         all={true}
                         clearClass={clearClass}
                         clearSearch={clearSearch}
-                        updatePreviousPage={updatePreviousPage}
                      />
                   )}
                </div>
@@ -158,7 +154,6 @@ const Classes = ({
                            window.scroll(0, 0);
                            clearClass();
                            clearSearch();
-                           updatePreviousPage(location.pathname);
                         }}
                         className="btn btn-primary"
                      >
@@ -191,7 +186,6 @@ Classes.propTypes = {
    classPDF: PropTypes.func.isRequired,
    clearClass: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -208,5 +202,4 @@ export default connect(mapStateToProps, {
    classPDF,
    clearClass,
    clearSearch,
-   updatePreviousPage,
-})(withRouter(Classes));
+})(Classes);

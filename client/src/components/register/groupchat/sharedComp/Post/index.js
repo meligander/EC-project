@@ -1,32 +1,33 @@
-import React from "react";
-import { Link, withRouter } from "react-router-dom";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import Moment from "react-moment";
 import PropTypes from "prop-types";
 
-import { addLike, clearPost, removeLike } from "../../../../../actions/post";
 import { clearProfile } from "../../../../../actions/user";
-import { updatePreviousPage } from "../../../../../actions/mixvalues";
+import { addLike, removeLike } from "../../../../../actions/post";
+
+import Comments from "../Comments";
+import Alert from "../../../../sharedComp/Alert";
 
 import "./style.scss";
 
 const Post = ({
-   location,
    post,
    addLike,
    removeLike,
    auth: { userLogged },
-   showActions,
-   isComment,
-   clearPost,
    clearProfile,
-   updatePreviousPage,
    setToggle,
 }) => {
+   const [toggleComments, setToggleComments] = useState(false);
+
+   const isAdmin = userLogged.type !== "Alumno" && userLogged.type !== "Tutor";
+
    return (
       <div className="post">
          <div className="show-sm btn-close">
-            {post.user._id === userLogged._id && isComment && (
+            {(post.user._id === userLogged._id || isAdmin) && (
                <button
                   type="button"
                   onClick={(e) => setToggle(e, post._id)}
@@ -36,18 +37,22 @@ const Post = ({
                </button>
             )}
          </div>
+         <Alert type={post._id} />
          <Link
             to={`/dashboards/${post.user}`}
             onClick={() => {
                window.scroll(0, 0);
                clearProfile();
-               updatePreviousPage(location.pathname);
             }}
          >
             <figure className="post-shape">
                <img
                   className="post-img"
-                  src={post.user.img}
+                  src={
+                     typeof post.user.img === "string"
+                        ? post.user.img
+                        : post.user.img.url
+                  }
                   alt="imagen alumno"
                />
                <figcaption className="post-caption">
@@ -59,7 +64,7 @@ const Post = ({
          <div className="post-text">
             <div>
                <div className="hide-sm btn-close">
-                  {post.user._id === userLogged._id && isComment && (
+                  {(post.user._id === userLogged._id || isAdmin) && (
                      <button
                         type="button"
                         onClick={(e) => setToggle(e, post._id)}
@@ -76,49 +81,50 @@ const Post = ({
                   Publicado el{" "}
                   <Moment format="DD/MM/YYYY [a las] HH:mm" date={post.date} />
                </p>
-               {showActions && (
-                  <>
-                     <button
-                        onClick={() => {
-                           addLike(post._id);
-                        }}
-                        className="btn btn-mix-secondary"
-                     >
-                        <i className="fas fa-thumbs-up"></i>
-                        {post.likes.length > 0 && (
-                           <span className="badge badge-secondary">
-                              {post.likes.length}
-                           </span>
-                        )}
-                     </button>
-                     <button
-                        className="btn btn-mix-secondary"
-                        onClick={() => {
-                           removeLike(post._id);
-                        }}
-                     >
-                        <i className="fas fa-thumbs-down"></i>
-                     </button>
-                     <Link
-                        to={`/chat/post/${post._id}`}
-                        className="btn btn-light"
-                        onClick={() => {
-                           clearPost();
-                           window.scroll(0, 0);
-                           updatePreviousPage(location.pathname);
-                        }}
-                     >
-                        <i className="far fa-comments"></i>
-                        {post.comments.length > 0 && (
-                           <span className="badge badge-primary">
-                              {post.comments.length}
-                           </span>
-                        )}
-                     </Link>
-                  </>
-               )}
+               <button
+                  onClick={() => {
+                     addLike(post._id);
+                  }}
+                  className="btn btn-mix-secondary"
+               >
+                  <i className="fas fa-thumbs-up"></i>
+                  {post.likes.length > 0 && (
+                     <span className="badge badge-secondary">
+                        {post.likes.length}
+                     </span>
+                  )}
+               </button>
+               <button
+                  className="btn btn-mix-secondary"
+                  onClick={() => {
+                     removeLike(post._id);
+                  }}
+               >
+                  <i className="fas fa-thumbs-down"></i>
+               </button>
+
+               <button
+                  className="btn btn-light"
+                  onClick={() => {
+                     setToggleComments(!toggleComments);
+                  }}
+               >
+                  <i className="far fa-comments"></i>
+                  {post.comments.length > 0 && (
+                     <span className="badge badge-primary">
+                        {post.comments.length}
+                     </span>
+                  )}
+               </button>
             </div>
          </div>
+         {toggleComments && (
+            <Comments
+               comments={post.comments}
+               post_id={post._id}
+               userLogged={userLogged}
+            />
+         )}
       </div>
    );
 };
@@ -126,13 +132,9 @@ const Post = ({
 Post.propTypes = {
    addLike: PropTypes.func.isRequired,
    removeLike: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
    setToggle: PropTypes.func,
    auth: PropTypes.object.isRequired,
-   showActions: PropTypes.bool,
-   isComment: PropTypes.bool,
-   clearProfile: PropTypes.func.isRequired,
-   clearPost: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -142,7 +144,5 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    addLike,
    removeLike,
-   clearPost,
    clearProfile,
-   updatePreviousPage,
-})(withRouter(Post));
+})(Post);

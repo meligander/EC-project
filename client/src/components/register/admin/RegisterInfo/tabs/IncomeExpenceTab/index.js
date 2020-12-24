@@ -7,7 +7,6 @@ import {
    clearExpenceTypes,
    registerExpence,
 } from "../../../../../../actions/expence";
-import { updatePreviousPage } from "../../../../../../actions/mixvalues";
 import { loadEmployees } from "../../../../../../actions/user";
 
 import Confirm from "../../../../../modal/Confirm";
@@ -22,9 +21,7 @@ const IncomeExpenceTab = ({
    clearExpenceTypes,
    loadEmployees,
    registerExpence,
-   updatePreviousPage,
    history,
-   location,
 }) => {
    const [otherValues, setOtherValues] = useState({
       show: false,
@@ -235,7 +232,6 @@ const IncomeExpenceTab = ({
                   onClick={() => {
                      window.scroll(0, 0);
                      clearExpenceTypes();
-                     updatePreviousPage(location.pathname);
                   }}
                   className="btn btn-mix-secondary"
                >
@@ -255,7 +251,6 @@ IncomeExpenceTab.propTypes = {
    users: PropTypes.object.isRequired,
    loadEmployees: PropTypes.func.isRequired,
    registerExpence: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
    clearExpenceTypes: PropTypes.func.isRequired,
 };
 
@@ -270,5 +265,4 @@ export default connect(mapStateToProps, {
    registerExpence,
    loadEmployees,
    clearExpenceTypes,
-   updatePreviousPage,
 })(withRouter(IncomeExpenceTab));

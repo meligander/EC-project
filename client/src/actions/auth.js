@@ -70,5 +70,4 @@ export const logOut = () => (dispatch) => {
    dispatch({
       type: LOGOUT,
    });
-   //dispatch(clearUsers());
 };

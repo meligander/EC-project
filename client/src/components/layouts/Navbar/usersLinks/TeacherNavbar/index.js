@@ -10,7 +10,6 @@ import {
 } from "../../../../../actions/navbar";
 import { clearClasses } from "../../../../../actions/class";
 import { clearProfile, clearSearch } from "../../../../../actions/user";
-import { updatePreviousPage } from "../../../../../actions/mixvalues";
 
 const TeacherNavbar = ({
    location,
@@ -92,7 +91,6 @@ const TeacherNavbar = ({
                   window.scroll(0, 0);
                   clearClasses();
                   changePageAndMenu("classes");
-                  updatePreviousPage(location.pathname);
                }}
             >
                <i className="fas fa-chalkboard-teacher"></i>
@@ -113,7 +111,6 @@ const TeacherNavbar = ({
                   window.scroll(0, 0);
                   clearSearch();
                   changePageAndMenu("search");
-                  updatePreviousPage(location.pathname);
                }}
             >
                <i className="fas fa-search"></i>

@@ -18,7 +18,6 @@ import Confirm from "../../../../modal/Confirm";
 const OneClass = ({
    history,
    match,
-   location,
    classes: { classInfo, loading },
    users: { users, loadingUsers },
    auth: { userLogged },
@@ -99,8 +98,8 @@ const OneClass = ({
                                        className="btn-text"
                                        onClick={() => {
                                           window.scroll(0, 0);
+                                          updatePreviousPage("");
                                           clearProfile();
-                                          updatePreviousPage(location.pathname);
                                        }}
                                     >
                                        Info &rarr;
@@ -132,7 +131,7 @@ const OneClass = ({
                            onClick={() => {
                               clearGrades();
                               clearGradeTypes();
-                              updatePreviousPage(location.pathname);
+                              updatePreviousPage("");
                               window.scroll(0, 0);
                            }}
                         >
@@ -152,7 +151,7 @@ const OneClass = ({
                            }
                            onClick={() => {
                               clearAttendances();
-                              updatePreviousPage(location.pathname);
+                              updatePreviousPage("");
                               window.scroll(0, 0);
                            }}
                         >
@@ -168,7 +167,7 @@ const OneClass = ({
                      }
                      onClick={() => {
                         clearPosts();
-                        updatePreviousPage(location.pathname);
+                        updatePreviousPage("");
                         window.scroll(0, 0);
                      }}
                   >
@@ -197,7 +196,7 @@ const OneClass = ({
                         onClick={() => {
                            window.scroll(0, 0);
                            clearSearch();
-                           updatePreviousPage(location.pathname);
+                           updatePreviousPage("");
                         }}
                      >
                         <i className="far fa-edit"></i>
@@ -246,6 +245,7 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    loadClass,
    deleteClass,
+   updatePreviousPage,
    clearGrades,
    clearAttendances,
    clearPosts,
@@ -253,5 +253,4 @@ export default connect(mapStateToProps, {
    clearSearch,
    clearGradeTypes,
    classPDF,
-   updatePreviousPage,
 })(withRouter(OneClass));

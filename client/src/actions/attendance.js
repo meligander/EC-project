@@ -3,7 +3,7 @@ import axios from "axios";
 import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
+import { updateLoadingSpinner, updatePreviousPage } from "./mixvalues";
 
 import {
    ATTENDANCES_LOADED,
@@ -60,6 +60,7 @@ export const loadAttendances = (class_id) => async (dispatch) => {
 export const updateAttendances = (formData, history, class_id) => async (
    dispatch
 ) => {
+   dispatch(updateLoadingSpinner(true));
    try {
       let attendances = [];
       attendances = JSON.stringify(formData);
@@ -69,15 +70,11 @@ export const updateAttendances = (formData, history, class_id) => async (
             "Content-Type": "application/json",
          },
       };
-      const res = await axios.post(
-         "/api/attendance/period",
-         attendances,
-         config
-      );
+      await axios.post("/api/attendance/period", attendances, config);
       dispatch({
          type: ATTENDANCES_UPDATED,
-         payload: res.data,
       });
+      dispatch(updatePreviousPage("/classes"));
 
       history.push(`/class/${class_id}`);
       dispatch(setAlert("Inasistencias Modificadas", "success", "2"));
@@ -94,6 +91,7 @@ export const updateAttendances = (formData, history, class_id) => async (
    }
 
    window.scroll(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const registerNewDate = (newDate) => async (dispatch) => {

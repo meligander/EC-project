@@ -3,7 +3,11 @@ import { saveAs } from "file-saver";
 import axios from "axios";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, clearValues } from "./mixvalues";
+import {
+   updateLoadingSpinner,
+   clearValues,
+   updatePreviousPage,
+} from "./mixvalues";
 import { logOutAndToggle } from "./navbar";
 import { clearInstallments } from "./installment";
 import { clearClass } from "./class";
@@ -202,6 +206,8 @@ export const registerUser = (formData, history, user_id) => async (
          //Update user
          res = await axios.put(`/api/users/${user_id}`, user, config);
       }
+
+      updatePreviousPage("twice");
 
       dispatch({
          type: !user_id ? REGISTER_SUCCESS : USER_UPDATED,

@@ -5,7 +5,6 @@ import moment from "moment";
 import PropTypes from "prop-types";
 
 import { loadCategories } from "../../../../actions/category";
-import { updatePreviousPage } from "../../../../actions/mixvalues";
 import {
    registerEnrollment,
    loadEnrollment,
@@ -19,14 +18,12 @@ import Confirm from "../../../modal/Confirm";
 const Enrollment = ({
    history,
    match,
-   location,
    loadCategories,
    registerEnrollment,
-   updatePreviousPage,
    loadEnrollment,
    clearEnrollments,
-   categories,
    auth: { userLogged },
+   categories,
    enrollments: { enrollment, loading },
 }) => {
    const day = moment();
@@ -34,21 +31,25 @@ const Enrollment = ({
 
    const [formData, setFormData] = useState({
       student: "",
-      studentName: "",
       year: thisYear,
       category: "",
       currentMonth: true,
    });
 
    const [otherValues, setOtherValues] = useState({
+      selectedStudent: {
+         _id: "",
+         name: "",
+      },
       enrollmentValue: 0,
       toggleModal: false,
-      isEdit: location.pathname !== "/enrollment",
-      oneLoad: true,
    });
 
-   const { toggleModal, enrollmentValue, isEdit, oneLoad } = otherValues;
-   const { student, year, category, currentMonth, studentName } = formData;
+   const { toggleModal, enrollmentValue, selectedStudent } = otherValues;
+
+   const { student, year, category, currentMonth } = formData;
+
+   const enrollment_id = match.params.id;
 
    useEffect(() => {
       const load = () => {
@@ -59,41 +60,43 @@ const Enrollment = ({
          });
       };
 
-      if (oneLoad) {
+      if (categories.loading) {
          loadCategories();
-         if (isEdit) {
-            loadEnrollment(match.params.id);
+         if (enrollment_id) {
+            console.log(enrollment_id);
+            loadEnrollment(enrollment_id);
          }
+      } else {
          setOtherValues((prev) => ({
             ...prev,
-            oneLoad: false,
+            enrollmentValue: categories.categories[0].value,
          }));
-      } else {
-         if (!categories.loading) {
-            setOtherValues((prev) => ({
-               ...prev,
-               enrollmentValue: categories.categories[0].value,
-            }));
-         }
-         if (isEdit && !loading) load();
+         if (!loading) load();
       }
    }, [
-      oneLoad,
-      categories.loading,
       enrollment,
-      isEdit,
+      categories,
       loading,
-      loadCategories,
-      categories.categories,
       loadEnrollment,
-      match.params.id,
+      loadCategories,
+      enrollment_id,
    ]);
 
    const selectStudent = (user) => {
+      setOtherValues({
+         ...otherValues,
+         selectedStudent: {
+            _id: user._id,
+            name: user.lastname + ", " + user.name,
+         },
+      });
+   };
+
+   const addStudent = (e) => {
+      e.preventDefault();
       setFormData({
          ...formData,
-         student: user._id,
-         studentName: user.lastname + ", " + user.name,
+         student: selectedStudent._id,
       });
    };
 
@@ -117,12 +120,7 @@ const Enrollment = ({
    };
 
    const onSubmit = () => {
-      registerEnrollment(
-         formData,
-         history,
-         userLogged._id,
-         isEdit && enrollment._id
-      );
+      registerEnrollment(formData, history, userLogged._id, enrollment_id);
    };
 
    const setToggle = (e) => {
@@ -134,27 +132,30 @@ const Enrollment = ({
    };
    return (
       <>
-         {!loading || !isEdit ? (
+         {!loading || !enrollment_id ? (
             <>
-               {!isEdit ? <h1>Inscripción</h1> : <h2>Editar inscripción</h2>}
+               {!enrollment_id ? (
+                  <h1>Inscripción</h1>
+               ) : (
+                  <h2>Editar inscripción</h2>
+               )}
                <Confirm
                   toggleModal={toggleModal}
                   setToggleModal={setToggle}
                   confirm={onSubmit}
                   text={`¿Está seguro que ${
-                     isEdit
+                     enrollment_id
                         ? "desea modificar la inscripción"
                         : "los datos son correctos"
                   }?`}
                />
-               {!isEdit && (
+               {!enrollment_id && (
                   <div className="btn-right">
                      <Link
                         to="/enrollment-list"
                         onClick={() => {
                            window.scroll(0, 0);
                            clearEnrollments();
-                           updatePreviousPage(location.pathname);
                         }}
                         className="btn btn-light"
                      >
@@ -163,21 +164,18 @@ const Enrollment = ({
                   </div>
                )}
                <form className="form" onSubmit={(e) => setToggle(e)}>
-                  {!isEdit && (
+                  {!enrollment_id && (
                      <StudentSearch
-                        selectedStudent={student}
                         selectStudent={selectStudent}
-                        enrollment={true}
+                        selectedStudent={selectedStudent}
+                        actionForSelected={addStudent}
+                        typeSearch="Enrollment"
                      />
                   )}
-                  <p className={`heading-tertiary ${!isEdit && "mt-3"}`}>
+                  <p className={`heading-tertiary ${!enrollment_id && "mt-3"}`}>
                      Alumno:{" "}
                      <span className="text-secondary">
-                        {!isEdit
-                           ? studentName
-                           : enrollment.student.lastname +
-                             ", " +
-                             enrollment.student.name}
+                        {student !== "" && selectedStudent.name}
                      </span>
                   </p>
                   <div className="form-group mt-3">
@@ -210,7 +208,7 @@ const Enrollment = ({
                         Categoría
                      </label>
                   </div>
-                  {!isEdit && (
+                  {!enrollment_id && (
                      <div className="form-group">
                         <input
                            className="form-input"
@@ -224,7 +222,7 @@ const Enrollment = ({
                         </label>
                      </div>
                   )}
-                  {isEdit && (
+                  {enrollment_id && (
                      <div className="form-group">
                         <input
                            className="form-input"
@@ -238,7 +236,7 @@ const Enrollment = ({
                         </label>
                      </div>
                   )}
-                  {!isEdit && (
+                  {!enrollment_id && (
                      <div className="form-group text-right py-1">
                         <input
                            className="form-checkbox"
@@ -260,7 +258,8 @@ const Enrollment = ({
                      </div>
                   )}
                   {(year === thisYear ||
-                     (isEdit && Number(enrollment.year) === thisYear)) && (
+                     (enrollment_id &&
+                        Number(enrollment.year) === thisYear)) && (
                      <div className="form-group text-right">
                         <input
                            className="form-checkbox"
@@ -283,7 +282,7 @@ const Enrollment = ({
                   <div className="btn-ctr">
                      <button type="submit" className="btn btn-primary">
                         <i className="fas fa-user-edit"></i>{" "}
-                        {isEdit ? "Guardar Cambios" : "Inscribir"}
+                        {enrollment_id ? "Guardar Cambios" : "Inscribir"}
                      </button>
                   </div>
                </form>
@@ -298,7 +297,6 @@ const Enrollment = ({
 Enrollment.propTypes = {
    loadCategories: PropTypes.func.isRequired,
    registerEnrollment: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
    loadEnrollment: PropTypes.func.isRequired,
    clearEnrollments: PropTypes.func.isRequired,
    categories: PropTypes.object.isRequired,
@@ -317,5 +315,4 @@ export default connect(mapStateToProps, {
    registerEnrollment,
    loadEnrollment,
    clearEnrollments,
-   updatePreviousPage,
 })(withRouter(Enrollment));

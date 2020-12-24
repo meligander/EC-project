@@ -4,6 +4,7 @@ import { Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import { loginUser } from "../../../actions/auth";
+import { clearProfile } from "../../../actions/user";
 import { changePage } from "../../../actions/navbar";
 
 import Alert from "../../sharedComp/Alert";
@@ -14,6 +15,7 @@ const Login = ({
    auth: { userLogged, isAuthenticated },
    mixvalues: { loadingSpinner },
    changePage,
+   clearProfile,
 }) => {
    const [formData, setFormData] = useState({
       email: "",
@@ -39,6 +41,7 @@ const Login = ({
       changePage("index");
    };
    if (isAuthenticated) {
+      clearProfile();
       return <Redirect to={`/dashboard/${userLogged._id}`} />;
    }
 
@@ -93,6 +96,7 @@ Login.prototypes = {
    loginUser: PropTypes.func.isRequired,
    changePage: PropTypes.func.isRequired,
    loadUser: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -103,4 +107,5 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    loginUser,
    changePage,
+   clearProfile,
 })(Login);

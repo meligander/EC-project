@@ -188,7 +188,10 @@ export const addPost = (formData, class_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 // Add comment
-export const addComment = (post_id, formData) => async (dispatch) => {
+export const addComment = (post_id, formData, screen) => async (dispatch) => {
+   //screen is to see where to go to see the alert
+   //post_id is to create a type of alert so it does not create as many alerts as comments
+
    dispatch(updateLoadingSpinner(true));
 
    const config = {
@@ -207,19 +210,20 @@ export const addComment = (post_id, formData) => async (dispatch) => {
          type: COMMENT_ADDED,
          payload: res.data,
       });
-      dispatch(setAlert("Comentario Agregado", "success", "2"));
+
+      dispatch(setAlert("Comentario Agregado", "success", post_id));
    } catch (err) {
       if (err.response.data.erros) {
          const errors = err.response.data.errors;
          errors.forEach((error) => {
-            dispatch(setAlert(error.msg, "danger", "2"));
+            dispatch(setAlert(error.msg, "danger", post_id));
          });
          dispatch({
             type: POST_ERROR,
             payload: errors,
          });
       } else {
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         dispatch(setAlert(err.response.data.msg, "danger", post_id));
          dispatch({
             type: POST_ERROR,
             payload: {
@@ -231,23 +235,26 @@ export const addComment = (post_id, formData) => async (dispatch) => {
       }
    }
 
-   window.scrollTo(0, 0);
+   window.scrollBy(0, screen);
    dispatch(updateLoadingSpinner(false));
 };
 
 //Delete a comment
-export const deleteComment = (post_id, comment_id) => async (dispatch) => {
+export const deleteComment = (post_id, comment_id, screen) => async (
+   dispatch
+) => {
    dispatch(updateLoadingSpinner(true));
-
    try {
-      await axios.delete(`/api/posts/comment/${post_id}/${comment_id}`);
+      const res = await axios.delete(
+         `/api/posts/comment/${post_id}/${comment_id}`
+      );
 
       dispatch({
          type: COMMENT_DELETED,
-         payload: comment_id,
+         payload: res.data,
       });
 
-      dispatch(setAlert("Comentario Eliminado", "success", "2"));
+      dispatch(setAlert("Comentario Eliminado", "success", post_id));
    } catch (err) {
       dispatch({
          type: POST_ERROR,
@@ -257,10 +264,10 @@ export const deleteComment = (post_id, comment_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(err.response.data.msg, "danger", post_id));
    }
 
-   window.scrollTo(0, 0);
+   window.scrollBy(0, screen);
    dispatch(updateLoadingSpinner(false));
 };
 

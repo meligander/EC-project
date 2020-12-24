@@ -87,10 +87,13 @@ const UserSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "class",
    },
-   img: {
+   noImg: {
       type: String,
       default:
          "https://pngimage.net/wp-content/uploads/2018/06/no-user-image-png-3-300x200.png",
+   },
+   img: {
+      type: Object,
    },
    date: {
       type: Date,

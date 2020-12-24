@@ -1,17 +1,6 @@
 @import "../../../style/abstract.scss";
 
 table.installments {
-   th {
-      &.inherit {
-         background-color: inherit;
-      }
-
-      &.blank {
-         background-color: $white-color;
-         opacity: 1;
-      }
-   }
-
    &.modify td {
       &:hover {
          background-color: lighten($secondary-color, 25%);

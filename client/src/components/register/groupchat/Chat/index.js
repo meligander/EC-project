@@ -21,7 +21,7 @@ const Chat = ({
 }) => {
    useEffect(() => {
       if (classes.loading) loadClass(match.params.id, true);
-      if (classes.classInfo !== null && loading) loadPosts(match.params.id);
+      if (classes.classInfo && loading) loadPosts(match.params.id);
    }, [loadPosts, loadClass, match.params.id, classes, loading]);
 
    const [otherValues, setOtherValues] = useState({
@@ -62,14 +62,12 @@ const Chat = ({
                   {", "}
                   {classes.classInfo.teacher.name}
                </p>
-               <PostForm class_id={classes.classInfo._id} isPost={true} />
+               <PostForm class_id={classes.classInfo._id} />
 
                {!loading &&
                   (posts.length > 0 ? (
                      posts.map((post) => (
                         <Post
-                           showActions={true}
-                           isComment={true}
                            post={post}
                            key={post._id}
                            setToggle={setToggle}

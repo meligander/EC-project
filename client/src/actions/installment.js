@@ -3,7 +3,7 @@ import axios from "axios";
 import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
+import { updateLoadingSpinner, updatePreviousPage } from "./mixvalues";
 
 import {
    INSTALLMENT_LOADED,
@@ -147,6 +147,9 @@ export const updateIntallment = (formData, history, user_id, inst_id) => async (
       dispatch({
          type: inst_id ? INSTALLMENT_UPDATED : INSTALLMENT_REGISTERED,
       });
+
+      dispatch(updatePreviousPage("dashboard"));
+
       dispatch(setAlert(res.data.msg, "success", "2"));
       dispatch(clearInstallments());
       history.push(`/installments/${user_id}`);

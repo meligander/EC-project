@@ -5,7 +5,6 @@ import { withRouter, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import { setAlert } from "../../../../../actions/alert";
-import { updatePreviousPage } from "../../../../../actions/mixvalues";
 import {
    registerNewGrade,
    deleteGrades,
@@ -32,7 +31,6 @@ const GradesTab = ({
    registerNewGrade,
    deleteGrades,
    updateGrades,
-   updatePreviousPage,
    clearGradeTypes,
    gradesPDF,
    certificatePDF,
@@ -421,7 +419,6 @@ const GradesTab = ({
                            onClick={() => {
                               window.scroll(0, 0);
                               clearGradeTypes();
-                              updatePreviousPage(location.pathname);
                            }}
                            className="btn btn-mix-secondary"
                         >
@@ -449,7 +446,6 @@ GradesTab.propTypes = {
    gradesPDF: PropTypes.func.isRequired,
    certificatePDF: PropTypes.func.isRequired,
    clearGradeTypes: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -463,7 +459,6 @@ export default connect(mapStateToProps, {
    registerNewGrade,
    deleteGrades,
    updateGrades,
-   updatePreviousPage,
    gradesPDF,
    certificatePDF,
    clearGradeTypes,
