@@ -94,6 +94,10 @@ const UserSchema = new mongoose.Schema({
    },
    img: {
       type: Object,
+      default: {
+         public_id: "",
+         url: "",
+      },
    },
    date: {
       type: Date,

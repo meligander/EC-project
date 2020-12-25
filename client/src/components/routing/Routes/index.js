@@ -123,7 +123,7 @@ const Routes = () => {
             <PrivateRoutes
                exact
                types={["Administrador", "Secretaria", "Admin/Profesor"]}
-               path="/edit-installment/:id/:year/:number"
+               path="/edit-installment/:type/:id"
                component={EditInstallment}
             />
             <PrivateRoutes

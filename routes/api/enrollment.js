@@ -103,7 +103,6 @@ router.get("/average", [auth, adminAuth], async (req, res) => {
             path: "student",
             model: "user",
             select: ["name", "lastname", "studentnumber"],
-            match: { active: true },
          })
          .populate({
             path: "category",
@@ -144,7 +143,6 @@ router.get("/absences", [auth, adminAuth], async (req, res) => {
             path: "student",
             model: "user",
             select: ["name", "lastname", "studentnumber"],
-            match: { active: true },
          })
          .populate({
             path: "category",
@@ -200,6 +198,7 @@ router.get("/year", [auth, adminAuth], async (req, res) => {
    try {
       const date = new Date();
       const year = date.getFullYear() + 1;
+
       let enrollments = await Enrollment.find({ year });
       if (enrollments.length === 0)
          enrollments = await Enrollment.find({ year: date.getFullYear() });

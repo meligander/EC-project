@@ -49,15 +49,12 @@ export const loadUser = (user_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(0, 0);
    }
    dispatch(updateLoadingSpinner(false));
 };
 
 //Load Relatives
 export const loadRelatives = (user_id) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
    try {
       let res = await axios.get(`/api/users/tutor/${user_id}`);
 
@@ -74,8 +71,6 @@ export const loadRelatives = (user_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(0, 0);
    }
 };
 
@@ -133,28 +128,6 @@ export const loadUsers = (
    dispatch(updateLoadingSpinner(false));
 };
 
-export const loadEmployees = () => async (dispatch) => {
-   try {
-      let res = await axios.get("/api/users/team");
-
-      dispatch({
-         type: USERS_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      dispatch({
-         type: USERS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(0, 0);
-   }
-};
-
 export const loadClassStudents = (class_id) => async (dispatch) => {
    try {
       const res = await axios.get(
@@ -173,8 +146,6 @@ export const loadClassStudents = (class_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(0, 0);
    }
    dispatch(updateLoadingSpinner(false));
 };
@@ -187,7 +158,7 @@ export const registerUser = (formData, history, user_id) => async (
 
    let user = {};
    for (const prop in formData) {
-      if (formData[prop]) {
+      if (formData[prop] !== "" && formData[prop] !== 0) {
          user[prop] = formData[prop];
       }
    }
@@ -204,14 +175,11 @@ export const registerUser = (formData, history, user_id) => async (
          res = await axios.post("/api/users", user, config);
       } else {
          //Update user
-         res = await axios.put(`/api/users/${user_id}`, user, config);
+         await axios.put(`/api/users/${user_id}`, user, config);
       }
-
-      updatePreviousPage("twice");
 
       dispatch({
          type: !user_id ? REGISTER_SUCCESS : USER_UPDATED,
-         payload: res.data,
       });
 
       dispatch(
@@ -221,8 +189,12 @@ export const registerUser = (formData, history, user_id) => async (
             "1"
          )
       );
+
+      dispatch(updatePreviousPage("twice"));
+      dispatch(clearUser());
       dispatch(clearValues());
-      history.push(`/dashboard/${res.data._id}`);
+
+      history.push(`/dashboard/${user_id ? user_id : res.data}`);
    } catch (err) {
       if (err.response.data.erros) {
          const errors = err.response.data.errors;
@@ -280,7 +252,7 @@ export const updateCredentials = (formData, history, user_id) => async (
          type: USER_UPDATED,
          payload: res.data,
       });
-      dispatch(clearProfile());
+      dispatch(clearUser());
       dispatch(setAlert("Credenciales modificadas", "success", "1"));
       history.push(`/dashboard/${user_id}`);
    } catch (err) {

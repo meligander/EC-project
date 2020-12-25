@@ -15,7 +15,7 @@ module.exports = (css, img, tbody, invoice) => {
 		        />
                 <title>Factura</title>          
             </head>
-            <body>
+            <body> 
                 <div class='container'>  
                     <table class="invoice-info">
                         <tbody>

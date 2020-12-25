@@ -60,6 +60,7 @@ export const loginUser = (formData) => async (dispatch) => {
                msg: err.response.data.msg,
             },
          });
+         dispatch(updateLoadingSpinner(false));
       }
 
       window.scrollTo(0, 0);

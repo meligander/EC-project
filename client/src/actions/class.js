@@ -36,8 +36,6 @@ export const loadUsersClass = (user_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(0, 0);
    }
 };
 
@@ -68,8 +66,6 @@ export const loadClass = (class_id, post = false) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(0, 0);
    }
 };
 
@@ -114,12 +110,7 @@ export const registerUpdateClass = (formData, history, class_id = 0) => async (
 ) => {
    dispatch(updateLoadingSpinner(true));
 
-   let newClass = {};
-   for (const prop in formData) {
-      if (formData[prop]) newClass[prop] = formData[prop];
-   }
-
-   newClass = JSON.stringify(newClass);
+   let newClass = JSON.stringify(formData);
 
    const config = {
       headers: {

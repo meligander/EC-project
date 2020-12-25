@@ -14,7 +14,6 @@ const GoBack = ({
    updatePreviousPage,
 }) => {
    const goBack = () => {
-      window.scroll(0, 0);
       switch (prevPage) {
          case "dashboard":
             history.push(`/dashboard/${userLogged._id}`);
@@ -24,7 +23,6 @@ const GoBack = ({
             history.goBack();
             break;
          case "twice":
-            console.log("hola");
             history.go(-2);
             break;
          default:

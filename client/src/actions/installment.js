@@ -43,8 +43,6 @@ export const loadStudentInstallments = (user_id, admin = false) => async (
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
    }
    dispatch(updateLoadingSpinner(false));
 };
@@ -100,8 +98,6 @@ export const loadInstallment = (installment_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
    }
 };
 
@@ -119,13 +115,7 @@ export const updateIntallment = (formData, history, user_id, inst_id) => async (
 ) => {
    dispatch(updateLoadingSpinner(true));
 
-   let installment = {};
-   for (const prop in formData) {
-      if (formData[prop] && formData[prop] !== 1)
-         installment[prop] = formData[prop];
-   }
-
-   installment = JSON.stringify(installment);
+   const installment = JSON.stringify(formData);
 
    const config = {
       headers: {

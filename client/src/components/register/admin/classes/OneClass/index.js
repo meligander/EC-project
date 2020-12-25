@@ -36,7 +36,8 @@ const OneClass = ({
 
    useEffect(() => {
       if (loading) loadClass(match.params.id);
-   }, [loadClass, match.params.id, loading]);
+      updatePreviousPage("/classes");
+   }, [loadClass, match.params.id, loading, updatePreviousPage]);
 
    const setToggle = () => {
       setToggleModal(!toggleModal);
@@ -98,7 +99,6 @@ const OneClass = ({
                                        className="btn-text"
                                        onClick={() => {
                                           window.scroll(0, 0);
-                                          updatePreviousPage("");
                                           clearProfile();
                                        }}
                                     >
@@ -131,7 +131,6 @@ const OneClass = ({
                            onClick={() => {
                               clearGrades();
                               clearGradeTypes();
-                              updatePreviousPage("");
                               window.scroll(0, 0);
                            }}
                         >
@@ -151,7 +150,6 @@ const OneClass = ({
                            }
                            onClick={() => {
                               clearAttendances();
-                              updatePreviousPage("");
                               window.scroll(0, 0);
                            }}
                         >
@@ -167,7 +165,6 @@ const OneClass = ({
                      }
                      onClick={() => {
                         clearPosts();
-                        updatePreviousPage("");
                         window.scroll(0, 0);
                      }}
                   >
@@ -196,7 +193,6 @@ const OneClass = ({
                         onClick={() => {
                            window.scroll(0, 0);
                            clearSearch();
-                           updatePreviousPage("");
                         }}
                      >
                         <i className="far fa-edit"></i>

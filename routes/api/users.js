@@ -15,37 +15,9 @@ const moment = require("moment");
 const User = require("../../models/User");
 const Enrollment = require("../../models/Enrollment");
 const Installment = require("../../models/Installment");
-
-//@route    GET api/users/team
-//@desc     Get team
-//@access   Public
-router.get("/team", async (req, res) => {
-   try {
-      let team = [];
-
-      const headmasters = await User.find({
-         type: "Admin/Profesor",
-         active: true,
-      }).sort({ lastname: 1, name: 1 });
-
-      const secretaries = await User.find({
-         type: "Secretaria",
-         active: true,
-      }).sort({ lastname: 1, name: 1 });
-
-      const teachers = await User.find({
-         type: "Profesor",
-         active: true,
-      }).sort({ lastname: 1, name: 1 });
-
-      team = headmasters.concat(secretaries, teachers);
-
-      res.json(team);
-   } catch (err) {
-      console.error(err.message);
-      return res.status(500).send("Server Error");
-   }
-});
+const Grade = require("../../models/Grade");
+const Attendance = require("../../models/Attendance");
+const Class = require("../../models/Class");
 
 //@route    GET api/users
 //@desc     Get all user || with filter
@@ -196,6 +168,11 @@ router.get("/", auth, async (req, res) => {
                case "Alumno y Tutor":
                   filter.type = { $in: ["Alumno", "Tutor"] };
                   break;
+               case "Team":
+                  filter.type = {
+                     $in: ["Admin/Profesor", "Profesor", "Secretaria"],
+                  };
+                  break;
                default:
                   break;
             }
@@ -207,7 +184,7 @@ router.get("/", auth, async (req, res) => {
                .populate({
                   path: "children",
                   model: "user",
-                  select: ["name", "lastname"],
+                  select: "-password",
                })
                .sort({ lastname: 1, name: 1 });
       }
@@ -471,7 +448,6 @@ router.post(
          salary,
          children,
          description,
-         active,
       } = req.body;
 
       let errors = [];
@@ -531,7 +507,6 @@ router.post(
             school,
             salary,
             description,
-            active,
          };
 
          if (type === "Alumno") {
@@ -561,13 +536,10 @@ router.post(
 
          await user.save();
 
-         user = await User.findOne({ _id: req.params.id })
-            .select("-password")
-            .populate({ path: "town", select: "name" })
-            .populate({ path: "neighbourhood", select: "name" })
-            .populate({ path: "children", select: "-password" });
+         user = await User.find().sort({ $natural: -1 }).limit(1);
+         user = user[0];
 
-         res.json(user);
+         res.json(user._id);
       } catch (err) {
          console.error(err.message);
          return res.status(500).send("Server Error");
@@ -618,27 +590,36 @@ router.put(
          return res.status(400).json({ errors });
       }
 
-      let user;
       try {
-         let imgObject;
+         let imgObject = {
+            public_id: "",
+            url: "",
+         };
 
-         if (img) {
-            const user = await User.findOne({ _id: req.params.id });
+         let user = await User.findOne({ _id: req.params.id });
 
-            if (user.noImg === "") deletePictures(user.img);
-
-            const uploadResponse = await cloudinaryUploader.uploader.upload(
-               img,
-               {
-                  upload_preset: "english-center",
-               }
-            );
-            imgObject = uploadResponse;
+         if (img.public_id !== "") {
+            if (img.public_id !== user.img.public_id) {
+               if (user.noImg === "") deletePictures(user.img);
+               const uploadResponse = await cloudinaryUploader.uploader.upload(
+                  img,
+                  {
+                     upload_preset: "english-center",
+                  }
+               );
+               imgObject = {
+                  public_id: uploadResponse.public_id,
+                  url: uploadResponse.url,
+               };
+            }
          }
+
+         if (!active) await inactivate(user._id, type);
 
          let data = {
             name,
             lastname,
+            active,
             ...(tel && { tel }),
             ...(cel && { cel }),
             ...(type && { type }),
@@ -657,10 +638,8 @@ router.put(
             ...(salary && { salary }),
             ...(children && { children }),
             ...(description && { description }),
-            ...(active && { active }),
-            ...(img && { img: imgObject, noImg: "" }),
+            ...(imgObject.public_id !== "" && { img: imgObject, noImg: "" }),
          };
-         user = await User.findOne({ _id: req.params.id });
 
          if (discount) {
             if (discount.toString() !== user.discount.toString()) {
@@ -694,17 +673,9 @@ router.put(
             }
          }
 
-         user = await User.findOneAndUpdate(
-            { _id: req.params.id },
-            { $set: data },
-            { new: true }
-         )
-            .select("-password")
-            .populate({ path: "town", select: "name" })
-            .populate({ path: "neighbourhood", select: "name" })
-            .populate({ path: "children", select: "-password" });
+         await User.findOneAndUpdate({ _id: user._id }, { $set: data });
 
-         res.json(user);
+         res.json({ msg: "User Updated" });
       } catch (err) {
          console.error(err.message);
          return res.status(500).send("Server Error");
@@ -810,6 +781,47 @@ function deletePictures(img) {
       }
       console.log(result);
    });
+}
+
+async function inactivate(user_id, type) {
+   switch (type) {
+      case "Alumno":
+         const date = new Date();
+         const month = date.getMonth() + 1;
+         const year = date.getFullYear();
+
+         await User.findOneAndUpdate({ _id: user_id }, { classroom: null });
+
+         const grades = await Grade.find({ student: user_id });
+         for (let x = 0; x < grades.length; x++) {
+            await Grade.findOneAndRemove({ _id: grades[x]._id });
+         }
+
+         const attendances = await Attendance.find({ user: user_id });
+         for (let x = 0; x < attendances.length; x++) {
+            await Attendance.findOneAndRemove({ _id: attendances[x]._id });
+         }
+
+         const installments = await Installment.find({
+            student: user_id,
+            year,
+            number: { $gt: month },
+         });
+         for (let x = 0; x < installments.length; x++) {
+            await Installment.findOneAndRemove({ _id: installments[x]._id });
+         }
+
+         break;
+      case "Profesor":
+         const classes = await Class.find({ teacher: user_id });
+
+         for (let x = 0; x < classes.length; x++) {
+            await Class.findOneAndRemove({ _id: classes[x]._id });
+         }
+         break;
+      default:
+         break;
+   }
 }
 
 module.exports = router;

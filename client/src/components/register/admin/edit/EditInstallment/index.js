@@ -22,7 +22,7 @@ const EditInstallment = ({
    loadUser,
    updateIntallment,
    deleteInstallment,
-   installment: { installment, loading },
+   installments: { installment, loading },
 }) => {
    const [formData, setformData] = useState({
       year: 0,
@@ -42,9 +42,8 @@ const EditInstallment = ({
    const { year, number, value, expired, student } = formData;
 
    const _id = match.params.id;
-   const yearParams = match.params.year;
 
-   const edit = yearParams !== "0";
+   const edit = match.params.type === "1";
 
    const day = moment();
    const thisYear = day.year();
@@ -61,19 +60,19 @@ const EditInstallment = ({
       };
       const loadNewData = () => {
          setformData({
+            year: 0,
+            number: 1,
             value: "",
             expired: false,
             student: users.user,
-            number: match.params.number,
-            year: yearParams,
          });
       };
-      if (!yearParams) {
+      if (edit) {
          if (loading) loadInstallment(_id);
          else loadEditData();
       } else {
          if (users.loading) loadUser(_id);
-         else if (yearParams !== "0") loadNewData();
+         else loadNewData();
       }
    }, [
       loadInstallment,
@@ -83,7 +82,7 @@ const EditInstallment = ({
       installment,
       users,
       _id,
-      yearParams,
+      edit,
    ]);
 
    const onChange = (e) => {
@@ -101,8 +100,7 @@ const EditInstallment = ({
    };
 
    const confirm = () => {
-      if (yearParams) updateIntallment(formData, history, student._id);
-      else updateIntallment(formData, history, student._id, _id);
+      updateIntallment(formData, history, student._id, edit && _id);
    };
 
    const setToggleDelete = (e) => {
@@ -127,7 +125,7 @@ const EditInstallment = ({
 
    return (
       <>
-         {!loading || (yearParams && !users.loading) ? (
+         {(!loading && edit) || (!edit && !users.loading) ? (
             <>
                <Confirm
                   text="¿Está seguro que desea eliminar la cuota?"
@@ -237,7 +235,7 @@ const EditInstallment = ({
                      >
                         <i className="far fa-save"></i>&nbsp; Guardar
                      </button>
-                     {!yearParams && (
+                     {edit && (
                         <button
                            type="submit"
                            onClick={setToggleDelete}
@@ -259,7 +257,7 @@ const EditInstallment = ({
 EditInstallment.propTypes = {
    installment_id: PropTypes.string,
    users: PropTypes.object.isRequired,
-   installment: PropTypes.object.isRequired,
+   installments: PropTypes.object.isRequired,
    loadInstallment: PropTypes.func.isRequired,
    loadUser: PropTypes.func.isRequired,
    deleteInstallment: PropTypes.func.isRequired,
@@ -268,7 +266,7 @@ EditInstallment.propTypes = {
 
 const mapStateToProps = (state) => ({
    users: state.users,
-   installment: state.installment,
+   installments: state.installments,
 });
 
 export default connect(mapStateToProps, {

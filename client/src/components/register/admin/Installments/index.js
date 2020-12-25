@@ -8,6 +8,7 @@ import {
    clearInstallment,
    loadStudentInstallments,
 } from "../../../../actions/installment";
+import { updatePreviousPage } from "../../../../actions/mixvalues";
 import { clearPenalty, updatePenalty } from "../../../../actions/penalty";
 
 import InstallmentsSearch from "../../../sharedComp/search/InstallmentsSearch";
@@ -15,11 +16,12 @@ import Confirm from "../../../modal/Confirm";
 
 const Installments = ({
    match,
-   installment: { usersInstallments, loadingUsersInstallments },
+   installments: { usersInstallments, loadingUsersInstallments },
    auth: { userLogged },
    clearInstallments,
    clearInstallment,
    clearPenalty,
+   updatePreviousPage,
    updatePenalty,
    loadStudentInstallments,
 }) => {
@@ -36,23 +38,26 @@ const Installments = ({
    const { toggleModal, student } = otherValues;
 
    useEffect(() => {
-      if (_id !== "0" && loadingUsersInstallments)
+      if (_id !== "0" && loadingUsersInstallments) {
          loadStudentInstallments(_id, true);
-      else {
-         if (!loadingUsersInstallments)
+      } else {
+         if (!loadingUsersInstallments) {
             setOtherValues((prev) => ({
                ...prev,
                student: {
-                  _id,
+                  _id: usersInstallments.rows[0][0].student._id,
                   name:
                      usersInstallments.rows[0][0].student.lastname +
                      ", " +
                      usersInstallments.rows[0][0].student.name,
                },
             }));
+         }
       }
+      updatePreviousPage("dashboard");
    }, [
       _id,
+      updatePreviousPage,
       loadStudentInstallments,
       loadingUsersInstallments,
       usersInstallments.rows,
@@ -104,7 +109,7 @@ const Installments = ({
                   }`}
                   to={
                      usersInstallments.rows.length > 0
-                        ? `/edit-installment/${_id}/0/0`
+                        ? `/edit-installment/2/${student._id}`
                         : "#"
                   }
                   onClick={() => {
@@ -122,17 +127,18 @@ const Installments = ({
 };
 
 Installments.propTypes = {
-   installment: PropTypes.object.isRequired,
+   installments: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
    clearInstallments: PropTypes.func.isRequired,
    clearInstallment: PropTypes.func.isRequired,
    clearPenalty: PropTypes.func.isRequired,
    updatePenalty: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
    loadStudentInstallments: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
-   installment: state.installment,
+   installments: state.installments,
    auth: state.auth,
 });
 
@@ -141,5 +147,6 @@ export default connect(mapStateToProps, {
    clearInstallment,
    clearPenalty,
    updatePenalty,
+   updatePreviousPage,
    loadStudentInstallments,
 })(withRouter(Installments));

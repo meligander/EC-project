@@ -22,16 +22,16 @@ const TeacherNavbar = ({
    clearSearch,
    clearProfile,
 }) => {
+   const string = location.pathname.substring(1, location.pathname.length);
+   const path =
+      string.indexOf("/") !== -1
+         ? string.substring(0, string.indexOf("/"))
+         : string;
+   let id;
+   if (path === "dashboard") {
+      id = string.substring(string.indexOf("/") + 1, string.length);
+   }
    useEffect(() => {
-      const string = location.pathname.substring(1, location.pathname.length);
-      const path =
-         string.indexOf("/") !== -1
-            ? string.substring(0, string.indexOf("/"))
-            : string;
-      let id;
-      if (path === "dashboard") {
-         id = string.substring(string.indexOf("/") + 1, string.length);
-      }
       switch (path) {
          case "chat":
          case "classes":
@@ -54,7 +54,7 @@ const TeacherNavbar = ({
             changePage("index");
             break;
       }
-   }, [changePage, location.pathname, userLogged._id]);
+   }, [changePage, path, id, userLogged._id]);
    return (
       <ul className={!showMenu ? "menu-nav" : "menu-nav show"}>
          <li

@@ -18,6 +18,7 @@ const StudentSearch = ({
    selectStudent,
    selectedStudent,
    typeSearch,
+   block,
 }) => {
    const [filterForm, setFilterForm] = useState({
       name: "",
@@ -51,8 +52,13 @@ const StudentSearch = ({
 
             <div className="btn-right mb-2">
                <button
-                  className="btn btn-light"
+                  className={`btn ${
+                     typeSearch === "Installment" && block
+                        ? "btn-black"
+                        : "btn-light"
+                  }`}
                   type="submit"
+                  disabled={typeSearch === "Installment" && block}
                   onClick={(e) => searchStudents(e)}
                >
                   <i className="fas fa-filter"></i>
@@ -138,6 +144,7 @@ StudentSearch.propTypes = {
    actionForSelected: PropTypes.func.isRequired,
    selectStudent: PropTypes.func.isRequired,
    typeSearch: PropTypes.string.isRequired,
+   block: PropTypes.bool,
 };
 
 const mapStateToProps = (state) => ({

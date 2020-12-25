@@ -5,8 +5,8 @@ import auth from "./auth";
 import navbar from "./navbar";
 import classes from "./class";
 import grades from "./grade";
-import attendance from "./attendance";
-import installment from "./installment";
+import attendances from "./attendance";
+import installments from "./installment";
 import towns from "./town";
 import neighbourhoods from "./neighbourhood";
 import registers from "./register";
@@ -16,15 +16,15 @@ import posts from "./post";
 import mixvalues from "./mixvalues";
 import invoices from "./invoice";
 import enrollments from "./enrollment";
-import penalty from "./penalty";
+import penalties from "./penalty";
 
 export default combineReducers({
    alert,
-   attendance,
+   attendances,
    auth,
    categories,
    classes,
-   installment,
+   installments,
    enrollments,
    expences,
    grades,
@@ -32,7 +32,7 @@ export default combineReducers({
    mixvalues,
    navbar,
    neighbourhoods,
-   penalty,
+   penalties,
    posts,
    registers,
    towns,

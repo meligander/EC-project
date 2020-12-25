@@ -18,7 +18,7 @@ import DateFilter from "../sharedComp/DateFilter";
 import NameField from "../../../../sharedComp/NameField";
 
 const InstallmentList = ({
-   installment: { installments, loadingInstallments },
+   installments: { installments, loadingInstallments },
    mixvalues: { totalDebt, page },
    loadInstallments,
    getTotalDebt,
@@ -173,7 +173,7 @@ const InstallmentList = ({
 };
 
 InstallmentList.propTypes = {
-   installment: PropTypes.object.isRequired,
+   installments: PropTypes.object.isRequired,
    mixvalues: PropTypes.object.isRequired,
    loadInstallments: PropTypes.func.isRequired,
    getTotalDebt: PropTypes.func.isRequired,
@@ -182,7 +182,7 @@ InstallmentList.propTypes = {
 };
 
 const mapStatetoProps = (state) => ({
-   installment: state.installment,
+   installments: state.installments,
    mixvalues: state.mixvalues,
 });
 

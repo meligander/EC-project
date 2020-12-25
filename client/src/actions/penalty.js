@@ -35,11 +35,13 @@ export const updatePenalty = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
       let penalty = JSON.stringify(formData);
+
       const config = {
          headers: {
             "Content-Type": "application/json",
          },
       };
+
       await axios.post("/api/penalty", penalty, config);
       dispatch({
          type: PENALTY_REGISTERED,

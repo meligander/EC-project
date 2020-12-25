@@ -17,7 +17,7 @@ import "./style.scss";
 
 const InvoiceTab = ({
    history,
-   installment: { installments },
+   installments: { installments },
    auth: { userLogged },
    mixvalues: { invoiceNumber },
    clearSearch,
@@ -276,7 +276,7 @@ const InvoiceTab = ({
                ) : (
                   <>
                      <div className="form-group">
-                        <div className="end-btn">
+                        <div className="btn-end">
                            <input
                               className="form-input"
                               type="text"
@@ -415,7 +415,7 @@ const InvoiceTab = ({
 };
 
 InvoiceTab.propTypes = {
-   installment: PropTypes.object.isRequired,
+   installments: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
    clearSearch: PropTypes.func.isRequired,
    registerInvoice: PropTypes.func.isRequired,
@@ -424,7 +424,7 @@ InvoiceTab.propTypes = {
 };
 
 const mapStateToProps = (state) => ({
-   installment: state.installment,
+   installments: state.installments,
    auth: state.auth,
    mixvalues: state.mixvalues,
 });

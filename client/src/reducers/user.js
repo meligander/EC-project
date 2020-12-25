@@ -31,8 +31,6 @@ export default function (state = initialState, action) {
 
    switch (type) {
       case USER_LOADED:
-      case REGISTER_SUCCESS:
-      case USER_UPDATED:
          return {
             ...state,
             loading: false,
@@ -50,6 +48,9 @@ export default function (state = initialState, action) {
             loadingUsersBK: false,
             usersBK: payload,
          };
+      case REGISTER_SUCCESS:
+      case USER_UPDATED:
+         return state;
       case USERS_TYPE_CHANGED:
          return {
             ...state,

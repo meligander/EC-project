@@ -86,26 +86,15 @@ const NewClassTab = ({
    };
 
    const onSubmit = () => {
-      if (registerClass) {
-         registerUpdateClass(
-            {
-               ...formData,
-               category: classInfo.category._id,
-               students: classInfo.students,
-            },
-            history
-         );
-      } else {
-         registerUpdateClass(
-            {
-               ...formData,
-               category: classInfo.category._id,
-               students: classInfo.students,
-            },
-            history,
-            classInfo._id
-         );
-      }
+      registerUpdateClass(
+         {
+            ...formData,
+            category: classInfo.category._id,
+            students: classInfo.students,
+         },
+         history,
+         !registerClass && classInfo._id
+      );
    };
 
    return (

@@ -30,8 +30,6 @@ export const loadRegister = () => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(0, 0);
    }
 };
 
@@ -77,7 +75,8 @@ export const closeRegister = (formData, user_id, history) => async (
    try {
       let register = {};
       for (const prop in formData) {
-         if (formData[prop]) register[prop] = formData[prop];
+         if (formData[prop] !== "" || formData[prop] === true)
+            register[prop] = formData[prop];
       }
 
       register = JSON.stringify(register);

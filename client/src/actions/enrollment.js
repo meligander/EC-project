@@ -131,8 +131,6 @@ export const loadEnrollment = (enrollment_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
    }
 };
 
@@ -144,12 +142,7 @@ export const registerEnrollment = (
 ) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
-   let enrollment = {};
-   for (const prop in formData) {
-      if (formData[prop]) enrollment[prop] = formData[prop];
-   }
-
-   enrollment = JSON.stringify(enrollment);
+   let enrollment = JSON.stringify(formData);
 
    const config = {
       headers: {

@@ -30,6 +30,20 @@ table {
    height: 17rem;
 }
 
+table.invoice-info {
+   position: relative;
+}
+
+table.invoice-info td.invoice-info {
+   position: absolute;
+   bottom: 0;
+   right: 3rem;
+}
+
+table.invoice-info tr.client {
+   padding-top: 3rem;
+}
+
 table.details {
    text-align: center;
    margin-top: 2rem;
@@ -50,16 +64,6 @@ table.details th {
 table.details td {
    font-weight: 300;
    padding: 0.5rem 1rem;
-}
-
-table.invoice-info {
-   position: relative;
-}
-
-table.invoice-info td.invoice-info {
-   position: absolute;
-   bottom: 0;
-   right: 3rem;
 }
 
 .summary {

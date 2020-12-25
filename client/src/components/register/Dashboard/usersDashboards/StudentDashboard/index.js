@@ -26,8 +26,8 @@ const StudentDashboard = ({
    auth: { userLogged },
    classes: { classInfo, loading },
    users: { user },
-   attendance,
-   installment: { usersInstallments, loadingUsersInstallments },
+   attendances,
+   installments: { usersInstallments, loadingUsersInstallments },
    grades: { usersGrades, loadingUsersGrades },
 }) => {
    const [pass, setPass] = useState(false);
@@ -191,18 +191,18 @@ const StudentDashboard = ({
                      <>
                         <h3 className="heading-tertiary text-primary p-1 m-1">
                            Inasistencias{" "}
-                           {attendance.attendances.length > 0 && (
+                           {attendances.attendances.length > 0 && (
                               <span className="badge">
                                  {" "}
-                                 {attendance.attendances.length}
+                                 {attendances.attendances.length}
                               </span>
                            )}
                         </h3>
 
-                        {attendance.attendances.length > 0 ? (
+                        {attendances.attendances.length > 0 ? (
                            <div className="absence">
                               {" "}
-                              {attendance.attendances.map(
+                              {attendances.attendances.map(
                                  (attendance, index) => (
                                     <div key={index} className="paragraph p-1">
                                        <i className="far fa-times-circle"></i>{" "}
@@ -231,7 +231,10 @@ const StudentDashboard = ({
                         </h3>
                         <div className="pb-2">
                            {usersInstallments.rows.length > 0 ? (
-                              <InstallmentsTable forAdmin={false} />
+                              <InstallmentsTable
+                                 installments={usersInstallments}
+                                 forAdmin={false}
+                              />
                            ) : (
                               <p className="heading-tertiary text-center">
                                  No hay ninguna cuota registrada
@@ -251,8 +254,8 @@ StudentDashboard.prototypes = {
    users: PropTypes.object.isRequired,
    classes: PropTypes.object.isRequired,
    grades: PropTypes.object.isRequired,
-   attendance: PropTypes.object.isRequired,
-   installment: PropTypes.object.isRequired,
+   attendances: PropTypes.object.isRequired,
+   installments: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
    loadUsersClass: PropTypes.func.isRequired,
    loadUsersGrades: PropTypes.func.isRequired,
@@ -265,10 +268,10 @@ StudentDashboard.prototypes = {
 const mapStateToProps = (state) => ({
    classes: state.classes,
    users: state.users,
-   attendance: state.attendance,
+   attendances: state.attendances,
    grades: state.grades,
    auth: state.auth,
-   installment: state.installment,
+   installments: state.installments,
 });
 
 export default connect(mapStateToProps, {

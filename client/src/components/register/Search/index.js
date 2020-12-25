@@ -4,11 +4,19 @@ import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import { clearStudentNumber } from "../../../actions/mixvalues";
+import { clearTowns } from "../../../actions/town";
+import { clearUser, clearSearch } from "../../../actions/user";
 
 import Tabs from "../../sharedComp/Tabs";
 import SearchTab from "./tabs/SearchTab";
 
-const Search = ({ auth: { userLogged, loading }, clearStudentNumber }) => {
+const Search = ({
+   auth: { userLogged, loading },
+   clearStudentNumber,
+   clearUser,
+   clearTowns,
+   clearSearch,
+}) => {
    return (
       <>
          {!loading && (
@@ -26,6 +34,9 @@ const Search = ({ auth: { userLogged, loading }, clearStudentNumber }) => {
                         onClick={() => {
                            window.scroll(0, 0);
                            clearStudentNumber();
+                           clearTowns();
+                           clearSearch();
+                           clearUser();
                         }}
                      >
                         <i className="fas fa-user-plus"></i>
@@ -52,7 +63,10 @@ const Search = ({ auth: { userLogged, loading }, clearStudentNumber }) => {
 
 Search.propTypes = {
    auth: PropTypes.object.isRequired,
+   clearUser: PropTypes.func.isRequired,
    clearStudentNumber: PropTypes.func.isRequired,
+   clearTowns: PropTypes.func.isRequired,
+   clearSearch: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -61,4 +75,7 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    clearStudentNumber,
+   clearUser,
+   clearTowns,
+   clearSearch,
 })(Search);

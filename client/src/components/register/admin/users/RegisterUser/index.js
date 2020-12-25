@@ -47,6 +47,7 @@ const RegisterUser = ({
    const [otherValues, setOtherValues] = useState({
       isEditing: false,
       toggleModal: false,
+      toggleActive: false,
       previewSource: "",
       fileInputState: "",
       selectedFile: "",
@@ -55,6 +56,7 @@ const RegisterUser = ({
    const {
       isEditing,
       toggleModal,
+      toggleActive,
       previewSource,
       fileInputState,
       selectedFile,
@@ -83,7 +85,10 @@ const RegisterUser = ({
       description: "",
       discount: "",
       chargeday: 0,
-      img: "",
+      img: {
+         public_id: "",
+         url: "",
+      },
       active: true,
    });
 
@@ -107,6 +112,7 @@ const RegisterUser = ({
       school,
       salary,
       children,
+      img,
       description,
       discount,
       chargeday,
@@ -123,33 +129,37 @@ const RegisterUser = ({
          if (user.dob) user.dob = moment(user.dob).utc().format("YYYY-MM-DD");
          setFormData((prev) => ({
             ...prev,
-            studentnumber: !user.studentnumber ? "" : user.studentnumber,
+            studentnumber: !user.studentnumber
+               ? studentNumber
+               : user.studentnumber,
             name: user.name,
             lastname: user.lastname,
             type: user.type,
             active: user.active,
-            tel: !user.tel ? "" : user.tel,
-            cel: !user.cel ? "" : user.cel,
-            dni: !user.dni ? "" : user.dni,
-            town: !user.town ? "" : user.town._id,
-            neighbourhood: !user.neighbourhood ? "" : user.neighbourhood._id,
-            address: !user.address ? "" : user.address,
-            dob: !user.dob ? "" : user.dob,
-            birthprov: !user.birthprov ? "" : user.birthprov,
-            birthtown: !user.birthtown ? "" : user.birthtown,
-            sex: !user.sex ? "" : user.sex,
-            degree: !user.degree ? "" : user.degree,
-            school: !user.school ? "" : user.school,
-            salary: !user.salary ? "" : user.salary,
+            sex: user.sex,
             children: user.children,
-            description: !user.description ? "" : user.description,
-            discount: user.discount === undefined ? "" : user.discount,
-            chargeday: !user.chargeday ? "" : user.chargeday,
+            ...(user.tel && { tel: user.tel }),
+            ...(user.cel && { cel: user.cel }),
+            ...(user.dni && { dni: user.dni }),
+            ...(user.town && { town: user.town }),
+            ...(user.neighbourhood && { neighbourhood: user.neighbourhood }),
+            ...(user.address && { address: user.address }),
+            ...(user.dob && { dob: user.dob }),
+            ...(user.birthprov && { birthprov: user.birthprov }),
+            ...(user.birthtown && { birthtown: user.birthtown }),
+            ...(user.degree && { degree: user.degree }),
+            ...(user.school && { school: user.school }),
+            ...(user.salary && { salary: user.salary }),
+            ...(user.description && { description: user.description }),
+            ...(user.img.public_id !== "" && { img: user.img }),
+            ...(user.discount && { discount: user.discount }),
+            ...(user.chargeday && { chargeday: user.chargeday }),
          }));
       };
 
       if (towns.loading) {
          loadTowns();
+         getStudentNumber();
       }
 
       if (location.pathname !== "/register") {
@@ -161,13 +171,12 @@ const RegisterUser = ({
             }
          }
       } else {
-         if (towns.loading) {
-            getStudentNumber();
-         } else
+         if (!towns.loading) {
             setFormData((prev) => ({
                ...prev,
                studentnumber: studentNumber,
             }));
+         }
       }
    }, [
       loading,
@@ -213,10 +222,10 @@ const RegisterUser = ({
       };
    };
 
-   const onChangeCheckbox = (e) => {
+   const onChangeCheckbox = () => {
       setFormData({
          ...formData,
-         active: e.target.checked,
+         active: !active,
       });
    };
 
@@ -233,6 +242,10 @@ const RegisterUser = ({
 
    const setToggle = () => {
       setOtherValues({ ...otherValues, toggleModal: !toggleModal });
+   };
+
+   const setToggleActive = () => {
+      setOtherValues({ ...otherValues, toggleActive: !toggleActive });
    };
 
    const onSubmit = () => {
@@ -301,6 +314,22 @@ const RegisterUser = ({
                         ? "aplicar los cambios"
                         : "registrar al nuevo usuario"
                   }?`}
+               />
+               <Confirm
+                  toggleModal={toggleActive}
+                  setToggleModal={setToggleActive}
+                  confirm={onChangeCheckbox}
+                  type="active"
+                  text={{
+                     question: "¿Está seguro que desea inactivar al usuario?",
+                     info: `No se le permitirá el ingreso a la página${
+                        type === "Alumno"
+                           ? ", se borrarán notas, asistencias, cuotas y se lo quitará de la clase."
+                           : type === "Profesor"
+                           ? " y se borrarán todas las clases en las que está asignado como profesor."
+                           : "."
+                     }`,
+                  }}
                />
                <div>
                   <h2 className="mb-2">
@@ -690,51 +719,65 @@ const RegisterUser = ({
                               </div>
                            )}
                            {changeType()}
-                           <div className="form-group my-3">
-                              <input
-                                 className="form-checkbox"
-                                 onChange={(e) => onChangeCheckbox(e)}
-                                 type="checkbox"
-                                 checked={active}
-                                 name="active"
-                                 id="active"
-                              />
-                              <label className="checkbox-lbl" htmlFor="active">
-                                 {active ? "Activo" : "Inactivo"}
-                              </label>
-                           </div>
+                           {isEditing && (
+                              <div className="form-group my-3">
+                                 <input
+                                    className="form-checkbox"
+                                    onChange={() => {
+                                       if (!active) onChangeCheckbox();
+                                       else setToggleActive();
+                                    }}
+                                    type="checkbox"
+                                    checked={active}
+                                    name="active"
+                                    id="active"
+                                 />
+                                 <label
+                                    className="checkbox-lbl"
+                                    htmlFor="active"
+                                 >
+                                    {active ? "Activo" : "Inactivo"}
+                                 </label>
+                              </div>
+                           )}
                         </>
                      )}
 
-                     {previewSource && (
-                        <div className="text-center mt-3">
-                           <img
-                              className="round-img"
-                              src={previewSource}
-                              alt="chosen img"
-                           />
-                        </div>
-                     )}
                      {isEditing && (
-                        <div className="upl-img my-5">
-                           <div
-                              className={`fileUpload ${
-                                 fileInputState ? "success" : ""
-                              }`}
-                           >
-                              <input
-                                 id="fileInput"
-                                 type="file"
-                                 name="image"
-                                 onChange={(e) => onChangeImg(e)}
-                                 className="upload"
+                        <>
+                           <div className="text-center mt-3">
+                              <img
+                                 className="round-img"
+                                 src={
+                                    previewSource
+                                       ? previewSource
+                                       : img.url !== ""
+                                       ? img.url
+                                       : "https://pngimage.net/wp-content/uploads/2018/06/no-user-image-png-3-300x200.png"
+                                 }
+                                 alt="chosen img"
                               />
-                              <span>
-                                 <i className="fa fa-cloud-upload"></i> Subir
-                                 imágen
-                              </span>
                            </div>
-                        </div>
+                           <div className="upl-img my-5">
+                              <div
+                                 className={`fileUpload ${
+                                    fileInputState ? "success" : ""
+                                 }`}
+                              >
+                                 <input
+                                    id="fileInput"
+                                    type="file"
+                                    name="image"
+                                    onChange={(e) => onChangeImg(e)}
+                                    className="upload"
+                                 />
+                                 <span>
+                                    <i className="fa fa-cloud-upload"></i> Subir
+                                    imágen
+                                 </span>
+                              </div>
+                           </div>
+                        </>
                      )}
 
                      <div className="btn-ctr">

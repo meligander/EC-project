@@ -1,45 +1,86 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import { setAlert } from "../../../../actions/alert";
 import {
    loadStudentInstallments,
    clearUserInstallments,
+   clearInstallment,
+   addInstallment,
 } from "../../../../actions/installment";
+import { clearSearch } from "../../../../actions/user";
 
 import StudentSearch from "../StudentSearch";
 import InstallmentsTable from "../../../tables/InstallmentsTable";
 
+import "./style.scss";
+
 const InstallmentsSearch = ({
-   installment: { usersInstallments, loadingUsersInstallments },
+   history,
+   location,
+   installments: { usersInstallments, loadingUsersInstallments, installments },
    loadStudentInstallments,
    clearUserInstallments,
+   clearInstallment,
+   clearSearch,
+   addInstallment,
    student,
    setAlert,
 }) => {
-   const [selectedStudent, setSelectedStudent] = useState({
-      _id: "",
-      name: "",
+   const [otherValues, setOtherValues] = useState({
+      selectedStudent: {
+         _id: "",
+         name: "",
+      },
+      selectedItem: { _id: 0 },
+      block: false,
    });
+
+   const { selectedStudent, selectedItem, block } = otherValues;
 
    useEffect(() => {
       if (student) {
-         setSelectedStudent((prev) => ({
-            ...prev,
-            _id: student._id,
-            name: student.name,
-         }));
+         if (student._id !== "") {
+            setOtherValues((prev) => ({
+               ...prev,
+               selectedStudent: {
+                  _id: student._id,
+                  name: student.name,
+               },
+               block: true,
+            }));
+         }
       }
    }, [student]);
 
+   const invoice = location.pathname === "/invoice-generation";
+
    const selectStudent = (user) => {
-      setSelectedStudent({
-         ...selectedStudent,
-         _id: user._id,
-         name: user.lastname + ", " + user.name,
+      setOtherValues({
+         ...otherValues,
+         selectedStudent: {
+            _id: user._id,
+            name: user.lastname + ", " + user.name,
+         },
       });
       clearUserInstallments();
+   };
+
+   const selectItem = (item) => {
+      if (item._id !== "")
+         setOtherValues({
+            ...otherValues,
+            selectedItem: item,
+         });
+      else
+         setOtherValues({
+            ...otherValues,
+            selectedItem: { _id: 0 },
+            year: "",
+            month: "",
+         });
    };
 
    const searchInstallments = (e) => {
@@ -48,24 +89,86 @@ const InstallmentsSearch = ({
          setAlert("Debe seleccionar un usuario primero", "danger", "3");
       else {
          loadStudentInstallments(selectedStudent._id, true);
+         clearSearch();
+         setOtherValues({
+            ...otherValues,
+            block: true,
+         });
       }
    };
+
+   const restore = () => {
+      setOtherValues({
+         ...otherValues,
+         block: false,
+         selectedStudent: {
+            _id: "",
+            name: "",
+         },
+      });
+      clearUserInstallments();
+      history.push("/installments/0");
+   };
+
+   //Inside Installment for edit
+   const seeInstallmentInfo = () => {
+      if (selectedItem._id === 0) {
+         setAlert("Debe seleccionar una cuota primero", "danger", "4");
+      } else {
+         history.push(`/edit-installment/1/${selectedItem._id}`);
+         clearInstallment();
+      }
+   };
+
+   //Inside Invoice to add them
+   const addToList = (e) => {
+      e.preventDefault();
+      if (selectedItem._id === 0) {
+         setAlert("No se ha seleccionado ninguna cuota", "danger", "4");
+      } else {
+         const pass = installments.every(
+            (item) => item._id !== selectedItem._id
+         );
+
+         if (pass) {
+            setAlert("Cuota agregada correctamente", "success", "4");
+            addInstallment(selectedItem);
+            setOtherValues({ ...otherValues, selectedItem: { _id: 0 } });
+         } else {
+            setAlert("Ya se ha agregado dicha cuota", "danger", "4");
+         }
+      }
+   };
+
    return (
-      <>
+      <div className="installment-search">
          <div className="form">
             <StudentSearch
                selectedStudent={selectedStudent}
                actionForSelected={searchInstallments}
                selectStudent={selectStudent}
                typeSearch={"Installment"}
+               block={block}
             />
          </div>
-         <p className="mb-3 paragraph">
-            <span className="text-dark heading-tertiary">Alumno: </span>
-            {selectedStudent.name}
-         </p>
+         <div className="btn-end mb-3">
+            <p className="paragraph">
+               <span className="text-dark heading-tertiary">Alumno: </span>
+               {selectedStudent.name}
+            </p>
+            <button className="btn-cancel" onClick={restore}>
+               <i className="fas fa-times"></i>
+            </button>
+         </div>
          {!loadingUsersInstallments && usersInstallments.rows.length > 0 ? (
-            <InstallmentsTable forAdmin={true} />
+            <InstallmentsTable
+               installments={usersInstallments}
+               forAdmin={true}
+               selectedItem={selectedItem}
+               student={selectedStudent._id}
+               selectItem={selectItem}
+               actionForSelected={invoice ? addToList : seeInstallmentInfo}
+            />
          ) : (
             !loadingUsersInstallments &&
             usersInstallments.rows.length === 0 && (
@@ -74,24 +177,30 @@ const InstallmentsSearch = ({
                </p>
             )
          )}
-      </>
+      </div>
    );
 };
 
 InstallmentsSearch.propTypes = {
-   installment: PropTypes.object.isRequired,
+   installments: PropTypes.object.isRequired,
    student: PropTypes.object,
    loadStudentInstallments: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
+   addInstallment: PropTypes.func.isRequired,
    clearUserInstallments: PropTypes.func.isRequired,
+   clearInstallment: PropTypes.func.isRequired,
+   clearSearch: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
-   installment: state.installment,
+   installments: state.installments,
 });
 
 export default connect(mapStateToProps, {
    loadStudentInstallments,
    setAlert,
    clearUserInstallments,
-})(InstallmentsSearch);
+   clearInstallment,
+   clearSearch,
+   addInstallment,
+})(withRouter(InstallmentsSearch));

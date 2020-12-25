@@ -66,8 +66,6 @@ export const loadInvoice = (invoice_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
    }
 };
 
@@ -109,12 +107,7 @@ export const registerInvoice = (
 ) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
-   let invoice = {};
-   for (const prop in formData) {
-      if (formData[prop]) invoice[prop] = formData[prop];
-   }
-
-   invoice = JSON.stringify(invoice);
+   let invoice = JSON.stringify(formData);
 
    const config = {
       headers: {

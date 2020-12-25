@@ -7,7 +7,7 @@ import {
    clearExpenceTypes,
    registerExpence,
 } from "../../../../../../actions/expence";
-import { loadEmployees } from "../../../../../../actions/user";
+import { loadUsers } from "../../../../../../actions/user";
 
 import Confirm from "../../../../../modal/Confirm";
 
@@ -19,7 +19,7 @@ const IncomeExpenceTab = ({
    expences,
    users,
    clearExpenceTypes,
-   loadEmployees,
+   loadUsers,
    registerExpence,
    history,
 }) => {
@@ -57,7 +57,7 @@ const IncomeExpenceTab = ({
             ...otherValues,
             show: true,
          });
-         loadEmployees();
+         loadUsers({ active: true, type: "Team" });
       } else {
          if (
             e.target.value !== "5ebb3804958b15468012db7a" &&
@@ -249,7 +249,7 @@ IncomeExpenceTab.propTypes = {
    registers: PropTypes.object.isRequired,
    expences: PropTypes.object.isRequired,
    users: PropTypes.object.isRequired,
-   loadEmployees: PropTypes.func.isRequired,
+   loadUsers: PropTypes.func.isRequired,
    registerExpence: PropTypes.func.isRequired,
    clearExpenceTypes: PropTypes.func.isRequired,
 };
@@ -263,6 +263,6 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    registerExpence,
-   loadEmployees,
+   loadUsers,
    clearExpenceTypes,
 })(withRouter(IncomeExpenceTab));

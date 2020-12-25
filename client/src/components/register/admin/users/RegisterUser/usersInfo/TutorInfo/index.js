@@ -57,6 +57,7 @@ const TutorInfo = ({
                actionForSelected={addToList}
                selectedStudent={selectedStudent}
                selectStudent={selectStudent}
+               typeSearch="Student"
             />
          )}
          <h3 className="heading-tertiary text-primary">

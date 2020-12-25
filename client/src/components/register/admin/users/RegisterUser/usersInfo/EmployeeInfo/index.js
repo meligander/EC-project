@@ -147,7 +147,7 @@ EmployeeInfo.propTypes = {
    type: PropTypes.string.isRequired,
    birthprov: PropTypes.string.isRequired,
    birthtown: PropTypes.string.isRequired,
-   salary: PropTypes.number.isRequired,
+   salary: PropTypes.string.isRequired,
    degree: PropTypes.string.isRequired,
    school: PropTypes.string.isRequired,
    description: PropTypes.string.isRequired,

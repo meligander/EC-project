@@ -19,12 +19,14 @@ const TutorNavbar = ({
    changePage,
    changePageAndMenu,
 }) => {
+   const string = location.pathname.substring(1, location.pathname.length);
+
    useEffect(() => {
-      const string = location.pathname.substring(1, location.pathname.length);
       let id = string.substring(
          string.indexOf("/") + 1,
          location.pathname.length
       );
+
       if (id.length > 25) {
          if (post !== null) id = post.classroom;
       }
@@ -39,7 +41,13 @@ const TutorNavbar = ({
          }
       }
       if (!pass) changePage("index");
-   }, [changePage, location.pathname, userLogged.children, post]);
+   }, [
+      changePage,
+      string,
+      userLogged.children,
+      post,
+      location.pathname.length,
+   ]);
 
    return (
       <ul className={!showMenu ? "menu-nav" : "menu-nav show"}>

@@ -34,8 +34,6 @@ export const loadPosts = (class_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(0, 0);
    }
 
    dispatch(updateLoadingSpinner(false));
@@ -59,8 +57,6 @@ export const loadPostById = (post_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(0, 0);
    }
 };
 
@@ -153,7 +149,9 @@ export const addPost = (formData, class_id) => async (dispatch) => {
       },
    };
    try {
-      const res = await axios.post(`/api/posts/${class_id}`, formData, config);
+      let post = JSON.stringify(formData);
+
+      const res = await axios.post(`/api/posts/${class_id}`, post, config);
 
       dispatch({
          type: POST_ADDED,
@@ -200,9 +198,11 @@ export const addComment = (post_id, formData, screen) => async (dispatch) => {
       },
    };
    try {
+      let comment = JSON.stringify(formData);
+
       const res = await axios.post(
          `/api/posts/comment/${post_id}`,
-         formData,
+         comment,
          config
       );
 

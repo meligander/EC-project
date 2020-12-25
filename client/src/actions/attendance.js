@@ -3,7 +3,7 @@ import axios from "axios";
 import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, updatePreviousPage } from "./mixvalues";
+import { updateLoadingSpinner } from "./mixvalues";
 
 import {
    ATTENDANCES_LOADED,
@@ -31,8 +31,6 @@ export const loadStudentAttendance = (user_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
    }
 };
 
@@ -52,8 +50,6 @@ export const loadAttendances = (class_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
    }
 };
 
@@ -62,8 +58,7 @@ export const updateAttendances = (formData, history, class_id) => async (
 ) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      let attendances = [];
-      attendances = JSON.stringify(formData);
+      let attendances = JSON.stringify(formData);
 
       const config = {
          headers: {
@@ -74,7 +69,6 @@ export const updateAttendances = (formData, history, class_id) => async (
       dispatch({
          type: ATTENDANCES_UPDATED,
       });
-      dispatch(updatePreviousPage("/classes"));
 
       history.push(`/class/${class_id}`);
       dispatch(setAlert("Inasistencias Modificadas", "success", "2"));

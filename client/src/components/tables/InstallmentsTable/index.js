@@ -1,12 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { connect } from "react-redux";
+import React from "react";
 import { withRouter } from "react-router-dom";
 import moment from "moment";
 import PropTypes from "prop-types";
-
-import { clearInstallment, addInstallment } from "../../../actions/installment";
-import { setAlert } from "../../../actions/alert";
-import { updatePreviousPage } from "../../../actions/mixvalues";
 
 import Alert from "../../sharedComp/Alert";
 
@@ -14,74 +9,16 @@ import "./style.scss";
 
 const InstallmentsTable = ({
    location,
-   history,
-   installment: {
-      installments,
-      usersInstallments: { years, rows },
-   },
-   clearInstallment,
-   updatePreviousPage,
-   addInstallment,
-   setAlert,
    forAdmin,
+   installments,
+   selectedItem,
+   selectItem,
+   actionForSelected,
 }) => {
+   const invoice = location.pathname === "/invoice-generation";
    const day = moment();
    const month = day.month() + 1;
    const year = day.year();
-   const invoice = location.pathname === "/invoice-generation";
-
-   const [otherValues, setOtherValues] = useState({
-      selectedItem: { _id: 0 },
-      student: "",
-   });
-
-   const { selectedItem, student } = otherValues;
-
-   useEffect(() => {
-      if (rows.length > 0) {
-         for (let x = 0; x < rows[0].length; x++) {
-            if (rows[0][x].student) {
-               setOtherValues((prev) => ({
-                  ...prev,
-                  student: rows[0][x].student._id,
-               }));
-               break;
-            }
-         }
-      }
-   }, [rows]);
-
-   const seeInstallmentInfo = (installment_id, edit, year, month) => {
-      updatePreviousPage("");
-      clearInstallment();
-      let number = month !== 0 ? month + 2 : month;
-      if (edit) history.push(`/edit-installment/${installment_id}`);
-      else
-         history.push(`/edit-installment/${installment_id}/${year}/${number}`);
-   };
-
-   const selectItem = (item) => {
-      if (item._id !== "")
-         setOtherValues({ ...otherValues, selectedItem: item });
-   };
-
-   const addToList = (e) => {
-      e.preventDefault();
-      if (selectedItem._id === 0) {
-         setAlert("No se ha seleccionado ninguna cuota", "danger", "4");
-      } else {
-         const pass = installments.every(
-            (item) => item._id !== selectedItem._id
-         );
-         if (pass) {
-            setAlert("Cuota agregada correctamente", "success", "4");
-            addInstallment(selectedItem);
-            setOtherValues({ ...otherValues, selectedItem: { _id: 0 } });
-         } else {
-            setAlert("Ya se ha agregado dicha cuota", "danger", "4");
-         }
-      }
-   };
 
    return (
       <>
@@ -133,9 +70,11 @@ const InstallmentsTable = ({
                   </tr>
                </thead>
                <tbody>
-                  {rows.map((row, i) => (
+                  {installments.rows.map((row, i) => (
                      <tr key={i}>
-                        {(forAdmin || years[i] <= year) && <th>{years[i]}</th>}
+                        {(forAdmin || installments.years[i] <= year) && (
+                           <th>{installments.years[i]}</th>
+                        )}
 
                         {row.map((item, index) =>
                            !forAdmin ? (
@@ -162,18 +101,15 @@ const InstallmentsTable = ({
                                     <td
                                        onDoubleClick={
                                           !invoice
-                                             ? () =>
-                                                  seeInstallmentInfo(
-                                                     item._id !== ""
-                                                        ? item._id
-                                                        : student,
-                                                     item._id !== "",
-                                                     years[i],
-                                                     index
-                                                  )
+                                             ? () => selectItem(item)
                                              : null
                                        }
-                                       className="paid"
+                                       className={`paid ${
+                                          selectedItem._id === item._id &&
+                                          !invoice
+                                             ? "selected"
+                                             : ""
+                                       }`}
                                     >
                                        PGO
                                     </td>
@@ -181,18 +117,7 @@ const InstallmentsTable = ({
                                     <td
                                        onDoubleClick={
                                           !invoice
-                                             ? () =>
-                                                  seeInstallmentInfo(
-                                                     item._id !== ""
-                                                        ? item._id
-                                                        : rows[0][0].student
-                                                        ? rows[0][0].student._id
-                                                        : rows[0][10].student
-                                                             ._id,
-                                                     item._id !== "",
-                                                     years[i],
-                                                     index
-                                                  )
+                                             ? () => selectItem(item)
                                              : () => selectItem(item)
                                        }
                                        className={`${
@@ -214,11 +139,20 @@ const InstallmentsTable = ({
                </tbody>
             </table>
          </div>
-         {invoice && (
-            <div className="btn-right">
-               <button className="btn btn-light" onClick={addToList}>
-                  <i className="fas fa-plus"></i>
-                  <span className="hide-md"> Agregar</span>
+         {forAdmin && (
+            <div className={`btn-right ${!invoice ? "next-btn" : ""}`}>
+               <button className="btn btn-light" onClick={actionForSelected}>
+                  {!invoice ? (
+                     <>
+                        <i className="far fa-edit"></i> &nbsp;
+                        <span className="hide-md">Editar</span>
+                     </>
+                  ) : (
+                     <>
+                        <i className="fas fa-plus"></i> &nbsp;
+                        <span className="hide-md">Agregar</span>
+                     </>
+                  )}
                </button>
             </div>
          )}
@@ -227,21 +161,11 @@ const InstallmentsTable = ({
 };
 
 InstallmentsTable.prototypes = {
-   installment: PropTypes.object.isRequired,
    forAdmin: PropTypes.bool.isRequired,
-   clearInstallment: PropTypes.func.isRequired,
-   setAlert: PropTypes.func.isRequired,
-   addInstallment: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
+   installments: PropTypes.array.isRequired,
+   selectedItem: PropTypes.object,
+   selectItem: PropTypes.func,
+   actionForSelected: PropTypes.func,
 };
 
-const mapStateToProps = (state) => ({
-   installment: state.installment,
-});
-
-export default connect(mapStateToProps, {
-   clearInstallment,
-   addInstallment,
-   setAlert,
-   updatePreviousPage,
-})(withRouter(InstallmentsTable));
+export default withRouter(InstallmentsTable);

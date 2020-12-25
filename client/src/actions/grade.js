@@ -3,7 +3,7 @@ import axios from "axios";
 import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, updatePreviousPage } from "./mixvalues";
+import { updateLoadingSpinner } from "./mixvalues";
 
 import {
    GRADES_LOADED,
@@ -36,8 +36,6 @@ export const loadUsersGrades = (user_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(0, 0);
    }
 };
 
@@ -57,8 +55,6 @@ export const loadGradesByClass = (class_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(0, 0);
    }
 };
 
@@ -78,8 +74,6 @@ export const loadGradeTypesByCategory = (category_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(0, 0);
    }
 };
 
@@ -99,8 +93,6 @@ export const loadGradeTypes = () => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scrollTo(0, 0);
    }
 };
 
@@ -184,8 +176,6 @@ export const updateGrades = (formData, history, class_id) => async (
          type: GRADES_UPDATED,
          payload: res.data,
       });
-
-      dispatch(updatePreviousPage("/classes"));
 
       dispatch(setAlert("Calificaciones Modificadas", "success", "2"));
       dispatch({

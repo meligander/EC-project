@@ -69,8 +69,6 @@ export const loadExpenceTypes = () => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
    }
 };
 

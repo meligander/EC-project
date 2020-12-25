@@ -63,7 +63,6 @@ const Enrollment = ({
       if (categories.loading) {
          loadCategories();
          if (enrollment_id) {
-            console.log(enrollment_id);
             loadEnrollment(enrollment_id);
          }
       } else {

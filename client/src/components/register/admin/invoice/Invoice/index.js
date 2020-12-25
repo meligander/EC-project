@@ -131,7 +131,7 @@ const Invoice = ({
                         </tbody>
                      </table>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right mt-3">
                      <p>
                         <span className="heading-tertiary text-dark">
                            Saldo:

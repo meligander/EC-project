@@ -48,6 +48,7 @@ router.post(
    ],
    async (req, res) => {
       const errorsResult = validationResult(req);
+
       let errors = [];
 
       if (!errorsResult.isEmpty()) {
@@ -70,6 +71,11 @@ router.post(
          if (!isMatch) {
             return res.status(400).json({ msg: "Credenciales Inválidas" });
          }
+
+         if (!user.active)
+            return res
+               .status(400)
+               .json({ msg: "Lo siento, ya no puede ingresar a la página." });
 
          const payload = {
             user: {

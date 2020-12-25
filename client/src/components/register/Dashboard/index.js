@@ -4,9 +4,9 @@ import Moment from "react-moment";
 import { withRouter, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { loadUser, deleteUser, clearUsers } from "../../../actions/user";
+import { loadUser, deleteUser } from "../../../actions/user";
 import { clearTowns } from "../../../actions/town";
-import { updatePreviousPage } from "../../../actions/mixvalues";
+import { clearStudentNumber } from "../../../actions/mixvalues";
 import { updateExpiredIntallments } from "../../../actions/installment";
 
 import Confirm from "../../modal/Confirm";
@@ -27,10 +27,10 @@ const Dashboard = ({
    users: { user, loading },
    mixvalues: { loadingSpinner },
    loadUser,
-   clearUsers,
    clearTowns,
+   deleteUser,
    updateExpiredIntallments,
-   updatePreviousPage,
+   clearStudentNumber,
 }) => {
    const [otherValues, setOtherValues] = useState({
       toggleModal: false,
@@ -229,9 +229,8 @@ const Dashboard = ({
                                     className="btn btn-light"
                                     onClick={() => {
                                        window.scroll(0, 0);
-                                       clearUsers();
                                        clearTowns();
-                                       updatePreviousPage(location.pathname);
+                                       clearStudentNumber();
                                     }}
                                  >
                                     <i className="far fa-edit"></i>{" "}
@@ -267,10 +266,9 @@ Dashboard.prototypes = {
    mixvalues: PropTypes.object.isRequired,
    loadUser: PropTypes.func.isRequired,
    deleteUser: PropTypes.func.isRequired,
-   clearUsers: PropTypes.func.isRequired,
    clearTowns: PropTypes.func.isRequired,
+   clearStudentNumber: PropTypes.func.isRequired,
    updateExpiredIntallments: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -281,8 +279,8 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    loadUser,
-   clearUsers,
    clearTowns,
+   deleteUser,
    updateExpiredIntallments,
-   updatePreviousPage,
+   clearStudentNumber,
 })(withRouter(Dashboard));

@@ -16,7 +16,7 @@ const Confirm = ({
    confirm,
    text,
    type,
-   penalty: { loading, penalty },
+   penalties: { loading, penalty },
    loadPenalty,
 }) => {
    const [formData, setFormData] = useState({
@@ -83,6 +83,13 @@ const Confirm = ({
                   </div>
                </div>
             );
+         case "active":
+            return (
+               <div className="popup-text">
+                  <h3 className="heading-tertiary">{text.question}</h3>
+                  <p className="paragraph">{text.info}</p>
+               </div>
+            );
          default:
             return (
                <div className="popup-text">
@@ -138,15 +145,15 @@ const Confirm = ({
 };
 
 Confirm.propTypes = {
+   penalties: PropTypes.object.isRequired,
+   type: PropTypes.string,
    toggleModal: PropTypes.bool.isRequired,
    setToggleModal: PropTypes.func.isRequired,
-   penalty: PropTypes.object.isRequired,
    loadPenalty: PropTypes.func.isRequired,
-   type: PropTypes.string,
 };
 
 const mapStateToProps = (state) => ({
-   penalty: state.penalty,
+   penalties: state.penalties,
 });
 
 export default connect(mapStateToProps, { loadPenalty })(Confirm);
