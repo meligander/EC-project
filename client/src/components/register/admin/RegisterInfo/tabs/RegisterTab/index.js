@@ -101,7 +101,7 @@ const RegisterTab = ({
                            window.scroll(0, 0);
                            clearExpences();
                         }}
-                        to="/expence-list"
+                        to="/transaction-list"
                      >
                         <span className="hide-sm">Ver </span>Listado
                      </Link>

@@ -73,15 +73,17 @@ export const updateAttendances = (formData, history, class_id) => async (
       history.push(`/class/${class_id}`);
       dispatch(setAlert("Inasistencias Modificadas", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: ATTENDANCES_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scroll(0, 0);
@@ -108,15 +110,17 @@ export const registerNewDate = (newDate) => async (dispatch) => {
 
       dispatch(setAlert("Día Agregado", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: ATTENDANCES_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scroll(0, 0);
@@ -135,15 +139,17 @@ export const deleteDate = (date) => async (dispatch) => {
 
       dispatch(setAlert("Fecha eliminada", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: ATTENDANCES_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scroll(0, 0);
@@ -192,15 +198,17 @@ export const attendancesPDF = (
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: ATTENDANCES_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scroll(0, 0);

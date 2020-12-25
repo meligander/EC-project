@@ -47,7 +47,7 @@ const EditExpenceType = ({
       newValue.push({
          _id: "",
          name: "",
-         type: 0,
+         type: "",
       });
       setNewET(newValue);
    };
@@ -120,11 +120,13 @@ const EditExpenceType = ({
                                     onChange={(e) => onChange(e, index)}
                                     value={exptyp.type}
                                  >
-                                    <option value="0">
+                                    <option value="">
                                        Seleccione el tipo de movimiento
                                     </option>
                                     <option value="Gasto">Gasto</option>
-                                    <option value="Ingreso">Ingreso</option>
+                                    <option value="Ingreso Especial">
+                                       Ingreso Especial
+                                    </option>
                                     <option value="Retiro">Retiro</option>
                                  </select>
                               </td>

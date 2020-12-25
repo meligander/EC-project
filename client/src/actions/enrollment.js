@@ -36,15 +36,17 @@ export const loadEnrollments = (filterData) => async (dispatch) => {
          payload: { enrollments: res.data, type: "enrollments" },
       });
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: ENROLLMENT_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
       window.scroll(0, 0);
    }
 
@@ -70,15 +72,17 @@ export const loadStudentAttendance = (filterData) => async (dispatch) => {
          payload: { enrollments: res.data, type: "attendance" },
       });
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: ENROLLMENT_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
       window.scroll(0, 0);
    }
 };
@@ -102,15 +106,17 @@ export const loadStudentAverage = (filterData) => async (dispatch) => {
          payload: { enrollments: res.data, type: "average" },
       });
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: ENROLLMENT_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
       window.scroll(0, 0);
    }
 };
@@ -193,15 +199,17 @@ export const registerEnrollment = (
             payload: errors,
          });
       } else {
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         const msg = err.response.data.msg;
+         const type = err.response.statusText;
          dispatch({
             type: ENROLLMENT_ERROR,
             payload: {
-               type: err.response.statusText,
+               type,
                status: err.response.status,
-               msg: err.response.data.msg,
+               msg,
             },
          });
+         dispatch(setAlert(msg ? msg : type, "danger", "2"));
       }
    }
 
@@ -221,15 +229,17 @@ export const deleteEnrollment = (enroll_id) => async (dispatch) => {
       dispatch(clearValues());
       dispatch(setAlert("Inscripción Eliminada", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: ENROLLMENT_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scrollTo(0, 0);
@@ -295,15 +305,17 @@ export const enrollmentsPDF = (enrollments, average) => async (dispatch) => {
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: ENROLLMENT_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scrollTo(0, 0);

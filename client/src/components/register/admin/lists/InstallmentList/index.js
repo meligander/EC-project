@@ -13,8 +13,7 @@ import {
 } from "../../../../../actions/mixvalues";
 
 import Loading from "../../../../modal/Loading";
-import ListButtons from "../sharedComp/DateFilter";
-import DateFilter from "../sharedComp/DateFilter";
+import ListButtons from "../sharedComp/ListButtons";
 import NameField from "../../../../sharedComp/NameField";
 
 const InstallmentList = ({
@@ -49,20 +48,13 @@ const InstallmentList = ({
    ]);
 
    const date = moment();
-   const daysOfMonth = date.daysInMonth();
-   date.set("date", daysOfMonth);
 
    const { startDate, endDate, name, lastname } = filterData;
 
    useEffect(() => {
       if (loadingInstallments) {
          updatePageNumber(0);
-         loadInstallments({
-            startDate: "",
-            endDate: "",
-            name: "",
-            lastname: "",
-         });
+         loadInstallments({});
          getTotalDebt();
       }
    }, [loadingInstallments, loadInstallments, getTotalDebt, updatePageNumber]);
@@ -76,12 +68,10 @@ const InstallmentList = ({
 
    const search = (e) => {
       e.preventDefault();
-      if (endDate === "") {
-         loadInstallments({
-            ...filterData,
-            endDate: date.format("YYYY-MM-DD"),
-         });
-      } else loadInstallments(filterData);
+      loadInstallments({
+         ...filterData,
+         ...(endDate === "" && { endDate: date.format("YYYY-MM") }),
+      });
    };
 
    const pdfGeneratorSave = () => {
@@ -98,12 +88,34 @@ const InstallmentList = ({
                </p>
 
                <form className="form">
-                  <DateFilter
-                     endDate={endDate}
-                     startDate={startDate}
-                     onChange={onChange}
-                     max={date.format("YYYY-MM")}
-                  />
+                  <div className="date-filter">
+                     <div>
+                        <input
+                           className="form-input"
+                           type="month"
+                           name="startDate"
+                           value={startDate}
+                           id="startDate"
+                           onChange={onChange}
+                        />
+                        <label htmlFor="startDate" className="form-label-show">
+                           Ingrese desde que fecha desea ver
+                        </label>
+                     </div>
+                     <div>
+                        <input
+                           className="form-input"
+                           type="month"
+                           name="endDate"
+                           value={endDate}
+                           max={date.format("YYYY-MM")}
+                           onChange={onChange}
+                        />
+                        <label htmlFor="endDate" className="form-label-show">
+                           Ingrese hasta que fecha desea ver
+                        </label>
+                     </div>
+                  </div>
                   <NameField
                      name={name}
                      lastname={lastname}

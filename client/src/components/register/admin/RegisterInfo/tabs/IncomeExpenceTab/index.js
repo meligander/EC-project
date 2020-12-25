@@ -90,7 +90,7 @@ const IncomeExpenceTab = ({
 
    const onSubmit = () => {
       let des = description;
-      if (teacher._id !== "") des = "Pago a " + teacher.name + "." + des;
+      if (teacher._id !== "") des = "Pago a " + teacher.name + ". " + des;
       registerExpence(
          { expencetype, value, description: des },
          history,

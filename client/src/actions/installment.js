@@ -67,16 +67,17 @@ export const loadInstallments = (filterData) => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: INSTALLMENTS_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      window.scroll(0, 0);
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    dispatch(updateLoadingSpinner(false));
@@ -154,15 +155,17 @@ export const updateIntallment = (formData, history, user_id, inst_id) => async (
             payload: errors,
          });
       } else {
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         const msg = err.response.data.msg;
+         const type = err.response.statusText;
          dispatch({
             type: INSTALLMENTS_ERROR,
             payload: {
-               type: err.response.statusText,
+               type,
                status: err.response.status,
-               msg: err.response.data.msg,
+               msg,
             },
          });
+         dispatch(setAlert(msg ? msg : type, "danger", "2"));
       }
    }
 
@@ -187,15 +190,17 @@ export const deleteInstallment = (inst_id, history, user_id) => async (
       dispatch(clearInstallments());
       history.push(`/installments/${user_id}`);
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: INSTALLMENTS_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scroll(0, 0);
@@ -211,15 +216,17 @@ export const removeInstallmentFromList = (inst_id) => async (dispatch) => {
 
       dispatch(setAlert("Cuota eliminada", "success", "5"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: INSTALLMENTS_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
       window.scroll(0, 0);
    }
 };
@@ -232,15 +239,17 @@ export const updateExpiredIntallments = () => async (dispatch) => {
          type: EXPIRED_INSTALLMENTS_UPDATED,
       });
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: INSTALLMENTS_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
       window.scroll(0, 0);
    }
 };
@@ -270,19 +279,21 @@ export const installmentsPDF = (installments) => async (dispatch) => {
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: INSTALLMENTS_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scroll(0, 0);
-   dispatch(updateLoadingSpinner(true));
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const clearInstallments = () => (dispatch) => {

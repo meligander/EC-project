@@ -4,6 +4,7 @@ import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
+import { updateExpiredIntallments } from "./installment";
 
 import {
    CATEGORIES_LOADED,
@@ -52,8 +53,9 @@ export const updateCategories = (formData, history, user_id) => async (
          type: CATEGORIES_UPDATED,
       });
 
+      dispatch(updateExpiredIntallments());
       dispatch(
-         setAlert("Precios de Categorías Modificados", "success", "1", 10000)
+         setAlert("Precios de Categorías Modificados", "success", "1", 7000)
       );
       history.push(`/dashboard/${user_id}`);
    } catch (err) {
@@ -67,15 +69,17 @@ export const updateCategories = (formData, history, user_id) => async (
             payload: errors,
          });
       } else {
+         const msg = err.response.data.msg;
+         const type = err.response.statusText;
          dispatch({
             type: CATEGORY_ERROR,
             payload: {
-               type: err.response.statusText,
+               type,
                status: err.response.status,
-               msg: err.response.data.msg,
+               msg,
             },
          });
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         dispatch(setAlert(msg ? msg : type, "danger", "2"));
       }
    }
 
@@ -109,19 +113,21 @@ export const categoriesPDF = (categories) => async (dispatch) => {
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: CATEGORY_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg !== "" ? msg : type, "danger", "2"));
    }
 
    window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(true));
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const clearCategories = () => (dispatch) => {

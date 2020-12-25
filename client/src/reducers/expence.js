@@ -1,10 +1,11 @@
 import {
-   EXPENCES_LOADED,
+   TRANSACTIONS_LOADED,
    EXPENCETYPES_LOADED,
    EXPENCE_REGISTERED,
    EXPENCE_DELETED,
    EXPENCETYPES_UPDATED,
    EXPENCETYPE_DELETED,
+   TRANSACTIONS_CLEARED,
    EXPENCES_CLEARED,
    EXPENCETYPES_CLEARED,
    EXPENCE_ERROR,
@@ -13,22 +14,22 @@ import {
 
 const initialState = {
    loading: true,
-   expences: [],
    expence: null,
+   transactions: [],
+   loadingTransactions: true,
    expencetypes: [],
    loadingET: true,
-   loadingExpences: true,
    error: {},
 };
 
 export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
-      case EXPENCES_LOADED:
+      case TRANSACTIONS_LOADED:
          return {
             ...state,
-            expences: payload,
-            loadingExpences: false,
+            transactions: payload,
+            loadingTransactions: false,
             error: {},
          };
       case EXPENCETYPES_LOADED:
@@ -44,19 +45,27 @@ export default function (state = initialState, action) {
       case EXPENCE_DELETED:
          return {
             ...state,
-            expences: state.expence.map((expence) => expence._id !== payload),
-            loadingExpences: false,
+            transactions: state.transactions.map(
+               (expence) => expence._id !== payload
+            ),
+            loadingTransactions: false,
          };
       case EXPENCETYPE_DELETED:
          return {
             ...state,
-            expencetypes: state.expence.map(
+            expencetypes: state.expencetypes.map(
                (expencetypes) => expencetypes._id !== payload
             ),
             loadingET: false,
          };
       case EXPENCES_CLEARED:
          return initialState;
+      case TRANSACTIONS_CLEARED:
+         return {
+            ...state,
+            transactions: [],
+            loadingTransactions: [],
+         };
       case EXPENCETYPES_CLEARED:
          return {
             ...state,
@@ -67,9 +76,9 @@ export default function (state = initialState, action) {
          return {
             ...state,
             expence: null,
-            expences: [],
+            transactions: [],
             loading: false,
-            loadingExpences: false,
+            loadingTransactions: false,
             error: payload,
          };
       case EXPENCETYPE_ERROR:

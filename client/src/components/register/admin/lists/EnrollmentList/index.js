@@ -20,6 +20,7 @@ import { updatePageNumber } from "../../../../../actions/mixvalues";
 import Loading from "../../../../modal/Loading";
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
+import NameFilter from "../../../../sharedComp/NameField";
 import Confirm from "../../../../modal/Confirm";
 
 const EnrollmentList = ({
@@ -40,8 +41,10 @@ const EnrollmentList = ({
    const [filterData, setFilterData] = useState({
       startDate: "",
       endDate: "",
+      name: "",
+      lastname: "",
       category: "",
-      year: "",
+      year: 0,
    });
 
    const [otherValues, setOtherValues] = useState({
@@ -50,7 +53,7 @@ const EnrollmentList = ({
    });
 
    const { toggleModal, toDelete } = otherValues;
-   const { startDate, endDate, category, year } = filterData;
+   const { startDate, endDate, category, year, name, lastname } = filterData;
 
    useEffect(() => {
       if (loadingEnrollments) {
@@ -110,6 +113,11 @@ const EnrollmentList = ({
                      startDate={startDate}
                      onChange={onChange}
                   />
+                  <NameFilter
+                     name={name}
+                     lastname={lastname}
+                     onChange={onChange}
+                  />
                   <div className="form-group">
                      <select
                         className="form-input"
@@ -148,7 +156,7 @@ const EnrollmentList = ({
                         onChange={onChange}
                         value={year}
                      >
-                        <option value="">* Seleccione el Año</option>
+                        <option value={0}>* Seleccione el Año</option>
                         <option value={thisYear - 1}>{thisYear - 1}</option>
                         <option value={thisYear}>{thisYear}</option>
                         <option value={thisYear + 1}>{thisYear + 1}</option>

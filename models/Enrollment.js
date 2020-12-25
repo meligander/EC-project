@@ -11,7 +11,7 @@ const EnrollmentSchema = new mongoose.Schema({
       default: Date.now,
    },
    year: {
-      type: String,
+      type: Number,
       required: true,
    },
    category: {

@@ -127,6 +127,7 @@ const RegisterUser = ({
          }));
          if (user.town) loadTownNeighbourhoods(user.town._id);
          if (user.dob) user.dob = moment(user.dob).utc().format("YYYY-MM-DD");
+
          setFormData((prev) => ({
             ...prev,
             studentnumber: !user.studentnumber
@@ -141,8 +142,10 @@ const RegisterUser = ({
             ...(user.tel && { tel: user.tel }),
             ...(user.cel && { cel: user.cel }),
             ...(user.dni && { dni: user.dni }),
-            ...(user.town && { town: user.town }),
-            ...(user.neighbourhood && { neighbourhood: user.neighbourhood }),
+            ...(user.town && { town: user.town._id }),
+            ...(user.neighbourhood && {
+               neighbourhood: user.neighbourhood._id,
+            }),
             ...(user.address && { address: user.address }),
             ...(user.dob && { dob: user.dob }),
             ...(user.birthprov && { birthprov: user.birthprov }),
@@ -158,12 +161,12 @@ const RegisterUser = ({
       };
 
       if (towns.loading) {
-         loadTowns();
          getStudentNumber();
+         loadTowns();
       }
 
       if (location.pathname !== "/register") {
-         if (!loading && !isEditing) {
+         if (!loading && !isEditing && studentNumber !== "") {
             load();
          } else {
             if (towns.loading) {

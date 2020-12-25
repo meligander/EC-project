@@ -71,15 +71,17 @@ export const addLike = (post_id) => async (dispatch) => {
          payload: { post_id, likes: res.data },
       });
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: POST_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
       window.scrollTo(0, 0);
    }
    dispatch(updateLoadingSpinner(false));
@@ -96,15 +98,17 @@ export const removeLike = (post_id) => async (dispatch) => {
          payload: { post_id, likes: res.data },
       });
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: POST_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
       window.scrollTo(0, 0);
    }
    dispatch(updateLoadingSpinner(false));
@@ -124,15 +128,17 @@ export const deletePost = (post_id) => async (dispatch) => {
 
       dispatch(setAlert("Posteo Eliminado", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: POST_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scrollTo(0, 0);
@@ -170,15 +176,17 @@ export const addPost = (formData, class_id) => async (dispatch) => {
             payload: errors,
          });
       } else {
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         const msg = err.response.data.msg;
+         const type = err.response.statusText;
          dispatch({
             type: POST_ERROR,
             payload: {
-               type: err.response.statusText,
+               type,
                status: err.response.status,
-               msg: err.response.data.msg,
+               msg,
             },
          });
+         dispatch(setAlert(msg ? msg : type, "danger", "2"));
       }
    }
 
@@ -223,15 +231,17 @@ export const addComment = (post_id, formData, screen) => async (dispatch) => {
             payload: errors,
          });
       } else {
-         dispatch(setAlert(err.response.data.msg, "danger", post_id));
+         const msg = err.response.data.msg;
+         const type = err.response.statusText;
          dispatch({
             type: POST_ERROR,
             payload: {
-               type: err.response.statusText,
+               type,
                status: err.response.status,
-               msg: err.response.data.msg,
+               msg,
             },
          });
+         dispatch(setAlert(msg ? msg : type, "danger", "2"));
       }
    }
 
@@ -256,15 +266,17 @@ export const deleteComment = (post_id, comment_id, screen) => async (
 
       dispatch(setAlert("Comentario Eliminado", "success", post_id));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: POST_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", post_id));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scrollBy(0, screen);

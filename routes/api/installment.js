@@ -17,6 +17,7 @@ const Penalty = require("../../models/Penalty");
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
       let installments = [];
+      let initialInstallments = [];
 
       const compareDate = new Date();
       const month = compareDate.getMonth() + 1;
@@ -24,68 +25,62 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 
       const filter = req.query;
 
-      let initialInstallments = await Installment.find({
-         value: { $ne: 0 },
-         year: { $lte: year },
-      }).populate({
-         path: "student",
-         model: "user",
-         select: ["name", "lastname"],
-         match: {
-            ...(filter.name && {
-               name: { $regex: `.*${filter.name}.*`, $options: "i" },
-            }),
-            ...(filter.lastname && {
-               lastname: {
-                  $regex: `.*${filter.lastname}.*`,
-                  $options: "i",
-               },
-            }),
-         },
-      });
-
       if (Object.entries(filter).length === 0) {
+         initialInstallments = await Installment.find({
+            value: { $ne: 0 },
+            year: { $lte: year },
+         }).populate({
+            path: "student",
+            model: "user",
+            select: ["name", "lastname"],
+         });
+
          for (let x = 0; x < initialInstallments.length; x++) {
-            if (
-               initialInstallments[x].year === year &&
-               initialInstallments[x].number > month
-            ) {
-               continue;
+            if (initialInstallments[x].student) {
+               if (
+                  initialInstallments[x].year === year &&
+                  initialInstallments[x].number > month
+               ) {
+                  continue;
+               }
+               installments.push(initialInstallments[x]);
             }
-            installments.push(initialInstallments[x]);
          }
       } else {
-         let startYear = 2000;
-         let startMonth = 0;
-         if (filter.startDate) {
-            startYear = new Date(filter.startDate).getFullYear();
-            startMonth = new Date(filter.startDate).getMonth();
-         }
-         const endYear = new Date(filter.endDate).getFullYear();
-         const endMonth = new Date(filter.endDate).getMonth() + 2;
+         const numberStart =
+            filter.startDate && new Date(filter.startDate).getMonth() + 2;
+         const numberEnd = new Date(filter.endDate).getMonth() + 2;
 
-         for (let x = 0; x < initialInstallments.length; x++) {
-            const number = initialInstallments[x].number;
-            if (initialInstallments[x].student) {
-               const year = initialInstallments[x].year;
-               if (year >= startYear && year <= endYear) {
-                  if (startYear === year) {
-                     if (startMonth <= number) {
-                        installments.push(initialInstallments[x]);
-                        continue;
-                     }
-                  }
-                  if (endYear === year) {
-                     if (endMonth >= number)
-                        installments.push(initialInstallments[x]);
-                  } else installments.push(initialInstallments[x]);
-               }
-            }
-         }
-
-         installments = installments.filter(
-            (installment) => installment.student
-         );
+         installments = await Installment.find({
+            value: { $ne: 0 },
+            year: {
+               ...(filter.startDate && {
+                  $gte: new Date(filter.startDate).getFullYear(),
+               }),
+               $lte: new Date(filter.endDate).getFullYear(),
+            },
+            number: {
+               ...(filter.startDate && {
+                  $gte: numberStart,
+               }),
+               $lte: numberEnd,
+            },
+         }).populate({
+            path: "student",
+            model: "user",
+            select: ["name", "lastname"],
+            match: {
+               ...(filter.name && {
+                  name: { $regex: `.*${filter.name}.*`, $options: "i" },
+               }),
+               ...(filter.lastname && {
+                  lastname: {
+                     $regex: `.*${filter.lastname}.*`,
+                     $options: "i",
+                  },
+               }),
+            },
+         });
       }
 
       installments = sortArray(installments);
@@ -483,8 +478,8 @@ function buildTable(installments, admin) {
    return { years, rows };
 }
 
-function sortArray(installments) {
-   installments.sort((a, b) => {
+function sortArray(array) {
+   const sortedArray = array.sort((a, b) => {
       if (a.student.lastname > b.student.lastname) return 1;
       if (a.student.lastname < b.student.lastname) return -1;
 
@@ -498,7 +493,7 @@ function sortArray(installments) {
       if (a.student.number < b.student.number) return -1;
    });
 
-   return installments;
+   return sortedArray;
 }
 
 module.exports = router;

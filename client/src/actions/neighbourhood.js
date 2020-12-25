@@ -28,7 +28,6 @@ export const loadTownNeighbourhoods = (town_id) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
       window.scroll(0, 0);
    }
 
@@ -51,7 +50,6 @@ export const loadNeighbourhoods = () => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
       window.scroll(0, 0);
    }
 };
@@ -81,15 +79,17 @@ export const updateNeighbourhoods = (formData) => async (dispatch) => {
 
       dispatch(setAlert("Barrios Modificados", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: NEIGHBOURHOODS_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scroll(0, 0);
@@ -109,15 +109,17 @@ export const deleteNeighbourhood = (toDelete) => async (dispatch) => {
 
       dispatch(setAlert("Barrio Eliminado", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: NEIGHBOURHOODS_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scrollTo(0, 0);

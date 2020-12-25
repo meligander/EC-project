@@ -23,6 +23,7 @@ const StudentSearch = ({
    const [filterForm, setFilterForm] = useState({
       name: "",
       lastname: "",
+      active: true,
       type: typeSearch === "Tutor/Student" ? "Alumno y Tutor" : "Alumno",
    });
 

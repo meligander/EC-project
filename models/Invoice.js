@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const InvoiceSchema = new mongoose.Schema({
    invoiceid: {
-      type: String,
+      type: Number,
       required: true,
    },
    user: {

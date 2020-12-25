@@ -6,6 +6,9 @@ table.expences {
    }
 
    .bg {
+      &-refund {
+         background-color: lighten(gold, 45%) !important  ;
+      }
       &-income {
          background-color: lighten($success-color, 62%) !important;
       }
@@ -13,7 +16,7 @@ table.expences {
          background-color: lighten($danger-color, 58%) !important;
       }
       &-withdrawal {
-         background-color: lighten($secondary-color, 30%) !important;
+         background-color: lighten(blueviolet, 43%) !important;
       }
    }
 }

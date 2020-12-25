@@ -25,14 +25,10 @@ router.get("/", [auth, adminAuth], async (req, res) => {
             ...((filter.startDate || filter.endDate) && {
                date: {
                   ...(filter.startDate && {
-                     $gte: new Date(
-                        new Date(filter.startDate).setHours(00, 00, 00)
-                     ),
+                     $gte: new Date(filter.startDate).setHours(00, 00, 00),
                   }),
                   ...(filter.endDate && {
-                     $lt: new Date(
-                        new Date(filter.endDate).setHours(23, 59, 59)
-                     ),
+                     $lte: new Date(filter.endDate).setHours(23, 59, 59),
                   }),
                },
             }),

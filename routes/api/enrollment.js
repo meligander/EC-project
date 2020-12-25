@@ -41,14 +41,10 @@ router.get("/", [auth, adminAuth], async (req, res) => {
             ...((filter.startDate || filter.endDate) && {
                date: {
                   ...(filter.startDate && {
-                     $gte: new Date(
-                        new Date(filter.startDate).setHours(00, 00, 00)
-                     ),
+                     $gte: new Date(filter.startDate).setHours(00, 00, 00),
                   }),
                   ...(filter.endDate && {
-                     $lt: new Date(
-                        new Date(filter.endDate).setHours(23, 59, 59)
-                     ),
+                     $lte: new Date(filter.endDate).setHours(23, 59, 59),
                   }),
                },
             }),
@@ -61,12 +57,25 @@ router.get("/", [auth, adminAuth], async (req, res) => {
                path: "student",
                model: "user",
                select: ["name", "lastname", "studentnumber"],
+               match: {
+                  ...(filter.name && {
+                     name: { $regex: `.*${filter.name}.*`, $options: "i" },
+                  }),
+                  ...(filter.lastname && {
+                     lastname: {
+                        $regex: `.*${filter.lastname}.*`,
+                        $options: "i",
+                     },
+                  }),
+               },
             })
             .populate({
                path: "category",
                model: "category",
             })
             .sort({ date: -1 });
+
+         enrollments = enrollments.filter((enroll) => enroll.student);
       }
 
       if (enrollments.length === 0) {

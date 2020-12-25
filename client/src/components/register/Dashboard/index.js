@@ -11,6 +11,7 @@ import { updateExpiredIntallments } from "../../../actions/installment";
 
 import Confirm from "../../modal/Confirm";
 import GoBack from "../../sharedComp/GoBack";
+import Alert from "../../sharedComp/Alert";
 import Loading from "../../modal/Loading";
 import StudentDashboard from "./usersDashboards/StudentDashboard";
 import RelativeDashboard from "./usersDashboards/RelativeDashboard";
@@ -22,7 +23,6 @@ import "./style.scss";
 const Dashboard = ({
    match,
    history,
-   location,
    auth: { userLogged },
    users: { user, loading },
    mixvalues: { loadingSpinner },
@@ -86,6 +86,7 @@ const Dashboard = ({
          {!loading ? (
             <>
                {loadingSpinner && <Loading />}
+               <Alert type="1" />
                <Confirm
                   setToggleModal={setToggle}
                   toggleModal={toggleModal}
@@ -93,7 +94,7 @@ const Dashboard = ({
                   text="¿Está seguro que desea eliminar el usuario?"
                />
                {user._id !== userLogged._id && <GoBack />}
-               <div className="mt-2">
+               <div className="mt-1">
                   <div className="profile-top bg-primary p-3">
                      <div className="img-about m-1">
                         <img

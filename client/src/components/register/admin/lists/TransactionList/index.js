@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import Moment from "react-moment";
 import PropTypes from "prop-types";
 
 import {
-   loadExpenceTypes,
-   loadExpences,
+   loadTransactions,
    deleteExpence,
-   expencesPDF,
+   transactionsPDF,
 } from "../../../../../actions/expence";
 import { updatePageNumber } from "../../../../../actions/mixvalues";
 
@@ -18,22 +18,21 @@ import Confirm from "../../../../modal/Confirm";
 
 import "./style.scss";
 
-const ExpenceList = ({
-   loadExpenceTypes,
-   loadExpences,
+const TransactionList = ({
+   loadTransactions,
    updatePageNumber,
    deleteExpence,
-   expencesPDF,
-   expences: { expences, loadingExpences, expencetypes, loadingET },
+   transactionsPDF,
+   expences: { transactions, loadingTransactions },
    mixvalues: { page },
 }) => {
    const [filterData, setFilterData] = useState({
       startDate: "",
       endDate: "",
-      expencetype: "",
+      transactionType: "",
    });
 
-   const { startDate, endDate, expencetype } = filterData;
+   const { startDate, endDate, transactionType } = filterData;
 
    const [otherValues, setOtherValues] = useState({
       expenceDelete: "",
@@ -43,12 +42,11 @@ const ExpenceList = ({
    const { expenceDelete, toggleModal } = otherValues;
 
    useEffect(() => {
-      if (loadingExpences) {
+      if (loadingTransactions) {
          updatePageNumber(0);
-         loadExpences({ startDate: "", endDate: "", expencetype: "" });
-         loadExpenceTypes();
+         loadTransactions({});
       }
-   }, [loadingExpences, loadExpences, loadExpenceTypes, updatePageNumber]);
+   }, [loadingTransactions, loadTransactions, updatePageNumber]);
 
    const onChange = (e) => {
       setFilterData({
@@ -66,7 +64,7 @@ const ExpenceList = ({
 
    const search = (e) => {
       e.preventDefault();
-      loadExpences(filterData);
+      loadTransactions(filterData);
    };
 
    const confirm = () => {
@@ -74,12 +72,74 @@ const ExpenceList = ({
    };
 
    const pdfGeneratorSave = () => {
-      expencesPDF(expences);
+      transactionsPDF(transactions);
+   };
+
+   const type = (transaction) => {
+      if (transaction.expencetype) {
+         let trClass = "";
+         switch (transaction.expencetype.type) {
+            case "Ingreso Especial":
+               trClass = "bg-refund";
+               break;
+            case "Retiro":
+               trClass = "bg-withdrawal";
+               break;
+            case "Gasto":
+               trClass = "bg-expence";
+               break;
+            default:
+               break;
+         }
+
+         return (
+            <tr key={transaction._id} className={trClass}>
+               <td>
+                  <Moment date={transaction.date} format="DD/MM/YY" />
+               </td>
+               <td>{`${transaction.expencetype.type} - ${transaction.expencetype.name}`}</td>
+               <td>${transaction.value}</td>
+               <td>{transaction.description}</td>
+               <td>
+                  <button
+                     onClick={() => setToggle(transaction._id)}
+                     className="btn btn-danger"
+                  >
+                     <i className="far fa-trash-alt"></i>
+                  </button>
+               </td>
+            </tr>
+         );
+      } else {
+         let name = "";
+
+         if (transaction.user) {
+            name = transaction.user.lastname + ", " + transaction.user.name;
+         } else {
+            name = transaction.lastname + ", " + transaction.name;
+         }
+
+         return (
+            <tr key={transaction._id} className="bg-income">
+               <td>
+                  <Moment date={transaction.date} format="DD/MM/YY" />
+               </td>
+               <td>Ingreso</td>
+               <td>${transaction.total}</td>
+               <td>Factura {name}</td>
+               <td>
+                  <Link to={`/invoice/${transaction._id}`} className="btn-text">
+                     Ver más &rarr;
+                  </Link>
+               </td>
+            </tr>
+         );
+      }
    };
 
    return (
       <>
-         {!loadingExpences ? (
+         {!loadingTransactions ? (
             <div>
                <h2>Listado Movimientos</h2>
                <Confirm
@@ -97,26 +157,25 @@ const ExpenceList = ({
                   <div className="form-group">
                      <select
                         className="form-input"
-                        name="expencetype"
-                        id="expencetype"
-                        value={expencetype}
+                        id="transactionType"
+                        name="transactionType"
                         onChange={onChange}
+                        value={transactionType}
                      >
                         <option value="">
-                           * Seleccione el Tipo de Movimiento
+                           Seleccione el tipo de movimiento
                         </option>
-                        {!loadingET &&
-                           expencetypes.length > 0 &&
-                           expencetypes.map((exp) => (
-                              <option key={exp._id} value={exp._id}>
-                                 {exp.name}
-                              </option>
-                           ))}
+                        <option value="Ingreso">Ingreso</option>
+                        <option value="Gasto">Gasto</option>
+                        <option value="Retiro">Retiro</option>
+                        <option value="Ingreso Especial">
+                           Ingreso Especial
+                        </option>
                      </select>
                      <label
-                        htmlFor="expencetype"
+                        htmlFor="transactionType"
                         className={`form-label ${
-                           expencetype === "" ? "lbl" : ""
+                           transactionType === "" ? "lbl" : ""
                         }`}
                      >
                         Tipo de Movimiento
@@ -133,58 +192,27 @@ const ExpenceList = ({
                      <thead>
                         <tr>
                            <th>Fecha</th>
-                           <th>Tipo de Movimiento</th>
+                           <th>Tipo</th>
                            <th>Importe</th>
                            <th>Descripción</th>
                            <th>&nbsp;</th>
                         </tr>
                      </thead>
                      <tbody>
-                        {!loadingExpences &&
-                           expences.length > 0 &&
-                           expences.map(
-                              (expence, i) =>
+                        {!loadingTransactions &&
+                           transactions.length > 0 &&
+                           transactions.map(
+                              (transaction, i) =>
                                  i >= page * 10 &&
-                                 i < (page + 1) * 10 && (
-                                    <tr
-                                       key={expence._id}
-                                       className={
-                                          expence.expencetype.type === "Gasto"
-                                             ? "bg-expence"
-                                             : expence.expencetype.type ===
-                                               "Ingreso"
-                                             ? "bg-income"
-                                             : "bg-withdrawal"
-                                       }
-                                    >
-                                       <td>
-                                          <Moment
-                                             date={expence.date}
-                                             format="DD/MM/YY"
-                                          />
-                                       </td>
-                                       <td>{expence.expencetype.name}</td>
-                                       <td>${expence.value}</td>
-                                       <td>{expence.description}</td>
-                                       <td>
-                                          <button
-                                             onClick={() =>
-                                                setToggle(expence._id)
-                                             }
-                                             className="btn btn-danger"
-                                          >
-                                             <i className="far fa-trash-alt"></i>
-                                          </button>
-                                       </td>
-                                    </tr>
-                                 )
+                                 i < (page + 1) * 10 &&
+                                 type(transaction)
                            )}
                      </tbody>
                   </table>
                </div>
                <ListButtons
                   page={page}
-                  items={expences}
+                  items={transactions}
                   changePage={updatePageNumber}
                   pdfGeneratorSave={pdfGeneratorSave}
                />
@@ -196,14 +224,13 @@ const ExpenceList = ({
    );
 };
 
-ExpenceList.propTypes = {
+TransactionList.propTypes = {
    mixvalues: PropTypes.object.isRequired,
    expences: PropTypes.object.isRequired,
-   loadExpenceTypes: PropTypes.func.isRequired,
-   loadExpences: PropTypes.func.isRequired,
+   loadTransactions: PropTypes.func.isRequired,
    updatePageNumber: PropTypes.func.isRequired,
    deleteExpence: PropTypes.func.isRequired,
-   expencesPDF: PropTypes.func.isRequired,
+   transactionsPDF: PropTypes.func.isRequired,
 };
 
 const mapStatetoProps = (state) => ({
@@ -212,9 +239,8 @@ const mapStatetoProps = (state) => ({
 });
 
 export default connect(mapStatetoProps, {
-   loadExpenceTypes,
-   loadExpences,
+   loadTransactions,
    updatePageNumber,
    deleteExpence,
-   expencesPDF,
-})(ExpenceList);
+   transactionsPDF,
+})(TransactionList);

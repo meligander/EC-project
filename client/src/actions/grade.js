@@ -114,15 +114,17 @@ export const registerNewGrade = (newGrade) => async (dispatch) => {
       });
       dispatch(setAlert("Nuevo Tipo de Nota Agregado", "success", "2"));
    } catch (err) {
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: GRADES_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scrollTo(0, 0);
@@ -144,15 +146,17 @@ export const deleteGrades = (grade) => async (dispatch) => {
 
       dispatch(setAlert("Tipo de Nota Eliminado", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: GRADES_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scrollTo(0, 0);
@@ -184,15 +188,17 @@ export const updateGrades = (formData, history, class_id) => async (
 
       history.push(`/class/${class_id}`);
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: GRADES_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    dispatch(updateLoadingSpinner(false));
@@ -219,15 +225,17 @@ export const updateGradeTypes = (formData) => async (dispatch) => {
 
       dispatch(setAlert("Tipos de Notas Modificados", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
-         type: GRADETYPE_ERROR,
+         type: GRADES_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scrollTo(0, 0);
@@ -247,15 +255,17 @@ export const deleteGradeType = (toDelete) => async (dispatch) => {
 
       dispatch(setAlert("Tipo de Nota Eliminado", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
-         type: GRADETYPE_ERROR,
+         type: GRADES_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scrollTo(0, 0);
@@ -307,19 +317,21 @@ export const gradesPDF = (
       );
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: GRADES_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(true));
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const certificatePDF = (
@@ -381,15 +393,17 @@ export const certificatePDF = (
 
       dispatch(setAlert("Certificados Generados", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: GRADES_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scrollTo(0, 0);

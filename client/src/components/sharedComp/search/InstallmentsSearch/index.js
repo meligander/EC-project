@@ -156,9 +156,12 @@ const InstallmentsSearch = ({
                <span className="text-dark heading-tertiary">Alumno: </span>
                {selectedStudent.name}
             </p>
-            <button className="btn-cancel" onClick={restore}>
-               <i className="fas fa-times"></i>
-            </button>
+
+            {selectedStudent._id !== "" && (
+               <button className="btn-cancel" onClick={restore}>
+                  <i className="fas fa-times"></i>
+               </button>
+            )}
          </div>
          {!loadingUsersInstallments && usersInstallments.rows.length > 0 ? (
             <InstallmentsTable

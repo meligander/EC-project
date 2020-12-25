@@ -29,7 +29,7 @@ import EditExpenceType from "../../register/admin/edit/EditExpenceType";
 import EditGradeType from "../../register/admin/edit/EditGradeType";
 import EnrollmentList from "../../register/admin/lists/EnrollmentList";
 import IncomeList from "../../register/admin/lists/IncomeList";
-import ExpenceList from "../../register/admin/lists/ExpenceList";
+import TransactionList from "../../register/admin/lists/TransactionList";
 import InstallmentList from "../../register/admin/lists/InstallmentList";
 import RegisterList from "../../register/admin/lists/RegisterList";
 import MentionList from "../../register/admin/lists/MentionList";
@@ -216,8 +216,8 @@ const Routes = () => {
             <PrivateRoutes
                exact
                types={["Administrador", "Secretaria", "Admin/Profesor"]}
-               path="/expence-list"
-               component={ExpenceList}
+               path="/transaction-list"
+               component={TransactionList}
             />
             <PrivateRoutes
                exact

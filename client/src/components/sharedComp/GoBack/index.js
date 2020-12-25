@@ -34,7 +34,7 @@ const GoBack = ({
 
    return (
       <>
-         <button onClick={goBack} className="btn">
+         <button onClick={goBack} className="btn mb-1">
             <i className="fas fa-chevron-left"></i> Volver
          </button>
          {loadingSpinner && <Loading />}

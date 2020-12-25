@@ -7,47 +7,52 @@ import { clearRegisters } from "./register";
 import { setAlert } from "./alert";
 
 import {
-   EXPENCES_LOADED,
+   TRANSACTIONS_LOADED,
    EXPENCETYPES_LOADED,
    EXPENCE_REGISTERED,
    EXPENCE_DELETED,
    EXPENCETYPES_UPDATED,
    EXPENCETYPE_DELETED,
+   TRANSACTIONS_CLEARED,
    EXPENCES_CLEARED,
    EXPENCETYPES_CLEARED,
    EXPENCE_ERROR,
    EXPENCETYPE_ERROR,
 } from "./types";
 
-export const loadExpences = (filterData) => async (dispatch) => {
+export const loadTransactions = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
       let filter = "";
 
       const filternames = Object.keys(filterData);
+
       for (let x = 0; x < filternames.length; x++) {
          const name = filternames[x];
-         if (filterData[name] !== "" || filterData[name] !== 0) {
+         if (filterData[name] !== "") {
             if (filter !== "") filter = filter + "&";
             filter = filter + filternames[x] + "=" + filterData[name];
          }
       }
       const res = await axios.get(`/api/expence?${filter}`);
       dispatch({
-         type: EXPENCES_LOADED,
+         type: TRANSACTIONS_LOADED,
          payload: res.data,
       });
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
+
       dispatch({
          type: EXPENCE_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
       window.scroll(0, 0);
    }
    dispatch(updateLoadingSpinner(false));
@@ -106,15 +111,17 @@ export const registerExpence = (formData, history, user_id) => async (
             payload: errors,
          });
       } else {
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         const msg = err.response.data.msg;
+         const type = err.response.statusText;
          dispatch({
             type: EXPENCE_ERROR,
             payload: {
-               type: err.response.statusText,
+               type,
                status: err.response.status,
-               msg: err.response.data.msg,
+               msg,
             },
          });
+         dispatch(setAlert(msg ? msg : type, "danger", "2"));
       }
    }
 
@@ -136,15 +143,17 @@ export const deleteExpence = (expence_id) => async (dispatch) => {
       dispatch(setAlert("Movimiento Eliminado", "success", "2"));
       dispatch(clearRegisters());
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: EXPENCE_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scrollTo(0, 0);
@@ -172,15 +181,17 @@ export const updateExpenceTypes = (formData) => async (dispatch) => {
 
       dispatch(setAlert("Tipos de Movimientos Modificados", "success", "2"));
    } catch (err) {
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: EXPENCE_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scrollTo(0, 0);
@@ -200,24 +211,26 @@ export const deleteExpenceType = (toDelete) => async (dispatch) => {
 
       dispatch(setAlert("Tipo de Gasto Eliminado", "success", "2"));
    } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
-         type: EXPENCETYPE_ERROR,
+         type: EXPENCE_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scrollTo(0, 0);
    dispatch(updateLoadingSpinner(false));
 };
 
-export const expencesPDF = (expences) => async (dispatch) => {
+export const transactionsPDF = (transactions) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
-   let expence = JSON.stringify(expences);
+   let transaction = JSON.stringify(transactions);
    try {
       const config = {
          headers: {
@@ -225,7 +238,7 @@ export const expencesPDF = (expences) => async (dispatch) => {
          },
       };
 
-      await axios.post("/api/expence/create-list", expence, config);
+      await axios.post("/api/expence/create-list", transaction, config);
 
       const pdf = await axios.get("/api/expence/fetch-list", {
          responseType: "blob",
@@ -239,19 +252,21 @@ export const expencesPDF = (expences) => async (dispatch) => {
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
       dispatch({
          type: EXPENCE_ERROR,
          payload: {
-            type: err.response.statusText,
+            type,
             status: err.response.status,
-            msg: err.response.data.msg,
+            msg,
          },
       });
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 
    window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(true));
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const clearExpenceTypes = () => (dispatch) => {
@@ -260,4 +275,8 @@ export const clearExpenceTypes = () => (dispatch) => {
 
 export const clearExpences = () => (dispatch) => {
    dispatch({ type: EXPENCES_CLEARED });
+};
+
+export const clearTransactions = () => (dispatch) => {
+   dispatch({ type: TRANSACTIONS_CLEARED });
 };

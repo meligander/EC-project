@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import Moment from "react-moment";
 import moment from "moment";
 import PropTypes from "prop-types";
@@ -147,12 +148,12 @@ const IncomeList = ({
                                           </td>
                                           <td>{invoice.total}</td>
                                           <td>
-                                             <a
-                                                href={`/invoice/${invoice._id}`}
+                                             <Link
+                                                to={`/invoice/${invoice._id}`}
                                                 className="btn-text"
                                              >
                                                 Ver más &rarr;
-                                             </a>
+                                             </Link>
                                           </td>
                                           {userLogged.type ===
                                              "Administrador" &&

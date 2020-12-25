@@ -189,27 +189,57 @@ router.put(
                category: categories[x]._id,
             });
 
-            for (let y = 0; y < enrollments.length; y++) {
-               const installments = await Installment.find({
-                  student: enrollments[y].student,
-                  ...(enrollments[y].year.toString() === year && {
-                     number: { $gte: month },
-                  }),
-                  year,
-               }).populate({ path: "student", select: "-password" });
-               for (let z = 0; z < installments.length; z++) {
-                  let newValue = installments[z].student.discount
-                     ? value - (value * installments[z].student.discount) / 100
-                     : value;
+            if (x === 0) {
+               const installmentsInsc = await Installment.find({
+                  number: 0,
+                  year: { $in: [year, year + 1] },
+                  value: { $ne: 0 },
+               });
+               for (let y = 0; y < installmentsInsc.length; y++) {
                   await Installment.findOneAndUpdate(
-                     { _id: installments[z]._id },
-                     { value: installments[z].number === 0 ? value : newValue }
+                     { _id: installmentsInsc[y]._id },
+                     {
+                        value,
+                     }
                   );
+               }
+               continue;
+            }
+
+            if (enrollments.length !== 0) {
+               for (let y = 0; y < enrollments.length; y++) {
+                  const installments = await Installment.find({
+                     enrollment: enrollments[y]._id,
+                     student: enrollments[y].student,
+                     number:
+                        enrollments[y].year === year
+                           ? { $gte: month, $ne: 0 }
+                           : {
+                                $ne: 0,
+                             },
+                     year: { $in: [year, year + 1] },
+                     value: { $ne: 0 },
+                  }).populate({ path: "student", select: "-password" });
+
+                  for (let z = 0; z < installments.length; z++) {
+                     let newValue = installments[z].student.discount
+                        ? value -
+                          (value * installments[z].student.discount) / 100
+                        : value;
+
+                     await Installment.findOneAndUpdate(
+                        { _id: installments[z]._id },
+                        {
+                           value: newValue,
+                           expired: false,
+                        }
+                     );
+                  }
                }
             }
          }
 
-         res.json({ msg: "Category Prices Updated" });
+         res.json({ msg: "Categories Prices Updated" });
       } catch (err) {
          console.error(err.message);
          return res.status(500).send("Server Error");

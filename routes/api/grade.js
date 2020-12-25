@@ -30,7 +30,11 @@ router.get("/:class_id", [auth], async (req, res) => {
             select: ["name", "lastname"],
          });
 
-      const tableGrades = await buildTable(grades, req.params.class_id, res);
+      const tableGrades = await buildClassTable(
+         grades,
+         req.params.class_id,
+         res
+      );
 
       res.json(tableGrades);
    } catch (err) {
@@ -67,28 +71,9 @@ router.get("/user/:id", [auth], async (req, res) => {
          });
       }
 
-      let obj = grades.reduce((res, curr) => {
-         if (res[curr.gradetype.name]) res[curr.gradetype.name].push(curr);
-         else Object.assign(res, { [curr.gradetype.name]: [curr] });
+      const studentTable = buildStudentTable(grades);
 
-         return res;
-      }, {});
-
-      let rows = [];
-      let headers = Object.getOwnPropertyNames(obj);
-
-      for (const x in obj) {
-         const dividedGrades = obj[x];
-         let row = Array.from(Array(5), () => ({
-            value: "",
-         }));
-         for (let x = 0; x < dividedGrades.length; x++) {
-            row[dividedGrades[x].period - 1] = dividedGrades[x];
-         }
-         rows.push(row);
-      }
-
-      res.json({ headers, rows });
+      res.json(studentTable);
    } catch (err) {
       console.error(err.message);
       res.status(500).send("Server Error");
@@ -663,7 +648,7 @@ router.post("/", auth, async (req, res) => {
             select: "name",
          });
 
-      const tableGrades = await buildTable(grades, classroom, res);
+      const tableGrades = await buildClassTable(grades, classroom, res);
 
       res.json(tableGrades);
    } catch (err) {
@@ -815,7 +800,11 @@ router.delete("/:type/:classroom/:period", auth, async (req, res) => {
             select: "name",
          });
 
-      const tableGrades = await buildTable(grades, req.params.classroom, res);
+      const tableGrades = await buildClassTable(
+         grades,
+         req.params.classroom,
+         res
+      );
 
       res.json(tableGrades);
    } catch (err) {
@@ -824,7 +813,32 @@ router.delete("/:type/:classroom/:period", auth, async (req, res) => {
    }
 });
 
-async function buildTable(grades, class_id, res) {
+function buildStudentTable(grades) {
+   let obj = grades.reduce((res, curr) => {
+      if (res[curr.gradetype.name]) res[curr.gradetype.name].push(curr);
+      else Object.assign(res, { [curr.gradetype.name]: [curr] });
+
+      return res;
+   }, {});
+
+   let rows = [];
+   let headers = Object.getOwnPropertyNames(obj);
+
+   for (const x in obj) {
+      const dividedGrades = obj[x];
+      let row = Array.from(Array(5), () => ({
+         value: "",
+      }));
+      for (let x = 0; x < dividedGrades.length; x++) {
+         row[dividedGrades[x].period - 1] = dividedGrades[x];
+      }
+      rows.push(row);
+   }
+
+   return { headers, rows };
+}
+
+async function buildClassTable(grades, class_id, res) {
    let users = [];
 
    try {

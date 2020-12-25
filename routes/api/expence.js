@@ -11,49 +11,75 @@ const moment = require("moment");
 const Expence = require("../../models/Expence");
 const Register = require("../../models/Register");
 const ExpenceType = require("../../models/ExpenceType");
+const Invoice = require("../../models/Invoice");
+const { type } = require("os");
 
 //@route    GET api/expence
 //@desc     get all expences
 //@access   Private
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
-      let expences;
+      let expences = [];
+      let invoices = [];
+      let transactions = [];
 
       if (Object.entries(req.query).length === 0) {
-         expences = await Expence.find()
-            .populate("expencetype")
-            .sort({ date: -1 });
+         expences = await Expence.find().populate("expencetype");
+         invoices = await Invoice.find().populate("user");
       } else {
          const filter = req.query;
 
-         expences = await Expence.find({
-            ...((filter.startDate || filter.endDate) && {
-               date: {
-                  ...(filter.startDate && {
-                     $gte: new Date(
-                        new Date(filter.startDate).setHours(00, 00, 00)
-                     ),
-                  }),
-                  ...(filter.endDate && {
-                     $lt: new Date(
-                        new Date(filter.endDate).setHours(23, 59, 59)
-                     ),
-                  }),
-               },
-            }),
-            ...(filter.expencetype && { expencetype: filter.expencetype }),
-         })
-            .populate("expencetype")
-            .sort({ date: -1 });
+         if (!filter.transactionType || filter.transactionType === "Ingreso") {
+            invoices = await Invoice.find({
+               ...((filter.startDate || filter.endDate) && {
+                  date: {
+                     ...(filter.startDate && {
+                        $gte: new Date(filter.startDate).setHours(00, 00, 00),
+                     }),
+                     ...(filter.endDate && {
+                        $lte: new Date(filter.endDate).setHours(23, 59, 59),
+                     }),
+                  },
+               }),
+            }).populate("user");
+         }
+         if (filter.transactionType !== "Ingreso") {
+            expences = await Expence.find({
+               ...((filter.startDate || filter.endDate) && {
+                  date: {
+                     ...(filter.startDate && {
+                        $gte: new Date(filter.startDate).setHours(00, 00, 00),
+                     }),
+                     ...(filter.endDate && {
+                        $lte: new Date(filter.endDate).setHours(23, 59, 59),
+                     }),
+                  },
+               }),
+            }).populate({
+               path: "expencetype",
+            });
+         }
+
+         if (filter.transactionType && filter.transactionType !== "Ingreso") {
+            let filteredExpences = [];
+            for (let x = 0; x < expences.length; x++) {
+               if (expences[x].expencetype.type === filter.transactionType)
+                  filteredExpences.push(expences[x]);
+            }
+            expences = filteredExpences;
+         }
       }
 
-      if (expences.length === 0) {
+      transactions = expences.concat(invoices);
+      transactions = sortArray(transactions);
+
+      if (transactions.length === 0) {
          return res.status(400).json({
-            msg: "No se encontraron gastos con dichas descripciones",
+            msg: "No se encontraron movimientos con dichas descripciones",
          });
       }
 
-      res.json(expences);
+      res.json(transactions);
    } catch (err) {
       console.error(err.message);
       return res.status(500).send("Server Error");
@@ -61,30 +87,57 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 });
 
 //@route    POST api/expence/create-list
-//@desc     Create a pdf of expences
+//@desc     Create a pdf of transactions
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "reports/expences.pdf";
+   const name = "reports/transactions.pdf";
 
-   const expences = req.body;
+   const transactions = req.body;
 
    let tbody = "";
 
-   for (let x = 0; x < expences.length; x++) {
+   for (let x = 0; x < transactions.length; x++) {
+      let name = "";
+
+      if (!transactions[x].expencetype) {
+         if (transactions[x].user) {
+            name =
+               transactions[x].user.lastname + ", " + transactions[x].user.name;
+         } else {
+            name = transactions[x].lastname + ", " + transactions[x].name;
+         }
+      }
+
       const date =
-         "<td>" + moment(expences[x].date).format("DD/MM/YY") + "</td>";
-      const expencetype = "<td>" + expences[x].expencetype.name + "</td>";
-      const value = "<td> $" + expences[x].value + "</td>";
+         "<td>" + moment(transactions[x].date).format("DD/MM/YY") + "</td>";
+      const type =
+         "<td>" +
+         (transactions[x].expencetype
+            ? transactions[x].expencetype.type +
+              " - " +
+              transactions[x].expencetype.name
+            : "Ingreso") +
+         "</td>";
+      const value =
+         "<td> $" +
+         (transactions[x].expencetype
+            ? transactions[x].value
+            : transactions[x].total) +
+         "</td>";
       const description =
          "<td>" +
-         (expences[x].description ? expences[x].description : "") +
+         (!transactions[x].expencetype
+            ? "Factura " + name
+            : transactions[x].description
+            ? transactions[x].description
+            : "") +
          "</td>";
 
-      tbody += "<tr>" + date + expencetype + value + description + "</tr>";
+      tbody += "<tr>" + date + type + value + description + "</tr>";
    }
 
    const thead =
-      "<th>Fecha</th> <th>Tipo de Movimiento</th> <th>Importe</th> <th>Descripción</th>";
+      "<th>Fecha</th> <th>Tipo</th> <th>Importe</th> <th>Descripción</th>";
 
    const img = path.join(
       "file://",
@@ -123,10 +176,10 @@ router.post("/create-list", (req, res) => {
 });
 
 //@route    GET api/expence/fetch-list
-//@desc     Get the pdf of expences
+//@desc     Get the pdf of transactions
 //@access   Private
 router.get("/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../reports/expences.pdf"));
+   res.sendFile(path.join(__dirname, "../../reports/transactions.pdf"));
 });
 
 //@route    POST api/expence
@@ -289,5 +342,14 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       res.status(500).send("Server error");
    }
 });
+
+function sortArray(array) {
+   let sortedArray = array.sort((a, b) => {
+      if (a.date > b.date) return -1;
+      if (a.date < b.date) return 1;
+   });
+
+   return sortedArray;
+}
 
 module.exports = router;

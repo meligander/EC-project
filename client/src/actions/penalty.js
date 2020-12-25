@@ -26,7 +26,6 @@ export const loadPenalty = () => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      dispatch(setAlert(err.response.data.msg, "danger", "2"));
       window.scrollTo(0, 0);
    }
 };
@@ -58,15 +57,17 @@ export const updatePenalty = (formData) => async (dispatch) => {
             payload: errors,
          });
       } else {
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         const msg = err.response.data.msg;
+         const type = err.response.statusText;
          dispatch({
             type: PENALTY_ERROR,
             payload: {
-               type: err.response.statusText,
+               type,
                status: err.response.status,
-               msg: err.response.data.msg,
+               msg,
             },
          });
+         dispatch(setAlert(msg ? msg : type, "danger", "2"));
       }
    }
 
