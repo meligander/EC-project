@@ -25,7 +25,7 @@ export const loadEnrollments = (filterData) => async (dispatch) => {
       const filternames = Object.keys(filterData);
       for (let x = 0; x < filternames.length; x++) {
          const name = filternames[x];
-         if (filterData[name] !== "") {
+         if (filterData[name] !== "" && filterData[name] !== 0) {
             if (filter !== "") filter = filter + "&";
             filter = filter + filternames[x] + "=" + filterData[name];
          }
