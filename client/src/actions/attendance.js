@@ -58,14 +58,7 @@ export const updateAttendances = (formData, history, class_id) => async (
 ) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      let attendances = JSON.stringify(formData);
-
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-      await axios.post("/api/attendance/period", attendances, config);
+      await axios.post("/api/attendance/period", formData);
       dispatch({
          type: ATTENDANCES_UPDATED,
       });
@@ -93,15 +86,7 @@ export const updateAttendances = (formData, history, class_id) => async (
 export const registerNewDate = (newDate) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      let date = {};
-      date = JSON.stringify(newDate);
-
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-      const res = await axios.post("/api/attendance", date, config);
+      const res = await axios.post("/api/attendance", newDate);
 
       dispatch({
          type: NEW_DATE_REGISTERED,
@@ -164,22 +149,16 @@ export const attendancesPDF = (
    classInfo
 ) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
-   let tableInfo = JSON.stringify({
+   let tableInfo = {
       header,
       students,
       attendances,
       period,
       classInfo,
-   });
+   };
 
    try {
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
-      await axios.post("/api/attendance/create-list", tableInfo, config);
+      await axios.post("/api/attendance/create-list", tableInfo);
 
       const pdf = await axios.get("/api/attendance/list/fetch-list", {
          responseType: "blob",

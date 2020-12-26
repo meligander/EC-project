@@ -148,23 +148,12 @@ export const registerEnrollment = (
 ) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
-   let enrollment = JSON.stringify(formData);
-
-   const config = {
-      headers: {
-         "Content-Type": "application/json",
-      },
-   };
    try {
       let res;
       if (!enroll_id) {
-         res = await axios.post("/api/enrollment", enrollment, config);
+         res = await axios.post("/api/enrollment", formData);
       } else {
-         res = await axios.put(
-            `/api/enrollment/${enroll_id}`,
-            enrollment,
-            config
-         );
+         res = await axios.put(`/api/enrollment/${enroll_id}`, formData);
       }
 
       dispatch({
@@ -176,7 +165,8 @@ export const registerEnrollment = (
          setAlert(
             `Inscripción ${!enroll_id ? "Registrada" : "Modificada"}`,
             "success",
-            "1"
+            "1",
+            7000
          )
       );
 
@@ -248,21 +238,13 @@ export const deleteEnrollment = (enroll_id) => async (dispatch) => {
 
 export const enrollmentsPDF = (enrollments, average) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
-
-   let enrollment = JSON.stringify(enrollments);
    try {
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
       let pdf;
       let name;
 
       switch (average) {
          case "enrollments":
-            await axios.post("/api/enrollment/create-list", enrollment, config);
+            await axios.post("/api/enrollment/create-list", enrollments);
 
             pdf = await axios.get("/api/enrollment/fetch-list", {
                responseType: "blob",
@@ -272,8 +254,7 @@ export const enrollmentsPDF = (enrollments, average) => async (dispatch) => {
          case "averages":
             await axios.post(
                "/api/enrollment/averages/create-list",
-               enrollment,
-               config
+               enrollments
             );
 
             pdf = await axios.get("/api/enrollment/averages/fetch-list", {
@@ -284,8 +265,7 @@ export const enrollmentsPDF = (enrollments, average) => async (dispatch) => {
          case "attendances":
             await axios.post(
                "/api/enrollment/absences/create-list",
-               enrollment,
-               config
+               enrollments
             );
 
             pdf = await axios.get("/api/enrollment/absences/fetch-list", {

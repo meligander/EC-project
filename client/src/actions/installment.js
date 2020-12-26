@@ -116,24 +116,13 @@ export const updateIntallment = (formData, history, user_id, inst_id) => async (
 ) => {
    dispatch(updateLoadingSpinner(true));
 
-   const installment = JSON.stringify(formData);
-
-   const config = {
-      headers: {
-         "Content-Type": "application/json",
-      },
-   };
    try {
       let res;
       if (!inst_id) {
-         res = await axios.post("/api/installment", installment, config);
+         res = await axios.post("/api/installment", formData);
       } else {
          //Update installment
-         res = await axios.put(
-            `/api/installment/${inst_id}`,
-            installment,
-            config
-         );
+         res = await axios.put(`/api/installment/${inst_id}`, formData);
       }
       dispatch({
          type: inst_id ? INSTALLMENT_UPDATED : INSTALLMENT_REGISTERED,
@@ -257,15 +246,8 @@ export const updateExpiredIntallments = () => async (dispatch) => {
 export const installmentsPDF = (installments) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
-   let installment = JSON.stringify(installments);
    try {
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
-      await axios.post("/api/installment/create-list", installment, config);
+      await axios.post("/api/installment/create-list", installments);
 
       const pdf = await axios.get("/api/installment/list/fetch-list", {
          responseType: "blob",

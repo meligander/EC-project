@@ -100,7 +100,12 @@ const EditInstallment = ({
    };
 
    const confirm = () => {
-      updateIntallment(formData, history, student._id, edit && _id);
+      updateIntallment(
+         { ...formData, value: value !== "" ? value : 0 },
+         history,
+         student._id,
+         edit && _id
+      );
    };
 
    const setToggleDelete = (e) => {

@@ -21,7 +21,9 @@ const StudentInfo = ({
                      value={discount}
                      onChange={(e) => onChange(e)}
                   >
-                     <option value="">* Seleccione el tipo de descuento</option>
+                     <option value={0}>
+                        * Seleccione el tipo de descuento
+                     </option>
                      <option value="0">Ninguno</option>
                      <option value="10">Hermanos</option>
                      <option value="50">Media Beca</option>
@@ -121,6 +123,7 @@ const StudentInfo = ({
 StudentInfo.propTypes = {
    isAdmin: PropTypes.bool.isRequired,
    chargeday: PropTypes.number.isRequired,
+   discount: PropTypes.number.isRequired,
    birthprov: PropTypes.string.isRequired,
    birthtown: PropTypes.string.isRequired,
    onChange: PropTypes.func.isRequired,

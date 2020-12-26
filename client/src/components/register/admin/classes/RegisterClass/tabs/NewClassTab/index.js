@@ -8,6 +8,7 @@ import {
    registerUpdateClass,
    removeStudent,
 } from "../../../../../../../actions/class";
+import { clearProfile } from "../../../../../../../actions/user";
 
 import ChosenChildrenTable from "../../../../../../tables/ChosenChildrenTable";
 import Confirm from "../../../../../../modal/Confirm";
@@ -17,6 +18,7 @@ const NewClassTab = ({
    location,
    registerUpdateClass,
    removeStudent,
+   clearProfile,
    users: { usersBK, loadingUsersBK },
    classes: { classInfo, loading },
 }) => {
@@ -253,6 +255,7 @@ const NewClassTab = ({
                   <ChosenChildrenTable
                      children={classInfo.students}
                      deleteChild={deleteChild}
+                     clearProfile={clearProfile}
                   />
                ) : (
                   <p className="text-secondary paragraph">
@@ -282,6 +285,7 @@ NewClassTab.propTypes = {
    classes: PropTypes.object.isRequired,
    registerUpdateClass: PropTypes.func.isRequired,
    removeStudent: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -292,4 +296,5 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    registerUpdateClass,
    removeStudent,
+   clearProfile,
 })(withRouter(NewClassTab));

@@ -1,7 +1,0 @@
-{
-	"mongoURI": "mongodb+srv://meligander:meligander@english-center-98nsv.mongodb.net/vmec-db?retryWrites=true&w=majority",
-	"jwtSecret": "mysecrettoken",
-	"api_key": "894774731353667",
-	"cloud_name": "meligander",
-	"api_secret": "4VNvmc5DtLqMVTntku-sIYe2jkI"
-}

@@ -19,7 +19,6 @@ const OneClass = ({
    history,
    match,
    classes: { classInfo, loading },
-   users: { users, loadingUsers },
    auth: { userLogged },
    loadClass,
    deleteClass,
@@ -57,7 +56,7 @@ const OneClass = ({
 
    return (
       <>
-         {!loading && !loadingUsers ? (
+         {!loading ? (
             <>
                <Confirm
                   toggleModal={toggleModal}
@@ -67,7 +66,7 @@ const OneClass = ({
                />
                <h1 className="pt-3 text-center light-font">Clase</h1>
                <ClassInfo classInfo={classInfo} />
-               {users.length !== 0 ? (
+               {classInfo.students.length !== 0 ? (
                   <table>
                      <thead>
                         <tr>
@@ -79,8 +78,8 @@ const OneClass = ({
                         </tr>
                      </thead>
                      <tbody>
-                        {users.length > 0 &&
-                           users.map((user) => (
+                        {classInfo.students.length > 0 &&
+                           classInfo.students.map((user) => (
                               <tr key={user._id}>
                                  <td>{user.studentnumber}</td>
                                  <td>{user.lastname + ", " + user.name}</td>
@@ -119,12 +118,12 @@ const OneClass = ({
                      <>
                         <Link
                            to={
-                              users.length > 0
+                              classInfo.students.length > 0
                                  ? `/grades/${classInfo._id}`
                                  : "!#"
                            }
                            className={
-                              users.length > 0
+                              classInfo.students.length > 0
                                  ? "btn btn-primary"
                                  : "btn btn-black"
                            }
@@ -139,12 +138,12 @@ const OneClass = ({
                         </Link>
                         <Link
                            to={
-                              users.length > 0
+                              classInfo.students.length > 0
                                  ? `/attendance/${classInfo._id}`
                                  : "!#"
                            }
                            className={
-                              users.length > 0
+                              classInfo.students.length > 0
                                  ? "btn btn-primary"
                                  : "btn btn-black"
                            }
@@ -159,9 +158,15 @@ const OneClass = ({
                      </>
                   )}
                   <Link
-                     to={users.length > 0 ? `/chat/${classInfo._id}` : "!#"}
+                     to={
+                        classInfo.students.length > 0
+                           ? `/chat/${classInfo._id}`
+                           : "!#"
+                     }
                      className={
-                        users.length > 0 ? "btn btn-primary" : "btn btn-black"
+                        classInfo.students.length > 0
+                           ? "btn btn-primary"
+                           : "btn btn-black"
                      }
                      onClick={() => {
                         clearPosts();
@@ -188,7 +193,7 @@ const OneClass = ({
                         <i className="fas fa-scroll"></i>
                      </button>
                      <Link
-                        to={`/edit-class/${classInfo._id}`}
+                        to={`/edit-class/${classInfo._id}/${classInfo.category._id}`}
                         className="btn btn-light"
                         onClick={() => {
                            window.scroll(0, 0);
@@ -219,7 +224,6 @@ const OneClass = ({
 
 OneClass.propTypes = {
    classes: PropTypes.object.isRequired,
-   users: PropTypes.object.isRequired,
    loadClass: PropTypes.func.isRequired,
    deleteClass: PropTypes.func.isRequired,
    updatePreviousPage: PropTypes.func.isRequired,
@@ -234,7 +238,6 @@ OneClass.propTypes = {
 
 const mapStateToProps = (state) => ({
    classes: state.classes,
-   users: state.users,
    auth: state.auth,
 });
 

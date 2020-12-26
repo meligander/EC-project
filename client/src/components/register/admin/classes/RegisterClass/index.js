@@ -17,24 +17,34 @@ const RegisterClass = ({
    loadClass,
    loadUsers,
    loadCategories,
-   users: { loadingUsersBK },
+   users: { loadingUsers, loadingUsersBK },
 }) => {
    const registerClass = location.pathname === "/register-class";
 
    useEffect(() => {
       if (!registerClass) {
-         if (loadingUsersBK) loadClass(match.params.id);
+         if (loadingUsersBK && loadingUsers) loadClass(match.params.id);
       }
+      console.log(loadingUsersBK);
       if (loadingUsersBK) {
          loadCategories(true);
          loadUsers({ type: "Profesor", active: true }, false);
+         if (!registerClass && loadingUsers) {
+            loadUsers({
+               type: "Alumno",
+               active: true,
+               classroom: "null",
+               category: match.params.category_id,
+            });
+         }
       }
    }, [
+      loadingUsers,
       loadClass,
       loadCategories,
       loadUsers,
       registerClass,
-      match.params.id,
+      match.params,
       loadingUsersBK,
    ]);
 

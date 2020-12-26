@@ -83,21 +83,13 @@ export const registerExpence = (formData, history, user_id) => async (
 ) => {
    dispatch(updateLoadingSpinner(true));
 
-   const config = {
-      headers: {
-         "Content-Type": "application/json",
-      },
-   };
-
    try {
-      let expence = JSON.stringify(formData);
-
-      await axios.post("/api/expence", expence, config);
+      await axios.post("/api/expence", formData);
 
       dispatch({
          type: EXPENCE_REGISTERED,
       });
-      dispatch(setAlert("Gasto/Ingreso Registrado", "success", "1"));
+      dispatch(setAlert("Gasto/Ingreso Registrado", "success", "1", 7000));
       history.push(`/dashboard/${user_id}`);
       dispatch(clearRegisters());
    } catch (err) {
@@ -164,15 +156,7 @@ export const updateExpenceTypes = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      let expencetypes = JSON.stringify(formData);
-
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
-      const res = await axios.post("/api/expence-type", expencetypes, config);
+      const res = await axios.post("/api/expence-type", formData);
 
       dispatch({
          type: EXPENCETYPES_UPDATED,
@@ -230,15 +214,8 @@ export const deleteExpenceType = (toDelete) => async (dispatch) => {
 
 export const transactionsPDF = (transactions) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
-   let transaction = JSON.stringify(transactions);
    try {
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
-      await axios.post("/api/expence/create-list", transaction, config);
+      await axios.post("/api/expence/create-list", transactions);
 
       const pdf = await axios.get("/api/expence/fetch-list", {
          responseType: "blob",

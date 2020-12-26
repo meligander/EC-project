@@ -86,7 +86,6 @@ const Dashboard = ({
          {!loading ? (
             <>
                {loadingSpinner && <Loading />}
-               <Alert type="1" />
                <Confirm
                   setToggleModal={setToggle}
                   toggleModal={toggleModal}
@@ -94,6 +93,7 @@ const Dashboard = ({
                   text="¿Está seguro que desea eliminar el usuario?"
                />
                {user._id !== userLogged._id && <GoBack />}
+               <Alert type="1" />
                <div className="mt-1">
                   <div className="profile-top bg-primary p-3">
                      <div className="img-about m-1">

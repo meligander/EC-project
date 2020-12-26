@@ -16,6 +16,7 @@ import {
    clearCategories,
 } from "../../../../../actions/category";
 import { updatePageNumber } from "../../../../../actions/mixvalues";
+import { clearProfile } from "../../../../../actions/user";
 
 import Loading from "../../../../modal/Loading";
 import ListButtons from "../sharedComp/ListButtons";
@@ -30,6 +31,7 @@ const EnrollmentList = ({
    loadEnrollments,
    clearEnrollment,
    clearCategories,
+   clearProfile,
    deleteEnrollment,
    loadCategories,
    updatePageNumber,
@@ -203,9 +205,18 @@ const EnrollmentList = ({
                                        </td>
                                        <td>{enroll.student.studentnumber}</td>
                                        <td>
-                                          {enroll.student.lastname +
-                                             ", " +
-                                             enroll.student.name}
+                                          <Link
+                                             className="btn-text"
+                                             to={`/dashboard/${enroll.student._id}`}
+                                             onClick={() => {
+                                                window.scroll(0, 0);
+                                                clearProfile();
+                                             }}
+                                          >
+                                             {enroll.student.lastname +
+                                                ", " +
+                                                enroll.student.name}
+                                          </Link>
                                        </td>
                                        <td>{enroll.category.name}</td>
                                        <td>{enroll.year}</td>
@@ -262,6 +273,7 @@ EnrollmentList.propTypes = {
    deleteEnrollment: PropTypes.func.isRequired,
    clearEnrollment: PropTypes.func.isRequired,
    clearCategories: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
    enrollmentsPDF: PropTypes.func.isRequired,
 };
 
@@ -278,5 +290,6 @@ export default connect(mapStatetoProps, {
    deleteEnrollment,
    clearEnrollment,
    clearCategories,
+   clearProfile,
    enrollmentsPDF,
 })(EnrollmentList);

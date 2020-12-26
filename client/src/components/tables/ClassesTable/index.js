@@ -3,7 +3,13 @@ import Moment from "react-moment";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-const ClassesTable = ({ classes, clearClass, clearSearch, all = true }) => {
+const ClassesTable = ({
+   classes,
+   clearClass,
+   clearSearch,
+   clearProfile,
+   all = true,
+}) => {
    return (
       <div className="wrapper">
          <table>
@@ -28,9 +34,18 @@ const ClassesTable = ({ classes, clearClass, clearSearch, all = true }) => {
                         <tr key={classItem._id}>
                            {all && (
                               <td>
-                                 {classItem.teacher.lastname +
-                                    ", " +
-                                    classItem.teacher.name}
+                                 <Link
+                                    to={`/dashboard/${classItem.teacher._id}`}
+                                    className="btn-text"
+                                    onClick={() => {
+                                       clearProfile();
+                                       window.scroll(0, 0);
+                                    }}
+                                 >
+                                    {classItem.teacher.lastname +
+                                       ", " +
+                                       classItem.teacher.name}
+                                 </Link>
                               </td>
                            )}
                            <td>{classItem.category.name}</td>
@@ -86,6 +101,7 @@ ClassesTable.propTypes = {
    classes: PropTypes.array.isRequired,
    all: PropTypes.bool,
    clearClass: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func,
    clearSearch: PropTypes.func.isRequired,
 };
 

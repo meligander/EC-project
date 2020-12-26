@@ -111,15 +111,8 @@ export const registerInvoice = (
 ) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
-   let invoice = JSON.stringify(formData);
-
-   const config = {
-      headers: {
-         "Content-Type": "application/json",
-      },
-   };
    try {
-      await axios.post("/api/invoice", invoice, config);
+      await axios.post("/api/invoice", formData);
 
       dispatch({
          type: INVOICE_REGISTERED,
@@ -163,16 +156,9 @@ export const registerInvoice = (
 
 export const invoicesPDF = (invoices) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
-   let invoice = JSON.stringify(invoices);
 
    try {
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
-      await axios.post("/api/invoice/create-list", invoice, config);
+      await axios.post("/api/invoice/create-list", invoices);
 
       const pdf = await axios.get("/api/invoice/list/fetch-list", {
          responseType: "blob",
@@ -206,21 +192,13 @@ export const invoicesPDF = (invoices) => async (dispatch) => {
 export const invoicePDF = (invoice, remaining) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
-   let invoiceDetails = JSON.stringify({ invoice, remaining });
-
    const name =
       !invoice.lastname || invoice.lastname === ""
          ? `${invoice.user.lastname}, ${invoice.user.name}`
          : `${invoice.lastname}, ${invoice.name}`;
 
    try {
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
-      await axios.post("/api/invoice/create-invoice", invoiceDetails, config);
+      await axios.post("/api/invoice/create-invoice", { invoice, remaining });
 
       const pdf = await axios.get("/api/invoice/for-print/fetch-invoice", {
          responseType: "blob",

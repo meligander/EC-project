@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import moment from "moment";
 import PropTypes from "prop-types";
 
@@ -11,6 +12,7 @@ import {
    getTotalDebt,
    updatePageNumber,
 } from "../../../../../actions/mixvalues";
+import { clearProfile } from "../../../../../actions/user";
 
 import Loading from "../../../../modal/Loading";
 import ListButtons from "../sharedComp/ListButtons";
@@ -22,6 +24,7 @@ const InstallmentList = ({
    loadInstallments,
    getTotalDebt,
    updatePageNumber,
+   clearProfile,
    installmentsPDF,
 }) => {
    const [filterData, setFilterData] = useState({
@@ -147,9 +150,18 @@ const InstallmentList = ({
                                  i < (page + 1) * 10 && (
                                     <tr key={installment._id}>
                                        <td>
-                                          {installment.student.lastname +
-                                             ", " +
-                                             installment.student.name}
+                                          <Link
+                                             to={`/dashboard/${installment.student._id}`}
+                                             className="btn-text"
+                                             onClick={() => {
+                                                window.scroll(0, 0);
+                                                clearProfile();
+                                             }}
+                                          >
+                                             {installment.student.lastname +
+                                                ", " +
+                                                installment.student.name}
+                                          </Link>
                                        </td>
                                        <td>
                                           {installmentName[installment.number]}
@@ -191,6 +203,7 @@ InstallmentList.propTypes = {
    getTotalDebt: PropTypes.func.isRequired,
    updatePageNumber: PropTypes.func.isRequired,
    installmentsPDF: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStatetoProps = (state) => ({
@@ -203,4 +216,5 @@ export default connect(mapStatetoProps, {
    getTotalDebt,
    updatePageNumber,
    installmentsPDF,
+   clearProfile,
 })(InstallmentList);

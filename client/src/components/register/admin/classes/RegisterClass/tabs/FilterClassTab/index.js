@@ -31,13 +31,13 @@ const FilterClassTab = ({
    });
 
    useEffect(() => {
-      if (!registerClass && !loading) {
+      if (!registerClass && !loading && category._id === "") {
          setCategory({
             _id: classInfo.category._id,
             name: classInfo.category.name,
          });
       }
-   }, [classInfo, registerClass, loading]);
+   }, [classInfo, registerClass, loading, category._id]);
 
    const filterStudents = (e) => {
       e.preventDefault();
@@ -111,7 +111,10 @@ const FilterClassTab = ({
             <div className="text-right">
                <button
                   onClick={filterStudents}
-                  className="btn btn-primary my-1"
+                  className={`btn ${
+                     registerClass ? "btn-primary" : "btn-black"
+                  } my-1`}
+                  disabled={!registerClass}
                >
                   Buscar Alumnos
                </button>

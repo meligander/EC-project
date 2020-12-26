@@ -16,26 +16,26 @@ const Attendance = ({
    classes: { loading, classInfo },
    loadAttendances,
    loadClass,
-   attendance,
+   attendances,
 }) => {
    useEffect(() => {
       if (loading) {
          loadClass(match.params.id);
       }
-      if (attendance.loading) {
+      if (attendances.loading) {
          loadAttendances(match.params.id);
       }
    }, [
       match.params.id,
       loadClass,
       loadAttendances,
-      attendance.loading,
+      attendances.loading,
       loading,
    ]);
 
    return (
       <>
-         {!attendance.loading ? (
+         {!attendances.loading ? (
             <>
                <h1 className="text-center light-font p-1 mt-2">
                   Inasistencias
@@ -67,14 +67,14 @@ const Attendance = ({
 
 Attendance.propTypes = {
    classes: PropTypes.object.isRequired,
-   attendance: PropTypes.object.isRequired,
+   attendances: PropTypes.object.isRequired,
    loadClass: PropTypes.func.isRequired,
    loadAttendances: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    classes: state.classes,
-   attendance: state.attendance,
+   attendances: state.attendances,
 });
 
 export default connect(mapStateToProps, {

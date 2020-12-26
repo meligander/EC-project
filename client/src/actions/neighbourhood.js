@@ -58,19 +58,7 @@ export const updateNeighbourhoods = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      let neighbourhoods = JSON.stringify(formData);
-
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
-      const res = await axios.post(
-         "/api/neighbourhood",
-         neighbourhoods,
-         config
-      );
+      const res = await axios.post("/api/neighbourhood", formData);
 
       dispatch({
          type: NEIGHBOURHOODS_UPDATED,

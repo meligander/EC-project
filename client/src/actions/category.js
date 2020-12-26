@@ -38,16 +38,9 @@ export const updateCategories = (formData, history, user_id) => async (
    dispatch
 ) => {
    dispatch(updateLoadingSpinner(true));
-   let categories = JSON.stringify(formData);
-
-   const config = {
-      headers: {
-         "Content-Type": "application/json",
-      },
-   };
 
    try {
-      await axios.put("/api/category", categories, config);
+      await axios.put("/api/category", formData);
 
       dispatch({
          type: CATEGORIES_UPDATED,
@@ -90,16 +83,8 @@ export const updateCategories = (formData, history, user_id) => async (
 export const categoriesPDF = (categories) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
-   let category = JSON.stringify(categories);
-
    try {
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
-      await axios.post("/api/category/create-list", category, config);
+      await axios.post("/api/category/create-list", categories);
 
       const pdf = await axios.get("/api/category/fetch-list", {
          responseType: "blob",

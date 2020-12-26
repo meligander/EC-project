@@ -6,6 +6,10 @@
    font-size: $default-font-size;
    justify-content: space-around;
 
+   &.row {
+      max-width: 100%;
+   }
+
    & > * {
       padding: 4rem;
    }

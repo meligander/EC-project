@@ -99,14 +99,7 @@ export const loadGradeTypes = () => async (dispatch) => {
 export const registerNewGrade = (newGrade) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      let grade = JSON.stringify(newGrade);
-
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-      const res = await axios.post("/api/grade", grade, config);
+      const res = await axios.post("/api/grade", newGrade);
 
       dispatch({
          type: NEW_GRADE_REGISTERED,
@@ -168,14 +161,7 @@ export const updateGrades = (formData, history, class_id) => async (
 ) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      let grades = JSON.stringify(formData);
-
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-      const res = await axios.post("/api/grade/period", grades, config);
+      const res = await axios.post("/api/grade/period", formData);
       dispatch({
          type: GRADES_UPDATED,
          payload: res.data,
@@ -209,14 +195,7 @@ export const updateGradeTypes = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      let gradetypes = JSON.stringify(formData);
-
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-      const res = await axios.post("/api/grade-type", gradetypes, config);
+      const res = await axios.post("/api/grade-type", formData);
 
       dispatch({
          type: GRADETYPES_UPDATED,
@@ -282,24 +261,17 @@ export const gradesPDF = (
 ) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
-   let tableInfo = JSON.stringify({
+   let tableInfo = {
       students,
       header,
       periods,
       classInfo,
       period,
-   });
+   };
 
    try {
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
-      if (all)
-         await axios.post("/api/grade/all/create-list", tableInfo, config);
-      else await axios.post("/api/grade/create-list", tableInfo, config);
+      if (all) await axios.post("/api/grade/all/create-list", tableInfo);
+      else await axios.post("/api/grade/create-list", tableInfo);
 
       const pdf = await axios.get("/api/grade/list/fetch-list", {
          responseType: "blob",
@@ -345,36 +317,25 @@ export const certificatePDF = (
    dispatch(updateLoadingSpinner(true));
 
    try {
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
       for (let x = 0; x < students.length; x++) {
          const period = periods[x];
          const student = students[x];
 
-         const info = JSON.stringify({
+         const info = {
             student,
             header,
             period,
             classInfo,
             certificateDate,
-         });
+         };
 
          if (periodNumber === 6) {
             await axios.post(
                "/api/grade/certificate-cambridge/create-list",
-               info,
-               config
+               info
             );
          } else {
-            await axios.post(
-               "/api/grade/certificate/create-list",
-               info,
-               config
-            );
+            await axios.post("/api/grade/certificate/create-list", info);
          }
 
          const pdf = await axios.get("/api/grade/certificate/fetch-list", {

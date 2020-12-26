@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter, Link } from "react-router-dom";
 import { connect } from "react-redux";
 import moment from "moment";
 import PropTypes from "prop-types";
 
-import { clearSearch } from "../../../../../../../actions/user";
+import { clearProfile, clearSearch } from "../../../../../../../actions/user";
 import { registerInvoice } from "../../../../../../../actions/invoice";
 import { removeInstallmentFromList } from "../../../../../../../actions/installment";
 import { setAlert } from "../../../../../../../actions/alert";
@@ -23,6 +23,7 @@ const InvoiceTab = ({
    clearSearch,
    setAlert,
    registerInvoice,
+   clearProfile,
    removeInstallmentFromList,
 }) => {
    const [otherValues, setOtherValues] = useState({
@@ -289,6 +290,16 @@ const InvoiceTab = ({
                               disabled
                               id="full-name"
                            />
+                           <Link
+                              onClick={() => {
+                                 window.scroll(0, 0);
+                                 clearProfile();
+                              }}
+                              className="btn-cancel search"
+                              to={`/dashboard/${selectedUser._id}`}
+                           >
+                              <i className="fas fa-search"></i>
+                           </Link>
                            <button
                               onClick={(e) => {
                                  e.preventDefault();
@@ -421,6 +432,7 @@ InvoiceTab.propTypes = {
    registerInvoice: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
    removeInstallmentFromList: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -434,4 +446,5 @@ export default connect(mapStateToProps, {
    setAlert,
    registerInvoice,
    removeInstallmentFromList,
+   clearProfile,
 })(withRouter(InvoiceTab));

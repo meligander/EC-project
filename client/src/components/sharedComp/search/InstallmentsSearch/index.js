@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { withRouter } from "react-router-dom";
+import { withRouter, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import { setAlert } from "../../../../actions/alert";
@@ -10,7 +10,7 @@ import {
    clearInstallment,
    addInstallment,
 } from "../../../../actions/installment";
-import { clearSearch } from "../../../../actions/user";
+import { clearSearch, clearProfile } from "../../../../actions/user";
 
 import StudentSearch from "../StudentSearch";
 import InstallmentsTable from "../../../tables/InstallmentsTable";
@@ -25,6 +25,7 @@ const InstallmentsSearch = ({
    clearUserInstallments,
    clearInstallment,
    clearSearch,
+   clearProfile,
    addInstallment,
    student,
    setAlert,
@@ -152,9 +153,18 @@ const InstallmentsSearch = ({
             />
          </div>
          <div className="btn-end mb-3">
-            <p className="paragraph">
-               <span className="text-dark heading-tertiary">Alumno: </span>
-               {selectedStudent.name}
+            <p className="heading-tertiary">
+               <span className="text-dark">Alumno: </span> &nbsp;&nbsp;
+               <Link
+                  to={`/dashboard/${selectedStudent._id}`}
+                  className="btn-text"
+                  onClick={() => {
+                     clearProfile();
+                     window.scroll(0, 0);
+                  }}
+               >
+                  {selectedStudent.name}
+               </Link>
             </p>
 
             {selectedStudent._id !== "" && (
@@ -193,6 +203,7 @@ InstallmentsSearch.propTypes = {
    clearUserInstallments: PropTypes.func.isRequired,
    clearInstallment: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -205,5 +216,6 @@ export default connect(mapStateToProps, {
    clearUserInstallments,
    clearInstallment,
    clearSearch,
+   clearProfile,
    addInstallment,
 })(withRouter(InstallmentsSearch));

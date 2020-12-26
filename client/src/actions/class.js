@@ -3,7 +3,7 @@ import axios from "axios";
 import { saveAs } from "file-saver";
 
 import { clearValues, updateLoadingSpinner } from "./mixvalues";
-import { loadClassStudents, addUserToList, removeUserFromList } from "./user";
+import { addUserToList, removeUserFromList } from "./user";
 import { setAlert } from "./alert";
 
 import {
@@ -16,6 +16,8 @@ import {
    CLASS_CLEARED,
    CLASSES_CLEARED,
    CLASS_ERROR,
+   CLASSSTUDENTS_LOADED,
+   CLASSSTUDENTS_ERROR,
    CLASSSTUDENT_ADDED,
    CLASSSTUDENT_REMOVED,
 } from "./types";
@@ -42,7 +44,6 @@ export const loadUsersClass = (user_id) => async (dispatch) => {
 export const loadClass = (class_id, post = false) => async (dispatch) => {
    //post: to start the spinner when we get to the chat, and finish it when the posts are loaded
    if (post) dispatch(updateLoadingSpinner(true));
-
    try {
       if (class_id === "0") {
          dispatch({
@@ -66,6 +67,29 @@ export const loadClass = (class_id, post = false) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
+   }
+};
+
+export const loadClassStudents = (class_id, loading) => async (dispatch) => {
+   try {
+      const res = await axios.get(
+         `/api/users?type=Alumno&classroom=${class_id}`
+      );
+      dispatch({
+         type: CLASSSTUDENTS_LOADED,
+         payload: res.data,
+      });
+      if (loading) dispatch(updateLoadingSpinner(false));
+   } catch (err) {
+      dispatch({
+         type: CLASSSTUDENTS_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      if (loading) dispatch(updateLoadingSpinner(false));
    }
 };
 
@@ -112,20 +136,12 @@ export const registerUpdateClass = (formData, history, class_id = 0) => async (
 ) => {
    dispatch(updateLoadingSpinner(true));
 
-   let newClass = JSON.stringify(formData);
-
-   const config = {
-      headers: {
-         "Content-Type": "application/json",
-      },
-   };
-
    try {
       let res = {};
       if (class_id === 0) {
-         res = await axios.post("/api/class", newClass, config);
+         res = await axios.post("/api/class", formData);
       } else {
-         res = await axios.put(`/api/class/${class_id}`, newClass, config);
+         res = await axios.put(`/api/class/${class_id}`, formData);
       }
 
       dispatch({
@@ -212,19 +228,13 @@ export const deleteClass = (class_id, history) => async (dispatch) => {
 export const classPDF = (classInfo, type) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
-   let tableInfo = JSON.stringify(classInfo);
    try {
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
       let pdf;
       let name = "";
 
       switch (type) {
          case "classes":
-            await axios.post("/api/class/create-list", tableInfo, config);
+            await axios.post("/api/class/create-list", classInfo);
 
             pdf = await axios.get("/api/class/list/fetch-list", {
                responseType: "blob",
@@ -232,11 +242,7 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
             name = "Cursos";
             break;
          case "class":
-            await axios.post(
-               "/api/class/oneclass/create-list",
-               classInfo,
-               config
-            );
+            await axios.post("/api/class/oneclass/create-list", classInfo);
 
             pdf = await axios.get("/api/class/oneclass/fetch-list", {
                responseType: "blob",
@@ -246,7 +252,7 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
             } ${classInfo.category.name} `;
             break;
          case "blank":
-            await axios.post("/api/class/blank/create-list", tableInfo, config);
+            await axios.post("/api/class/blank/create-list", classInfo);
 
             pdf = await axios.get("/api/class/blank/fetch-list", {
                responseType: "blob",

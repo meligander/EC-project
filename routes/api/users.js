@@ -50,6 +50,7 @@ router.get("/", auth, async (req, res) => {
                         filter.classroom = null;
                      else filter.classroom = req.query.classroom;
                   }
+
                   if (req.query.category) {
                      const date = new Date();
                      const enrollments = await Enrollment.find({
@@ -614,7 +615,7 @@ router.put(
             }
          }
 
-         if (!active) await inactivate(user._id, type);
+         if (!active) await inactivateUser(user._id, type);
 
          let data = {
             name,
@@ -642,7 +643,7 @@ router.put(
          };
 
          if (discount) {
-            if (discount.toString() !== user.discount.toString()) {
+            if (discount !== user.discount) {
                const date = new Date();
                const month = date.getMonth() + 1;
                const yearl = date.getFullYear();
@@ -655,7 +656,7 @@ router.put(
                   let installments = await Installment.find({
                      enrollment: enrollments[x]._id,
                      value: { $ne: 0 },
-                     ...(enrollments[x].year === yearl.toString() && {
+                     ...(enrollments[x].year === yearl && {
                         number: { $gte: month },
                      }),
                   });
@@ -783,7 +784,7 @@ function deletePictures(img) {
    });
 }
 
-async function inactivate(user_id, type) {
+async function inactivateUser(user_id, type) {
    switch (type) {
       case "Alumno":
          const date = new Date();
@@ -802,7 +803,7 @@ async function inactivate(user_id, type) {
             await Attendance.findOneAndRemove({ _id: attendances[x]._id });
          }
 
-         const installments = await Installment.find({
+         let installments = await Installment.find({
             student: user_id,
             year,
             number: { $gt: month },
@@ -810,12 +811,45 @@ async function inactivate(user_id, type) {
          for (let x = 0; x < installments.length; x++) {
             await Installment.findOneAndRemove({ _id: installments[x]._id });
          }
+         installments = await Installment.find({
+            student: user_id,
+            year: year + 1,
+         });
+         for (let x = 0; x < installments.length; x++) {
+            await Installment.findOneAndRemove({ _id: installments[x]._id });
+         }
+
+         await Enrollment.findOneAndRemove({ student: user_id, year });
+         await Enrollment.findOneAndRemove({
+            student: user_id,
+            year: year + 1,
+         });
 
          break;
       case "Profesor":
          const classes = await Class.find({ teacher: user_id });
 
          for (let x = 0; x < classes.length; x++) {
+            const attendances = await Attendance.find({
+               classroom: classes[x]._id,
+            });
+            for (let y = 0; y < attendances.length; y++) {
+               await Attendance.findOneAndRemove({ _id: attendances[y]._id });
+            }
+
+            const grades = await Grade.find({ classroom: classes[x]._id });
+            for (let y = 0; y < grades.length; y++) {
+               await Grade.findOneAndRemove({ _id: grades[y]._id });
+            }
+
+            const users = await User.find({ classroom: classes[x]._id });
+            for (let y = 0; y < users.length; y++) {
+               await User.findOneAndUpdate(
+                  { _id: users[y]._id },
+                  { classroom: null }
+               );
+            }
+
             await Class.findOneAndRemove({ _id: classes[x]._id });
          }
          break;

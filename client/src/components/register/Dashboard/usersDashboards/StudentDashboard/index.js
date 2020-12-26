@@ -32,6 +32,9 @@ const StudentDashboard = ({
 }) => {
    const [pass, setPass] = useState(false);
 
+   const date = new Date();
+   const year = date.getFullYear();
+
    useEffect(() => {
       if (userLogged.type === "Tutor" && user.type === "Alumno") {
          for (let x = 0; x < userLogged.children.length; x++) {
@@ -231,10 +234,20 @@ const StudentDashboard = ({
                         </h3>
                         <div className="pb-2">
                            {usersInstallments.rows.length > 0 ? (
-                              <InstallmentsTable
-                                 installments={usersInstallments}
-                                 forAdmin={false}
-                              />
+                              <>
+                                 {usersInstallments.rows[0][0].year !==
+                                 year + 1 ? (
+                                    <InstallmentsTable
+                                       installments={usersInstallments}
+                                       forAdmin={false}
+                                    />
+                                 ) : (
+                                    <p className="heading-tertiary text-center">
+                                       No hay ninguna cuota registrada del
+                                       corriente año
+                                    </p>
+                                 )}
+                              </>
                            ) : (
                               <p className="heading-tertiary text-center">
                                  No hay ninguna cuota registrada

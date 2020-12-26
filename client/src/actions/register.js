@@ -81,15 +81,7 @@ export const closeRegister = (formData, user_id, history) => async (
             register[prop] = formData[prop];
       }
 
-      register = JSON.stringify(register);
-
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
-      await axios.put("/api/register", register, config);
+      await axios.put("/api/register", register);
 
       dispatch({
          type: REGISTER_CLOSED,
@@ -97,7 +89,7 @@ export const closeRegister = (formData, user_id, history) => async (
 
       history.push(`/dashboard/${user_id}`);
       dispatch(clearRegisters());
-      dispatch(setAlert("Caja del día Cerrada", "success", "1"));
+      dispatch(setAlert("Caja del día Cerrada", "success", "1", 7000));
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;
@@ -149,16 +141,8 @@ export const deleteRegister = (register_id) => async (dispatch) => {
 export const registerPDF = (registers) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
-   let register = JSON.stringify(registers);
-
    try {
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
-      await axios.post("/api/register/create-list", register, config);
+      await axios.post("/api/register/create-list", registers);
 
       const pdf = await axios.get("/api/register/fetch-list", {
          responseType: "blob",

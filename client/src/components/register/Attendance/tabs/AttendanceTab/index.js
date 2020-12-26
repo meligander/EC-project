@@ -16,7 +16,7 @@ import Confirm from "../../../../modal/Confirm";
 const AttendanceTab = ({
    history,
    classes: { classInfo },
-   attendance: {
+   attendances: {
       attendances: { header, students, periods },
       loading,
    },
@@ -279,7 +279,7 @@ const AttendanceTab = ({
 
 AttendanceTab.propTypes = {
    classes: PropTypes.object.isRequired,
-   attendance: PropTypes.object.isRequired,
+   attendances: PropTypes.object.isRequired,
    registerNewDate: PropTypes.func.isRequired,
    updateAttendances: PropTypes.func.isRequired,
    deleteDate: PropTypes.func.isRequired,
@@ -290,7 +290,7 @@ AttendanceTab.propTypes = {
 
 const mapStateToProps = (state) => ({
    classes: state.classes,
-   attendance: state.attendance,
+   attendances: state.attendances,
 });
 
 export default connect(mapStateToProps, {

@@ -149,15 +149,8 @@ export const deletePost = (post_id) => async (dispatch) => {
 export const addPost = (formData, class_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
-   const config = {
-      headers: {
-         "Content-Type": "application/json",
-      },
-   };
    try {
-      let post = JSON.stringify(formData);
-
-      const res = await axios.post(`/api/posts/${class_id}`, post, config);
+      const res = await axios.post(`/api/posts/${class_id}`, formData);
 
       dispatch({
          type: POST_ADDED,
@@ -200,19 +193,8 @@ export const addComment = (post_id, formData, screen) => async (dispatch) => {
 
    dispatch(updateLoadingSpinner(true));
 
-   const config = {
-      headers: {
-         "Content-Type": "application/json",
-      },
-   };
    try {
-      let comment = JSON.stringify(formData);
-
-      const res = await axios.post(
-         `/api/posts/comment/${post_id}`,
-         comment,
-         config
-      );
+      const res = await axios.post(`/api/posts/comment/${post_id}`, formData);
 
       dispatch({
          type: COMMENT_ADDED,

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { clearSearch } from "../../../../../../../actions/user";
+import { clearSearch, clearProfile } from "../../../../../../../actions/user";
 import { setAlert } from "../../../../../../../actions/alert";
 
 import ChosenChildrenTable from "../../../../../../tables/ChosenChildrenTable";
@@ -13,6 +13,7 @@ const TutorInfo = ({
    children,
    setAlert,
    clearSearch,
+   clearProfile,
    isAdmin,
 }) => {
    const [selectedStudent, setSelectedStudent] = useState({
@@ -67,6 +68,7 @@ const TutorInfo = ({
             <ChosenChildrenTable
                children={children}
                deleteChild={deleteChild}
+               clearProfile={clearProfile}
             />
          )}
       </div>
@@ -78,9 +80,11 @@ TutorInfo.propTypes = {
    setChildren: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 export default connect(null, {
    setAlert,
    clearSearch,
+   clearProfile,
 })(TutorInfo);

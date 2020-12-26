@@ -83,7 +83,7 @@ const RegisterUser = ({
       school: "",
       children: [],
       description: "",
-      discount: "",
+      discount: 0,
       chargeday: 0,
       img: {
          public_id: "",
@@ -327,7 +327,7 @@ const RegisterUser = ({
                      question: "¿Está seguro que desea inactivar al usuario?",
                      info: `No se le permitirá el ingreso a la página${
                         type === "Alumno"
-                           ? ", se borrarán notas, asistencias, cuotas y se lo quitará de la clase."
+                           ? ", se borrarán notas, asistencias, cuotas, inscripción y se lo quitará de la clase."
                            : type === "Profesor"
                            ? " y se borrarán todas las clases en las que está asignado como profesor."
                            : "."

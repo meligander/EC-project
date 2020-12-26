@@ -9,7 +9,11 @@ import {
    classPDF,
 } from "../../../../../actions/class";
 import { loadCategories } from "../../../../../actions/category";
-import { loadUsers, clearSearch } from "../../../../../actions/user";
+import {
+   loadUsers,
+   clearSearch,
+   clearProfile,
+} from "../../../../../actions/user";
 
 import ClassesTable from "../../../../tables/ClassesTable";
 import Loading from "../../../../modal/Loading";
@@ -24,6 +28,7 @@ const Classes = ({
    loadCategories,
    classPDF,
    clearClass,
+   clearProfile,
    clearSearch,
 }) => {
    const [filterForm, setfilterForm] = useState({
@@ -142,6 +147,7 @@ const Classes = ({
                         all={true}
                         clearClass={clearClass}
                         clearSearch={clearSearch}
+                        clearProfile={clearProfile}
                      />
                   )}
                </div>
@@ -184,6 +190,7 @@ Classes.propTypes = {
    loadUsers: PropTypes.func.isRequired,
    loadCategories: PropTypes.func.isRequired,
    classPDF: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
    clearClass: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
 };
@@ -202,4 +209,5 @@ export default connect(mapStateToProps, {
    classPDF,
    clearClass,
    clearSearch,
+   clearProfile,
 })(Classes);

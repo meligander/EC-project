@@ -36,14 +36,7 @@ export const updateTowns = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      let towns = JSON.stringify(formData);
-      const config = {
-         headers: {
-            "Content-Type": "application/json",
-         },
-      };
-
-      const res = await axios.post("/api/town", towns, config);
+      const res = await axios.post("/api/town", formData);
 
       dispatch({
          type: TOWNS_UPDATED,

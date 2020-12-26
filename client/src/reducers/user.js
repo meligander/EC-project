@@ -6,13 +6,14 @@ import {
    REGISTER_SUCCESS,
    USER_UPDATED,
    USER_DELETED,
+   USERFORLIST_ADDED,
+   USERFROMLIST_REMOVED,
    USERS_CLEARED,
    USER_CLEARED,
    SEARCH_CLEARED,
    USERS_ERROR,
    USER_ERROR,
-   USERFORLIST_ADDED,
-   USERFROMLIST_REMOVED,
+   USERSBK_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -109,6 +110,11 @@ export default function (state = initialState, action) {
             ...state,
             users: [],
             loadingUsers: false,
+            error: payload,
+         };
+      case USERSBK_ERROR:
+         return {
+            ...state,
             usersBK: [],
             loadingUsersBK: true,
             error: payload,
