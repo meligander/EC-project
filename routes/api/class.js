@@ -10,7 +10,6 @@ const pdfTemplate = require("../../templates/list");
 const pdfTemplate2 = require("../../templates/classInfo");
 
 const Class = require("../../models/Class");
-const User = require("../../models/User");
 const Enrollment = require("../../models/Enrollment");
 const Attendance = require("../../models/Attendance");
 const Grade = require("../../models/Grade");
@@ -95,18 +94,21 @@ router.get("/:class_id", auth, async (req, res) => {
 });
 
 //@route    GET api/class/user/:id
-//@desc     Get logged user's class
+//@desc     Get a user's class
 //@access   Private
 router.get("/user/:id", auth, async (req, res) => {
    try {
       const date = new Date();
-      let user = await User.findOne({ _id: req.params.id });
+
+      let enroll = await Enrollment.findOne({ student: req.params.id });
+
       let classinfo = await Class.findOne({
-         _id: user.classroom,
+         _id: enroll.classroom._id,
          year: date.getFullYear(),
       })
          .populate("category", ["name"])
          .populate("teacher", ["name", "lastname"]);
+
       if (!classinfo) {
          return res
             .status(400)
@@ -119,6 +121,110 @@ router.get("/user/:id", auth, async (req, res) => {
       return res.status(500).send("Server Error");
    }
 });
+
+//@route    GET api/class/list/fetch-list
+//@desc     Get the pdf of classes
+//@access   Private
+router.get("/list/fetch-list", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/classes.pdf"));
+});
+
+//@route    GET api/class/oneclass/fetch-list
+//@desc     Get the pdf of a class
+//@access   Private
+router.get("/oneclass/fetch-list", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/class.pdf"));
+});
+
+//@route    GET api/attendance/blank/fetch-list
+//@desc     Get the pdf of the class  for attendances and grades
+//@access   Private
+router.get("/blank/fetch-list", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/blank.pdf"));
+});
+
+//@route    POST api/class
+//@desc     Register a class
+//@access   Private
+router.post(
+   "/",
+   [
+      auth,
+      adminAuth,
+      check("teacher", "El profesor es necesario").not().isEmpty(),
+      check("category", "La categoría es necesaria").not().isEmpty(),
+   ],
+   async (req, res) => {
+      let {
+         teacher,
+         category,
+         classroom,
+         day1,
+         day2,
+         hourin1,
+         hourin2,
+         hourout1,
+         hourout2,
+         students,
+      } = req.body;
+
+      const date = new Date();
+      const year = date.getFullYear();
+
+      let errors = [];
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
+         return res.status(400).json({ errors });
+      }
+
+      try {
+         let hours = [hourin1, hourin2, hourout1, hourout2];
+         for (let x = 0; x < hours.length; x++) {
+            if (hours[x]) {
+               const date = moment("2000-01-01 " + hours[x]).format(
+                  "YYYY-MM-DD HH:mm"
+               );
+               hours[x] = date;
+            }
+         }
+
+         let data = {
+            teacher,
+            category,
+            ...(classroom && { classroom: classroom }),
+            ...(day1 && { day1: day1 }),
+            ...(day2 && { day2: day2 }),
+            ...(hours[0] && { hourin1: hours[0] }),
+            ...(hours[1] && { hourin2: hours[1] }),
+            ...(hours[2] && { hourout1: hours[2] }),
+            ...(hours[3] && { hourout2: hours[3] }),
+            year,
+         };
+
+         const classinfo = new Class(data);
+
+         await classinfo.save();
+
+         let lastClass = await Class.find().sort({ $natural: -1 }).limit(1);
+         const newClass = lastClass[0];
+
+         for (let x = 0; x < students.length; x++) {
+            await Enrollment.findOneAndUpdate(
+               {
+                  student: students[x]._id,
+               },
+               { "classroom._id": newClass._id }
+            );
+         }
+
+         res.json(newClass);
+      } catch (err) {
+         console.error(err.message);
+         return res.status(500).send("Server Error");
+      }
+   }
+);
 
 //@route    POST api/class/create-list
 //@desc     Create a pdf of classes
@@ -218,13 +324,6 @@ router.post("/create-list", (req, res) => {
    });
 });
 
-//@route    GET api/class/list/fetch-list
-//@desc     Get the pdf of classes
-//@access   Private
-router.get("/list/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../reports/classes.pdf"));
-});
-
 //@route    POST api/class/oneclass/create-list
 //@desc     Create a pdf of a class
 //@access   Private
@@ -292,13 +391,6 @@ router.post("/oneclass/create-list", (req, res) => {
          res.send(Promise.resolve());
       }
    );
-});
-
-//@route    GET api/class/oneclass/fetch-list
-//@desc     Get the pdf of a class
-//@access   Private
-router.get("/oneclass/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../reports/class.pdf"));
 });
 
 //@route    POST api/class/blank/create-list
@@ -372,96 +464,6 @@ router.post("/blank/create-list", (req, res) => {
    );
 });
 
-//@route    GET api/attendance/blank/fetch-list
-//@desc     Get the pdf of the class  for attendances and grades
-//@access   Private
-router.get("/blank/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../reports/blank.pdf"));
-});
-
-//@route    POST api/class
-//@desc     Register a class
-//@access   Private
-router.post(
-   "/",
-   [
-      auth,
-      adminAuth,
-      check("teacher", "El profesor es necesario").not().isEmpty(),
-      check("category", "La categoría es necesaria").not().isEmpty(),
-   ],
-   async (req, res) => {
-      let {
-         teacher,
-         category,
-         classroom,
-         day1,
-         day2,
-         hourin1,
-         hourin2,
-         hourout1,
-         hourout2,
-         students,
-      } = req.body;
-
-      const date = new Date();
-      const year = date.getFullYear();
-
-      let errors = [];
-      const errorsResult = validationResult(req);
-      if (!errorsResult.isEmpty()) {
-         errors = errorsResult.array();
-         return res.status(400).json({ errors });
-      }
-
-      try {
-         let hours = [hourin1, hourin2, hourout1, hourout2];
-         for (let x = 0; x < hours.length; x++) {
-            if (hours[x]) {
-               const date = moment("2000-01-01 " + hours[x]).format(
-                  "YYYY-MM-DD HH:mm"
-               );
-               hours[x] = date;
-            }
-         }
-
-         let data = {
-            teacher,
-            category,
-            ...(classroom && { classroom: classroom }),
-            ...(day1 && { day1: day1 }),
-            ...(day2 && { day2: day2 }),
-            ...(hours[0] && { hourin1: hours[0] }),
-            ...(hours[1] && { hourin2: hours[1] }),
-            ...(hours[2] && { hourout1: hours[2] }),
-            ...(hours[3] && { hourout2: hours[3] }),
-            year,
-         };
-
-         const classinfo = new Class(data);
-
-         await classinfo.save();
-
-         let lastClass = await Class.find().sort({ $natural: -1 }).limit(1);
-         const newClass = lastClass[0];
-
-         for (let x = 0; x < students.length; x++) {
-            await Enrollment.findOneAndUpdate(
-               {
-                  student: students[x]._id,
-               },
-               { "classroom._id": newClass._id }
-            );
-         }
-
-         res.json(newClass);
-      } catch (err) {
-         console.error(err.message);
-         return res.status(500).send("Server Error");
-      }
-   }
-);
-
 //@route    PUT api/class/:id
 //@desc     Update a class
 //@access   Private
@@ -531,30 +533,7 @@ router.put(
             );
          }
 
-         for (let x = 0; x < toDelete.length; x++) {
-            await Enrollment.findOneAndUpdate(
-               {
-                  student: toDelete[x].student,
-               },
-               { "classroom._id": null }
-            );
-
-            const attendances = await Attendance.find({
-               user: toDelete[x].student,
-               classroom: req.params.id,
-            });
-            for (let y = 0; y < attendances.length; y++) {
-               await Attendance.findOneAndDelete({ _id: attendances[y] });
-            }
-
-            const grades = await Grade.find({
-               student: toDelete[x].student,
-               classroom: req.params.id,
-            });
-            for (let y = 0; y < grades.length; y++) {
-               await Attendance.findOneAndDelete({ _id: grades[y] });
-            }
-         }
+         await deleteInfoRelated(toDelete);
 
          const classinfo = await Class.findOneAndUpdate(
             { _id: req.params.id },
@@ -579,32 +558,11 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       await Class.findOneAndRemove({ _id: req.params.id });
 
       //Delete the property classroom form students
-      const students = await User.find({ classroom: req.params.id });
+      const enrollments = await Enrollment.find({
+         "classroom._id": req.params.id,
+      });
 
-      for (let x = 0; x < students.length; x++) {
-         await Enrollment.findOneAndUpdate(
-            {
-               student: students[x]._id,
-            },
-            { "classroom._id": null }
-         );
-
-         const attendances = await Attendance.find({
-            user: toDelete[x].student,
-            classroom: req.params.id,
-         });
-         for (let y = 0; y < attendances.length; y++) {
-            await Attendance.findOneAndDelete({ _id: attendances[y] });
-         }
-
-         const grades = await Grade.find({
-            student: toDelete[x].student,
-            classroom: req.params.id,
-         });
-         for (let y = 0; y < grades.length; y++) {
-            await Attendance.findOneAndDelete({ _id: grades[y] });
-         }
-      }
+      await deleteInfoRelated(enrollments);
 
       res.json({ msg: "Class deleted" });
    } catch (err) {
@@ -612,5 +570,32 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       res.status(500).send("Server error");
    }
 });
+
+async function deleteInfoRelated(students) {
+   for (let x = 0; x < students.length; x++) {
+      await Enrollment.findOneAndUpdate(
+         {
+            student: students[x].student,
+         },
+         { "classroom._id": null }
+      );
+
+      const attendances = await Attendance.find({
+         student: students[x].student,
+         classroom: req.params.id,
+      });
+      for (let y = 0; y < attendances.length; y++) {
+         await Attendance.findOneAndDelete({ _id: attendances[y] });
+      }
+
+      const grades = await Grade.find({
+         student: students[x].student,
+         classroom: req.params.id,
+      });
+      for (let y = 0; y < grades.length; y++) {
+         await Attendance.findOneAndDelete({ _id: grades[y] });
+      }
+   }
+}
 
 module.exports = router;

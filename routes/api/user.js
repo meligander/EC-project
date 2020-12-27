@@ -795,7 +795,7 @@ async function inactivateUser(user_id, type) {
             await Grade.findOneAndRemove({ _id: grades[x]._id });
          }
 
-         const attendances = await Attendance.find({ user: user_id });
+         const attendances = await Attendance.find({ student: user_id });
          for (let x = 0; x < attendances.length; x++) {
             await Attendance.findOneAndRemove({ _id: attendances[x]._id });
          }

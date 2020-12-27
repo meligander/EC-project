@@ -26,7 +26,8 @@ router.get("/:class_id", [auth], async (req, res) => {
          },
       })
          .populate({
-            path: "user",
+            path: "student",
+            model: "user",
             select: ["name", "lastname"],
          })
          .sort({ date: 1 });
@@ -43,17 +44,17 @@ router.get("/:class_id", [auth], async (req, res) => {
    }
 });
 
-//@route    GET api/attendance/user/:id
-//@desc     Get a user's attendances
+//@route    GET api/attendance/student/:id
+//@desc     Get a student's attendances
 //@access   Private
-router.get("/user/:id", [auth], async (req, res) => {
+router.get("/student/:id", [auth], async (req, res) => {
    try {
       const date = new Date();
       const start = new Date(date.getFullYear(), 01, 01);
       const end = new Date(date.getFullYear(), 12, 31);
 
       const attendances = await Attendance.find({
-         user: req.params.id,
+         student: req.params.id,
          date: {
             $gte: start,
             $lt: end,
@@ -70,6 +71,137 @@ router.get("/user/:id", [auth], async (req, res) => {
    } catch (err) {
       console.error(err.message);
       res.status(500).send("Server Error");
+   }
+});
+
+//@route    GET api/attendance/fetch-list
+//@desc     Get the pdf of the class attendances
+//@access   Private
+router.get("/list/fetch-list", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/attendances.pdf"));
+});
+
+//@route    POST api/attendance/period
+//@desc     Add or remove attendances from a period when save
+//@access   Private
+router.post("/period", auth, async (req, res) => {
+   const attendances = req.body;
+
+   const classroom = attendances[0][0].classroom;
+   const period = attendances[0][0].period;
+
+   const date = new Date();
+   const year = date.getFullYear();
+
+   try {
+      for (let x = 0; x < attendances.length; x++) {
+         let count = 0;
+         const student = attendances[x][0].student;
+
+         for (let y = 0; y < attendances[x].length; y++) {
+            if (attendances[x][y].inassistance) {
+               if (attendances[x][y]._id === "") {
+                  const data = {
+                     student,
+                     date: attendances[x][y].date,
+                     period,
+                     classroom,
+                  };
+                  const attendance = new Attendance(data);
+                  await attendance.save();
+               }
+               count++;
+            } else {
+               if (attendances[x][y]._id !== "") {
+                  await Attendance.findOneAndDelete({
+                     student,
+                     date: attendances[x][y].date,
+                     period,
+                     classroom,
+                  });
+               }
+            }
+         }
+
+         const filter2 = { year, student };
+
+         const enrollment = await Enrollment.findOne(filter2);
+
+         let periodAbsence = [];
+         let allAbsence = 0;
+
+         if (enrollment.periodAbsence.length === 0)
+            periodAbsence = new Array(4).fill(0);
+         else periodAbsence = [...enrollment.periodAbsence];
+
+         periodAbsence[period - 1] = parseFloat(count);
+
+         for (let y = 0; y < 4; y++) {
+            allAbsence += periodAbsence[y];
+         }
+
+         await Enrollment.findOneAndUpdate(
+            { _id: enrollment._id },
+            {
+               "classroom.periodAbsence": periodAbsence,
+               "classroom.absence": allAbsence,
+            }
+         );
+      }
+
+      res.json({ msg: "Attendances Updated" });
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server Error");
+   }
+});
+
+//@route    POST api/attendance
+//@desc     Add a date column for the period
+//@access   Private
+router.post("/", auth, async (req, res) => {
+   const { period, date, classroom } = req.body;
+
+   const data = {
+      period,
+      date: new Date(date),
+      classroom,
+   };
+
+   try {
+      let attendance = await Attendance.findOne(data);
+
+      if (attendance) {
+         return res.status(400).json({ msg: "Ya se ha agregado dicha fecha" });
+      }
+
+      attendance = new Attendance(data);
+      await attendance.save();
+
+      const date = new Date();
+      const start = new Date(date.getFullYear(), 01, 01);
+      const end = new Date(date.getFullYear(), 12, 31);
+
+      let attendances = await Attendance.find({
+         classroom,
+         date: {
+            $gte: start,
+            $lt: end,
+         },
+      })
+         .populate({
+            path: "student",
+            model: "user",
+            select: ["name", "lastname"],
+         })
+         .sort({ date: 1 });
+
+      let attendancesTable = await buildTable(attendances, classroom, res);
+
+      res.json(attendancesTable);
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server Error");
    }
 });
 
@@ -152,162 +284,16 @@ router.post("/create-list", (req, res) => {
    });
 });
 
-//@route    GET api/attendance/fetch-list
-//@desc     Get the pdf of the class attendances
-//@access   Private
-router.get("/list/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../reports/attendances.pdf"));
-});
-
-//@route    POST api/attendance
-//@desc     Add a date
-//@access   Private
-router.post("/", auth, async (req, res) => {
-   const { user, period, date, classroom } = req.body;
-
-   const data = {
-      ...(user !== undefined && user),
-      period,
-      date: new Date(date),
-      classroom,
-   };
-
-   try {
-      let attendance = await Attendance.findOne(data);
-
-      if (attendance) {
-         return res.status(400).json({ msg: "Ya se ha agregado dicha fecha" });
-      }
-
-      attendance = new Attendance(data);
-      await attendance.save();
-
-      const date = new Date();
-      const start = new Date(date.getFullYear(), 01, 01);
-      const end = new Date(date.getFullYear(), 12, 31);
-
-      let attendances = await Attendance.find({
-         classroom,
-         date: {
-            $gte: start,
-            $lt: end,
-         },
-      })
-         .populate({
-            path: "user",
-            select: ["name", "lastname"],
-         })
-         .sort({ date: 1 });
-
-      let attendancesTable = await buildTable(attendances, classroom, res);
-
-      res.json(attendancesTable);
-   } catch (err) {
-      console.error(err.message);
-      return res.status(500).send("Server Error");
-   }
-});
-
-//@route    POST api/attendance/period
-//@desc     Add or remove attendances from a period
-//@access   Private
-router.post("/period", auth, async (req, res) => {
-   const attendances = req.body;
-
-   const classroom = attendances[0][0].classroom;
-   const period = attendances[0][0].period;
-
-   const date = new Date();
-   const year = date.getFullYear();
-
-   try {
-      for (let x = 0; x < attendances.length; x++) {
-         let count = 0;
-         const student = attendances[x][0].user;
-
-         for (let y = 0; y < attendances[x].length; y++) {
-            if (attendances[x][y].inassistance) {
-               if (attendances[x][y]._id === "") {
-                  const data = {
-                     user: attendances[x][y].user,
-                     date: attendances[x][y].date,
-                     period,
-                     classroom,
-                  };
-                  const attendance = new Attendance(data);
-                  await attendance.save();
-               }
-               count++;
-            } else {
-               if (attendances[x][y]._id !== "") {
-                  await Attendance.findOneAndDelete({
-                     user: attendances[x][y].user,
-                     date: attendances[x][y].date,
-                     period,
-                     classroom,
-                  });
-               }
-            }
-         }
-         const filter2 = { year, student };
-
-         const enrollment = await Enrollment.findOne(filter2);
-
-         let periodAbsence = [];
-         let allAbsence = 0;
-
-         if (enrollment.periodAbsence.length === 0)
-            periodAbsence = new Array(4).fill(0);
-         else periodAbsence = [...enrollment.periodAbsence];
-
-         periodAbsence[period - 1] = parseFloat(count);
-
-         for (let y = 0; y < 4; y++) {
-            allAbsence += periodAbsence[y];
-         }
-
-         await Enrollment.findOneAndUpdate(
-            { _id: enrollment._id },
-            {
-               "classroom.periodAbsence": periodAbsence,
-               "classroom.absence": allAbsence,
-            }
-         );
-      }
-
-      res.json({ msg: "Attendances Updated" });
-   } catch (err) {
-      console.error(err.message);
-      return res.status(500).send("Server Error");
-   }
-});
-
-//@route    DELETE api/attendance/:id
-//@desc     Delete an attendance
-//@access   Private
-router.delete("/:id", auth, async (req, res) => {
-   try {
-      //Remove attendace
-      await Attendance.findOneAndRemove({ _id: req.params.id });
-
-      res.json({ msg: "Attendance deleted" });
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server error");
-   }
-});
-
 //@route    DELETE api/attendance/date/:date
-//@desc     Delete attendances with the same date
+//@desc     Delete attendances with the same date and the entire column
 //@access   Private
-router.delete("/date/:date", auth, async (req, res) => {
+router.delete("/date/:date/:classroom", auth, async (req, res) => {
    try {
       //Remove attendace
       const attendancesToDelete = await Attendance.find({
          date: req.params.date,
+         classroom: req.params.classroom,
       });
-
-      const classroom = attendancesToDelete[0].classroom;
 
       for (let x = 0; x < attendancesToDelete.length; x++) {
          await Attendance.findOneAndRemove({ _id: attendancesToDelete[x].id });
@@ -318,14 +304,15 @@ router.delete("/date/:date", auth, async (req, res) => {
       const end = new Date(date.getFullYear(), 12, 31);
 
       const attendances = await Attendance.find({
-         classroom,
+         classroom: req.params.classroom,
          date: {
             $gte: start,
-            $lt: end,
+            $lte: end,
          },
       })
          .populate({
-            path: "user",
+            path: "student",
+            model: "user",
             select: ["name", "lastname"],
          })
          .sort({ date: 1 });
@@ -341,6 +328,7 @@ router.delete("/date/:date", auth, async (req, res) => {
 
 async function buildTable(attendances, class_id, res) {
    let users = [];
+   let enrollments = [];
    try {
       enrollments = await Enrollment.find({
          "classroom._id": class_id,
@@ -406,9 +394,9 @@ async function buildTable(attendances, class_id, res) {
 
       //Divide all grades per student in this particular period
       let classStudents = allPeriods[x].reduce((res, curr) => {
-         if (curr.user !== undefined) {
-            if (res[curr.user._id]) res[curr.user._id].push(curr);
-            else Object.assign(res, { [curr.user._id]: [curr] });
+         if (curr.student) {
+            if (res[curr.student._id]) res[curr.student._id].push(curr);
+            else Object.assign(res, { [curr.student._id]: [curr] });
          }
          return res;
       }, {});
@@ -423,11 +411,11 @@ async function buildTable(attendances, class_id, res) {
 
       //Sort them in the same order as users
       studentsArray = studentsArray.sort((a, b) => {
-         if (a[0].user.lastname > b[0].user.lastname) return 1;
-         if (a[0].user.lastname < b[0].user.lastname) return -1;
+         if (a[0].student.lastname > b[0].student.lastname) return 1;
+         if (a[0].student.lastname < b[0].student.lastname) return -1;
 
-         if (a[0].user.name > b[0].user.name) return 1;
-         if (a[0].user.name < b[0].user.name) return -1;
+         if (a[0].student.name > b[0].student.name) return 1;
+         if (a[0].student.name < b[0].student.name) return -1;
       });
 
       let studentNumber = 0;
@@ -455,13 +443,13 @@ async function buildTable(attendances, class_id, res) {
                continue;
             }
 
-            row[rowNumber].user = users[z].student._id;
+            row[rowNumber].student = users[z].student._id;
 
             let added = false;
 
-            if (studentsArray[studentNumber] !== undefined) {
+            if (studentsArray[studentNumber]) {
                if (
-                  studentsArray[studentNumber][0].user._id.toString() ===
+                  studentsArray[studentNumber][0].student._id.toString() ===
                   users[z].student._id.toString()
                ) {
                   for (
@@ -493,7 +481,7 @@ async function buildTable(attendances, class_id, res) {
          if (users[z] && studentsArray[studentNumber]) {
             if (
                users[z].student._id.toString() ===
-               studentsArray[studentNumber][0].user._id.toString()
+               studentsArray[studentNumber][0].student._id.toString()
             ) {
                studentNumber++;
             }

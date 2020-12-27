@@ -7,7 +7,7 @@ import { updateLoadingSpinner } from "./mixvalues";
 
 import {
    ATTENDANCES_LOADED,
-   USER_ATTENDANCES_LOADED,
+   STUDENT_ATTENDANCES_LOADED,
    NEW_DATE_REGISTERED,
    ATTENDANCES_UPDATED,
    DATES_DELETED,
@@ -15,11 +15,11 @@ import {
    ATTENDANCES_ERROR,
 } from "./types";
 
-export const loadStudentAttendance = (user_id) => async (dispatch) => {
+export const loadStudentAttendance = (student_id) => async (dispatch) => {
    try {
-      const res = await axios.get(`/api/attendance/user/${user_id}`);
+      const res = await axios.get(`/api/attendance/student/${student_id}`);
       dispatch({
-         type: USER_ATTENDANCES_LOADED,
+         type: STUDENT_ATTENDANCES_LOADED,
          payload: res.data,
       });
    } catch (err) {
@@ -112,10 +112,12 @@ export const registerNewDate = (newDate) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const deleteDate = (date) => async (dispatch) => {
+export const deleteDate = (date, classroom) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      const res = await axios.delete(`/api/attendance/date/${date}`);
+      const res = await axios.delete(
+         `/api/attendance/date/${date}/${classroom}`
+      );
 
       dispatch({
          type: DATES_DELETED,

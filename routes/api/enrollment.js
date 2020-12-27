@@ -622,7 +622,7 @@ router.put(
                });
 
             const attendances = await Attendance.find({
-               user: enrollment.student,
+               student: enrollment.student,
                classroom: enrollment.classroom._id,
             });
             for (let x = 0; x < attendances.length; x++) {

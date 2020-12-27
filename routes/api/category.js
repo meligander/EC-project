@@ -31,61 +31,6 @@ router.get("/", [auth], async (req, res) => {
    }
 });
 
-//@route    POST api/category/create-list
-//@desc     Create a pdf of categories
-//@access   Private
-router.post("/create-list", (req, res) => {
-   const name = "reports/categories.pdf";
-
-   const category = req.body;
-
-   let tbody = "";
-
-   for (let x = 0; x < category.length; x++) {
-      const categoryName = "<td>" + category[x].name + "</td>";
-      const value = "<td>" + category[x].value + "</td>";
-
-      tbody += "<tr>" + categoryName + value + "</tr>";
-   }
-
-   const thead = "<th>Nombre</th> <th>Valor</th>";
-
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/list/style.css"
-   );
-
-   const options = {
-      format: "A4",
-      header: {
-         height: "15mm",
-         contents: `<div></div>`,
-      },
-      footer: {
-         height: "17mm",
-         contents:
-            '<footer class="footer">Villa de Merlo English Center</footer>',
-      },
-   };
-
-   pdf.create(
-      pdfTemplate(css, img, "categorías", thead, tbody, true),
-      options
-   ).toFile(name, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
-
-      res.send(Promise.resolve());
-   });
-});
-
 //@route    GET api/category/fetch-list
 //@desc     Get the pdf of categories
 //@access   Private
@@ -124,24 +69,57 @@ router.post(
    }
 );
 
-//@route    PUT api/category/:id_category
-//@desc     Update a category
+//@route    POST api/category/create-list
+//@desc     Create a pdf of categories
 //@access   Private
-router.put("/:id_category", [auth, adminAuth], async (req, res) => {
-   const { value } = req.body;
+router.post("/create-list", (req, res) => {
+   const category = req.body;
 
-   try {
-      const category = await Category.findOneAndUpdate(
-         { _id: req.params.id_category },
-         { $set: { value } },
-         { new: true }
-      );
+   let tbody = "";
 
-      res.json(category);
-   } catch (err) {
-      console.error(err.message);
-      return res.status(500).send("Server Error");
+   for (let x = 0; x < category.length; x++) {
+      const name = "<td>" + category[x].name + "</td>";
+      const value = "<td>" + category[x].value + "</td>";
+
+      tbody += "<tr>" + name + value + "</tr>";
    }
+
+   const thead = "<th>Nombre</th> <th>Valor</th>";
+
+   const img = path.join(
+      "file://",
+      __dirname,
+      "../../templates/assets/logo.png"
+   );
+   const css = path.join(
+      "file://",
+      __dirname,
+      "../../templates/list/style.css"
+   );
+
+   const options = {
+      format: "A4",
+      header: {
+         height: "15mm",
+         contents: `<div></div>`,
+      },
+      footer: {
+         height: "17mm",
+         contents:
+            '<footer class="footer">Villa de Merlo English Center</footer>',
+      },
+   };
+
+   pdf.create(
+      pdfTemplate(css, img, "categorías", thead, tbody, true),
+      options
+   ).toFile("reports/categories.pdf", (err) => {
+      if (err) {
+         res.send(Promise.reject());
+      }
+
+      res.send(Promise.resolve());
+   });
 });
 
 //@route    PUT api/category
@@ -246,20 +224,5 @@ router.put(
       }
    }
 );
-
-//@route    DELETE api/category/:id
-//@desc     Delete a category
-//@access   Private
-router.delete("/:id", [auth, adminAuth], async (req, res) => {
-   try {
-      //Remove Category
-      await Category.findOneAndRemove({ _id: req.params.id });
-
-      res.json({ msg: "Category Deleted" });
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server error");
-   }
-});
 
 module.exports = router;

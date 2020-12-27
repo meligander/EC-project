@@ -131,7 +131,7 @@ const AttendanceTab = ({
          );
          window.scroll(0, 0);
       } else {
-         deleteDate(toDelete.date);
+         deleteDate(toDelete.date, toDelete.classroom);
          setOtherValues({ ...otherValues, dayPlus: false });
          setFormData({
             ...formData,
@@ -141,7 +141,9 @@ const AttendanceTab = ({
    };
 
    const saveAttendances = () => {
-      const AttendancePeriod = newAttendances.filter((grade) => grade[0].user);
+      const AttendancePeriod = newAttendances.filter(
+         (attendance) => attendance[0].student
+      );
       updateAttendances(AttendancePeriod, history, classInfo._id);
    };
 
@@ -205,7 +207,7 @@ const AttendanceTab = ({
                               newAttendances.length > 0 &&
                               newAttendances[i].map((row, key) => (
                                  <td key={key}>
-                                    {row.user !== undefined ? (
+                                    {row.student ? (
                                        <input
                                           type="checkbox"
                                           checked={!row.inassistance}
