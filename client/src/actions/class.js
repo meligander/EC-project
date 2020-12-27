@@ -73,7 +73,7 @@ export const loadClass = (class_id, post = false) => async (dispatch) => {
 export const loadClassStudents = (class_id, loading) => async (dispatch) => {
    try {
       const res = await axios.get(
-         `/api/users?type=Alumno&classroom=${class_id}`
+         `/api/user?type=Alumno&classroom=${class_id}`
       );
       dispatch({
          type: CLASSSTUDENTS_LOADED,
@@ -131,27 +131,34 @@ export const loadClasses = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const registerUpdateClass = (formData, history, class_id = 0) => async (
+export const registerUpdateClass = (formData, history, class_id) => async (
    dispatch
 ) => {
    dispatch(updateLoadingSpinner(true));
 
+   let newClass = {};
+   for (const prop in formData) {
+      if (formData[prop] !== "" && formData[prop] !== 0) {
+         newClass[prop] = formData[prop];
+      }
+   }
+
    try {
       let res = {};
-      if (class_id === 0) {
-         res = await axios.post("/api/class", formData);
+      if (!class_id) {
+         res = await axios.post("/api/class", newClass);
       } else {
          res = await axios.put(`/api/class/${class_id}`, formData);
       }
 
       dispatch({
-         type: class_id === 0 ? CLASS_REGISTERED : CLASS_UPDATED,
+         type: !class_id ? CLASS_REGISTERED : CLASS_UPDATED,
          payload: res.data,
       });
 
       dispatch(
          setAlert(
-            class_id === 0 ? "Nueva Clase Creada" : "Clase Modificada",
+            !class_id ? "Nueva Clase Creada" : "Clase Modificada",
             "success",
             "2"
          )
@@ -161,7 +168,7 @@ export const registerUpdateClass = (formData, history, class_id = 0) => async (
       dispatch(clearValues());
       dispatch(clearClasses());
    } catch (err) {
-      if (err.response.data.erros) {
+      if (err.response.data.errors) {
          const errors = err.response.data.errors;
          errors.forEach((error) => {
             dispatch(setAlert(error.msg, "danger", "2"));

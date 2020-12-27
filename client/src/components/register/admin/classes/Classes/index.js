@@ -155,13 +155,17 @@ const Classes = ({
                <div className="btn-right">
                   {userLogged.type !== "Profesor" && (
                      <Link
-                        to="/register-class"
+                        to={users.users.length !== 0 ? "/register-class" : "#"}
                         onClick={() => {
                            window.scroll(0, 0);
                            clearClass();
                            clearSearch();
                         }}
-                        className="btn btn-primary"
+                        className={`btn ${
+                           users.users.length !== 0
+                              ? "btn-primary"
+                              : "btn-black"
+                        }`}
                      >
                         <i className="fas fa-plus"></i> Curso
                      </Link>

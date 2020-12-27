@@ -148,12 +148,19 @@ export const registerEnrollment = (
 ) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
+   let enrollment = {};
+   for (const prop in formData) {
+      if (formData[prop] !== "" && formData[prop] !== 0) {
+         enrollment[prop] = formData[prop];
+      }
+   }
+
    try {
       let res;
       if (!enroll_id) {
-         res = await axios.post("/api/enrollment", formData);
+         res = await axios.post("/api/enrollment", enrollment);
       } else {
-         res = await axios.put(`/api/enrollment/${enroll_id}`, formData);
+         res = await axios.put(`/api/enrollment/${enroll_id}`, enrollment);
       }
 
       dispatch({
@@ -179,7 +186,7 @@ export const registerEnrollment = (
          dispatch(clearEnrollment());
       }
    } catch (err) {
-      if (err.response.data.erros) {
+      if (err.response.data.errors) {
          const errors = err.response.data.errors;
          errors.forEach((error) => {
             dispatch(setAlert(error.msg, "danger", "2"));
@@ -201,6 +208,7 @@ export const registerEnrollment = (
          });
          dispatch(setAlert(msg ? msg : type, "danger", "2"));
       }
+      dispatch(updateLoadingSpinner(false));
    }
 
    window.scrollTo(0, 0);

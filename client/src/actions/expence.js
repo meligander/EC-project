@@ -93,7 +93,7 @@ export const registerExpence = (formData, history, user_id) => async (
       history.push(`/dashboard/${user_id}`);
       dispatch(clearRegisters());
    } catch (err) {
-      if (err.response.data.erros) {
+      if (err.response.data.errors) {
          const errors = err.response.data.errors;
          errors.forEach((error) => {
             dispatch(setAlert(error.msg, "danger", "2"));

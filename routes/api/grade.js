@@ -9,7 +9,6 @@ const pdfTemplate2 = require("../../templates/cambridgeCertificate");
 
 const Grade = require("../../models/Grade");
 const Enrollment = require("../../models/Enrollment");
-const User = require("../../models/User");
 
 //@route    GET api/grade/:class_id
 //@desc     Get all grades for a class
@@ -744,7 +743,10 @@ router.post("/period", auth, async (req, res) => {
 
          await Enrollment.findOneAndUpdate(
             { _id: enrollment._id },
-            { periodAverage, average: allAverage }
+            {
+               "classroom.periodAverage": periodAverage,
+               "classroom.average": allAverage,
+            }
          );
       }
 
@@ -815,25 +817,30 @@ router.delete("/:type/:classroom/:period", auth, async (req, res) => {
 
 function buildStudentTable(grades) {
    let obj = grades.reduce((res, curr) => {
-      if (res[curr.gradetype.name]) res[curr.gradetype.name].push(curr);
-      else Object.assign(res, { [curr.gradetype.name]: [curr] });
-
+      if (res[curr.gradetype.name]) {
+         res[curr.gradetype.name].push(curr);
+      } else Object.assign(res, { [curr.gradetype.name]: [curr] });
       return res;
    }, {});
 
    let rows = [];
-   let headers = Object.getOwnPropertyNames(obj);
 
    for (const x in obj) {
-      const dividedGrades = obj[x];
-      let row = Array.from(Array(5), () => ({
-         value: "",
-      }));
-      for (let x = 0; x < dividedGrades.length; x++) {
-         row[dividedGrades[x].period - 1] = dividedGrades[x];
+      if (obj[x][0].period === 6) {
+         delete obj[x];
+      } else {
+         const dividedGrades = obj[x];
+         let row = Array.from(Array(5), () => ({
+            value: "",
+         }));
+         for (let x = 0; x < dividedGrades.length; x++) {
+            row[dividedGrades[x].period - 1] = dividedGrades[x];
+         }
+         rows.push(row);
       }
-      rows.push(row);
    }
+
+   let headers = Object.getOwnPropertyNames(obj);
 
    return { headers, rows };
 }
@@ -842,24 +849,34 @@ async function buildClassTable(grades, class_id, res) {
    let users = [];
 
    try {
-      users = await User.find({
-         type: "Alumno",
-         classroom: class_id,
-      }).sort({ lastname: 1, name: 1 });
+      enrollments = await Enrollment.find({
+         "classroom._id": class_id,
+      }).populate({
+         model: "user",
+         path: "student",
+         select: ["name", "lastname", "dni"],
+      });
    } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");
    }
 
+   users = enrollments.sort((a, b) => {
+      if (a.student.lastname > b.student.lastname) return 1;
+      if (a.student.lastname < b.student.lastname) return -1;
+
+      if (a.student.name > b.student.name) return 1;
+      if (a.student.name < b.student.name) return -1;
+   });
+
    let header = [];
    let periods = [];
 
-   //Get the student's header
    let students = users.map((user) => {
       return {
-         _id: user._id,
-         name: user.lastname + ", " + user.name,
-         dni: user.dni,
+         _id: user.student._id,
+         name: user.student.lastname + ", " + user.student.name,
+         dni: user.student.dni,
       };
    });
 
@@ -935,20 +952,20 @@ async function buildClassTable(grades, class_id, res) {
             row[rowNumber].name = "input" + count;
 
             //For the items that are buttons (doesnt have a user related)
-            if (users[z] === undefined) {
+            if (!users[z]) {
                count++;
                rowNumber++;
                continue;
             }
 
-            row[rowNumber].student = users[z]._id;
+            row[rowNumber].student = users[z].student._id;
 
             let added = false;
 
-            if (studentsArray[studentNumber] !== undefined) {
+            if (studentsArray[studentNumber]) {
                if (
                   studentsArray[studentNumber][0].student._id.toString() ===
-                  users[z]._id.toString()
+                  users[z].student._id.toString()
                ) {
                   for (
                      let y = 0;
@@ -976,12 +993,9 @@ async function buildClassTable(grades, class_id, res) {
             rowNumber++;
          }
 
-         if (
-            users[z] !== undefined &&
-            studentsArray[studentNumber] !== undefined
-         ) {
+         if (users[z] && studentsArray[studentNumber]) {
             if (
-               users[z]._id.toString() ===
+               users[z].student._id.toString() ===
                studentsArray[studentNumber][0].student._id.toString()
             ) {
                studentNumber++;

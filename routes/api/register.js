@@ -35,7 +35,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
          }).sort({ date: -1 });
       }
 
-      if (registers === 0) {
+      if (registers.length === 0) {
          return res.status(400).json({
             msg:
                "No se encontró información de la caja con dichas descripciones",
@@ -56,6 +56,13 @@ router.get("/last", [auth, adminAuth], async (req, res) => {
    try {
       let register = await Register.find().sort({ $natural: -1 }).limit(1);
       register = register[0];
+
+      if (!register) {
+         return res.status(400).json({
+            msg:
+               "No se encontró información de la caja con dichas descripciones",
+         });
+      }
 
       res.json(register);
    } catch (err) {

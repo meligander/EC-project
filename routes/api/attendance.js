@@ -8,7 +8,6 @@ const pdfTemplate = require("../../templates/assistanceGrades");
 
 const Attendance = require("../../models/Attendance");
 const Enrollment = require("../../models/Enrollment");
-const User = require("../../models/User");
 
 //@route    GET api/attendance/:class_id
 //@desc     Get all attendances
@@ -269,7 +268,10 @@ router.post("/period", auth, async (req, res) => {
 
          await Enrollment.findOneAndUpdate(
             { _id: enrollment._id },
-            { periodAbsence, absence: allAbsence }
+            {
+               "classroom.periodAbsence": periodAbsence,
+               "classroom.absence": allAbsence,
+            }
          );
       }
 
@@ -340,20 +342,32 @@ router.delete("/date/:date", auth, async (req, res) => {
 async function buildTable(attendances, class_id, res) {
    let users = [];
    try {
-      users = await User.find({
-         type: "Alumno",
-         classroom: class_id,
-      }).sort({ lastname: 1, name: 1 });
+      enrollments = await Enrollment.find({
+         "classroom._id": class_id,
+      }).populate({
+         model: "user",
+         path: "student",
+         select: ["name", "lastname"],
+      });
    } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");
    }
+
+   users = enrollments.sort((a, b) => {
+      if (a.student.lastname > b.student.lastname) return 1;
+      if (a.student.lastname < b.student.lastname) return -1;
+
+      if (a.student.name > b.student.name) return 1;
+      if (a.student.name < b.student.name) return -1;
+   });
+
    let header = [];
    let periods = [];
 
    //Get the student's header
    let students = users.map((user) => {
-      return user.lastname + ", " + user.name;
+      return user.student.lastname + ", " + user.student.name;
    });
 
    //Add last row for the eliminate button
@@ -435,20 +449,20 @@ async function buildTable(attendances, class_id, res) {
             row[rowNumber].name = "input" + count;
 
             //For the items that are buttons (doesnt have a user related)
-            if (users[z] === undefined) {
+            if (!users[z]) {
                count++;
                rowNumber++;
                continue;
             }
 
-            row[rowNumber].user = users[z]._id;
+            row[rowNumber].user = users[z].student._id;
 
             let added = false;
 
             if (studentsArray[studentNumber] !== undefined) {
                if (
                   studentsArray[studentNumber][0].user._id.toString() ===
-                  users[z]._id.toString()
+                  users[z].student._id.toString()
                ) {
                   for (
                      let y = 0;
@@ -476,12 +490,9 @@ async function buildTable(attendances, class_id, res) {
             rowNumber++;
          }
 
-         if (
-            users[z] !== undefined &&
-            studentsArray[studentNumber] !== undefined
-         ) {
+         if (users[z] && studentsArray[studentNumber]) {
             if (
-               users[z]._id.toString() ===
+               users[z].student._id.toString() ===
                studentsArray[studentNumber][0].user._id.toString()
             ) {
                studentNumber++;

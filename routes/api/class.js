@@ -12,6 +12,8 @@ const pdfTemplate2 = require("../../templates/classInfo");
 const Class = require("../../models/Class");
 const User = require("../../models/User");
 const Enrollment = require("../../models/Enrollment");
+const Attendance = require("../../models/Attendance");
+const Grade = require("../../models/Grade");
 
 //@route    GET api/class
 //@desc     Get all classes || with filter
@@ -34,10 +36,10 @@ router.get("/", [auth], async (req, res) => {
             });
       } else {
          let filter = {
-            ...(req.query.teacher !== undefined && {
+            ...(req.query.teacher && {
                teacher: req.query.teacher,
             }),
-            ...(req.query.category !== undefined && {
+            ...(req.query.category && {
                category: req.query.category,
             }),
             year: date.getFullYear(),
@@ -112,21 +114,6 @@ router.get("/user/:id", auth, async (req, res) => {
       }
 
       res.json(classinfo);
-   } catch (err) {
-      console.error(err.message);
-      return res.status(500).send("Server Error");
-   }
-});
-
-//@route    GET api/class/user/:id
-//@desc     Get active classs
-//@access   Private
-router.get("/year/active", auth, async (req, res) => {
-   try {
-      const date = new Date();
-      const year = date.getFullYear();
-      let classes = await Class.find({ year });
-      res.json(classes.length);
    } catch (err) {
       console.error(err.message);
       return res.status(500).send("Server Error");
@@ -406,8 +393,8 @@ router.post(
    async (req, res) => {
       let {
          teacher,
-         classroom,
          category,
+         classroom,
          day1,
          day2,
          hourin1,
@@ -430,7 +417,7 @@ router.post(
       try {
          let hours = [hourin1, hourin2, hourout1, hourout2];
          for (let x = 0; x < hours.length; x++) {
-            if (hours[x] !== undefined) {
+            if (hours[x]) {
                const date = moment("2000-01-01 " + hours[x]).format(
                   "YYYY-MM-DD HH:mm"
                );
@@ -451,54 +438,23 @@ router.post(
             year,
          };
 
-         teacher = await User.findOne({ _id: teacher });
-         if (!teacher && teacher.type !== "Profesor")
-            return res
-               .status(400)
-               .json({ msg: "El usuario no es un profesor" });
-
-         const enrollments = await Enrollment.find({ category });
-
-         for (let x = 0; x < students.length; x++) {
-            let enrollment = false;
-            let student = await User.findOne({ _id: students[x]._id });
-            if (student.classroom !== null) {
-               return res.status(400).json({
-                  msg:
-                     "El alumno " +
-                     student.lastname +
-                     ", " +
-                     student.name +
-                     " ya tiene asignada una clase",
-               });
-            }
-            for (let y = 0; y < enrollments.length; y++) {
-               if (student.id == enrollments[y].student) enrollment = true;
-            }
-            if (!enrollment) {
-               return res.status(400).json({
-                  msg:
-                     "El alumno " +
-                     student.lastname +
-                     ", " +
-                     student.name +
-                     " no está inscripto a dicha categoría",
-               });
-            }
-         }
-
-         let classinfo = new Class(data);
+         const classinfo = new Class(data);
 
          await classinfo.save();
 
+         let lastClass = await Class.find().sort({ $natural: -1 }).limit(1);
+         const newClass = lastClass[0];
+
          for (let x = 0; x < students.length; x++) {
-            await User.findOneAndUpdate(
-               { _id: students[x]._id },
-               { classroom: classinfo.id }
+            await Enrollment.findOneAndUpdate(
+               {
+                  student: students[x]._id,
+               },
+               { "classroom._id": newClass._id }
             );
          }
 
-         res.json(classinfo);
+         res.json(newClass);
       } catch (err) {
          console.error(err.message);
          return res.status(500).send("Server Error");
@@ -520,7 +476,6 @@ router.put(
       let {
          teacher,
          classroom,
-         category,
          day1,
          day2,
          hourin1,
@@ -540,7 +495,7 @@ router.put(
       try {
          let hours = [hourin1, hourin2, hourout1, hourout2];
          for (let x = 0; x < hours.length; x++) {
-            if (hours[x] !== undefined) {
+            if (hours[x]) {
                const date = moment("2000-01-01 " + hours[x]).format(
                   "YYYY-MM-DD HH:mm"
                );
@@ -559,72 +514,53 @@ router.put(
             ...(hours[3] && { hourout2: hours[3] }),
          };
 
-         teacher = await User.findOne({ _id: teacher });
-         if (!teacher && teacher.type !== "Profesor")
-            return res
-               .status(400)
-               .json({ msg: "El usuario no es un profesor" });
-
-         const enrollments = await Enrollment.find({ category });
+         let toDelete = await Enrollment.find({
+            "classroom._id": req.params.id,
+         });
 
          for (let x = 0; x < students.length; x++) {
-            let student = await User.findOne({ _id: students[x]._id });
-            if (student.classroom !== null) {
-               if (student.classroom != req.params.id) {
-                  return res.status(400).json({
-                     msg:
-                        "El alumno " +
-                        student.lastname +
-                        ", " +
-                        student.name +
-                        " ya tiene asignada una clase",
-                  });
-               }
+            await Enrollment.findOneAndUpdate(
+               {
+                  student: students[x]._id,
+               },
+               { "classroom._id": req.params.id }
+            );
+
+            toDelete = toDelete.filter(
+               (enroll) => enroll.student != students[x]._id
+            );
+         }
+
+         for (let x = 0; x < toDelete.length; x++) {
+            await Enrollment.findOneAndUpdate(
+               {
+                  student: toDelete[x].student,
+               },
+               { "classroom._id": null }
+            );
+
+            const attendances = await Attendance.find({
+               user: toDelete[x].student,
+               classroom: req.params.id,
+            });
+            for (let y = 0; y < attendances.length; y++) {
+               await Attendance.findOneAndDelete({ _id: attendances[y] });
             }
 
-            for (let y = 0; y < enrollments.length; y++) {
-               if (student.id == enrollments[y].student) enrollment = true;
-            }
-            if (!enrollment) {
-               return res.status(400).json({
-                  msg:
-                     "El alumno " +
-                     student.lastname +
-                     ", " +
-                     student.name +
-                     " no está inscripto a dicha categoría",
-               });
+            const grades = await Grade.find({
+               student: toDelete[x].student,
+               classroom: req.params.id,
+            });
+            for (let y = 0; y < grades.length; y++) {
+               await Attendance.findOneAndDelete({ _id: grades[y] });
             }
          }
 
-         let classinfo = await Class.findOneAndUpdate(
+         const classinfo = await Class.findOneAndUpdate(
             { _id: req.params.id },
             { $set: data },
             { new: true }
          );
-
-         const oldStudents = await User.find({ classroom: req.params.id });
-         const toDelte = oldStudents;
-
-         for (let x = 0; x < students.length; x++) {
-            for (const y in oldStudents) {
-               if (students[x]._id === oldStudents[y].id) {
-                  toDelte.splice(y, 1);
-               } else {
-                  await User.findOneAndUpdate(
-                     { _id: students[x]._id },
-                     { classroom: req.params.id }
-                  );
-               }
-            }
-         }
-
-         for (let x = 0; x < toDelte.length; x++) {
-            await User.findOneAndUpdate(
-               { _id: toDelte[x].id },
-               { classroom: null }
-            );
-         }
 
          res.json(classinfo);
       } catch (err) {
@@ -646,10 +582,28 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       const students = await User.find({ classroom: req.params.id });
 
       for (let x = 0; x < students.length; x++) {
-         await User.findOneAndUpdate(
-            { _id: students[x].id },
-            { classroom: null }
+         await Enrollment.findOneAndUpdate(
+            {
+               student: students[x]._id,
+            },
+            { "classroom._id": null }
          );
+
+         const attendances = await Attendance.find({
+            user: toDelete[x].student,
+            classroom: req.params.id,
+         });
+         for (let y = 0; y < attendances.length; y++) {
+            await Attendance.findOneAndDelete({ _id: attendances[y] });
+         }
+
+         const grades = await Grade.find({
+            student: toDelete[x].student,
+            classroom: req.params.id,
+         });
+         for (let y = 0; y < grades.length; y++) {
+            await Attendance.findOneAndDelete({ _id: grades[y] });
+         }
       }
 
       res.json({ msg: "Class deleted" });

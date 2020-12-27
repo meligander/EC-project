@@ -8,7 +8,7 @@ import { clearClass, loadUsersClass } from "../../../../../actions/class";
 import { loadUsersGrades } from "../../../../../actions/grade";
 import { loadStudentAttendance } from "../../../../../actions/attendance";
 import { loadStudentInstallments } from "../../../../../actions/installment";
-import { clearProfile } from "../../../../../actions/user";
+import { clearProfile, loadRelatives } from "../../../../../actions/user";
 
 import RelativeDashboard from "../RelativeDashboard";
 import StudentGradesTable from "../../../../tables/StudentGradesTable";
@@ -21,6 +21,7 @@ const StudentDashboard = ({
    loadUsersGrades,
    loadStudentAttendance,
    loadStudentInstallments,
+   loadRelatives,
    clearClass,
    clearProfile,
    auth: { userLogged },
@@ -46,6 +47,7 @@ const StudentDashboard = ({
       }
 
       if (loading) {
+         loadRelatives(user._id);
          loadUsersClass(user._id);
          loadUsersGrades(user._id);
          loadStudentAttendance(user._id);
@@ -57,6 +59,7 @@ const StudentDashboard = ({
       loading,
       loadUsersClass,
       loadUsersGrades,
+      loadRelatives,
       loadStudentAttendance,
       loadStudentInstallments,
    ]);
@@ -274,6 +277,7 @@ StudentDashboard.prototypes = {
    loadUsersGrades: PropTypes.func.isRequired,
    loadStudentAttendance: PropTypes.func.isRequired,
    loadStudentInstallments: PropTypes.func.isRequired,
+   loadRelatives: PropTypes.func.isRequired,
    clearClass: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
 };
@@ -292,6 +296,7 @@ export default connect(mapStateToProps, {
    loadUsersGrades,
    loadStudentAttendance,
    loadStudentInstallments,
+   loadRelatives,
    clearClass,
    clearProfile,
 })(StudentDashboard);

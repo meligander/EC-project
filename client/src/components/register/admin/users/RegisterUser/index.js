@@ -83,8 +83,8 @@ const RegisterUser = ({
       school: "",
       children: [],
       description: "",
-      discount: 0,
-      chargeday: 0,
+      discount: "",
+      chargeday: "",
       img: {
          public_id: "",
          url: "",

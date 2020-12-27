@@ -41,7 +41,7 @@ const Installments = ({
       if (_id !== "0" && loadingUsersInstallments) {
          loadStudentInstallments(_id, true);
       } else {
-         if (!loadingUsersInstallments) {
+         if (!loadingUsersInstallments && usersInstallments.rows.length > 0) {
             setOtherValues((prev) => ({
                ...prev,
                student: {

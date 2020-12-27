@@ -44,11 +44,13 @@ const AdminDashboard = ({
 
    useEffect(() => {
       const changeDate = () => {
-         if (register.temporary)
-            setAdminData((prev) => ({
-               ...prev,
-               dateR: register.date,
-            }));
+         if (register) {
+            if (register.temporary)
+               setAdminData((prev) => ({
+                  ...prev,
+                  dateR: register.date,
+               }));
+         }
       };
       if (loadingAdminDash && oneLoad) {
          getAdminDash();
@@ -114,13 +116,13 @@ const AdminDashboard = ({
                      <div className="register-info-money my-5 text-center">
                         <p className=" heading-tertiary">
                            <span className="text-dark">Ingresos: </span>$
-                           {register.income && register.temporary
+                           {register && register.income && register.temporary
                               ? register.income
                               : 0}
                         </p>
                         <p className=" heading-tertiary">
                            <span className="text-dark">Egresos: </span>$
-                           {register.expence && register.temporary
+                           {register && register.expence && register.temporary
                               ? register.expence
                               : 0}
                         </p>
@@ -219,28 +221,29 @@ const AdminDashboard = ({
                      <div className="text-center my-4 py-3">
                         <p className="heading-tertiary">
                            <span className="text-dark">Deuda: </span>$
-                           {totalDebt}
+                           {totalDebt ? totalDebt : 0}
                         </p>
                         <p className="heading-tertiary">
                            <span className="text-dark">Alumnos Activos: </span>
-                           {activeStudents}
+                           {activeStudents ? activeStudents : 0}
                         </p>
                         <p className="heading-tertiary">
                            <span className="text-dark">
                               Inscripciones{" "}
-                              {enrollments.year.toString() !== "" &&
-                                 enrollments.year}
+                              {enrollments.year
+                                 ? enrollments.year
+                                 : dateR.format("YYYY")}
                               :{" "}
                            </span>
                            {enrollments.length}
                         </p>
                         <p className="heading-tertiary">
                            <span className="text-dark">Profesores: </span>
-                           {activeTeachers}
+                           {activeTeachers ? activeTeachers : 0}
                         </p>
                         <p className="heading-tertiary">
                            <span className="text-dark">Cursos: </span>
-                           {activeClasses}
+                           {activeClasses ? activeClasses : 0}
                         </p>
                      </div>
                   </div>

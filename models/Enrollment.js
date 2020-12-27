@@ -19,17 +19,23 @@ const EnrollmentSchema = new mongoose.Schema({
       ref: "category",
       required: true,
    },
-   periodAverage: {
-      type: Array,
-   },
-   average: {
-      type: Number,
-   },
-   periodAbsence: {
-      type: Array,
-   },
-   absence: {
-      type: Number,
+   classroom: {
+      _id: {
+         type: mongoose.Schema.Types.ObjectId,
+         ref: "class",
+      },
+      periodAverage: {
+         type: Array,
+      },
+      average: {
+         type: Number,
+      },
+      periodAbsence: {
+         type: Array,
+      },
+      absence: {
+         type: Number,
+      },
    },
 });
 

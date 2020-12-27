@@ -64,10 +64,11 @@ const StudentTable = ({
                            {!search && (
                               <td>
                                  <button
-                                    className="btn btn-secondary"
+                                    className="btn btn-success"
                                     onClick={(e) => addChild(e, user)}
                                  >
-                                    Seleccionar
+                                    <i className="fas fa-plus-circle"></i>&nbsp;
+                                    Agregar
                                  </button>
                               </td>
                            )}

@@ -66,8 +66,6 @@ export default function (state = initialState, action) {
          return {
             ...state,
             enrollments: [],
-            enrollment: null,
-            loading: false,
             loadingEnrollments: false,
             error: payload,
          };

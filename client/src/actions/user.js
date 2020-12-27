@@ -36,7 +36,7 @@ import {
 export const loadUser = (user_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      const res = await axios.get(`/api/users/${user_id}`);
+      const res = await axios.get(`/api/user/${user_id}`);
       dispatch({
          type: USER_LOADED,
          payload: res.data,
@@ -56,8 +56,9 @@ export const loadUser = (user_id) => async (dispatch) => {
 
 //Load Relatives
 export const loadRelatives = (user_id) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
    try {
-      let res = await axios.get(`/api/users/tutor/${user_id}`);
+      let res = await axios.get(`/api/user/tutor/${user_id}`);
 
       dispatch({
          type: USERS_LOADED,
@@ -97,8 +98,7 @@ export const loadUsers = (
             filter = filter + filternames[x] + "=" + filterData[name];
          }
       }
-
-      let res = await axios.get(`/api/users?${filter}`);
+      let res = await axios.get(`/api/user?${filter}`);
 
       dispatch({
          type: primary ? USERS_LOADED : USERSBK_LOADED,
@@ -145,10 +145,10 @@ export const registerUser = (formData, history, user_id) => async (
    try {
       let res;
       if (!user_id) {
-         res = await axios.post("/api/users", user);
+         res = await axios.post("/api/user", user);
       } else {
          //Update user
-         await axios.put(`/api/users/${user_id}`, user);
+         await axios.put(`/api/user/${user_id}`, user);
       }
 
       dispatch({
@@ -170,7 +170,7 @@ export const registerUser = (formData, history, user_id) => async (
 
       history.push(`/dashboard/${user_id ? user_id : res.data}`);
    } catch (err) {
-      if (err.response.data.erros) {
+      if (err.response.data.errors) {
          const errors = err.response.data.errors;
          errors.forEach((error) => {
             dispatch(setAlert(error.msg, "danger", "2"));
@@ -210,7 +210,7 @@ export const updateCredentials = (formData, history, user_id) => async (
    }
 
    try {
-      let res = await axios.put(`/api/users/credentials/${user_id}`, user);
+      let res = await axios.put(`/api/user/credentials/${user_id}`, user);
 
       dispatch({
          type: USER_UPDATED,
@@ -236,15 +236,15 @@ export const updateCredentials = (formData, history, user_id) => async (
    window.scrollTo(0, 0);
 };
 
-export const deleteUser = (user_id, history, userLogged_id) => async (
+export const deleteUser = (user, history, userLogged_id) => async (
    dispatch
 ) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.delete(`/api/users/${user_id}`);
+      await axios.delete(`/api/user/${user._id}/${user.type}`);
 
-      if (user_id === userLogged_id) dispatch(logOutAndToggle());
+      if (user._id === userLogged_id) dispatch(logOutAndToggle());
       else history.push(`/dashboard/${userLogged_id}`);
 
       dispatch({
@@ -267,16 +267,16 @@ export const deleteUser = (user_id, history, userLogged_id) => async (
    }
 
    window.scrollTo(0, 0);
-   if (user_id === userLogged_id) dispatch(updateLoadingSpinner(false));
+   if (user._id === userLogged_id) dispatch(updateLoadingSpinner(false));
 };
 
 export const userPDF = (users, usersType) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.post("/api/users/create-list", { users, usersType });
+      await axios.post("/api/user/create-list", { users, usersType });
 
-      const pdf = await axios.get("/api/users/lista/fetch-list", {
+      const pdf = await axios.get("/api/user/lista/fetch-list", {
          responseType: "blob",
       });
 

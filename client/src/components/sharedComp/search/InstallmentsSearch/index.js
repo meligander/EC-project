@@ -108,7 +108,7 @@ const InstallmentsSearch = ({
          },
       });
       clearUserInstallments();
-      history.push("/installments/0");
+      if (!invoice) history.push("/installments/0");
    };
 
    //Inside Installment for edit

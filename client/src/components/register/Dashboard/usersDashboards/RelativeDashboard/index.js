@@ -1,22 +1,17 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { clearProfile, loadRelatives } from "../../../../../actions/user";
+import { clearProfile } from "../../../../../actions/user";
 
 import "./style.scss";
 
 const RelativeDashboard = ({
-   loadRelatives,
    users: { user, users, usersLoading },
    clearProfile,
 }) => {
    const student = user.studentnumber;
-
-   useEffect(() => {
-      if (student) loadRelatives(user._id);
-   }, [loadRelatives, user._id, student]);
 
    const relatives = (user) => {
       return (
@@ -72,7 +67,6 @@ const RelativeDashboard = ({
 
 RelativeDashboard.propTypes = {
    users: PropTypes.object.isRequired,
-   loadRelatives: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
 };
 
@@ -81,6 +75,5 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps, {
-   loadRelatives,
    clearProfile,
 })(RelativeDashboard);

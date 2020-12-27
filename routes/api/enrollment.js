@@ -10,7 +10,8 @@ const moment = require("moment");
 
 const Enrollment = require("../../models/Enrollment");
 const Installment = require("../../models/Installment");
-const User = require("../../models/User");
+const Attendance = require("../../models/Attendance");
+const Grade = require("../../models/Grade");
 const Category = require("../../models/Category");
 
 //@route    GET api/enrollment
@@ -105,7 +106,7 @@ router.get("/average", [auth, adminAuth], async (req, res) => {
          category: filter.category
             ? filter.category
             : { $ne: "5ebb3498397c2d2610a4eab8" },
-         average: { $exists: true },
+         "classroom.average": { $exists: true },
          year: date.getFullYear(),
       })
          .populate({
@@ -117,7 +118,7 @@ router.get("/average", [auth, adminAuth], async (req, res) => {
             path: "category",
             model: "category",
          })
-         .sort({ average: -1 })
+         .sort({ "classroom.average": -1 })
          .limit(filter.amount ? parseInt(filter.amount) : 50);
 
       if (enrollments.length === 0) {
@@ -145,7 +146,9 @@ router.get("/absences", [auth, adminAuth], async (req, res) => {
 
       enrollments = await Enrollment.find({
          ...(filter.category && { category: filter.category }),
-         ...(filter.absence && { absence: { $lte: filter.absence } }),
+         ...(filter.absence && {
+            "classroom.absence": { $lte: filter.absence },
+         }),
          year: date.getFullYear(),
       })
          .populate({
@@ -157,7 +160,7 @@ router.get("/absences", [auth, adminAuth], async (req, res) => {
             path: "category",
             model: "category",
          })
-         .sort({ absence: 1 });
+         .sort({ "classroom.absence": 1 });
 
       if (enrollments.length === 0) {
          return res.status(400).json({
@@ -172,7 +175,7 @@ router.get("/absences", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/enrollment/year
+//@route    GET api/enrollment/one/:id
 //@desc     get one enrollment
 //@access   Private
 router.get("/one/:id", [auth, adminAuth], async (req, res) => {
@@ -485,7 +488,6 @@ router.post(
       auth,
       adminAuth,
       check("student", "El alumno es necesario").not().isEmpty(),
-      check("year", "El año es necesario").not().isEmpty(),
       check("category", "La categoría es necesaria").not().isEmpty(),
    ],
    async (req, res) => {
@@ -495,6 +497,7 @@ router.post(
       const errorsResult = validationResult(req);
       if (!errorsResult.isEmpty()) {
          errors = errorsResult.array();
+         console.log(errors);
          return res.status(400).json({ errors });
       }
 
@@ -513,6 +516,17 @@ router.post(
 
          await enrollment.save();
 
+         enrollment = await Enrollment.find()
+            .sort({ $natural: -1 })
+            .populate({ path: "category" })
+            .populate({
+               path: "student",
+               model: "user",
+               select: "-password",
+            })
+            .limit(1);
+         enrollment = enrollment[0];
+
          let number = 0;
          let categoryInstallment = await Category.findOne({
             name: "Inscripción",
@@ -529,28 +543,20 @@ router.post(
          });
          installment.save();
 
-         categoryInstallment = await Category.findOne({ _id: category });
-
          const date = new Date();
-         if (date.getFullYear() == year && date.getMonth() !== 3) {
+         if (date.getFullYear() === year) {
             /* ESTO ESTA HARKODEADO PORQ NO ME FUNCIONA DATE!!! MUESTRA UN MES ATRAS */
             number = date.getMonth() + (currentMonth ? 1 : 2);
-         } else {
-            number = 3;
          }
 
          const amount = 13 - number;
 
          for (let x = 0; x < amount; x++) {
-            let value = categoryInstallment.value;
+            let value = enrollment.category.value;
+            const discount = enrollment.student.discount;
 
-            const studentfound = await User.findOne({ _id: student });
-            if (
-               studentfound.discount !== undefined &&
-               studentfound.discount !== 0
-            ) {
-               const disc =
-                  (categoryInstallment.value * studentfound.discount) / 100;
+            if (discount && discount !== 0) {
+               const disc = (value * discount) / 100;
                value = Math.round((value - disc) / 10) * 10;
             }
 
@@ -599,28 +605,54 @@ router.put(
       let enrollment;
 
       try {
-         enrollment = await Enrollment.findOne({ _id: req.params.id });
+         enrollment = await Enrollment.findOne({ _id: req.params.id }).populate(
+            {
+               path: "category",
+               model: "category",
+            }
+         );
 
-         if (enrollment._id.toString() !== category) {
+         if (enrollment.category._id.toString() !== category) {
             const date = new Date();
 
-            if (date.getFullYear() != year)
+            if (date.getFullYear() !== year)
                return res.status(400).json({
                   msg:
                      "No se puede modificar la categoría de una inscripción que no está en curso. Para ello elimine la anterior y vuelva a crearla",
                });
 
-            categoryInstallment = await Category.findOne({ _id: category });
+            const attendances = await Attendance.find({
+               user: enrollment.student,
+               classroom: enrollment.classroom._id,
+            });
+            for (let x = 0; x < attendances.length; x++) {
+               await Attendance.findOneAndRemove({ _id: attendances[x]._id });
+            }
+
+            const grades = await Grade.find({
+               student: enrollment.student,
+               classroom: enrollment.classroom._id,
+            });
+            for (let x = 0; x < grades.length; x++) {
+               await Grade.findOneAndRemove({ _id: grades[x]._id });
+            }
 
             enrollment = await Enrollment.findOneAndUpdate(
                { _id: req.params.id },
-               { category: category },
+               {
+                  category: category,
+                  average: null,
+                  periodAverage: [],
+                  periodAbsence: [],
+                  absence: null,
+                  classroom: null,
+               },
                { new: true }
             )
                .populate({
                   path: "student",
                   model: "user",
-                  select: ["name", "lastname", "studentnumber"],
+                  select: "-password",
                })
                .populate({
                   path: "category",
@@ -634,19 +666,11 @@ router.put(
                number = number + 1;
             }
 
-            const studentfound = await User.findOneAndUpdate(
-               {
-                  _id: enrollment.student._id,
-               },
-               { classroom: null },
-               { new: true }
-            );
+            let value = enrollment.category.value;
+            const discount = enrollment.student.discount;
 
-            let value = categoryInstallment.value;
-
-            if (studentfound.discount && studentfound.discount !== 0) {
-               const disc =
-                  (categoryInstallment.value * studentfound.discount) / 100;
+            if (discount && discount !== 0) {
+               const disc = (value * discount) / 100;
                value = Math.round((value - disc) / 10) * 10;
             }
 
@@ -681,14 +705,32 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       const enrollment = await Enrollment.findOneAndRemove({
          _id: req.params.id,
       });
+
       const InstallmentsToRemove = await Installment.find({
-         enrollment: req.params.id,
+         enrollment: enrollment._id,
       });
+
       //Remove Installments
       for (const x in InstallmentsToRemove) {
          await Installment.findOneAndRemove({
             _id: InstallmentsToRemove[x].id,
          });
+      }
+
+      const attendances = await Attendance.find({
+         user: enrollment.student,
+         classroom: enrollment.classroom._id,
+      });
+      for (let x = 0; x < attendances.length; x++) {
+         await Attendance.findOneAndRemove({ _id: attendances[x]._id });
+      }
+
+      const grades = await Grade.find({
+         student: enrollment.student,
+         classroom: enrollment.classroom._id,
+      });
+      for (let x = 0; x < grades.length; x++) {
+         await Grade.findOneAndRemove({ _id: grades[x]._id });
       }
 
       res.json({ msg: "Enrollment and installments deleted" });

@@ -165,7 +165,7 @@ const EnrollmentList = ({
                      </select>
                      <label
                         htmlFor="year"
-                        className={`form-label ${year === "" ? "lbl" : ""}`}
+                        className={`form-label ${year === 0 ? "lbl" : ""}`}
                      >
                         Año
                      </label>

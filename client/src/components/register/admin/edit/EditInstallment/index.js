@@ -161,9 +161,12 @@ const EditInstallment = ({
                         value={year}
                      >
                         <option value={0}>* Seleccione el Año</option>
-                        <option value={thisYear - 1}>{thisYear - 1}</option>
-                        <option value={thisYear}>{thisYear}</option>
                         <option value={thisYear + 1}>{thisYear + 1}</option>
+                        <option value={thisYear}>{thisYear}</option>
+                        <option value={thisYear - 1}>{thisYear - 1}</option>
+                        <option value={thisYear - 2}>{thisYear - 2}</option>
+                        <option value={thisYear - 3}>{thisYear - 3}</option>
+                        <option value={thisYear - 4}>{thisYear - 4}</option>
                      </select>
                      <label
                         htmlFor="year"

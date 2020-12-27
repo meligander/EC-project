@@ -19,7 +19,7 @@ const Grade = require("../../models/Grade");
 const Attendance = require("../../models/Attendance");
 const Class = require("../../models/Class");
 
-//@route    GET api/users
+//@route    GET api/user
 //@desc     Get all user || with filter
 //@access   Private
 router.get("/", auth, async (req, res) => {
@@ -45,15 +45,19 @@ router.get("/", auth, async (req, res) => {
             switch (req.query.type) {
                case "Alumno":
                   search = false;
-                  if (req.query.classroom) {
+                  const classroom = req.query.classroom;
+                  /* if (req.query.classroom) {
                      if (req.query.classroom === "null")
                         filter.classroom = null;
                      else filter.classroom = req.query.classroom;
-                  }
-
+                  } */
                   if (req.query.category) {
                      const date = new Date();
                      const enrollments = await Enrollment.find({
+                        ...(classroom && {
+                           "classroom._id":
+                              classroom === "null" ? null : classroom,
+                        }),
                         category: req.query.category,
                         year: date.getFullYear(),
                      })
@@ -102,6 +106,7 @@ router.get("/", auth, async (req, res) => {
                         const enrollment = await Enrollment.findOne({
                            student: students[x]._id,
                            year: date.getFullYear(),
+                           ...(classroom && { "classroom._id": classroom }),
                         }).populate({ path: "category", select: "name" });
 
                         user = {
@@ -117,7 +122,14 @@ router.get("/", auth, async (req, res) => {
                            ...(students[x].cel && { cel: students[x].cel }),
                            ...(students[x].dob && { dob: students[x].dob }),
                         };
-                        users.push(user);
+
+                        if (!classroom) {
+                           users.push(user);
+                        } else {
+                           if (enrollment) {
+                              users.push(user);
+                           }
+                        }
                      }
                   }
                   break;
@@ -202,7 +214,7 @@ router.get("/", auth, async (req, res) => {
    }
 });
 
-//@route    GET api/users/:id
+//@route    GET api/user/:id
 //@desc     Get a user
 //@access   Private
 router.get("/:id", auth, async (req, res) => {
@@ -226,7 +238,7 @@ router.get("/:id", auth, async (req, res) => {
    }
 });
 
-//@route    GET api/users/tutor/:id
+//@route    GET api/user/tutor/:id
 //@desc     Get a user's tutors
 //@access   Private
 router.get("/tutor/:id", auth, async (req, res) => {
@@ -247,7 +259,7 @@ router.get("/tutor/:id", auth, async (req, res) => {
    }
 });
 
-//@route    GET api/users/register/number
+//@route    GET api/user/register/number
 //@desc     Get last studentnumber
 //@access   Private
 router.get("/register/number", [auth, adminAuth], async (req, res) => {
@@ -257,7 +269,7 @@ router.get("/register/number", [auth, adminAuth], async (req, res) => {
          .sort({ $natural: -1 })
          .limit(1);
 
-      if (number[0] !== undefined) {
+      if (number[0]) {
          studentnumber = Number(number[0].studentnumber) + 1;
       }
       res.json(studentnumber);
@@ -267,27 +279,7 @@ router.get("/register/number", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/users/active/:type
-//@desc     Get active users
-//@access   Private
-router.get("/active/:type", [auth, adminAuth], async (req, res) => {
-   try {
-      const users = await User.find({
-         type:
-            req.params.type === "Profesor"
-               ? { $in: ["Profesor", "Admin/Profesor"] }
-               : req.params.type,
-         active: true,
-      });
-
-      res.json(users.length);
-   } catch (err) {
-      console.error(err.message);
-      return res.status(500).send("Server Error");
-   }
-});
-
-//@route    POST api/users/create-list
+//@route    POST api/user/create-list
 //@desc     Create a pdf of users
 //@access   Private
 router.post("/create-list", (req, res) => {
@@ -406,14 +398,14 @@ router.post("/create-list", (req, res) => {
    });
 });
 
-//@route    GET api/users/lista/fetch-list
+//@route    GET api/user/lista/fetch-list
 //@desc     Get the pdf of users
 //@access   Private
 router.get("/lista/fetch-list", (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/users.pdf"));
 });
 
-//@route    POST api/users
+//@route    POST api/user
 //@desc     Register user
 //@access   Private
 router.post(
@@ -459,7 +451,7 @@ router.post(
       }
 
       var regex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
-      if (email !== undefined && !regex.test(email))
+      if (email && !regex.test(email))
          return res.status(400).json({
             value: email,
             msg: "El mail es inválido",
@@ -514,7 +506,6 @@ router.post(
             data = {
                ...data,
                studentnumber,
-               classroom: null,
             };
          }
          if (type === "Tutor") {
@@ -537,7 +528,13 @@ router.post(
 
          await user.save();
 
-         user = await User.find().sort({ $natural: -1 }).limit(1);
+         user = await User.find()
+            .sort({ $natural: -1 })
+            .select("-password")
+            .populate({ path: "town", select: "name" })
+            .populate({ path: "neighbourhood", select: "name" })
+            .populate({ path: "children", select: "-password" })
+            .limit(1);
          user = user[0];
 
          res.json(user._id);
@@ -548,7 +545,7 @@ router.post(
    }
 );
 
-//@route    PUT api/users/:id
+//@route    PUT api/user/:id
 //@desc     Update another user
 //@access   Private
 router.put(
@@ -684,14 +681,14 @@ router.put(
    }
 );
 
-//@route    PUT api/users/credentials/:id
+//@route    PUT api/user/credentials/:id
 //@desc     Update another user's credentials
 //@access   Private
 router.put("/credentials/:id", [auth], async (req, res) => {
    const { password, email } = req.body;
 
    var regex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
-   if (email !== undefined && !regex.test(email))
+   if (email && !regex.test(email))
       return res.status(400).json({
          value: email,
          msg: "El mail es inválido",
@@ -738,7 +735,7 @@ router.put("/credentials/:id", [auth], async (req, res) => {
    }
 });
 
-//@route    DELETE api/users
+//@route    DELETE api/user
 //@desc     Delete user
 //@access   Private
 router.delete("/", auth, async (req, res) => {
@@ -760,13 +757,15 @@ router.delete("/", auth, async (req, res) => {
    }
 });
 
-//@route    DELETE api/users/:id
+//@route    DELETE api/user/:id
 //@desc     Delete another user
 //@access   Private
-router.delete("/:id", [auth, adminAuth], async (req, res) => {
+router.delete("/:id/:type", [auth, adminAuth], async (req, res) => {
    try {
       //Remove user
       await User.findOneAndRemove({ _id: req.params.id });
+
+      await inactivateUser(req.params.id, req.params.type);
 
       res.json({ msg: "User deleted" });
    } catch (err) {
@@ -790,8 +789,6 @@ async function inactivateUser(user_id, type) {
          const date = new Date();
          const month = date.getMonth() + 1;
          const year = date.getFullYear();
-
-         await User.findOneAndUpdate({ _id: user_id }, { classroom: null });
 
          const grades = await Grade.find({ student: user_id });
          for (let x = 0; x < grades.length; x++) {
@@ -842,11 +839,19 @@ async function inactivateUser(user_id, type) {
                await Grade.findOneAndRemove({ _id: grades[y]._id });
             }
 
-            const users = await User.find({ classroom: classes[x]._id });
-            for (let y = 0; y < users.length; y++) {
+            const enrollments = await Enrollment.find({
+               "classroom._id": classes[x]._id,
+            });
+            for (let y = 0; y < enrollments.length; y++) {
                await User.findOneAndUpdate(
                   { _id: users[y]._id },
-                  { classroom: null }
+                  {
+                     classroom: {
+                        _id: null,
+                        periodAbsence: [],
+                        periodAverage: [],
+                     },
+                  }
                );
             }
 

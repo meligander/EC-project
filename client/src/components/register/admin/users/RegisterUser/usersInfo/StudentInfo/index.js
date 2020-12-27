@@ -21,16 +21,16 @@ const StudentInfo = ({
                      value={discount}
                      onChange={(e) => onChange(e)}
                   >
-                     <option value={0}>
-                        * Seleccione el tipo de descuento
-                     </option>
-                     <option value="0">Ninguno</option>
-                     <option value="10">Hermanos</option>
-                     <option value="50">Media Beca</option>
+                     <option value="">* Seleccione el tipo de descuento</option>
+                     <option value={0}>Ninguno</option>
+                     <option value={10}>Hermanos</option>
+                     <option value={50}>Media Beca</option>
                   </select>
                   <label
                      htmlFor="discount"
-                     className={`form-label ${discount === "" ? "lbl" : ""}`}
+                     className={`form-label ${
+                        discount === "" || discount === 0 ? "lbl" : ""
+                     }`}
                   >
                      Tipo de descuento
                   </label>
@@ -43,14 +43,14 @@ const StudentInfo = ({
                      value={chargeday}
                      onChange={(e) => onChange(e)}
                   >
-                     <option value={0}>* Seleccione día de recargo</option>
+                     <option value="">* Seleccione día de recargo</option>
                      <option value="10">10</option>
                      <option value="15">15</option>
                      <option value="31">30/31</option>
                   </select>
                   <label
                      htmlFor="chargeday"
-                     className={`form-label ${chargeday === 0 ? "lbl" : ""}`}
+                     className={`form-label ${chargeday === "" ? "lbl" : ""}`}
                   >
                      Seleccione el dia del mes en que se aplica el recargo a la
                      cuota
@@ -122,8 +122,8 @@ const StudentInfo = ({
 
 StudentInfo.propTypes = {
    isAdmin: PropTypes.bool.isRequired,
-   chargeday: PropTypes.number.isRequired,
-   discount: PropTypes.number.isRequired,
+   chargeday: PropTypes.string.isRequired,
+   discount: PropTypes.string.isRequired,
    birthprov: PropTypes.string.isRequired,
    birthtown: PropTypes.string.isRequired,
    onChange: PropTypes.func.isRequired,

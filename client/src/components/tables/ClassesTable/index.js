@@ -52,23 +52,37 @@ const ClassesTable = ({
                            {!all && <td>{classItem.classroom}</td>}
                            <td>{classItem.day1}</td>
                            <td>
-                              <Moment format="HH:mm" date={classItem.hourin1} />
+                              {classItem.hourin1 && (
+                                 <Moment
+                                    format="HH:mm"
+                                    date={classItem.hourin1}
+                                 />
+                              )}
                            </td>
                            <td>
-                              <Moment
-                                 format="HH:mm"
-                                 date={classItem.hourout1}
-                              />
+                              {classItem.hourout1 && (
+                                 <Moment
+                                    format="HH:mm"
+                                    date={classItem.hourout1}
+                                 />
+                              )}
                            </td>
                            <td>{classItem.day2}</td>
                            <td>
-                              <Moment format="HH:mm" date={classItem.hourin2} />
+                              {classItem.hourin2 && (
+                                 <Moment
+                                    format="HH:mm"
+                                    date={classItem.hourin2}
+                                 />
+                              )}
                            </td>
                            <td>
-                              <Moment
-                                 format="HH:mm"
-                                 date={classItem.hourout2}
-                              />
+                              {classItem.hourout2 && (
+                                 <Moment
+                                    format="HH:mm"
+                                    date={classItem.hourout2}
+                                 />
+                              )}
                            </td>
                            <td>
                               <Link
@@ -89,7 +103,7 @@ const ClassesTable = ({
             </tbody>
          </table>
          {classes.length === 0 && (
-            <p className="heading-tertiary text-dark m-2">
+            <p className="heading-tertiary text-center text-dark m-2">
                No se han encontrado clases
             </p>
          )}

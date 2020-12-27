@@ -18,6 +18,7 @@ const initialState = {
    loading: true,
    classInfo: null,
    loadingClasses: true,
+   loadingStudents: true,
    classes: [],
    error: {},
 };
@@ -44,7 +45,7 @@ export default function (state = initialState, action) {
          return {
             ...state,
             classInfo: { ...state.classInfo, students: payload },
-            loading: false,
+            loadingStudents: false,
             error: {},
          };
       case CLASS_REGISTERED:
@@ -103,6 +104,7 @@ export default function (state = initialState, action) {
             ...state,
             classInfo: null,
             loading: true,
+            loadingStudents: true,
             error: {},
          };
       case CLASSES_CLEARED:
@@ -124,6 +126,7 @@ export default function (state = initialState, action) {
                students: [],
             },
             loading: false,
+            loadingStudents: false,
          };
       default:
          return state;

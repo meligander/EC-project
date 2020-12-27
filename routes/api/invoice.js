@@ -159,7 +159,7 @@ router.get("/id", [auth, adminAuth], async (req, res) => {
    try {
       let invoice = await Invoice.find().sort({ $natural: -1 }).limit(1);
       invoice = invoice[0];
-      let number = invoice.invoiceid ? Number(invoice.invoiceid) + 1 : 0;
+      let number = invoice ? Number(invoice.invoiceid) + 1 : 1;
 
       res.json(number);
    } catch (err) {
@@ -325,7 +325,7 @@ router.post("/create-invoice", (req, res) => {
       user: invoice.lastname
          ? `${invoice.lastname}, ${invoice.name}`
          : `${invoice.user.lastname}, ${invoice.user.name}`,
-      email: invoice.user ? invoice.user.email : invoice.email,
+      email: invoice.user.email !== "" ? invoice.user.email : invoice.email,
       cel: invoice.user ? (invoice.user.cel ? invoice.user.cel : "") : "",
       invoiceid: invoice.invoiceid,
       date: moment(invoice.date).format("DD/MM/YY"),

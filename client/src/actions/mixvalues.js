@@ -18,7 +18,7 @@ import {
 
 export const getStudentNumber = () => async (dispatch) => {
    try {
-      let res = await axios.get("/api/users/register/number");
+      let res = await axios.get("/api/user/register/number");
       dispatch({
          type: STUDENTNUMBER_LOADED,
          payload: res.data,
@@ -63,14 +63,15 @@ export const getAdminDash = () => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
       let payload = {};
-      let res = await axios.get("/api/installment/month/debts");
+      let res;
+      res = await axios.get("/api/installment/month/debts");
       payload.totalDebt = res.data;
-      res = await axios.get("/api/users/active/Alumno");
-      payload.activeStudents = res.data;
-      res = await axios.get("/api/users/active/Profesor");
-      payload.activeTeachers = res.data;
-      res = await axios.get("/api/class/year/active");
-      payload.activeClasses = res.data;
+      res = await axios.get("/api/user?active=true&type=Alumno");
+      payload.activeStudents = res.data.length;
+      res = await axios.get("/api/user?active=true&type=Profesor");
+      payload.activeTeachers = res.data.length;
+      res = await axios.get("/api/class");
+      payload.activeClasses = res.data.length;
       res = await axios.get("/api/enrollment/year");
       payload.enrollments = res.data;
 

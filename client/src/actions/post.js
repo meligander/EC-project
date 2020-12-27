@@ -159,7 +159,7 @@ export const addPost = (formData, class_id) => async (dispatch) => {
 
       dispatch(setAlert("Posteo Creado", "success", "2"));
    } catch (err) {
-      if (err.response.data.erros) {
+      if (err.response.data.errors) {
          const errors = err.response.data.errors;
          errors.forEach((error) => {
             dispatch(setAlert(error.msg, "danger", "2"));
@@ -203,7 +203,7 @@ export const addComment = (post_id, formData, screen) => async (dispatch) => {
 
       dispatch(setAlert("Comentario Agregado", "success", post_id));
    } catch (err) {
-      if (err.response.data.erros) {
+      if (err.response.data.errors) {
          const errors = err.response.data.errors;
          errors.forEach((error) => {
             dispatch(setAlert(error.msg, "danger", post_id));

@@ -134,7 +134,11 @@ router.get("/student/:id/:admin", auth, async (req, res) => {
             select: ["name", "lastname", "studentnumber"],
          });
 
-      if (installments.length === 0) return [];
+      if (installments.length === 0) {
+         return res.status(400).json({
+            msg: "No se encontraron deudas con dichas descripciones",
+         });
+      }
 
       installments = buildTable(installments, req.params.admin === "true");
 
@@ -146,23 +150,26 @@ router.get("/student/:id/:admin", auth, async (req, res) => {
 });
 
 //@route    GET api/installment/month/debts
-//@desc     Get all installments
+//@desc     Get the total debt
 //@access   Private
 router.get("/month/debts", [auth, adminAuth], async (req, res) => {
    try {
       const date = new Date();
       const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+
       const installmentsExpired = await Installment.find({
          value: { $ne: 0 },
          expired: true,
       });
-      const MonthInstallments = await Installment.find({
+      const monthInstallments = await Installment.find({
          value: { $ne: 0 },
          expired: false,
+         year,
          number: { $in: [month, 0] },
       });
 
-      const installments = installmentsExpired.concat(MonthInstallments);
+      const installments = installmentsExpired.concat(monthInstallments);
 
       let totalDebt = 0;
       for (let x = 0; x < installments.length; x++) {

@@ -59,7 +59,14 @@ export default function (state = initialState, action) {
             loadingET: false,
          };
       case EXPENCES_CLEARED:
-         return initialState;
+         return {
+            ...state,
+            loading: true,
+            expence: null,
+            transactions: [],
+            loadingTransactions: true,
+            error: {},
+         };
       case TRANSACTIONS_CLEARED:
          return {
             ...state,

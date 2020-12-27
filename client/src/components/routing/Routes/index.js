@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch } from "react-router-dom";
+import { Switch, Route } from "react-router-dom";
 
 //Unregister Pages
 import Login from "../../unregister/Login";
@@ -36,6 +36,7 @@ import MentionList from "../../register/admin/lists/MentionList";
 
 import PrivateRoutes from "../PrivateRoutes";
 import PublicRoutes from "../PublicRoutes";
+import NotFound from "../../layouts/NotFound";
 
 const Routes = () => {
    return (
@@ -157,7 +158,7 @@ const Routes = () => {
                   "Profesor",
                   "Admin/Profesor",
                ]}
-               path="/attendance/:id"
+               path="/attendances/:id"
                component={Attendance}
             />
             <PrivateRoutes
@@ -237,6 +238,7 @@ const Routes = () => {
                path="/mention-list"
                component={MentionList}
             />
+            <Route component={NotFound} />
          </Switch>
       </section>
    );

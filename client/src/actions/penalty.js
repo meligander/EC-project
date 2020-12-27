@@ -39,7 +39,7 @@ export const updatePenalty = (formData) => async (dispatch) => {
       });
       dispatch(setAlert("Recargo Modificado", "success", "4"));
    } catch (err) {
-      if (err.response.data.erros) {
+      if (err.response.data.errors) {
          const errors = err.response.data.errors;
          errors.forEach((error) => {
             dispatch(setAlert(error.msg, "danger", "2"));

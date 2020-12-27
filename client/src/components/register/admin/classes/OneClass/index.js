@@ -18,7 +18,7 @@ import Confirm from "../../../../modal/Confirm";
 const OneClass = ({
    history,
    match,
-   classes: { classInfo, loading },
+   classes: { classInfo, loading, loadingStudents },
    auth: { userLogged },
    loadClass,
    deleteClass,
@@ -56,7 +56,7 @@ const OneClass = ({
 
    return (
       <>
-         {!loading ? (
+         {!loadingStudents ? (
             <>
                <Confirm
                   toggleModal={toggleModal}
@@ -97,6 +97,7 @@ const OneClass = ({
                                        to={`/dashboard/${user._id}`}
                                        className="btn-text"
                                        onClick={() => {
+                                          updatePreviousPage("");
                                           window.scroll(0, 0);
                                           clearProfile();
                                        }}
@@ -129,6 +130,7 @@ const OneClass = ({
                            }
                            onClick={() => {
                               clearGrades();
+                              updatePreviousPage("");
                               clearGradeTypes();
                               window.scroll(0, 0);
                            }}
@@ -139,7 +141,7 @@ const OneClass = ({
                         <Link
                            to={
                               classInfo.students.length > 0
-                                 ? `/attendance/${classInfo._id}`
+                                 ? `/attendances/${classInfo._id}`
                                  : "!#"
                            }
                            className={
@@ -149,6 +151,7 @@ const OneClass = ({
                            }
                            onClick={() => {
                               clearAttendances();
+                              updatePreviousPage("");
                               window.scroll(0, 0);
                            }}
                         >
@@ -170,6 +173,7 @@ const OneClass = ({
                      }
                      onClick={() => {
                         clearPosts();
+                        updatePreviousPage("");
                         window.scroll(0, 0);
                      }}
                   >
@@ -197,6 +201,7 @@ const OneClass = ({
                         className="btn btn-light"
                         onClick={() => {
                            window.scroll(0, 0);
+                           updatePreviousPage("");
                            clearSearch();
                         }}
                      >
@@ -209,9 +214,9 @@ const OneClass = ({
                )}
             </>
          ) : !loading && classInfo === null ? (
-            <div className="class p-2 bg-white">
-               <h1 className="text-primary x-large text-dark p-1">Curso</h1>
-               <p className="lead">
+            <div className="p-2 bg-white">
+               <h1 className="heading-secondary text-dark p-1">Curso</h1>
+               <p className="paragraph text-center">
                   El alumno no está asignado a ninguna clase
                </p>
             </div>

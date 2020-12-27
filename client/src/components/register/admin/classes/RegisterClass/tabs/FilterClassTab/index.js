@@ -12,6 +12,7 @@ import { setAlert } from "../../../../../../../actions/alert";
 
 import StudentTable from "../../../../../../tables/StudentTable";
 import Alert from "../../../../../../sharedComp/Alert";
+import Loading from "../../../../../../modal/Loading";
 
 const FilterClassTab = ({
    location,
@@ -20,7 +21,7 @@ const FilterClassTab = ({
    updateClassCategory,
    addStudent,
    categories,
-   classes: { classInfo, loading },
+   classes: { classInfo, loading, loadingStudents },
    users: { users, loadingUsers },
 }) => {
    const registerClass = location.pathname === "/register-class";
@@ -79,57 +80,66 @@ const FilterClassTab = ({
 
    return (
       <>
-         <form className="form">
-            <div className="form-group">
-               <select
-                  className="form-input"
-                  name="new-category"
-                  disabled={!registerClass}
-                  id="new-category"
-                  onChange={onChange}
-                  value={category._id}
-               >
-                  <option value="">* Seleccione Categoría</option>
-                  {!categories.loading &&
-                     categories.categories.map((category) => (
-                        <React.Fragment key={category._id}>
-                           {category.name !== "Inscripción" && (
-                              <option value={category._id}>
-                                 {category.name}
-                              </option>
-                           )}
-                        </React.Fragment>
-                     ))}
-               </select>
-               <label
-                  htmlFor="new-category"
-                  className={`form-label ${category._id === "" ? "lbl" : ""}`}
-               >
-                  Categoría
-               </label>
-            </div>
-            <div className="text-right">
-               <button
-                  onClick={filterStudents}
-                  className={`btn ${
-                     registerClass ? "btn-primary" : "btn-black"
-                  } my-1`}
-                  disabled={!registerClass}
-               >
-                  Buscar Alumnos
-               </button>
-            </div>
-         </form>
-         <div className="mt-2">
-            <Alert type="3" />
-            <StudentTable
-               users={users}
-               loadingUsers={loadingUsers}
-               search={false}
-               addChild={addChild}
-               type="Alumno"
-            />
-         </div>
+         {" "}
+         {!loadingStudents ? (
+            <>
+               <form className="form">
+                  <div className="form-group">
+                     <select
+                        className="form-input"
+                        name="new-category"
+                        disabled={!registerClass}
+                        id="new-category"
+                        onChange={onChange}
+                        value={category._id}
+                     >
+                        <option value="">* Seleccione Categoría</option>
+                        {!categories.loading &&
+                           categories.categories.map((category) => (
+                              <React.Fragment key={category._id}>
+                                 {category.name !== "Inscripción" && (
+                                    <option value={category._id}>
+                                       {category.name}
+                                    </option>
+                                 )}
+                              </React.Fragment>
+                           ))}
+                     </select>
+                     <label
+                        htmlFor="new-category"
+                        className={`form-label ${
+                           category._id === "" ? "lbl" : ""
+                        }`}
+                     >
+                        Categoría
+                     </label>
+                  </div>
+                  <div className="text-right">
+                     <button
+                        onClick={filterStudents}
+                        className={`btn ${
+                           registerClass ? "btn-primary" : "btn-black"
+                        } my-1`}
+                        disabled={!registerClass}
+                     >
+                        Buscar Alumnos
+                     </button>
+                  </div>
+               </form>
+               <div className="mt-2">
+                  <Alert type="3" />
+                  <StudentTable
+                     users={users}
+                     loadingUsers={loadingUsers}
+                     search={false}
+                     addChild={addChild}
+                     type="Alumno"
+                  />
+               </div>
+            </>
+         ) : (
+            <Loading />
+         )}
       </>
    );
 };

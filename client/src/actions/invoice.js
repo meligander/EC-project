@@ -126,7 +126,7 @@ export const registerInvoice = (
       dispatch(setAlert("Factura Registrada", "success", "1", 7000));
       history.push(`/dashboard/${user_id}`);
    } catch (err) {
-      if (err.response.data.erros) {
+      if (err.response.data.errors) {
          const errors = err.response.data.errors;
          errors.forEach((error) => {
             dispatch(setAlert(error.msg, "danger", "2"));

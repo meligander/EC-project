@@ -8,8 +8,10 @@ import {
    registerExpence,
 } from "../../../../../../actions/expence";
 import { loadUsers } from "../../../../../../actions/user";
+import { setAlert } from "../../../../../../actions/alert";
 
 import Confirm from "../../../../../modal/Confirm";
+import Alert from "../../../../../sharedComp/Alert";
 
 import "./style.scss";
 
@@ -21,6 +23,7 @@ const IncomeExpenceTab = ({
    clearExpenceTypes,
    loadUsers,
    registerExpence,
+   setAlert,
    history,
 }) => {
    const [otherValues, setOtherValues] = useState({
@@ -106,15 +109,25 @@ const IncomeExpenceTab = ({
    };
 
    const setValueAfterHours = (e) => {
-      setFormData({
-         ...formData,
-         hours: e.target.value,
-         value: e.target.value * teacher.salary,
-      });
+      if (teacher.salary && teacher.salary !== "") {
+         setFormData({
+            ...formData,
+            hours: e.target.value,
+            value: e.target.value * teacher.salary,
+         });
+      } else {
+         window.scroll(0, 0);
+         setAlert(
+            "No está definido el salario del empleado seleccionado",
+            "danger",
+            "3"
+         );
+      }
    };
 
    return (
       <div className="register income-tab">
+         <Alert type="3" />
          <Confirm
             toggleModal={toggleModal}
             setToggleModal={setToggle}
@@ -251,6 +264,7 @@ IncomeExpenceTab.propTypes = {
    users: PropTypes.object.isRequired,
    loadUsers: PropTypes.func.isRequired,
    registerExpence: PropTypes.func.isRequired,
+   setAlert: PropTypes.func.isRequired,
    clearExpenceTypes: PropTypes.func.isRequired,
 };
 
@@ -265,4 +279,5 @@ export default connect(mapStateToProps, {
    registerExpence,
    loadUsers,
    clearExpenceTypes,
+   setAlert,
 })(withRouter(IncomeExpenceTab));

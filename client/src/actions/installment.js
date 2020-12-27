@@ -134,7 +134,7 @@ export const updateIntallment = (formData, history, user_id, inst_id) => async (
       dispatch(clearInstallments());
       history.push(`/installments/${user_id}`);
    } catch (err) {
-      if (err.response.data.erros) {
+      if (err.response.data.errors) {
          const errors = err.response.data.errors;
          errors.forEach((error) => {
             dispatch(setAlert(error.msg, "danger", "2"));

@@ -78,7 +78,7 @@ const Dashboard = ({
    };
 
    const confirm = () => {
-      deleteUser(user._id, history, userLogged._id);
+      deleteUser(user, history, userLogged._id);
    };
 
    return (

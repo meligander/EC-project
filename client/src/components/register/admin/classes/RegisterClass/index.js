@@ -25,7 +25,7 @@ const RegisterClass = ({
       if (!registerClass) {
          if (loadingUsersBK && loadingUsers) loadClass(match.params.id);
       }
-      console.log(loadingUsersBK);
+
       if (loadingUsersBK) {
          loadCategories(true);
          loadUsers({ type: "Profesor", active: true }, false);
