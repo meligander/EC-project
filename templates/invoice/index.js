@@ -51,6 +51,7 @@ module.exports = (css, img, tbody, invoice) => {
                             <tr>
                             <th>Nombre</th>
                             <th>Cuota</th>
+                            <th>Año</th>
                             <th>Importe</th>
                             <th>Pago</th>
                             </tr>

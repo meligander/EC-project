@@ -1,9 +1,9 @@
 import {
    GRADES_LOADED,
-   USER_GRADES_LOADED,
+   STUDENTGRADES_LOADED,
    GRADETYPES_LOADED,
    GRADES_UPDATED,
-   NEW_GRADE_REGISTERED,
+   NEWGRADE_REGISTERED,
    GRADES_DELETED,
    GRADETYPES_UPDATED,
    GRADETYPE_DELETED,
@@ -20,11 +20,11 @@ const initialState = {
       students: [],
       period: [],
    },
-   usersGrades: {
+   studentGrades: {
       headers: [],
       rows: [],
    },
-   loadingUsersGrades: true,
+   loadingStudentGrades: true,
    gradeTypes: [],
    loadingGT: true,
    error: {},
@@ -34,7 +34,7 @@ export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
       case GRADES_DELETED:
-      case NEW_GRADE_REGISTERED:
+      case NEWGRADE_REGISTERED:
       case GRADES_LOADED:
          return {
             ...state,
@@ -42,11 +42,11 @@ export default function (state = initialState, action) {
             loading: false,
             error: {},
          };
-      case USER_GRADES_LOADED:
+      case STUDENTGRADES_LOADED:
          return {
             ...state,
-            usersGrades: payload,
-            loadingUsersGrades: false,
+            studentGrades: payload,
+            loadingStudentGrades: false,
          };
       case GRADETYPES_LOADED:
       case GRADETYPES_UPDATED:
@@ -61,8 +61,8 @@ export default function (state = initialState, action) {
       case GRADETYPE_DELETED:
          return {
             ...state,
-            gradeTypes: state.gradeTypes.map(
-               (gradeType) => gradeType._id !== payload
+            gradeTypes: state.gradeTypes.filter(
+               (gradeType) => gradeType[0]._id !== payload
             ),
             loadingGT: false,
          };
@@ -73,19 +73,19 @@ export default function (state = initialState, action) {
       case GRADES_ERROR:
          return {
             ...state,
-            grades: [],
             loading: false,
-            usersGrades: {
+            studentGrades: {
                headers: [],
                rows: [],
             },
-            loadingUsersGrades: false,
+            loadingStudentGrades: false,
             error: payload,
          };
       case GRADETYPE_ERROR:
          return {
             ...state,
             loadingGT: false,
+            gradeTypes: [],
             error: payload,
          };
       default:

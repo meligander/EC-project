@@ -5,8 +5,6 @@ import PropTypes from "prop-types";
 
 import { loadPenalty } from "../../../actions/penalty";
 
-import Alert from "../../sharedComp/Alert";
-
 import logo from "../../../img/logoSinLetras.png";
 import "./style.scss";
 
@@ -27,8 +25,8 @@ const Confirm = ({
    const { percentage, date } = formData;
 
    useEffect(() => {
-      if (type === "penalty") loadPenalty();
-   }, [loadPenalty, type]);
+      if (type === "penalty" && loading) loadPenalty();
+   }, [loadPenalty, type, loading]);
 
    const onChange = (e) => {
       setFormData({
@@ -42,16 +40,27 @@ const Confirm = ({
             if (!loading)
                return (
                   <div className="popup-penalty">
-                     <p className="posted-date">
-                        Última Actualización:{" "}
-                        <Moment format="DD/MM/YY" date={penalty.date} />
-                     </p>
-                     <Alert type="4" />
+                     {penalty && (
+                        <p className="posted-date">
+                           Última Actualización:{" "}
+                           <Moment format="DD/MM/YY" date={penalty.date} />
+                        </p>
+                     )}
+
                      <h3>Actualización de Recargo</h3>
 
-                     <h4 className="pt-2">
-                        Recargo Actual: {penalty.percentage} %
-                     </h4>
+                     <div className="pt-2">
+                        <h4>
+                           {" "}
+                           Recargo Actual: {penalty && penalty.percentage}%
+                        </h4>
+
+                        {!penalty && (
+                           <h5 className="paragraph text-danger text-center">
+                              No hay ningún recargo registrado
+                           </h5>
+                        )}
+                     </div>
 
                      <h4>
                         <input
@@ -104,6 +113,15 @@ const Confirm = ({
          <div className="popup-content text-center">
             <div className="popup-img">
                <img src={logo} alt="logo" />
+               <button
+                  onClick={(e) => {
+                     e.preventDefault();
+                     setToggleModal();
+                  }}
+                  className="btn-cancel"
+               >
+                  <i className="fas fa-times"></i>
+               </button>
             </div>
             {chooseType(type)}
             <div className="btn-ctr">

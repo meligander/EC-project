@@ -14,7 +14,7 @@ const Installment = require("../../models/Installment");
 const Register = require("../../models/Register");
 
 //@route    GET api/invoice
-//@desc     get all invoices
+//@desc     get all invoices || with filters
 //@access   Private
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
@@ -152,22 +152,6 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/invoice/id
-//@desc     get invoice next number
-//@access   Private
-router.get("/id", [auth, adminAuth], async (req, res) => {
-   try {
-      let invoice = await Invoice.find().sort({ $natural: -1 }).limit(1);
-      invoice = invoice[0];
-      let number = invoice ? Number(invoice.invoiceid) + 1 : 1;
-
-      res.json(number);
-   } catch (err) {
-      console.error(err.message);
-      return res.status(500).send("Server Error");
-   }
-});
-
 //@route    GET api/invoice/:id
 //@desc     get one invoice
 //@access   Private
@@ -191,7 +175,7 @@ router.get("/:id", [auth, adminAuth], async (req, res) => {
 
       if (!invoice)
          return res.status(400).json({
-            msg: "No se encontraró una factura con esas descripciones",
+            msg: "No se encontró una factura con esas descripciones",
          });
 
       res.json(invoice);
@@ -201,74 +185,23 @@ router.get("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    POST api/invoice/create-list
-//@desc     Create a pdf of income
+//@route    GET api/invoice/id
+//@desc     get invoice next number
 //@access   Private
-router.post("/create-list", (req, res) => {
-   const name = "reports/invoices.pdf";
+router.get("/last/invoiceid", [auth, adminAuth], async (req, res) => {
+   try {
+      let number = 1;
+      let invoice = await Invoice.find().sort({ $natural: -1 }).limit(1);
 
-   const invoices = req.body;
-
-   let tbody = "";
-
-   for (let x = 0; x < invoices.length; x++) {
-      const date =
-         " <td>" + moment(invoices[x].date).format("DD/MM/YY") + "</td>";
-      const id = "<td>" + invoices[x].invoiceid + "</td>";
-      let name = "";
-
-      if (invoices[x].user === undefined) {
-         name =
-            "<td>" + invoices[x].lastname + ", " + invoices[x].name + "</td>";
-      } else {
-         name =
-            "<td>" +
-            invoices[x].user.lastname +
-            ", " +
-            invoices[x].user.name +
-            "</td>";
+      if (invoice[0]) {
+         number = Number(invoice[0].invoiceid) + 1;
       }
-      const total = "<td> $" + invoices[x].total + "</td>";
 
-      tbody += "<tr>" + date + id + name + total + "</tr>";
+      res.json(number);
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server Error");
    }
-
-   const thead =
-      "<th>Fecha</th> <th>N° Factura</th> <th>Nombre</th> <th>Total</th>";
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/list/style.css"
-   );
-
-   const options = {
-      format: "A4",
-      header: {
-         height: "15mm",
-         contents: `<div></div>`,
-      },
-      footer: {
-         height: "17mm",
-         contents:
-            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
-      },
-   };
-
-   pdf.create(pdfTemplate(css, img, "ingresos", thead, tbody), options).toFile(
-      name,
-      (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
-      }
-   );
 });
 
 //@route    GET api/invoice/list/fetch-list
@@ -276,88 +209,6 @@ router.post("/create-list", (req, res) => {
 //@access   Private
 router.get("/list/fetch-list", (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/invoices.pdf"));
-});
-
-//@route    POST api/invoice/create-invoice
-//@desc     Create a pdf of an invoice
-//@access   Private
-router.post("/create-invoice", (req, res) => {
-   const name = "reports/invoice.pdf";
-
-   const { invoice, remaining } = req.body;
-
-   let tbody = "";
-
-   const installment = [
-      "Insc",
-      "",
-      "",
-      "Mar",
-      "Abr",
-      "May",
-      "Jun",
-      "Jul",
-      "Agto",
-      "Sept",
-      "Oct",
-      "Nov",
-      "Dic",
-   ];
-
-   for (let x = 0; x < invoice.details.length; x++) {
-      let userName = "";
-      let instName = "";
-      if (invoice.details[x].installment) {
-         userName = `<td> ${invoice.details[x].installment.student.lastname}, ${invoice.details[x].installment.student.name} </td>`;
-         instName = `<td> ${
-            installment[invoice.details[x].installment.number]
-         }</td>`;
-      } else {
-         userName = `<td> ${invoice.details[x].item.student.lastname}, ${invoice.details[x].item.student.name} </td>`;
-         instName = `<td> ${installment[invoice.details[x].item.number]}</td>`;
-      }
-      const value = `<td> $${invoice.details[x].value} </td>`;
-      const payment = `<td> $${invoice.details[x].payment} </td>`;
-      tbody += "<tr>" + userName + instName + value + payment + "</tr>";
-   }
-
-   let invoiceDetails = {
-      user: invoice.lastname
-         ? `${invoice.lastname}, ${invoice.name}`
-         : `${invoice.user.lastname}, ${invoice.user.name}`,
-      email: invoice.user.email !== "" ? invoice.user.email : invoice.email,
-      cel: invoice.user ? (invoice.user.cel ? invoice.user.cel : "") : "",
-      invoiceid: invoice.invoiceid,
-      date: moment(invoice.date).format("DD/MM/YY"),
-      total: invoice.total,
-      remaining,
-   };
-
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/invoice/style.css"
-   );
-
-   const options = {
-      format: "A4",
-   };
-
-   pdf.create(pdfTemplate2(css, img, tbody, invoiceDetails), options).toFile(
-      name,
-      (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
-      }
-   );
 });
 
 //@route    GET api/invoice/for-print/fetch-invoice
@@ -465,8 +316,7 @@ router.post(
             await Register.findOneAndUpdate(
                { _id: last.id },
                {
-                  income:
-                     last.income !== undefined ? last.income + total : total,
+                  income: last.income ? last.income + total : total,
                   registermoney: plusvalue,
                }
             );
@@ -490,6 +340,159 @@ router.post(
       }
    }
 );
+
+//@route    POST api/invoice/create-list
+//@desc     Create a pdf list of income
+//@access   Private
+router.post("/create-list", (req, res) => {
+   const name = "reports/invoices.pdf";
+
+   const invoices = req.body;
+
+   let tbody = "";
+
+   for (let x = 0; x < invoices.length; x++) {
+      const date =
+         " <td>" + moment(invoices[x].date).format("DD/MM/YY") + "</td>";
+      const id = "<td>" + invoices[x].invoiceid + "</td>";
+      let name = "";
+
+      if (invoices[x].user === undefined) {
+         name =
+            "<td>" + invoices[x].lastname + ", " + invoices[x].name + "</td>";
+      } else {
+         name =
+            "<td>" +
+            invoices[x].user.lastname +
+            ", " +
+            invoices[x].user.name +
+            "</td>";
+      }
+      const total = "<td> $" + invoices[x].total + "</td>";
+
+      tbody += "<tr>" + date + id + name + total + "</tr>";
+   }
+
+   const thead =
+      "<th>Fecha</th> <th>N° Factura</th> <th>Nombre</th> <th>Total</th>";
+   const img = path.join(
+      "file://",
+      __dirname,
+      "../../templates/assets/logo.png"
+   );
+   const css = path.join(
+      "file://",
+      __dirname,
+      "../../templates/list/style.css"
+   );
+
+   const options = {
+      format: "A4",
+      header: {
+         height: "15mm",
+         contents: `<div></div>`,
+      },
+      footer: {
+         height: "17mm",
+         contents:
+            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
+      },
+   };
+
+   pdf.create(pdfTemplate(css, img, "ingresos", thead, tbody), options).toFile(
+      name,
+      (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
+
+         res.send(Promise.resolve());
+      }
+   );
+});
+
+//@route    POST api/invoice/create-invoice
+//@desc     Create a pdf of an invoice
+//@access   Private
+router.post("/create-invoice", (req, res) => {
+   const name = "reports/invoice.pdf";
+
+   const { invoice, remaining } = req.body;
+
+   let tbody = "";
+
+   const installment = [
+      "Insc",
+      "",
+      "",
+      "Mar",
+      "Abr",
+      "May",
+      "Jun",
+      "Jul",
+      "Agto",
+      "Sept",
+      "Oct",
+      "Nov",
+      "Dic",
+   ];
+
+   for (let x = 0; x < invoice.details.length; x++) {
+      let userName = "";
+      let instName = "";
+      if (invoice.details[x].installment) {
+         userName = `<td> ${invoice.details[x].installment.student.lastname}, ${invoice.details[x].installment.student.name} </td>`;
+         instName = `<td> ${
+            installment[invoice.details[x].installment.number]
+         }</td>`;
+      } else {
+         userName = `<td> ${invoice.details[x].item.student.lastname}, ${invoice.details[x].item.student.name} </td>`;
+         instName = `<td> ${installment[invoice.details[x].item.number]}</td>`;
+      }
+      const year = `<td>${invoice.details[x].item.year}</td>`;
+      const value = `<td> $${invoice.details[x].value} </td>`;
+      const payment = `<td> $${invoice.details[x].payment} </td>`;
+      tbody += "<tr>" + userName + instName + year + value + payment + "</tr>";
+   }
+
+   let invoiceDetails = {
+      user: invoice.lastname
+         ? `${invoice.lastname}, ${invoice.name}`
+         : `${invoice.user.lastname}, ${invoice.user.name}`,
+      email: invoice.user.email !== "" ? invoice.user.email : invoice.email,
+      cel: invoice.user ? (invoice.user.cel ? invoice.user.cel : "") : "",
+      invoiceid: invoice.invoiceid,
+      date: moment(invoice.date).format("DD/MM/YY"),
+      total: invoice.total,
+      remaining,
+   };
+
+   const img = path.join(
+      "file://",
+      __dirname,
+      "../../templates/assets/logo.png"
+   );
+   const css = path.join(
+      "file://",
+      __dirname,
+      "../../templates/invoice/style.css"
+   );
+
+   const options = {
+      format: "A4",
+   };
+
+   pdf.create(pdfTemplate2(css, img, tbody, invoiceDetails), options).toFile(
+      name,
+      (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
+
+         res.send(Promise.resolve());
+      }
+   );
+});
 
 //@route    DELETE api/invoice/:id
 //@desc     Delete an invoice

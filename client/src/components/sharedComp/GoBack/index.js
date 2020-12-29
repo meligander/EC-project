@@ -1,9 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "react-router";
 import PropTypes from "prop-types";
 
 import { updatePreviousPage } from "../../../actions/mixvalues";
+import { clearProfile } from "../../../actions/user";
 
 import Loading from "../../modal/Loading";
 
@@ -12,8 +13,10 @@ const GoBack = ({
    mixvalues: { loadingSpinner, prevPage },
    auth: { userLogged },
    updatePreviousPage,
+   clearProfile,
 }) => {
    const goBack = () => {
+      clearProfile();
       switch (prevPage) {
          case "dashboard":
             history.push(`/dashboard/${userLogged._id}`);
@@ -21,9 +24,6 @@ const GoBack = ({
             break;
          case "":
             history.goBack();
-            break;
-         case "twice":
-            history.go(-2);
             break;
          default:
             history.push(prevPage);
@@ -46,6 +46,7 @@ GoBack.propTypes = {
    mixvalues: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
    updatePreviousPage: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStatetoProps = (state) => ({
@@ -53,6 +54,6 @@ const mapStatetoProps = (state) => ({
    auth: state.auth,
 });
 
-export default connect(mapStatetoProps, { updatePreviousPage })(
+export default connect(mapStatetoProps, { updatePreviousPage, clearProfile })(
    withRouter(GoBack)
 );

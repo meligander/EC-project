@@ -5,8 +5,11 @@ import moment from "moment";
 import PropTypes from "prop-types";
 
 //Actions
-import { registerUser, loadUser } from "../../../../../actions/user";
-import { getStudentNumber } from "../../../../../actions/mixvalues";
+import {
+   registerUser,
+   loadUser,
+   getStudentNumber,
+} from "../../../../../actions/user";
 import { loadTowns, clearTowns } from "../../../../../actions/town";
 import {
    loadTownNeighbourhoods,
@@ -26,7 +29,11 @@ const RegisterUser = ({
    registerUser,
    history,
    auth,
-   users: { user, loading },
+   users: {
+      user,
+      loading,
+      otherValues: { studentNumber },
+   },
    towns,
    neighbourhoods,
    location,
@@ -34,7 +41,6 @@ const RegisterUser = ({
    loadTowns,
    loadTownNeighbourhoods,
    getStudentNumber,
-   mixvalues: { studentNumber },
    clearNeighbourhoods,
    clearTowns,
 }) => {
@@ -51,6 +57,7 @@ const RegisterUser = ({
       previewSource: "",
       fileInputState: "",
       selectedFile: "",
+      condition: false,
    });
 
    const {
@@ -60,6 +67,7 @@ const RegisterUser = ({
       previewSource,
       fileInputState,
       selectedFile,
+      condition,
    } = otherValues;
 
    const [formData, setFormData] = useState({
@@ -71,8 +79,8 @@ const RegisterUser = ({
       cel: "",
       type: "",
       dni: "",
-      town: 0,
-      neighbourhood: 0,
+      town: "",
+      neighbourhood: "",
       address: "",
       dob: "",
       birthprov: "",
@@ -125,7 +133,9 @@ const RegisterUser = ({
             ...prev,
             isEditing: true,
          }));
+
          if (user.town) loadTownNeighbourhoods(user.town._id);
+
          if (user.dob) user.dob = moment(user.dob).utc().format("YYYY-MM-DD");
 
          setFormData((prev) => ({
@@ -155,8 +165,8 @@ const RegisterUser = ({
             ...(user.salary && { salary: user.salary }),
             ...(user.description && { description: user.description }),
             ...(user.img.public_id !== "" && { img: user.img }),
-            ...(user.discount && { discount: user.discount }),
-            ...(user.chargeday && { chargeday: user.chargeday }),
+            ...(user.discount && { discount: user.discount.toString() }),
+            ...(user.chargeday && { chargeday: user.chargeday.toString() }),
          }));
       };
 
@@ -171,6 +181,23 @@ const RegisterUser = ({
          } else {
             if (towns.loading) {
                loadUser(match.params.id, true);
+            } else {
+               if (user && isEditing) {
+                  if (user.town) {
+                     setOtherValues((prev) => ({
+                        ...prev,
+                        condition:
+                           !loading &&
+                           !neighbourhoods.loading &&
+                           !towns.loading,
+                     }));
+                  } else {
+                     setOtherValues((prev) => ({
+                        ...prev,
+                        condition: !loading && !towns.loading,
+                     }));
+                  }
+               }
             }
          }
       } else {
@@ -179,6 +206,10 @@ const RegisterUser = ({
                ...prev,
                studentnumber: studentNumber,
             }));
+            setOtherValues((prev) => ({
+               ...prev,
+               condition: !towns.loading,
+            }));
          }
       }
    }, [
@@ -186,6 +217,7 @@ const RegisterUser = ({
       location.pathname,
       match.params.id,
       towns.loading,
+      neighbourhoods.loading,
       getStudentNumber,
       studentNumber,
       user,
@@ -306,7 +338,7 @@ const RegisterUser = ({
 
    return (
       <>
-         {!loading || (!isEditing && !auth.loading) ? (
+         {condition ? (
             <>
                <Confirm
                   toggleModal={toggleModal}
@@ -347,7 +379,7 @@ const RegisterUser = ({
                         : "Editar Imágen"}
                   </h2>
 
-                  {isEditing && (
+                  {isEditing && user && (
                      <div className="btn-right mb-3">
                         <Link
                            to={`/credentials/${user._id}`}
@@ -607,18 +639,14 @@ const RegisterUser = ({
                                     value={town}
                                     onChange={(e) => onChange(e)}
                                  >
-                                    <option value="0">
+                                    <option value="">
                                        * Seleccione localidad donde vive
                                     </option>
-                                    {!towns.loading &&
-                                       towns.towns.map((town) => (
-                                          <option
-                                             key={town._id}
-                                             value={town._id}
-                                          >
-                                             {town.name}
-                                          </option>
-                                       ))}
+                                    {towns.towns.map((town) => (
+                                       <option key={town._id} value={town._id}>
+                                          {town.name}
+                                       </option>
+                                    ))}
                                  </select>
                                  <label
                                     htmlFor="town"
@@ -641,13 +669,13 @@ const RegisterUser = ({
                                        <>
                                           {neighbourhoods.neighbourhoods
                                              .length === 0 ? (
-                                             <option value="0">
+                                             <option value="">
                                                 Dicha localidad no tiene barrios
                                                 adheridos
                                              </option>
                                           ) : (
                                              <>
-                                                <option value="0">
+                                                <option value="">
                                                    * Seleccione barrio donde
                                                    vive
                                                 </option>

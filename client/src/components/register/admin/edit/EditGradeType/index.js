@@ -7,42 +7,95 @@ import {
    updateGradeTypes,
    deleteGradeType,
 } from "../../../../../actions/grade";
+import { loadCategories } from "../../../../../actions/category";
+import { setAlert } from "../../../../../actions/alert";
 
 import Loading from "../../../../modal/Loading";
 import EditButtons from "../sharedComp/EditButtons";
 import Confirm from "../../../../modal/Confirm";
-import { setAlert } from "../../../../../actions/alert";
 
 const EditGradeType = ({
    loadGradeTypes,
+   loadCategories,
    updateGradeTypes,
    deleteGradeType,
-   grades: { gradeTypes, loadingGT },
    setAlert,
+   grades: { gradeTypes, loadingGT },
+   categories: { categories },
 }) => {
+   const header = [
+      "K",
+      "IC",
+      "IB",
+      "IA",
+      "P",
+      "J",
+      "1°",
+      "2°",
+      "3°",
+      "4°",
+      "5°",
+      "6°",
+      "C",
+      "Pf",
+   ];
+
    const [otherValues, setOtherValues] = useState({
       toggleModalDelete: false,
       toggleModalSave: false,
       toDelete: "",
-   });
-
-   const [formData, setFormData] = useState({
-      header: [],
-      rows: [],
       newRow: [],
+      amount: 0,
+      oneLoad: true,
    });
 
-   const { header, rows, newRow } = formData;
+   const [formData, setFormData] = useState([]);
 
-   const { toggleModalDelete, toggleModalSave, toDelete } = otherValues;
+   const {
+      toggleModalDelete,
+      toggleModalSave,
+      toDelete,
+      newRow,
+      amount,
+      oneLoad,
+   } = otherValues;
 
    useEffect(() => {
-      if (loadingGT) loadGradeTypes();
-      else setFormData(gradeTypes);
-   }, [loadGradeTypes, loadingGT, gradeTypes]);
+      if (oneLoad) {
+         loadGradeTypes();
+         loadCategories();
+         setOtherValues((prev) => ({
+            ...prev,
+            oneLoad: false,
+         }));
+      } else {
+         if (categories.length > 0 && newRow.length === 0) {
+            let newRow = [{ _id: "", name: "" }];
+            for (let x = 1; x < categories.length; x++) {
+               newRow.push({ category: categories[x]._id, checks: false });
+            }
+            setOtherValues((prev) => ({
+               ...prev,
+               newRow,
+            }));
+         }
+
+         if (!loadingGT) {
+            setFormData(gradeTypes);
+         }
+      }
+   }, [
+      newRow,
+      loadGradeTypes,
+      loadingGT,
+      gradeTypes,
+      loadCategories,
+      categories,
+      oneLoad,
+   ]);
 
    const onChange = (e, index, i) => {
-      let newValue = [...rows];
+      let newValue = [...formData];
 
       if (e.target.name === "input") {
          newValue[index][0].name = e.target.value;
@@ -53,31 +106,47 @@ const EditGradeType = ({
          };
       }
 
-      setFormData({
-         ...formData,
-         rows: newValue,
-      });
+      setFormData(newValue);
    };
 
    const addGradeType = () => {
-      if (rows[rows.length - 1][0]._id === "") {
-         setAlert("Agregue un tipo de nota por vez", "danger", "2");
-         window.scroll(0, 0);
-      } else {
-         let newValue = [...rows, newRow];
-         setFormData({
-            ...formData,
-            rows: newValue,
-         });
-      }
+      let rowToAdd = new Array(15);
+
+      rowToAdd[amount] = [...newRow];
+      rowToAdd[amount][0] = {
+         _id: "",
+         name: "",
+      };
+      let newValue = [...formData, rowToAdd[amount]];
+
+      setOtherValues({
+         ...otherValues,
+         amount: amount + 1,
+      });
+
+      setFormData(newValue);
    };
 
    const deleteGradeTypeConfirm = () => {
-      deleteGradeType(toDelete[0]._id);
+      console.log(toDelete);
+      if (toDelete[0]._id === "") {
+         setAlert(
+            "El tipo de nota no se ha guardado todavía. Vuelva a recargar la página y desaparecerá.",
+            "danger",
+            "2"
+         );
+         window.scroll(0, 0);
+      } else {
+         deleteGradeType(toDelete[0]._id);
+      }
    };
 
    const saveGradeTypes = () => {
-      updateGradeTypes(rows);
+      updateGradeTypes(formData);
+      setOtherValues({
+         ...otherValues,
+         oneLoad: true,
+      });
    };
 
    const setToggleSave = () => {
@@ -99,6 +168,7 @@ const EditGradeType = ({
       <>
          {!loadingGT ? (
             <>
+               {" "}
                <Confirm
                   toggleModal={toggleModalSave}
                   setToggleModal={setToggleSave}
@@ -125,8 +195,8 @@ const EditGradeType = ({
                         </tr>
                      </thead>
                      <tbody>
-                        {rows.length > 0 &&
-                           rows.map((row, index) => (
+                        {formData.length > 0 &&
+                           formData.map((row, index) => (
                               <tr key={index}>
                                  {row.map((item, i) =>
                                     i === 0 ? (
@@ -182,7 +252,9 @@ const EditGradeType = ({
 
 EditGradeType.propTypes = {
    grades: PropTypes.object.isRequired,
+   categories: PropTypes.object.isRequired,
    loadGradeTypes: PropTypes.func.isRequired,
+   loadCategories: PropTypes.func.isRequired,
    updateGradeTypes: PropTypes.func.isRequired,
    deleteGradeType: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
@@ -190,10 +262,12 @@ EditGradeType.propTypes = {
 
 const mapStateToProps = (state) => ({
    grades: state.grades,
+   categories: state.categories,
 });
 
 export default connect(mapStateToProps, {
    loadGradeTypes,
+   loadCategories,
    updateGradeTypes,
    deleteGradeType,
    setAlert,

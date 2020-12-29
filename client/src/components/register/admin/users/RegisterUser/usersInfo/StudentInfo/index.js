@@ -43,7 +43,9 @@ const StudentInfo = ({
                      value={chargeday}
                      onChange={(e) => onChange(e)}
                   >
-                     <option value="">* Seleccione día de recargo</option>
+                     <option value="">
+                        * Seleccione día de recargo en que se aplica el recargo
+                     </option>
                      <option value="10">10</option>
                      <option value="15">15</option>
                      <option value="31">30/31</option>
@@ -52,8 +54,7 @@ const StudentInfo = ({
                      htmlFor="chargeday"
                      className={`form-label ${chargeday === "" ? "lbl" : ""}`}
                   >
-                     Seleccione el dia del mes en que se aplica el recargo a la
-                     cuota
+                     Día de recargo
                   </label>
                </div>
             </>
@@ -91,6 +92,7 @@ const StudentInfo = ({
                <option value="Santiago del Estero">Santiago del Estero</option>
                <option value="Tierra del Fuego">Tierra del Fuego</option>
                <option value="Tucumán">Tucumán</option>
+               <option value=".">Otro</option>
             </select>
             <label
                htmlFor="birthprov"

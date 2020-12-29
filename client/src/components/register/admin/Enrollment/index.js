@@ -10,6 +10,7 @@ import {
    loadEnrollment,
    clearEnrollments,
 } from "../../../../actions/enrollment";
+import { clearSearch } from "../../../../actions/user";
 
 import StudentSearch from "../../../sharedComp/search/StudentSearch";
 import Loading from "../../../modal/Loading";
@@ -22,6 +23,7 @@ const Enrollment = ({
    registerEnrollment,
    loadEnrollment,
    clearEnrollments,
+   clearSearch,
    auth: { userLogged },
    categories,
    enrollments: { enrollment, loading },
@@ -97,6 +99,7 @@ const Enrollment = ({
          ...formData,
          student: selectedStudent._id,
       });
+      clearSearch();
    };
 
    const onChange = (e) => {
@@ -131,7 +134,7 @@ const Enrollment = ({
    };
    return (
       <>
-         {!loading || !enrollment_id ? (
+         {(!loading || !enrollment_id) && !categories.loading ? (
             <>
                {!enrollment_id ? (
                   <h1>Inscripción</h1>
@@ -186,8 +189,7 @@ const Enrollment = ({
                         value={category}
                      >
                         <option value="">* Seleccione Categoría</option>
-                        {!categories.loading &&
-                           categories.categories.length > 0 &&
+                        {categories.categories.length > 0 &&
                            categories.categories.map(
                               (category) =>
                                  category.name !== "Inscripción" && (
@@ -298,6 +300,7 @@ Enrollment.propTypes = {
    registerEnrollment: PropTypes.func.isRequired,
    loadEnrollment: PropTypes.func.isRequired,
    clearEnrollments: PropTypes.func.isRequired,
+   clearSearch: PropTypes.func.isRequired,
    categories: PropTypes.object.isRequired,
    enrollments: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
@@ -314,4 +317,5 @@ export default connect(mapStateToProps, {
    registerEnrollment,
    loadEnrollment,
    clearEnrollments,
+   clearSearch,
 })(withRouter(Enrollment));

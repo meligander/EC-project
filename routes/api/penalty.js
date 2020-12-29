@@ -5,6 +5,7 @@ const adminAuth = require("../../middleware/adminAuth");
 const { check, validationResult } = require("express-validator");
 
 const Penalty = require("../../models/Penalty");
+const { findOneAndRemove } = require("../../models/Penalty");
 
 //@route    GET api/penalty/last
 //@desc     get last penalty
@@ -27,26 +28,6 @@ router.get("/last", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/penalty
-//@desc     get all penalties
-//@access   Private
-router.get("/", [auth, adminAuth], async (req, res) => {
-   try {
-      let penalties = await Penalty.find();
-
-      if (penalties.length === 0) {
-         return res.status(400).json({
-            msg: "No se encontraron recargos con dichas descripciones",
-         });
-      }
-
-      res.json(penalties);
-   } catch (err) {
-      console.error(err.message);
-      return res.status(500).send("Server Error");
-   }
-});
-
 //@route    POST api/penalty
 //@desc     Add a penalty
 //@access   Private
@@ -55,12 +36,15 @@ router.post(
    [
       auth,
       adminAuth,
-      check("percentage", "El porcentaje es necesario").not().isEmpty(),
+      check("percentage", "No se pudo registrar, agregue el porcentaje")
+         .not()
+         .isEmpty(),
    ],
    async (req, res) => {
       const { percentage } = req.body;
 
       let errors = [];
+
       const errorsResult = validationResult(req);
       if (!errorsResult.isEmpty()) {
          errors = errorsResult.array();
@@ -71,6 +55,14 @@ router.post(
          let penalty = new Penalty({ percentage });
 
          await penalty.save();
+
+         penalty = await Penalty.find().sort({ $natural: -1 });
+
+         penalty = penalty[1];
+
+         if (penalty) {
+            await Penalty.findOneAndRemove({ _id: penalty._id });
+         }
 
          res.json({ msg: "Penalty Registered" });
       } catch (err) {

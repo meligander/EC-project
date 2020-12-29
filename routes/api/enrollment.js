@@ -15,7 +15,7 @@ const Grade = require("../../models/Grade");
 const Category = require("../../models/Category");
 
 //@route    GET api/enrollment
-//@desc     get all enrollments
+//@desc     get all enrollments || with filter
 //@access   Private
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
@@ -141,10 +141,9 @@ router.get("/absences", [auth, adminAuth], async (req, res) => {
    try {
       let date = new Date();
 
-      let enrollments;
       const filter = req.query;
 
-      enrollments = await Enrollment.find({
+      const enrollments = await Enrollment.find({
          ...(filter.category && { category: filter.category }),
          ...(filter.absence && {
             "classroom.absence": { $lte: filter.absence },
@@ -215,22 +214,149 @@ router.get("/year", [auth, adminAuth], async (req, res) => {
       if (enrollments.length === 0)
          enrollments = await Enrollment.find({ year: date.getFullYear() });
 
-      let newEn = {
-         length: "",
-         year: "",
+      let yearEnrollments = {
+         length: 0,
+         year: 0,
       };
       if (enrollments.length !== 0) {
-         newEn = {
+         yearEnrollments = {
             length: enrollments.length,
             year: enrollments[0].year,
          };
       }
-      res.json(newEn);
+
+      res.json(yearEnrollments);
    } catch (err) {
       console.error(err.message);
       return res.status(500).send("Server Error");
    }
 });
+
+//@route    GET api/enrollment/fetch-list
+//@desc     Get the pdf of enrollments
+//@access   Private
+router.get("/fetch-list", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/enrollments.pdf"));
+});
+
+//@route    GET api/enrollment/averages/fetch-list
+//@desc     Get the pdf of enrollments
+//@access   Private
+router.get("/averages/fetch-list", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/averages.pdf"));
+});
+
+//@route    GET api/enrollment/absences/fetch-list
+//@desc     Get the pdf of enrollments
+//@access   Private
+router.get("/absences/fetch-list", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/absences.pdf"));
+});
+
+//@route    POST api/enrollment
+//@desc     Add an enrollment
+//@access   Private
+router.post(
+   "/",
+   [
+      auth,
+      adminAuth,
+      check("student", "El alumno es necesario").not().isEmpty(),
+      check("category", "La categoría es necesaria").not().isEmpty(),
+   ],
+   async (req, res) => {
+      const { student, year, category, currentMonth } = req.body;
+
+      let errors = [];
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
+         console.log(errors);
+         return res.status(400).json({ errors });
+      }
+
+      let enrollment;
+
+      try {
+         enrollment = await Enrollment.findOne({ student, year });
+         if (enrollment)
+            return res
+               .status(400)
+               .json({ msg: "El alumno ya está inscripto para dicho año" });
+
+         let data = { student, year, category };
+
+         enrollment = new Enrollment(data);
+
+         await enrollment.save();
+
+         enrollment = await Enrollment.find()
+            .sort({ $natural: -1 })
+            .populate({ path: "category" })
+            .populate({
+               path: "student",
+               model: "user",
+               select: "-password",
+            })
+            .limit(1);
+         enrollment = enrollment[0];
+
+         let number = 0;
+         let categoryInstallment = await Category.findOne({
+            name: "Inscripción",
+         });
+         let installment;
+
+         installment = new Installment({
+            year,
+            student,
+            number,
+            value: categoryInstallment.value,
+            expired: false,
+            enrollment: enrollment.id,
+         });
+         installment.save();
+
+         const date = new Date();
+         if (date.getFullYear() === year) {
+            /* ESTO ESTA HARKODEADO PORQ NO ME FUNCIONA DATE!!! MUESTRA UN MES ATRAS */
+            number = date.getMonth() + (currentMonth ? 1 : 2);
+         } else {
+            number = 3;
+         }
+
+         const amount = 13 - number;
+
+         for (let x = 0; x < amount; x++) {
+            let value = enrollment.category.value;
+            const discount = enrollment.student.discount;
+
+            if (discount && discount !== 0) {
+               const disc = (value * discount) / 100;
+               value = Math.round((value - disc) / 10) * 10;
+            }
+
+            installment = new Installment({
+               number,
+               year,
+               student,
+               value,
+               expired: false,
+               enrollment: enrollment.id,
+            });
+
+            number++;
+
+            await installment.save();
+         }
+
+         res.json({ msg: "Enrollment Registered" });
+      } catch (err) {
+         console.error(err.message);
+         return res.status(500).send("Server Error");
+      }
+   }
+);
 
 //@route    POST api/enrollment/create-list
 //@desc     Create a pdf of enrollment
@@ -305,13 +431,6 @@ router.post("/create-list", (req, res) => {
    });
 });
 
-//@route    GET api/enrollment/fetch-list
-//@desc     Get the pdf of enrollments
-//@access   Private
-router.get("/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../reports/enrollments.pdf"));
-});
-
 //@route    POST api/enrollment/averages/create-list
 //@desc     Create a pdf of the students' averages
 //@access   Private
@@ -375,13 +494,6 @@ router.post("/averages/create-list", (req, res) => {
 
       res.send(Promise.resolve());
    });
-});
-
-//@route    GET api/enrollment/averages/fetch-list
-//@desc     Get the pdf of enrollments
-//@access   Private
-router.get("/averages/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../reports/averages.pdf"));
 });
 
 //@route    POST api/enrollment/absences/create-list
@@ -472,116 +584,6 @@ router.post("/absences/create-list", (req, res) => {
    });
 });
 
-//@route    GET api/enrollment/absences/fetch-list
-//@desc     Get the pdf of enrollments
-//@access   Private
-router.get("/absences/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../reports/absences.pdf"));
-});
-
-//@route    POST api/enrollment
-//@desc     Add an enrollment
-//@access   Private
-router.post(
-   "/",
-   [
-      auth,
-      adminAuth,
-      check("student", "El alumno es necesario").not().isEmpty(),
-      check("category", "La categoría es necesaria").not().isEmpty(),
-   ],
-   async (req, res) => {
-      const { student, year, category, currentMonth } = req.body;
-
-      let errors = [];
-      const errorsResult = validationResult(req);
-      if (!errorsResult.isEmpty()) {
-         errors = errorsResult.array();
-         console.log(errors);
-         return res.status(400).json({ errors });
-      }
-
-      let enrollment;
-
-      try {
-         enrollment = await Enrollment.findOne({ student, year });
-         if (enrollment)
-            return res
-               .status(400)
-               .json({ msg: "El alumno ya está inscripto para dicho año" });
-
-         let data = { student, year, category };
-
-         enrollment = new Enrollment(data);
-
-         await enrollment.save();
-
-         enrollment = await Enrollment.find()
-            .sort({ $natural: -1 })
-            .populate({ path: "category" })
-            .populate({
-               path: "student",
-               model: "user",
-               select: "-password",
-            })
-            .limit(1);
-         enrollment = enrollment[0];
-
-         let number = 0;
-         let categoryInstallment = await Category.findOne({
-            name: "Inscripción",
-         });
-         let installment;
-
-         installment = new Installment({
-            year,
-            student,
-            number,
-            value: categoryInstallment.value,
-            expired: false,
-            enrollment: enrollment.id,
-         });
-         installment.save();
-
-         const date = new Date();
-         if (date.getFullYear() === year) {
-            /* ESTO ESTA HARKODEADO PORQ NO ME FUNCIONA DATE!!! MUESTRA UN MES ATRAS */
-            number = date.getMonth() + (currentMonth ? 1 : 2);
-         }
-
-         const amount = 13 - number;
-
-         for (let x = 0; x < amount; x++) {
-            let value = enrollment.category.value;
-            const discount = enrollment.student.discount;
-
-            if (discount && discount !== 0) {
-               const disc = (value * discount) / 100;
-               value = Math.round((value - disc) / 10) * 10;
-            }
-
-            installment = new Installment({
-               number,
-               year,
-               student,
-               value,
-               expired: false,
-               enrollment: enrollment.id,
-            });
-
-            number++;
-
-            await installment.save();
-         }
-
-         res.json({ msg: "Enrollment Registered" });
-      } catch (err) {
-         console.error(err.message);
-         return res.status(500).send("Server Error");
-      }
-   }
-);
-
 //@route    PUT api/enrollment/:id
 //@desc     Update the category of the enrollment
 //@access   Private
@@ -641,11 +643,13 @@ router.put(
                { _id: req.params.id },
                {
                   category: category,
-                  average: null,
-                  periodAverage: [],
-                  periodAbsence: [],
-                  absence: null,
-                  classroom: null,
+                  classroom: {
+                     _id: null,
+                     average: null,
+                     absence: null,
+                     periodAbsence: [],
+                     periodAverage: [],
+                  },
                },
                { new: true }
             )
@@ -718,7 +722,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       }
 
       const attendances = await Attendance.find({
-         user: enrollment.student,
+         student: enrollment.student,
          classroom: enrollment.classroom._id,
       });
       for (let x = 0; x < attendances.length; x++) {

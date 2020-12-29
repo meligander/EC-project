@@ -115,8 +115,7 @@ function AttendanceTab({
                      enrollments.map(
                         (enroll, i) =>
                            i >= page * 10 &&
-                           i < (page + 1) * 10 &&
-                           enroll.student.active && (
+                           i < (page + 1) * 10 && (
                               <tr key={enroll._id}>
                                  <td>{enroll.student.studentnumber}</td>
                                  <td>
@@ -125,7 +124,7 @@ function AttendanceTab({
                                        enroll.student.name}
                                  </td>
                                  <td>{enroll.category.name}</td>
-                                 <td>{enroll.absence}</td>
+                                 <td>{enroll.classroom.absence}</td>
                               </tr>
                            )
                      )}

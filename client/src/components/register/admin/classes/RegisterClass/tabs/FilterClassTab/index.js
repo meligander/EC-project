@@ -80,8 +80,8 @@ const FilterClassTab = ({
 
    return (
       <>
-         {" "}
-         {!loadingStudents ? (
+         {(registerClass || (!loading && !loadingStudents && !registerClass)) &&
+         !categories.loading ? (
             <>
                <form className="form">
                   <div className="form-group">
@@ -94,16 +94,15 @@ const FilterClassTab = ({
                         value={category._id}
                      >
                         <option value="">* Seleccione Categoría</option>
-                        {!categories.loading &&
-                           categories.categories.map((category) => (
-                              <React.Fragment key={category._id}>
-                                 {category.name !== "Inscripción" && (
-                                    <option value={category._id}>
-                                       {category.name}
-                                    </option>
-                                 )}
-                              </React.Fragment>
-                           ))}
+                        {categories.categories.map((category) => (
+                           <React.Fragment key={category._id}>
+                              {category.name !== "Inscripción" && (
+                                 <option value={category._id}>
+                                    {category.name}
+                                 </option>
+                              )}
+                           </React.Fragment>
+                        ))}
                      </select>
                      <label
                         htmlFor="new-category"

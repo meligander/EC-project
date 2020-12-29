@@ -2,6 +2,8 @@ import {
    REGISTER_LOADED,
    REGISTERS_LOADED,
    REGISTER_CLOSED,
+   NEWREGISTER_ADDED,
+   NEWREGISTER_ALLOWED,
    REGISTER_DELETED,
    REGISTERS_CLEARED,
    REGISTER_ERROR,
@@ -12,6 +14,7 @@ const initialState = {
    register: null,
    registers: [],
    loadingRegisters: true,
+   addNew: false,
    error: {},
 };
 
@@ -34,6 +37,17 @@ export default function (state = initialState, action) {
          };
       case REGISTER_CLOSED:
          return state;
+      case NEWREGISTER_ADDED:
+         return {
+            ...state,
+            loading: true,
+            addNew: false,
+         };
+      case NEWREGISTER_ALLOWED:
+         return {
+            ...state,
+            addNew: true,
+         };
       case REGISTER_DELETED:
          return {
             ...state,
@@ -50,6 +64,7 @@ export default function (state = initialState, action) {
             registers: [],
             loading: false,
             loadingRegisters: false,
+            addNew: false,
             error: payload,
          };
       default:

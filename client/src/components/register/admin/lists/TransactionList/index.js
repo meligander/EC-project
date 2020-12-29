@@ -204,8 +204,11 @@ const TransactionList = ({
                            transactions.map(
                               (transaction, i) =>
                                  i >= page * 10 &&
-                                 i < (page + 1) * 10 &&
-                                 type(transaction)
+                                 i < (page + 1) * 10 && (
+                                    <React.Fragment key={i}>
+                                       {type(transaction)}
+                                    </React.Fragment>
+                                 )
                            )}
                      </tbody>
                   </table>

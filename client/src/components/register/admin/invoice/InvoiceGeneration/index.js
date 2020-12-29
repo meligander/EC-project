@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { getInvoiceNumber } from "../../../../../actions/mixvalues";
+import { getInvoiceNumber } from "../../../../../actions/invoice";
 
 import Tabs from "../../../../sharedComp/Tabs";
 import InstallmentsSearch from "../../../../sharedComp/search/InstallmentsSearch";

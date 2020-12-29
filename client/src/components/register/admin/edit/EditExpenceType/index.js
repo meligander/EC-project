@@ -7,6 +7,7 @@ import {
    loadExpenceTypes,
    updateExpenceTypes,
 } from "../../../../../actions/expence";
+import { setAlert } from "../../../../../actions/alert";
 
 import EditButtons from "../sharedComp/EditButtons";
 import Loading from "../../../../modal/Loading";
@@ -17,6 +18,7 @@ const EditExpenceType = ({
    loadExpenceTypes,
    updateExpenceTypes,
    deleteExpenceType,
+   setAlert,
 }) => {
    const [newET, setNewET] = useState([]);
 
@@ -53,7 +55,13 @@ const EditExpenceType = ({
    };
 
    const deleteExpenceTypeConfirm = () => {
-      deleteExpenceType(toDelete._id);
+      if (toDelete._id === "") {
+         setAlert(
+            "El tipo de movimiento no se ha guardado todavía. Vuelva a recargar la página y desaparecerá.",
+            "danger",
+            "2"
+         );
+      } else deleteExpenceType(toDelete._id);
    };
 
    const saveExpenceTypes = () => {
@@ -160,6 +168,7 @@ EditExpenceType.propTypes = {
    loadExpenceTypes: PropTypes.func.isRequired,
    updateExpenceTypes: PropTypes.func.isRequired,
    deleteExpenceType: PropTypes.func.isRequired,
+   setAlert: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -170,4 +179,5 @@ export default connect(mapStateToProps, {
    loadExpenceTypes,
    updateExpenceTypes,
    deleteExpenceType,
+   setAlert,
 })(EditExpenceType);

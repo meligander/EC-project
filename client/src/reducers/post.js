@@ -1,18 +1,15 @@
 import {
-   POST_LOADED,
    POSTS_LOADED,
    POST_ADDED,
    POST_DELETED,
-   LIKES_UPDATED,
    COMMENT_ADDED,
    COMMENT_DELETED,
+   LIKES_UPDATED,
    POSTS_CLEARED,
-   POST_CLEARED,
    POST_ERROR,
 } from "../actions/types";
 
 const initialState = {
-   post: null,
    posts: [],
    loading: true,
    error: {},
@@ -21,12 +18,6 @@ const initialState = {
 export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
-      case POST_LOADED:
-         return {
-            ...state,
-            post: payload,
-            loading: false,
-         };
       case POSTS_LOADED:
          return {
             ...state,
@@ -37,7 +28,7 @@ export default function (state = initialState, action) {
          return {
             ...state,
             posts: [payload, ...state.posts],
-            loding: false,
+            loading: false,
          };
       case POST_DELETED:
          return {
@@ -64,12 +55,6 @@ export default function (state = initialState, action) {
                else return post;
             }),
             loading: false,
-         };
-      case POST_CLEARED:
-         return {
-            ...state,
-            post: null,
-            loading: true,
          };
       case POSTS_CLEARED:
          return initialState;

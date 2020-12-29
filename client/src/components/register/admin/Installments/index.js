@@ -68,7 +68,7 @@ const Installments = ({
    };
 
    const confirm = (percentage) => {
-      updatePenalty(percentage);
+      updatePenalty({ percentage });
       clearPenalty();
    };
 

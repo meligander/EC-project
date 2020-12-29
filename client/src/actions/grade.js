@@ -7,10 +7,10 @@ import { updateLoadingSpinner } from "./mixvalues";
 
 import {
    GRADES_LOADED,
-   USER_GRADES_LOADED,
+   STUDENTGRADES_LOADED,
    GRADETYPES_LOADED,
    GRADES_UPDATED,
-   NEW_GRADE_REGISTERED,
+   NEWGRADE_REGISTERED,
    GRADES_DELETED,
    GRADETYPES_UPDATED,
    GRADETYPE_DELETED,
@@ -24,7 +24,7 @@ export const loadUsersGrades = (user_id) => async (dispatch) => {
    try {
       const res = await axios.get(`/api/grade/user/${user_id}`);
       dispatch({
-         type: USER_GRADES_LOADED,
+         type: STUDENTGRADES_LOADED,
          payload: res.data,
       });
    } catch (err) {
@@ -39,7 +39,7 @@ export const loadUsersGrades = (user_id) => async (dispatch) => {
    }
 };
 
-export const loadGradesByClass = (class_id) => async (dispatch) => {
+export const loadGrades = (class_id) => async (dispatch) => {
    try {
       const res = await axios.get(`/api/grade/${class_id}`);
       dispatch({
@@ -49,25 +49,6 @@ export const loadGradesByClass = (class_id) => async (dispatch) => {
    } catch (err) {
       dispatch({
          type: GRADES_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-   }
-};
-
-export const loadGradeTypesByCategory = (category_id) => async (dispatch) => {
-   try {
-      const res = await axios.get(`/api/grade-type/category/${category_id}`);
-      dispatch({
-         type: GRADETYPES_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      dispatch({
-         type: GRADETYPE_ERROR,
          payload: {
             type: err.response.statusText,
             status: err.response.status,
@@ -96,48 +77,35 @@ export const loadGradeTypes = () => async (dispatch) => {
    }
 };
 
+export const loadGradeTypesByCategory = (category_id) => async (dispatch) => {
+   try {
+      const res = await axios.get(`/api/grade-type/category/${category_id}`);
+      dispatch({
+         type: GRADETYPES_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      dispatch({
+         type: GRADETYPE_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+   }
+};
+
 export const registerNewGrade = (newGrade) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
       const res = await axios.post("/api/grade", newGrade);
 
       dispatch({
-         type: NEW_GRADE_REGISTERED,
+         type: NEWGRADE_REGISTERED,
          payload: res.data,
       });
       dispatch(setAlert("Nuevo Tipo de Nota Agregado", "success", "2"));
-   } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: GRADES_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-   }
-
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
-};
-
-export const deleteGrades = (grade) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-
-   try {
-      const res = await axios.delete(
-         `/api/grade/${grade.gradetype}/${grade.classroom}/${grade.period}`
-      );
-
-      dispatch({
-         type: GRADES_DELETED,
-         payload: res.data,
-      });
-
-      dispatch(setAlert("Tipo de Nota Eliminado", "success", "2"));
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;
@@ -189,6 +157,38 @@ export const updateGrades = (formData, history, class_id) => async (
 
    dispatch(updateLoadingSpinner(false));
    window.scrollTo(0, 0);
+};
+
+export const deleteGrades = (grade) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
+   try {
+      const res = await axios.delete(
+         `/api/grade/${grade.gradetype}/${grade.classroom}/${grade.period}`
+      );
+
+      dispatch({
+         type: GRADES_DELETED,
+         payload: res.data,
+      });
+
+      dispatch(setAlert("Tipo de Nota Eliminado", "success", "2"));
+   } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
+      dispatch({
+         type: GRADES_ERROR,
+         payload: {
+            type,
+            status: err.response.status,
+            msg,
+         },
+      });
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+   }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const updateGradeTypes = (formData) => async (dispatch) => {

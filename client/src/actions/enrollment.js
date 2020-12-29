@@ -3,18 +3,61 @@ import axios from "axios";
 import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, clearValues } from "./mixvalues";
+import { updateLoadingSpinner } from "./mixvalues";
+import { clearTotalDebt } from "./installment";
 
 import {
    ENROLLMENT_LOADED,
    ENROLLMENTS_LOADED,
+   YEARENROLLMENTS_LOADED,
    ENROLLMENT_REGISTERED,
    ENROLLMENT_UPDATED,
    ENROLLMENT_DELETED,
    ENROLLMENT_CLEARED,
+   YEARENROLLMENTS_CLEARED,
    ENROLLMENTS_CLEARED,
    ENROLLMENT_ERROR,
 } from "./types";
+
+export const loadEnrollment = (enrollment_id) => async (dispatch) => {
+   try {
+      const res = await axios.get(`/api/enrollment/one/${enrollment_id}`);
+      dispatch({
+         type: ENROLLMENT_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      dispatch({
+         type: ENROLLMENT_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+   }
+};
+
+export const getYearEnrollments = () => async (dispatch) => {
+   try {
+      let res = await axios.get("/api/enrollment/year");
+
+      dispatch({
+         type: YEARENROLLMENTS_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      dispatch({
+         type: ENROLLMENT_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      window.scroll(0, 0);
+   }
+};
 
 export const loadEnrollments = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
@@ -54,6 +97,8 @@ export const loadEnrollments = (filterData) => async (dispatch) => {
 };
 
 export const loadStudentAttendance = (filterData) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
    try {
       let filter = "";
 
@@ -67,6 +112,7 @@ export const loadStudentAttendance = (filterData) => async (dispatch) => {
       }
 
       const res = await axios.get(`/api/enrollment/absences?${filter}`);
+
       dispatch({
          type: ENROLLMENTS_LOADED,
          payload: { enrollments: res.data, type: "attendance" },
@@ -85,9 +131,12 @@ export const loadStudentAttendance = (filterData) => async (dispatch) => {
       dispatch(setAlert(msg ? msg : type, "danger", "2"));
       window.scroll(0, 0);
    }
+
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const loadStudentAverage = (filterData) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
    try {
       let filter = "";
 
@@ -119,25 +168,8 @@ export const loadStudentAverage = (filterData) => async (dispatch) => {
       dispatch(setAlert(msg ? msg : type, "danger", "2"));
       window.scroll(0, 0);
    }
-};
 
-export const loadEnrollment = (enrollment_id) => async (dispatch) => {
-   try {
-      const res = await axios.get(`/api/enrollment/one/${enrollment_id}`);
-      dispatch({
-         type: ENROLLMENT_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      dispatch({
-         type: ENROLLMENT_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-   }
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const registerEnrollment = (
@@ -172,12 +204,13 @@ export const registerEnrollment = (
          setAlert(
             `Inscripción ${!enroll_id ? "Registrada" : "Modificada"}`,
             "success",
-            "1",
+            !enroll_id ? "1" : "2",
             7000
          )
       );
 
-      dispatch(clearValues());
+      dispatch(clearYearEnrollments());
+      dispatch(clearTotalDebt());
 
       if (!enroll_id) {
          history.push(`/dashboard/${user_id}`);
@@ -208,9 +241,9 @@ export const registerEnrollment = (
          });
          dispatch(setAlert(msg ? msg : type, "danger", "2"));
       }
-      dispatch(updateLoadingSpinner(false));
    }
 
+   dispatch(updateLoadingSpinner(false));
    window.scrollTo(0, 0);
 };
 
@@ -224,7 +257,7 @@ export const deleteEnrollment = (enroll_id) => async (dispatch) => {
          type: ENROLLMENT_DELETED,
          payload: enroll_id,
       });
-      dispatch(clearValues());
+      dispatch(clearYearEnrollments());
       dispatch(setAlert("Inscripción Eliminada", "success", "2"));
    } catch (err) {
       const msg = err.response.data.msg;
@@ -312,6 +345,10 @@ export const enrollmentsPDF = (enrollments, average) => async (dispatch) => {
 
 export const clearEnrollment = () => (dispatch) => {
    dispatch({ type: ENROLLMENT_CLEARED });
+};
+
+export const clearYearEnrollments = () => (dispatch) => {
+   dispatch({ type: YEARENROLLMENTS_CLEARED });
 };
 
 export const clearEnrollments = () => (dispatch) => {

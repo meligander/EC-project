@@ -79,6 +79,158 @@ router.get("/user/:id", [auth], async (req, res) => {
    }
 });
 
+//@route    GET api/grade/list/fetch-list
+//@desc     Get the pdf of the class grades during a period
+//@access   Private
+router.get("/list/fetch-list", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/grades.pdf"));
+});
+
+//@route    GET api/grade/certificate/fetch-list
+//@desc     Get the pdf of the class grades during a period
+//@access   Private
+router.get("/certificate/fetch-list", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/certificate.pdf"));
+});
+
+//@route    POST api/grade/period
+//@desc     Add or remove grades from a period
+//@access   Private
+router.post("/period", auth, async (req, res) => {
+   const periodRows = req.body;
+
+   const date = new Date();
+   const year = date.getFullYear();
+
+   try {
+      const period = periodRows[0][0].period;
+      const classroom = periodRows[0][0].classroom;
+
+      for (let x = 0; x < periodRows.length; x++) {
+         let average = 0;
+         let count = 0;
+         const student = periodRows[x][0].student;
+
+         for (let y = 0; y < periodRows[x].length; y++) {
+            const filter = {
+               student,
+               gradetype: periodRows[x][y].gradetype,
+               classroom,
+               period,
+            };
+
+            let value = periodRows[x][y].value;
+
+            if (value !== 0 && value !== "") {
+               value = parseFloat(value);
+
+               if (value > 10 || value < 0) {
+                  return res.status(400).json({
+                     errors: [{ msg: "La nota debe ser entre 0 y 10" }],
+                  });
+               }
+
+               average += value;
+               count++;
+
+               const grade = await Grade.findOneAndUpdate(filter, {
+                  value: value,
+               });
+
+               if (!grade) {
+                  const data = {
+                     ...filter,
+                     value: value,
+                  };
+                  const newGrade = new Grade(data);
+
+                  newGrade.save();
+               }
+            } else {
+               await Grade.findOneAndRemove(filter);
+            }
+         }
+
+         average = average / count;
+         average = Math.round((average + Number.EPSILON) * 100) / 100;
+
+         const filter2 = { year, student };
+
+         const enrollment = await Enrollment.findOne(filter2);
+
+         let periodAverage = [];
+         let allAverage = 0;
+
+         if (enrollment.classroom.periodAverage.length === 0)
+            periodAverage = new Array(6).fill(0);
+         else periodAverage = [...enrollment.classroom.periodAverage];
+
+         periodAverage[period - 1] = parseFloat(average);
+
+         let full = 0;
+         for (let y = 0; y < 5; y++) {
+            if (periodAverage[y] !== 0) {
+               allAverage += periodAverage[y];
+               full++;
+            }
+         }
+
+         allAverage = allAverage / full;
+         allAverage = Math.round((allAverage + Number.EPSILON) * 100) / 100;
+
+         await Enrollment.findOneAndUpdate(
+            { _id: enrollment._id },
+            {
+               "classroom.periodAverage": periodAverage,
+               "classroom.average": allAverage,
+            }
+         );
+      }
+
+      res.json({ msg: "Grades Updated" });
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server Error");
+   }
+});
+
+//@route    POST api/grades
+//@desc     Add a grade
+//@access   Private
+router.post("/", auth, async (req, res) => {
+   const { student, period, classroom, gradetype, value } = req.body;
+   const data = { student, period, classroom, gradetype, value };
+   let grade;
+
+   try {
+      grade = new Grade(data);
+
+      await grade.save();
+
+      const grades = await Grade.find({
+         classroom,
+      })
+         .populate({
+            path: "student",
+            model: "user",
+            select: ["name", "lastname"],
+            option: { sort: { lastname: -1, name: -1 } },
+         })
+         .populate({
+            path: "gradetype",
+            model: "gradetypes",
+            select: "name",
+         });
+
+      const tableGrades = await buildClassTable(grades, classroom, res);
+
+      res.json(tableGrades);
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server Error");
+   }
+});
+
 //@route    POST api/grade/create-list
 //@desc     Create a pdf of the class grades during a period
 //@access   Private
@@ -173,13 +325,6 @@ router.post("/create-list", (req, res) => {
 
       res.send(Promise.resolve());
    });
-});
-
-//@route    GET api/grade/list/fetch-list
-//@desc     Get the pdf of the class grades during a period
-//@access   Private
-router.get("/list/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../reports/grades.pdf"));
 });
 
 //@route    POST api/grade/all/create-list
@@ -464,15 +609,8 @@ router.post("/certificate/create-list", async (req, res) => {
    });
 });
 
-//@route    GET api/grade/certificate/fetch-list
-//@desc     Get the pdf of the class grades during a period
-//@access   Private
-router.get("/certificate/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../reports/certificate.pdf"));
-});
-
 //@route    POST api/grade/certificate-cambridge/create-list
-//@desc     Create all cambridge certificate pdfs of the class
+//@desc     Create all cambridge certificate pdfs of the class (starter, movers, flyers)
 //@access   Private
 router.post("/certificate-cambridge/create-list", (req, res) => {
    const name = "reports/certificate.pdf";
@@ -617,159 +755,6 @@ router.post("/certificate-cambridge/create-list", (req, res) => {
 
       res.send(Promise.resolve());
    });
-});
-
-//@route    POST api/grades
-//@desc     Add a grade
-//@access   Private
-router.post("/", auth, async (req, res) => {
-   const { student, period, classroom, gradetype, value } = req.body;
-   const data = { student, period, classroom, gradetype, value };
-   let grade;
-
-   try {
-      grade = new Grade(data);
-
-      await grade.save();
-
-      const grades = await Grade.find({
-         classroom,
-      })
-         .populate({
-            path: "student",
-            model: "user",
-            select: ["name", "lastname"],
-            option: { sort: { lastname: -1, name: -1 } },
-         })
-         .populate({
-            path: "gradetype",
-            model: "gradetypes",
-            select: "name",
-         });
-
-      const tableGrades = await buildClassTable(grades, classroom, res);
-
-      res.json(tableGrades);
-   } catch (err) {
-      console.error(err.message);
-      return res.status(500).send("Server Error");
-   }
-});
-
-//@route    POST api/grade/period
-//@desc     Add or remove grades from a period
-//@access   Private
-router.post("/period", auth, async (req, res) => {
-   const periodRows = req.body;
-
-   const date = new Date();
-   const year = date.getFullYear();
-
-   try {
-      const period = periodRows[0][0].period;
-      const classroom = periodRows[0][0].classroom;
-
-      for (let x = 0; x < periodRows.length; x++) {
-         let average = 0;
-         let count = 0;
-         const student = periodRows[x][0].student;
-
-         for (let y = 0; y < periodRows[x].length; y++) {
-            const filter = {
-               student,
-               gradetype: periodRows[x][y].gradetype,
-               classroom,
-               period,
-            };
-
-            let value = periodRows[x][y].value;
-
-            if (value !== 0 && value !== "") {
-               value = parseFloat(value);
-
-               if (value > 10 || value < 0) {
-                  return res.status(400).json({
-                     errors: [{ msg: "La nota debe ser entre 0 y 10" }],
-                  });
-               }
-
-               average += value;
-               count++;
-
-               const grade = await Grade.findOneAndUpdate(filter, {
-                  value: value,
-               });
-
-               if (!grade) {
-                  const data = {
-                     ...filter,
-                     value: value,
-                  };
-                  const newGrade = new Grade(data);
-
-                  newGrade.save();
-               }
-            } else {
-               await Grade.findOneAndRemove(filter);
-            }
-         }
-
-         average = average / count;
-         average = Math.round((average + Number.EPSILON) * 100) / 100;
-
-         const filter2 = { year, student };
-
-         const enrollment = await Enrollment.findOne(filter2);
-
-         let periodAverage = [];
-         let allAverage = 0;
-
-         if (enrollment.periodAverage.length === 0)
-            periodAverage = new Array(6).fill(0);
-         else periodAverage = [...enrollment.periodAverage];
-
-         periodAverage[period - 1] = parseFloat(average);
-
-         let full = 0;
-         for (let y = 0; y < 5; y++) {
-            if (periodAverage[y] !== 0) {
-               allAverage += periodAverage[y];
-               full++;
-            }
-         }
-
-         allAverage = allAverage / full;
-         allAverage = Math.round((allAverage + Number.EPSILON) * 100) / 100;
-
-         await Enrollment.findOneAndUpdate(
-            { _id: enrollment._id },
-            {
-               "classroom.periodAverage": periodAverage,
-               "classroom.average": allAverage,
-            }
-         );
-      }
-
-      res.json({ msg: "Grades Updated" });
-   } catch (err) {
-      console.error(err.message);
-      return res.status(500).send("Server Error");
-   }
-});
-
-//@route    DELETE api/grade/:id
-//@desc     Delete a grade
-//@access   Private
-router.delete("/:id", auth, async (req, res) => {
-   try {
-      //Remove grade
-      await Grade.findOneAndRemove({ _id: req.params.id });
-
-      res.json({ msg: "Grade deleted" });
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server error");
-   }
 });
 
 //@route    DELETE api/grade/:type/:classroom/:period
@@ -962,28 +947,22 @@ async function buildClassTable(grades, class_id, res) {
 
             let added = false;
 
-            if (studentsArray[studentNumber]) {
-               if (
-                  studentsArray[studentNumber][0].student._id.toString() ===
+            if (
+               studentsArray[studentNumber] &&
+               studentsArray[studentNumber][0].student._id.toString() ===
                   users[z].student._id.toString()
-               ) {
-                  for (
-                     let y = 0;
-                     y < studentsArray[studentNumber].length;
-                     y++
+            ) {
+               for (let y = 0; y < studentsArray[studentNumber].length; y++) {
+                  if (
+                     studentsArray[studentNumber][y].gradetype.name === index
                   ) {
-                     if (
-                        studentsArray[studentNumber][y].gradetype.name === index
-                     ) {
-                        row[rowNumber]._id =
-                           studentsArray[studentNumber][y]._id;
-                        row[rowNumber].value =
-                           studentsArray[studentNumber][y].value;
+                     row[rowNumber]._id = studentsArray[studentNumber][y]._id;
+                     row[rowNumber].value =
+                        studentsArray[studentNumber][y].value;
 
-                        count++;
-                        added = true;
-                        break;
-                     }
+                     count++;
+                     added = true;
+                     break;
                   }
                }
             }
@@ -993,13 +972,13 @@ async function buildClassTable(grades, class_id, res) {
             rowNumber++;
          }
 
-         if (users[z] && studentsArray[studentNumber]) {
-            if (
-               users[z].student._id.toString() ===
+         if (
+            users[z] &&
+            studentsArray[studentNumber] &&
+            users[z].student._id.toString() ===
                studentsArray[studentNumber][0].student._id.toString()
-            ) {
-               studentNumber++;
-            }
+         ) {
+            studentNumber++;
          }
          period.push(row);
       }

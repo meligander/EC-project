@@ -100,7 +100,7 @@ const EnrollmentList = ({
 
    return (
       <>
-         {!loading ? (
+         {!loadingEnrollments && !loading ? (
             <>
                <h2>Listado Inscripciones</h2>
                <Confirm
@@ -129,8 +129,7 @@ const EnrollmentList = ({
                         value={category}
                      >
                         <option value="">* Seleccione Categoría</option>
-                        {!loading &&
-                           categories.length > 0 &&
+                        {categories.length > 0 &&
                            categories.map(
                               (category) =>
                                  category.name !== "Inscripción" && (
@@ -190,8 +189,7 @@ const EnrollmentList = ({
                         </tr>
                      </thead>
                      <tbody>
-                        {!loadingEnrollments &&
-                           enrollments.length > 0 &&
+                        {enrollments.length > 0 &&
                            enrollments.map(
                               (enroll, i) =>
                                  i >= page * 10 &&

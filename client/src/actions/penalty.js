@@ -30,14 +30,16 @@ export const loadPenalty = () => async (dispatch) => {
    }
 };
 
-export const updatePenalty = (formData) => async (dispatch) => {
+export const updatePenalty = (penalty) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+
    try {
-      await axios.post("/api/penalty", formData);
+      await axios.post("/api/penalty", penalty);
       dispatch({
          type: PENALTY_REGISTERED,
       });
-      dispatch(setAlert("Recargo Modificado", "success", "4"));
+      dispatch(clearPenalty());
+      dispatch(setAlert("Recargo Modificado", "success", "2"));
    } catch (err) {
       if (err.response.data.errors) {
          const errors = err.response.data.errors;

@@ -68,7 +68,7 @@ const Classes = ({
 
    return (
       <>
-         {!loadingClasses ? (
+         {!loadingClasses && !categories.loading && !users.loadingUsers ? (
             <>
                <h1>Cursos</h1>
                {userLogged.type !== "Profesor" && (
@@ -82,8 +82,7 @@ const Classes = ({
                            value={teacher}
                         >
                            <option value="">* Seleccione Profesor</option>
-                           {!users.loadingUsers &&
-                              users.users.length > 0 &&
+                           {users.users.length > 0 &&
                               users.users.map((teacher) => (
                                  <option key={teacher._id} value={teacher._id}>
                                     {teacher.lastname + " " + teacher.name}
@@ -108,16 +107,15 @@ const Classes = ({
                            value={category}
                         >
                            <option value="">* Seleccione Categoría</option>
-                           {!categories.loading &&
-                              categories.categories.map((category) => (
-                                 <React.Fragment key={category._id}>
-                                    {category.name !== "Inscripción" && (
-                                       <option value={category._id}>
-                                          {category.name}
-                                       </option>
-                                    )}
-                                 </React.Fragment>
-                              ))}
+                           {categories.categories.map((category) => (
+                              <React.Fragment key={category._id}>
+                                 {category.name !== "Inscripción" && (
+                                    <option value={category._id}>
+                                       {category.name}
+                                    </option>
+                                 )}
+                              </React.Fragment>
+                           ))}
                         </select>
                         <label
                            htmlFor="category"
@@ -141,15 +139,13 @@ const Classes = ({
                )}
 
                <div className="pt-4">
-                  {!loadingClasses && (
-                     <ClassesTable
-                        classes={classes}
-                        all={true}
-                        clearClass={clearClass}
-                        clearSearch={clearSearch}
-                        clearProfile={clearProfile}
-                     />
-                  )}
+                  <ClassesTable
+                     classes={classes}
+                     all={true}
+                     clearClass={clearClass}
+                     clearSearch={clearSearch}
+                     clearProfile={clearProfile}
+                  />
                </div>
 
                <div className="btn-right">

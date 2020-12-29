@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 
 import {
    clearGradeTypes,
-   loadGradesByClass,
+   loadGrades,
    loadGradeTypesByCategory,
 } from "../../../actions/grade";
 import { loadClass } from "../../../actions/class";
@@ -19,7 +19,7 @@ const Grades = ({
    match,
    classes,
    grades: { loadingGT, loading },
-   loadGradesByClass,
+   loadGrades,
    loadGradeTypesByCategory,
    loadClass,
    clearGradeTypes,
@@ -28,7 +28,7 @@ const Grades = ({
 
    useEffect(() => {
       if (oneLoad) {
-         if (loading) loadGradesByClass(match.params.id);
+         if (loading) loadGrades(match.params.id);
          if (classes.loading) loadClass(match.params.id);
          clearGradeTypes();
          setOneLoad(false);
@@ -45,7 +45,7 @@ const Grades = ({
       loadGradeTypesByCategory,
       classes.classInfo,
       loadClass,
-      loadGradesByClass,
+      loadGrades,
       clearGradeTypes,
       match.params.id,
    ]);
@@ -132,7 +132,7 @@ const Grades = ({
 Grades.propTypes = {
    grades: PropTypes.object.isRequired,
    classes: PropTypes.object.isRequired,
-   loadGradesByClass: PropTypes.func.isRequired,
+   loadGrades: PropTypes.func.isRequired,
    loadGradeTypesByCategory: PropTypes.func.isRequired,
    loadClass: PropTypes.func.isRequired,
    clearGradeTypes: PropTypes.func.isRequired,
@@ -144,7 +144,7 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps, {
-   loadGradesByClass,
+   loadGrades,
    loadClass,
    loadGradeTypesByCategory,
    clearGradeTypes,

@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const auth = require("../../middleware/auth");
 const adminAuth = require("../../middleware/adminAuth");
-const { check, validationResult } = require("express-validator");
 
 const Town = require("../../models/Town");
 const Neighbourhood = require("../../models/Neighbourhood");
@@ -26,65 +25,6 @@ router.get("/", [auth], async (req, res) => {
       return res.status(500).send("Server Error");
    }
 });
-
-//@route    POST api/town/one
-//@desc     Add a town
-//@access   Private
-router.post(
-   "/one",
-   [auth, adminAuth, check("name", "El nombre es necesario").not().isEmpty()],
-   async (req, res) => {
-      const { name } = req.body;
-
-      let errors = validationResult(req);
-      if (!errors.isEmpty()) {
-         errors = errors.array();
-         return res.status(400).json({ errors });
-      }
-
-      try {
-         let town = new Town({ name });
-
-         await town.save();
-
-         res.json(town);
-      } catch (err) {
-         console.error(err.message);
-         return res.status(500).send("Server Error");
-      }
-   }
-);
-
-//@route    PUT api/town/:id_town
-//@desc     Update a town
-//@access   Private
-router.put(
-   "/:id_town",
-   [auth, adminAuth, check("name", "El nombre es necesario").not().isEmpty()],
-   async (req, res) => {
-      const { name } = req.body;
-
-      let errors = [];
-      const errorsResult = validationResult(req);
-      if (!errorsResult.isEmpty()) {
-         errors = errorsResult.array();
-         return res.status(400).json({ errors });
-      }
-
-      try {
-         let town = await Town.findOneAndUpdate(
-            { _id: req.params.id_town },
-            { $set: { name } },
-            { new: true }
-         );
-
-         res.json(town);
-      } catch (err) {
-         console.error(err.message);
-         return res.status(500).send("Server Error");
-      }
-   }
-);
 
 //@route    POST api/town
 //@desc     Update all towns
@@ -126,7 +66,7 @@ router.post("/", [auth, adminAuth], async (req, res) => {
 });
 
 //@route    DELETE api/town/:id
-//@desc     Delete a town
+//@desc     Delete a town and all its neighbourhoods
 //@access   Private
 router.delete("/:id", [auth, adminAuth], async (req, res) => {
    try {

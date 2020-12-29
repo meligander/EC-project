@@ -18,8 +18,10 @@ import "./style.scss";
 const InvoiceTab = ({
    history,
    installments: { installments },
+   invoices: {
+      otherValues: { invoiceNumber },
+   },
    auth: { userLogged },
-   mixvalues: { invoiceNumber },
    clearSearch,
    setAlert,
    registerInvoice,
@@ -350,6 +352,7 @@ const InvoiceTab = ({
                      <tr>
                         <th>Nombre</th>
                         <th>Cuota</th>
+                        <th>Año</th>
                         <th>Importe</th>
                         <th>A Pagar</th>
                         <th>&nbsp;</th>
@@ -366,6 +369,7 @@ const InvoiceTab = ({
                                     invoice.item.student.name}
                               </td>
                               <td>{installment[invoice.item.number]}</td>
+                              <td>{invoice.item.year}</td>
                               <td>{invoice.item.value}</td>
                               <td>
                                  <input
@@ -427,6 +431,7 @@ const InvoiceTab = ({
 
 InvoiceTab.propTypes = {
    installments: PropTypes.object.isRequired,
+   invoices: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
    clearSearch: PropTypes.func.isRequired,
    registerInvoice: PropTypes.func.isRequired,
@@ -437,8 +442,8 @@ InvoiceTab.propTypes = {
 
 const mapStateToProps = (state) => ({
    installments: state.installments,
+   invoices: state.invoices,
    auth: state.auth,
-   mixvalues: state.mixvalues,
 });
 
 export default connect(mapStateToProps, {

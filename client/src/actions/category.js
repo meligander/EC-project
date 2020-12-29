@@ -13,9 +13,7 @@ import {
    CATEGORY_ERROR,
 } from "./types";
 
-export const loadCategories = (editClass = false) => async (dispatch) => {
-   //editClass is to start the spinner when we get to register class // edit class
-   if (editClass) dispatch(updateLoadingSpinner(true));
+export const loadCategories = () => async (dispatch) => {
    try {
       const res = await axios.get("/api/category");
       dispatch({

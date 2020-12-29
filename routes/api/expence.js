@@ -15,7 +15,7 @@ const Invoice = require("../../models/Invoice");
 const { type } = require("os");
 
 //@route    GET api/expence
-//@desc     get all expences
+//@desc     get all expences || with filter
 //@access   Private
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
@@ -85,6 +85,134 @@ router.get("/", [auth, adminAuth], async (req, res) => {
       return res.status(500).send("Server Error");
    }
 });
+
+//@route    GET api/expence/fetch-list
+//@desc     Get the pdf of transactions
+//@access   Private
+router.get("/fetch-list", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/transactions.pdf"));
+});
+
+//@route    POST api/expence
+//@desc     Add an expence
+//@access   Private
+router.post(
+   "/",
+   [
+      auth,
+      adminAuth,
+      check("value", "El valor es necesario").not().isEmpty(),
+      check("expencetype", "El tipo de gasto es necesario").not().isEmpty(),
+   ],
+   async (req, res) => {
+      let { value, expencetype, description } = req.body;
+
+      let errors = [];
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
+         return res.status(400).json({ errors });
+      }
+
+      try {
+         const expencetypeinfo = await ExpenceType.findOne({
+            _id: expencetype,
+         });
+
+         let last = await Register.find().sort({ $natural: -1 }).limit(1);
+         last = last[0];
+
+         const msg =
+            "Primero debe ingresar dinero a la caja antes de hacer cualquier transacción";
+
+         if (!last)
+            return res.status(400).json({
+               msg,
+            });
+
+         if (last.registermoney === 0)
+            return res.status(400).json({
+               msg,
+            });
+
+         if (expencetypeinfo.type !== "Ingreso" && last.registermoney < value)
+            return res.status(400).json({
+               msg: "No se puede utilizar más dinero del que hay en caja",
+            });
+
+         let data = { value, expencetype, description };
+
+         let expence = new Expence(data);
+
+         await expence.save();
+
+         //search for the last expence
+         let expences = await Expence.find()
+            .populate("expencetype")
+            .sort({ $natural: -1 })
+            .limit(1);
+         expence = expences[0];
+
+         value = Number(value);
+
+         const plusvalue = Math.floor((last.registermoney + value) * 100) / 100;
+         const minusvalue =
+            Math.floor((last.registermoney - value) * 100) / 100;
+
+         if (last.temporary) {
+            await Register.findOneAndUpdate(
+               { _id: last.id },
+               {
+                  ...(expencetypeinfo.type === "Gasto" && {
+                     expence: !last.expence
+                        ? value
+                        : Math.floor((last.expence + value) * 100) / 100,
+                     registermoney: minusvalue,
+                  }),
+                  ...(expencetypeinfo.type === "Ingreso" && {
+                     cheatincome: !last.cheatincome
+                        ? value
+                        : Math.floor((last.cheatincome + value) * 100) / 100,
+                     registermoney: plusvalue,
+                  }),
+                  ...(expencetypeinfo.type === "Retiro" && {
+                     withdrawal: !last.withdrawal
+                        ? value
+                        : Math.floor((last.withdrawal + value) * 100) / 100,
+                     registermoney: minusvalue,
+                  }),
+               }
+            );
+         } else {
+            const data = {
+               temporary: true,
+               difference: 0,
+               ...(expencetypeinfo.type === "Gasto" && {
+                  expence: value,
+                  registermoney: minusvalue,
+               }),
+               ...(expencetypeinfo.type === "Ingreso" && {
+                  cheatincome: value,
+                  registermoney: plusvalue,
+               }),
+               ...(expencetypeinfo.type === "Retiro" && {
+                  withdrawal: value,
+                  registermoney: minusvalue,
+               }),
+            };
+
+            const register = new Register(data);
+
+            await register.save();
+         }
+
+         res.json({ msg: "Expence Register" });
+      } catch (err) {
+         console.error(err.message);
+         return res.status(500).send("Server Error");
+      }
+   }
+);
 
 //@route    POST api/expence/create-list
 //@desc     Create a pdf of transactions
@@ -174,135 +302,6 @@ router.post("/create-list", (req, res) => {
       res.send(Promise.resolve());
    });
 });
-
-//@route    GET api/expence/fetch-list
-//@desc     Get the pdf of transactions
-//@access   Private
-router.get("/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../reports/transactions.pdf"));
-});
-
-//@route    POST api/expence
-//@desc     Add an expence
-//@access   Private
-router.post(
-   "/",
-   [
-      auth,
-      adminAuth,
-      check("value", "El valor es necesario").not().isEmpty(),
-      check("expencetype", "El tipo de gasto es necesario").not().isEmpty(),
-   ],
-   async (req, res) => {
-      let { value, expencetype, description } = req.body;
-
-      let errors = [];
-      const errorsResult = validationResult(req);
-      if (!errorsResult.isEmpty()) {
-         errors = errorsResult.array();
-         return res.status(400).json({ errors });
-      }
-
-      try {
-         const expencetypeinfo = await ExpenceType.findOne({
-            _id: expencetype,
-         });
-
-         let last = await Register.find().sort({ $natural: -1 }).limit(1);
-         last = last[0];
-         if (last === undefined)
-            return res.status(400).json({
-               msg:
-                  "Primero debe ingresar dinero a la caja antes de hacer cualquier transacción",
-            });
-
-         if (last.registermoney === 0)
-            return res.status(400).json({
-               msg:
-                  "Primero debe ingresar dinero a la caja antes de hacer cualquier transacción",
-            });
-
-         if (expencetypeinfo.type !== "Ingreso" && last.registermoney < value)
-            return res.status(400).json({
-               msg: "No se puede utilizar más dinero del que hay en caja",
-            });
-
-         let data = { value, expencetype, description };
-
-         let expence = new Expence(data);
-
-         await expence.save();
-
-         //search for the last expence
-         let expences = await Expence.find()
-            .populate("expencetype")
-            .sort({ $natural: -1 })
-            .limit(1);
-         expence = expences[0];
-
-         value = Number(value);
-
-         const plusvalue = Math.floor((last.registermoney + value) * 100) / 100;
-         const minusvalue =
-            Math.floor((last.registermoney - value) * 100) / 100;
-
-         if (last.temporary) {
-            await Register.findOneAndUpdate(
-               { _id: last.id },
-               {
-                  ...(expencetypeinfo.type === "Gasto" && {
-                     expence:
-                        last.expence === undefined
-                           ? value
-                           : Math.floor((last.expence + value) * 100) / 100,
-                     registermoney: minusvalue,
-                  }),
-                  ...(expencetypeinfo.type === "Ingreso" && {
-                     cheatincome:
-                        last.cheatincome === undefined
-                           ? value
-                           : Math.floor((last.cheatincome + value) * 100) / 100,
-                     registermoney: plusvalue,
-                  }),
-                  ...(expencetypeinfo.type === "Retiro" && {
-                     withdrawal:
-                        last.withdrawal === undefined
-                           ? value
-                           : Math.floor((last.withdrawal + value) * 100) / 100,
-                     registermoney: minusvalue,
-                  }),
-               }
-            );
-         } else {
-            const data = {
-               temporary: true,
-               difference: 0,
-               ...(expencetypeinfo.type === "Gasto" && {
-                  expence: value,
-                  registermoney: minusvalue,
-               }),
-               ...(expencetypeinfo.type === "Ingreso" && {
-                  cheatincome: value,
-                  registermoney: plusvalue,
-               }),
-               ...(expencetypeinfo.type === "Retiro" && {
-                  withdrawal: value,
-                  registermoney: minusvalue,
-               }),
-            };
-
-            const register = new Register(data);
-
-            await register.save();
-         }
-
-         res.json({ msg: "Expence Register" });
-      } catch (err) {
-         console.error(err.message);
-         return res.status(500).send("Server Error");
-      }
-   }
-);
 
 //@route    DELETE api/expence/:id
 //@desc     Delete an expence

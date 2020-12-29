@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-const StudentGradesTable = ({ usersGrades: { headers, rows } }) => {
+const StudentGradesTable = ({ studentGrades: { headers, rows } }) => {
    return (
       <table>
          <thead>
@@ -41,7 +41,7 @@ const StudentGradesTable = ({ usersGrades: { headers, rows } }) => {
 };
 
 StudentGradesTable.prototypes = {
-   usersGrades: PropTypes.object.isRequired,
+   studentGrades: PropTypes.object.isRequired,
 };
 
 export default StudentGradesTable;

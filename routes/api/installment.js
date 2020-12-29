@@ -12,7 +12,7 @@ const Enrollment = require("../../models/Enrollment");
 const Penalty = require("../../models/Penalty");
 
 //@route    GET api/installment
-//@desc     Get all installments
+//@desc     Get all installments || with filters
 //@access   Private
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
@@ -158,18 +158,18 @@ router.get("/month/debts", [auth, adminAuth], async (req, res) => {
       const month = date.getMonth() + 1;
       const year = date.getFullYear();
 
-      const installmentsExpired = await Installment.find({
+      const thisYearinstallments = await Installment.find({
          value: { $ne: 0 },
-         expired: true,
+         year: { $lte: year },
+         number: { $lte: month },
       });
-      const monthInstallments = await Installment.find({
+      const nextYearEnrollment = await Installment.find({
          value: { $ne: 0 },
-         expired: false,
-         year,
-         number: { $in: [month, 0] },
+         year: year + 1,
+         number: 0,
       });
 
-      const installments = installmentsExpired.concat(monthInstallments);
+      const installments = thisYearinstallments.concat(nextYearEnrollment);
 
       let totalDebt = 0;
       for (let x = 0; x < installments.length; x++) {
@@ -182,6 +182,73 @@ router.get("/month/debts", [auth, adminAuth], async (req, res) => {
       res.status(500).send("Server Error");
    }
 });
+
+//@route    GET api/installment/fetch-list
+//@desc     Get the pdf of installments
+//@access   Private
+router.get("/list/fetch-list", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/debt.pdf"));
+});
+
+//@route    POST api/installment
+//@desc     Add an installment
+//@access   Private
+router.post(
+   "/",
+   [
+      auth,
+      adminAuth,
+      check("number", "La cuota es necesaria").not().isEmpty(),
+      check("student", "El alumno es necesario").not().isEmpty(),
+      check("year", "El año es necesario").not().isEmpty(),
+      check("value", "El valor es necesario").not().isEmpty(),
+   ],
+   async (req, res) => {
+      const { number, year, student, value, expired } = req.body;
+
+      try {
+         let errors = [];
+         const errorsResult = validationResult(req);
+         if (!errorsResult.isEmpty()) {
+            errors = errorsResult.array();
+            return res.status(400).json({ errors });
+         }
+
+         const enrollment = await Enrollment.findOne({ year, student });
+         if (enrollment) {
+            const installment = await Installment.findOne({
+               enrollment: enrollment.id,
+               year,
+               number,
+            });
+
+            if (installment) {
+               return res.status(400).json({
+                  msg: "Ya existe una cuota de ese alumno para dicho año y mes",
+               });
+            }
+         }
+
+         let data = {
+            number,
+            value,
+            ...(enrollment && { enrollment: enrollment.id }),
+            student,
+            year,
+            expired,
+         };
+
+         installment = new Installment(data);
+
+         await installment.save();
+
+         res.json({ msg: "Cuota Agregada" });
+      } catch (err) {
+         console.error(err.message);
+         return res.status(500).send("Server Error");
+      }
+   }
+);
 
 //@route    POST api/installment/create-list
 //@desc     Create a pdf of installments
@@ -261,73 +328,6 @@ router.post("/create-list", (req, res) => {
    );
 });
 
-//@route    GET api/installment/fetch-list
-//@desc     Get the pdf of installments
-//@access   Private
-router.get("/list/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../reports/debt.pdf"));
-});
-
-//@route    POST api/installment
-//@desc     Add an installment
-//@access   Private
-router.post(
-   "/",
-   [
-      auth,
-      adminAuth,
-      check("number", "La cuota es necesaria").not().isEmpty(),
-      check("student", "El alumno es necesario").not().isEmpty(),
-      check("year", "El año es necesario").not().isEmpty(),
-      check("value", "El valor es necesario").not().isEmpty(),
-   ],
-   async (req, res) => {
-      const { number, year, student, value, expired } = req.body;
-
-      try {
-         let errors = [];
-         const errorsResult = validationResult(req);
-         if (!errorsResult.isEmpty()) {
-            errors = errorsResult.array();
-            return res.status(400).json({ errors });
-         }
-
-         const enrollment = await Enrollment.findOne({ year, student });
-         if (enrollment) {
-            const installment = await Installment.findOne({
-               enrollment: enrollment.id,
-               year,
-               number,
-            });
-
-            if (installment) {
-               return res.status(400).json({
-                  msg: "Ya existe una cuota de ese alumno para dicho año y mes",
-               });
-            }
-         }
-
-         let data = {
-            number,
-            value,
-            ...(enrollment && { enrollment: enrollment.id }),
-            student,
-            year,
-            expired,
-         };
-
-         installment = new Installment(data);
-
-         await installment.save();
-
-         res.json({ msg: "Cuota Agregada" });
-      } catch (err) {
-         console.error(err.message);
-         return res.status(500).send("Server Error");
-      }
-   }
-);
-
 //@route    PUT api/installment/:id
 //@desc     Update an installment
 //@access   Private
@@ -365,7 +365,6 @@ router.put(
 router.put("/", [auth], async (req, res) => {
    try {
       const date = new Date();
-      //HARKODEADOOOOO
       const month = date.getMonth() + 1;
       const day = date.getDate();
       const installments = await Installment.find({
@@ -381,23 +380,29 @@ router.put("/", [auth], async (req, res) => {
       let penalty = await Penalty.find().sort({ $natural: -1 }).limit(1);
       penalty = penalty[0];
 
-      for (let x = 0; x < installments.length; x++) {
-         if (
-            (installments[x].number < month && !installments[x].expired) ||
-            (installments[x].number === month &&
-               installments[x].student.chargeday < day &&
-               !installments[x].expired)
-         ) {
-            const charge =
-               (installments[x].value * penalty.percentage) / 100 +
-               installments[x].value;
-            const value = Math.round(charge / 10) * 10;
+      if (penalty) {
+         for (let x = 0; x < installments.length; x++) {
+            if (
+               (installments[x].number < month && !installments[x].expired) ||
+               (installments[x].number === month &&
+                  installments[x].student.chargeday < day &&
+                  !installments[x].expired)
+            ) {
+               const charge =
+                  (installments[x].value * penalty.percentage) / 100 +
+                  installments[x].value;
+               const value = Math.round(charge / 10) * 10;
 
-            await Installment.findOneAndUpdate(
-               { _id: installments[x].id },
-               { value, expired: true }
-            );
+               await Installment.findOneAndUpdate(
+                  { _id: installments[x].id },
+                  { value, expired: true }
+               );
+            }
          }
+      } else {
+         return res.status(400).json({
+            msg: "Por favor, establezca el recargo a aplicar a las cuotas",
+         });
       }
 
       res.json({ msg: "Installments updated" });

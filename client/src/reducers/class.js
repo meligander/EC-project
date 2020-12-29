@@ -1,6 +1,8 @@
 import {
    CLASS_LOADED,
    CLASSES_LOADED,
+   CLASSSTUDENTS_LOADED,
+   ACTIVECLASSES_LOADED,
    CLASS_REGISTERED,
    CLASS_UPDATED,
    CLASS_DELETED,
@@ -9,8 +11,8 @@ import {
    CLASSSTUDENT_REMOVED,
    CLASS_CLEARED,
    CLASSES_CLEARED,
+   ACTIVECLASSES_CLEARED,
    CLASS_ERROR,
-   CLASSSTUDENTS_LOADED,
    CLASSSTUDENTS_ERROR,
 } from "../actions/types";
 
@@ -20,6 +22,9 @@ const initialState = {
    loadingClasses: true,
    loadingStudents: true,
    classes: [],
+   otherValues: {
+      activeClasses: "",
+   },
    error: {},
 };
 
@@ -47,6 +52,13 @@ export default function (state = initialState, action) {
             classInfo: { ...state.classInfo, students: payload },
             loadingStudents: false,
             error: {},
+         };
+      case ACTIVECLASSES_LOADED:
+         return {
+            ...state,
+            otherValues: {
+               activeClasses: payload,
+            },
          };
       case CLASS_REGISTERED:
          return {
@@ -109,6 +121,13 @@ export default function (state = initialState, action) {
          };
       case CLASSES_CLEARED:
          return initialState;
+      case ACTIVECLASSES_CLEARED:
+         return {
+            ...state,
+            otherValues: {
+               activeClasses: "",
+            },
+         };
       case CLASS_ERROR:
          return {
             ...state,
@@ -116,6 +135,9 @@ export default function (state = initialState, action) {
             classes: [],
             loading: false,
             loadingClasses: false,
+            otherValues: {
+               activeClasses: 0,
+            },
             error: payload,
          };
       case CLASSSTUDENTS_ERROR:

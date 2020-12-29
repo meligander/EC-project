@@ -48,6 +48,7 @@ const EmployeeInfo = ({
                <option value="Santiago del Estero">Santiago del Estero</option>
                <option value="Tierra del Fuego">Tierra del Fuego</option>
                <option value="Tucumán">Tucumán</option>
+               <option value=".">Otro</option>
             </select>
             <label
                htmlFor="birthprov"

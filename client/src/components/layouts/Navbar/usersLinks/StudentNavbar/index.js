@@ -8,7 +8,8 @@ import {
    changePage,
    changePageAndMenu,
 } from "../../../../../actions/navbar";
-import { clearProfile, clearSearch } from "../../../../../actions/user";
+import { clearProfile } from "../../../../../actions/user";
+import { clearClass } from "../../../../../actions/class";
 import { clearPosts } from "../../../../../actions/post";
 
 const StudentNavbar = ({
@@ -18,7 +19,7 @@ const StudentNavbar = ({
    changePage,
    changePageAndMenu,
    clearPosts,
-   clearSearch,
+   clearClass,
    clearProfile,
    location,
 }) => {
@@ -90,6 +91,7 @@ const StudentNavbar = ({
                onClick={() => {
                   window.scroll(0, 0);
                   clearPosts();
+                  clearClass();
                   changePageAndMenu("chat");
                }}
             >
@@ -113,7 +115,7 @@ const StudentNavbar = ({
                }`}
                onClick={() => {
                   window.scroll(0, 0);
-                  clearSearch();
+                  clearClass();
                   changePageAndMenu("classmates");
                }}
             >
@@ -144,7 +146,7 @@ StudentNavbar.propTypes = {
    logOutAndToggle: PropTypes.func.isRequired,
    changePage: PropTypes.func.isRequired,
    changePageAndMenu: PropTypes.func.isRequired,
-   clearSearch: PropTypes.func.isRequired,
+   clearClass: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
    clearPosts: PropTypes.func.isRequired,
 };
@@ -160,5 +162,5 @@ export default connect(mapStateToProps, {
    changePageAndMenu,
    clearProfile,
    clearPosts,
-   clearSearch,
+   clearClass,
 })(withRouter(StudentNavbar));

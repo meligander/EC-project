@@ -1,16 +1,18 @@
 import {
    INSTALLMENT_LOADED,
    INSTALLMENTS_LOADED,
-   USER_INSTALLMENTS_LOADED,
+   STUDENTINSTALLMENTS_LOADED,
+   TOTALDEBT_LOADED,
    INSTALLMENT_UPDATED,
    INSTALLMENT_REGISTERED,
    INSTALLMENT_DELETED,
-   INVOICE_DETAIL_ADDED,
-   INVOICE_DETAIL_REMOVED,
-   EXPIRED_INSTALLMENTS_UPDATED,
+   INVOICEDETAIL_ADDED,
+   INVOICEDETAIL_REMOVED,
+   EXPIREDINSTALLMENTS_UPDATED,
    INSTALLMENT_CLEARED,
    INSTALLMENTS_CLEARED,
-   USER_INSTALLMENTS_CLEARED,
+   STUDENTINSTALLMENTS_CLEARED,
+   TOTALDEBT_CLEARED,
    INSTALLMENTS_ERROR,
 } from "../actions/types";
 
@@ -24,6 +26,9 @@ const initialState = {
    loadingUsersInstallments: true,
    installment: null,
    loadingInstallments: true,
+   otherValues: {
+      totalDebt: "",
+   },
    error: {},
 };
 
@@ -44,19 +49,26 @@ export default function (state = initialState, action) {
             loadingInstallments: false,
             error: {},
          };
-      case USER_INSTALLMENTS_LOADED:
+      case STUDENTINSTALLMENTS_LOADED:
          return {
             ...state,
             usersInstallments: payload,
             loadingUsersInstallments: false,
          };
-      case INVOICE_DETAIL_ADDED:
+      case TOTALDEBT_LOADED:
+         return {
+            ...state,
+            otherValues: {
+               totalDebt: payload,
+            },
+         };
+      case INVOICEDETAIL_ADDED:
          return {
             ...state,
             installments: [...state.installments, payload],
             loadingInstallments: false,
          };
-      case INVOICE_DETAIL_REMOVED:
+      case INVOICEDETAIL_REMOVED:
          return {
             ...state,
             installments: state.installments.filter(
@@ -67,7 +79,7 @@ export default function (state = initialState, action) {
       case INSTALLMENT_UPDATED:
       case INSTALLMENT_REGISTERED:
       case INSTALLMENT_DELETED:
-      case EXPIRED_INSTALLMENTS_UPDATED:
+      case EXPIREDINSTALLMENTS_UPDATED:
          return state;
       case INSTALLMENT_CLEARED:
          return {
@@ -77,7 +89,7 @@ export default function (state = initialState, action) {
          };
       case INSTALLMENTS_CLEARED:
          return initialState;
-      case USER_INSTALLMENTS_CLEARED:
+      case STUDENTINSTALLMENTS_CLEARED:
          return {
             ...state,
             usersInstallments: {
@@ -85,6 +97,13 @@ export default function (state = initialState, action) {
                rows: [],
             },
             loadingUsersInstallments: true,
+         };
+      case TOTALDEBT_CLEARED:
+         return {
+            ...state,
+            otherValues: {
+               totalDebt: "",
+            },
          };
       case INSTALLMENTS_ERROR:
          return {

@@ -5,12 +5,13 @@ const adminAuth = require("../../middleware/adminAuth");
 const path = require("path");
 const pdf = require("html-pdf");
 const pdfTemplate = require("../../templates/list");
+const { check, validationResult } = require("express-validator");
 const moment = require("moment");
 
 const Register = require("../../models/Register");
 
 //@route    GET api/register
-//@desc     get all cashier register
+//@desc     get all cashier register || with filter
 //@access   Private
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
@@ -70,6 +71,57 @@ router.get("/last", [auth, adminAuth], async (req, res) => {
       return res.status(500).send("Server Error");
    }
 });
+
+//@route    GET api/expence/fetch-list
+//@desc     Get the pdf of expences
+//@access   Private
+router.get("/fetch-list", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/registers.pdf"));
+});
+
+//@route    POST api/register
+//@desc     Add first register
+//@access   Private
+router.post(
+   "/",
+   [
+      auth,
+      adminAuth,
+      check(
+         "difference",
+         "Debe colocar la 'DIFERENCIA' para agregar el dinero inicial en la caja"
+      )
+         .not()
+         .isEmpty(),
+   ],
+   async (req, res) => {
+      const { difference, description } = req.body;
+
+      let errors = [];
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
+         return res.status(400).json({ errors });
+      }
+
+      try {
+         let data = {
+            temporary: true,
+            ...(description && { description }),
+            registermoney: Math.floor(difference * 100) / 100,
+         };
+
+         let register = new Register(data);
+
+         await register.save();
+
+         res.json(register);
+      } catch (err) {
+         console.error(err.message);
+         return res.status(500).send("Server Error");
+      }
+   }
+);
 
 //@route    POST api/expence/create-list
 //@desc     Create a pdf of expences
@@ -166,35 +218,6 @@ router.post("/create-list", (req, res) => {
          res.send(Promise.resolve());
       }
    );
-});
-
-//@route    GET api/expence/fetch-list
-//@desc     Get the pdf of expences
-//@access   Private
-router.get("/fetch-list", (req, res) => {
-   res.sendFile(path.join(__dirname, "../../reports/registers.pdf"));
-});
-
-//@route    POST api/register
-//@desc     Add first register
-//@access   Private
-router.post("/", [auth, adminAuth], async (req, res) => {
-   const { difference, description } = req.body;
-
-   try {
-      let data = { temporary: false, description };
-
-      data.registermoney = Math.floor(difference * 100) / 100;
-
-      let register = new Register(data);
-
-      await register.save();
-
-      res.json(register);
-   } catch (err) {
-      console.error(err.message);
-      return res.status(500).send("Server Error");
-   }
 });
 
 //@route    PUT api/register

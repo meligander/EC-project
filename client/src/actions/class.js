@@ -2,48 +2,29 @@ import moment from "moment";
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-import { clearValues, updateLoadingSpinner } from "./mixvalues";
+import { updateLoadingSpinner } from "./mixvalues";
 import { addUserToList, removeUserFromList } from "./user";
 import { setAlert } from "./alert";
 
 import {
    CLASS_LOADED,
    CLASSES_LOADED,
+   CLASSSTUDENTS_LOADED,
+   ACTIVECLASSES_LOADED,
    CLASS_REGISTERED,
+   CLASSSTUDENT_ADDED,
    CLASS_UPDATED,
+   CLASSSTUDENT_REMOVED,
    CLASS_DELETED,
    CLASSCATEGORY_UPDATED,
    CLASS_CLEARED,
    CLASSES_CLEARED,
+   ACTIVECLASSES_CLEARED,
    CLASS_ERROR,
-   CLASSSTUDENTS_LOADED,
    CLASSSTUDENTS_ERROR,
-   CLASSSTUDENT_ADDED,
-   CLASSSTUDENT_REMOVED,
 } from "./types";
 
-export const loadUsersClass = (user_id) => async (dispatch) => {
-   try {
-      const res = await axios.get(`/api/class/user/${user_id}`);
-      dispatch({
-         type: CLASS_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      dispatch({
-         type: CLASS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-   }
-};
-
 export const loadClass = (class_id, post = false) => async (dispatch) => {
-   //post: to start the spinner when we get to the chat, and finish it when the posts are loaded
-   if (post) dispatch(updateLoadingSpinner(true));
    try {
       if (class_id === "0") {
          dispatch({
@@ -70,7 +51,47 @@ export const loadClass = (class_id, post = false) => async (dispatch) => {
    }
 };
 
-export const loadClassStudents = (class_id, loading) => async (dispatch) => {
+export const getActiveClasses = () => async (dispatch) => {
+   try {
+      let res = await axios.get("/api/class");
+
+      dispatch({
+         type: ACTIVECLASSES_LOADED,
+         payload: res.data.length,
+      });
+   } catch (err) {
+      dispatch({
+         type: CLASS_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      window.scroll(0, 0);
+   }
+};
+
+export const loadUserClass = (user_id) => async (dispatch) => {
+   try {
+      const res = await axios.get(`/api/class/user/${user_id}`);
+      dispatch({
+         type: CLASS_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      dispatch({
+         type: CLASS_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+   }
+};
+
+export const loadClassStudents = (class_id) => async (dispatch) => {
    try {
       const res = await axios.get(
          `/api/user?type=Alumno&classroom=${class_id}`
@@ -79,7 +100,6 @@ export const loadClassStudents = (class_id, loading) => async (dispatch) => {
          type: CLASSSTUDENTS_LOADED,
          payload: res.data,
       });
-      if (loading) dispatch(updateLoadingSpinner(false));
    } catch (err) {
       dispatch({
          type: CLASSSTUDENTS_ERROR,
@@ -89,7 +109,6 @@ export const loadClassStudents = (class_id, loading) => async (dispatch) => {
             msg: err.response.data.msg,
          },
       });
-      if (loading) dispatch(updateLoadingSpinner(false));
    }
 };
 
@@ -165,7 +184,7 @@ export const registerUpdateClass = (formData, history, class_id) => async (
       );
 
       history.push("/classes");
-      dispatch(clearValues());
+      dispatch(clearActiveClasses());
       dispatch(clearClasses());
    } catch (err) {
       if (err.response.data.errors) {
@@ -200,6 +219,22 @@ export const updateClassCategory = (classInfo) => (dispatch) => {
    dispatch({ type: CLASSCATEGORY_UPDATED, payload: classInfo });
 };
 
+export const addStudent = (student) => (dispatch) => {
+   dispatch({
+      type: CLASSSTUDENT_ADDED,
+      payload: student,
+   });
+   dispatch(removeUserFromList(student._id));
+};
+
+export const removeStudent = (student) => (dispatch) => {
+   dispatch({
+      type: CLASSSTUDENT_REMOVED,
+      payload: student._id,
+   });
+   dispatch(addUserToList(student));
+};
+
 export const deleteClass = (class_id, history) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
@@ -211,9 +246,10 @@ export const deleteClass = (class_id, history) => async (dispatch) => {
          payload: class_id,
       });
 
-      dispatch(setAlert("Curso Eliminado", "success", "2"));
-      dispatch(clearValues());
+      dispatch(clearActiveClasses());
+
       history.push("/classes");
+      dispatch(setAlert("Curso Eliminado", "success", "2"));
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;
@@ -297,25 +333,15 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const addStudent = (student) => (dispatch) => {
-   dispatch({
-      type: CLASSSTUDENT_ADDED,
-      payload: student,
-   });
-   dispatch(removeUserFromList(student._id));
-};
-
-export const removeStudent = (student) => (dispatch) => {
-   dispatch({
-      type: CLASSSTUDENT_REMOVED,
-      payload: student._id,
-   });
-   dispatch(addUserToList(student));
-};
-
 export const clearClass = () => (dispatch) => {
    dispatch({
       type: CLASS_CLEARED,
+   });
+};
+
+export const clearActiveClasses = () => (dispatch) => {
+   dispatch({
+      type: ACTIVECLASSES_CLEARED,
    });
 };
 

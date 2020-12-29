@@ -98,32 +98,54 @@ router.post(
    }
 );
 
-//@route    DELETE api/posts
-//@desc     Delete a post
+//@route    POST api/posts/comment/:id
+//@desc     Comment on a post
 //@access   Private
-router.delete("/:id", auth, async (req, res) => {
-   try {
-      const post = await Post.findOne({ _id: req.params.id });
-
-      if (!post)
-         return res.status(404).json({ msg: "Publicación no encontrada" });
-
-      //Check user
-      if (post.user.toString() !== req.user.id) {
-         return res.status(401).json({ msg: "Usuario no autorizado" });
+router.post(
+   "/comment/:id",
+   [auth, [check("text", "El texto es necesario").not().isEmpty()]],
+   async (req, res) => {
+      let errors = [];
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
+         return res.status(400).json({ errors });
       }
 
-      await post.remove();
+      try {
+         const user = await User.findById(req.user.id).select("-password");
+         let post = await Post.findById(req.params.id);
 
-      return res.json({ msg: "Post deleted" });
-   } catch (err) {
-      const error = err.message.toString();
-      console.error(err.message);
-      if (error.includes("ObjectId"))
-         return res.status(404).json({ msg: "Publicación no encontrada" });
-      res.status(500).send("Server error");
+         const newComment = {
+            text: req.body.text,
+            name: user.name,
+            lastname: user.lastname,
+            user: req.user.id,
+         };
+
+         post.comments.unshift(newComment);
+
+         await post.save();
+
+         post = await Post.findById(req.params.id)
+            .populate({
+               path: "user",
+               select: "-password",
+               model: "user",
+            })
+            .populate({
+               path: "comments.user",
+               model: "user",
+               select: "-password",
+            });
+
+         return res.json(post);
+      } catch (err) {
+         console.error(err.message);
+         res.status(500).send("Server error");
+      }
    }
-});
+);
 
 //@route    PUT api/posts/like/:id
 //@desc     Add like to a post
@@ -184,54 +206,32 @@ router.put("/unlike/:id", auth, async (req, res) => {
    }
 });
 
-//@route    POST api/posts/comment/:id
-//@desc     Comment on a post
+//@route    DELETE api/posts
+//@desc     Delete a post
 //@access   Private
-router.post(
-   "/comment/:id",
-   [auth, [check("text", "El texto es necesario").not().isEmpty()]],
-   async (req, res) => {
-      let errors = [];
-      const errorsResult = validationResult(req);
-      if (!errorsResult.isEmpty()) {
-         errors = errorsResult.array();
-         return res.status(400).json({ errors });
+router.delete("/:id", auth, async (req, res) => {
+   try {
+      const post = await Post.findOne({ _id: req.params.id });
+
+      if (!post)
+         return res.status(404).json({ msg: "Publicación no encontrada" });
+
+      //Check user
+      if (post.user.toString() !== req.user.id) {
+         return res.status(401).json({ msg: "Usuario no autorizado" });
       }
 
-      try {
-         const user = await User.findById(req.user.id).select("-password");
-         let post = await Post.findById(req.params.id);
+      await post.remove();
 
-         const newComment = {
-            text: req.body.text,
-            name: user.name,
-            lastname: user.lastname,
-            user: req.user.id,
-         };
-
-         post.comments.unshift(newComment);
-
-         await post.save();
-
-         post = await Post.findById(req.params.id)
-            .populate({
-               path: "user",
-               select: "-password",
-               model: "user",
-            })
-            .populate({
-               path: "comments.user",
-               model: "user",
-               select: "-password",
-            });
-
-         return res.json(post);
-      } catch (err) {
-         console.error(err.message);
-         res.status(500).send("Server error");
-      }
+      return res.json({ msg: "Post deleted" });
+   } catch (err) {
+      const error = err.message.toString();
+      console.error(err.message);
+      if (error.includes("ObjectId"))
+         return res.status(404).json({ msg: "Publicación no encontrada" });
+      res.status(500).send("Server error");
    }
-);
+});
 
 //@route    DELETE api/posts/comment/:id/:comment_id
 //@desc     Delete a comment on a post

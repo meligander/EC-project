@@ -83,8 +83,15 @@ export const registerExpence = (formData, history, user_id) => async (
 ) => {
    dispatch(updateLoadingSpinner(true));
 
+   let expence = {};
+   for (const prop in formData) {
+      if (formData[prop] !== "" && formData[prop] !== 0) {
+         expence[prop] = formData[prop];
+      }
+   }
+
    try {
-      await axios.post("/api/expence", formData);
+      await axios.post("/api/expence", expence);
 
       dispatch({
          type: EXPENCE_REGISTERED,
@@ -149,7 +156,7 @@ export const deleteExpence = (expence_id) => async (dispatch) => {
    }
 
    window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(true));
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const updateExpenceTypes = (formData) => async (dispatch) => {

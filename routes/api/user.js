@@ -46,11 +46,7 @@ router.get("/", auth, async (req, res) => {
                case "Alumno":
                   search = false;
                   const classroom = req.query.classroom;
-                  /* if (req.query.classroom) {
-                     if (req.query.classroom === "null")
-                        filter.classroom = null;
-                     else filter.classroom = req.query.classroom;
-                  } */
+
                   if (req.query.category) {
                      const date = new Date();
                      const enrollments = await Enrollment.find({
@@ -136,7 +132,10 @@ router.get("/", auth, async (req, res) => {
                case "Tutor":
                   const name = req.query.studentname;
                   const lastname = req.query.studentlastname;
+
                   if (name || lastname) {
+                     search = false;
+
                      const filter2 = {
                         ...(name && {
                            name: { $regex: `.*${name}.*`, $options: "i" },
@@ -165,8 +164,6 @@ router.get("/", auth, async (req, res) => {
                               users.push(allusers[x]);
                         }
                      }
-
-                     search = false;
                   }
                   break;
                case "Secretaria":
@@ -223,7 +220,7 @@ router.get("/:id", auth, async (req, res) => {
          .select("-password")
          .populate({ path: "town", select: "name" })
          .populate({ path: "neighbourhood", select: "name" })
-         .populate({ path: "children", select: "-password" });
+         .populate({ path: "children", model: "user", select: "-password" });
 
       if (!user) {
          return res
@@ -277,125 +274,6 @@ router.get("/register/number", [auth, adminAuth], async (req, res) => {
       console.error(err.message);
       return res.status(500).send("Server Error");
    }
-});
-
-//@route    POST api/user/create-list
-//@desc     Create a pdf of users
-//@access   Private
-router.post("/create-list", (req, res) => {
-   const nameReport = "reports/users.pdf";
-
-   const { users, usersType } = req.body;
-
-   let tbody = "";
-   let thead = "";
-
-   if (usersType === "Alumno") {
-      thead =
-         "<th>Legajo</th><th>Nombre</th><th>Edad</th><th>Celular</th><th>Categoría</th>";
-   } else {
-      thead = "<th>Nombre</th><th>Email</th><th>Celular</th>";
-      switch (usersType) {
-         case "Tutor":
-            thead += "<th>Nombre Alumno</th>";
-            break;
-         case "Profesor":
-         case "Administrador":
-            thead += "<th>Fecha Nacimiento</th>";
-            if (usersType === "Administrador") thead += "<th>Rol</th>";
-            break;
-         default:
-            break;
-      }
-   }
-
-   let name = "";
-   let cel = "";
-
-   for (let x = 0; x < users.length; x++) {
-      name = "<td>" + users[x].lastname + ", " + users[x].name + "</td>";
-      cel = "<td>" + (users[x].cel ? users[x].cel : "") + "</td>";
-
-      if (usersType === "Alumno") {
-         const years =
-            "<td>" +
-            (users[x].dob ? moment().diff(users[x].dob, "years", false) : "") +
-            "</td>";
-         const studentnumber = "<td>" + users[x].studentnumber + "</td>";
-         category =
-            "<td>" + (users[x].category ? users[x].category : "") + "</td>";
-
-         tbody +=
-            "<tr>" + studentnumber + name + years + cel + category + "</tr>";
-      } else {
-         const email =
-            "<td>" + (users[x].email ? users[x].email : "") + "</td>";
-
-         if (usersType === "Tutor") {
-            const studentname =
-               "<td>" +
-               (users[x].children.length > 0
-                  ? users[x].children[0].user.lastname +
-                    ", " +
-                    users[x].children[0].user.name
-                  : "") +
-               "</td>";
-            tbody += "<tr>" + name + email + cel + studentname + "</tr>";
-         } else {
-            const dob =
-               "<td>" +
-               (users[x].dob ? moment(users[x].dob).format("DD/MM/YY") : "") +
-               "</td>";
-            if (usersType === "Profesor")
-               tbody += "<tr>" + name + email + cel + dob + "</tr>";
-            else {
-               const type = "<td>" + users[x].type + "</td>";
-               tbody += "<tr>" + name + email + cel + dob + type + "</tr>";
-            }
-         }
-      }
-   }
-
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/list/style.css"
-   );
-
-   const options = {
-      format: "A4",
-      header: {
-         height: "15mm",
-         contents: `<div></div>`,
-      },
-      footer: {
-         height: "17mm",
-         contents:
-            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
-      },
-   };
-
-   pdf.create(
-      pdfTemplate(
-         css,
-         img,
-         usersType === "Alumno" ? "Alumnos" : usersType + "es",
-         thead,
-         tbody
-      ),
-      options
-   ).toFile(nameReport, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
-
-      res.send(Promise.resolve());
-   });
 });
 
 //@route    GET api/user/lista/fetch-list
@@ -545,6 +423,125 @@ router.post(
    }
 );
 
+//@route    POST api/user/create-list
+//@desc     Create a pdf of users
+//@access   Private
+router.post("/create-list", (req, res) => {
+   const nameReport = "reports/users.pdf";
+
+   const { users, usersType } = req.body;
+
+   let tbody = "";
+   let thead = "";
+
+   if (usersType === "Alumno") {
+      thead =
+         "<th>Legajo</th><th>Nombre</th><th>Edad</th><th>Celular</th><th>Categoría</th>";
+   } else {
+      thead = "<th>Nombre</th><th>Email</th><th>Celular</th>";
+      switch (usersType) {
+         case "Tutor":
+            thead += "<th>Nombre Alumno</th>";
+            break;
+         case "Profesor":
+         case "Administrador":
+            thead += "<th>Fecha Nacimiento</th>";
+            if (usersType === "Administrador") thead += "<th>Rol</th>";
+            break;
+         default:
+            break;
+      }
+   }
+
+   let name = "";
+   let cel = "";
+
+   for (let x = 0; x < users.length; x++) {
+      name = "<td>" + users[x].lastname + ", " + users[x].name + "</td>";
+      cel = "<td>" + (users[x].cel ? users[x].cel : "") + "</td>";
+
+      if (usersType === "Alumno") {
+         const years =
+            "<td>" +
+            (users[x].dob ? moment().diff(users[x].dob, "years", false) : "") +
+            "</td>";
+         const studentnumber = "<td>" + users[x].studentnumber + "</td>";
+         category =
+            "<td>" + (users[x].category ? users[x].category : "") + "</td>";
+
+         tbody +=
+            "<tr>" + studentnumber + name + years + cel + category + "</tr>";
+      } else {
+         const email =
+            "<td>" + (users[x].email ? users[x].email : "") + "</td>";
+
+         if (usersType === "Tutor") {
+            const studentname =
+               "<td>" +
+               (users[x].children.length > 0
+                  ? users[x].children[0].user.lastname +
+                    ", " +
+                    users[x].children[0].user.name
+                  : "") +
+               "</td>";
+            tbody += "<tr>" + name + email + cel + studentname + "</tr>";
+         } else {
+            const dob =
+               "<td>" +
+               (users[x].dob ? moment(users[x].dob).format("DD/MM/YY") : "") +
+               "</td>";
+            if (usersType === "Profesor")
+               tbody += "<tr>" + name + email + cel + dob + "</tr>";
+            else {
+               const type = "<td>" + users[x].type + "</td>";
+               tbody += "<tr>" + name + email + cel + dob + type + "</tr>";
+            }
+         }
+      }
+   }
+
+   const img = path.join(
+      "file://",
+      __dirname,
+      "../../templates/assets/logo.png"
+   );
+   const css = path.join(
+      "file://",
+      __dirname,
+      "../../templates/list/style.css"
+   );
+
+   const options = {
+      format: "A4",
+      header: {
+         height: "15mm",
+         contents: `<div></div>`,
+      },
+      footer: {
+         height: "17mm",
+         contents:
+            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
+      },
+   };
+
+   pdf.create(
+      pdfTemplate(
+         css,
+         img,
+         usersType === "Alumno" ? "Alumnos" : usersType + "es",
+         thead,
+         tbody
+      ),
+      options
+   ).toFile(nameReport, (err) => {
+      if (err) {
+         res.send(Promise.reject());
+      }
+
+      res.send(Promise.resolve());
+   });
+});
+
 //@route    PUT api/user/:id
 //@desc     Update another user
 //@access   Private
@@ -596,20 +593,18 @@ router.put(
 
          let user = await User.findOne({ _id: req.params.id });
 
-         if (img.public_id !== "") {
-            if (img.public_id !== user.img.public_id) {
-               if (user.noImg === "") deletePictures(user.img);
-               const uploadResponse = await cloudinaryUploader.uploader.upload(
-                  img,
-                  {
-                     upload_preset: "english-center",
-                  }
-               );
-               imgObject = {
-                  public_id: uploadResponse.public_id,
-                  url: uploadResponse.url,
-               };
-            }
+         if (img.public_id !== user.img.public_id) {
+            if (user.noImg === "") deletePictures(user.img);
+            const uploadResponse = await cloudinaryUploader.uploader.upload(
+               img,
+               {
+                  upload_preset: "english-center",
+               }
+            );
+            imgObject = {
+               public_id: uploadResponse.public_id,
+               url: uploadResponse.url,
+            };
          }
 
          if (!active) await inactivateUser(user._id, type);
@@ -639,34 +634,33 @@ router.put(
             ...(imgObject.public_id !== "" && { img: imgObject, noImg: "" }),
          };
 
-         if (discount) {
-            if (discount !== user.discount) {
-               const date = new Date();
-               const month = date.getMonth() + 1;
-               const yearl = date.getFullYear();
-               let enrollments = await Enrollment.find({
-                  student: req.params.id,
-                  year: { $in: [yearl, yearl + 1] },
-               }).populate({ path: "category", model: "category" });
+         if (discount && discount !== user.discount) {
+            const date = new Date();
+            const month = date.getMonth() + 1;
+            const yearl = date.getFullYear();
 
-               for (let x = 0; x < enrollments.length; x++) {
-                  let installments = await Installment.find({
-                     enrollment: enrollments[x]._id,
-                     value: { $ne: 0 },
-                     ...(enrollments[x].year === yearl && {
-                        number: { $gte: month },
-                     }),
-                  });
-                  let value = enrollments[x].category.value;
-                  const disc = (value * discount) / 100;
-                  value = Math.round((value - disc) / 10) * 10;
-                  for (let y = 0; y < installments.length; y++) {
-                     if (installments[y].number === 0) continue;
-                     await Installment.findOneAndUpdate(
-                        { _id: installments[y]._id },
-                        { value }
-                     );
-                  }
+            let enrollments = await Enrollment.find({
+               student: req.params.id,
+               year: { $in: [yearl, yearl + 1] },
+            }).populate({ path: "category", model: "category" });
+
+            for (let x = 0; x < enrollments.length; x++) {
+               let installments = await Installment.find({
+                  enrollment: enrollments[x]._id,
+                  value: { $ne: 0 },
+                  ...(enrollments[x].year === yearl && {
+                     number: { $gte: month },
+                  }),
+               });
+               let value = enrollments[x].category.value;
+               const disc = (value * discount) / 100;
+               value = Math.round((value - disc) / 10) * 10;
+               for (let y = 0; y < installments.length; y++) {
+                  if (installments[y].number === 0) continue;
+                  await Installment.findOneAndUpdate(
+                     { _id: installments[y]._id },
+                     { value, expired: false }
+                  );
                }
             }
          }
@@ -682,7 +676,7 @@ router.put(
 );
 
 //@route    PUT api/user/credentials/:id
-//@desc     Update another user's credentials
+//@desc     Update user's credentials
 //@access   Private
 router.put("/credentials/:id", [auth], async (req, res) => {
    const { password, email } = req.body;
@@ -698,7 +692,7 @@ router.put("/credentials/:id", [auth], async (req, res) => {
 
    try {
       //See if users exists
-      if (email !== undefined) {
+      if (email) {
          user = await User.findOne({ email });
          if (user && user.id !== req.user.id && user.email !== email)
             return res
@@ -707,11 +701,10 @@ router.put("/credentials/:id", [auth], async (req, res) => {
       }
 
       let data = {
-         ...(password !== undefined && { password }),
-         ...(email !== undefined && { email }),
+         ...(email && { email }),
       };
 
-      if (password !== undefined) {
+      if (password) {
          //Encrypt password -- agregarlo a cuando se cambia el password
          const salt = await bcrypt.genSalt(10);
 
@@ -732,28 +725,6 @@ router.put("/credentials/:id", [auth], async (req, res) => {
    } catch (err) {
       console.error(err.message);
       return res.status(500).send("Server Error");
-   }
-});
-
-//@route    DELETE api/user
-//@desc     Delete user
-//@access   Private
-router.delete("/", auth, async (req, res) => {
-   try {
-      let user = await User.findOne({ _id: req.user.id });
-
-      if (user.type !== "Administrador") {
-         return res
-            .status(400)
-            .json({ errors: [{ msg: "Usuario sin autorización" }] });
-      }
-      //Remove user
-      await User.findOneAndRemove({ _id: req.user.id });
-
-      res.json({ msg: "User deleted" });
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server error");
    }
 });
 

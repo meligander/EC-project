@@ -25,7 +25,7 @@ app.use("/api/grade-type", require("./routes/api/gradeType"));
 app.use("/api/installment", require("./routes/api/installment"));
 app.use("/api/invoice", require("./routes/api/invoice"));
 app.use("/api/neighbourhood", require("./routes/api/neighbourhood"));
-app.use("/api/posts", require("./routes/api/posts"));
+app.use("/api/post", require("./routes/api/post"));
 app.use("/api/register", require("./routes/api/register"));
 app.use("/api/town", require("./routes/api/town"));
 app.use("/api/penalty", require("./routes/api/penalty"));

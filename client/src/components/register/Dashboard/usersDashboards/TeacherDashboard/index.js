@@ -6,6 +6,7 @@ import { clearClasses, loadClasses } from "../../../../../actions/class";
 import { clearSearch } from "../../../../../actions/user";
 
 import ClassesTable from "../../../../tables/ClassesTable";
+import Loading from "../../../../modal/Loading";
 
 const TeacherDashboard = ({
    loadClasses,
@@ -17,9 +18,10 @@ const TeacherDashboard = ({
    useEffect(() => {
       loadClasses({ teacher: user._id });
    }, [user._id, loadClasses]);
+
    return (
       <div className="p-4 bg-white">
-         {!loadingClasses && (
+         {!loadingClasses ? (
             <>
                <h3 className="heading-secondary text-dark p-1">Cursos</h3>
                {classes.length > 0 ? (
@@ -35,6 +37,8 @@ const TeacherDashboard = ({
                   </p>
                )}
             </>
+         ) : (
+            <Loading />
          )}
       </div>
    );

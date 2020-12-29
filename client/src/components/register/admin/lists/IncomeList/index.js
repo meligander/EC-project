@@ -123,8 +123,7 @@ const IncomeList = ({
                            </tr>
                         </thead>
                         <tbody>
-                           {!loadingInvoices &&
-                              invoices.length > 0 &&
+                           {invoices.length > 0 &&
                               invoices.map(
                                  (invoice, index, arr) =>
                                     index >= page * 10 &&

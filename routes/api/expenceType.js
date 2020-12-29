@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const auth = require("../../middleware/auth");
 const adminAuth = require("../../middleware/adminAuth");
-const { check, validationResult } = require("express-validator");
 
 const ExpenceType = require("../../models/ExpenceType");
 
@@ -45,36 +44,6 @@ router.get("/:id", [auth, adminAuth], async (req, res) => {
       res.status(500).send("Server Error");
    }
 });
-
-//@route    POST api/expence-type
-//@desc     Add an expence type
-//@access   Private
-router.post(
-   "/one",
-   [auth, adminAuth, check("name", "El nombre es necesario").not().isEmpty()],
-   async (req, res) => {
-      const { name, type } = req.body;
-      let expenceType;
-
-      let errors = [];
-      const errorsResult = validationResult(req);
-      if (!errorsResult.isEmpty()) {
-         errors = errorsResult.array();
-         return res.status(400).json({ errors });
-      }
-
-      try {
-         expenceType = new ExpenceType({ name, type });
-
-         await expenceType.save();
-
-         res.json(expenceType);
-      } catch (err) {
-         console.error(err.message);
-         return res.status(500).send("Server Error");
-      }
-   }
-);
 
 //@route    POST api/expence-type
 //@desc     Update all expence types

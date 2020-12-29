@@ -2,7 +2,9 @@ import {
    USER_LOADED,
    USERS_LOADED,
    USERSBK_LOADED,
-   USERS_TYPE_CHANGED,
+   STUDENTNUMBER_LOADED,
+   ACTIVEUSERS_LOADED,
+   USERSTYPE_CHANGED,
    REGISTER_SUCCESS,
    USER_UPDATED,
    USER_DELETED,
@@ -11,6 +13,7 @@ import {
    USERS_CLEARED,
    USER_CLEARED,
    SEARCH_CLEARED,
+   OTHERVALUES_CLEARED,
    USERS_ERROR,
    USER_ERROR,
    USERSBK_ERROR,
@@ -24,6 +27,11 @@ const initialState = {
    usersType: "",
    usersBK: [],
    loadingUsersBK: true,
+   otherValues: {
+      studentNumber: "",
+      activeStudents: "",
+      activeTeachers: "",
+   },
    error: {},
 };
 
@@ -49,10 +57,26 @@ export default function (state = initialState, action) {
             loadingUsersBK: false,
             usersBK: payload,
          };
+      case STUDENTNUMBER_LOADED:
+         return {
+            ...state,
+            otherValues: {
+               ...state.otherValues,
+               studentNumber: payload,
+            },
+         };
+      case ACTIVEUSERS_LOADED:
+         return {
+            ...state,
+            otherValues: {
+               ...state.otherValues,
+               [payload.type]: payload.info,
+            },
+         };
       case REGISTER_SUCCESS:
       case USER_UPDATED:
          return state;
-      case USERS_TYPE_CHANGED:
+      case USERSTYPE_CHANGED:
          return {
             ...state,
             usersType: payload,
@@ -93,17 +117,27 @@ export default function (state = initialState, action) {
             loadingUsersBK: true,
             usersType: "",
          };
+      case OTHERVALUES_CLEARED:
+         return {
+            ...state,
+            otherValues: {
+               ...state.otherValues,
+               [payload]: "",
+            },
+         };
       case USER_ERROR:
          return {
             ...state,
-            loading: true,
             loadingUsers: true,
-            user: null,
             users: [],
             usersType: "",
             usersBK: [],
             loadingUsersBK: true,
-            error: {},
+            error: payload,
+            otherValues: {
+               ...state.otherValues,
+               [payload.userType]: 0,
+            },
          };
       case USERS_ERROR:
          return {

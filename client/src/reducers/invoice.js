@@ -1,10 +1,12 @@
 import {
    INVOICE_LOADED,
    INVOICES_LOADED,
+   INVOICENUMBER_LOADED,
    INVOICE_REGISTERED,
    INVOICE_DELETED,
    INVOICE_CLEARED,
    INVOICES_CLEARED,
+   INVOICENUMBER_CLEARED,
    INVOICE_ERROR,
 } from "../actions/types";
 
@@ -13,6 +15,9 @@ const initialState = {
    invoices: [],
    invoice: null,
    loadingInvoices: true,
+   otherValues: {
+      invoiceNumber: "",
+   },
    error: {},
 };
 
@@ -33,6 +38,13 @@ export default function (state = initialState, action) {
             loadingInvoices: false,
             error: {},
          };
+      case INVOICENUMBER_LOADED:
+         return {
+            ...state,
+            otherValues: {
+               invoiceNumber: payload,
+            },
+         };
       case INVOICE_REGISTERED:
          return state;
       case INVOICE_DELETED:
@@ -49,6 +61,13 @@ export default function (state = initialState, action) {
             ...state,
             loading: true,
             invoice: null,
+         };
+      case INVOICENUMBER_CLEARED:
+         return {
+            ...state,
+            otherValues: {
+               invoiceNumber: "",
+            },
          };
       case INVOICE_ERROR:
          return {

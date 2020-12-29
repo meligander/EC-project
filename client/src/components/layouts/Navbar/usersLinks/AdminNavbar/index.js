@@ -8,7 +8,7 @@ import {
    changePage,
    changePageAndMenu,
 } from "../../../../../actions/navbar";
-import { clearInvoiceNumber } from "../../../../../actions/mixvalues";
+import { clearInvoiceNumber } from "../../../../../actions/invoice";
 import { clearInstallments } from "../../../../../actions/installment";
 import { clearRegisters } from "../../../../../actions/register";
 import { clearProfile, clearSearch } from "../../../../../actions/user";

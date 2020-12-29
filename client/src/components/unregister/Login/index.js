@@ -1,22 +1,14 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
-import { Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import { loginUser } from "../../../actions/auth";
-import { clearProfile } from "../../../actions/user";
 import { changePage } from "../../../actions/navbar";
 
 import Alert from "../../sharedComp/Alert";
 import Loading from "../../modal/Loading";
 
-const Login = ({
-   loginUser,
-   auth: { userLogged, isAuthenticated },
-   mixvalues: { loadingSpinner },
-   changePage,
-   clearProfile,
-}) => {
+const Login = ({ loginUser, mixvalues: { loadingSpinner }, changePage }) => {
    const [formData, setFormData] = useState({
       email: "",
       password: "",
@@ -40,10 +32,12 @@ const Login = ({
       loginUser(credentials);
       changePage("index");
    };
-   if (isAuthenticated) {
+
+   /* if (isAuthenticated) {
       clearProfile();
+      console.log(`/dashboard/${userLogged._id}`);
       return <Redirect to={`/dashboard/${userLogged._id}`} />;
-   }
+   } */
 
    return (
       <div className="inner-container">
@@ -91,21 +85,17 @@ const Login = ({
 };
 
 Login.prototypes = {
-   auth: PropTypes.object.isRequired,
    mixvalues: PropTypes.object.isRequired,
    loginUser: PropTypes.func.isRequired,
    changePage: PropTypes.func.isRequired,
    loadUser: PropTypes.func.isRequired,
-   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
-   auth: state.auth,
    mixvalues: state.mixvalues,
 });
 
 export default connect(mapStateToProps, {
    loginUser,
    changePage,
-   clearProfile,
 })(Login);

@@ -4,23 +4,20 @@ import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
 
 import {
-   POST_LOADED,
    POSTS_LOADED,
    POST_ADDED,
    POST_DELETED,
-   LIKES_UPDATED,
    COMMENT_ADDED,
    COMMENT_DELETED,
+   LIKES_UPDATED,
    POSTS_CLEARED,
-   POST_CLEARED,
    POST_ERROR,
 } from "./types";
 
 //Get all posts
 export const loadPosts = (class_id) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
    try {
-      const res = await axios.get(`/api/posts/class/${class_id}`);
+      const res = await axios.get(`/api/post/class/${class_id}`);
       dispatch({
          type: POSTS_LOADED,
          payload: res.data,
@@ -35,122 +32,21 @@ export const loadPosts = (class_id) => async (dispatch) => {
          },
       });
    }
-
-   dispatch(updateLoadingSpinner(false));
-};
-
-//Get a post by ID
-export const loadPostById = (post_id) => async (dispatch) => {
-   try {
-      const res = await axios.get(`/api/posts/${post_id}`);
-
-      dispatch({
-         type: POST_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      dispatch({
-         type: POST_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-   }
-};
-
-//Add like
-export const addLike = (post_id) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-   try {
-      const res = await axios.put(`/api/posts/like/${post_id}`);
-
-      dispatch({
-         type: LIKES_UPDATED,
-         payload: { post_id, likes: res.data },
-      });
-   } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: POST_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      window.scrollTo(0, 0);
-   }
-   dispatch(updateLoadingSpinner(false));
-};
-
-//Remove like
-export const removeLike = (post_id) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-   try {
-      const res = await axios.put(`/api/posts/unlike/${post_id}`);
-
-      dispatch({
-         type: LIKES_UPDATED,
-         payload: { post_id, likes: res.data },
-      });
-   } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: POST_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      window.scrollTo(0, 0);
-   }
-   dispatch(updateLoadingSpinner(false));
-};
-
-//Delete a post
-export const deletePost = (post_id) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-
-   try {
-      await axios.delete(`/api/posts/${post_id}`);
-
-      dispatch({
-         type: POST_DELETED,
-         payload: post_id,
-      });
-
-      dispatch(setAlert("Posteo Eliminado", "success", "2"));
-   } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: POST_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-   }
-
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
 };
 
 //Add a post
 export const addPost = (formData, class_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
+   let post = {};
+   for (const prop in formData) {
+      if (formData[prop] !== "" && formData[prop] !== 0) {
+         post[prop] = formData[prop];
+      }
+   }
+
    try {
-      const res = await axios.post(`/api/posts/${class_id}`, formData);
+      const res = await axios.post(`/api/post/${class_id}`, post);
 
       dispatch({
          type: POST_ADDED,
@@ -186,6 +82,38 @@ export const addPost = (formData, class_id) => async (dispatch) => {
    window.scrollTo(0, 0);
    dispatch(updateLoadingSpinner(false));
 };
+
+//Delete a post
+export const deletePost = (post_id) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
+   try {
+      await axios.delete(`/api/post/${post_id}`);
+
+      dispatch({
+         type: POST_DELETED,
+         payload: post_id,
+      });
+
+      dispatch(setAlert("Posteo Eliminado", "success", "2"));
+   } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
+      dispatch({
+         type: POST_ERROR,
+         payload: {
+            type,
+            status: err.response.status,
+            msg,
+         },
+      });
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+   }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
+};
+
 // Add comment
 export const addComment = (post_id, formData, screen) => async (dispatch) => {
    //screen is to see where to go to see the alert
@@ -193,8 +121,15 @@ export const addComment = (post_id, formData, screen) => async (dispatch) => {
 
    dispatch(updateLoadingSpinner(true));
 
+   let comment = {};
+   for (const prop in formData) {
+      if (formData[prop] !== "" && formData[prop] !== 0) {
+         comment[prop] = formData[prop];
+      }
+   }
+
    try {
-      const res = await axios.post(`/api/posts/comment/${post_id}`, formData);
+      const res = await axios.post(`/api/post/comment/${post_id}`, comment);
 
       dispatch({
          type: COMMENT_ADDED,
@@ -223,7 +158,7 @@ export const addComment = (post_id, formData, screen) => async (dispatch) => {
                msg,
             },
          });
-         dispatch(setAlert(msg ? msg : type, "danger", "2"));
+         dispatch(setAlert(msg ? msg : type, "danger", post_id));
       }
    }
 
@@ -238,7 +173,7 @@ export const deleteComment = (post_id, comment_id, screen) => async (
    dispatch(updateLoadingSpinner(true));
    try {
       const res = await axios.delete(
-         `/api/posts/comment/${post_id}/${comment_id}`
+         `/api/post/comment/${post_id}/${comment_id}`
       );
 
       dispatch({
@@ -258,15 +193,63 @@ export const deleteComment = (post_id, comment_id, screen) => async (
             msg,
          },
       });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", post_id));
    }
 
    window.scrollBy(0, screen);
    dispatch(updateLoadingSpinner(false));
 };
 
-export const clearPost = () => (dispatch) => {
-   dispatch({ type: POST_CLEARED });
+//Add like
+export const addLike = (post_id) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+   try {
+      const res = await axios.put(`/api/post/like/${post_id}`);
+
+      dispatch({
+         type: LIKES_UPDATED,
+         payload: { post_id, likes: res.data },
+      });
+   } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
+      dispatch({
+         type: POST_ERROR,
+         payload: {
+            type,
+            status: err.response.status,
+            msg,
+         },
+      });
+      dispatch(setAlert(msg ? msg : type, "danger", post_id));
+   }
+   dispatch(updateLoadingSpinner(false));
+};
+
+//Remove like
+export const removeLike = (post_id) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+   try {
+      const res = await axios.put(`/api/post/unlike/${post_id}`);
+
+      dispatch({
+         type: LIKES_UPDATED,
+         payload: { post_id, likes: res.data },
+      });
+   } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
+      dispatch({
+         type: POST_ERROR,
+         payload: {
+            type,
+            status: err.response.status,
+            msg,
+         },
+      });
+      dispatch(setAlert(msg ? msg : type, "danger", post_id));
+   }
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const clearPosts = () => (dispatch) => {

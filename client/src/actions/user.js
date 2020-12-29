@@ -3,11 +3,7 @@ import { saveAs } from "file-saver";
 import axios from "axios";
 
 import { setAlert } from "./alert";
-import {
-   updateLoadingSpinner,
-   clearValues,
-   updatePreviousPage,
-} from "./mixvalues";
+import { updateLoadingSpinner } from "./mixvalues";
 import { logOutAndToggle } from "./navbar";
 import { clearInstallments } from "./installment";
 import { clearClass } from "./class";
@@ -18,7 +14,9 @@ import {
    USER_LOADED,
    USERS_LOADED,
    USERSBK_LOADED,
-   USERS_TYPE_CHANGED,
+   STUDENTNUMBER_LOADED,
+   ACTIVEUSERS_LOADED,
+   USERSTYPE_CHANGED,
    REGISTER_SUCCESS,
    USER_UPDATED,
    SEARCH_CLEARED,
@@ -27,6 +25,7 @@ import {
    USERFROMLIST_REMOVED,
    USERS_CLEARED,
    USER_CLEARED,
+   OTHERVALUES_CLEARED,
    USER_ERROR,
    USERS_ERROR,
    USERSBK_ERROR,
@@ -34,7 +33,6 @@ import {
 
 //Load User
 export const loadUser = (user_id) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
    try {
       const res = await axios.get(`/api/user/${user_id}`);
       dispatch({
@@ -54,25 +52,56 @@ export const loadUser = (user_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-//Load Relatives
-export const loadRelatives = (user_id) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
+export const getStudentNumber = () => async (dispatch) => {
    try {
-      let res = await axios.get(`/api/user/tutor/${user_id}`);
-
+      let res = await axios.get("/api/user/register/number");
       dispatch({
-         type: USERS_LOADED,
+         type: STUDENTNUMBER_LOADED,
          payload: res.data,
       });
    } catch (err) {
       dispatch({
-         type: USERS_ERROR,
+         type: USER_ERROR,
          payload: {
             type: err.response.statusText,
             status: err.response.status,
             msg: err.response.data.msg,
          },
       });
+      window.scroll(0, 0);
+   }
+};
+
+export const getActiveUsers = (type) => async (dispatch) => {
+   try {
+      let res;
+      let payload = {};
+
+      if (type === "Alumno") {
+         res = await axios.get("/api/user?active=true&type=Alumno");
+         payload.type = "activeStudents";
+         payload.info = res.data.length;
+      } else {
+         res = await axios.get("/api/user?active=true&type=Profesor");
+         payload.type = "activeTeachers";
+         payload.info = res.data.length;
+      }
+
+      dispatch({
+         type: ACTIVEUSERS_LOADED,
+         payload,
+      });
+   } catch (err) {
+      dispatch({
+         type: USER_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+            userType: type === "Alumno" ? "activeStudents" : "activeTeachers",
+         },
+      });
+      window.scroll(0, 0);
    }
 };
 
@@ -107,7 +136,7 @@ export const loadUsers = (
 
       if (search) {
          dispatch({
-            type: USERS_TYPE_CHANGED,
+            type: USERSTYPE_CHANGED,
             payload: filterData.type,
          });
       }
@@ -129,6 +158,27 @@ export const loadUsers = (
    dispatch(updateLoadingSpinner(false));
 };
 
+//Load Relatives
+export const loadRelatives = (user_id) => async (dispatch) => {
+   try {
+      let res = await axios.get(`/api/user/tutor/${user_id}`);
+
+      dispatch({
+         type: USERS_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      dispatch({
+         type: USERS_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+   }
+};
+
 //Update or register a user
 export const registerUser = (formData, history, user_id) => async (
    dispatch
@@ -137,7 +187,7 @@ export const registerUser = (formData, history, user_id) => async (
 
    let user = {};
    for (const prop in formData) {
-      if (formData[prop] !== "" && formData[prop] !== 0) {
+      if (formData[prop] !== "") {
          user[prop] = formData[prop];
       }
    }
@@ -164,9 +214,9 @@ export const registerUser = (formData, history, user_id) => async (
          )
       );
 
-      dispatch(updatePreviousPage("twice"));
       dispatch(clearUser());
-      dispatch(clearValues());
+      dispatch(clearClass());
+      dispatch(clearOtherValues("activeStudents"));
 
       history.push(`/dashboard/${user_id ? user_id : res.data}`);
    } catch (err) {
@@ -192,9 +242,9 @@ export const registerUser = (formData, history, user_id) => async (
          });
          dispatch(setAlert(msg ? msg : type, "danger", "2"));
       }
-      dispatch(updateLoadingSpinner(false));
    }
 
+   dispatch(updateLoadingSpinner(false));
    window.scrollTo(0, 0);
 };
 
@@ -206,7 +256,7 @@ export const updateCredentials = (formData, history, user_id) => async (
 
    let user = {};
    for (const prop in formData) {
-      if (formData[prop]) user[prop] = formData[prop];
+      if (formData[prop] !== "") user[prop] = formData[prop];
    }
 
    try {
@@ -236,6 +286,20 @@ export const updateCredentials = (formData, history, user_id) => async (
    window.scrollTo(0, 0);
 };
 
+export const addUserToList = (user) => (dispatch) => {
+   dispatch({
+      type: USERFORLIST_ADDED,
+      payload: user,
+   });
+};
+
+export const removeUserFromList = (user_id) => (dispatch) => {
+   dispatch({
+      type: USERFROMLIST_REMOVED,
+      payload: user_id,
+   });
+};
+
 export const deleteUser = (user, history, userLogged_id) => async (
    dispatch
 ) => {
@@ -251,7 +315,8 @@ export const deleteUser = (user, history, userLogged_id) => async (
          type: USER_DELETED,
       });
       dispatch(setAlert("Usuario Eliminado", "success", "1", 7000));
-      dispatch(clearValues());
+
+      dispatch(clearOtherValues("activeStudents"));
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;
@@ -308,20 +373,6 @@ export const userPDF = (users, usersType) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const addUserToList = (user) => (dispatch) => {
-   dispatch({
-      type: USERFORLIST_ADDED,
-      payload: user,
-   });
-};
-
-export const removeUserFromList = (user_id) => (dispatch) => {
-   dispatch({
-      type: USERFROMLIST_REMOVED,
-      payload: user_id,
-   });
-};
-
 export const clearProfile = () => (dispatch) => {
    dispatch({
       type: USER_CLEARED,
@@ -347,5 +398,12 @@ export const clearUsers = () => (dispatch) => {
 export const clearSearch = () => (dispatch) => {
    dispatch({
       type: SEARCH_CLEARED,
+   });
+};
+
+export const clearOtherValues = (type) => (dispatch) => {
+   dispatch({
+      type: OTHERVALUES_CLEARED,
+      payload: type,
    });
 };

@@ -6,15 +6,17 @@ import {
    deleteNeighbourhood,
    updateNeighbourhoods,
 } from "../../../../../../../actions/neighbourhood";
+import { setAlert } from "../../../../../../../actions/alert";
 
 import Confirm from "../../../../../../modal/Confirm";
 import EditButtons from "../../../sharedComp/EditButtons";
 
 const NeighbourhoodTab = ({
-   neighbourhoods: { neighbourhoods, loading, error },
    towns,
+   neighbourhoods: { neighbourhoods, loading, error },
    updateNeighbourhoods,
    deleteNeighbourhood,
+   setAlert,
 }) => {
    const [newNB, setNewNB] = useState([]);
    const [otherValues, setOtherValues] = useState({
@@ -49,7 +51,13 @@ const NeighbourhoodTab = ({
    };
 
    const deleteNeighbourhoodConfirm = () => {
-      deleteNeighbourhood(toDelete._id);
+      if (toDelete._id === "") {
+         setAlert(
+            "El barrio no se ha guardado todavía. Vuelva a recargar la página y desaparecerá.",
+            "danger",
+            "2"
+         );
+      } else deleteNeighbourhood(toDelete._id);
    };
 
    const saveNeighbourhoods = () => {
@@ -116,8 +124,7 @@ const NeighbourhoodTab = ({
                               <option value={0}>
                                  *Seleccione la localidad a la que pertenece
                               </option>
-                              {!towns.loading &&
-                                 towns.towns.length > 0 &&
+                              {towns.towns.length > 0 &&
                                  towns.towns.map((town, index) => (
                                     <option key={index} value={town._id}>
                                        {town.name}
@@ -156,6 +163,7 @@ NeighbourhoodTab.propTypes = {
    towns: PropTypes.object.isRequired,
    updateNeighbourhoods: PropTypes.func.isRequired,
    deleteNeighbourhood: PropTypes.func.isRequired,
+   setAlert: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -166,4 +174,5 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    updateNeighbourhoods,
    deleteNeighbourhood,
+   setAlert,
 })(NeighbourhoodTab);

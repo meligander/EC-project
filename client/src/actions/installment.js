@@ -7,31 +7,27 @@ import { updateLoadingSpinner, updatePreviousPage } from "./mixvalues";
 
 import {
    INSTALLMENT_LOADED,
+   TOTALDEBT_LOADED,
    INSTALLMENTS_LOADED,
-   USER_INSTALLMENTS_LOADED,
+   STUDENTINSTALLMENTS_LOADED,
    INSTALLMENT_UPDATED,
    INSTALLMENT_REGISTERED,
    INSTALLMENT_DELETED,
-   INVOICE_DETAIL_ADDED,
-   INVOICE_DETAIL_REMOVED,
-   EXPIRED_INSTALLMENTS_UPDATED,
+   INVOICEDETAIL_ADDED,
+   INVOICEDETAIL_REMOVED,
+   EXPIREDINSTALLMENTS_UPDATED,
    INSTALLMENT_CLEARED,
+   TOTALDEBT_CLEARED,
    INSTALLMENTS_CLEARED,
-   USER_INSTALLMENTS_CLEARED,
+   STUDENTINSTALLMENTS_CLEARED,
    INSTALLMENTS_ERROR,
 } from "./types";
 
-export const loadStudentInstallments = (user_id, admin = false) => async (
-   dispatch
-) => {
-   //admin: if is for the dashboard, dont start it... only when is the admin loading the installments
-   if (admin) dispatch(updateLoadingSpinner(true));
+export const loadInstallment = (installment_id) => async (dispatch) => {
    try {
-      const res = await axios.get(
-         `/api/installment/student/${user_id}/${admin}`
-      );
+      const res = await axios.get(`/api/installment/${installment_id}`);
       dispatch({
-         type: USER_INSTALLMENTS_LOADED,
+         type: INSTALLMENT_LOADED,
          payload: res.data,
       });
    } catch (err) {
@@ -44,7 +40,53 @@ export const loadStudentInstallments = (user_id, admin = false) => async (
          },
       });
    }
-   dispatch(updateLoadingSpinner(false));
+};
+
+export const getTotalDebt = () => async (dispatch) => {
+   try {
+      let res = await axios.get("/api/installment/month/debts");
+
+      dispatch({
+         type: TOTALDEBT_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      dispatch({
+         type: INSTALLMENTS_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      window.scroll(0, 0);
+   }
+};
+
+export const loadStudentInstallments = (user_id, admin = false) => async (
+   dispatch
+) => {
+   //admin: if is for the dashboard, dont do it... only when is the admin loading the installments
+   if (admin) dispatch(updateLoadingSpinner(true));
+   try {
+      const res = await axios.get(
+         `/api/installment/student/${user_id}/${admin}`
+      );
+      dispatch({
+         type: STUDENTINSTALLMENTS_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      dispatch({
+         type: INSTALLMENTS_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+   }
+   if (admin) dispatch(updateLoadingSpinner(false));
 };
 
 export const loadInstallments = (filterData) => async (dispatch) => {
@@ -83,29 +125,10 @@ export const loadInstallments = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const loadInstallment = (installment_id) => async (dispatch) => {
-   try {
-      const res = await axios.get(`/api/installment/${installment_id}`);
-      dispatch({
-         type: INSTALLMENT_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      dispatch({
-         type: INSTALLMENTS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-   }
-};
-
 export const addInstallment = (installment) => (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    dispatch({
-      type: INVOICE_DETAIL_ADDED,
+      type: INVOICEDETAIL_ADDED,
       payload: installment,
    });
    dispatch(updateLoadingSpinner(false));
@@ -116,13 +139,20 @@ export const updateIntallment = (formData, history, user_id, inst_id) => async (
 ) => {
    dispatch(updateLoadingSpinner(true));
 
+   let installment = {};
+   for (const prop in formData) {
+      if (formData[prop] !== "" && formData[prop] !== 0) {
+         installment[prop] = formData[prop];
+      }
+   }
+
    try {
       let res;
       if (!inst_id) {
-         res = await axios.post("/api/installment", formData);
+         res = await axios.post("/api/installment", installment);
       } else {
          //Update installment
-         res = await axios.put(`/api/installment/${inst_id}`, formData);
+         res = await axios.put(`/api/installment/${inst_id}`, installment);
       }
       dispatch({
          type: inst_id ? INSTALLMENT_UPDATED : INSTALLMENT_REGISTERED,
@@ -162,6 +192,29 @@ export const updateIntallment = (formData, history, user_id, inst_id) => async (
    dispatch(updateLoadingSpinner(false));
 };
 
+export const updateExpiredIntallments = () => async (dispatch) => {
+   try {
+      await axios.put("/api/installment");
+
+      dispatch({
+         type: EXPIREDINSTALLMENTS_UPDATED,
+      });
+   } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
+      dispatch({
+         type: INSTALLMENTS_ERROR,
+         payload: {
+            type,
+            status: err.response.status,
+            msg,
+         },
+      });
+      dispatch(setAlert(msg ? msg : type, "danger", "1", 7000));
+      window.scroll(0, 0);
+   }
+};
+
 export const deleteInstallment = (inst_id, history, user_id) => async (
    dispatch
 ) => {
@@ -199,34 +252,11 @@ export const deleteInstallment = (inst_id, history, user_id) => async (
 export const removeInstallmentFromList = (inst_id) => async (dispatch) => {
    try {
       dispatch({
-         type: INVOICE_DETAIL_REMOVED,
+         type: INVOICEDETAIL_REMOVED,
          payload: inst_id,
       });
 
       dispatch(setAlert("Cuota eliminada", "success", "5"));
-   } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: INSTALLMENTS_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      window.scroll(0, 0);
-   }
-};
-
-export const updateExpiredIntallments = () => async (dispatch) => {
-   try {
-      await axios.put("/api/installment");
-
-      dispatch({
-         type: EXPIRED_INSTALLMENTS_UPDATED,
-      });
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;
@@ -278,6 +308,18 @@ export const installmentsPDF = (installments) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
+export const clearInstallment = () => (dispatch) => {
+   dispatch({
+      type: INSTALLMENT_CLEARED,
+   });
+};
+
+export const clearTotalDebt = () => (dispatch) => {
+   dispatch({
+      type: TOTALDEBT_CLEARED,
+   });
+};
+
 export const clearInstallments = () => (dispatch) => {
    dispatch({
       type: INSTALLMENTS_CLEARED,
@@ -286,12 +328,6 @@ export const clearInstallments = () => (dispatch) => {
 
 export const clearUserInstallments = () => (dispatch) => {
    dispatch({
-      type: USER_INSTALLMENTS_CLEARED,
-   });
-};
-
-export const clearInstallment = () => (dispatch) => {
-   dispatch({
-      type: INSTALLMENT_CLEARED,
+      type: STUDENTINSTALLMENTS_CLEARED,
    });
 };

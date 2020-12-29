@@ -10,7 +10,7 @@ const Attendance = require("../../models/Attendance");
 const Enrollment = require("../../models/Enrollment");
 
 //@route    GET api/attendance/:class_id
-//@desc     Get all attendances
+//@desc     Get all attendances for a class
 //@access   Private
 router.get("/:class_id", [auth], async (req, res) => {
    try {
@@ -130,16 +130,14 @@ router.post("/period", auth, async (req, res) => {
          let periodAbsence = [];
          let allAbsence = 0;
 
-         if (enrollment.periodAbsence.length === 0)
+         if (enrollment.classroom.periodAbsence.length === 0)
             periodAbsence = new Array(4).fill(0);
-         else periodAbsence = [...enrollment.periodAbsence];
-
-         periodAbsence[period - 1] = parseFloat(count);
+         else periodAbsence = [...enrollment.classroom.periodAbsence];
+         periodAbsence[period - 1] = parseInt(count);
 
          for (let y = 0; y < 4; y++) {
             allAbsence += periodAbsence[y];
          }
-
          await Enrollment.findOneAndUpdate(
             { _id: enrollment._id },
             {
@@ -447,28 +445,22 @@ async function buildTable(attendances, class_id, res) {
 
             let added = false;
 
-            if (studentsArray[studentNumber]) {
-               if (
-                  studentsArray[studentNumber][0].student._id.toString() ===
+            if (
+               studentsArray[studentNumber] &&
+               studentsArray[studentNumber][0].student._id.toString() ===
                   users[z].student._id.toString()
-               ) {
-                  for (
-                     let y = 0;
-                     y < studentsArray[studentNumber].length;
-                     y++
+            ) {
+               for (let y = 0; y < studentsArray[studentNumber].length; y++) {
+                  if (
+                     studentsArray[studentNumber][y].date.toString() ===
+                     new Date(index).toString()
                   ) {
-                     if (
-                        studentsArray[studentNumber][y].date.toString() ===
-                        new Date(index).toString()
-                     ) {
-                        row[rowNumber].inassistance = true;
-                        row[rowNumber]._id =
-                           studentsArray[studentNumber][y]._id;
+                     row[rowNumber].inassistance = true;
+                     row[rowNumber]._id = studentsArray[studentNumber][y]._id;
 
-                        count++;
-                        added = true;
-                        break;
-                     }
+                     count++;
+                     added = true;
+                     break;
                   }
                }
             }
@@ -478,13 +470,13 @@ async function buildTable(attendances, class_id, res) {
             rowNumber++;
          }
 
-         if (users[z] && studentsArray[studentNumber]) {
-            if (
-               users[z].student._id.toString() ===
+         if (
+            users[z] &&
+            studentsArray[studentNumber] &&
+            users[z].student._id.toString() ===
                studentsArray[studentNumber][0].student._id.toString()
-            ) {
-               studentNumber++;
-            }
+         ) {
+            studentNumber++;
          }
          period.push(row);
       }

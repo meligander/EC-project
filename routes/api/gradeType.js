@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const auth = require("../../middleware/auth");
 const adminAuth = require("../../middleware/adminAuth");
-const { check, validationResult } = require("express-validator");
 
 const GradeType = require("../../models/GradeType");
 const Category = require("../../models/Category");
@@ -50,37 +49,6 @@ router.get("/category/:id", [auth], async (req, res) => {
       return res.status(500).send("Server Error");
    }
 });
-
-//@route    POST api/grade-type/one
-//@desc     Add a grade type to the list of grades in a class
-//@access   Private
-router.post(
-   "/one",
-   [auth, adminAuth, check("name", "El nombre es necesario").not().isEmpty()],
-   async (req, res) => {
-      const { name, categories } = req.body;
-
-      let errors = [];
-      const errorsResult = validationResult(req);
-      if (!errorsResult.isEmpty()) {
-         errors = errorsResult.array();
-         return res.status(400).json({ errors });
-      }
-
-      try {
-         let data = { name, categories };
-
-         const gradetype = new GradeType(data);
-
-         await gradetype.save();
-
-         res.json(gradetype);
-      } catch (err) {
-         console.error(err.message);
-         return res.status(500).send("Server Error");
-      }
-   }
-);
 
 //@route    POST api/grade-type
 //@desc     Update all grade types
@@ -139,7 +107,7 @@ router.post("/", [auth, adminAuth], async (req, res) => {
          newGradeTypes.push(gType);
       }
 
-      newGradeTypes = buildTable(newGradeTypes);
+      newGradeTypes = await buildTable(newGradeTypes);
 
       res.json(newGradeTypes);
    } catch (err) {
@@ -173,25 +141,7 @@ async function buildTable(gradetypes) {
       res.status(500).send("Server error");
    }
 
-   const header = [
-      "K",
-      "IC",
-      "IB",
-      "IA",
-      "P",
-      "J",
-      "1°",
-      "2°",
-      "3°",
-      "4°",
-      "5°",
-      "6°",
-      "C",
-      "Pf",
-   ];
-
    let rows = [];
-   let newRow = [];
 
    for (let x = 0; x < gradetypes.length + 1; x++) {
       let row = new Array(categories.length);
@@ -222,9 +172,8 @@ async function buildTable(gradetypes) {
       }
 
       if (x !== gradetypes.length) rows.push(row);
-      else newRow = row;
    }
-   return { header, rows, newRow };
+   return rows;
 }
 
 module.exports = router;

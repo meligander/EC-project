@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link, withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
@@ -17,7 +17,7 @@ import "./style.scss";
 
 const IncomeExpenceTab = ({
    auth: { userLogged },
-   registers: { register, loading },
+   registers: { register },
    expences,
    users,
    clearExpenceTypes,
@@ -29,6 +29,7 @@ const IncomeExpenceTab = ({
    const [otherValues, setOtherValues] = useState({
       show: false,
       toggleModal: false,
+      employeePaymentID: "",
    });
 
    const [formData, setFormData] = useState({
@@ -45,7 +46,20 @@ const IncomeExpenceTab = ({
 
    const { expencetype, value, description, hours, teacher } = formData;
 
-   const { show, toggleModal } = otherValues;
+   const { show, toggleModal, employeePaymentID } = otherValues;
+
+   useEffect(() => {
+      if (!expences.loadingET) {
+         for (let x = 0; x < expences.expencetypes.length; x++) {
+            if (expences.expencetypes[x].name === "Pago a Empleados") {
+               setOtherValues((prev) => ({
+                  ...prev,
+                  employeePaymentID: expences.expencetypes[x]._id,
+               }));
+            }
+         }
+      }
+   }, [expences.loadingET, expences.expencetypes]);
 
    const onChange = (e) => {
       setFormData({
@@ -54,7 +68,7 @@ const IncomeExpenceTab = ({
       });
       if (
          e.target.name === "expencetype" &&
-         e.target.value === "5ebb3804958b15468012db7a"
+         e.target.value === employeePaymentID
       ) {
          setOtherValues({
             ...otherValues,
@@ -63,7 +77,7 @@ const IncomeExpenceTab = ({
          loadUsers({ active: true, type: "Team" });
       } else {
          if (
-            e.target.value !== "5ebb3804958b15468012db7a" &&
+            e.target.value !== employeePaymentID &&
             e.target.name === "expencetype"
          )
             setOtherValues({
@@ -134,11 +148,17 @@ const IncomeExpenceTab = ({
             confirm={onSubmit}
             text="¿Está seguro que desea registrar un nuevo movimiento?"
          />
+         {!register && (
+            <p className="bg-secondary paragraph mb-3 p-2">
+               Debe ingresar dinero en la caja para registrar un nuevo
+               Movimiento
+            </p>
+         )}
          <table>
             <tbody>
                <tr>
                   <td>Dinero en Caja</td>
-                  <td>${!loading && register.registermoney}</td>
+                  <td>${register ? register.registermoney : 0}</td>
                </tr>
                <tr>
                   <td>Tipo de Gasto</td>
@@ -149,7 +169,7 @@ const IncomeExpenceTab = ({
                         onChange={onChange}
                         id="select"
                      >
-                        <option value="0">* Tipo de Movimiento</option>
+                        <option value="">* Tipo de Movimiento</option>
                         {!expences.loadingET &&
                            expences.expencetypes.map((expty) => (
                               <option key={expty._id} value={expty._id}>
@@ -230,9 +250,10 @@ const IncomeExpenceTab = ({
                type="submit"
                onClick={(e) => {
                   e.preventDefault();
-                  setToggle();
+                  if (register) setToggle();
                }}
-               className="btn btn-primary"
+               className={`btn ${register ? "btn-primary" : "btn-black"}`}
+               disabled={!register}
             >
                <i className="far fa-save"></i>
                <span className="hide-sm"> Guardar</span>

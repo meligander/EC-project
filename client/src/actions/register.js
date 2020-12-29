@@ -8,7 +8,9 @@ import { updateLoadingSpinner } from "./mixvalues";
 import {
    REGISTER_LOADED,
    REGISTERS_LOADED,
+   NEWREGISTER_ADDED,
    REGISTER_CLOSED,
+   NEWREGISTER_ALLOWED,
    REGISTER_DELETED,
    REGISTERS_CLEARED,
    REGISTER_ERROR,
@@ -66,6 +68,56 @@ export const loadRegisters = (filterData) => async (dispatch) => {
       window.scrollTo(0, 0);
    }
 
+   dispatch(updateLoadingSpinner(false));
+};
+
+export const createRegister = (formData, user_id, history) => async (
+   dispatch
+) => {
+   dispatch(updateLoadingSpinner(true));
+
+   let register = {};
+   for (const prop in formData) {
+      if (formData[prop] !== "" && formData[prop] !== 0) {
+         register[prop] = formData[prop];
+      }
+   }
+   try {
+      await axios.post("/api/register", register);
+
+      dispatch({ type: NEWREGISTER_ADDED });
+
+      history.push(`/dashboard/${user_id}`);
+
+      dispatch(
+         setAlert("Caja Abierta para Transacciones", "success", "1", 7000)
+      );
+   } catch (err) {
+      if (err.response.data.errors) {
+         const errors = err.response.data.errors;
+         errors.forEach((error) => {
+            dispatch(setAlert(error.msg, "danger", "2"));
+         });
+         dispatch({
+            type: REGISTER_ERROR,
+            payload: errors,
+         });
+      } else {
+         const msg = err.response.data.msg;
+         const type = err.response.statusText;
+         dispatch({
+            type: REGISTER_ERROR,
+            payload: {
+               type,
+               status: err.response.status,
+               msg,
+            },
+         });
+         dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      }
+   }
+
+   window.scroll(0, 0);
    dispatch(updateLoadingSpinner(false));
 };
 
@@ -171,6 +223,10 @@ export const registerPDF = (registers) => async (dispatch) => {
 
    window.scrollTo(0, 0);
    dispatch(updateLoadingSpinner(false));
+};
+
+export const allowNewRegister = () => (dispatch) => {
+   dispatch({ type: NEWREGISTER_ALLOWED });
 };
 
 export const clearRegisters = () => (dispatch) => {

@@ -7,11 +7,9 @@ import PropTypes from "prop-types";
 import {
    loadInstallments,
    installmentsPDF,
-} from "../../../../../actions/installment";
-import {
    getTotalDebt,
-   updatePageNumber,
-} from "../../../../../actions/mixvalues";
+} from "../../../../../actions/installment";
+import { updatePageNumber } from "../../../../../actions/mixvalues";
 import { clearProfile } from "../../../../../actions/user";
 
 import Loading from "../../../../modal/Loading";
@@ -142,8 +140,7 @@ const InstallmentList = ({
                         </tr>
                      </thead>
                      <tbody>
-                        {!loadingInstallments &&
-                           installments.length > 0 &&
+                        {installments.length > 0 &&
                            installments.map(
                               (installment, i) =>
                                  i >= page * 10 &&

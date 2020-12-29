@@ -4,17 +4,61 @@ import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
 import { clearRegisters } from "./register";
-import { updateLoadingSpinner, clearValues } from "./mixvalues";
+import { clearTotalDebt } from "./installment";
+import { updateLoadingSpinner } from "./mixvalues";
 
 import {
    INVOICE_LOADED,
    INVOICES_LOADED,
+   INVOICENUMBER_LOADED,
    INVOICE_REGISTERED,
    INVOICE_DELETED,
    INVOICE_CLEARED,
    INVOICES_CLEARED,
    INVOICE_ERROR,
+   INVOICENUMBER_CLEARED,
 } from "./types";
+
+export const loadInvoice = (invoice_id) => async (dispatch) => {
+   try {
+      const res = await axios.get(`/api/invoice/${invoice_id}`);
+
+      dispatch({
+         type: INVOICE_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      dispatch({
+         type: INVOICE_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+   }
+};
+
+export const getInvoiceNumber = () => async (dispatch) => {
+   try {
+      let res = await axios.get("/api/invoice/last/invoiceid");
+
+      dispatch({
+         type: INVOICENUMBER_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      dispatch({
+         type: INVOICE_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      window.scroll(0, 0);
+   }
+};
 
 export const loadInvoices = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
@@ -51,58 +95,6 @@ export const loadInvoices = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const loadInvoice = (invoice_id) => async (dispatch) => {
-   try {
-      const res = await axios.get(`/api/invoice/${invoice_id}`);
-
-      dispatch({
-         type: INVOICE_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      dispatch({
-         type: INVOICE_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-   }
-};
-
-export const deleteInvoice = (invoice_id) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-
-   try {
-      await axios.delete(`/api/invoice/${invoice_id}`);
-
-      dispatch({
-         type: INVOICE_DELETED,
-         payload: invoice_id,
-      });
-
-      dispatch(clearValues());
-      dispatch(clearRegisters());
-      dispatch(setAlert("Factura Eliminada", "success", "2"));
-   } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: INVOICE_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-   }
-
-   window.scroll(0, 0);
-   dispatch(updateLoadingSpinner(false));
-};
-
 export const registerInvoice = (
    formData,
    remaining,
@@ -111,8 +103,15 @@ export const registerInvoice = (
 ) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
+   let invoice = {};
+   for (const prop in formData) {
+      if (formData[prop] !== "" && formData[prop] !== 0) {
+         invoice[prop] = formData[prop];
+      }
+   }
+
    try {
-      await axios.post("/api/invoice", formData);
+      await axios.post("/api/invoice", invoice);
 
       dispatch({
          type: INVOICE_REGISTERED,
@@ -120,7 +119,7 @@ export const registerInvoice = (
 
       dispatch(invoicePDF(formData, remaining));
 
-      dispatch(clearValues());
+      dispatch(clearTotalDebt());
       dispatch(clearRegisters());
 
       dispatch(setAlert("Factura Registrada", "success", "1", 7000));
@@ -152,6 +151,39 @@ export const registerInvoice = (
 
    dispatch(updateLoadingSpinner(false));
    window.scrollTo(0, 0);
+};
+
+export const deleteInvoice = (invoice_id) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
+   try {
+      await axios.delete(`/api/invoice/${invoice_id}`);
+
+      dispatch({
+         type: INVOICE_DELETED,
+         payload: invoice_id,
+      });
+
+      dispatch(clearTotalDebt());
+      dispatch(clearRegisters());
+
+      dispatch(setAlert("Factura Eliminada", "success", "2"));
+   } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
+      dispatch({
+         type: INVOICE_ERROR,
+         payload: {
+            type,
+            status: err.response.status,
+            msg,
+         },
+      });
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+   }
+
+   window.scroll(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const invoicesPDF = (invoices) => async (dispatch) => {
@@ -236,6 +268,10 @@ export const invoicePDF = (invoice, remaining) => async (dispatch) => {
 
 export const clearInvoice = () => (dispatch) => {
    dispatch({ type: INVOICE_CLEARED });
+};
+
+export const clearInvoiceNumber = () => (dispatch) => {
+   dispatch({ type: INVOICENUMBER_CLEARED });
 };
 
 export const clearInvoices = () => (dispatch) => {

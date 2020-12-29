@@ -1,8 +1,8 @@
 import {
-   STUDENT_ATTENDANCES_LOADED,
+   STUDENTATTENDANCES_LOADED,
    ATTENDANCES_LOADED,
    ATTENDANCES_UPDATED,
-   NEW_DATE_REGISTERED,
+   NEWDATE_REGISTERED,
    DATES_DELETED,
    ATTENDANCES_CLEARED,
    ATTENDANCES_ERROR,
@@ -15,6 +15,8 @@ const initialState = {
       students: [],
       period: [],
    },
+   studentAttendances: [],
+   loadingStudentAttendances: true,
    error: {},
 };
 
@@ -22,13 +24,20 @@ export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
       case ATTENDANCES_LOADED:
-      case STUDENT_ATTENDANCES_LOADED:
-      case NEW_DATE_REGISTERED:
+      case NEWDATE_REGISTERED:
       case DATES_DELETED:
          return {
             ...state,
             attendances: payload,
             loading: false,
+            error: {},
+         };
+
+      case STUDENTATTENDANCES_LOADED:
+         return {
+            ...state,
+            studentAttendances: payload,
+            loadingStudentAttendances: false,
             error: {},
          };
       case ATTENDANCES_UPDATED:
@@ -38,6 +47,8 @@ export default function (state = initialState, action) {
       case ATTENDANCES_ERROR:
          return {
             ...state,
+            studentAttendances: [],
+            loadingStudentAttendances: false,
             error: payload,
          };
       default:

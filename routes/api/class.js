@@ -100,14 +100,20 @@ router.get("/user/:id", auth, async (req, res) => {
    try {
       const date = new Date();
 
-      let enroll = await Enrollment.findOne({ student: req.params.id });
-
-      let classinfo = await Class.findOne({
-         _id: enroll.classroom._id,
+      let enroll = await Enrollment.findOne({
+         student: req.params.id,
          year: date.getFullYear(),
-      })
-         .populate("category", ["name"])
-         .populate("teacher", ["name", "lastname"]);
+      });
+
+      let classinfo;
+      if (enroll) {
+         classinfo = await Class.findOne({
+            _id: enroll.classroom._id,
+            year: date.getFullYear(),
+         })
+            .populate("category", ["name"])
+            .populate("teacher", ["name", "lastname"]);
+      }
 
       if (!classinfo) {
          return res

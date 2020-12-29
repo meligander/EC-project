@@ -11,6 +11,26 @@ import {
    NEIGHBOURHOODS_ERROR,
 } from "./types";
 
+export const loadNeighbourhoods = () => async (dispatch) => {
+   try {
+      const res = await axios.get("/api/neighbourhood");
+      dispatch({
+         type: NEIGHBOURHOODS_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      dispatch({
+         type: NEIGHBOURHOODS_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      window.scroll(0, 0);
+   }
+};
+
 export const loadTownNeighbourhoods = (town_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
@@ -32,26 +52,6 @@ export const loadTownNeighbourhoods = (town_id) => async (dispatch) => {
    }
 
    dispatch(updateLoadingSpinner(false));
-};
-
-export const loadNeighbourhoods = () => async (dispatch) => {
-   try {
-      const res = await axios.get("/api/neighbourhood");
-      dispatch({
-         type: NEIGHBOURHOODS_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      dispatch({
-         type: NEIGHBOURHOODS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-      window.scroll(0, 0);
-   }
 };
 
 export const updateNeighbourhoods = (formData) => async (dispatch) => {

@@ -4,9 +4,13 @@ import Moment from "react-moment";
 import { withRouter, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { loadUser, deleteUser } from "../../../actions/user";
+import {
+   loadUser,
+   deleteUser,
+   clearOtherValues,
+   clearSearch,
+} from "../../../actions/user";
 import { clearTowns } from "../../../actions/town";
-import { clearStudentNumber } from "../../../actions/mixvalues";
 import { updateExpiredIntallments } from "../../../actions/installment";
 
 import Confirm from "../../modal/Confirm";
@@ -25,12 +29,12 @@ const Dashboard = ({
    history,
    auth: { userLogged },
    users: { user, loading },
-   mixvalues: { loadingSpinner },
    loadUser,
    clearTowns,
+   clearSearch,
    deleteUser,
    updateExpiredIntallments,
-   clearStudentNumber,
+   clearOtherValues,
 }) => {
    const [otherValues, setOtherValues] = useState({
       toggleModal: false,
@@ -47,9 +51,17 @@ const Dashboard = ({
    useEffect(() => {
       if (loading) {
          loadUser(match.params.id);
-         updateExpiredIntallments();
+      } else {
+         if (user._id === userLogged._id) updateExpiredIntallments();
       }
-   }, [loadUser, match.params.id, loading, user, updateExpiredIntallments]);
+   }, [
+      loadUser,
+      match.params.id,
+      loading,
+      updateExpiredIntallments,
+      user,
+      userLogged,
+   ]);
 
    const type = () => {
       switch (user.type) {
@@ -85,7 +97,6 @@ const Dashboard = ({
       <>
          {!loading ? (
             <>
-               {loadingSpinner && <Loading />}
                <Confirm
                   setToggleModal={setToggle}
                   toggleModal={toggleModal}
@@ -116,7 +127,7 @@ const Dashboard = ({
                         </p>
                      </div>
 
-                     <div className="about p-1">
+                     <div className="about p-2">
                         <div className="about-info">
                            <h4 className="heading-tertiary">
                               Info {user.type}:
@@ -124,7 +135,9 @@ const Dashboard = ({
                            {user.dni && (
                               <p>
                                  <span className="text-dark">DNI: </span>
-                                 {user.dni}
+                                 {user.dni
+                                    .toString()
+                                    .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
                               </p>
                            )}
 
@@ -166,12 +179,16 @@ const Dashboard = ({
                               </p>
                            )}
 
-                           {user.birthtown && user.birthprov && (
+                           {(user.birthtown || user.birthprov) && (
                               <p>
                                  <span className="text-dark">
                                     Lugar de Nacimiento:{" "}
                                  </span>
-                                 {user.birthtown}, {user.birthprov}
+                                 {`${user.birthtown}${
+                                    user.birthprov === "."
+                                       ? user.birthprov
+                                       : ", " + user.birthprov
+                                 }`}
                               </p>
                            )}
                            {user.type === "Profesor" && (
@@ -215,7 +232,7 @@ const Dashboard = ({
                                     </p>
                                     <p>
                                        <span className="text-dark">
-                                          Dia recargo:{" "}
+                                          Día recargo:{" "}
                                        </span>
                                        {user.chargeday}
                                     </p>
@@ -231,7 +248,8 @@ const Dashboard = ({
                                     onClick={() => {
                                        window.scroll(0, 0);
                                        clearTowns();
-                                       clearStudentNumber();
+                                       clearSearch();
+                                       clearOtherValues("studentNumber");
                                     }}
                                  >
                                     <i className="far fa-edit"></i>{" "}
@@ -264,24 +282,24 @@ const Dashboard = ({
 Dashboard.prototypes = {
    users: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
-   mixvalues: PropTypes.object.isRequired,
    loadUser: PropTypes.func.isRequired,
    deleteUser: PropTypes.func.isRequired,
    clearTowns: PropTypes.func.isRequired,
-   clearStudentNumber: PropTypes.func.isRequired,
+   clearSearch: PropTypes.func.isRequired,
+   clearOtherValues: PropTypes.func.isRequired,
    updateExpiredIntallments: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    auth: state.auth,
    users: state.users,
-   mixvalues: state.mixvalues,
 });
 
 export default connect(mapStateToProps, {
    loadUser,
-   clearTowns,
    deleteUser,
    updateExpiredIntallments,
-   clearStudentNumber,
+   clearTowns,
+   clearSearch,
+   clearOtherValues,
 })(withRouter(Dashboard));

@@ -1,11 +1,13 @@
 import {
    ENROLLMENT_LOADED,
    ENROLLMENTS_LOADED,
+   YEARENROLLMENTS_LOADED,
    ENROLLMENT_REGISTERED,
    ENROLLMENT_UPDATED,
    ENROLLMENT_DELETED,
    ENROLLMENT_CLEARED,
    ENROLLMENTS_CLEARED,
+   YEARENROLLMENTS_CLEARED,
    ENROLLMENT_ERROR,
 } from "../actions/types";
 
@@ -15,6 +17,12 @@ const initialState = {
    type: "",
    enrollment: null,
    loadingEnrollments: true,
+   otherValues: {
+      yearEnrollments: {
+         year: "",
+         length: "",
+      },
+   },
    error: {},
 };
 
@@ -35,6 +43,13 @@ export default function (state = initialState, action) {
             type: payload.type,
             loadingEnrollments: false,
             error: {},
+         };
+      case YEARENROLLMENTS_LOADED:
+         return {
+            ...state,
+            otherValues: {
+               yearEnrollments: payload,
+            },
          };
       case ENROLLMENT_REGISTERED:
          return state;
@@ -62,6 +77,16 @@ export default function (state = initialState, action) {
          };
       case ENROLLMENTS_CLEARED:
          return initialState;
+      case YEARENROLLMENTS_CLEARED:
+         return {
+            ...state,
+            otherValues: {
+               yearEnrollments: {
+                  year: "",
+                  length: "",
+               },
+            },
+         };
       case ENROLLMENT_ERROR:
          return {
             ...state,

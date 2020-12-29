@@ -7,29 +7,42 @@ const router = express.Router();
 const auth = require("../../middleware/auth");
 
 const User = require("../../models/User");
+const Enrollment = require("../../models/Enrollment");
 
 //@route    GET api/auth
 //@desc     Get user
 //@access   Private
 router.get("/", auth, async (req, res) => {
    try {
-      const user = await User.findById(req.user.id)
+      let user = {};
+
+      user = await User.findById(req.user.id)
          .select("-password")
          .populate({
-            path: "town",
-            model: "town",
-            select: "name",
-         })
-         .populate({
-            path: "neighbourhood",
-            model: "neighbourhood",
-            select: "name",
-         })
-         .populate({
-            path: "children.user",
+            path: "children",
             model: "user",
-            select: ["name", "lastname", "classroom"],
+            select: ["name", "lastname", "studentnumber"],
          });
+
+      if (user.type === "Alumno") {
+         enrollment = await Enrollment.findOne({
+            student: req.user.id,
+         }).populate({
+            path: "student",
+            model: "user",
+            select: ["name", "lastname", "studentnumber"],
+         });
+
+         user = {
+            _id: req.user.id,
+            name: enrollment.student.name,
+            lastname: enrollment.student.lastname,
+            studentnumber: enrollment.student.studentnumber,
+            type: "Alumno",
+            classroom: enrollment.classroom._id,
+         };
+      }
+
       res.json(user);
    } catch (err) {
       console.error(err.message);

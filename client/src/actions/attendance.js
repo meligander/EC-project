@@ -7,8 +7,8 @@ import { updateLoadingSpinner } from "./mixvalues";
 
 import {
    ATTENDANCES_LOADED,
-   STUDENT_ATTENDANCES_LOADED,
-   NEW_DATE_REGISTERED,
+   STUDENTATTENDANCES_LOADED,
+   NEWDATE_REGISTERED,
    ATTENDANCES_UPDATED,
    DATES_DELETED,
    ATTENDANCES_CLEARED,
@@ -19,7 +19,7 @@ export const loadStudentAttendance = (student_id) => async (dispatch) => {
    try {
       const res = await axios.get(`/api/attendance/student/${student_id}`);
       dispatch({
-         type: STUDENT_ATTENDANCES_LOADED,
+         type: STUDENTATTENDANCES_LOADED,
          payload: res.data,
       });
    } catch (err) {
@@ -53,18 +53,17 @@ export const loadAttendances = (class_id) => async (dispatch) => {
    }
 };
 
-export const updateAttendances = (formData, history, class_id) => async (
-   dispatch
-) => {
+export const registerNewDate = (newDate) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      await axios.post("/api/attendance/period", formData);
+      const res = await axios.post("/api/attendance", newDate);
+
       dispatch({
-         type: ATTENDANCES_UPDATED,
+         type: NEWDATE_REGISTERED,
+         payload: res.data,
       });
 
-      history.push(`/class/${class_id}`);
-      dispatch(setAlert("Inasistencias Modificadas", "success", "2"));
+      dispatch(setAlert("Día Agregado", "success", "2"));
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;
@@ -83,17 +82,18 @@ export const updateAttendances = (formData, history, class_id) => async (
    dispatch(updateLoadingSpinner(false));
 };
 
-export const registerNewDate = (newDate) => async (dispatch) => {
+export const updateAttendances = (formData, history, class_id) => async (
+   dispatch
+) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      const res = await axios.post("/api/attendance", newDate);
-
+      await axios.post("/api/attendance/period", formData);
       dispatch({
-         type: NEW_DATE_REGISTERED,
-         payload: res.data,
+         type: ATTENDANCES_UPDATED,
       });
 
-      dispatch(setAlert("Día Agregado", "success", "2"));
+      history.push(`/class/${class_id}`);
+      dispatch(setAlert("Inasistencias Modificadas", "success", "2"));
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;

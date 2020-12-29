@@ -27,7 +27,7 @@ const RegisterClass = ({
       }
 
       if (loadingUsersBK) {
-         loadCategories(true);
+         loadCategories();
          loadUsers({ type: "Profesor", active: true }, false);
          if (!registerClass && loadingUsers) {
             loadUsers({

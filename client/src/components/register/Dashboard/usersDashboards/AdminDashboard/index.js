@@ -7,27 +7,31 @@ import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import { loadRegister, clearRegisters } from "../../../../../actions/register";
-import { clearInvoiceNumber } from "../../../../../actions/mixvalues";
-import { clearInstallments } from "../../../../../actions/installment";
-import { getAdminDash } from "../../../../../actions/mixvalues";
-import { clearSearch } from "../../../../../actions/user";
-import { clearClasses } from "../../../../../actions/class";
+import { clearInvoiceNumber } from "../../../../../actions/invoice";
+import {
+   clearInstallments,
+   getTotalDebt,
+} from "../../../../../actions/installment";
+import { getYearEnrollments } from "../../../../../actions/enrollment";
+import { clearSearch, getActiveUsers } from "../../../../../actions/user";
+import { clearClasses, getActiveClasses } from "../../../../../actions/class";
 import { clearCategories } from "../../../../../actions/category";
+
+import Loading from "../../../../modal/Loading";
 
 import "./style.scss";
 
 const AdminDashboard = ({
-   mixvalues: {
-      loadingAdminDash,
-      activeStudents,
-      activeClasses,
-      activeTeachers,
-      enrollments,
-      totalDebt,
-   },
    registers: { register, loading },
+   yearEnrollments,
+   totalDebt,
+   activeUsers,
+   activeClasses,
    loadRegister,
-   getAdminDash,
+   getTotalDebt,
+   getYearEnrollments,
+   getActiveUsers,
+   getActiveClasses,
    clearInvoiceNumber,
    clearInstallments,
    clearRegisters,
@@ -35,44 +39,66 @@ const AdminDashboard = ({
    clearClasses,
    clearCategories,
 }) => {
-   const [adminData, setAdminData] = useState({
+   const date = new Date();
+
+   const [otherValues, setOtherValues] = useState({
       dateR: moment(),
-      oneLoad: true,
+      oneLoadDate: true,
+      oneLoadInfoAdmin: true,
    });
 
-   const { dateR, oneLoad } = adminData;
+   const { dateR, oneLoadDate, oneLoadInfoAdmin } = otherValues;
 
    useEffect(() => {
       const changeDate = () => {
-         if (register) {
-            if (register.temporary)
-               setAdminData((prev) => ({
-                  ...prev,
-                  dateR: register.date,
-               }));
+         if (register && register.temporary) {
+            setOtherValues((prev) => ({
+               ...prev,
+               dateR: register.date,
+               oneLoadDate: false,
+            }));
          }
       };
-      if (loadingAdminDash && oneLoad) {
-         getAdminDash();
-         setAdminData((prev) => ({
+
+      if (oneLoadDate && !loading) changeDate();
+
+      if (oneLoadInfoAdmin) {
+         if (yearEnrollments.year === "") getYearEnrollments();
+         if (activeUsers.activeStudents === "") getActiveUsers("Alumno");
+         if (activeUsers.activeTeachers === "") getActiveUsers("Profesor");
+         if (totalDebt === "") getTotalDebt();
+         if (activeClasses === "") getActiveClasses();
+         if (loading) loadRegister();
+
+         setOtherValues((prev) => ({
             ...prev,
-            oneLoad: false,
+            oneLoadInfoAdmin: false,
          }));
       }
-      if (loading && oneLoad) loadRegister();
-      if (!loading) changeDate();
    }, [
-      loadingAdminDash,
-      getAdminDash,
       loading,
       register,
+      oneLoadDate,
+      oneLoadInfoAdmin,
+      yearEnrollments,
+      activeUsers,
+      totalDebt,
+      activeClasses,
       loadRegister,
-      oneLoad,
+      getYearEnrollments,
+      getActiveUsers,
+      getTotalDebt,
+      getActiveClasses,
    ]);
 
    return (
       <>
-         {!loading && !loadingAdminDash && (
+         {!loading &&
+         yearEnrollments.year !== "" &&
+         totalDebt !== "" &&
+         activeUsers.activeTeachers !== "" &&
+         activeUsers.activeStudents !== "" &&
+         activeClasses !== "" ? (
             <>
                <section className="section-sidebar">
                   <div className="sidebar">
@@ -221,34 +247,36 @@ const AdminDashboard = ({
                      <div className="text-center my-4 py-3">
                         <p className="heading-tertiary">
                            <span className="text-dark">Deuda: </span>$
-                           {totalDebt ? totalDebt : 0}
+                           {totalDebt}
                         </p>
                         <p className="heading-tertiary">
                            <span className="text-dark">Alumnos Activos: </span>
-                           {activeStudents ? activeStudents : 0}
+                           {activeUsers.activeStudents}
                         </p>
                         <p className="heading-tertiary">
                            <span className="text-dark">
                               Inscripciones{" "}
-                              {enrollments.year
-                                 ? enrollments.year
-                                 : dateR.format("YYYY")}
+                              {yearEnrollments.year !== 0
+                                 ? yearEnrollments.year
+                                 : date.getFullYear()}
                               :{" "}
                            </span>
-                           {enrollments.length}
+                           {yearEnrollments.length}
                         </p>
                         <p className="heading-tertiary">
                            <span className="text-dark">Profesores: </span>
-                           {activeTeachers ? activeTeachers : 0}
+                           {activeUsers.activeTeachers}
                         </p>
                         <p className="heading-tertiary">
                            <span className="text-dark">Cursos: </span>
-                           {activeClasses ? activeClasses : 0}
+                           {activeClasses}
                         </p>
                      </div>
                   </div>
                </section>
             </>
+         ) : (
+            <Loading />
          )}
       </>
    );
@@ -256,9 +284,11 @@ const AdminDashboard = ({
 
 AdminDashboard.propTypes = {
    registers: PropTypes.object.isRequired,
-   mixvalues: PropTypes.object.isRequired,
    loadRegister: PropTypes.func.isRequired,
-   getAdminDash: PropTypes.func.isRequired,
+   getTotalDebt: PropTypes.func.isRequired,
+   getYearEnrollments: PropTypes.func.isRequired,
+   getActiveUsers: PropTypes.func.isRequired,
+   getActiveClasses: PropTypes.func.isRequired,
    clearInvoiceNumber: PropTypes.func.isRequired,
    clearInstallments: PropTypes.func.isRequired,
    clearRegisters: PropTypes.func.isRequired,
@@ -268,13 +298,19 @@ AdminDashboard.propTypes = {
 };
 
 const mapStateToProps = (state) => ({
-   mixvalues: state.mixvalues,
    registers: state.registers,
+   yearEnrollments: state.enrollments.otherValues.yearEnrollments,
+   totalDebt: state.installments.otherValues.totalDebt,
+   activeUsers: state.users.otherValues,
+   activeClasses: state.classes.otherValues.activeClasses,
 });
 
 export default connect(mapStateToProps, {
-   getAdminDash,
    loadRegister,
+   getTotalDebt,
+   getYearEnrollments,
+   getActiveUsers,
+   getActiveClasses,
    clearInstallments,
    clearInvoiceNumber,
    clearRegisters,
