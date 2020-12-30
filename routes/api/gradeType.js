@@ -11,7 +11,7 @@ const Category = require("../../models/Category");
 //@access   Private
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
-      let gradetypes = await GradeType.find();
+      let gradetypes = await GradeType.find().sort({ name: 1 });
 
       if (gradetypes.length === 0) {
          return res.status(400).json({
@@ -35,7 +35,7 @@ router.get("/category/:id", [auth], async (req, res) => {
    try {
       let gradetypes = await GradeType.find({
          "categories.category": req.params.id,
-      });
+      }).sort({ name: 1 });
 
       if (gradetypes.length === 0) {
          return res.status(400).json({

@@ -10,7 +10,7 @@ const NotFound = () => {
             Inexistente
          </h1>
          <p className="heading-secondary fancy-heading">
-            Lo siento, esta página no se encontró.
+            Lo siento, esta página no existe.
          </p>
       </div>
    );

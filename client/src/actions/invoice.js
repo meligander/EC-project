@@ -247,7 +247,7 @@ export const invoicePDF = (invoice, remaining) => async (dispatch) => {
 
       saveAs(pdfBlob, `Factura ${name}  ${date}.pdf`);
 
-      dispatch(setAlert("PDF Generado", "success", "2"));
+      dispatch(setAlert("PDF Generado", "success", "1"));
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;

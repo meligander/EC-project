@@ -271,7 +271,6 @@ router.post(
       const errorsResult = validationResult(req);
       if (!errorsResult.isEmpty()) {
          errors = errorsResult.array();
-         console.log(errors);
          return res.status(400).json({ errors });
       }
 
@@ -319,7 +318,6 @@ router.post(
 
          const date = new Date();
          if (date.getFullYear() === year) {
-            /* ESTO ESTA HARKODEADO PORQ NO ME FUNCIONA DATE!!! MUESTRA UN MES ATRAS */
             number = date.getMonth() + (currentMonth ? 1 : 2);
          } else {
             number = 3;
@@ -451,7 +449,7 @@ router.post("/averages/create-list", (req, res) => {
          enrollment[x].student.name +
          "</td>";
       const category = "<td>" + enrollment[x].category.name + "</td>";
-      const average = "<td>" + enrollment[x].average + "</td>";
+      const average = "<td>" + enrollment[x].classroom.average + "</td>";
 
       tbody +=
          "<tr>" + studentnumber + studentname + category + average + "</tr>";
@@ -519,7 +517,7 @@ router.post("/absences/create-list", (req, res) => {
 
       let type;
 
-      switch (enrollment[x].absence) {
+      switch (enrollment[x].classroom.absence) {
          case 0:
             type = "Perfecta";
             break;
@@ -533,7 +531,7 @@ router.post("/absences/create-list", (req, res) => {
       }
 
       type = "<td>" + type + "</td>";
-      const absence = "<td>" + enrollment[x].absence + "</td>";
+      const absence = "<td>" + enrollment[x].classroom.absence + "</td>";
 
       tbody +=
          "<tr>" +
@@ -617,12 +615,6 @@ router.put(
          if (enrollment.category._id.toString() !== category) {
             const date = new Date();
 
-            if (date.getFullYear() !== year)
-               return res.status(400).json({
-                  msg:
-                     "No se puede modificar la categoría de una inscripción que no está en curso. Para ello elimine la anterior y vuelva a crearla",
-               });
-
             const attendances = await Attendance.find({
                student: enrollment.student,
                classroom: enrollment.classroom._id,
@@ -663,11 +655,10 @@ router.put(
                   model: "category",
                });
 
-            /* ESTO ESTA HARKODEADO PORQ NO ME FUNCIONA DATE!!! MUESTRA UN MES ATRAS */
-            let number = date.getMonth() + 1;
+            let number = 3;
 
-            if (!currentMonth) {
-               number = number + 1;
+            if (date.getFullYear() === year) {
+               number = date.getMonth() + (currentMonth ? 1 : 2);
             }
 
             let value = enrollment.category.value;

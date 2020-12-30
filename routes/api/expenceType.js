@@ -25,26 +25,6 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/expence-type/:id
-//@desc     Get one expence type
-//@access   Public
-router.get("/:id", [auth, adminAuth], async (req, res) => {
-   try {
-      const expenceType = await ExpenceType.findOne({ _id: req.params.id });
-
-      if (!expenceType) {
-         return res.status(400).json({
-            msg: "No se encontró un tipo de gasto con dichas descripciones",
-         });
-      }
-
-      res.json(expenceTypes);
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server Error");
-   }
-});
-
 //@route    POST api/expence-type
 //@desc     Update all expence types
 //@access   Private

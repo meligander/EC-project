@@ -140,8 +140,9 @@ export const closeRegister = (formData, user_id, history) => async (
          type: REGISTER_CLOSED,
       });
 
-      history.push(`/dashboard/${user_id}`);
       dispatch(clearRegisters());
+
+      history.push(`/dashboard/${user_id}`);
       dispatch(setAlert("Caja del día Cerrada", "success", "1", 7000));
    } catch (err) {
       const msg = err.response.data.msg;

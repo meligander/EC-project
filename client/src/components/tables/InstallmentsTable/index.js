@@ -142,7 +142,9 @@ const InstallmentsTable = ({
          {forAdmin && (
             <div className={`btn-right ${!invoice ? "next-btn" : ""}`}>
                <button
-                  className="btn btn-mix-secondary"
+                  className={`btn ${
+                     !invoice ? "btn-mix-secondary" : "btn-light"
+                  } `}
                   onClick={actionForSelected}
                >
                   {!invoice ? (

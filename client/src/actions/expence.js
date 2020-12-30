@@ -97,6 +97,7 @@ export const registerExpence = (formData, history, user_id) => async (
          type: EXPENCE_REGISTERED,
       });
 
+      dispatch(clearTransactions());
       dispatch(clearRegisters());
 
       dispatch(setAlert("Gasto/Ingreso Registrado", "success", "1", 7000));
@@ -142,7 +143,8 @@ export const deleteExpence = (expence_id) => async (dispatch) => {
       });
 
       dispatch(setAlert("Movimiento Eliminado", "success", "2"));
-      dispatch(clearRegisters());
+
+      dispatch(clearTransactions());
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;
