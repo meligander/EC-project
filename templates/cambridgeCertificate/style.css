@@ -46,6 +46,9 @@ html {
 
 .body {
    padding: 0.5rem 1rem;
+
+   /* deploy */
+   font-size: 80%;
 }
 
 .student {
