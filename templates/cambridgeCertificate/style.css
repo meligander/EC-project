@@ -1,5 +1,5 @@
 html {
-   font-size: 49%;
+   font-size: 50%;
 }
 
 .container {
@@ -71,6 +71,10 @@ table {
    width: 100%;
    border-collapse: collapse;
    text-align: center;
+
+   /* deployed */
+   font-size: 80%;
+   font-weight: lighter;
 }
 
 table td img {

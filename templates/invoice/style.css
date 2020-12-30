@@ -1,5 +1,5 @@
 html {
-   font-size: 49%;
+   font-size: 50%;
 }
 
 .container {
@@ -16,6 +16,10 @@ html {
 table {
    border-collapse: collapse;
    width: 100%;
+
+   /* deployed */
+   font-size: 80%;
+   font-weight: lighter;
 }
 
 .business {
