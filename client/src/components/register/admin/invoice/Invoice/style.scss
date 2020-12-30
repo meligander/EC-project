@@ -4,6 +4,10 @@
    border: 1px solid $black-color;
    padding: 5rem;
 
+   @include respond(phone) {
+      padding: 2rem;
+   }
+
    .row {
       justify-content: space-between;
       align-items: flex-end;
@@ -20,7 +24,8 @@
 
          @include respond(phone) {
             order: -1;
-            margin-bottom: 2rem;
+            margin-bottom: 4rem;
+            align-self: center;
          }
       }
 

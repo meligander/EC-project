@@ -22,7 +22,7 @@ const Class = require("../../models/Class");
 //@route    GET api/user
 //@desc     Get all user || with filter
 //@access   Private
-router.get("/", auth, async (req, res) => {
+router.get("/", async (req, res) => {
    try {
       let users = [];
       let search = true;

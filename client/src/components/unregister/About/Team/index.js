@@ -41,20 +41,66 @@ const Team = ({ users: { loadingUsers, users }, loadUsers }) => {
                <h1 className="heading-secondary text-center text-primary mb-5">
                   Conoce nuestro equipo
                </h1>
-
-               <div className="row">
-                  <div className="btns">
-                     <button
-                        className={`btn-icon ${
-                           teamNumber === 0 ? "text-dark" : "text-primary"
-                        }`}
-                        onClick={moveDown}
-                     >
-                        <h2>
-                           <i className="fas fa-chevron-circle-left"></i>
-                        </h2>
-                     </button>
-                     <div className="show-md">
+               {users.length > 0 && (
+                  <div className="row">
+                     <div className="btns">
+                        <button
+                           className={`btn-icon ${
+                              teamNumber === 0 ? "text-dark" : "text-primary"
+                           }`}
+                           onClick={moveDown}
+                        >
+                           <h2>
+                              <i className="fas fa-chevron-circle-left"></i>
+                           </h2>
+                        </button>
+                        <div className="show-md">
+                           <button
+                              className={`btn-icon ${
+                                 teamNumber === users.length - 1
+                                    ? "text-dark"
+                                    : "text-primary"
+                              }`}
+                              onClick={moveUp}
+                           >
+                              <h2>
+                                 <i className="fas fa-chevron-circle-right"></i>
+                              </h2>
+                           </button>
+                        </div>
+                     </div>
+                     <div className="person">
+                        <figure className="person-shape">
+                           <img
+                              src={
+                                 users[teamNumber].noImg !== ""
+                                    ? users[teamNumber].noImg
+                                    : users[teamNumber].img.url
+                              }
+                              alt={
+                                 users[teamNumber].type +
+                                 " de Villa de Merlo English Center"
+                              }
+                              className="person-img"
+                           />
+                           <figcaption className="person-caption">
+                              {users[teamNumber].name +
+                                 " " +
+                                 users[teamNumber].lastname}
+                           </figcaption>
+                        </figure>
+                        <div className="person-text">
+                           <h3 className="heading-tertiary text-dark">
+                              {users[teamNumber].type === "Admin/Profesor"
+                                 ? "Directora y Profesora"
+                                 : users[teamNumber].type}
+                           </h3>
+                           <p className="paragraph">
+                              {users[teamNumber].description}
+                           </p>
+                        </div>
+                     </div>
+                     <div className="hide-md">
                         <button
                            className={`btn-icon ${
                               teamNumber === users.length - 1
@@ -69,48 +115,7 @@ const Team = ({ users: { loadingUsers, users }, loadUsers }) => {
                         </button>
                      </div>
                   </div>
-                  <div className="person">
-                     <figure className="person-shape">
-                        <img
-                           src={users[teamNumber].img}
-                           alt={
-                              users[teamNumber].type +
-                              " de Villa de Merlo English Center"
-                           }
-                           className="person-img"
-                        />
-                        <figcaption className="person-caption">
-                           {users[teamNumber].name +
-                              " " +
-                              users[teamNumber].lastname}
-                        </figcaption>
-                     </figure>
-                     <div className="person-text">
-                        <h3 className="heading-tertiary text-dark">
-                           {users[teamNumber].type === "Admin/Profesor"
-                              ? "Directora y Profesora"
-                              : users[teamNumber].type}
-                        </h3>
-                        <p className="paragraph">
-                           {users[teamNumber].description}
-                        </p>
-                     </div>
-                  </div>
-                  <div className="hide-md">
-                     <button
-                        className={`btn-icon ${
-                           teamNumber === users.length - 1
-                              ? "text-dark"
-                              : "text-primary"
-                        }`}
-                        onClick={moveUp}
-                     >
-                        <h2>
-                           <i className="fas fa-chevron-circle-right"></i>
-                        </h2>
-                     </button>
-                  </div>
-               </div>
+               )}
             </section>
          )}
       </>
