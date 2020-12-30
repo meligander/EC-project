@@ -80,29 +80,6 @@ const StudentNavbar = ({
             className={
                !showMenu
                   ? "nav-item"
-                  : `nav-item show ${currentNav === "chat" ? "current" : ""}`
-            }
-         >
-            <Link
-               className="nav-link"
-               to={`/chat/${
-                  userLogged.classroom !== null ? userLogged.classroom : 0
-               }`}
-               onClick={() => {
-                  window.scroll(0, 0);
-                  clearPosts();
-                  clearClass();
-                  changePageAndMenu("chat");
-               }}
-            >
-               <i className="far fa-comments"></i>
-               <span className="hide-md">&nbsp; Posteo Grupal</span>
-            </Link>
-         </li>
-         <li
-            className={
-               !showMenu
-                  ? "nav-item"
                   : `nav-item show ${
                        currentNav === "classmates" ? "current" : ""
                     }`
@@ -121,6 +98,29 @@ const StudentNavbar = ({
             >
                <i className="fas fa-address-book"></i>
                <span className="hide-md"> &nbsp; Clase</span>
+            </Link>
+         </li>
+         <li
+            className={
+               !showMenu
+                  ? "nav-item"
+                  : `nav-item show ${currentNav === "chat" ? "current" : ""}`
+            }
+         >
+            <Link
+               className="nav-link"
+               to={`/chat/${
+                  userLogged.classroom !== null ? userLogged.classroom : 0
+               }`}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  clearPosts();
+                  clearClass();
+                  changePageAndMenu("chat");
+               }}
+            >
+               <i className="far fa-comments"></i>
+               <span className="hide-md">&nbsp; Posteo Grupal</span>
             </Link>
          </li>
          <li className={!showMenu ? "nav-item" : "nav-item show"}>

@@ -705,6 +705,12 @@ router.put("/credentials/:id", [auth], async (req, res) => {
       };
 
       if (password) {
+         if (password.length < 6) {
+            return res
+               .status(400)
+               .json({ msg: "La contraseña debe contener 6 carácteres o más" });
+         }
+
          //Encrypt password -- agregarlo a cuando se cambia el password
          const salt = await bcrypt.genSalt(10);
 

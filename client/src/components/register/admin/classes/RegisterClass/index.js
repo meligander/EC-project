@@ -23,7 +23,7 @@ const RegisterClass = ({
 
    useEffect(() => {
       if (!registerClass) {
-         if (loadingUsersBK && loadingUsers) loadClass(match.params.id);
+         if (loadingUsersBK && loadingUsers) loadClass(match.params.class_id);
       }
 
       if (loadingUsersBK) {

@@ -354,19 +354,26 @@ router.post("/all/create-list", (req, res) => {
 
    for (let x = 0; x < periodName.length; x++) {
       thead += `<th class='border' colspan=${
-         header[x].length === 0 ? 1 : header[x].length
+         !header[x] || header[x].length === 0 ? 1 : header[x].length
       } >${periodName[x]}</th>`;
    }
 
    thead += "</tr><tr><th class='no-border border-right'></th>";
 
    for (let x = 0; x < 5; x++) {
-      for (let y = 0; y < header[x].length; y++) {
-         thead += `<th class='${
-            y + 1 === header[x].length
-               ? "border-right border-bottom"
-               : "border-bottom"
-         }'> ${header[x][y].substring(0, 1)}</th>`;
+      if (header[x]) {
+         for (let y = 0; y < header[x].length; y++) {
+            thead += `<th class='${
+               y + 1 === header[x].length
+                  ? "border-right border-bottom"
+                  : "border-bottom"
+            }'> ${header[x][y]
+               .split(" ")
+               .map((x) => x[0])
+               .join("")}</th>`;
+         }
+      } else {
+         thead += "<th class='border-right border-bottom'></th>";
       }
    }
 
@@ -378,7 +385,7 @@ router.post("/all/create-list", (req, res) => {
       tbody += "<tr>";
       for (let y = 0; y < tableGrades[x].length; y++) {
          if (number < y) {
-            number += header[border].length;
+            number += header[border] ? header[border].length : 1;
             border++;
          }
          tbody += `<${y === 0 ? "th" : "td"} class='${
@@ -995,39 +1002,46 @@ function buildAllGradesTable(students, periods, className) {
       let row = [];
       let count = 0;
       row[count] = students[x].name;
-
       let numberOfPeriods = 5;
       if (className === "Kinder") numberOfPeriods = 4;
+
       for (let y = 0; y < numberOfPeriods; y++) {
-         for (let z = 0; z < periods[y][x].length; z++) {
-            count++;
-            if (className === "Kinder") {
-               switch (true) {
-                  case periods[y][x][z].value < 4:
-                     row[count] = "M";
-                     break;
-                  case periods[y][x][z].value >= 4 &&
-                     periods[y][x][z].value < 6:
-                     row[count] = "Reg";
-                     break;
-                  case periods[y][x][z].value >= 6 &&
-                     periods[y][x][z].value < 7.5:
-                     row[count] = "B";
-                     break;
-                  case periods[y][x][z].value >= 7.5 &&
-                     periods[y][x][z].value < 9:
-                     row[count] = "MB";
-                     break;
-                  case periods[y][x][z].value >= 9 &&
-                     periods[y][x][z].value <= 10:
-                     row[count] = "Sobr";
-                     break;
-                  default:
-                     break;
-               }
-            } else {
-               row[count] = periods[y][x][z].value;
+         if (periods[y] && periods[y][x]) {
+            for (let z = 0; z < periods[y][x].length; z++) {
+               count++;
+               if (periods[y][x][z]) {
+                  if (className === "Kinder") {
+                     switch (true) {
+                        case periods[y][x][z].value < 4:
+                           row[count] = "M";
+                           break;
+                        case periods[y][x][z].value >= 4 &&
+                           periods[y][x][z].value < 6:
+                           row[count] = "Reg";
+                           break;
+                        case periods[y][x][z].value >= 6 &&
+                           periods[y][x][z].value < 7.5:
+                           row[count] = "B";
+                           break;
+                        case periods[y][x][z].value >= 7.5 &&
+                           periods[y][x][z].value < 9:
+                           row[count] = "MB";
+                           break;
+                        case periods[y][x][z].value >= 9 &&
+                           periods[y][x][z].value <= 10:
+                           row[count] = "Sobr";
+                           break;
+                        default:
+                           break;
+                     }
+                  } else {
+                     if (periods[y][x]) row[count] = periods[y][x][z].value;
+                  }
+               } else row[count] = "";
             }
+         } else {
+            count++;
+            row[count] = "";
          }
       }
       table.push(row);

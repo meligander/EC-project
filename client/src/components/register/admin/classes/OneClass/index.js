@@ -34,9 +34,8 @@ const OneClass = ({
    const [toggleModal, setToggleModal] = useState(false);
 
    useEffect(() => {
-      if (loading) loadClass(match.params.id);
-      updatePreviousPage("/classes");
-   }, [loadClass, match.params.id, loading, updatePreviousPage]);
+      if (loading) loadClass(match.params.class_id);
+   }, [loadClass, match.params.class_id, loading]);
 
    const setToggle = () => {
       setToggleModal(!toggleModal);
@@ -191,14 +190,14 @@ const OneClass = ({
                         <i className="fas fa-file-pdf"></i>
                      </button>
                      <button
-                        className="btn btn-print-blank"
+                        className="btn btn-secondary"
                         onClick={blankPdfGenerator}
                      >
                         <i className="fas fa-scroll"></i>
                      </button>
                      <Link
                         to={`/edit-class/${classInfo._id}/${classInfo.category._id}`}
-                        className="btn btn-light"
+                        className="btn btn-mix-secondary"
                         onClick={() => {
                            window.scroll(0, 0);
                            updatePreviousPage("");

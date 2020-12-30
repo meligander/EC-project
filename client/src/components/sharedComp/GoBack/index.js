@@ -9,6 +9,7 @@ import { clearProfile } from "../../../actions/user";
 import Loading from "../../modal/Loading";
 
 const GoBack = ({
+   match,
    history,
    mixvalues: { loadingSpinner, prevPage },
    auth: { userLogged },
@@ -16,7 +17,8 @@ const GoBack = ({
    clearProfile,
 }) => {
    const goBack = () => {
-      clearProfile();
+      if (match.params.user_id) clearProfile();
+
       switch (prevPage) {
          case "dashboard":
             history.push(`/dashboard/${userLogged._id}`);

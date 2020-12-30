@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import {
    loadStudentAttendance,
    enrollmentsPDF,
 } from "../../../../../../../actions/enrollment";
+import { clearProfile } from "../../../../../../../actions/user";
 import { updatePageNumber } from "../../../../../../../actions/mixvalues";
 import { setAlert } from "../../../../../../../actions/alert";
 
@@ -17,6 +19,7 @@ function AttendanceTab({
    categories: { categories, loading },
    loadStudentAttendance,
    updatePageNumber,
+   clearProfile,
    enrollmentsPDF,
    setAlert,
 }) {
@@ -98,7 +101,7 @@ function AttendanceTab({
                </button>
             </div>
          </form>
-         <div className="wrapper mt-3">
+         <div className="wrapper list mt-3">
             <table>
                <thead>
                   <tr>
@@ -118,11 +121,18 @@ function AttendanceTab({
                            i < (page + 1) * 10 && (
                               <tr key={enroll._id}>
                                  <td>{enroll.student.studentnumber}</td>
-                                 <td>
+                                 <Link
+                                    className="btn-text"
+                                    to={`/dashboard/${enroll.student._id}`}
+                                    onClick={() => {
+                                       window.scroll(0, 0);
+                                       clearProfile();
+                                    }}
+                                 >
                                     {enroll.student.lastname +
                                        ", " +
                                        enroll.student.name}
-                                 </td>
+                                 </Link>
                                  <td>{enroll.category.name}</td>
                                  <td>{enroll.classroom.absence}</td>
                               </tr>
@@ -148,6 +158,7 @@ AttendanceTab.propTypes = {
    loadStudentAttendance: PropTypes.func.isRequired,
    enrollmentsPDF: PropTypes.func.isRequired,
    setAlert: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -161,4 +172,5 @@ export default connect(mapStateToProps, {
    updatePageNumber,
    enrollmentsPDF,
    setAlert,
+   clearProfile,
 })(AttendanceTab);

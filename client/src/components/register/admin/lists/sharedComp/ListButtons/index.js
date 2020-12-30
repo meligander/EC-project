@@ -1,13 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import "./style.scss";
+
 const ListButtons = ({ changePage, items, page, pdfGeneratorSave }) => {
    const itemsNumber = page * 10;
    const sub = items.length - itemsNumber;
    return (
       <>
          {items.length > 10 && (
-            <div className="btn-ctr	">
+            <div className="btn-list btn-ctr">
                {page !== 0 && (
                   <button
                      onClick={() => changePage(page - 1)}

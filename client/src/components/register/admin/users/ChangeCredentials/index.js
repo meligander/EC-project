@@ -40,9 +40,9 @@ const ChangeCredentials = ({
             email: !user.email ? "" : user.email,
          }));
       else {
-         loadUser(match.params.id);
+         loadUser(match.params.user_id);
       }
-   }, [loading, match.params.id, loadUser, user]);
+   }, [loading, match.params, loadUser, user]);
 
    const onChange = (e) => {
       setFormData({
@@ -54,7 +54,7 @@ const ChangeCredentials = ({
    const onSubmit = () => {
       if ((password !== "" || password2 !== "") && password !== password2) {
          setAlert("Las contraseñas deben coincidir", "danger", "2");
-         window.scrollTo(500, 0);
+         window.scrollTo(0, 0);
       } else {
          updateCredentials(formData, history, user._id);
       }
@@ -78,21 +78,23 @@ const ChangeCredentials = ({
                   {`Cambio de ${isAdmin ? "Email y/o " : ""}Contraseña`}
                </h4>
                <form className="form">
-                  <div className="form-group">
-                     <input
-                        className="form-input"
-                        id="email"
-                        type="text"
-                        value={email}
-                        disabled={!isAdmin}
-                        name="email"
-                        onChange={(e) => onChange(e)}
-                        placeholder="Dirección de correo electrónico"
-                     />
-                     <label htmlFor="email" className="form-label">
-                        Dirección de correo electrónico
-                     </label>
-                  </div>
+                  {isAdmin && (
+                     <div className="form-group">
+                        <input
+                           className="form-input"
+                           id="email"
+                           type="text"
+                           value={email}
+                           name="email"
+                           onChange={(e) => onChange(e)}
+                           placeholder="Dirección de correo electrónico"
+                        />
+                        <label htmlFor="email" className="form-label">
+                           Dirección de correo electrónico
+                        </label>
+                     </div>
+                  )}
+
                   <div className="form-group">
                      <input
                         className="form-input"

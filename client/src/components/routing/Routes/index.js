@@ -46,7 +46,7 @@ const Routes = () => {
             <PrivateRoutes
                exact
                types={[]}
-               path="/dashboard/:id"
+               path="/dashboard/:user_id"
                component={Dashboard}
             />
             <PrivateRoutes
@@ -57,14 +57,14 @@ const Routes = () => {
             />
             <PrivateRoutes
                exact
-               path="/edit-user/:id"
+               path="/edit-user/:user_id"
                types={[]}
                component={RegisterUser}
             />
             <PrivateRoutes
                exact
                types={[]}
-               path="/credentials/:id"
+               path="/credentials/:user_id"
                component={ChangeCredentials}
             />
             <PrivateRoutes
@@ -90,11 +90,16 @@ const Routes = () => {
                path="/categories"
                component={Categories}
             />
-            <PrivateRoutes exact types={[]} path="/chat/:id" component={Chat} />
             <PrivateRoutes
                exact
                types={[]}
-               path="/class/:id"
+               path="/chat/:class_id"
+               component={Chat}
+            />
+            <PrivateRoutes
+               exact
+               types={[]}
+               path="/class/:class_id"
                component={OneClass}
             />
             <PrivateRoutes
@@ -106,25 +111,19 @@ const Routes = () => {
             <PrivateRoutes
                exact
                types={["Administrador", "Secretaria", "Admin/Profesor"]}
-               path="/edit-class/:id/:category_id"
+               path="/edit-class/:class_id/:category_id"
                component={RegisterClass}
             />
             <PrivateRoutes
                exact
                types={["Administrador", "Secretaria", "Admin/Profesor"]}
-               path="/installments/:studentid"
+               path="/installments/:user_id"
                component={Installments}
             />
             <PrivateRoutes
                exact
                types={["Administrador", "Secretaria", "Admin/Profesor"]}
-               path="/edit-installment/:id"
-               component={EditInstallment}
-            />
-            <PrivateRoutes
-               exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
-               path="/edit-installment/:type/:id"
+               path="/edit-installment/:type/:installment_id"
                component={EditInstallment}
             />
             <PrivateRoutes
@@ -147,7 +146,7 @@ const Routes = () => {
             <PrivateRoutes
                exact
                types={["Administrador", "Secretaria", "Admin/Profesor"]}
-               path="/invoice/:id"
+               path="/invoice/:invoice_id"
                component={Invoice}
             />
             <PrivateRoutes
@@ -158,7 +157,7 @@ const Routes = () => {
                   "Profesor",
                   "Admin/Profesor",
                ]}
-               path="/attendances/:id"
+               path="/attendances/:class_id"
                component={Attendance}
             />
             <PrivateRoutes
@@ -169,7 +168,7 @@ const Routes = () => {
                   "Profesor",
                   "Admin/Profesor",
                ]}
-               path="/grades/:id"
+               path="/grades/:class_id"
                component={Grades}
             />
             <PrivateRoutes
@@ -181,7 +180,7 @@ const Routes = () => {
             <PrivateRoutes
                exact
                types={["Administrador", "Secretaria", "Admin/Profesor"]}
-               path="/edit-enrollment/:id"
+               path="/edit-enrollment/:enrollment_id"
                component={Enrollment}
             />
             <PrivateRoutes

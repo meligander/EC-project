@@ -6,6 +6,7 @@ import PropTypes from "prop-types";
 import {
    loadClasses,
    clearClass,
+   clearClasses,
    classPDF,
 } from "../../../../../actions/class";
 import { loadCategories } from "../../../../../actions/category";
@@ -21,16 +22,23 @@ import Loading from "../../../../modal/Loading";
 const Classes = ({
    classes: { classes, loadingClasses },
    users,
-   auth: { userLogged, loading },
+   auth: { userLogged },
    categories,
    loadClasses,
    loadUsers,
    loadCategories,
    classPDF,
    clearClass,
+   clearClasses,
    clearProfile,
    clearSearch,
 }) => {
+   const [otherValues, setOtherValues] = useState({
+      condition: true,
+   });
+
+   const { condition } = otherValues;
+
    const [filterForm, setfilterForm] = useState({
       teacher: "",
       category: "",
@@ -39,16 +47,35 @@ const Classes = ({
    const { teacher, category } = filterForm;
 
    useEffect(() => {
-      if (!loading) {
-         if (userLogged.type === "Profesor") {
-            loadClasses({ teacher: userLogged._id });
-         } else {
+      if (userLogged.type === "Profesor") {
+         if (loadingClasses) loadClasses({ teacher: userLogged._id });
+         else
+            setOtherValues((prev) => ({
+               ...prev,
+               condition: !loadingClasses,
+            }));
+      } else {
+         if (loadingClasses) {
             loadUsers({ type: "Profesor", active: true });
             loadCategories();
             loadClasses({});
+         } else {
+            setOtherValues((prev) => ({
+               ...prev,
+               condition:
+                  !loadingClasses && !categories.loading && !users.loadingUsers,
+            }));
          }
       }
-   }, [loadUsers, loadCategories, loadClasses, userLogged, loading]);
+   }, [
+      loadUsers,
+      loadCategories,
+      loadClasses,
+      userLogged,
+      loadingClasses,
+      categories.loading,
+      users.loadingUsers,
+   ]);
 
    const onChange = (e) => {
       setfilterForm({
@@ -68,7 +95,7 @@ const Classes = ({
 
    return (
       <>
-         {!loadingClasses && !categories.loading && !users.loadingUsers ? (
+         {condition ? (
             <>
                <h1>Cursos</h1>
                {userLogged.type !== "Profesor" && (
@@ -141,9 +168,8 @@ const Classes = ({
                <div className="pt-4">
                   <ClassesTable
                      classes={classes}
-                     all={true}
+                     all={userLogged.type !== "Profesor" ? true : false}
                      clearClass={clearClass}
-                     clearSearch={clearSearch}
                      clearProfile={clearProfile}
                   />
                </div>
@@ -154,7 +180,7 @@ const Classes = ({
                         to={users.users.length !== 0 ? "/register-class" : "#"}
                         onClick={() => {
                            window.scroll(0, 0);
-                           clearClass();
+                           clearClasses();
                            clearSearch();
                         }}
                         className={`btn ${
@@ -192,6 +218,7 @@ Classes.propTypes = {
    classPDF: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
    clearClass: PropTypes.func.isRequired,
+   clearClasses: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
 };
 
@@ -208,6 +235,7 @@ export default connect(mapStateToProps, {
    loadUsers,
    classPDF,
    clearClass,
+   clearClasses,
    clearSearch,
    clearProfile,
 })(Classes);

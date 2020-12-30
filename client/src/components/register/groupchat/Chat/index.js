@@ -20,9 +20,9 @@ const Chat = ({
    classes,
 }) => {
    useEffect(() => {
-      if (classes.loading) loadClass(match.params.id, true);
-      if (classes.classInfo && loading) loadPosts(match.params.id);
-   }, [loadPosts, loadClass, match.params.id, classes, loading]);
+      if (classes.loading) loadClass(match.params.class_id, true);
+      if (classes.classInfo && loading) loadPosts(match.params.class_id);
+   }, [loadPosts, loadClass, match.params.class_id, classes, loading]);
 
    const [otherValues, setOtherValues] = useState({
       toggleModal: false,

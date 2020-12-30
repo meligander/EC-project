@@ -20,18 +20,12 @@ const Attendance = ({
 }) => {
    useEffect(() => {
       if (loading) {
-         loadClass(match.params.id);
+         loadClass(match.params.class_id);
       }
       if (attendances.loading) {
-         loadAttendances(match.params.id);
+         loadAttendances(match.params.class_id);
       }
-   }, [
-      match.params.id,
-      loadClass,
-      loadAttendances,
-      attendances.loading,
-      loading,
-   ]);
+   }, [match.params, loadClass, loadAttendances, attendances.loading, loading]);
 
    return (
       <>

@@ -50,13 +50,13 @@ const Dashboard = ({
 
    useEffect(() => {
       if (loading) {
-         loadUser(match.params.id);
+         loadUser(match.params.user_id);
       } else {
          if (user._id === userLogged._id) updateExpiredIntallments();
       }
    }, [
       loadUser,
-      match.params.id,
+      match.params.user_id,
       loading,
       updateExpiredIntallments,
       user,
@@ -110,7 +110,7 @@ const Dashboard = ({
                      <div className="img-about m-1">
                         <img
                            src={user.noImg !== "" ? user.noImg : user.img.url}
-                           alt="Perfil Alumno"
+                           alt="Perfil Usuario"
                            className="round-img p-1"
                         />
                         <h3 className="heading-secondary text-center text-secondary light-font my-1">
@@ -244,7 +244,7 @@ const Dashboard = ({
                               <>
                                  <Link
                                     to={`/edit-user/${user._id}`}
-                                    className="btn btn-light"
+                                    className="btn btn-mix-secondary"
                                     onClick={() => {
                                        window.scroll(0, 0);
                                        clearTowns();

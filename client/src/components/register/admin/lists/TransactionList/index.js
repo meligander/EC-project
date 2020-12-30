@@ -9,6 +9,7 @@ import {
    deleteExpence,
    transactionsPDF,
 } from "../../../../../actions/expence";
+import { loadRegister } from "../../../../../actions/register";
 import { updatePageNumber } from "../../../../../actions/mixvalues";
 
 import Loading from "../../../../modal/Loading";
@@ -20,10 +21,12 @@ import "./style.scss";
 
 const TransactionList = ({
    loadTransactions,
+   loadRegister,
    updatePageNumber,
    deleteExpence,
    transactionsPDF,
    expences: { transactions, loadingTransactions },
+   registers: { register, loading },
    mixvalues: { page },
 }) => {
    const [filterData, setFilterData] = useState({
@@ -45,8 +48,9 @@ const TransactionList = ({
       if (loadingTransactions) {
          updatePageNumber(0);
          loadTransactions({});
+         loadRegister();
       }
-   }, [loadingTransactions, loadTransactions, updatePageNumber]);
+   }, [loadingTransactions, loadTransactions, updatePageNumber, loadRegister]);
 
    const onChange = (e) => {
       setFilterData({
@@ -101,12 +105,14 @@ const TransactionList = ({
                <td>${transaction.value}</td>
                <td>{transaction.description}</td>
                <td>
-                  <button
-                     onClick={() => setToggle(transaction._id)}
-                     className="btn btn-danger"
-                  >
-                     <i className="far fa-trash-alt"></i>
-                  </button>
+                  {register.date < transaction.date && (
+                     <button
+                        onClick={() => setToggle(transaction._id)}
+                        className="btn btn-danger"
+                     >
+                        <i className="far fa-trash-alt"></i>
+                     </button>
+                  )}
                </td>
             </tr>
          );
@@ -139,7 +145,7 @@ const TransactionList = ({
 
    return (
       <>
-         {!loadingTransactions ? (
+         {!loadingTransactions && !loading ? (
             <div>
                <h2>Listado Movimientos</h2>
                <Confirm
@@ -187,7 +193,7 @@ const TransactionList = ({
                      </button>
                   </div>
                </form>
-               <div className="wrapper my-2">
+               <div className="wrapper list my-2">
                   <table className="expences">
                      <thead>
                         <tr>
@@ -230,7 +236,9 @@ const TransactionList = ({
 TransactionList.propTypes = {
    mixvalues: PropTypes.object.isRequired,
    expences: PropTypes.object.isRequired,
+   registers: PropTypes.object.isRequired,
    loadTransactions: PropTypes.func.isRequired,
+   loadRegister: PropTypes.func.isRequired,
    updatePageNumber: PropTypes.func.isRequired,
    deleteExpence: PropTypes.func.isRequired,
    transactionsPDF: PropTypes.func.isRequired,
@@ -238,11 +246,13 @@ TransactionList.propTypes = {
 
 const mapStatetoProps = (state) => ({
    expences: state.expences,
+   registers: state.registers,
    mixvalues: state.mixvalues,
 });
 
 export default connect(mapStatetoProps, {
    loadTransactions,
+   loadRegister,
    updatePageNumber,
    deleteExpence,
    transactionsPDF,

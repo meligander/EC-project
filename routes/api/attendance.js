@@ -288,9 +288,10 @@ router.post("/create-list", (req, res) => {
 router.delete("/date/:date/:classroom", auth, async (req, res) => {
    try {
       //Remove attendace
+      const classroom = req.params.classroom;
       const attendancesToDelete = await Attendance.find({
          date: req.params.date,
-         classroom: req.params.classroom,
+         classroom: classroom,
       });
 
       for (let x = 0; x < attendancesToDelete.length; x++) {
@@ -302,7 +303,7 @@ router.delete("/date/:date/:classroom", auth, async (req, res) => {
       const end = new Date(date.getFullYear(), 12, 31);
 
       const attendances = await Attendance.find({
-         classroom: req.params.classroom,
+         classroom: classroom,
          date: {
             $gte: start,
             $lte: end,

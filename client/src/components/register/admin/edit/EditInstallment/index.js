@@ -41,7 +41,7 @@ const EditInstallment = ({
 
    const { year, number, value, expired, student } = formData;
 
-   const _id = match.params.id;
+   const _id = match.params.installment_id;
 
    const edit = match.params.type === "1";
 

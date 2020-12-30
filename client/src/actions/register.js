@@ -86,6 +86,7 @@ export const createRegister = (formData, user_id, history) => async (
       await axios.post("/api/register", register);
 
       dispatch({ type: NEWREGISTER_ADDED });
+      dispatch(clearRegisters());
 
       history.push(`/dashboard/${user_id}`);
 
@@ -171,6 +172,7 @@ export const deleteRegister = (register_id) => async (dispatch) => {
          payload: register_id,
       });
       dispatch(setAlert("Cierre de Caja Eliminado", "success", "2"));
+
       dispatch({ type: REGISTERS_CLEARED });
    } catch (err) {
       const msg = err.response.data.msg;

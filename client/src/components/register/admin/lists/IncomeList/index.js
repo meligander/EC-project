@@ -108,7 +108,7 @@ const IncomeList = ({
                </form>
 
                {invoices.length > 0 && (
-                  <div className="wrapper">
+                  <div className="wrapper list">
                      <table className="end-btn">
                         <thead>
                            <tr>

@@ -51,7 +51,7 @@ const Enrollment = ({
 
    const { student, year, category, currentMonth } = formData;
 
-   const enrollment_id = match.params.id;
+   const enroll_id = match.params.enrollment_id;
 
    useEffect(() => {
       const load = () => {
@@ -64,8 +64,8 @@ const Enrollment = ({
 
       if (categories.loading) {
          loadCategories();
-         if (enrollment_id) {
-            loadEnrollment(enrollment_id);
+         if (enroll_id) {
+            loadEnrollment(enroll_id);
          }
       } else {
          setOtherValues((prev) => ({
@@ -80,7 +80,7 @@ const Enrollment = ({
       loading,
       loadEnrollment,
       loadCategories,
-      enrollment_id,
+      enroll_id,
    ]);
 
    const selectStudent = (user) => {
@@ -122,7 +122,7 @@ const Enrollment = ({
    };
 
    const onSubmit = () => {
-      registerEnrollment(formData, history, userLogged._id, enrollment_id);
+      registerEnrollment(formData, history, userLogged._id, enroll_id);
    };
 
    const setToggle = (e) => {
@@ -134,24 +134,20 @@ const Enrollment = ({
    };
    return (
       <>
-         {(!loading || !enrollment_id) && !categories.loading ? (
+         {(!loading || !enroll_id) && !categories.loading ? (
             <>
-               {!enrollment_id ? (
-                  <h1>Inscripción</h1>
-               ) : (
-                  <h2>Editar inscripción</h2>
-               )}
+               {!enroll_id ? <h1>Inscripción</h1> : <h2>Editar inscripción</h2>}
                <Confirm
                   toggleModal={toggleModal}
                   setToggleModal={setToggle}
                   confirm={onSubmit}
                   text={`¿Está seguro que ${
-                     enrollment_id
+                     enroll_id
                         ? "desea modificar la inscripción"
                         : "los datos son correctos"
                   }?`}
                />
-               {!enrollment_id && (
+               {!enroll_id && (
                   <div className="btn-right">
                      <Link
                         to="/enrollment-list"
@@ -166,7 +162,7 @@ const Enrollment = ({
                   </div>
                )}
                <form className="form" onSubmit={(e) => setToggle(e)}>
-                  {!enrollment_id && (
+                  {!enroll_id && (
                      <StudentSearch
                         selectStudent={selectStudent}
                         selectedStudent={selectedStudent}
@@ -174,7 +170,7 @@ const Enrollment = ({
                         typeSearch="Enrollment"
                      />
                   )}
-                  <p className={`heading-tertiary ${!enrollment_id && "mt-3"}`}>
+                  <p className={`heading-tertiary ${!enroll_id && "mt-3"}`}>
                      Alumno:{" "}
                      <span className="text-secondary">
                         {student !== "" && selectedStudent.name}
@@ -209,7 +205,7 @@ const Enrollment = ({
                         Categoría
                      </label>
                   </div>
-                  {!enrollment_id && (
+                  {!enroll_id && (
                      <div className="form-group">
                         <input
                            className="form-input"
@@ -223,7 +219,7 @@ const Enrollment = ({
                         </label>
                      </div>
                   )}
-                  {enrollment_id && (
+                  {enroll_id && (
                      <div className="form-group">
                         <input
                            className="form-input"
@@ -237,7 +233,7 @@ const Enrollment = ({
                         </label>
                      </div>
                   )}
-                  {!enrollment_id && (
+                  {!enroll_id && (
                      <div className="form-group text-right py-1">
                         <input
                            className="form-checkbox"
@@ -259,8 +255,7 @@ const Enrollment = ({
                      </div>
                   )}
                   {(year === thisYear ||
-                     (enrollment_id &&
-                        Number(enrollment.year) === thisYear)) && (
+                     (enroll_id && Number(enrollment.year) === thisYear)) && (
                      <div className="form-group text-right">
                         <input
                            className="form-checkbox"
@@ -283,7 +278,7 @@ const Enrollment = ({
                   <div className="btn-ctr">
                      <button type="submit" className="btn btn-primary">
                         <i className="fas fa-user-edit"></i>{" "}
-                        {enrollment_id ? "Guardar Cambios" : "Inscribir"}
+                        {enroll_id ? "Guardar Cambios" : "Inscribir"}
                      </button>
                   </div>
                </form>

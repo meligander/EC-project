@@ -25,7 +25,7 @@ const Installments = ({
    updatePenalty,
    loadStudentInstallments,
 }) => {
-   const _id = match.params.studentid;
+   const _id = match.params.user_id;
 
    const [otherValues, setOtherValues] = useState({
       toggleModal: false,

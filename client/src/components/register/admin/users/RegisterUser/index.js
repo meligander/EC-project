@@ -133,7 +133,6 @@ const RegisterUser = ({
             ...prev,
             isEditing: true,
          }));
-
          if (user.town) loadTownNeighbourhoods(user.town._id);
 
          if (user.dob) user.dob = moment(user.dob).utc().format("YYYY-MM-DD");
@@ -176,11 +175,11 @@ const RegisterUser = ({
       }
 
       if (location.pathname !== "/register") {
-         if (!loading && !isEditing && studentNumber !== "") {
+         if (!loading && !isEditing) {
             load();
          } else {
             if (towns.loading) {
-               loadUser(match.params.id, true);
+               loadUser(match.params.user_id, true);
             } else {
                if (user && isEditing) {
                   if (user.town) {
@@ -215,7 +214,7 @@ const RegisterUser = ({
    }, [
       loading,
       location.pathname,
-      match.params.id,
+      match.params,
       towns.loading,
       neighbourhoods.loading,
       getStudentNumber,

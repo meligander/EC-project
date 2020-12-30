@@ -26,8 +26,8 @@ const Invoice = ({
             rem += invoice.details[x].value - invoice.details[x].payment;
          }
          setRemaining(rem);
-      } else loadInvoice(match.params.id);
-   }, [loadInvoice, match.params.id, invoice, loading]);
+      } else loadInvoice(match.params.invoice_id);
+   }, [loadInvoice, match.params, invoice, loading]);
 
    const installment = [
       "Insc",

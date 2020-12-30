@@ -16,7 +16,9 @@ const PrivateRoutes = ({
 }) => {
    if (!loading) {
       if (Component === Dashboard) {
-         return <Route exact path="/dashboard/:id" component={Dashboard} />;
+         return (
+            <Route exact path="/dashboard/:user_id" component={Dashboard} />
+         );
       }
       let pass = false;
       if (types.length === 0) {

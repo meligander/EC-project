@@ -41,13 +41,13 @@ const Comments = ({
    };
 
    const deletePostComment = () => {
-      let screen = 100 + (commentsArray.length - index) * 70;
+      let screen = 100 + (commentsArray.length - index) * 100;
       deleteComment(post_id, toDelete, -screen);
    };
 
    const registerComment = (e) => {
       e.preventDefault();
-      let screen = 100 + commentsArray.length * 70;
+      let screen = 100 + commentsArray.length * 100;
       addComment(post_id, postForm, -screen);
       setPostForm({
          text: "",

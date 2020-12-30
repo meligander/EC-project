@@ -96,9 +96,11 @@ export const registerExpence = (formData, history, user_id) => async (
       dispatch({
          type: EXPENCE_REGISTERED,
       });
+
+      dispatch(clearRegisters());
+
       dispatch(setAlert("Gasto/Ingreso Registrado", "success", "1", 7000));
       history.push(`/dashboard/${user_id}`);
-      dispatch(clearRegisters());
    } catch (err) {
       if (err.response.data.errors) {
          const errors = err.response.data.errors;

@@ -3,13 +3,7 @@ import Moment from "react-moment";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-const ClassesTable = ({
-   classes,
-   clearClass,
-   clearSearch,
-   clearProfile,
-   all = true,
-}) => {
+const ClassesTable = ({ classes, clearClass, clearProfile, all = true }) => {
    return (
       <div className="wrapper">
          <table>
@@ -17,7 +11,6 @@ const ClassesTable = ({
                <tr>
                   {all && <th>&nbsp; Profesor &nbsp;</th>}
                   <th>Categoría</th>
-                  {!all && <th>Aula</th>}
                   <th>Día 1</th>
                   <th>Comienzo</th>
                   <th>Fin</th>
@@ -49,7 +42,6 @@ const ClassesTable = ({
                               </td>
                            )}
                            <td>{classItem.category.name}</td>
-                           {!all && <td>{classItem.classroom}</td>}
                            <td>{classItem.day1}</td>
                            <td>
                               {classItem.hourin1 && (
@@ -88,7 +80,6 @@ const ClassesTable = ({
                               <Link
                                  onClick={() => {
                                     clearClass();
-                                    clearSearch();
                                     window.scroll(0, 0);
                                  }}
                                  to={`/class/${classItem._id}`}
@@ -116,7 +107,6 @@ ClassesTable.propTypes = {
    all: PropTypes.bool,
    clearClass: PropTypes.func.isRequired,
    clearProfile: PropTypes.func,
-   clearSearch: PropTypes.func.isRequired,
 };
 
 export default ClassesTable;

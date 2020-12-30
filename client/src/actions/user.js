@@ -284,6 +284,7 @@ export const updateCredentials = (formData, history, user_id) => async (
    }
 
    window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const addUserToList = (user) => (dispatch) => {

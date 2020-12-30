@@ -68,7 +68,7 @@ const AdminDashboard = ({
          if (activeUsers.activeTeachers === "") getActiveUsers("Profesor");
          if (totalDebt === "") getTotalDebt();
          if (activeClasses === "") getActiveClasses();
-         if (loading) loadRegister();
+         if (loading || !register) loadRegister();
 
          setOtherValues((prev) => ({
             ...prev,

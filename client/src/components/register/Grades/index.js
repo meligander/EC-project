@@ -28,8 +28,8 @@ const Grades = ({
 
    useEffect(() => {
       if (oneLoad) {
-         if (loading) loadGrades(match.params.id);
-         if (classes.loading) loadClass(match.params.id);
+         if (loading) loadGrades(match.params.class_id);
+         if (classes.loading) loadClass(match.params.class_id);
          clearGradeTypes();
          setOneLoad(false);
       } else {
@@ -47,7 +47,7 @@ const Grades = ({
       loadClass,
       loadGrades,
       clearGradeTypes,
-      match.params.id,
+      match.params.class_id,
    ]);
 
    const tabs = (className) => {
