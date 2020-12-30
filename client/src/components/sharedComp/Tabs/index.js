@@ -39,8 +39,8 @@ const Tabs = ({ tablist, panellist }) => {
                >
                   {tablist.length > 3 ? (
                      <>
-                        {tab.substring(0, 4)}
-                        <span className="hide-sm">{tab.substring(4)}</span>
+                        {tab.substring(0, 3)}
+                        <span className="hide-sm">{tab.substring(3)}</span>
                      </>
                   ) : (
                      tab
