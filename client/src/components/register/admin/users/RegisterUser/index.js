@@ -732,26 +732,22 @@ const RegisterUser = ({
                         </>
                      )}
 
-                     {isAdmin ||
-                        (type === "Profesor" && (
-                           <div className="form-group">
-                              <textarea
-                                 className="form-input"
-                                 name="description"
-                                 id="description"
-                                 rows="4"
-                                 onChange={(e) => onChange(e)}
-                                 value={description}
-                                 placeholder="Descripción"
-                              ></textarea>
-                              <label
-                                 htmlFor="description"
-                                 className="form-label"
-                              >
-                                 Descripción
-                              </label>
-                           </div>
-                        ))}
+                     {(isAdmin || type === "Profesor") && (
+                        <div className="form-group">
+                           <textarea
+                              className="form-input"
+                              name="description"
+                              id="description"
+                              rows="4"
+                              onChange={(e) => onChange(e)}
+                              value={description}
+                              placeholder="Descripción"
+                           ></textarea>
+                           <label htmlFor="description" className="form-label">
+                              Descripción
+                           </label>
+                        </div>
+                     )}
 
                      {isEditing && isAdmin && (
                         <div className="form-group my-3">

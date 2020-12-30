@@ -135,6 +135,7 @@
 
       img {
          width: 5rem;
+         height: auto;
 
          @include respond(small-phone) {
             width: 4rem;
