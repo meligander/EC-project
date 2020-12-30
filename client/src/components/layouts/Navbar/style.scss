@@ -134,7 +134,8 @@
       @include easeOut;
 
       @include respond(phone) {
-         height: 17vh;
+         height: 25vh;
+         padding: 3rem 0 5rem 0;
          transform: translate3d(100%, 0, 0);
       }
 
@@ -150,7 +151,7 @@
       @include easeOut;
 
       @include respond(phone) {
-         height: 83vh;
+         height: 75vh;
          transform: translate3d(-100%, 0, 0);
       }
 
