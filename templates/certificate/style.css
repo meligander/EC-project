@@ -5,7 +5,7 @@ html {
 .container {
    margin: 5rem;
    font-size: 1.7rem;
-   border: 2px solid black;
+   border: 1.5px solid black;
    height: 95rem;
    position: relative;
 }
@@ -28,7 +28,7 @@ table {
 
    /* deployed */
    font-size: 80%;
-   font-weight: lighter;
+   font-weight: 300;
 }
 
 table.header {
@@ -36,12 +36,12 @@ table.header {
 }
 
 table.header td {
-   border-bottom: 2px solid black;
+   border-bottom: 1.5px solid black;
 }
 
 table.header .logo {
    width: 35%;
-   border-right: 2px solid black;
+   border-right: 1.5px solid black;
 }
 
 table.header .logo img {
@@ -120,7 +120,7 @@ table.header .logo img {
 
 .grades .grades-table th,
 .grades .grades-table td {
-   border: 2px solid black;
+   border: 1.5px solid black;
    padding: 0.5rem 0;
 }
 

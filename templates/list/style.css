@@ -28,7 +28,7 @@ table {
 
    /* deployed */
    font-size: 80%;
-   font-weight: lighter;
+   font-weight: 300;
 }
 table.small {
    width: 60%;

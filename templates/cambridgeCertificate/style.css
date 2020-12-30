@@ -5,7 +5,7 @@ html {
 .container {
    margin: 5rem;
    font-size: 1.7rem;
-   border: 2px solid black;
+   border: 1.5px solid black;
    height: 95rem;
    position: relative;
 }
@@ -74,7 +74,7 @@ table {
 
    /* deployed */
    font-size: 80%;
-   font-weight: lighter;
+   font-weight: 300;
 }
 
 table td img {
