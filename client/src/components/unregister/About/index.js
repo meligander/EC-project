@@ -13,10 +13,10 @@ const About = () => {
          <header className="header">
             <div className="header-textbox">
                <h2 className="heading-secondary text-white mb-4">
-                  Instituto de Ingles en la Villa de Merlo
+                  Instituto de Inglés en la Villa de Merlo
                </h2>
                <p className="heading-tertiary text-light mb-5">
-                  Clases de ingles para todas las edades. bla bla bla
+                  Clases de inglés para todas las edades. bla bla bla
                </p>
             </div>
          </header>
