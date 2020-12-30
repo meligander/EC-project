@@ -135,10 +135,11 @@
 
       img {
          width: 5rem;
-         height: auto;
+         height: 4.5rem;
 
          @include respond(small-phone) {
             width: 4rem;
+            height: 3.7rem;
          }
       }
 
