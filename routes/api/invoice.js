@@ -440,16 +440,19 @@ router.post("/create-invoice", (req, res) => {
    for (let x = 0; x < invoice.details.length; x++) {
       let userName = "";
       let instName = "";
+      let year = "";
       if (invoice.details[x].installment) {
          userName = `<td> ${invoice.details[x].installment.student.lastname}, ${invoice.details[x].installment.student.name} </td>`;
          instName = `<td> ${
             installment[invoice.details[x].installment.number]
          }</td>`;
+         year = `<td>${invoice.details[x].installment.year}</td>`;
       } else {
          userName = `<td> ${invoice.details[x].item.student.lastname}, ${invoice.details[x].item.student.name} </td>`;
          instName = `<td> ${installment[invoice.details[x].item.number]}</td>`;
+         year = `<td>${invoice.details[x].item.year}</td>`;
       }
-      const year = `<td>${invoice.details[x].item.year}</td>`;
+
       const value = `<td> $${invoice.details[x].value} </td>`;
       const payment = `<td> $${invoice.details[x].payment} </td>`;
       tbody += "<tr>" + userName + instName + year + value + payment + "</tr>";

@@ -95,8 +95,8 @@ const Confirm = ({
          case "active":
             return (
                <div className="popup-text">
-                  <h3 className="heading-tertiary">{text.question}</h3>
-                  <p className="paragraph">{text.info}</p>
+                  <h3>{text.question}</h3>
+                  <p>{text.info}</p>
                </div>
             );
          default:

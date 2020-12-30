@@ -728,49 +728,48 @@ const RegisterUser = ({
                                  </div>
                               )}
                            </div>
-
-                           {type === "Admin/Profesor" && (
-                              <div className="form-group">
-                                 <textarea
-                                    className="form-input"
-                                    name="description"
-                                    id="description"
-                                    rows="4"
-                                    onChange={(e) => onChange(e)}
-                                    value={description}
-                                    placeholder="Descripción"
-                                 ></textarea>
-                                 <label
-                                    htmlFor="description"
-                                    className="form-label"
-                                 >
-                                    Descripción
-                                 </label>
-                              </div>
-                           )}
                            {changeType()}
-                           {isEditing && (
-                              <div className="form-group my-3">
-                                 <input
-                                    className="form-checkbox"
-                                    onChange={() => {
-                                       if (!active) onChangeCheckbox();
-                                       else setToggleActive();
-                                    }}
-                                    type="checkbox"
-                                    checked={active}
-                                    name="active"
-                                    id="active"
-                                 />
-                                 <label
-                                    className="checkbox-lbl"
-                                    htmlFor="active"
-                                 >
-                                    {active ? "Activo" : "Inactivo"}
-                                 </label>
-                              </div>
-                           )}
                         </>
+                     )}
+
+                     {isAdmin ||
+                        (type === "Profesor" && (
+                           <div className="form-group">
+                              <textarea
+                                 className="form-input"
+                                 name="description"
+                                 id="description"
+                                 rows="4"
+                                 onChange={(e) => onChange(e)}
+                                 value={description}
+                                 placeholder="Descripción"
+                              ></textarea>
+                              <label
+                                 htmlFor="description"
+                                 className="form-label"
+                              >
+                                 Descripción
+                              </label>
+                           </div>
+                        ))}
+
+                     {isEditing && isAdmin && (
+                        <div className="form-group my-3">
+                           <input
+                              className="form-checkbox"
+                              onChange={() => {
+                                 if (!active) onChangeCheckbox();
+                                 else setToggleActive();
+                              }}
+                              type="checkbox"
+                              checked={active}
+                              name="active"
+                              id="active"
+                           />
+                           <label className="checkbox-lbl" htmlFor="active">
+                              {active ? "Activo" : "Inactivo"}
+                           </label>
+                        </div>
                      )}
 
                      {isEditing && (

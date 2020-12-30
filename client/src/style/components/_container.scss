@@ -4,8 +4,11 @@
    padding: 2rem 3.2rem;
    min-height: 90vh;
 
-   @include respond(small-phone) {
-      padding: 1.5rem 2rem;
+   @include respond(tab-port) {
+      padding: 2rem;
+   }
+   @include respond(phone) {
+      padding: 3rem 2rem;
    }
 
    h1,
