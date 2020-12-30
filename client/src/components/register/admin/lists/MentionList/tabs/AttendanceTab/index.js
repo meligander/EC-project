@@ -121,18 +121,20 @@ function AttendanceTab({
                            i < (page + 1) * 10 && (
                               <tr key={enroll._id}>
                                  <td>{enroll.student.studentnumber}</td>
-                                 <Link
-                                    className="btn-text"
-                                    to={`/dashboard/${enroll.student._id}`}
-                                    onClick={() => {
-                                       window.scroll(0, 0);
-                                       clearProfile();
-                                    }}
-                                 >
-                                    {enroll.student.lastname +
-                                       ", " +
-                                       enroll.student.name}
-                                 </Link>
+                                 <td>
+                                    <Link
+                                       className="btn-text"
+                                       to={`/dashboard/${enroll.student._id}`}
+                                       onClick={() => {
+                                          window.scroll(0, 0);
+                                          clearProfile();
+                                       }}
+                                    >
+                                       {enroll.student.lastname +
+                                          ", " +
+                                          enroll.student.name}
+                                    </Link>
+                                 </td>
                                  <td>{enroll.category.name}</td>
                                  <td>{enroll.classroom.absence}</td>
                               </tr>

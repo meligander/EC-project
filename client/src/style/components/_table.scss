@@ -103,14 +103,10 @@ table {
       border-bottom: 2px solid rgba($primary-color, 0.4);
    }
 
-   tr {
-      text-align: center !important;
-   }
-
    th,
    td {
       padding: 1rem;
-      //text-align: center !important;
+      text-align: center !important;
 
       @include respond(small-phone) {
          padding: 0.5rem;
