@@ -1,5 +1,7 @@
 html {
+   /* deploy */
    font-size: 50%;
+   font-family: "Times New Roman", Times, serif;
 }
 
 .header {
