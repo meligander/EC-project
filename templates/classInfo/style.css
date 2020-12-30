@@ -1,5 +1,9 @@
 @import "../list/style.css";
 
+html {
+   font-size: 40%;
+}
+
 .class-info,
 .teacher {
    font-family: "Courgette", cursive;

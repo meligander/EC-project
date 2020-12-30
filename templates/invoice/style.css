@@ -1,3 +1,7 @@
+html {
+   font-size: 40%;
+}
+
 .container {
    margin: 5rem;
    padding: 0 3rem 3rem 3rem;
