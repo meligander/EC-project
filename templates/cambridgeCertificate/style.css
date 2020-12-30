@@ -48,7 +48,7 @@ html {
    padding: 0.5rem 1rem;
 
    /* deploy */
-   font-size: 80%;
+   font-size: 85%;
 }
 
 .student {
@@ -76,7 +76,6 @@ table {
    text-align: center;
 
    /* deployed */
-   font-size: 80%;
    font-weight: 300;
 }
 

@@ -27,7 +27,6 @@ table {
    text-align: center;
 
    /* deployed */
-   font-size: 80%;
    font-weight: 300;
 }
 
@@ -53,7 +52,7 @@ table.header .logo img {
    padding: 5rem 1rem 2rem 1rem;
 
    /* deploy */
-   font-size: 80%;
+   font-size: 85%;
 }
 
 .body .capital {
