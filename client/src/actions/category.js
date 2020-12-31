@@ -5,6 +5,7 @@ import { saveAs } from "file-saver";
 import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
 import { updateExpiredIntallments } from "./installment";
+import { clearProfile } from "./user";
 
 import {
    CATEGORIES_LOADED,
@@ -48,6 +49,7 @@ export const updateCategories = (formData, history, user_id) => async (
       dispatch(
          setAlert("Precios de Categorías Modificados", "success", "1", 7000)
       );
+      dispatch(clearProfile());
       history.push(`/dashboard/${user_id}`);
    } catch (err) {
       if (err.response.data.errors) {

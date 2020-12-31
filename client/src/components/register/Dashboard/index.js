@@ -228,7 +228,7 @@ const Dashboard = ({
                                        <span className="text-dark">
                                           Descuento:{" "}
                                        </span>
-                                       {user.discount}
+                                       {user.discount}%
                                     </p>
                                     <p>
                                        <span className="text-dark">

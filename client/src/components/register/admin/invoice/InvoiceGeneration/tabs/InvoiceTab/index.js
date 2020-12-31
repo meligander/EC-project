@@ -401,7 +401,7 @@ const InvoiceTab = ({
                                        }
                                        placeholder="Monto"
                                        min="0"
-                                       max="1800"
+                                       max={invoice.item.value}
                                        name={name}
                                        value={invoice.payment}
                                     />
