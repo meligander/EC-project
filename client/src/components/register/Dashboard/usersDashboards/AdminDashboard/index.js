@@ -268,7 +268,7 @@ const AdminDashboard = ({
                            {activeUsers.activeTeachers}
                         </p>
                         <p className="heading-tertiary">
-                           <span className="text-dark">Cursos: </span>
+                           <span className="text-dark">Clases: </span>
                            {activeClasses}
                         </p>
                      </div>
