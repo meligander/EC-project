@@ -41,7 +41,7 @@ const StudentSearch = ({
    return (
       <div className="my-2">
          <h3>{`Búsqueda de ${
-            typeSearch === "Tutor" ? "Usuarios" : "Alumnos"
+            typeSearch === "Tutor/Student" ? "Usuarios" : "Alumnos"
          }`}</h3>
          <div className="border my-2">
             <Alert type="3" />
@@ -63,7 +63,7 @@ const StudentSearch = ({
                   onClick={(e) => searchStudents(e)}
                >
                   <i className="fas fa-filter"></i>
-                  <span className="hide-sm">Buscar</span>
+                  <span className="hide-sm">&nbsp; Buscar</span>
                </button>
             </div>
             <table className="search">
@@ -125,11 +125,14 @@ const StudentSearch = ({
                >
                   {typeSearch !== "Installment" ? (
                      <>
-                        <i className="fas fa-plus-circle"></i>
-                        <span className="hide-md"> Agregar</span>
+                        <i className="fas fa-plus"></i>
+                        <span className="hide-md">&nbsp; Agregar</span>
                      </>
                   ) : (
-                     "Ver Cuotas"
+                     <>
+                        <i className="fas fa-money-check-alt"></i>
+                        <span className="hide-md">&nbsp; Ver Cuotas</span>
+                     </>
                   )}
                </button>
             </div>

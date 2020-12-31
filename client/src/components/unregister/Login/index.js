@@ -76,7 +76,7 @@ const Login = ({ loginUser, mixvalues: { loadingSpinner }, changePage }) => {
             </div>
             <div className="btn-right">
                <button type="submit" className="btn btn-primary">
-                  <i className="fas fa-sign-in-alt"></i> &nbsp;Iniciar Sesión
+                  <i className="fas fa-sign-in-alt"></i>&nbsp; Iniciar Sesión
                </button>
             </div>
          </form>

@@ -229,7 +229,7 @@ const EditGradeType = ({
                                        onClick={() => setToggleDelete(row)}
                                        className="btn btn-danger"
                                     >
-                                       <i className="fas fa-times"></i>
+                                       <i className="far fa-trash-alt"></i>
                                     </button>
                                  </td>
                               </tr>

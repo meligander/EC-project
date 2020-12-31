@@ -143,7 +143,7 @@ const EditExpenceType = ({
                                     onClick={() => setToggleDelete(exptyp)}
                                     className="btn btn-danger"
                                  >
-                                    <i className="fas fa-trash"></i>
+                                    <i className="far fa-trash-alt"></i>
                                  </button>
                               </td>
                            </tr>

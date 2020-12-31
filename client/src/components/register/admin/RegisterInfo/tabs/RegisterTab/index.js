@@ -94,7 +94,10 @@ const RegisterTab = ({
                                     }}
                                     to="/income-list"
                                  >
-                                    <span className="hide-sm">Ver </span>Listado
+                                    <i className="fas fa-list-ul"></i>
+                                    <span className="hide-sm">
+                                       &nbsp; Listado
+                                    </span>
                                  </Link>
                               </td>
                            </tr>
@@ -117,7 +120,10 @@ const RegisterTab = ({
                                     }}
                                     to="/transaction-list"
                                  >
-                                    <span className="hide-sm">Ver </span>Listado
+                                    <i className="fas fa-list-ul"></i>
+                                    <span className="hide-sm">
+                                       &nbsp; Listado
+                                    </span>
                                  </Link>
                               </td>
                            </tr>
@@ -157,7 +163,10 @@ const RegisterTab = ({
                                     }}
                                     className="btn btn-light"
                                  >
-                                    <span className="hide-sm">Ver </span>Cierres
+                                    <i className="fas fa-list-ul"></i>
+                                    <span className="hide-sm">
+                                       &nbsp; Cierres
+                                    </span>
                                  </Link>
                               </td>
                            </tr>
@@ -232,7 +241,7 @@ const RegisterTab = ({
                      }`}
                   >
                      <i className="far fa-save"></i>
-                     <span className="hide-sm"> Guardar</span>
+                     <span className="hide-sm">&nbsp; Guardar</span>
                   </button>
                </div>
             </div>

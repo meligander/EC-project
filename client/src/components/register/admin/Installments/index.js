@@ -86,7 +86,7 @@ const Installments = ({
                {userLogged.type === "Administrador" ||
                   userLogged.type === "Admin/Profesor"}
                <button className="btn btn-secondary" onClick={setToggle}>
-                  <i className="fas fa-dollar-sign"></i> Recargo
+                  <i className="fas fa-dollar-sign"></i>&nbsp; Recargo
                </button>
                <Link
                   to="/installment-list"
@@ -96,7 +96,8 @@ const Installments = ({
                   }}
                   className="btn btn-light"
                >
-                  Ver Listado Deudas
+                  <i className="fas fa-list-ul"></i>&nbsp;{" "}
+                  <span className="hide-sm">Listado</span> Deudas
                </Link>
             </div>
             <InstallmentsSearch student={student} />
@@ -117,8 +118,7 @@ const Installments = ({
                      clearInstallment();
                   }}
                >
-                  <i className="fas fa-plus-circle"></i> &nbsp; Agregar una
-                  cuota
+                  <i className="fas fa-plus-circle"></i>&nbsp; Agregar cuota
                </Link>
             </div>
          </div>

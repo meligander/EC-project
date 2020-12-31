@@ -256,7 +256,7 @@ const IncomeExpenceTab = ({
                disabled={!register}
             >
                <i className="far fa-save"></i>
-               <span className="hide-sm"> Guardar</span>
+               <span className="hide-sm">&nbsp; Guardar</span>
             </button>
 
             {(userLogged.type === "Administrador" ||
@@ -270,7 +270,7 @@ const IncomeExpenceTab = ({
                   className="btn btn-mix-secondary"
                >
                   <i className="fas fa-edit"></i>
-                  <span className="hide-sm"> Tipo Movimiento</span>
+                  <span className="hide-sm">&nbsp; Tipo Movimiento</span>
                </Link>
             )}
          </div>

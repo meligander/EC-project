@@ -41,7 +41,7 @@ const Search = ({
                   }}
                >
                   <i className="fas fa-user-plus"></i>
-                  <span className="hide-sm"> Registrar Usuario</span>
+                  <span className="hide-sm">&nbsp; Registrar Usuario</span>
                </Link>
             </div>
          )}

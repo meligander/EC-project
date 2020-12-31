@@ -97,7 +97,7 @@ const StudentNavbar = ({
                }}
             >
                <i className="fas fa-address-book"></i>
-               <span className="hide-md"> &nbsp; Clase</span>
+               <span className="hide-md">&nbsp; Clase</span>
             </Link>
          </li>
          <li
@@ -133,7 +133,7 @@ const StudentNavbar = ({
                }}
             >
                <i className="fas fa-sign-out-alt"></i>
-               <span className="hide-md"> &nbsp; Cerrar Sesión</span>
+               <span className="hide-md">&nbsp; Cerrar Sesión</span>
             </Link>
          </li>
       </ul>

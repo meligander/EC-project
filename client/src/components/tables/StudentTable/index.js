@@ -40,9 +40,7 @@ const StudentTable = ({
                            <td>
                               {user.lastname}, {user.name}
                            </td>
-                           <td className="hide-sm">
-                              {user.dob !== undefined && years}
-                           </td>
+                           <td className="hide-sm">{user.dob && years}</td>
                            {search && (
                               <>
                                  <td className="hide-sm">{user.cel}</td>
@@ -67,7 +65,7 @@ const StudentTable = ({
                                     className="btn btn-success"
                                     onClick={(e) => addChild(e, user)}
                                  >
-                                    <i className="fas fa-plus-circle"></i>&nbsp;
+                                    <i className="fas fa-plus"></i>&nbsp;
                                     Agregar
                                  </button>
                               </td>

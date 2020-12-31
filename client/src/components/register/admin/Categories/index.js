@@ -155,8 +155,8 @@ const Categories = ({
                      onClick={setToggle}
                      className="btn btn-primary"
                   >
-                     <i className="far fa-save"></i> Actualizar
-                     <span className="hide-sm"> Precios</span>
+                     <i className="far fa-save"></i>
+                     <span className="hide-sm">&nsbp; Actualizar</span>
                   </button>
                   <button
                      className="btn btn-secondary"

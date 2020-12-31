@@ -344,11 +344,11 @@ const GradesTab = ({
          <div className="btn-right">
             <button className="btn btn-primary" onClick={setToggleSave}>
                <i className="far fa-save"></i>
-               <span className="hide-md"> Guardar Cambios</span>
+               <span className="hide-md">&nbsp; Guardar Cambios</span>
             </button>
             <button className="btn btn-light" onClick={clickAddGrade}>
                <i className="fas fa-plus"></i>
-               <span className="hide-md"> Nota</span>
+               <span className="hide-md">&nbsp; Nota</span>
             </button>
             <button
                className="btn btn-secondary"
@@ -364,8 +364,8 @@ const GradesTab = ({
                   className="btn btn-secondary"
                   onClick={() => pdfGeneratorSave(true)}
                >
-                  <i className="fas fa-file-pdf"></i> Todas{" "}
-                  <span className="hide-md">las notas</span>
+                  <i className="fas fa-file-pdf"></i>&nbsp; Todas
+                  <span className="hide-md"> las notas</span>
                </button>
             )}
             {(period === 5 ||
@@ -410,7 +410,7 @@ const GradesTab = ({
                         className="btn btn-dark"
                      >
                         <i className="fas fa-plus"></i>
-                        <span className="hide-md"> Agregar</span>
+                        <span className="hide-md">&nbsp; Agregar</span>
                      </button>
                      {(userLogged.type === "Administrador" ||
                         userLogged.type === "Admin/Profesor") && (
@@ -423,7 +423,7 @@ const GradesTab = ({
                            className="btn btn-mix-secondary"
                         >
                            <i className="fas fa-edit"></i>
-                           <span className="hide-md"> Tipo Nota</span>
+                           <span className="hide-md">&nbsp; Tipo Nota</span>
                         </Link>
                      )}
                   </div>

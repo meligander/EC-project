@@ -134,8 +134,8 @@ const OneClass = ({
                               window.scroll(0, 0);
                            }}
                         >
-                           <i className="fas fa-marker"></i>{" "}
-                           <span className="hide-sm">Notas</span>
+                           <i className="fas fa-marker"></i>
+                           <span className="hide-sm">&nbsp; Notas</span>
                         </Link>
                         <Link
                            to={
@@ -154,8 +154,8 @@ const OneClass = ({
                               window.scroll(0, 0);
                            }}
                         >
-                           <i className="fas fa-check-circle"></i>{" "}
-                           <span className="hide-sm">Inasistencias</span>
+                           <i className="fas fa-check-circle"></i>
+                           <span className="hide-sm">&nbsp; Inasistencias</span>
                         </Link>
                      </>
                   )}
@@ -176,8 +176,8 @@ const OneClass = ({
                         window.scroll(0, 0);
                      }}
                   >
-                     <i className="far fa-comments"></i>{" "}
-                     <span className="hide-sm">Chat</span>
+                     <i className="far fa-comments"></i>
+                     <span className="hide-sm">&nbsp; Chat</span>
                   </Link>
                </div>
                <br />

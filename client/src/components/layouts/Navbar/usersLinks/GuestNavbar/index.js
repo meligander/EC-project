@@ -45,8 +45,8 @@ const GuestNavbar = ({
                   changePageAndMenu("index");
                }}
             >
-               <i className="fas fa-home"></i> &nbsp;
-               <span className="hide-md">Página Principal</span>
+               <i className="fas fa-home"></i>
+               <span className="hide-md">&nbsp; Página Principal</span>
             </Link>
          </li>
          <li
@@ -64,8 +64,8 @@ const GuestNavbar = ({
                   changePageAndMenu("about");
                }}
             >
-               <i className="fas fa-info-circle"></i> &nbsp;
-               <span className="hide-md">Acerca de Nosotros</span>
+               <i className="fas fa-info-circle"></i>
+               <span className="hide-md">&nbsp; Acerca de Nosotros</span>
             </Link>
          </li>
          <li
@@ -83,8 +83,8 @@ const GuestNavbar = ({
                   changePageAndMenu("contact");
                }}
             >
-               <i className="fas fa-address-book"></i> &nbsp;
-               <span className="hide-md">Contáctanos</span>
+               <i className="fas fa-address-book"></i>
+               <span className="hide-md">&nbsp; Contáctanos</span>
             </Link>
          </li>
          <li
@@ -102,8 +102,8 @@ const GuestNavbar = ({
                   changePageAndMenu("login");
                }}
             >
-               <i className="fas fa-sign-in-alt"></i> &nbsp;
-               <span className="hide-md">Iniciar Sesión</span>
+               <i className="fas fa-sign-in-alt"></i>
+               <span className="hide-md">&nbsp; Iniciar Sesión</span>
             </Link>
          </li>
       </ul>

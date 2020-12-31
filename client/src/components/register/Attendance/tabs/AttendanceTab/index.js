@@ -240,11 +240,11 @@ const AttendanceTab = ({
          <div className="btn-right">
             <button className="btn btn-primary" onClick={setToggleSave}>
                <i className="far fa-save"></i>
-               <span className="hide-md"> Guardar Cambios</span>
+               <span className="hide-md">&nbsp; Guardar</span>
             </button>
             <button className="btn btn-light" onClick={clickAddDate}>
                <i className="fas fa-plus"></i>
-               <span className="hide-md"> Día</span>
+               <span className="hide-md">&nbsp; Día</span>
             </button>
             <button className="btn btn-secondary" onClick={pdfGeneratorSave}>
                <i className="fas fa-file-pdf"></i>
@@ -269,7 +269,7 @@ const AttendanceTab = ({
                   <div className="btn-ctr">
                      <button className="btn btn-dark" onClick={addDate}>
                         <i className="fas fa-plus"></i>
-                        <span className="hide-sm"> Agregar</span>
+                        <span className="hide-sm">&nbsp; Agregar</span>
                      </button>
                   </div>
                </div>

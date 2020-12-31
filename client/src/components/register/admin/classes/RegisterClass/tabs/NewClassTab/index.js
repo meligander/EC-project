@@ -276,13 +276,16 @@ const NewClassTab = ({
                Todavía no hay alumnos añadidos
             </p>
          )}
+
          <div className="btn-ctr">
-            <input
-               className="btn btn-primary"
-               onClick={setToggle}
-               type="submit"
-               value={registerClass ? "Registrar" : "Guardar Cambios"}
-            />
+            <button className="btn btn-primary" onClick={setToggle}>
+               {!registerClass ? (
+                  <i className="fas fa-edit"></i>
+               ) : (
+                  <i className="far fa-save"></i>
+               )}
+               &nbsp; {!registerClass ? "Guardar Cambios" : "Registrar"}
+            </button>
          </div>
       </>
    );

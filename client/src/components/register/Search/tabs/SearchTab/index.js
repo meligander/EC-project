@@ -142,7 +142,7 @@ const SearchTab = ({
                   onClick={(e) => searchUsers(e)}
                   className="btn btn-light"
                >
-                  <i className="fas fa-filter"></i> Buscar
+                  <i className="fas fa-filter"></i>&nbsp; Buscar
                </button>
             </div>
          </form>

@@ -157,7 +157,8 @@ const Enrollment = ({
                         }}
                         className="btn btn-light"
                      >
-                        Ver Listado
+                        <i className="fas fa-list-ul"></i>
+                        <span className="hide-sm">&nbsp; Listado</span>
                      </Link>
                   </div>
                )}
@@ -277,7 +278,7 @@ const Enrollment = ({
                   <div className="show-md mt-4"></div>
                   <div className="btn-ctr">
                      <button type="submit" className="btn btn-primary">
-                        <i className="fas fa-user-edit"></i>{" "}
+                        <i className="fas fa-user-edit"></i>&nbsp;{" "}
                         {enroll_id ? "Guardar Cambios" : "Inscribir"}
                      </button>
                   </div>

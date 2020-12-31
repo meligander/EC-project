@@ -252,16 +252,20 @@ const Dashboard = ({
                                        clearOtherValues("studentNumber");
                                     }}
                                  >
-                                    <i className="far fa-edit"></i>{" "}
-                                    <span className="hide-md">Editar</span>
+                                    <i className="far fa-edit"></i>
+                                    <span className="hide-md">
+                                       &nbsp; Editar
+                                    </span>
                                  </Link>
                                  {isAdmin && (
                                     <button
                                        className="btn btn-danger"
                                        onClick={setToggle}
                                     >
-                                       <i className="fas fa-user-minus"></i>{" "}
-                                       <span className="hide-md">Eliminar</span>
+                                       <i className="fas fa-user-minus"></i>
+                                       <span className="hide-md">
+                                          &nbsp; Eliminar
+                                       </span>
                                     </button>
                                  )}
                               </>

@@ -28,7 +28,7 @@ const ChosenChildrenTable = ({ children, deleteChild, clearProfile }) => {
                            onClick={(e) => deleteChild(e, child)}
                            className="btn btn-danger"
                         >
-                           <i className="far fa-trash-alt"></i> &nbsp; Eliminar
+                           <i className="far fa-trash-alt"></i>&nbsp; Eliminar
                         </button>
                      </td>
                   </tr>
