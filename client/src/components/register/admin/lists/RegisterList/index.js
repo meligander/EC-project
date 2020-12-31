@@ -75,14 +75,14 @@ const RegisterList = ({
                   setToggleModal={setToggle}
                />
                <h2>Caja Diaria</h2>
-               <form className="form">
+               <form className="form" onSubmit={search}>
                   <DateFilter
                      endDate={endDate}
                      startDate={startDate}
                      onChange={onChange}
                   />
                   <div className="btn-right my-1">
-                     <button onClick={search} className="btn btn-light">
+                     <button type="submit" className="btn btn-light">
                         <i className="fas fa-filter"></i>&nbsp; Buscar
                      </button>
                   </div>

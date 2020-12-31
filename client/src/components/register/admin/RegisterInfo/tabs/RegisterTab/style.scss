@@ -1,6 +1,10 @@
 @import "../../../../../../style/abstract.scss";
 
 .register-tab {
+   .form {
+      width: 100%;
+   }
+
    table td {
       padding: 2rem 1rem;
 

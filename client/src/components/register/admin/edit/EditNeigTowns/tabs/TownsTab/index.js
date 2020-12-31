@@ -77,7 +77,6 @@ const TownsTab = ({
 
    return (
       <>
-         (
          <div className="mt-3">
             <Confirm
                toggleModal={toggleModalDelete}
@@ -131,7 +130,6 @@ const TownsTab = ({
             )}
             <EditButtons add={addTown} save={setToggleSave} type="Localidad" />
          </div>
-         )
       </>
    );
 };

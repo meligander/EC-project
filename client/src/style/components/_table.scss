@@ -140,6 +140,10 @@ table {
 
    td:first-child input {
       min-width: 17rem;
+
+      @include respond(small-phone) {
+         min-width: 12rem;
+      }
    }
 
    tr:nth-child(odd) {

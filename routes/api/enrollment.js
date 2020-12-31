@@ -313,6 +313,7 @@ router.post(
             value: categoryInstallment.value,
             expired: false,
             enrollment: enrollment.id,
+            debt: true,
          });
          installment.save();
 

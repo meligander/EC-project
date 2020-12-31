@@ -28,6 +28,10 @@
 
    &.smaller {
       width: 50%;
+
+      @include respond(small-phone) {
+         width: 75%;
+      }
    }
 
    &-group {
@@ -37,6 +41,9 @@
          display: inline-flex;
          width: 100%;
 
+         .form-input {
+            width: 50%;
+         }
          .form-label {
             width: 100%;
          }

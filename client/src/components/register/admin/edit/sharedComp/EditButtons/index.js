@@ -6,7 +6,7 @@ const EditButtons = ({ save, add, type }) => {
       <div className="btn-right p-2">
          <button onClick={save} className="btn btn-primary">
             <i className="far fa-save"></i>
-            <span className="hide-sm">&nsbp; Guardar </span>
+            <span className="hide-sm">&nbsp; Guardar </span>
          </button>
          <button onClick={add} className="btn btn-primary">
             <i className="fas fa-plus"></i>

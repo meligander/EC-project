@@ -35,6 +35,11 @@
          @include respond(phone) {
             top: 0;
             transform: scale(1.2);
+
+            &:hover {
+               left: 10.6rem;
+               transform: scale(2.5) !important;
+            }
          }
       }
       &--p2 {
@@ -45,6 +50,10 @@
             top: -1rem;
             transform: scale(1.3);
             z-index: 100;
+
+            &:hover {
+               transform: scale(2.5) !important;
+            }
          }
       }
       &--p3 {
@@ -55,6 +64,12 @@
             top: 1rem;
             left: 0;
             transform: scale(1.2);
+
+            &:hover {
+               left: -10.7rem !important;
+               top: 0 !important;
+               transform: scale(2.5) !important;
+            }
          }
       }
 

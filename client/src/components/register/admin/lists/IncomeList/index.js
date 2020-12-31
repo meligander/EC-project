@@ -86,7 +86,7 @@ const IncomeList = ({
                   confirm={confirm}
                />
                <h2>Listado Ingresos</h2>
-               <form className="form bigger">
+               <form className="form bigger" onSubmit={search}>
                   <DateFilter
                      endDate={endDate}
                      startDate={startDate}
@@ -101,7 +101,7 @@ const IncomeList = ({
                   />
 
                   <div className="btn-right mb-3">
-                     <button onClick={search} className="btn btn-light">
+                     <button type="submit" className="btn btn-light">
                         <i className="fas fa-filter"></i>&nbsp; Buscar
                      </button>
                   </div>

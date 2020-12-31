@@ -140,7 +140,7 @@ const IncomeExpenceTab = ({
    };
 
    return (
-      <div className="register income-tab">
+      <>
          <Alert type="3" />
          <Confirm
             toggleModal={toggleModal}
@@ -154,127 +154,131 @@ const IncomeExpenceTab = ({
                Movimiento
             </p>
          )}
-         <table>
-            <tbody>
-               <tr>
-                  <td>Dinero en Caja</td>
-                  <td>${register ? register.registermoney : 0}</td>
-               </tr>
-               <tr>
-                  <td>Tipo de Gasto</td>
-                  <td>
-                     <select
-                        name="expencetype"
-                        value={expencetype}
-                        onChange={onChange}
-                        id="select"
-                     >
-                        <option value="">* Tipo de Movimiento</option>
-                        {!expences.loadingET &&
-                           expences.expencetypes.map((expty) => (
-                              <option key={expty._id} value={expty._id}>
-                                 {expty.name}
-                              </option>
-                           ))}
-                     </select>
-                  </td>
-               </tr>
-               {show && (
-                  <>
-                     <tr>
-                        <td>Empleado</td>
-                        <td>
-                           <select
-                              name="teacher"
-                              value={teacher._id}
-                              onChange={onChangeTeacher}
-                              id="select"
-                           >
-                              <option value={0}>* Empleado</option>
-                              {!users.loadingUsers &&
-                                 users.users.map((user) => (
-                                    <React.Fragment key={user._id}>
-                                       {user.type !== "Admin/Profesor" && (
-                                          <option value={user._id}>
-                                             {user.lastname}, {user.name}
-                                          </option>
-                                       )}
-                                    </React.Fragment>
-                                 ))}
-                           </select>
-                        </td>
-                     </tr>
-                     <tr>
-                        <td>Horas</td>
-                        <td>
-                           <input
-                              type="number"
-                              onChange={setValueAfterHours}
-                              placeholder="Horas"
-                              value={hours}
-                              name="hours"
-                              id=""
-                           />
-                        </td>
-                     </tr>
-                  </>
-               )}
-               <tr>
-                  <td>Importe</td>
-                  <td>
-                     <input
-                        type="text"
-                        placeholder="Importe"
-                        name="value"
-                        onChange={onChange}
-                        value={value}
-                     />
-                  </td>
-               </tr>
-               <tr>
-                  <td>Descripción</td>
-                  <td>
-                     <textarea
-                        placeholder="Descripción"
-                        name="description"
-                        value={description}
-                        onChange={onChange}
-                     ></textarea>
-                  </td>
-               </tr>
-            </tbody>
-         </table>
+         <form
+            className="register income-tab"
+            onSubmit={(e) => {
+               e.preventDefault();
+               if (register) setToggle();
+            }}
+         >
+            <table>
+               <tbody>
+                  <tr>
+                     <td>Dinero en Caja</td>
+                     <td>${register ? register.registermoney : 0}</td>
+                  </tr>
+                  <tr>
+                     <td>Tipo de Gasto</td>
+                     <td>
+                        <select
+                           name="expencetype"
+                           value={expencetype}
+                           onChange={onChange}
+                           id="select"
+                        >
+                           <option value="">* Tipo de Movimiento</option>
+                           {!expences.loadingET &&
+                              expences.expencetypes.map((expty) => (
+                                 <option key={expty._id} value={expty._id}>
+                                    {expty.name}
+                                 </option>
+                              ))}
+                        </select>
+                     </td>
+                  </tr>
+                  {show && (
+                     <>
+                        <tr>
+                           <td>Empleado</td>
+                           <td>
+                              <select
+                                 name="teacher"
+                                 value={teacher._id}
+                                 onChange={onChangeTeacher}
+                                 id="select"
+                              >
+                                 <option value={0}>* Empleado</option>
+                                 {!users.loadingUsers &&
+                                    users.users.map((user) => (
+                                       <React.Fragment key={user._id}>
+                                          {user.type !== "Admin/Profesor" && (
+                                             <option value={user._id}>
+                                                {user.lastname}, {user.name}
+                                             </option>
+                                          )}
+                                       </React.Fragment>
+                                    ))}
+                              </select>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td>Horas</td>
+                           <td>
+                              <input
+                                 type="number"
+                                 onChange={setValueAfterHours}
+                                 placeholder="Horas"
+                                 value={hours}
+                                 name="hours"
+                                 id=""
+                              />
+                           </td>
+                        </tr>
+                     </>
+                  )}
+                  <tr>
+                     <td>Importe</td>
+                     <td>
+                        <input
+                           type="text"
+                           placeholder="Importe"
+                           name="value"
+                           onChange={onChange}
+                           value={value}
+                        />
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>Descripción</td>
+                     <td>
+                        <textarea
+                           placeholder="Descripción"
+                           name="description"
+                           value={description}
+                           onChange={onChange}
+                        ></textarea>
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
 
-         <div className="btn-ctr mt-5">
-            <button
-               type="submit"
-               onClick={(e) => {
-                  e.preventDefault();
-                  if (register) setToggle();
-               }}
-               className={`btn ${register ? "btn-primary" : "btn-black"}`}
-               disabled={!register}
-            >
-               <i className="far fa-save"></i>
-               <span className="hide-sm">&nbsp; Guardar</span>
-            </button>
-
-            {(userLogged.type === "Administrador" ||
-               userLogged.type === "Admin/Profesor") && (
-               <Link
-                  to="/edit-expencetypes"
-                  onClick={() => {
-                     window.scroll(0, 0);
-                     clearExpenceTypes();
-                  }}
-                  className="btn btn-mix-secondary"
+            <div className="btn-ctr mt-5">
+               <button
+                  type="submit"
+                  className={`btn ${register ? "btn-primary" : "btn-black"}`}
+                  disabled={!register}
                >
-                  <i className="fas fa-edit"></i>
-                  <span className="hide-sm">&nbsp; Tipo Movimiento</span>
-               </Link>
-            )}
-         </div>
-      </div>
+                  <i className="far fa-save"></i>
+                  <span className="hide-sm">&nbsp; Guardar</span>
+               </button>
+
+               {(userLogged.type === "Administrador" ||
+                  userLogged.type === "Admin/Profesor") && (
+                  <Link
+                     to="/edit-expencetypes"
+                     onClick={() => {
+                        window.scroll(0, 0);
+                        clearExpenceTypes();
+                     }}
+                     className="btn btn-mix-secondary"
+                  >
+                     <i className="fas fa-edit"></i>
+                     <span className="hide-sm">&nbsp; Tipo Movimiento</span>
+                  </Link>
+               )}
+            </div>
+         </form>
+      </>
    );
 };
 

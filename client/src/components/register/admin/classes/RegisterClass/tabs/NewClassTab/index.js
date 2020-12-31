@@ -115,7 +115,7 @@ const NewClassTab = ({
             confirm={onSubmit}
             text="¿Está seguro que los datos son correctos?"
          />
-         <form className="form">
+         <form className="form" onSubmit={setToggle}>
             <div className="form-group my-3 heading-tertiary">
                <p>Categoría: &nbsp; {!loading && classInfo.category.name}</p>
             </div>
@@ -253,40 +253,40 @@ const NewClassTab = ({
                   <label className="form-label show">Salida</label>
                </div>
             </div>
-         </form>
-         <h3 className="text-primary heading-tertiary my-3">
-            Lista de Alumnos
-         </h3>
-         {!loading && classInfo.students ? (
-            <>
-               {classInfo.students.length > 0 ? (
-                  <ChosenChildrenTable
-                     children={classInfo.students}
-                     deleteChild={deleteChild}
-                     clearProfile={clearProfile}
-                  />
-               ) : (
-                  <p className="text-secondary paragraph">
-                     Todavía no hay alumnos añadidos
-                  </p>
-               )}
-            </>
-         ) : (
-            <p className="text-secondary paragraph">
-               Todavía no hay alumnos añadidos
-            </p>
-         )}
+            <h3 className="text-primary heading-tertiary my-3">
+               Lista de Alumnos
+            </h3>
+            {!loading && classInfo.students ? (
+               <>
+                  {classInfo.students.length > 0 ? (
+                     <ChosenChildrenTable
+                        children={classInfo.students}
+                        deleteChild={deleteChild}
+                        clearProfile={clearProfile}
+                     />
+                  ) : (
+                     <p className="text-secondary paragraph">
+                        Todavía no hay alumnos añadidos
+                     </p>
+                  )}
+               </>
+            ) : (
+               <p className="text-secondary paragraph">
+                  Todavía no hay alumnos añadidos
+               </p>
+            )}
 
-         <div className="btn-ctr">
-            <button className="btn btn-primary" onClick={setToggle}>
-               {!registerClass ? (
-                  <i className="fas fa-edit"></i>
-               ) : (
-                  <i className="far fa-save"></i>
-               )}
-               &nbsp; {!registerClass ? "Guardar Cambios" : "Registrar"}
-            </button>
-         </div>
+            <div className="btn-ctr">
+               <button className="btn btn-primary" type="submit">
+                  {!registerClass ? (
+                     <i className="fas fa-edit"></i>
+                  ) : (
+                     <i className="far fa-save"></i>
+                  )}
+                  &nbsp; {!registerClass ? "Guardar Cambios" : "Registrar"}
+               </button>
+            </div>
+         </form>
       </>
    );
 };

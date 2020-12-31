@@ -168,7 +168,6 @@ const EditGradeType = ({
       <>
          {!loadingGT ? (
             <>
-               {" "}
                <Confirm
                   toggleModal={toggleModalSave}
                   setToggleModal={setToggleSave}
@@ -182,7 +181,7 @@ const EditGradeType = ({
                   text="¿Está seguro que desea eliminar el tipo de nota?"
                />
                <h2>Editar tipo de notas</h2>
-               <div className="wrapper both">
+               <div className="wrapper both mt-3">
                   <table className="stick">
                      <thead>
                         <tr>

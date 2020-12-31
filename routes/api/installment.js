@@ -17,54 +17,24 @@ const Penalty = require("../../models/Penalty");
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
       let installments = [];
-      let initialInstallments = [];
-
-      const compareDate = new Date();
-      const month = compareDate.getMonth() + 1;
-      const year = compareDate.getFullYear();
 
       const filter = req.query;
 
       if (Object.entries(filter).length === 0) {
-         initialInstallments = await Installment.find({
+         installments = await Installment.find({
             value: { $ne: 0 },
-            year: { $lte: year },
+            debt: true,
          }).populate({
             path: "student",
             model: "user",
             select: ["name", "lastname"],
          });
-
-         for (let x = 0; x < initialInstallments.length; x++) {
-            if (initialInstallments[x].student) {
-               if (
-                  initialInstallments[x].year === year &&
-                  initialInstallments[x].number > month
-               ) {
-                  continue;
-               }
-               installments.push(initialInstallments[x]);
-            }
-         }
       } else {
-         const numberStart =
-            filter.startDate && new Date(filter.startDate).getMonth() + 2;
-         const numberEnd = new Date(filter.endDate).getMonth() + 2;
-
-         installments = await Installment.find({
+         let initialInstallments = await Installment.find({
             value: { $ne: 0 },
-            year: {
-               ...(filter.startDate && {
-                  $gte: new Date(filter.startDate).getFullYear(),
-               }),
-               $lte: new Date(filter.endDate).getFullYear(),
-            },
-            number: {
-               ...(filter.startDate && {
-                  $gte: numberStart,
-               }),
-               $lte: numberEnd,
-            },
+            debt: true,
+            ...(filter.year && { year: filter.year }),
+            ...(filter.number && { number: filter.number }),
          }).populate({
             path: "student",
             model: "user",
@@ -81,6 +51,11 @@ router.get("/", [auth, adminAuth], async (req, res) => {
                }),
             },
          });
+
+         for (let x = 0; x < initialInstallments.length; x++) {
+            if (initialInstallments[x].student)
+               installments.push(initialInstallments[x]);
+         }
       }
 
       installments = sortArray(installments);
@@ -154,22 +129,10 @@ router.get("/student/:id/:admin", auth, async (req, res) => {
 //@access   Private
 router.get("/month/debts", [auth, adminAuth], async (req, res) => {
    try {
-      const date = new Date();
-      const month = date.getMonth() + 1;
-      const year = date.getFullYear();
-
-      const thisYearinstallments = await Installment.find({
+      const installments = await Installment.find({
          value: { $ne: 0 },
-         year: { $lte: year },
-         number: { $lte: month },
+         debt: true,
       });
-      const nextYearEnrollment = await Installment.find({
-         value: { $ne: 0 },
-         year: year + 1,
-         number: 0,
-      });
-
-      const installments = thisYearinstallments.concat(nextYearEnrollment);
 
       let totalDebt = 0;
       for (let x = 0; x < installments.length; x++) {
@@ -367,15 +330,27 @@ router.put("/", [auth], async (req, res) => {
       const date = new Date();
       const month = date.getMonth() + 1;
       const day = date.getDate();
-      const installments = await Installment.find({
+
+      let installments = await Installment.find({
          number: { $lte: month, $ne: 0 },
-         year: { $lte: date.getFullYear() },
+         year: date.getFullYear(),
          value: { $ne: 0 },
       }).populate({
          path: "student",
          model: "user",
          select: "chargeday",
       });
+
+      let previusYearsInstallments = await Installment.find({
+         year: { $lt: date.getFullYear() },
+         value: { $ne: 0 },
+      }).populate({
+         path: "student",
+         model: "user",
+         select: "chargeday",
+      });
+
+      installments = installments.concat(previusYearsInstallments);
 
       let penalty = await Penalty.find().sort({ $natural: -1 }).limit(1);
       penalty = penalty[0];
@@ -397,6 +372,13 @@ router.put("/", [auth], async (req, res) => {
                   { _id: installments[x].id },
                   { value, expired: true }
                );
+            } else {
+               if (!installments[x].debt) {
+                  await Installment.findOneAndUpdate(
+                     { _id: installments[x].id },
+                     { debt: true }
+                  );
+               }
             }
          }
       } else {

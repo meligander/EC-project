@@ -119,6 +119,8 @@ export const loadInstallments = (filterData) => async (dispatch) => {
             msg,
          },
       });
+
+      window.scroll(0, 0);
       dispatch(setAlert(msg ? msg : type, "danger", "2"));
    }
 

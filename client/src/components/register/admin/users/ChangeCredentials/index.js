@@ -77,7 +77,13 @@ const ChangeCredentials = ({
                   <i className="fas fa-unlock"></i>&nbsp;{" "}
                   {`Cambio de ${isAdmin ? "Email y/o " : ""}Contraseña`}
                </h4>
-               <form className="form">
+               <form
+                  className="form"
+                  onSubmit={(e) => {
+                     e.preventDefault();
+                     setToggleModal(true);
+                  }}
+               >
                   {isAdmin && (
                      <div className="form-group">
                         <input
@@ -124,13 +130,7 @@ const ChangeCredentials = ({
                      </label>
                   </div>
                   <div className="btn-right">
-                     <button
-                        onClick={(e) => {
-                           e.preventDefault();
-                           setToggleModal(true);
-                        }}
-                        className="btn btn-primary"
-                     >
+                     <button className="btn btn-primary">
                         <i className="fas fa-user-check"></i>&nbsp; Guardar
                         Cambios
                      </button>

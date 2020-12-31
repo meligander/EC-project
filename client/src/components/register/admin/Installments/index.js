@@ -10,6 +10,7 @@ import {
 } from "../../../../actions/installment";
 import { updatePreviousPage } from "../../../../actions/mixvalues";
 import { clearPenalty, updatePenalty } from "../../../../actions/penalty";
+import { clearUser } from "../../../../actions/user";
 
 import InstallmentsSearch from "../../../sharedComp/search/InstallmentsSearch";
 import Confirm from "../../../modal/Confirm";
@@ -20,6 +21,7 @@ const Installments = ({
    auth: { userLogged },
    clearInstallments,
    clearInstallment,
+   clearUser,
    clearPenalty,
    updatePreviousPage,
    updatePenalty,
@@ -116,6 +118,7 @@ const Installments = ({
                   onClick={() => {
                      window.scroll(0, 0);
                      clearInstallment();
+                     clearUser();
                   }}
                >
                   <i className="fas fa-plus-circle"></i>&nbsp; Agregar cuota
@@ -132,6 +135,7 @@ Installments.propTypes = {
    clearInstallments: PropTypes.func.isRequired,
    clearInstallment: PropTypes.func.isRequired,
    clearPenalty: PropTypes.func.isRequired,
+   clearUser: PropTypes.func.isRequired,
    updatePenalty: PropTypes.func.isRequired,
    updatePreviousPage: PropTypes.func.isRequired,
    loadStudentInstallments: PropTypes.func.isRequired,
@@ -146,6 +150,7 @@ export default connect(mapStateToProps, {
    clearInstallments,
    clearInstallment,
    clearPenalty,
+   clearUser,
    updatePenalty,
    updatePreviousPage,
    loadStudentInstallments,

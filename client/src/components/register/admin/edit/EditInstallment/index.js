@@ -145,7 +145,7 @@ const EditInstallment = ({
                   toggleModal={toggleModalSave}
                />
                <h2>{edit ? "Editar Cuota" : "Crear Cuota"}</h2>
-               <form className="form">
+               <form className="form" onSubmit={setToggleSave}>
                   <p className="heading-tertiary">
                      <span className="text-dark">Alumno:</span>
                      &nbsp;&nbsp;&nbsp;
@@ -236,20 +236,15 @@ const EditInstallment = ({
                      </label>
                   </div>
                   <div className="btn-ctr py-2">
-                     <button
-                        type="submit"
-                        onClick={setToggleSave}
-                        className="btn btn-primary"
-                     >
+                     <button type="submit" className="btn btn-primary">
                         <i className="far fa-save"></i>&nbsp; Guardar
                      </button>
                      {edit && (
                         <button
-                           type="submit"
                            onClick={setToggleDelete}
                            className="btn btn-danger"
                         >
-                           <i className="fas fa-trash"></i>&nbsp; Eliminar
+                           <i className="far fa-trash-alt"></i>&nbsp; Eliminar
                         </button>
                      )}
                   </div>

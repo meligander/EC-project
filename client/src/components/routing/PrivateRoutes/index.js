@@ -36,7 +36,7 @@ const PrivateRoutes = ({
          return (
             <>
                <GoBack />
-               <div className="inner-container mt-1">
+               <div className="inner-container">
                   <Alert type="2" />
                   <Route exact path={path} component={Component} />
                </div>

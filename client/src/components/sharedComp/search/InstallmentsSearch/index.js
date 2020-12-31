@@ -152,9 +152,9 @@ const InstallmentsSearch = ({
                block={block}
             />
          </div>
-         <div className="btn-end mb-3">
+         <div className="btn-end">
             <p className="heading-tertiary">
-               <span className="text-dark">Alumno: </span> &nbsp;&nbsp;
+               <span className="text-dark">Alumno: </span> &nbsp;
                <Link
                   to={`/dashboard/${selectedStudent._id}`}
                   className="btn-text"

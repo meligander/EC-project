@@ -109,7 +109,7 @@ const EnrollmentList = ({
                   confirm={deleteEnroll}
                   text="¿Está seguro que desea eliminar la inscripción?"
                />
-               <form className="form">
+               <form className="form" onSubmit={search}>
                   <DateFilter
                      endDate={endDate}
                      startDate={startDate}
@@ -170,7 +170,7 @@ const EnrollmentList = ({
                      </label>
                   </div>
                   <div className="btn-right mb-1">
-                     <button onClick={search} className="btn btn-light">
+                     <button type="submit" className="btn btn-light">
                         <i className="fas fa-filter"></i>&nbsp; Buscar
                      </button>
                   </div>

@@ -162,7 +162,7 @@ const Enrollment = ({
                      </Link>
                   </div>
                )}
-               <form className="form" onSubmit={(e) => setToggle(e)}>
+               <form className="form" onSubmit={setToggle}>
                   {!enroll_id && (
                      <StudentSearch
                         selectStudent={selectStudent}
