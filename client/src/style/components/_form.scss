@@ -42,7 +42,7 @@
          width: 100%;
 
          .form-input {
-            width: 50%;
+            min-width: 50%;
          }
          .form-label {
             width: 100%;
@@ -53,6 +53,7 @@
    &-input {
       display: block;
       width: 100%;
+
       padding: 0.96rem;
       font-size: inherit;
       border-radius: 2px;
@@ -60,6 +61,11 @@
       border: none;
       //para que cuando se haga focus no se agrade el bloque entero
       border-bottom: 3px solid transparent;
+
+      @include respond(small-phone) {
+         -webkit-appearance: none;
+         -moz-appearance: none;
+      }
 
       &:focus {
          outline: none;
