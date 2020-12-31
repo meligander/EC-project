@@ -249,7 +249,7 @@ export const deleteClass = (class_id, history) => async (dispatch) => {
       dispatch(clearActiveClasses());
 
       history.push("/classes");
-      dispatch(setAlert("Curso Eliminado", "success", "2"));
+      dispatch(setAlert("Clase Eliminado", "success", "2"));
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;
@@ -282,7 +282,7 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
             pdf = await axios.get("/api/class/list/fetch-list", {
                responseType: "blob",
             });
-            name = "Cursos";
+            name = "Clases";
             break;
          case "class":
             await axios.post("/api/class/oneclass/create-list", classInfo);
@@ -290,7 +290,7 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
             pdf = await axios.get("/api/class/oneclass/fetch-list", {
                responseType: "blob",
             });
-            name = `Curso ${
+            name = `Clase ${
                classInfo.teacher.lastname + ", " + classInfo.teacher.name
             } ${classInfo.category.name} `;
             break;
