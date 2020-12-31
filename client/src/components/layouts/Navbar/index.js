@@ -54,10 +54,10 @@ const Navbar = ({
             }}
          >
             <div className="navbar-logo">
-               <img src={onlyLogo} alt="Logo English Center" />
+               <img src={onlyLogo} alt="Logo English Centre" />
             </div>
             <p className="navbar-heading hide-sm">
-               Villa de Merlo English Center
+               Villa de Merlo English Centre
             </p>
          </Link>
          {userLogged !== null && (
@@ -75,11 +75,11 @@ const Navbar = ({
          <div className={!showMenu ? "menu" : "menu show"}>
             <div className={!showMenu ? "menu-branding" : "menu-branding show"}>
                <div className="logo">
-                  <img src={logo} alt="English Center logo" />
+                  <img src={logo} alt="English Centre logo" />
                </div>
                <div className="address">
                   <h3 className="heading-tertiary">
-                     Villa de Merlo English Center
+                     Villa de Merlo English Centre
                   </h3>
                   <p className="paragraph">
                      Villa De Merlo - San Luis <br /> Argentina

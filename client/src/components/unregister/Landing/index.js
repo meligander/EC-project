@@ -8,7 +8,7 @@ const Landing = () => {
       <section className="landing">
          <div className="main-text">
             <h1 className="heading-primary fancy-heading">
-               Villa de Merlo English Center
+               Villa de Merlo English Centre
             </h1>
             <br />
             <p className="heading-tertiary">
