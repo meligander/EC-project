@@ -52,8 +52,8 @@ const RegisterClass = ({
       <>
          <h2>
             {location.pathname !== "/register-class"
-               ? "Editar Curso"
-               : "Nuevo Curso"}
+               ? "Editar Clase"
+               : "Nueva Clase"}
          </h2>
          <Tabs
             tablist={["Alumnos", "Clase"]}

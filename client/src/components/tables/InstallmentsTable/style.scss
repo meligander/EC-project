@@ -15,4 +15,8 @@ table.installments {
 .next-btn {
    margin-right: 19rem;
    margin-bottom: -6.75rem;
+
+   @include respond(phone) {
+      margin-bottom: -5.8rem;
+   }
 }

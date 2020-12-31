@@ -2,10 +2,12 @@
 
 .profile-top {
    display: flex;
+   padding: 3rem;
 
    @include respond(small-phone) {
       flex-direction: column;
       align-items: center;
+      padding: 1.5rem;
    }
 
    & > * {

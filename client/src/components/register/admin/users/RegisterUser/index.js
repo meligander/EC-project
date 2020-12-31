@@ -723,7 +723,7 @@ const RegisterUser = ({
                                           clearTowns();
                                        }}
                                     >
-                                       <i className="far fa-edit"></i>&nsbp;
+                                       <i className="far fa-edit"></i>&nbsp;
                                        Editar
                                     </Link>
                                  </div>
@@ -807,7 +807,7 @@ const RegisterUser = ({
                      )}
 
                      <div className="btn-ctr">
-                        <button className="btn btn-primary">
+                        <button className="btn btn-primary" type="submit">
                            {isEditing ? (
                               <i className="fas fa-user-edit"></i>
                            ) : (

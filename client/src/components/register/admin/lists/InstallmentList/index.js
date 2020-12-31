@@ -29,9 +29,12 @@ const InstallmentList = ({
    clearProfile,
    installmentsPDF,
 }) => {
+   const date = moment();
+   const thisYear = date.year();
+
    const [filterData, setFilterData] = useState({
-      startDate: "",
-      endDate: "",
+      number: "",
+      year: "",
       name: "",
       lastname: "",
    });
@@ -52,9 +55,7 @@ const InstallmentList = ({
       "Diciembre",
    ]);
 
-   const date = moment();
-
-   const { startDate, endDate, name, lastname } = filterData;
+   const { number, year, name, lastname } = filterData;
 
    useEffect(() => {
       if (loadingInstallments) {
@@ -75,7 +76,6 @@ const InstallmentList = ({
       e.preventDefault();
       loadInstallments({
          ...filterData,
-         ...(endDate === "" && { endDate: date.format("YYYY-MM") }),
       });
    };
 
@@ -92,34 +92,51 @@ const InstallmentList = ({
                   Total: {totalDebt !== "" ? "$" + totalDebt : "$"}
                </p>
 
-               <form className="form">
-                  <div className="date-filter">
-                     <div>
-                        <input
-                           className="form-input"
-                           type="month"
-                           name="startDate"
-                           value={startDate}
-                           id="startDate"
-                           onChange={onChange}
-                        />
-                        <label htmlFor="startDate" className="form-label-show">
-                           Ingrese desde que fecha desea ver
-                        </label>
-                     </div>
-                     <div>
-                        <input
-                           className="form-input"
-                           type="month"
-                           name="endDate"
-                           value={endDate}
-                           max={date.format("YYYY-MM")}
-                           onChange={onChange}
-                        />
-                        <label htmlFor="endDate" className="form-label-show">
-                           Ingrese hasta que fecha desea ver
-                        </label>
-                     </div>
+               <form className="form" onSubmit={search}>
+                  <div className="form-group">
+                     <select
+                        className="form-input"
+                        id="number"
+                        name="number"
+                        onChange={onChange}
+                        value={number}
+                     >
+                        <option value="">* Seleccione la cuota</option>
+                        {installmentName.map(
+                           (name, i) =>
+                              name !== "" && (
+                                 <option key={i} value={i}>
+                                    {name}
+                                 </option>
+                              )
+                        )}
+                     </select>
+                     <label
+                        htmlFor="number"
+                        className={`form-label ${number === "" ? "lbl" : ""}`}
+                     >
+                        Cuota
+                     </label>
+                  </div>
+                  <div className="form-group">
+                     <select
+                        className="form-input"
+                        id="year"
+                        name="year"
+                        onChange={onChange}
+                        value={year}
+                     >
+                        <option value="">* Seleccione el Año</option>
+                        <option value={thisYear - 1}>{thisYear - 1}</option>
+                        <option value={thisYear}>{thisYear}</option>
+                        <option value={thisYear + 1}>{thisYear + 1}</option>
+                     </select>
+                     <label
+                        htmlFor="year"
+                        className={`form-label ${year === "" ? "lbl" : ""}`}
+                     >
+                        Año
+                     </label>
                   </div>
                   <NameField
                      name={name}
@@ -128,7 +145,7 @@ const InstallmentList = ({
                   />
 
                   <div className="btn-right my-1">
-                     <button onClick={search} className="btn btn-light">
+                     <button type="submit" className="btn btn-light">
                         <i className="fas fa-filter"></i>&nbsp; Buscar
                      </button>
                   </div>

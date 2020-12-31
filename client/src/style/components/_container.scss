@@ -1,5 +1,5 @@
 .container {
-   margin: 5rem auto 2rem auto;
+   margin: 5.6rem auto 2rem auto;
    overflow: hidden;
    padding: 2rem 3.2rem;
    min-height: 90vh;
@@ -7,8 +7,12 @@
    @include respond(tab-port) {
       padding: 2rem;
    }
+
    @include respond(phone) {
-      padding: 3rem 2rem;
+      padding: 2.3rem 2rem;
+   }
+   @include respond(small-phone) {
+      padding: 1rem;
    }
 
    h1,
@@ -43,10 +47,14 @@
 
    .inner-container {
       padding: 6rem;
+      margin-top: 1rem;
       background-color: $white-color;
 
       @include respond(phone) {
          padding: 3rem;
+      }
+      @include respond(small-phone) {
+         margin-top: 0;
       }
    }
 }

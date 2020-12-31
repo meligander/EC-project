@@ -99,7 +99,7 @@ const Classes = ({
             <>
                <h1>Clases</h1>
                {userLogged.type !== "Profesor" && (
-                  <div className="form">
+                  <form className="form" onSubmit={onSearch}>
                      <div className="form-group">
                         <select
                            id="teacher"
@@ -154,15 +154,11 @@ const Classes = ({
                         </label>
                      </div>
                      <div className="btn-right">
-                        <button
-                           type="submit"
-                           onClick={onSearch}
-                           className="btn btn-light"
-                        >
-                           <i className="fas fa-filter"></i>&nsbp; Buscar
+                        <button type="submit" className="btn btn-light">
+                           <i className="fas fa-filter"></i>&nbsp; Buscar
                         </button>
                      </div>
-                  </div>
+                  </form>
                )}
 
                <div className="pt-4">
@@ -189,7 +185,7 @@ const Classes = ({
                               : "btn-black"
                         }`}
                      >
-                        <i className="fas fa-plus"></i>&nsbp; Nueva Clase
+                        <i className="fas fa-plus"></i>&nbsp; Nueva Clase
                      </Link>
                   )}
                   <button

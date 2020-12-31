@@ -83,7 +83,7 @@ const FilterClassTab = ({
          {(registerClass || (!loading && !loadingStudents && !registerClass)) &&
          !categories.loading ? (
             <>
-               <form className="form">
+               <form className="form" onSubmit={filterStudents}>
                   <div className="form-group">
                      <select
                         className="form-input"
@@ -115,13 +115,12 @@ const FilterClassTab = ({
                   </div>
                   <div className="text-right">
                      <button
-                        onClick={filterStudents}
                         className={`btn ${
-                           registerClass ? "btn-primary" : "btn-black"
+                           registerClass ? "btn-light" : "btn-black"
                         } my-1`}
                         disabled={!registerClass}
                      >
-                        Buscar Alumnos
+                        <i className="fas fa-filter"></i>&nbsp; Buscar
                      </button>
                   </div>
                </form>

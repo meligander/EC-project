@@ -56,7 +56,7 @@ function AverageTab({
       <>
          {!loading ? (
             <>
-               <form className="form">
+               <form className="form" onSubmit={search}>
                   <div className="form-group">
                      <select
                         className="form-input"
@@ -101,7 +101,7 @@ function AverageTab({
                      </label>
                   </div>
                   <div className="btn-right mb-1">
-                     <button onClick={search} className="btn btn-light">
+                     <button type="submit" className="btn btn-light">
                         <i className="fas fa-filter"></i>&nbsp; Buscar
                      </button>
                   </div>

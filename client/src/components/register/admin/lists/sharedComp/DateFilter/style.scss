@@ -7,6 +7,7 @@
    margin: 2rem 0;
 
    @include respond(small-phone) {
+      width: 100%;
       flex-direction: column;
 
       > * {
@@ -14,6 +15,10 @@
 
          &:first-child {
             margin-bottom: 2rem;
+         }
+
+         .form-input {
+            width: 100%;
          }
       }
    }

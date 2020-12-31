@@ -106,7 +106,7 @@ const Dashboard = ({
                {user._id !== userLogged._id && <GoBack />}
                <Alert type="1" />
                <div className="mt-1">
-                  <div className="profile-top bg-primary p-3">
+                  <div className="profile-top bg-primary">
                      <div className="img-about m-1">
                         <img
                            src={user.noImg !== "" ? user.noImg : user.img.url}

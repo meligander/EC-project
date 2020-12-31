@@ -30,7 +30,7 @@ const PostForm = ({ addPost, class_id }) => {
                Realiza un comentario para que lo vea la clase
             </h3>
          </div>
-         <form className="paragraph">
+         <form className="paragraph" onSubmit={onSubmit}>
             <textarea
                className="form-input"
                cols="30"
@@ -40,11 +40,7 @@ const PostForm = ({ addPost, class_id }) => {
                placeholder="Di algo..."
             ></textarea>
             <div className="btn-right my-2 p-1">
-               <button
-                  type="submit"
-                  onClick={onSubmit}
-                  className="btn btn-primary"
-               >
+               <button type="submit" className="btn btn-primary">
                   <i className="far fa-paper-plane"></i>&nbsp; Enviar
                </button>
             </div>

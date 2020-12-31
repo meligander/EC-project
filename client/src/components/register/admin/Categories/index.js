@@ -106,7 +106,7 @@ const Categories = ({
                   setToggleModal={setToggle}
                   toggleModal={toggleModal}
                />
-               <div className="form ">
+               <form className="form " onSubmit={setToggle}>
                   <div className="form-group">
                      <input
                         className="form-input"
@@ -123,48 +123,45 @@ const Categories = ({
                         precio.
                      </label>
                   </div>
-               </div>
-               <table className="smaller category">
-                  <thead>
-                     <tr>
-                        <th>Nombre</th>
-                        <th>Valor</th>
-                     </tr>
-                  </thead>
-                  <tbody>
-                     {formData.length > 0 &&
-                        formData.map((category, index) => (
-                           <tr key={index}>
-                              <td>{category.name}</td>
-                              <td>
-                                 <input
-                                    type="number"
-                                    name={`value${index}`}
-                                    value={category.value}
-                                    placeholder="Valor"
-                                    onChange={(e) => onChange(e, index)}
-                                 />
-                              </td>
-                           </tr>
-                        ))}
-                  </tbody>
-               </table>
-               <div className="btn-right p-2">
-                  <button
-                     type="submit"
-                     onClick={setToggle}
-                     className="btn btn-primary"
-                  >
-                     <i className="far fa-save"></i>
-                     <span className="hide-sm">&nsbp; Actualizar</span>
-                  </button>
-                  <button
-                     className="btn btn-secondary"
-                     onClick={pdfGeneratorSave}
-                  >
-                     <i className="fas fa-file-pdf"></i>
-                  </button>
-               </div>
+
+                  <table className="smaller category">
+                     <thead>
+                        <tr>
+                           <th>Nombre</th>
+                           <th>Valor</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        {formData.length > 0 &&
+                           formData.map((category, index) => (
+                              <tr key={index}>
+                                 <td>{category.name}</td>
+                                 <td>
+                                    <input
+                                       type="number"
+                                       name={`value${index}`}
+                                       value={category.value}
+                                       placeholder="Valor"
+                                       onChange={(e) => onChange(e, index)}
+                                    />
+                                 </td>
+                              </tr>
+                           ))}
+                     </tbody>
+                  </table>
+                  <div className="btn-right p-2">
+                     <button type="submit" className="btn btn-primary">
+                        <i className="far fa-save"></i>
+                        <span className="hide-sm">&nsbp; Actualizar</span>
+                     </button>
+                     <button
+                        className="btn btn-secondary"
+                        onClick={pdfGeneratorSave}
+                     >
+                        <i className="fas fa-file-pdf"></i>
+                     </button>
+                  </div>
+               </form>
             </>
          ) : (
             <Loading />

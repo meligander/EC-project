@@ -4,12 +4,14 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
 import { changePageAndMenu, changePage } from "../../../../../actions/navbar";
+import { clearSearch } from "../../../../../actions/user";
 
 const GuestNavbar = ({
    location,
    navbar: { showMenu, currentNav },
    changePage,
    changePageAndMenu,
+   clearSearch,
 }) => {
    useEffect(() => {
       const string = location.pathname.substring(1, location.pathname.length);
@@ -62,6 +64,7 @@ const GuestNavbar = ({
                onClick={() => {
                   window.scroll(0, 0);
                   changePageAndMenu("about");
+                  clearSearch();
                }}
             >
                <i className="fas fa-info-circle"></i>
@@ -114,12 +117,15 @@ GuestNavbar.propTypes = {
    navbar: PropTypes.object.isRequired,
    changePage: PropTypes.func.isRequired,
    changePageAndMenu: PropTypes.func.isRequired,
+   clearSearch: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    navbar: state.navbar,
 });
 
-export default connect(mapStateToProps, { changePage, changePageAndMenu })(
-   withRouter(GuestNavbar)
-);
+export default connect(mapStateToProps, {
+   changePage,
+   changePageAndMenu,
+   clearSearch,
+})(withRouter(GuestNavbar));

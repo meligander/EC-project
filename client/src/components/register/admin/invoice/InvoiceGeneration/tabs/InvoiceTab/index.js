@@ -188,7 +188,8 @@ const InvoiceTab = ({
       setOtherValues({ ...otherValues, toggleSearch: !toggleSearch });
    };
 
-   const beforeToggle = () => {
+   const beforeToggle = (e) => {
+      e.preventDefault();
       if (total === 0) {
          setAlert("Debe registrar el pago de una cuota primero", "danger", "2");
          window.scroll(0, 0);
@@ -212,7 +213,7 @@ const InvoiceTab = ({
             confirm={confirm}
             text="¿Está seguro que la factura es correcta?"
          />
-         <form className="form bigger">
+         <form className="form bigger" onSubmit={beforeToggle}>
             <div className="form-group mb-2">
                <div className="two-in-row">
                   <input
@@ -362,89 +363,86 @@ const InvoiceTab = ({
                   typeSearch="Tutor/Student"
                />
             )}
+            <h3 className="text-primary heading-tertiary">
+               Detalle de Factura
+            </h3>
+            <Alert type="5" />
+            {details.length > 0 && (
+               <div className="wrapper">
+                  <table>
+                     <thead>
+                        <tr>
+                           <th>Nombre</th>
+                           <th>Cuota</th>
+                           <th>Año</th>
+                           <th>Importe</th>
+                           <th>A Pagar</th>
+                           <th>&nbsp;</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        {details.map((invoice, index) => {
+                           const name = "payment" + index;
+                           return (
+                              <tr key={index}>
+                                 <td>
+                                    {invoice.item.student.lastname +
+                                       ", " +
+                                       invoice.item.student.name}
+                                 </td>
+                                 <td>{installment[invoice.item.number]}</td>
+                                 <td>{invoice.item.year}</td>
+                                 <td>{invoice.item.value}</td>
+                                 <td>
+                                    <input
+                                       type="number"
+                                       onChange={(e) =>
+                                          onChangeValue(e, invoice.item, index)
+                                       }
+                                       placeholder="Monto"
+                                       min="0"
+                                       max="1800"
+                                       name={name}
+                                       value={invoice.payment}
+                                    />
+                                 </td>
+                                 <td>
+                                    <button
+                                       onClick={(e) => {
+                                          e.preventDefault();
+                                          removeItem(invoice.item);
+                                       }}
+                                       className="btn btn-danger"
+                                    >
+                                       <i className="far fa-trash-alt"></i>
+                                    </button>
+                                 </td>
+                              </tr>
+                           );
+                        })}
+                     </tbody>
+                  </table>
+               </div>
+            )}
+            <div className="text-right mt-3">
+               <div className="invoice-detail">
+                  <label htmlFor="remaining">Saldo</label>
+                  <input
+                     type="number"
+                     value={remaining}
+                     disabled
+                     name="remaining"
+                  />
+               </div>
+               <div className="invoice-detail">
+                  <label htmlFor="total">Total a Pagar</label>
+                  <input type="number" name="total" value={total} disabled />
+               </div>
+               <button type="submit" className="btn btn-primary mt-3">
+                  <i className="fas fa-file-invoice-dollar"></i>&nbsp; Pagar
+               </button>
+            </div>
          </form>
-         <h3 className="text-primary heading-tertiary">Detalle de Factura</h3>
-         <Alert type="5" />
-         {details.length > 0 && (
-            <div className="wrapper">
-               <table>
-                  <thead>
-                     <tr>
-                        <th>Nombre</th>
-                        <th>Cuota</th>
-                        <th>Año</th>
-                        <th>Importe</th>
-                        <th>A Pagar</th>
-                        <th>&nbsp;</th>
-                     </tr>
-                  </thead>
-                  <tbody>
-                     {details.map((invoice, index) => {
-                        const name = "payment" + index;
-                        return (
-                           <tr key={index}>
-                              <td>
-                                 {invoice.item.student.lastname +
-                                    ", " +
-                                    invoice.item.student.name}
-                              </td>
-                              <td>{installment[invoice.item.number]}</td>
-                              <td>{invoice.item.year}</td>
-                              <td>{invoice.item.value}</td>
-                              <td>
-                                 <input
-                                    type="number"
-                                    onChange={(e) =>
-                                       onChangeValue(e, invoice.item, index)
-                                    }
-                                    placeholder="Monto"
-                                    min="0"
-                                    max="1800"
-                                    name={name}
-                                    value={invoice.payment}
-                                 />
-                              </td>
-                              <td>
-                                 <button
-                                    onClick={(e) => {
-                                       e.preventDefault();
-                                       removeItem(invoice.item);
-                                    }}
-                                    className="btn btn-danger"
-                                 >
-                                    <i className="far fa-trash-alt"></i>
-                                 </button>
-                              </td>
-                           </tr>
-                        );
-                     })}
-                  </tbody>
-               </table>
-            </div>
-         )}
-
-         <div className="text-right mt-3">
-            <div className="invoice-detail">
-               <label htmlFor="remaining">Saldo</label>
-               <input
-                  type="number"
-                  value={remaining}
-                  disabled
-                  name="remaining"
-               />
-            </div>
-            <div className="invoice-detail">
-               <label htmlFor="total">Total a Pagar</label>
-               <input type="number" name="total" value={total} disabled />
-            </div>
-            <button
-               type="submit"
-               onClick={beforeToggle}
-               className="btn btn-primary mt-3"
-            >
-               <i className="fas fa-file-invoice-dollar"></i>&nbsp; Pagar
-            </button>
-         </div>
       </div>
    );
 };
