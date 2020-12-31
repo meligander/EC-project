@@ -57,7 +57,7 @@ const Invoice = ({
                   <div className="row">
                      <div>
                         <h3 className="heading-tertiary fancy-heading text-dark">
-                           Villa de Merlo English Center
+                           Villa de Merlo English Centre
                         </h3>
                         <p className="paragraph">Coronel Mercau 783</p>
                         <p className="paragraph">

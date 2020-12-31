@@ -22,7 +22,7 @@ module.exports = (css, img, tbody, invoice) => {
                             <tr>
                                 <td>
                                     <h3 class="business">
-                                        Villa de Merlo English Center
+                                        Villa de Merlo English Centre
                                     </h3>
                                     <p>Coronel Mercau 783</p>
                                     <p>Villa de Merlo, San Luis, Argentina</p>

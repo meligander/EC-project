@@ -79,7 +79,7 @@ const Team = ({ users: { loadingUsers, users }, loadUsers }) => {
                               }
                               alt={
                                  users[teamNumber].type +
-                                 " de Villa de Merlo English Center"
+                                 " de Villa de Merlo English Centre"
                               }
                               className="person-img"
                            />

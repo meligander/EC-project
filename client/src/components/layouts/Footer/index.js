@@ -7,7 +7,7 @@ const Footer = () => {
       <Fragment>
          <footer className="footer bg-primary">
             <p>
-               <span className="hide-sm">Villa de Merlo</span> English Center
+               <span className="hide-sm">Villa de Merlo</span> English Centre
                Copyright &copy; 2020
             </p>
          </footer>

@@ -241,8 +241,8 @@ const AdminDashboard = ({
                   </div>
                   <div className="info p-3">
                      <h3 className="heading-tertiary text-dark">
-                        <i className="fas fa-user-cog"></i> Administración de
-                        Usuarios
+                        <i className="fas fa-user-cog"></i>&nbsp; Administración
+                        de Usuarios
                      </h3>
                      <div className="text-center my-4 py-3">
                         <p className="heading-tertiary">
