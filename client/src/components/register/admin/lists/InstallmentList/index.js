@@ -150,7 +150,7 @@ const InstallmentList = ({
                      </button>
                   </div>
                </form>
-               <div className="wrapper list">
+               <div className="wrapper">
                   <table className="my-2">
                      <thead>
                         <tr>
