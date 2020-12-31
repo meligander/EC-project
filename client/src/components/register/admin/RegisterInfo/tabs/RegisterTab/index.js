@@ -72,7 +72,8 @@ const RegisterTab = ({
                />
                <form
                   className="form"
-                  onSubmit={() => {
+                  onSubmit={(e) => {
+                     e.preventDefault();
                      if (addNew || (register && register.temporary))
                         setToggle();
                   }}
