@@ -95,7 +95,7 @@
       text-align: end;
 
       @include respond(phone) {
-         margin-top: 2rem;
+         margin-top: 1.5rem;
       }
 
       & > *:not(:last-child) {
