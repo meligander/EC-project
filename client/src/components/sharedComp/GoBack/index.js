@@ -8,6 +8,8 @@ import { clearProfile } from "../../../actions/user";
 
 import Loading from "../../modal/Loading";
 
+import "./style.scss";
+
 const GoBack = ({
    match,
    history,
@@ -36,7 +38,7 @@ const GoBack = ({
 
    return (
       <>
-         <button onClick={goBack} className="btn mb-1">
+         <button onClick={goBack} className="btn btn-goback">
             <i className="fas fa-chevron-left"></i> Volver
          </button>
          {loadingSpinner && <Loading />}

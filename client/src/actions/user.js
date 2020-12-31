@@ -214,7 +214,7 @@ export const registerUser = (formData, history, user_id) => async (
          )
       );
 
-      dispatch(clearUser());
+      dispatch(clearProfile());
       dispatch(clearClass());
       dispatch(clearOtherValues("activeStudents"));
 
@@ -266,7 +266,7 @@ export const updateCredentials = (formData, history, user_id) => async (
          type: USER_UPDATED,
          payload: res.data,
       });
-      dispatch(clearUser());
+      dispatch(clearProfile());
       dispatch(setAlert("Credenciales modificadas", "success", "1", 7000));
       history.push(`/dashboard/${user_id}`);
    } catch (err) {
@@ -308,6 +308,8 @@ export const deleteUser = (user, history, userLogged_id) => async (
 
    try {
       await axios.delete(`/api/user/${user._id}/${user.type}`);
+
+      dispatch(clearProfile());
 
       if (user._id === userLogged_id) dispatch(logOutAndToggle());
       else history.push(`/dashboard/${userLogged_id}`);

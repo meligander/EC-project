@@ -4,6 +4,7 @@ import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
+import { clearProfile } from "./user";
 
 import {
    REGISTER_LOADED,
@@ -88,6 +89,7 @@ export const createRegister = (formData, user_id, history) => async (
       dispatch({ type: NEWREGISTER_ADDED });
       dispatch(clearRegisters());
 
+      dispatch(clearProfile());
       history.push(`/dashboard/${user_id}`);
 
       dispatch(

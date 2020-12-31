@@ -5,6 +5,7 @@ import { saveAs } from "file-saver";
 import { updateLoadingSpinner } from "./mixvalues";
 import { clearRegisters } from "./register";
 import { setAlert } from "./alert";
+import { clearProfile } from "./user";
 
 import {
    TRANSACTIONS_LOADED,
@@ -101,6 +102,7 @@ export const registerExpence = (formData, history, user_id) => async (
       dispatch(clearRegisters());
 
       dispatch(setAlert("Gasto/Ingreso Registrado", "success", "1", 7000));
+      dispatch(clearProfile());
       history.push(`/dashboard/${user_id}`);
    } catch (err) {
       if (err.response.data.errors) {

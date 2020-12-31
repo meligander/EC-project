@@ -6,6 +6,7 @@ import { setAlert } from "./alert";
 import { clearRegisters } from "./register";
 import { clearTotalDebt } from "./installment";
 import { updateLoadingSpinner } from "./mixvalues";
+import { clearProfile } from "./user";
 
 import {
    INVOICE_LOADED,
@@ -123,6 +124,7 @@ export const registerInvoice = (
       dispatch(clearRegisters());
 
       dispatch(setAlert("Factura Registrada", "success", "1", 7000));
+      dispatch(clearProfile());
       history.push(`/dashboard/${user_id}`);
    } catch (err) {
       if (err.response.data.errors) {

@@ -5,6 +5,7 @@ import { saveAs } from "file-saver";
 import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
 import { clearTotalDebt } from "./installment";
+import { clearProfile } from "./user";
 
 import {
    ENROLLMENT_LOADED,
@@ -213,6 +214,7 @@ export const registerEnrollment = (
       dispatch(clearTotalDebt());
 
       if (!enroll_id) {
+         dispatch(clearProfile());
          history.push(`/dashboard/${user_id}`);
       } else {
          history.push("/enrollment-list");

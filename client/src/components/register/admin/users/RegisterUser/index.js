@@ -629,7 +629,7 @@ const RegisterUser = ({
                                  Dirección
                               </label>
                            </div>
-                           <div className="border">
+                           <div className="border mb-4">
                               <div className="form-group">
                                  <select
                                     className="form-input"
@@ -733,7 +733,7 @@ const RegisterUser = ({
                         </>
                      )}
 
-                     {(isAdmin || type === "Profesor") && (
+                     {type !== "Alumno" && type !== "Tutor" && (
                         <div className="form-group">
                            <textarea
                               className="form-input"
@@ -798,7 +798,7 @@ const RegisterUser = ({
                                     className="upload"
                                  />
                                  <span>
-                                    <i className="fa fa-cloud-upload"></i>&nsbp;
+                                    <i className="fa fa-cloud-upload"></i>&nbsp;
                                     Subir imágen
                                  </span>
                               </div>

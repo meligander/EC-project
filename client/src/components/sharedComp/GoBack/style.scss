@@ -1,0 +1,9 @@
+@import "../../../style/abstract.scss";
+
+.btn-goback {
+   margin-bottom: 1rem;
+
+   @include respond(small-phone) {
+      margin-bottom: 0;
+   }
+}

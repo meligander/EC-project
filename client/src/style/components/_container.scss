@@ -53,9 +53,6 @@
       @include respond(phone) {
          padding: 3rem;
       }
-      @include respond(small-phone) {
-         margin-top: 0;
-      }
    }
 }
 
