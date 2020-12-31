@@ -106,7 +106,7 @@ function AverageTab({
                      </button>
                   </div>
                </form>
-               <div className="wrapper list mt-3">
+               <div className="wrapper mt-3">
                   <table>
                      <thead>
                         <tr>

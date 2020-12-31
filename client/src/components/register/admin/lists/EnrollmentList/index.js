@@ -175,7 +175,7 @@ const EnrollmentList = ({
                      </button>
                   </div>
                </form>
-               <div className="wrapper list">
+               <div className="wrapper">
                   <table>
                      <thead>
                         <tr>

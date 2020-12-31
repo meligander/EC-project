@@ -193,7 +193,7 @@ const TransactionList = ({
                      </button>
                   </div>
                </form>
-               <div className="wrapper list my-2">
+               <div className="wrapper my-2">
                   <table className="expences">
                      <thead>
                         <tr>
