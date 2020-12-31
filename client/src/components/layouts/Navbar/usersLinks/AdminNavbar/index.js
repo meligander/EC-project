@@ -129,7 +129,7 @@ const AdminNavbar = ({
                }}
             >
                <i className="fas fa-search"></i>
-               <span className="hide-md"> &nbsp; Búsqueda</span>
+               <span className="hide-md">&nbsp; Búsqueda</span>
             </Link>
          </li>
          <li
@@ -151,7 +151,7 @@ const AdminNavbar = ({
                }}
             >
                <i className="fas fa-chalkboard"></i>
-               <span className="hide-md">&nbsp; Cursos</span>
+               <span className="hide-md">&nbsp; Clases</span>
             </Link>
          </li>
          <li
@@ -232,7 +232,7 @@ const AdminNavbar = ({
                onClick={() => logOutAndToggle()}
             >
                <i className="fas fa-sign-out-alt"></i>
-               <span className="hide-md"> &nbsp; Cerrar Sesión</span>
+               <span className="hide-md">&nbsp; Cerrar Sesión</span>
             </Link>
          </li>
       </ul>

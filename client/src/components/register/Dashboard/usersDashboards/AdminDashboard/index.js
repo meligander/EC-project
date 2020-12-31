@@ -136,7 +136,7 @@ const AdminDashboard = ({
                   </div>
                   <div className="info p-3">
                      <h3 className="heading-tertiary text-dark">
-                        <i className="fas fa-calendar-day"></i>{" "}
+                        <i className="fas fa-calendar-day"></i> &nbsp;
                         <Moment format="LLLL" locale="es" date={dateR} />
                      </h3>
                      <div className="register-info-money my-5 text-center">

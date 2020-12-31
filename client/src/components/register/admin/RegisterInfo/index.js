@@ -39,7 +39,7 @@ const RegisterInfo = ({
       <>
          <h1 className="text-center">Caja</h1>
          <h3 className="heading-tertiary my-4 text-dark">
-            <i className="fas fa-calendar-day"></i>{" "}
+            <i className="fas fa-calendar-day"></i> &nbsp;
             <Moment format="LLLL" locale="es" date={date} />
          </h3>
          <Tabs

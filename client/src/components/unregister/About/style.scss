@@ -18,12 +18,12 @@
    -webkit-clip-path: polygon(0 0, 100% 0, 100% 75vh, 0 100%);
    clip-path: polygon(0 0, 100% 0, 100% 75vh, 0 100%);
 
-   @include respond(tab-land) {
-      margin-top: 5.4rem;
-   }
-
    @include respond(tab-port) {
       margin-top: 6.4rem;
+   }
+
+   @include respond(tab-land) {
+      margin-top: 5.4rem;
    }
 
    h2,

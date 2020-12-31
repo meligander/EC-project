@@ -12,7 +12,7 @@ const Landing = () => {
             </h1>
             <br />
             <p className="heading-tertiary">
-               Insituto de inglés para todas las edades
+               Instituto de inglés para todas las edades
             </p>
             <div className="btn-ctr mt-5">
                <Link to="/login" className="btn btn-primary">

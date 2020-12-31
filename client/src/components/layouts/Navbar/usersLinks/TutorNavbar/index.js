@@ -113,7 +113,7 @@ const TutorNavbar = ({
                }}
             >
                <i className="fas fa-sign-out-alt"></i>
-               <span className="hide-md"> &nbsp; Cerrar Sesión</span>
+               <span className="hide-md">&nbsp; Cerrar Sesión</span>
             </Link>
          </li>
       </ul>

@@ -36,8 +36,9 @@ const InvoiceTab = ({
          name: "",
          email: "",
       },
-      registerUser: false,
+      registeredUser: false,
       toggleModal: false,
+      toggleSearch: false,
    });
 
    const [invoice, setInvoice] = useState({
@@ -83,7 +84,13 @@ const InvoiceTab = ({
       remaining,
    } = invoice;
 
-   const { day, selectedUser, registerUser, toggleModal } = otherValues;
+   const {
+      day,
+      selectedUser,
+      registeredUser,
+      toggleModal,
+      toggleSearch,
+   } = otherValues;
 
    useEffect(() => {
       const initInput = () => {
@@ -116,7 +123,8 @@ const InvoiceTab = ({
       e.preventDefault();
       setOtherValues({
          ...otherValues,
-         registerUser: true,
+         registeredUser: true,
+         toggleSearch: !toggleSearch,
       });
 
       setInvoice({
@@ -175,6 +183,11 @@ const InvoiceTab = ({
       setOtherValues({ ...otherValues, toggleModal: !toggleModal });
    };
 
+   const setToggleSearch = (e) => {
+      e.preventDefault();
+      setOtherValues({ ...otherValues, toggleSearch: !toggleSearch });
+   };
+
    const beforeToggle = () => {
       if (total === 0) {
          setAlert("Debe registrar el pago de una cuota primero", "danger", "2");
@@ -221,9 +234,14 @@ const InvoiceTab = ({
                   <label className="form-label">Fecha</label>
                </div>
             </div>
-            <h3 className="paragraph text-primary ">Usuario a Pagar</h3>
+            <div className="paying-user">
+               <h3 className="paragraph text-primary ">Usuario a Pagar</h3>
+               <button onClick={setToggleSearch} className="btn-cancel search">
+                  <i className="fas fa-search"></i>
+               </button>
+            </div>
             <div className="mb-2">
-               {!registerUser ? (
+               {!registeredUser ? (
                   <>
                      <div className="form-group">
                         <div className="two-in-row">
@@ -300,14 +318,14 @@ const InvoiceTab = ({
                               className="btn-cancel search"
                               to={`/dashboard/${selectedUser._id}`}
                            >
-                              <i className="fas fa-search"></i>
+                              <i className="fas fa-user-circle"></i>
                            </Link>
                            <button
                               onClick={(e) => {
                                  e.preventDefault();
                                  setOtherValues({
                                     ...otherValues,
-                                    registerUser: !registerUser,
+                                    registeredUser: !registeredUser,
                                  });
                               }}
                               className="btn-cancel"
@@ -336,12 +354,14 @@ const InvoiceTab = ({
                   </>
                )}
             </div>
-            <StudentSearch
-               selectStudent={selectUser}
-               selectedStudent={selectedUser}
-               actionForSelected={addUser}
-               typeSearch="Tutor/Student"
-            />
+            {toggleSearch && (
+               <StudentSearch
+                  selectStudent={selectUser}
+                  selectedStudent={selectedUser}
+                  actionForSelected={addUser}
+                  typeSearch="Tutor/Student"
+               />
+            )}
          </form>
          <h3 className="text-primary heading-tertiary">Detalle de Factura</h3>
          <Alert type="5" />
@@ -422,7 +442,7 @@ const InvoiceTab = ({
                onClick={beforeToggle}
                className="btn btn-primary mt-3"
             >
-               <i className="fas fa-file-invoice-dollar"></i> Pagar
+               <i className="fas fa-file-invoice-dollar"></i>&nbsp; Pagar
             </button>
          </div>
       </div>

@@ -74,7 +74,7 @@ const ChangeCredentials = ({
                   Modificar Credenciales
                </h3>
                <h4 className="heading-tertiary text-lighter-primary text-moved-right">
-                  <i className="fas fa-unlock"></i>{" "}
+                  <i className="fas fa-unlock"></i>&nbsp;{" "}
                   {`Cambio de ${isAdmin ? "Email y/o " : ""}Contraseña`}
                </h4>
                <form className="form">
@@ -131,7 +131,8 @@ const ChangeCredentials = ({
                         }}
                         className="btn btn-primary"
                      >
-                        <i className="fas fa-user-check"></i> Guardar Cambios
+                        <i className="fas fa-user-check"></i>&nbsp; Guardar
+                        Cambios
                      </button>
                   </div>
                </form>

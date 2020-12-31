@@ -149,13 +149,13 @@ const InstallmentsTable = ({
                >
                   {!invoice ? (
                      <>
-                        <i className="far fa-edit"></i> &nbsp;
-                        <span className="hide-md">Editar</span>
+                        <i className="far fa-edit"></i>
+                        <span className="hide-md">&nbsp; Editar</span>
                      </>
                   ) : (
                      <>
-                        <i className="fas fa-plus"></i> &nbsp;
-                        <span className="hide-md">Agregar</span>
+                        <i className="fas fa-plus"></i>
+                        <span className="hide-md">&nbsp; Agregar</span>
                      </>
                   )}
                </button>

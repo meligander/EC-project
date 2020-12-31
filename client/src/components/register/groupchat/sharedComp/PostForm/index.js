@@ -45,7 +45,7 @@ const PostForm = ({ addPost, class_id }) => {
                   onClick={onSubmit}
                   className="btn btn-primary"
                >
-                  <i className="far fa-paper-plane"></i> Enviar
+                  <i className="far fa-paper-plane"></i>&nbsp; Enviar
                </button>
             </div>
          </form>

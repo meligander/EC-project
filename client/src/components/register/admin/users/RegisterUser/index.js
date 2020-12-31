@@ -387,7 +387,7 @@ const RegisterUser = ({
                               window.scroll(0, 0);
                            }}
                         >
-                           <i className="fas fa-unlock"></i> &nbsp; Modificar
+                           <i className="fas fa-unlock"></i>&nbsp; Modificar
                            credenciales
                         </Link>
                      </div>
@@ -723,7 +723,8 @@ const RegisterUser = ({
                                           clearTowns();
                                        }}
                                     >
-                                       <i className="far fa-edit"></i> Editar
+                                       <i className="far fa-edit"></i>&nsbp;
+                                       Editar
                                     </Link>
                                  </div>
                               )}
@@ -797,8 +798,8 @@ const RegisterUser = ({
                                     className="upload"
                                  />
                                  <span>
-                                    <i className="fa fa-cloud-upload"></i> Subir
-                                    imágen
+                                    <i className="fa fa-cloud-upload"></i>&nsbp;
+                                    Subir imágen
                                  </span>
                               </div>
                            </div>
@@ -811,8 +812,8 @@ const RegisterUser = ({
                               <i className="fas fa-user-edit"></i>
                            ) : (
                               <i className="fas fa-user-plus"></i>
-                           )}{" "}
-                           {isEditing ? "Guardar Cambios" : "Registrar"}
+                           )}
+                           &nbsp; {isEditing ? "Guardar Cambios" : "Registrar"}
                         </button>
                      </div>
                   </form>

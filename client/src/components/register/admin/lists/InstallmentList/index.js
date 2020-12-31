@@ -17,8 +17,12 @@ import ListButtons from "../sharedComp/ListButtons";
 import NameField from "../../../../sharedComp/NameField";
 
 const InstallmentList = ({
-   installments: { installments, loadingInstallments },
-   mixvalues: { totalDebt, page },
+   installments: {
+      installments,
+      loadingInstallments,
+      otherValues: { totalDebt },
+   },
+   mixvalues: { page },
    loadInstallments,
    getTotalDebt,
    updatePageNumber,
@@ -125,7 +129,7 @@ const InstallmentList = ({
 
                   <div className="btn-right my-1">
                      <button onClick={search} className="btn btn-light">
-                        <i className="fas fa-filter"></i> Buscar
+                        <i className="fas fa-filter"></i>&nbsp; Buscar
                      </button>
                   </div>
                </form>

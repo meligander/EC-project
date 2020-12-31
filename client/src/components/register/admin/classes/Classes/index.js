@@ -97,7 +97,7 @@ const Classes = ({
       <>
          {condition ? (
             <>
-               <h1>Cursos</h1>
+               <h1>Clases</h1>
                {userLogged.type !== "Profesor" && (
                   <div className="form">
                      <div className="form-group">
@@ -159,7 +159,7 @@ const Classes = ({
                            onClick={onSearch}
                            className="btn btn-light"
                         >
-                           <i className="fas fa-filter"></i> Buscar
+                           <i className="fas fa-filter"></i>&nsbp; Buscar
                         </button>
                      </div>
                   </div>
@@ -189,7 +189,7 @@ const Classes = ({
                               : "btn-black"
                         }`}
                      >
-                        <i className="fas fa-plus"></i> Curso
+                        <i className="fas fa-plus"></i>&nsbp; Nueva Clase
                      </Link>
                   )}
                   <button
