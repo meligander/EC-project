@@ -607,7 +607,7 @@ router.put(
             };
          }
 
-         if (!active) await inactivateUser(user._id, type);
+         if (!active) await inactivateUser(user._id, type, false);
 
          let data = {
             name,
@@ -742,7 +742,7 @@ router.delete("/:id/:type", [auth, adminAuth], async (req, res) => {
       //Remove user
       await User.findOneAndRemove({ _id: req.params.id });
 
-      await inactivateUser(req.params.id, req.params.type);
+      await inactivateUser(req.params.id, req.params.type, true);
 
       res.json({ msg: "User deleted" });
    } catch (err) {
@@ -760,7 +760,7 @@ function deletePictures(img) {
    });
 }
 
-async function inactivateUser(user_id, type) {
+async function inactivateUser(user_id, type, completeDeletion) {
    switch (type) {
       case "Alumno":
          const date = new Date();
@@ -779,8 +779,10 @@ async function inactivateUser(user_id, type) {
 
          let installments = await Installment.find({
             student: user_id,
-            year,
-            number: { $gt: month },
+            ...(!completeDeletion && {
+               year,
+               number: { $gt: month },
+            }),
          });
          for (let x = 0; x < installments.length; x++) {
             await Installment.findOneAndRemove({ _id: installments[x]._id });
