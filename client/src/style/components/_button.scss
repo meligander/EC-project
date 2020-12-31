@@ -102,11 +102,7 @@
          margin-right: 3rem !important;
 
          @include respond(small-phone) {
-<<<<<<< HEAD
-            margin-right: 2rem !important;
-=======
             margin-right: 1.5rem !important;
->>>>>>> 8f4bf7b0e98f08db222ec5b47030b278a97cb3f0
          }
       }
    }
