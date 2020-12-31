@@ -9,6 +9,7 @@ import {
    deleteExpence,
    transactionsPDF,
 } from "../../../../../actions/expence";
+import { clearInvoice } from "../../../../../actions/invoice";
 import { loadRegister } from "../../../../../actions/register";
 import { updatePageNumber } from "../../../../../actions/mixvalues";
 
@@ -24,6 +25,7 @@ const TransactionList = ({
    loadRegister,
    updatePageNumber,
    deleteExpence,
+   clearInvoice,
    transactionsPDF,
    expences: { transactions, loadingTransactions },
    registers: { register, loading },
@@ -134,7 +136,14 @@ const TransactionList = ({
                <td>${transaction.total}</td>
                <td>Factura {name}</td>
                <td>
-                  <Link to={`/invoice/${transaction._id}`} className="btn-text">
+                  <Link
+                     to={`/invoice/${transaction._id}`}
+                     onClick={() => {
+                        window.scroll(0, 0);
+                        clearInvoice();
+                     }}
+                     className="btn-text"
+                  >
                      Ver más &rarr;
                   </Link>
                </td>
@@ -242,6 +251,7 @@ TransactionList.propTypes = {
    updatePageNumber: PropTypes.func.isRequired,
    deleteExpence: PropTypes.func.isRequired,
    transactionsPDF: PropTypes.func.isRequired,
+   clearInvoice: PropTypes.func.isRequired,
 };
 
 const mapStatetoProps = (state) => ({
@@ -255,5 +265,6 @@ export default connect(mapStatetoProps, {
    loadRegister,
    updatePageNumber,
    deleteExpence,
+   clearInvoice,
    transactionsPDF,
 })(TransactionList);

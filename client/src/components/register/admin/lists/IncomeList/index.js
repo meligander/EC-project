@@ -7,6 +7,7 @@ import PropTypes from "prop-types";
 
 import {
    loadInvoices,
+   clearInvoice,
    deleteInvoice,
    invoicesPDF,
 } from "../../../../../actions/invoice";
@@ -25,6 +26,7 @@ const IncomeList = ({
    invoices: { loadingInvoices, invoices },
    mixvalues: { page },
    loadInvoices,
+   clearInvoice,
    updatePageNumber,
    invoicesPDF,
    deleteInvoice,
@@ -149,6 +151,10 @@ const IncomeList = ({
                                           <td>
                                              <Link
                                                 to={`/invoice/${invoice._id}`}
+                                                onClick={() => {
+                                                   window.scroll(0, 0);
+                                                   clearInvoice();
+                                                }}
                                                 className="btn-text"
                                              >
                                                 Ver más &rarr;
@@ -204,6 +210,7 @@ IncomeList.propTypes = {
    loadInvoices: PropTypes.func.isRequired,
    updatePageNumber: PropTypes.func.isRequired,
    deleteInvoice: PropTypes.func.isRequired,
+   clearInvoice: PropTypes.func.isRequired,
    invoicesPDF: PropTypes.func.isRequired,
 };
 
@@ -218,4 +225,5 @@ export default connect(mapStatetoProps, {
    updatePageNumber,
    deleteInvoice,
    invoicesPDF,
+   clearInvoice,
 })(IncomeList);
