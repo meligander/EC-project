@@ -214,13 +214,19 @@ router.post(
 
          let lastClass = await Class.find().sort({ $natural: -1 }).limit(1);
          const newClass = lastClass[0];
-
          for (let x = 0; x < students.length; x++) {
             await Enrollment.findOneAndUpdate(
                {
                   student: students[x]._id,
+                  year,
                },
-               { "classroom._id": newClass._id }
+               {
+                  classroom: {
+                     _id: newClass._id,
+                     periodAverage: [],
+                     periodAbsence: [],
+                  },
+               }
             );
          }
 
@@ -500,6 +506,9 @@ router.put(
          return res.status(400).json({ errors });
       }
 
+      const date = new Date();
+      const year = date.getFullYear();
+
       try {
          let hours = [hourin1, hourin2, hourout1, hourout2];
          for (let x = 0; x < hours.length; x++) {
@@ -530,8 +539,15 @@ router.put(
             await Enrollment.findOneAndUpdate(
                {
                   student: students[x]._id,
+                  year,
                },
-               { "classroom._id": req.params.id }
+               {
+                  classroom: {
+                     _id: req.params.id,
+                     periodAverage: [],
+                     periodAbsence: [],
+                  },
+               }
             );
 
             toDelete = toDelete.filter(

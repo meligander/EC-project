@@ -17,13 +17,15 @@ const RegisterClass = ({
    loadClass,
    loadUsers,
    loadCategories,
+   classes: { loading },
    users: { loadingUsers, loadingUsersBK },
 }) => {
    const registerClass = location.pathname === "/register-class";
 
    useEffect(() => {
       if (!registerClass) {
-         if (loadingUsersBK && loadingUsers) loadClass(match.params.class_id);
+         if (loading && loadingUsersBK && loadingUsers)
+            loadClass(match.params.class_id);
       }
 
       if (loadingUsersBK) {
@@ -46,6 +48,7 @@ const RegisterClass = ({
       registerClass,
       match.params,
       loadingUsersBK,
+      loading,
    ]);
 
    return (
@@ -72,6 +75,7 @@ RegisterClass.prototypes = {
 
 const mapStateToProps = (state) => ({
    users: state.users,
+   classes: state.classes,
 });
 
 export default connect(mapStateToProps, {
