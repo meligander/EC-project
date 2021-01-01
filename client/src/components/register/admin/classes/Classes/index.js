@@ -56,9 +56,10 @@ const Classes = ({
             }));
       } else {
          if (loadingClasses) {
+            loadClasses({});
+            console.log("hello");
             loadUsers({ type: "Profesor", active: true });
             loadCategories();
-            loadClasses({});
          } else {
             setOtherValues((prev) => ({
                ...prev,
