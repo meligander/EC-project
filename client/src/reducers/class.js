@@ -91,6 +91,7 @@ export default function (state = initialState, action) {
             error: {},
          };
       case CLASSSTUDENT_ADDED:
+         console.log(payload);
          return {
             ...state,
             classInfo: {
@@ -149,6 +150,7 @@ export default function (state = initialState, action) {
             },
             loading: false,
             loadingStudents: false,
+            error: payload,
          };
       default:
          return state;

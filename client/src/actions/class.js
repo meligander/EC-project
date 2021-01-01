@@ -37,6 +37,7 @@ export const loadClass = (class_id, post = false) => async (dispatch) => {
             type: CLASS_LOADED,
             payload: res.data,
          });
+         console.log("hola");
          if (!post) dispatch(loadClassStudents(class_id));
       }
    } catch (err) {
