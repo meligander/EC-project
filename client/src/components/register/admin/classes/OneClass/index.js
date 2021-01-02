@@ -86,6 +86,7 @@ const OneClass = ({
                                     {user.dob && (
                                        <Moment
                                           format="DD/MM/YY"
+                                          utc
                                           date={user.dob}
                                        />
                                     )}

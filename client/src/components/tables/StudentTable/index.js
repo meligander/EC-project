@@ -32,7 +32,7 @@ const StudentTable = ({
             {!loadingUsers &&
                type === "Alumno" &&
                users.map((user) => {
-                  const years = moment().diff(user.dob, "years", false);
+                  const years = moment().utc().diff(user.dob, "years", false);
                   return (
                      user.type === "Alumno" && (
                         <tr key={user._id}>

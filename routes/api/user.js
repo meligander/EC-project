@@ -488,7 +488,9 @@ router.post("/create-list", (req, res) => {
          } else {
             const dob =
                "<td>" +
-               (users[x].dob ? moment(users[x].dob).format("DD/MM/YY") : "") +
+               (users[x].dob
+                  ? moment(users[x].dob).utc().format("DD/MM/YY")
+                  : "") +
                "</td>";
             if (usersType === "Profesor")
                tbody += "<tr>" + name + email + cel + dob + "</tr>";

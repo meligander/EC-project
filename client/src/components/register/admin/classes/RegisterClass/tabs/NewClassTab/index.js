@@ -63,16 +63,16 @@ const NewClassTab = ({
             ...(classInfo.day1 && { day1: classInfo.day1 }),
             ...(classInfo.day2 && { day2: classInfo.day2 }),
             ...(classInfo.hourin1 && {
-               hourin1: moment(classInfo.hourin1).format("HH:mm"),
+               hourin1: moment(classInfo.hourin1).utc().format("HH:mm"),
             }),
             ...(classInfo.hourin2 && {
-               hourin2: moment(classInfo.hourin2).format("HH:mm"),
+               hourin2: moment(classInfo.hourin2).utc().format("HH:mm"),
             }),
             ...(classInfo.hourout1 && {
-               hourout1: moment(classInfo.hourout1).format("HH:mm"),
+               hourout1: moment(classInfo.hourout1).utc().format("HH:mm"),
             }),
             ...(classInfo.hourout2 && {
-               hourout2: moment(classInfo.hourout2).format("HH:mm"),
+               hourout2: moment(classInfo.hourout2).utc().format("HH:mm"),
             }),
          }));
       }
