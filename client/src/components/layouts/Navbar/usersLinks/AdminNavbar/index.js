@@ -150,7 +150,7 @@ const AdminNavbar = ({
                   changePageAndMenu("classes");
                }}
             >
-               <i className="fas fa-chalkboard"></i>
+               <i className="fas fa-chalkboard-teacher"></i>
                <span className="hide-md">&nbsp; Clases</span>
             </Link>
          </li>
