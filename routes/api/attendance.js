@@ -433,6 +433,7 @@ async function buildTable(attendances, class_id, res) {
          //Add or modify the info that is in every item in the array row
          for (const index in days) {
             row[rowNumber].date = new Date(index);
+
             row[rowNumber].name = "input" + count;
 
             //For the items that are buttons (doesnt have a user related)

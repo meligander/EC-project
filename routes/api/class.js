@@ -188,9 +188,14 @@ router.post(
          let hours = [hourin1, hourin2, hourout1, hourout2];
          for (let x = 0; x < hours.length; x++) {
             if (hours[x]) {
-               const date = moment("2000-01-01 " + hours[x]).format(
-                  "YYYY-MM-DD HH:mm"
-               );
+               const hour = hours[x].substring(0, 2);
+               const minutes = hours[x].substring(3);
+
+               const date = new Date();
+
+               date.setUTCHours(hour, minutes, 0);
+
+               hours[x] = date;
                hours[x] = date;
             }
          }
@@ -260,26 +265,26 @@ router.post("/create-list", (req, res) => {
       const hourin1 =
          "<td>" +
          (classes[x].hourin1
-            ? moment(classes[x].hourin1).format("HH:mm")
+            ? moment(classes[x].hourin1).utc().format("HH:mm")
             : "") +
          "</td>";
       const hourout1 =
          "<td>" +
          (classes[x].hourout1
-            ? moment(classes[x].hourout1).format("HH:mm")
+            ? moment(classes[x].hourout1).utc().format("HH:mm")
             : "") +
          "</td>";
       const day2 = "<td>" + (classes[x].day2 ? classes[x].day2 : "") + "</td>";
       const hourin2 =
          "<td>" +
          (classes[x].hourin2
-            ? moment(classes[x].hourin2).format("HH:mm")
+            ? moment(classes[x].hourin2).utc().format("HH:mm")
             : "") +
          "</td>";
       const hourout2 =
          "<td>" +
          (classes[x].hourout2
-            ? moment(classes[x].hourout2).format("HH:mm")
+            ? moment(classes[x].hourout2).utc().format("HH:mm")
             : "") +
          "</td>";
 
@@ -358,7 +363,7 @@ router.post("/oneclass/create-list", (req, res) => {
       const dob =
          "<td>" +
          (classInfo.students[x].dob
-            ? moment(classInfo.students[x].dob).format("DD/MM/YY")
+            ? moment(classInfo.students[x].dob).utc().format("DD/MM/YY")
             : "") +
          "</td>";
       const cel =
@@ -513,9 +518,13 @@ router.put(
          let hours = [hourin1, hourin2, hourout1, hourout2];
          for (let x = 0; x < hours.length; x++) {
             if (hours[x]) {
-               const date = moment("2000-01-01 " + hours[x]).format(
-                  "YYYY-MM-DD HH:mm"
-               );
+               const hour = hours[x].substring(0, 2);
+               const minutes = hours[x].substring(3);
+
+               const date = new Date();
+
+               date.setUTCHours(hour, minutes, 0);
+
                hours[x] = date;
             }
          }

@@ -146,11 +146,13 @@ const StudentDashboard = ({
                                           </span>{" "}
                                           <Moment
                                              format="HH:mm"
+                                             utc
                                              date={classInfo.hourin1}
                                           />{" "}
                                           -{" "}
                                           <Moment
                                              format="HH:mm"
+                                             utc
                                              date={classInfo.hourout1}
                                           />
                                        </p>
@@ -163,11 +165,13 @@ const StudentDashboard = ({
                                           </span>
                                           <Moment
                                              format="HH:mm"
+                                             utc
                                              date={classInfo.hourin1}
                                           />{" "}
                                           -{" "}
                                           <Moment
                                              format="HH:mm"
+                                             utc
                                              date={classInfo.hourout1}
                                           />
                                        </p>
@@ -177,11 +181,13 @@ const StudentDashboard = ({
                                           </span>
                                           <Moment
                                              format="HH:mm"
+                                             utc
                                              date={classInfo.hourin2}
                                           />{" "}
                                           -{" "}
                                           <Moment
                                              format="HH:mm"
+                                             utc
                                              date={classInfo.hourout2}
                                           />
                                        </p>
@@ -238,6 +244,7 @@ const StudentDashboard = ({
                                     <i className="far fa-times-circle"></i>{" "}
                                     <Moment
                                        format="DD/MM"
+                                       utc
                                        date={attendance.date}
                                     />
                                  </div>
