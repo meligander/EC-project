@@ -51,11 +51,6 @@ const RestTable = ({ loadingUsers, users, type, usersType, clearProfile }) => {
                               {user.dob && (
                                  <Moment
                                     date={user.dob}
-<<<<<<< HEAD
-                                    utc
-                                    format={"DD/MM/YY"}
-=======
->>>>>>> 0a0ee73906cf99815444afe8f03826a96ea77273
                                     utc
                                     format={"DD/MM/YY"}
                                  />
