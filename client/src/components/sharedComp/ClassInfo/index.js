@@ -27,11 +27,11 @@ const ClassInfo = ({ classInfo }) => {
                <div className="schedule">
                   <p>
                      <span className="text-dark">Entrada: </span>
-                     <Moment format="HH:mm" date={classInfo.hourin1} />
+                     <Moment format="HH:mm" utc date={classInfo.hourin1} />
                   </p>
                   <p>
                      <span className="text-dark">Salida: </span>
-                     <Moment format="HH:mm" date={classInfo.hourout1} />
+                     <Moment format="HH:mm" utc date={classInfo.hourout1} />
                   </p>
                </div>
             </div>
@@ -43,11 +43,11 @@ const ClassInfo = ({ classInfo }) => {
                <div className="schedule">
                   <p>
                      <span className="text-dark">Entrada: </span>
-                     <Moment format="HH:mm" date={classInfo.hourin2} />
+                     <Moment format="HH:mm" utc date={classInfo.hourin2} />
                   </p>
                   <p>
                      <span className="text-dark">Salida: </span>
-                     <Moment format="HH:mm" date={classInfo.hourout2} />
+                     <Moment format="HH:mm" utc date={classInfo.hourout2} />
                   </p>
                </div>
             </div>

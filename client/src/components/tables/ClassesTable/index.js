@@ -47,6 +47,7 @@ const ClassesTable = ({ classes, clearClass, clearProfile, all = true }) => {
                               {classItem.hourin1 && (
                                  <Moment
                                     format="HH:mm"
+                                    utc
                                     date={classItem.hourin1}
                                  />
                               )}
@@ -55,6 +56,7 @@ const ClassesTable = ({ classes, clearClass, clearProfile, all = true }) => {
                               {classItem.hourout1 && (
                                  <Moment
                                     format="HH:mm"
+                                    utc
                                     date={classItem.hourout1}
                                  />
                               )}
@@ -64,6 +66,7 @@ const ClassesTable = ({ classes, clearClass, clearProfile, all = true }) => {
                               {classItem.hourin2 && (
                                  <Moment
                                     format="HH:mm"
+                                    utc
                                     date={classItem.hourin2}
                                  />
                               )}
@@ -72,6 +75,7 @@ const ClassesTable = ({ classes, clearClass, clearProfile, all = true }) => {
                               {classItem.hourout2 && (
                                  <Moment
                                     format="HH:mm"
+                                    utc
                                     date={classItem.hourout2}
                                  />
                               )}

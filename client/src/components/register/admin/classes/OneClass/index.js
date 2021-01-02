@@ -71,7 +71,7 @@ const OneClass = ({
                         <tr>
                            <th>Legajo</th>
                            <th>Nombre</th>
-                           <th>Fec. Nac.</th>
+                           <th>Fecha Nac.</th>
                            <th>Celular</th>
                            <th>&nbsp;</th>
                         </tr>
@@ -86,6 +86,7 @@ const OneClass = ({
                                     {user.dob && (
                                        <Moment
                                           format="DD/MM/YY"
+                                          utc
                                           date={user.dob}
                                        />
                                     )}
