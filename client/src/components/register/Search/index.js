@@ -22,9 +22,7 @@ const Search = ({
 }) => {
    return (
       <>
-         <h1>
-            <i className="fas fa-search"></i> Búsqueda
-         </h1>
+         <h1>Búsqueda</h1>
          {(userLogged.type === "Administrador" ||
             userLogged.type === "Secretaria" ||
             userLogged.type === "Admin/Profesor") && (

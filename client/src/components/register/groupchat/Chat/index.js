@@ -58,10 +58,8 @@ const Chat = ({
                         text="¿Está seguro que desea eliminar la publicación?"
                      />
                      <p className="heading-tertiary">
-                        <i className="far fa-comments"></i> Bienvenido al chat
-                        de {classes.classInfo.category.name} del profesor{" "}
-                        {classes.classInfo.teacher.lastname}
-                        {", "}
+                        Bienvenido al chat de {classes.classInfo.category.name}{" "}
+                        del profesor {classes.classInfo.teacher.lastname},{" "}
                         {classes.classInfo.teacher.name}
                      </p>
                      <PostForm class_id={classes.classInfo._id} />

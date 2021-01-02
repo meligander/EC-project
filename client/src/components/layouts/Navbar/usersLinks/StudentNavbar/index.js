@@ -96,7 +96,7 @@ const StudentNavbar = ({
                   changePageAndMenu("classmates");
                }}
             >
-               <i className="fas fa-address-book"></i>
+               <i className="fas fa-chalkboard-teacher"></i>
                <span className="hide-md">&nbsp; Clase</span>
             </Link>
          </li>
