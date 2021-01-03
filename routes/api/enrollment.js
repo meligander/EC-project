@@ -319,7 +319,7 @@ router.post(
          installment.save();
 
          const date = new Date();
-         if (date.getFullYear() === year && date.getMonth() < 3) {
+         if (date.getFullYear() === year && date.getMonth() > 2) {
             number = date.getMonth() + (currentMonth ? 1 : 2);
          } else {
             number = 3;
@@ -659,7 +659,7 @@ router.put(
 
             let number = 3;
 
-            if (date.getFullYear() === year && date.getMonth() < 3) {
+            if (date.getFullYear() === year && date.getMonth() > 2) {
                number = date.getMonth() + (currentMonth ? 1 : 2);
             }
 
