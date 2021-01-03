@@ -213,13 +213,6 @@ const OneClass = ({
                   </div>
                )}
             </>
-         ) : !loading && classInfo === null ? (
-            <div className="p-2 bg-white">
-               <h1 className="heading-secondary text-dark p-1">Curso</h1>
-               <p className="paragraph text-center">
-                  El alumno no está asignado a ninguna clase
-               </p>
-            </div>
          ) : (
             <Loading />
          )}
