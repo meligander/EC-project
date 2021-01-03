@@ -53,6 +53,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
             year: filter.year
                ? filter.year
                : { $in: [date.getFullYear(), date.getFullYear() + 1] },
+            ...(filter.student && { student: filter.student }),
          })
             .populate({
                path: "student",
