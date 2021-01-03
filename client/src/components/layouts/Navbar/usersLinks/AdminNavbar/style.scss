@@ -13,7 +13,7 @@
       }
 
       @include respond(small-phone) {
-         padding: 1.6rem !important;
+         padding: 1.6rem 2rem !important;
       }
 
       & > .nav-link {
@@ -25,7 +25,6 @@
 
          @include respond(small-phone) {
             font-size: 3rem;
-            background-size: 261%;
          }
       }
    }
