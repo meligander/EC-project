@@ -1,0 +1,32 @@
+@import "../../../../../style/abstract.scss";
+
+.admin.menu-nav {
+   @include respond(small-phone) {
+      flex-direction: row;
+   }
+
+   .smaller {
+      padding: 1.5rem 0 !important;
+
+      @include respond(tab-port) {
+         padding: 1.3rem !important;
+      }
+
+      @include respond(small-phone) {
+         padding: 1.6rem !important;
+      }
+
+      & > .nav-link {
+         font-size: 2.5rem;
+
+         @include respond(tab-port) {
+            font-size: 2.2rem;
+         }
+
+         @include respond(small-phone) {
+            font-size: 3rem;
+            background-size: 261%;
+         }
+      }
+   }
+}

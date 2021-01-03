@@ -194,7 +194,7 @@ const AdminDashboard = ({
                               }}
                               className="side-nav-link"
                            >
-                              <i className="fas fa-chalkboard side-nav-icon"></i>
+                              <i className="fas fa-chalkboard-teacher side-nav-icon"></i>
                               <span className="hide-sm"> Clases</span>
                            </Link>
                         </li>

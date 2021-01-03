@@ -14,6 +14,8 @@ import { clearRegisters } from "../../../../../actions/register";
 import { clearProfile, clearSearch } from "../../../../../actions/user";
 import { clearClasses } from "../../../../../actions/class";
 
+import "./style.scss";
+
 const AdminNavbar = ({
    location,
    navbar: { showMenu, currentNav },
@@ -87,7 +89,7 @@ const AdminNavbar = ({
    }, [changePage, userLogged._id, id, path]);
 
    return (
-      <ul className={!showMenu ? "menu-nav" : "menu-nav show"}>
+      <ul className={`admin menu-nav ${showMenu ? "show" : ""}`}>
          <li
             className={
                !showMenu
