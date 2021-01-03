@@ -134,7 +134,7 @@
       @include easeOut;
 
       @include respond(phone) {
-         height: 25vh;
+         height: 28vh;
          padding: 3rem 0 5rem 0;
          transform: translate3d(100%, 0, 0);
       }
@@ -151,7 +151,7 @@
       @include easeOut;
 
       @include respond(phone) {
-         height: 75vh;
+         height: 72vh;
          transform: translate3d(-100%, 0, 0);
       }
 
@@ -166,7 +166,7 @@
             filter: invert(100%);
             -webkit-filter: invert(100%);
 
-            @include respond(phone) {
+            @include respond(tab-port) {
                width: 30rem;
                height: 30rem;
             }
@@ -200,22 +200,6 @@
 
       &.current > a {
          color: $dark-color;
-      }
-
-      &.smaller {
-         padding: 1.5rem;
-
-         @include respond(phone) {
-            padding: 4rem 0;
-         }
-
-         & > .nav-link {
-            font-size: 2.5rem;
-
-            @include respond(small-phone) {
-               font-size: 2rem;
-            }
-         }
       }
    }
 
