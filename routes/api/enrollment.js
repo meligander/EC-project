@@ -318,11 +318,7 @@ router.post(
          installment.save();
 
          const date = new Date();
-<<<<<<< HEAD
-         if (date.getFullYear() === year && date.getMonth() > 3) {
-=======
          if (date.getFullYear() === year && date.getMonth() > 2) {
->>>>>>> 2a05ec8af7c0510b48b7c2d49ccc050773dc29c4
             number = date.getMonth() + (currentMonth ? 1 : 2);
          } else {
             number = 3;
@@ -662,11 +658,7 @@ router.put(
 
             let number = 3;
 
-<<<<<<< HEAD
-            if (date.getFullYear() === year && date.getMonth() > 3) {
-=======
             if (date.getFullYear() === year && date.getMonth() > 2) {
->>>>>>> 2a05ec8af7c0510b48b7c2d49ccc050773dc29c4
                number = date.getMonth() + (currentMonth ? 1 : 2);
             }
 
