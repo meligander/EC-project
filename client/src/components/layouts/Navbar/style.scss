@@ -135,12 +135,8 @@
 
       @include respond(phone) {
          height: 29vh;
-         padding: 2rem 0 4rem 0;
+         padding: 6rem 0;
          transform: translate3d(100%, 0, 0);
-      }
-
-      @include respond(small-phone) {
-         padding: 2rem 0 6.5rem 0;
       }
 
       &.show {
