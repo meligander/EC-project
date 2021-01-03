@@ -17,7 +17,7 @@ const Category = require("../../models/Category");
 //@route    GET api/enrollment
 //@desc     get all enrollments || with filter
 //@access   Private
-router.get("/", [auth, adminAuth], async (req, res) => {
+router.get("/", [auth], async (req, res) => {
    try {
       let date = new Date();
       let enrollments;

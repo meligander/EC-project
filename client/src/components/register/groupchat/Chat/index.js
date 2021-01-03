@@ -49,38 +49,26 @@ const Chat = ({
 
          {!classes.loading && !loading ? (
             <>
-               {classes.classInfo ? (
-                  <>
-                     <Confirm
-                        toggleModal={toggleModal}
-                        setToggleModal={setToggle}
-                        confirm={deletePostC}
-                        text="¿Está seguro que desea eliminar la publicación?"
-                     />
-                     <p className="heading-tertiary">
-                        Bienvenido al chat de {classes.classInfo.category.name}{" "}
-                        del profesor {classes.classInfo.teacher.lastname},{" "}
-                        {classes.classInfo.teacher.name}
-                     </p>
-                     <PostForm class_id={classes.classInfo._id} />
+               <Confirm
+                  toggleModal={toggleModal}
+                  setToggleModal={setToggle}
+                  confirm={deletePostC}
+                  text="¿Está seguro que desea eliminar la publicación?"
+               />
+               <p className="heading-tertiary">
+                  Bienvenido al chat de {classes.classInfo.category.name} del
+                  profesor {classes.classInfo.teacher.lastname},{" "}
+                  {classes.classInfo.teacher.name}
+               </p>
+               <PostForm class_id={classes.classInfo._id} />
 
-                     {posts.length > 0 ? (
-                        posts.map((post) => (
-                           <Post
-                              post={post}
-                              key={post._id}
-                              setToggle={setToggle}
-                           />
-                        ))
-                     ) : (
-                        <p className="heading-tertiary text-center my-4">
-                           No hay ninguna publicación hasta el momento
-                        </p>
-                     )}
-                  </>
+               {posts.length > 0 ? (
+                  posts.map((post) => (
+                     <Post post={post} key={post._id} setToggle={setToggle} />
+                  ))
                ) : (
-                  <p className="heading-tertiary text-center my-5">
-                     El alumno no está asignado a ninguna clase
+                  <p className="heading-tertiary text-center my-4">
+                     No hay ninguna publicación hasta el momento
                   </p>
                )}
             </>
