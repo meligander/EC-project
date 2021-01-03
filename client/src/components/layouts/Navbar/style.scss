@@ -134,8 +134,8 @@
       @include easeOut;
 
       @include respond(phone) {
-         height: 28vh;
-         padding: 3rem 0 5rem 0;
+         height: 29vh;
+         padding: 2rem 0 6.5rem 0;
          transform: translate3d(100%, 0, 0);
       }
 
@@ -151,7 +151,7 @@
       @include easeOut;
 
       @include respond(phone) {
-         height: 72vh;
+         height: 71vh;
          transform: translate3d(-100%, 0, 0);
       }
 
@@ -219,7 +219,7 @@
       @include shortTrans;
 
       @include respond(phone) {
-         background-size: 251%;
+         background-size: 260%;
       }
 
       &:hover {
