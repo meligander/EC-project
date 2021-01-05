@@ -60,10 +60,8 @@ router.post(
       check("password", "La contraseña es necesaria").exists(),
    ],
    async (req, res) => {
-      const errorsResult = validationResult(req);
-
       let errors = [];
-
+      const errorsResult = validationResult(req);
       if (!errorsResult.isEmpty()) {
          errors = errorsResult.array();
          return res.status(400).json({ errors });

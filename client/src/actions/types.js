@@ -170,6 +170,7 @@ export const POST_DELETED = "POST_DELETED";
 export const COMMENT_ADDED = "COMMENT_ADDED";
 export const COMMENT_DELETED = "COMMENT_DELETED";
 export const LIKES_UPDATED = "LIKES_UPDATED";
+export const POST_SEEN = "POST_SEEN";
 export const POSTS_CLEARED = "POSTS_CLEARED";
 export const POST_ERROR = "POST_ERROR";
 

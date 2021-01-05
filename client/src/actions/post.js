@@ -10,6 +10,7 @@ import {
    COMMENT_ADDED,
    COMMENT_DELETED,
    LIKES_UPDATED,
+   POST_SEEN,
    POSTS_CLEARED,
    POST_ERROR,
 } from "./types";
@@ -133,7 +134,7 @@ export const addComment = (post_id, formData, screen) => async (dispatch) => {
 
       dispatch({
          type: COMMENT_ADDED,
-         payload: res.data,
+         payload: { post_id, comments: res.data },
       });
 
       dispatch(setAlert("Comentario Agregado", "success", post_id));
@@ -178,7 +179,7 @@ export const deleteComment = (post_id, comment_id, screen) => async (
 
       dispatch({
          type: COMMENT_DELETED,
-         payload: res.data,
+         payload: { post_id, comments: res.data },
       });
 
       dispatch(setAlert("Comentario Eliminado", "success", post_id));
@@ -223,6 +224,29 @@ export const addRemoveLike = (post_id) => async (dispatch) => {
       dispatch(setAlert(msg ? msg : type, "danger", post_id));
    }
    dispatch(updateLoadingSpinner(false));
+};
+
+export const seenPost = (post_id, data) => async (dispatch) => {
+   try {
+      const res = await axios.put(`/api/post/seen/${post_id}`, data);
+
+      dispatch({
+         type: POST_SEEN,
+         payload: { post_id, seenArray: res.data },
+      });
+   } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
+      dispatch({
+         type: POST_ERROR,
+         payload: {
+            type,
+            status: err.response.status,
+            msg,
+         },
+      });
+      dispatch(setAlert(msg ? msg : type, "danger", post_id));
+   }
 };
 
 export const clearPosts = () => (dispatch) => {

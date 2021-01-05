@@ -5,7 +5,7 @@ import Moment from "react-moment";
 import PropTypes from "prop-types";
 
 import { clearProfile } from "../../../../../actions/user";
-import { addRemoveLike /* , seenPost */ } from "../../../../../actions/post";
+import { addRemoveLike, seenPost } from "../../../../../actions/post";
 
 import Comments from "../Comments";
 import Confirm from "../../../../modal/Confirm";
@@ -17,7 +17,7 @@ const Post = ({
    post,
    auth: { userLogged },
    addRemoveLike,
-   /* seenPost, */
+   seenPost,
    clearProfile,
    setToggle,
 }) => {
@@ -53,24 +53,25 @@ const Post = ({
 
          if (userLogged.type !== "Administrador") {
             let seen = false;
+            let newOne = true;
             for (let x = 0; x < post.seenArray.length; x++) {
                if (
                   post.seenArray[x] &&
-                  post.seenArray[x].user === userLogged._id &&
-                  post.seenArray[x].seen
+                  post.seenArray[x].user === userLogged._id
                ) {
-                  seen = true;
+                  if (post.seenArray[x].seen) seen = true;
+                  else newOne = false;
                   break;
                }
             }
 
             if (!seen) {
-               /* const newSeen = {
+               const newSeen = {
                   user: userLogged._id,
                   seen: true,
-               }; */
+               };
 
-               /*  seenPost(post._id, { newSeen }); */
+               seenPost(post._id, { newSeen, newOne });
 
                setotherValues((prev) => ({
                   ...prev,
@@ -84,7 +85,7 @@ const Post = ({
             oneLoad: false,
          }));
       }
-   }, [post, userLogged, oneLoad /* , seenPost */]);
+   }, [post, userLogged, oneLoad, seenPost]);
 
    const setToggleComments = () => {
       setotherValues({
@@ -101,7 +102,7 @@ const Post = ({
    };
 
    return (
-      <div className={`post ${hasNotSeen ? "bg-lighter" : "bg-white"} `}>
+      <div className={`post ${hasNotSeen ? "bg-unseen" : "bg-white"} `}>
          <Confirm
             toggleModal={toggleUsersLiked}
             setToggleModal={setToggleUsersLiked}
@@ -215,7 +216,7 @@ const Post = ({
 
 Post.propTypes = {
    addRemoveLike: PropTypes.func.isRequired,
-   /* seenPost: PropTypes.func.isRequired, */
+   seenPost: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
    setToggle: PropTypes.func,
    post: PropTypes.object.isRequired,
@@ -228,6 +229,6 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    addRemoveLike,
-   /* seenPost, */
+   seenPost,
    clearProfile,
 })(Post);

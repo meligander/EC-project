@@ -62,6 +62,12 @@ router.post(
             name: user.name,
             lastname: user.lastname,
             user: req.user.id,
+            seenArray: [
+               {
+                  user: req.user.id,
+                  seen: true,
+               },
+            ],
          });
          let post = await newPost.save();
 
@@ -104,38 +110,30 @@ router.post(
       }
 
       try {
-         const user = await User.findById(req.user.id).select("-password");
          let post = await Post.findById(req.params.id);
 
          const newComment = {
             text: req.body.text,
-            name: user.name,
-            lastname: user.lastname,
             user: req.user.id,
          };
 
          post.comments.unshift(newComment);
 
+         post.seenArray = post.seenArray.map((seen) =>
+            seen.user === req.user.id ? seen : { user: seen.user, seen: false }
+         );
+
+         console.log(post);
+
          await post.save();
 
-         post = await Post.findById(req.params.id)
-            .populate({
-               path: "user",
-               model: "user",
-               select: ["name", "lastname", "noImg", "img", "_id"],
-            })
-            .populate({
-               path: "comments.user",
-               model: "user",
-               select: ["name", "lastname", "noImg", "img", "_id"],
-            })
-            .populate({
-               path: "likes.user",
-               model: "user",
-               select: ["name", "lastname", "noImg", "img", "_id"],
-            });
+         post = await Post.findById(req.params.id).populate({
+            path: "comments.user",
+            model: "user",
+            select: ["name", "lastname", "noImg", "img", "_id"],
+         });
 
-         return res.json(post);
+         return res.json(post.comments);
       } catch (err) {
          console.error(err.message);
          res.status(500).send("Server error");
@@ -165,24 +163,45 @@ router.put("/like/:id", auth, async (req, res) => {
 
       await post.save();
 
-      post = await Post.findOne({ _id: req.params.id })
-         .populate({
-            path: "user",
-            model: "user",
-            select: ["name", "lastname", "noImg", "img", "_id"],
-         })
-         .populate({
-            path: "comments.user",
-            model: "user",
-            select: ["name", "lastname", "noImg", "img", "_id"],
-         })
-         .populate({
-            path: "likes.user",
-            model: "user",
-            select: ["name", "lastname", "noImg", "img", "_id"],
-         });
+      post = await Post.findOne({ _id: req.params.id }).populate({
+         path: "likes.user",
+         model: "user",
+         select: ["name", "lastname", "noImg", "img", "_id"],
+      });
 
       res.json(post.likes);
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server error");
+   }
+});
+
+//@route    PUT api/posts/seen/:id
+//@desc     Mark a post as seen by a user
+//@access   Private
+router.put("/seen/:id", auth, async (req, res) => {
+   try {
+      const { newSeen, newOne } = req.body;
+
+      let post = await Post.findOne({ _id: req.params.id });
+
+      let seenArray = [];
+
+      if (newOne) seenArray = [...seenArray, newSeen];
+      else
+         seenArray = post.seenArray.map((seen) =>
+            seen.user === newSeen.user ? newSeen : seen
+         );
+
+      post = await Post.findOneAndUpdate(
+         { _id: post._id },
+         { seenArray },
+         { new: true }
+      );
+
+      console.log(post);
+
+      res.json(post.seenArray);
    } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");
@@ -198,11 +217,6 @@ router.delete("/:id", auth, async (req, res) => {
 
       if (!post)
          return res.status(404).json({ msg: "Publicación no encontrada" });
-
-      //Check user
-      if (post.user.toString() !== req.user.id) {
-         return res.status(401).json({ msg: "Usuario no autorizado" });
-      }
 
       await post.remove();
 
@@ -221,7 +235,11 @@ router.delete("/:id", auth, async (req, res) => {
 //@access   Private
 router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
    try {
-      const post = await Post.findById(req.params.id);
+      const post = await Post.findById(req.params.id).populate({
+         path: "comments.user",
+         model: "user",
+         select: ["name", "lastname", "noImg", "img", "_id"],
+      });
 
       //Pull out comment
       const comment = post.comments.find(
@@ -241,7 +259,7 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
 
       await post.save();
 
-      res.json(post);
+      res.json(post.comments);
    } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");
