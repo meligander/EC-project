@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import { updatePageNumber } from "../../../../../../../actions/mixvalues";
-import { setAlert } from "../../../../../../../actions/alert";
 import { clearProfile } from "../../../../../../../actions/user";
 import {
    loadStudentAverage,
@@ -22,7 +21,6 @@ function AverageTab({
    updatePageNumber,
    enrollmentsPDF,
    clearProfile,
-   setAlert,
 }) {
    const [filterData, setFilterData] = useState({
       amount: "",
@@ -44,12 +42,7 @@ function AverageTab({
    };
 
    const pdfGeneratorSave = () => {
-      if (enrollments.length === 0) {
-         setAlert("Primero debe realizar una búsqueda", "danger", "2");
-         window.scrollTo(500, 0);
-      } else {
-         enrollmentsPDF(enrollments, "averages");
-      }
+      enrollmentsPDF(enrollments, "averages");
    };
 
    return (
@@ -168,7 +161,6 @@ AverageTab.propTypes = {
    enrollments: PropTypes.object.isRequired,
    loadStudentAverage: PropTypes.func.isRequired,
    enrollmentsPDF: PropTypes.func.isRequired,
-   setAlert: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
 };
 
@@ -182,6 +174,5 @@ export default connect(mapStateToProps, {
    loadStudentAverage,
    updatePageNumber,
    enrollmentsPDF,
-   setAlert,
    clearProfile,
 })(AverageTab);

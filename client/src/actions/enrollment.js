@@ -4,7 +4,7 @@ import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
-import { clearTotalDebt } from "./installment";
+import { clearTotalDebt, updateExpiredIntallments } from "./installment";
 import { clearProfile } from "./user";
 
 import {
@@ -210,6 +210,7 @@ export const registerEnrollment = (
          )
       );
 
+      dispatch(updateExpiredIntallments());
       dispatch(clearYearEnrollments());
       dispatch(clearTotalDebt());
 

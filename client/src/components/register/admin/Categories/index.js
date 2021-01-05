@@ -37,9 +37,11 @@ const Categories = ({
          setFormData(categories);
       };
       const monthMinMax = (date, num) => {
-         if (date.getMonth() + num < 11)
-            return `${date.getFullYear()}-${date.getMonth() + num}`;
-         else {
+         if (date.getMonth() + num < 11) {
+            let value = date.getMonth() + num;
+            if (value < 9) value = "0" + value;
+            return `${date.getFullYear()}-${value}`;
+         } else {
             let value = num - (11 - date.getMonth());
             if (value < 9) value = "0" + value;
             return `${date.getFullYear() + 1}-${value}`;

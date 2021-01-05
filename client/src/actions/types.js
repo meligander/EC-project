@@ -36,6 +36,8 @@ export const USERAUTH_LOADED = "USERAUTH_LOADED";
 export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
 export const LOGIN_FAIL = "LOGIN_FAIL";
 export const LOGOUT = "LOGOUT";
+export const STARTLOGOUT = "STARTLOGOUT";
+export const FINISHLOGOUT = "FINISHLOGOUT";
 export const AUTH_ERROR = "AUTH_ERROR";
 
 //Classes

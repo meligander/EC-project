@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
 //Actions
-import { setAlert } from "../../../../../actions/alert";
 import { updateCredentials, loadUser } from "../../../../../actions/user";
 
 import Loading from "../../../../modal/Loading";
@@ -11,7 +10,6 @@ import Confirm from "../../../../modal/Confirm";
 
 const ChangeCredentials = ({
    match,
-   setAlert,
    updateCredentials,
    history,
    loadUser,
@@ -24,7 +22,11 @@ const ChangeCredentials = ({
       password2: "",
    });
 
-   const [toggleModal, setToggleModal] = useState(false);
+   const [otherValues, setOtherValues] = useState({
+      toggleModal: false,
+   });
+
+   const { toggleModal } = otherValues;
 
    const { email, password, password2 } = formData;
 
@@ -52,12 +54,11 @@ const ChangeCredentials = ({
    };
 
    const onSubmit = () => {
-      if ((password !== "" || password2 !== "") && password !== password2) {
-         setAlert("Las contraseñas deben coincidir", "danger", "2");
-         window.scrollTo(0, 0);
-      } else {
-         updateCredentials(formData, history, user._id);
-      }
+      updateCredentials(formData, history, user._id);
+   };
+
+   const setToggle = () => {
+      setOtherValues({ ...otherValues, toggleModal: !toggleModal });
    };
 
    return (
@@ -66,7 +67,7 @@ const ChangeCredentials = ({
             <div className="p-4">
                <Confirm
                   toggleModal={toggleModal}
-                  setToggleModal={setToggleModal}
+                  setToggleModal={setToggle}
                   confirm={onSubmit}
                   text="¿Está seguro que desea aplicar los cambios?"
                />
@@ -81,7 +82,7 @@ const ChangeCredentials = ({
                   className="form"
                   onSubmit={(e) => {
                      e.preventDefault();
-                     setToggleModal(true);
+                     setToggle();
                   }}
                >
                   {isAdmin && (
@@ -145,7 +146,6 @@ const ChangeCredentials = ({
 };
 
 ChangeCredentials.prototypes = {
-   setAlert: PropTypes.func.isRequired,
    updateCredentials: PropTypes.func.isRequired,
    loadUser: PropTypes.func.isRequired,
    users: PropTypes.object.isRequired,
@@ -158,7 +158,6 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps, {
-   setAlert,
    updateCredentials,
    loadUser,
 })(ChangeCredentials);

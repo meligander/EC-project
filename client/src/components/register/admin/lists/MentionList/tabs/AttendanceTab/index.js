@@ -9,7 +9,6 @@ import {
 } from "../../../../../../../actions/enrollment";
 import { clearProfile } from "../../../../../../../actions/user";
 import { updatePageNumber } from "../../../../../../../actions/mixvalues";
-import { setAlert } from "../../../../../../../actions/alert";
 
 import ListButtons from "../../../sharedComp/ListButtons";
 
@@ -21,7 +20,6 @@ function AttendanceTab({
    updatePageNumber,
    clearProfile,
    enrollmentsPDF,
-   setAlert,
 }) {
    const [filterData, setFilterData] = useState({
       absence: "",
@@ -43,12 +41,7 @@ function AttendanceTab({
    };
 
    const pdfGeneratorSave = () => {
-      if (enrollments.length === 0) {
-         setAlert("Primero debe realizar una búsqueda", "danger", "2");
-         window.scrollTo(500, 0);
-      } else {
-         enrollmentsPDF(enrollments, "attendances");
-      }
+      enrollmentsPDF(enrollments, "attendances");
    };
 
    return (
@@ -159,7 +152,6 @@ AttendanceTab.propTypes = {
    enrollments: PropTypes.object.isRequired,
    loadStudentAttendance: PropTypes.func.isRequired,
    enrollmentsPDF: PropTypes.func.isRequired,
-   setAlert: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
 };
 
@@ -173,6 +165,5 @@ export default connect(mapStateToProps, {
    loadStudentAttendance,
    updatePageNumber,
    enrollmentsPDF,
-   setAlert,
    clearProfile,
 })(AttendanceTab);

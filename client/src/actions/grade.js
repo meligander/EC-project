@@ -20,9 +20,9 @@ import {
    GRADETYPE_ERROR,
 } from "./types";
 
-export const loadUsersGrades = (user_id) => async (dispatch) => {
+export const loadUsersGrades = (user_id, class_id) => async (dispatch) => {
    try {
-      const res = await axios.get(`/api/grade/user/${user_id}`);
+      const res = await axios.get(`/api/grade/student/${class_id}/${user_id}`);
       dispatch({
          type: STUDENTGRADES_LOADED,
          payload: res.data,

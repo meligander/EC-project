@@ -7,7 +7,6 @@ import PropTypes from "prop-types";
 import { clearProfile, clearSearch } from "../../../../../../../actions/user";
 import { registerInvoice } from "../../../../../../../actions/invoice";
 import { removeInstallmentFromList } from "../../../../../../../actions/installment";
-import { setAlert } from "../../../../../../../actions/alert";
 
 import Alert from "../../../../../../sharedComp/Alert";
 import StudentSearch from "../../../../../../sharedComp/search/StudentSearch";
@@ -23,7 +22,6 @@ const InvoiceTab = ({
    },
    auth: { userLogged },
    clearSearch,
-   setAlert,
    registerInvoice,
    clearProfile,
    removeInstallmentFromList,
@@ -190,10 +188,7 @@ const InvoiceTab = ({
 
    const beforeToggle = (e) => {
       e.preventDefault();
-      if (total === 0) {
-         setAlert("Debe registrar el pago de una cuota primero", "danger", "2");
-         window.scroll(0, 0);
-      } else setOtherValues({ ...otherValues, toggleModal: !toggleModal });
+      setOtherValues({ ...otherValues, toggleModal: !toggleModal });
    };
 
    const confirm = () => {
@@ -453,7 +448,6 @@ InvoiceTab.propTypes = {
    auth: PropTypes.object.isRequired,
    clearSearch: PropTypes.func.isRequired,
    registerInvoice: PropTypes.func.isRequired,
-   setAlert: PropTypes.func.isRequired,
    removeInstallmentFromList: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
 };
@@ -466,7 +460,6 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    clearSearch,
-   setAlert,
    registerInvoice,
    removeInstallmentFromList,
    clearProfile,

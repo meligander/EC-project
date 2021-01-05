@@ -6,7 +6,6 @@ import {
    deleteNeighbourhood,
    updateNeighbourhoods,
 } from "../../../../../../../actions/neighbourhood";
-import { setAlert } from "../../../../../../../actions/alert";
 
 import Confirm from "../../../../../../modal/Confirm";
 import EditButtons from "../../../sharedComp/EditButtons";
@@ -16,16 +15,16 @@ const NeighbourhoodTab = ({
    neighbourhoods: { neighbourhoods, loading, error },
    updateNeighbourhoods,
    deleteNeighbourhood,
-   setAlert,
 }) => {
    const [newNB, setNewNB] = useState([]);
    const [otherValues, setOtherValues] = useState({
       toggleModalDelete: false,
       toggleModalSave: false,
       toDelete: "",
+      count: 0,
    });
 
-   const { toggleModalDelete, toggleModalSave, toDelete } = otherValues;
+   const { toggleModalDelete, toggleModalSave, toDelete, count } = otherValues;
 
    useEffect(() => {
       if (!loading) setNewNB(neighbourhoods);
@@ -43,20 +42,21 @@ const NeighbourhoodTab = ({
    const addNeighbourhood = () => {
       let newValue = [...newNB];
       newValue.push({
-         _id: "",
+         _id: count,
          name: "",
          town: 0,
       });
       setNewNB(newValue);
+      setOtherValues({
+         ...otherValues,
+         count: count + 1,
+      });
    };
 
    const deleteNeighbourhoodConfirm = () => {
-      if (toDelete._id === "") {
-         setAlert(
-            "El barrio no se ha guardado todavía. Vuelva a recargar la página y desaparecerá.",
-            "danger",
-            "2"
-         );
+      if (typeof toDelete._id === "number") {
+         const array = newNB.filter((nb) => nb._id !== toDelete._id);
+         setNewNB(array);
       } else deleteNeighbourhood(toDelete._id);
    };
 
@@ -163,7 +163,6 @@ NeighbourhoodTab.propTypes = {
    towns: PropTypes.object.isRequired,
    updateNeighbourhoods: PropTypes.func.isRequired,
    deleteNeighbourhood: PropTypes.func.isRequired,
-   setAlert: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -174,5 +173,4 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    updateNeighbourhoods,
    deleteNeighbourhood,
-   setAlert,
 })(NeighbourhoodTab);

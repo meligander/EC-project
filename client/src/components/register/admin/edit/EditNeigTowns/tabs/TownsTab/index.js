@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
 import { deleteTown, updateTowns } from "../../../../../../../actions/town";
-import { setAlert } from "../../../../../../../actions/alert";
 
 import Confirm from "../../../../../../modal/Confirm";
 import EditButtons from "../../../sharedComp/EditButtons";
@@ -12,16 +11,16 @@ const TownsTab = ({
    towns: { towns, loading, error },
    updateTowns,
    deleteTown,
-   setAlert,
 }) => {
    const [newTowns, setNewTowns] = useState([]);
    const [otherValues, setOtherValues] = useState({
       toggleModalDelete: false,
       toggleModalSave: false,
       toDelete: "",
+      count: 0,
    });
 
-   const { toggleModalDelete, toggleModalSave, toDelete } = otherValues;
+   const { toggleModalDelete, toggleModalSave, toDelete, count } = otherValues;
 
    useEffect(() => {
       if (!loading) setNewTowns(towns);
@@ -40,19 +39,17 @@ const TownsTab = ({
    const addTown = () => {
       let newValue = [...newTowns];
       newValue.push({
-         _id: "",
+         _id: count,
          name: "",
       });
       setNewTowns(newValue);
+      setOtherValues({ ...otherValues, count: count + 1 });
    };
 
    const deleteTownConfirm = () => {
-      if (toDelete._id === "") {
-         setAlert(
-            "La localidad no se ha guardado todavía. Vuelva a recargar la página y desaparecerá.",
-            "danger",
-            "2"
-         );
+      if (typeof toDelete._id === "number") {
+         const array = newTowns.filter((town) => town._id !== toDelete._id);
+         setNewTowns(array);
       } else deleteTown(toDelete._id);
    };
 
@@ -138,13 +135,10 @@ TownsTab.propTypes = {
    towns: PropTypes.object.isRequired,
    updateTowns: PropTypes.func.isRequired,
    deleteTown: PropTypes.func.isRequired,
-   setAlert: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    towns: state.towns,
 });
 
-export default connect(mapStateToProps, { updateTowns, deleteTown, setAlert })(
-   TownsTab
-);
+export default connect(mapStateToProps, { updateTowns, deleteTown })(TownsTab);

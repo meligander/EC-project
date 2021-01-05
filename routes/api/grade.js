@@ -42,20 +42,14 @@ router.get("/:class_id", [auth], async (req, res) => {
    }
 });
 
-//@route    GET api/grade/user/:id
+//@route    GET api/grade/student/:class_id/:user_id
 //@desc     Get all grades for a user
 //@access   Private
-router.get("/user/:id", [auth], async (req, res) => {
+router.get("/student/:class_id/:user_id", [auth], async (req, res) => {
    try {
-      const date = new Date();
-      const start = new Date(date.getFullYear(), 01, 01);
-      const end = new Date(date.getFullYear(), 12, 31);
       const grades = await Grade.find({
-         student: req.params.id,
-         date: {
-            $gte: start,
-            $lt: end,
-         },
+         classroom: req.params.class_id,
+         student: req.params.user_id,
       })
          .populate({
             path: "gradetype",
@@ -198,7 +192,18 @@ router.post("/period", auth, async (req, res) => {
 //@desc     Add a grade
 //@access   Private
 router.post("/", auth, async (req, res) => {
-   const { student, period, classroom, gradetype, value } = req.body;
+   const { student, period, classroom, gradetype, value, periods } = req.body;
+
+   if (gradetype === "")
+      return res.status(400).json({
+         msg: "Primero debe elegir un tipo de nota",
+      });
+
+   if (period !== 1 && !periods[period - 2])
+      return res.status(400).json({
+         msg: "Debe agregar por lo menos una nota en los bimestres anteriores",
+      });
+
    const data = { student, period, classroom, gradetype, value };
    let grade;
 

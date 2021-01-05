@@ -11,7 +11,8 @@ import {
    clearSearch,
 } from "../../../actions/user";
 import { clearTowns } from "../../../actions/town";
-import { updateExpiredIntallments } from "../../../actions/installment";
+import { clearUser } from "../../../actions/user";
+import { clearNeighbourhoods } from "../../../actions/neighbourhood";
 
 import Confirm from "../../modal/Confirm";
 import GoBack from "../../sharedComp/GoBack";
@@ -23,6 +24,7 @@ import AdminDashboard from "./usersDashboards/AdminDashboard";
 import TeacherDashboard from "./usersDashboards/TeacherDashboard";
 
 import "./style.scss";
+import ExpireAuthToken from "../../../utils/ExpireAuthToken";
 
 const Dashboard = ({
    match,
@@ -32,8 +34,9 @@ const Dashboard = ({
    loadUser,
    clearTowns,
    clearSearch,
+   clearNeighbourhoods,
+   clearUser,
    deleteUser,
-   updateExpiredIntallments,
    clearOtherValues,
 }) => {
    const [otherValues, setOtherValues] = useState({
@@ -51,17 +54,8 @@ const Dashboard = ({
    useEffect(() => {
       if (loading) {
          loadUser(match.params.user_id);
-      } else {
-         if (user._id === userLogged._id) updateExpiredIntallments();
       }
-   }, [
-      loadUser,
-      match.params.user_id,
-      loading,
-      updateExpiredIntallments,
-      user,
-      userLogged,
-   ]);
+   }, [loadUser, match.params.user_id, loading]);
 
    const type = () => {
       switch (user.type) {
@@ -97,6 +91,7 @@ const Dashboard = ({
       <>
          {!loading ? (
             <>
+               <ExpireAuthToken />
                <Confirm
                   setToggleModal={setToggle}
                   toggleModal={toggleModal}
@@ -248,6 +243,8 @@ const Dashboard = ({
                                     onClick={() => {
                                        window.scroll(0, 0);
                                        clearTowns();
+                                       clearUser();
+                                       clearNeighbourhoods();
                                        clearSearch();
                                        clearOtherValues("studentNumber");
                                     }}
@@ -291,7 +288,8 @@ Dashboard.prototypes = {
    clearTowns: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
    clearOtherValues: PropTypes.func.isRequired,
-   updateExpiredIntallments: PropTypes.func.isRequired,
+   clearUser: PropTypes.func.isRequired,
+   clearNeighbourhoods: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -302,8 +300,9 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    loadUser,
    deleteUser,
-   updateExpiredIntallments,
    clearTowns,
    clearSearch,
    clearOtherValues,
+   clearNeighbourhoods,
+   clearUser,
 })(withRouter(Dashboard));

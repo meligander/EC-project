@@ -3,12 +3,11 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
 import { loginUser } from "../../../actions/auth";
-import { changePage } from "../../../actions/navbar";
 
 import Alert from "../../sharedComp/Alert";
 import Loading from "../../modal/Loading";
 
-const Login = ({ loginUser, mixvalues: { loadingSpinner }, changePage }) => {
+const Login = ({ loginUser, mixvalues: { loadingSpinner } }) => {
    const [formData, setFormData] = useState({
       email: "",
       password: "",
@@ -23,21 +22,10 @@ const Login = ({ loginUser, mixvalues: { loadingSpinner }, changePage }) => {
       });
    };
 
-   const onSubmit = async (e) => {
+   const onSubmit = (e) => {
       e.preventDefault();
-      let credentials = {};
-      if (formData.password !== "") credentials.password = formData.password;
-      if ((credentials.email = formData.email !== ""))
-         credentials.email = formData.email;
-      loginUser(credentials);
-      changePage("index");
+      loginUser(formData);
    };
-
-   /* if (isAuthenticated) {
-      clearProfile();
-      console.log(`/dashboard/${userLogged._id}`);
-      return <Redirect to={`/dashboard/${userLogged._id}`} />;
-   } */
 
    return (
       <div className="inner-container">
@@ -87,7 +75,6 @@ const Login = ({ loginUser, mixvalues: { loadingSpinner }, changePage }) => {
 Login.prototypes = {
    mixvalues: PropTypes.object.isRequired,
    loginUser: PropTypes.func.isRequired,
-   changePage: PropTypes.func.isRequired,
    loadUser: PropTypes.func.isRequired,
 };
 
@@ -97,5 +84,4 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    loginUser,
-   changePage,
 })(Login);

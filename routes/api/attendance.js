@@ -47,18 +47,11 @@ router.get("/:class_id", [auth], async (req, res) => {
 //@route    GET api/attendance/student/:id
 //@desc     Get a student's attendances
 //@access   Private
-router.get("/student/:id", [auth], async (req, res) => {
+router.get("/student/:class_id/:user_id", [auth], async (req, res) => {
    try {
-      const date = new Date();
-      const start = new Date(date.getFullYear(), 01, 01);
-      const end = new Date(date.getFullYear(), 12, 31);
-
       const attendances = await Attendance.find({
-         student: req.params.id,
-         date: {
-            $gte: start,
-            $lt: end,
-         },
+         student: req.params.user_id,
+         classroom: req.params.class_id,
       }).sort({ date: 1 });
 
       if (attendances.length === 0) {
@@ -158,7 +151,15 @@ router.post("/period", auth, async (req, res) => {
 //@desc     Add a date column for the period
 //@access   Private
 router.post("/", auth, async (req, res) => {
-   const { period, date, classroom } = req.body;
+   const { date, period, classroom, periods } = req.body;
+
+   if (date === "")
+      return res.status(400).json({ msg: "Primero debe elegir una fecha" });
+
+   if (period !== 1 && !periods[period - 2])
+      return res.status(400).json({
+         msg: "Debe agregar por lo menos una fecha en los bimestres anteriores",
+      });
 
    const data = {
       period,
