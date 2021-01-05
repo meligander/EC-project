@@ -90,32 +90,12 @@ const AttendanceTab = ({
    };
 
    const addDate = () => {
-      let pass = true;
-      if (period !== 1) {
-         if (!periods[period - 2]) {
-            pass = false;
-         }
-      }
-      if (!pass || newDay.date === "") {
-         if (newDay.date === "") {
-            setAlert("Primero debe elegir una fecha", "danger", "2");
-            window.scroll(0, 0);
-         } else {
-            setAlert(
-               "Debe agregar por lo menos una fecha en los bimestres anteriores",
-               "danger",
-               "2"
-            );
-         }
-         window.scroll(0, 0);
-      } else {
-         registerNewDate(newDay);
-         setOtherValues({ ...otherValues, dayPlus: !dayPlus });
-         setFormData({
-            ...formData,
-            newAttendances: periods[period - 1],
-         });
-      }
+      registerNewDate({ ...newDay, periods });
+      setOtherValues({ ...otherValues, dayPlus: !dayPlus });
+      setFormData({
+         ...formData,
+         newAttendances: periods[period - 1],
+      });
    };
 
    const clickAddDate = () => {

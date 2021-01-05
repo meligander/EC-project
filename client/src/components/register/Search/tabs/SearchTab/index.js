@@ -4,7 +4,6 @@ import PropTypes from "prop-types";
 
 import { loadCategories } from "../../../../../actions/category";
 import { clearProfile, loadUsers, userPDF } from "../../../../../actions/user";
-import { setAlert } from "../../../../../actions/alert";
 
 import StudentTable from "../../../../tables/StudentTable";
 import RestTable from "../../../../tables/RestTable";
@@ -18,7 +17,6 @@ const SearchTab = ({
    clearProfile,
    typeF,
    userPDF,
-   setAlert,
 }) => {
    const [filterForm, setFilterForm] = useState({
       name: "",
@@ -60,12 +58,7 @@ const SearchTab = ({
    };
 
    const pdfGeneratorSave = () => {
-      if (users.length === 0) {
-         setAlert("Primero debe realizar una búsqueda", "danger", "2");
-         window.scrollTo(0, 0);
-      } else {
-         userPDF(users, usersType);
-      }
+      userPDF(users, usersType);
    };
 
    useEffect(() => {
@@ -180,7 +173,6 @@ SearchTab.propTypes = {
    loadUsers: PropTypes.func.isRequired,
    loadCategories: PropTypes.func.isRequired,
    userPDF: PropTypes.func.isRequired,
-   setAlert: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
 };
 
@@ -193,6 +185,5 @@ export default connect(mapStateToProps, {
    loadCategories,
    loadUsers,
    userPDF,
-   setAlert,
    clearProfile,
 })(SearchTab);

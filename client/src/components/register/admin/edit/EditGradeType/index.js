@@ -8,7 +8,6 @@ import {
    deleteGradeType,
 } from "../../../../../actions/grade";
 import { loadCategories } from "../../../../../actions/category";
-import { setAlert } from "../../../../../actions/alert";
 
 import Loading from "../../../../modal/Loading";
 import EditButtons from "../sharedComp/EditButtons";
@@ -19,7 +18,6 @@ const EditGradeType = ({
    loadCategories,
    updateGradeTypes,
    deleteGradeType,
-   setAlert,
    grades: { gradeTypes, loadingGT },
    categories: { categories },
 }) => {
@@ -114,7 +112,7 @@ const EditGradeType = ({
 
       rowToAdd[amount] = [...newRow];
       rowToAdd[amount][0] = {
-         _id: "",
+         _id: amount,
          name: "",
       };
       let newValue = [...formData, rowToAdd[amount]];
@@ -128,17 +126,10 @@ const EditGradeType = ({
    };
 
    const deleteGradeTypeConfirm = () => {
-      console.log(toDelete);
-      if (toDelete[0]._id === "") {
-         setAlert(
-            "El tipo de nota no se ha guardado todavía. Vuelva a recargar la página y desaparecerá.",
-            "danger",
-            "2"
-         );
-         window.scroll(0, 0);
-      } else {
-         deleteGradeType(toDelete[0]._id);
-      }
+      if (typeof toDelete[0]._id === "number") {
+         const array = formData.filter((row) => row[0]._id !== toDelete[0]._id);
+         setFormData(array);
+      } else deleteGradeType(toDelete[0]._id);
    };
 
    const saveGradeTypes = () => {
@@ -256,7 +247,6 @@ EditGradeType.propTypes = {
    loadCategories: PropTypes.func.isRequired,
    updateGradeTypes: PropTypes.func.isRequired,
    deleteGradeType: PropTypes.func.isRequired,
-   setAlert: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -269,5 +259,4 @@ export default connect(mapStateToProps, {
    loadCategories,
    updateGradeTypes,
    deleteGradeType,
-   setAlert,
 })(EditGradeType);

@@ -223,7 +223,13 @@ router.get("/for-print/fetch-invoice", (req, res) => {
 //@access   Private
 router.post(
    "/",
-   [auth, adminAuth, check("total", "El pago es necesario").not().isEmpty()],
+   [
+      auth,
+      adminAuth,
+      check("total", "Debe ingresar el pago de todas las cuotas agregadas")
+         .not()
+         .isEmpty(),
+   ],
    async (req, res) => {
       let {
          invoiceid,
@@ -235,7 +241,8 @@ router.post(
          details,
          remaining,
       } = req.body;
-      total = Number(total);
+
+      if (total) total = Number(total);
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -249,13 +256,12 @@ router.post(
          let installment;
          for (let x = 0; x < details.length; x++) {
             if (details[x].payment === "")
-               return res.status(400).json({ msg: "El pago es necesario" });
+               return res.status(400).json({
+                  msg: "Debe ingresar el pago de todas las cuotas agregadas",
+               });
             installment = await Installment.findOne({
                _id: details[x].item._id,
             });
-
-            if (installment.value === 0)
-               return res.status(400).json({ msg: "Dicha cuota ya está paga" });
 
             if (installment.value < parseFloat(details[x].payment))
                return res.status(400).json({
@@ -263,7 +269,7 @@ router.post(
                });
          }
 
-         if ((lastname === "" || name === "") && user._id === "") {
+         if ((lastname === "" && name === "") || user._id === "") {
             return res.status(400).json({
                msg: "La factura debe estar a nombre de alguien",
             });

@@ -35,9 +35,10 @@ const Classes = ({
 }) => {
    const [otherValues, setOtherValues] = useState({
       condition: true,
+      oneLoad: true,
    });
 
-   const { condition } = otherValues;
+   const { condition, oneLoad } = otherValues;
 
    const [filterForm, setfilterForm] = useState({
       teacher: "",
@@ -48,17 +49,27 @@ const Classes = ({
 
    useEffect(() => {
       if (userLogged.type === "Profesor") {
-         if (loadingClasses) loadClasses({ teacher: userLogged._id });
-         else
+         if (oneLoad) {
+            loadClasses({ teacher: userLogged._id });
+            setOtherValues((prev) => ({
+               ...prev,
+               oneLoad: false,
+            }));
+         } else
             setOtherValues((prev) => ({
                ...prev,
                condition: !loadingClasses,
             }));
       } else {
-         if (loadingClasses) {
+         if (oneLoad) {
             loadClasses({});
             loadUsers({ type: "Profesor", active: true });
             loadCategories();
+
+            setOtherValues((prev) => ({
+               ...prev,
+               oneLoad: false,
+            }));
          } else {
             setOtherValues((prev) => ({
                ...prev,
@@ -72,6 +83,7 @@ const Classes = ({
       loadCategories,
       loadClasses,
       userLogged,
+      oneLoad,
       loadingClasses,
       categories.loading,
       users.loadingUsers,

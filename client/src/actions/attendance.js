@@ -15,9 +15,13 @@ import {
    ATTENDANCES_ERROR,
 } from "./types";
 
-export const loadStudentAttendance = (student_id) => async (dispatch) => {
+export const loadStudentAttendance = (user_id, class_id) => async (
+   dispatch
+) => {
    try {
-      const res = await axios.get(`/api/attendance/student/${student_id}`);
+      const res = await axios.get(
+         `/api/attendance/student/${class_id}/${user_id}`
+      );
       dispatch({
          type: STUDENTATTENDANCES_LOADED,
          payload: res.data,

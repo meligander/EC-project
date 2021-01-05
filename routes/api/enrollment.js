@@ -363,23 +363,28 @@ router.post(
 router.post("/create-list", (req, res) => {
    const name = "reports/enrollments.pdf";
 
-   const enrollment = req.body;
+   const enrollments = req.body;
+
+   if (enrollments.length === 0)
+      return res
+         .status(400)
+         .json({ msg: "Primero debe realizar una búsqueda" });
 
    let tbody = "";
 
-   for (let x = 0; x < enrollment.length; x++) {
+   for (let x = 0; x < enrollments.length; x++) {
       const date =
-         "<td>" + moment(enrollment[x].date).format("DD/MM/YY") + "</td>";
+         "<td>" + moment(enrollments[x].date).format("DD/MM/YY") + "</td>";
       const studentnumber =
-         "<td>" + enrollment[x].student.studentnumber + "</td>";
+         "<td>" + enrollments[x].student.studentnumber + "</td>";
       const studentname =
          "<td>" +
-         enrollment[x].student.lastname +
+         enrollments[x].student.lastname +
          ", " +
-         enrollment[x].student.name +
+         enrollments[x].student.name +
          "</td>";
-      const category = "<td>" + enrollment[x].category.name + "</td>";
-      const year = "<td>" + enrollment[x].year + "</td>";
+      const category = "<td>" + enrollments[x].category.name + "</td>";
+      const year = "<td>" + enrollments[x].year + "</td>";
 
       tbody +=
          "<tr>" +
@@ -436,21 +441,26 @@ router.post("/create-list", (req, res) => {
 router.post("/averages/create-list", (req, res) => {
    const name = "reports/averages.pdf";
 
-   const enrollment = req.body;
+   const enrollments = req.body;
+
+   if (enrollments.length === 0)
+      return res
+         .status(400)
+         .json({ msg: "Primero debe realizar una búsqueda" });
 
    let tbody = "";
 
-   for (let x = 0; x < enrollment.length; x++) {
+   for (let x = 0; x < enrollments.length; x++) {
       const studentnumber =
-         "<td>" + enrollment[x].student.studentnumber + "</td>";
+         "<td>" + enrollments[x].student.studentnumber + "</td>";
       const studentname =
          "<td>" +
-         enrollment[x].student.lastname +
+         enrollments[x].student.lastname +
          ", " +
-         enrollment[x].student.name +
+         enrollments[x].student.name +
          "</td>";
-      const category = "<td>" + enrollment[x].category.name + "</td>";
-      const average = "<td>" + enrollment[x].classroom.average + "</td>";
+      const category = "<td>" + enrollments[x].category.name + "</td>";
+      const average = "<td>" + enrollments[x].classroom.average + "</td>";
 
       tbody +=
          "<tr>" + studentnumber + studentname + category + average + "</tr>";
@@ -501,24 +511,29 @@ router.post("/averages/create-list", (req, res) => {
 router.post("/absences/create-list", (req, res) => {
    const name = "reports/absences.pdf";
 
-   const enrollment = req.body;
+   const enrollments = req.body;
+
+   if (enrollments.length === 0)
+      return res
+         .status(400)
+         .json({ msg: "Primero debe realizar una búsqueda" });
 
    let tbody = "";
 
-   for (let x = 0; x < enrollment.length; x++) {
+   for (let x = 0; x < enrollments.length; x++) {
       const studentnumber =
-         "<td>" + enrollment[x].student.studentnumber + "</td>";
+         "<td>" + enrollments[x].student.studentnumber + "</td>";
       const studentname =
          "<td>" +
-         enrollment[x].student.lastname +
+         enrollments[x].student.lastname +
          ", " +
-         enrollment[x].student.name +
+         enrollments[x].student.name +
          "</td>";
-      const category = "<td>" + enrollment[x].category.name + "</td>";
+      const category = "<td>" + enrollments[x].category.name + "</td>";
 
       let type;
 
-      switch (enrollment[x].classroom.absence) {
+      switch (enrollments[x].classroom.absence) {
          case 0:
             type = "Perfecta";
             break;
@@ -532,7 +547,7 @@ router.post("/absences/create-list", (req, res) => {
       }
 
       type = "<td>" + type + "</td>";
-      const absence = "<td>" + enrollment[x].classroom.absence + "</td>";
+      const absence = "<td>" + enrollments[x].classroom.absence + "</td>";
 
       tbody +=
          "<tr>" +

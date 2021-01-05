@@ -1,7 +1,9 @@
 import axios from "axios";
 
 import { setAlert } from "./alert";
+import { changePage } from "./navbar";
 import { updateLoadingSpinner } from "./mixvalues";
+import { updateExpiredIntallments } from "./installment";
 
 import {
    USERAUTH_LOADED,
@@ -9,6 +11,8 @@ import {
    LOGIN_SUCCESS,
    LOGIN_FAIL,
    LOGOUT,
+   STARTLOGOUT,
+   FINISHLOGOUT,
 } from "./types";
 
 export const loadUser = () => async (dispatch) => {
@@ -27,19 +31,22 @@ export const loadUser = () => async (dispatch) => {
 
 export const loginUser = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
-   const config = {
-      headers: {
-         "Content-Type": "application/json",
-      },
-   };
-   let user = JSON.stringify(formData);
+
+   let user = {};
+
+   for (const prop in formData) {
+      if (formData[prop] !== "") user[prop] = formData[prop];
+   }
+
    try {
-      const res = await axios.post("/api/auth", user, config);
+      const res = await axios.post("/api/auth", user);
       dispatch({
          type: LOGIN_SUCCESS,
          payload: res.data,
       });
+
       dispatch(loadUser());
+      dispatch(updateExpiredIntallments());
    } catch (err) {
       if (err.response.data.erros) {
          const errors = err.response.data.errors;
@@ -65,6 +72,17 @@ export const loginUser = (formData) => async (dispatch) => {
       window.scrollTo(0, 0);
       dispatch(updateLoadingSpinner(false));
    }
+};
+
+export const expireSesion = (history) => (dispatch) => {
+   dispatch({
+      type: STARTLOGOUT,
+   });
+   history.push("/login");
+   dispatch(changePage("login"));
+   dispatch({
+      type: FINISHLOGOUT,
+   });
 };
 
 export const logOut = () => (dispatch) => {

@@ -431,6 +431,11 @@ router.post("/create-list", (req, res) => {
 
    const { users, usersType } = req.body;
 
+   if (users.length === 0)
+      return res.status(400).json({
+         msg: "Primero debe realizar una búsqueda",
+      });
+
    let tbody = "";
    let thead = "";
 
@@ -681,7 +686,7 @@ router.put(
 //@desc     Update user's credentials
 //@access   Private
 router.put("/credentials/:id", [auth], async (req, res) => {
-   const { password, email } = req.body;
+   const { password, password2, email } = req.body;
 
    var regex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
    if (email && !regex.test(email))
@@ -693,6 +698,11 @@ router.put("/credentials/:id", [auth], async (req, res) => {
       });
 
    try {
+      if ((password !== "" || password2 !== "") && password !== password2)
+         return res
+            .status(400)
+            .json({ msg: "Las contraseñas deben coincidir" });
+
       //See if users exists
       if (email) {
          user = await User.findOne({ email });

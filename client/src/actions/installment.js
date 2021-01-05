@@ -161,6 +161,7 @@ export const updateIntallment = (formData, history, user_id, inst_id) => async (
       });
 
       dispatch(updatePreviousPage("dashboard"));
+      dispatch(updateExpiredIntallments());
 
       dispatch(setAlert(res.data.msg, "success", "2"));
       dispatch(clearInstallments());

@@ -7,6 +7,7 @@ import Loading from "../../modal/Loading";
 import Dashboard from "../../register/Dashboard";
 import GoBack from "../../sharedComp/GoBack";
 import Alert from "../../sharedComp/Alert";
+import ExpireAuthToken from "../../../utils/ExpireAuthToken";
 
 const PrivateRoutes = ({
    component: Component,
@@ -37,6 +38,7 @@ const PrivateRoutes = ({
             <>
                <GoBack />
                <div className="inner-container">
+                  <ExpireAuthToken />
                   <Alert type="2" />
                   <Route exact path={path} component={Component} />
                </div>

@@ -7,7 +7,6 @@ import {
    loadExpenceTypes,
    updateExpenceTypes,
 } from "../../../../../actions/expence";
-import { setAlert } from "../../../../../actions/alert";
 
 import EditButtons from "../sharedComp/EditButtons";
 import Loading from "../../../../modal/Loading";
@@ -18,7 +17,6 @@ const EditExpenceType = ({
    loadExpenceTypes,
    updateExpenceTypes,
    deleteExpenceType,
-   setAlert,
 }) => {
    const [newET, setNewET] = useState([]);
 
@@ -26,9 +24,10 @@ const EditExpenceType = ({
       toggleModalSave: false,
       toggleModalDelete: false,
       toDelete: "",
+      count: 0,
    });
 
-   const { toggleModalSave, toggleModalDelete, toDelete } = otherValues;
+   const { toggleModalSave, toggleModalDelete, toDelete, count } = otherValues;
 
    useEffect(() => {
       if (loadingET) loadExpenceTypes();
@@ -47,20 +46,18 @@ const EditExpenceType = ({
    const addExpenceType = () => {
       let newValue = [...newET];
       newValue.push({
-         _id: "",
+         _id: count,
          name: "",
          type: "",
       });
+      setOtherValues({ ...otherValues, count: count + 1 });
       setNewET(newValue);
    };
 
    const deleteExpenceTypeConfirm = () => {
-      if (toDelete._id === "") {
-         setAlert(
-            "El tipo de movimiento no se ha guardado todavía. Vuelva a recargar la página y desaparecerá.",
-            "danger",
-            "2"
-         );
+      if (typeof toDelete._id === "number") {
+         const array = newET.filter((et) => et._id !== toDelete._id);
+         setNewET(array);
       } else deleteExpenceType(toDelete._id);
    };
 
@@ -168,7 +165,6 @@ EditExpenceType.propTypes = {
    loadExpenceTypes: PropTypes.func.isRequired,
    updateExpenceTypes: PropTypes.func.isRequired,
    deleteExpenceType: PropTypes.func.isRequired,
-   setAlert: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -179,5 +175,4 @@ export default connect(mapStateToProps, {
    loadExpenceTypes,
    updateExpenceTypes,
    deleteExpenceType,
-   setAlert,
 })(EditExpenceType);

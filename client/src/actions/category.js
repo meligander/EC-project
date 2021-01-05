@@ -45,11 +45,12 @@ export const updateCategories = (formData, history, user_id) => async (
          type: CATEGORIES_UPDATED,
       });
 
-      dispatch(updateExpiredIntallments());
       dispatch(
          setAlert("Precios de Categorías Modificados", "success", "1", 7000)
       );
       dispatch(clearProfile());
+      dispatch(updateExpiredIntallments());
+
       history.push(`/dashboard/${user_id}`);
    } catch (err) {
       if (err.response.data.errors) {

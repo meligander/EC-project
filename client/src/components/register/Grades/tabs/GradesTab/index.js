@@ -18,7 +18,6 @@ import Confirm from "../../../../modal/Confirm";
 
 const GradesTab = ({
    history,
-   location,
    period,
    classes: { classInfo },
    auth: { userLogged },
@@ -133,37 +132,18 @@ const GradesTab = ({
    };
 
    const addGradeType = () => {
-      let pass = true;
-      if (period !== 1) {
-         if (!periods[period - 2]) {
-            pass = false;
-         }
-      }
-      if (!pass || newGradeType.gradetype === 0) {
-         if (newGradeType.gradetype === 0) {
-            setAlert("Primero debe elegir un tipo de nota", "danger", "2");
-         } else {
-            setAlert(
-               "Debe agregar por lo menos una nota en los bimestres anteriores",
-               "danger",
-               "2"
-            );
-         }
-         window.scroll(0, 0);
-      } else {
-         registerNewGrade(newGradeType);
-         setOtherValues({
-            ...otherValues,
-            gradePlus: !gradePlus,
-            gradetypes: gradetypes.filter(
-               (gt) => gt._id !== newGradeType.gradetype
-            ),
-         });
-         setFormData({
-            ...formData,
-            newGrades: periods[period - 1],
-         });
-      }
+      registerNewGrade({ ...newGradeType, periods });
+      setOtherValues({
+         ...otherValues,
+         gradePlus: !gradePlus,
+         gradetypes: gradetypes.filter(
+            (gt) => gt._id !== newGradeType.gradetype
+         ),
+      });
+      setFormData({
+         ...formData,
+         newGrades: periods[period - 1],
+      });
    };
 
    const deleteGradeType = () => {

@@ -49,14 +49,17 @@ const StudentDashboard = ({
 
       if (loading) {
          loadRelatives(user._id);
-         loadUserClass(user._id);
-         loadUsersGrades(user._id);
-         loadStudentAttendance(user._id);
+         loadUserClass(user._id, year);
          loadStudentInstallments(user._id, false);
+      } else {
+         loadUsersGrades(user._id, classInfo._id);
+         loadStudentAttendance(user._id, classInfo._id);
       }
    }, [
       userLogged,
       user,
+      classInfo,
+      year,
       loading,
       loadUserClass,
       loadUsersGrades,

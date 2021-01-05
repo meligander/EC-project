@@ -88,7 +88,7 @@ const Navbar = ({
             </div>
             {!visitor ? (
                <>
-                  {!loading ? (
+                  {!loading || !isAuthenticated ? (
                      type()
                   ) : (
                      <ul className={!showMenu ? "menu-nav" : "menu-nav show"}>
@@ -98,8 +98,10 @@ const Navbar = ({
                            }
                         >
                            <p className="lead">
-                              <i className="far fa-clock"></i> &nbsp;
-                              <span className="hide-md">Cargando...</span>
+                              <i className="far fa-clock"></i>
+                              <span className="hide-md">
+                                 &nbsp; Cargando...
+                              </span>
                            </p>
                         </li>
                      </ul>
