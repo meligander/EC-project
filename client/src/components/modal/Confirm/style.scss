@@ -69,6 +69,27 @@
             font-size: 1.6rem;
          }
       }
+
+      .user {
+         display: flex;
+         justify-content: flex-start;
+         align-items: center;
+         padding: 0.8rem 3rem;
+
+         &:first-child {
+            padding-top: 0;
+         }
+
+         &:last-child {
+            padding-bottom: 0;
+         }
+
+         .round-img {
+            margin-right: 2rem;
+            height: 6rem;
+            width: 6rem;
+         }
+      }
    }
 
    &-penalty {

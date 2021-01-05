@@ -17,6 +17,7 @@ const Enrollment = require("../../models/Enrollment");
 const Installment = require("../../models/Installment");
 const Grade = require("../../models/Grade");
 const Attendance = require("../../models/Attendance");
+const Post = require("../../models/Post");
 const Class = require("../../models/Class");
 
 //@route    GET api/user
@@ -779,14 +780,66 @@ async function inactivateUser(user_id, type, completeDeletion) {
          const month = date.getMonth() + 1;
          const year = date.getFullYear();
 
-         const grades = await Grade.find({ student: user_id });
+         const enrollment = await Enrollment.findOneAndRemove({
+            student: user_id,
+            year,
+         });
+         await Enrollment.findOneAndRemove({
+            student: user_id,
+            year: year + 1,
+         });
+
+         const grades = await Grade.find({
+            student: user_id,
+            classroom: enrollment.classroom._id,
+         });
          for (let x = 0; x < grades.length; x++) {
             await Grade.findOneAndRemove({ _id: grades[x]._id });
          }
 
-         const attendances = await Attendance.find({ student: user_id });
+         const attendances = await Attendance.find({
+            student: user_id,
+            classroom: enrollment.classroom._id,
+         });
          for (let x = 0; x < attendances.length; x++) {
             await Attendance.findOneAndRemove({ _id: attendances[x]._id });
+         }
+
+         if (completeDeletion) {
+            let posts = await Post.find({
+               classroom: enrollment.classroom._id,
+               user: user_id,
+            });
+            for (let x = 0; x < posts.length; x++) {
+               await Post.findOneAndDelete({ _id: posts[x] });
+            }
+            posts = await Post.find({
+               classroom: enrollment.classroom._id,
+               "comments.user": user_id,
+            });
+            let position = [];
+            for (let x = 0; x < posts.length; x++) {
+               for (let y = 0; y < posts[x].comments.length; y++) {
+                  if (posts[x].comments[y].user === user_id) {
+                     position.unshift(y);
+                  }
+               }
+               for (let y = 0; y < position.length; y++) {
+                  posts[x].comments.splice(position, 1);
+               }
+            }
+            posts = await Post.find({
+               classroom: enrollment.classroom._id,
+               "likes.user": user_id,
+            });
+            for (let x = 0; x < posts.length; x++) {
+               for (let y = 0; y < posts[x].likes.length; y++) {
+                  if (posts[x].likes[y].user === user_id) {
+                     posts[x].likes.splice(y, 1);
+                     break;
+                  }
+               }
+            }
          }
 
          let installments = await Installment.find({
@@ -799,19 +852,15 @@ async function inactivateUser(user_id, type, completeDeletion) {
          for (let x = 0; x < installments.length; x++) {
             await Installment.findOneAndRemove({ _id: installments[x]._id });
          }
-         installments = await Installment.find({
-            student: user_id,
-            year: year + 1,
-         });
-         for (let x = 0; x < installments.length; x++) {
-            await Installment.findOneAndRemove({ _id: installments[x]._id });
+         if (!completeDeletion) {
+            installments = await Installment.find({
+               student: user_id,
+               year: year + 1,
+            });
+            for (let x = 0; x < installments.length; x++) {
+               await Installment.findOneAndRemove({ _id: installments[x]._id });
+            }
          }
-
-         await Enrollment.findOneAndRemove({ student: user_id, year });
-         await Enrollment.findOneAndRemove({
-            student: user_id,
-            year: year + 1,
-         });
 
          break;
       case "Profesor":
@@ -830,6 +879,11 @@ async function inactivateUser(user_id, type, completeDeletion) {
                await Grade.findOneAndRemove({ _id: grades[y]._id });
             }
 
+            const posts = await Post.find({ classroom: classes[x]._id });
+            for (let y = 0; y < posts.length; y++) {
+               await Post.findOneAndDelete({ _id: posts[y] });
+            }
+
             const enrollments = await Enrollment.find({
                "classroom._id": classes[x]._id,
             });
@@ -841,6 +895,8 @@ async function inactivateUser(user_id, type, completeDeletion) {
                         _id: null,
                         periodAbsence: [],
                         periodAverage: [],
+                        average: null,
+                        absence: null,
                      },
                   }
                );

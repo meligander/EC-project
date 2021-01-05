@@ -200,37 +200,10 @@ export const deleteComment = (post_id, comment_id, screen) => async (
    dispatch(updateLoadingSpinner(false));
 };
 
-//Add like
-export const addLike = (post_id) => async (dispatch) => {
+export const addRemoveLike = (post_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
       const res = await axios.put(`/api/post/like/${post_id}`);
-
-      dispatch({
-         type: LIKES_UPDATED,
-         payload: { post_id, likes: res.data },
-      });
-   } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: POST_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", post_id));
-   }
-   dispatch(updateLoadingSpinner(false));
-};
-
-//Remove like
-export const removeLike = (post_id) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-   try {
-      const res = await axios.put(`/api/post/unlike/${post_id}`);
 
       dispatch({
          type: LIKES_UPDATED,

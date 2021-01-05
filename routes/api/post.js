@@ -16,46 +16,26 @@ router.get("/class/:class_id", auth, async (req, res) => {
          .sort({
             date: -1,
          })
-         .populate({ path: "user", model: "user", select: "-password" })
+         .populate({
+            path: "user",
+            model: "user",
+            select: ["name", "lastname", "noImg", "img", "_id"],
+         })
          .populate({
             path: "comments.user",
             model: "user",
-            select: "-password",
+            select: ["name", "lastname", "noImg", "img", "_id"],
+         })
+         .populate({
+            path: "likes.user",
+            model: "user",
+            select: ["name", "lastname", "noImg", "img", "_id"],
          });
 
       return res.json(posts);
    } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");
-   }
-});
-
-//@route    GET api/posts/:id
-//@desc     Get post by ID
-//@access   Private
-router.get("/:id", auth, async (req, res) => {
-   try {
-      const post = await Post.findById(req.params.id)
-         .populate({
-            path: "user",
-            select: "-password",
-            model: "user",
-         })
-         .populate({
-            path: "comments.user",
-            model: "user",
-            select: "-password",
-         });
-
-      if (!post)
-         return res.status(404).json({ msg: "Publicación no encontrada" });
-
-      return res.json(post);
-   } catch (err) {
-      console.error(err.message);
-      if (err.kind === "ObjectId")
-         return res.status(404).json({ msg: "Post not found" });
-      return res.status(500).send("Server error");
    }
 });
 
@@ -85,11 +65,22 @@ router.post(
          });
          let post = await newPost.save();
 
-         post = await Post.findOne({ _id: post._id }).populate({
-            path: "user",
-            select: "-password",
-            model: "user",
-         });
+         post = await Post.findOne({ _id: post._id })
+            .populate({
+               path: "user",
+               model: "user",
+               select: ["name", "lastname", "noImg", "img", "_id"],
+            })
+            .populate({
+               path: "comments.user",
+               model: "user",
+               select: ["name", "lastname", "noImg", "img", "_id"],
+            })
+            .populate({
+               path: "likes.user",
+               model: "user",
+               select: ["name", "lastname", "noImg", "img", "_id"],
+            });
          return res.json(post);
       } catch (err) {
          console.error(err.message);
@@ -130,13 +121,18 @@ router.post(
          post = await Post.findById(req.params.id)
             .populate({
                path: "user",
-               select: "-password",
                model: "user",
+               select: ["name", "lastname", "noImg", "img", "_id"],
             })
             .populate({
                path: "comments.user",
                model: "user",
-               select: "-password",
+               select: ["name", "lastname", "noImg", "img", "_id"],
+            })
+            .populate({
+               path: "likes.user",
+               model: "user",
+               select: ["name", "lastname", "noImg", "img", "_id"],
             });
 
          return res.json(post);
@@ -148,56 +144,43 @@ router.post(
 );
 
 //@route    PUT api/posts/like/:id
-//@desc     Add like to a post
+//@desc     Add or remove like of a post
 //@access   Private
 router.put("/like/:id", auth, async (req, res) => {
    try {
-      const post = await Post.findById(req.params.id);
+      let post = await Post.findById(req.params.id);
 
       if (
          post.likes.filter((like) => like.user.toString() === req.user.id)
             .length > 0
       ) {
-         return res
-            .status(400)
-            .json({ msg: "Ya se ha marcado la publicación como Me Gusta" });
-      }
+         const removeIndex = post.likes
+            .map((like) => like.user.toString())
+            .indexOf(req.user.id);
 
-      post.likes.unshift({ user: req.user.id });
+         post.likes.splice(removeIndex, 1);
+      } else {
+         post.likes.unshift({ user: req.user.id });
+      }
 
       await post.save();
 
-      res.json(post.likes);
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server error");
-   }
-});
-
-//@route    PUT api/posts/unlike/:id
-//@desc     Remove like to a post
-//@access   Private
-router.put("/unlike/:id", auth, async (req, res) => {
-   try {
-      const post = await Post.findById(req.params.id);
-
-      if (
-         post.likes.filter((like) => like.user.toString() === req.user.id)
-            .length === 0
-      ) {
-         return res.status(400).json({
-            msg: "La publicación todavía no se ha marcado como Me Gusta",
+      post = await Post.findOne({ _id: req.params.id })
+         .populate({
+            path: "user",
+            model: "user",
+            select: ["name", "lastname", "noImg", "img", "_id"],
+         })
+         .populate({
+            path: "comments.user",
+            model: "user",
+            select: ["name", "lastname", "noImg", "img", "_id"],
+         })
+         .populate({
+            path: "likes.user",
+            model: "user",
+            select: ["name", "lastname", "noImg", "img", "_id"],
          });
-      }
-
-      //Get remove index
-      const removeIndex = post.likes
-         .map((like) => like.user.toString())
-         .indexOf(req.user.id);
-
-      post.likes.splice(removeIndex, 1);
-
-      await post.save();
 
       res.json(post.likes);
    } catch (err) {
@@ -238,17 +221,7 @@ router.delete("/:id", auth, async (req, res) => {
 //@access   Private
 router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
    try {
-      const post = await Post.findById(req.params.id)
-         .populate({
-            path: "user",
-            select: "-password",
-            model: "user",
-         })
-         .populate({
-            path: "comments.user",
-            model: "user",
-            select: "-password",
-         });
+      const post = await Post.findById(req.params.id);
 
       //Pull out comment
       const comment = post.comments.find(
