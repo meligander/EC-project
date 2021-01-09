@@ -82,7 +82,7 @@ const SearchTab = ({
 
    return (
       <>
-         <form className="form" onClick={(e) => searchUsers(e)}>
+         <form className="form">
             <NameField
                name={name}
                lastname={lastname}
@@ -145,7 +145,11 @@ const SearchTab = ({
                </label>
             </div>
             <div className="btn-right mb-1">
-               <button type="submit" className="btn btn-light">
+               <button
+                  type="submit"
+                  className="btn btn-light"
+                  onClick={(e) => searchUsers(e)}
+               >
                   <i className="fas fa-filter"></i>&nbsp; Buscar
                </button>
             </div>
