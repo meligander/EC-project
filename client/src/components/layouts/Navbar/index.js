@@ -42,23 +42,19 @@ const Navbar = ({
    }, [userLogged, loadStudentClass, getUnseenPosts]);
 
    const type = () => {
-      if (isAuthenticated) {
-         switch (userLogged.type) {
-            case "student":
-               return <StudentNavbar />;
-            case "teacher":
-               return <TeacherNavbar />;
-            case "guardian":
-               return <GuardianNavbar />;
-            case "admin":
-            case "secretary":
-            case "admin&teacher":
-               return <AdminNavbar />;
-            default:
-               return <GuestNavbar />;
-         }
-      } else {
-         return <GuestNavbar />;
+      switch (userLogged.type) {
+         case "student":
+            return <StudentNavbar />;
+         case "teacher":
+            return <TeacherNavbar />;
+         case "guardian":
+            return <GuardianNavbar />;
+         case "admin":
+         case "secretary":
+         case "admin&teacher":
+            return <AdminNavbar />;
+         default:
+            return <GuestNavbar />;
       }
    };
 
@@ -105,21 +101,25 @@ const Navbar = ({
                   </p>
                </div>
             </div>
-            {!loading ? (
-               type()
+            {isAuthenticated ? (
+               loading ? (
+                  <ul className={!showMenu ? "menu-nav" : "menu-nav show"}>
+                     <li
+                        className={
+                           !showMenu ? "nav-item" : "nav-item show current"
+                        }
+                     >
+                        <p className="heading-tertiary">
+                           <i className="far fa-clock"></i>
+                           <span className="hide-md">&nbsp; Cargando...</span>
+                        </p>
+                     </li>
+                  </ul>
+               ) : (
+                  type()
+               )
             ) : (
-               <ul className={!showMenu ? "menu-nav" : "menu-nav show"}>
-                  <li
-                     className={
-                        !showMenu ? "nav-item" : "nav-item show current"
-                     }
-                  >
-                     <p className="heading-tertiary">
-                        <i className="far fa-clock"></i>
-                        <span className="hide-md">&nbsp; Cargando...</span>
-                     </p>
-                  </li>
-               </ul>
+               <GuestNavbar />
             )}
          </div>
       </nav>

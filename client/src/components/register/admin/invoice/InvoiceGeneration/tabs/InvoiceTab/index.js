@@ -340,7 +340,9 @@ const InvoiceTab = ({
                      </div>
                      <div className="form-group">
                         <input
-                           className="form-input text-danger"
+                           className={`form-input ${
+                              !user.email ? "text-danger" : ""
+                           }`}
                            id="email-user"
                            value={
                               user.email
