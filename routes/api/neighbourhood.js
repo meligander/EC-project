@@ -55,6 +55,8 @@ router.post("/", [auth, adminAuth], async (req, res) => {
    let neighbourhood = {};
    let newNeighbourhoods = [];
 
+   let checkForValidMongoDbID = new RegExp("^[0-9a-fA-F]{24}$");
+
    try {
       for (let x = 0; x < neighbourhoods.length; x++) {
          if (neighbourhoods[x].name === "")
@@ -70,7 +72,7 @@ router.post("/", [auth, adminAuth], async (req, res) => {
          let town = neighbourhoods[x].town;
          let id = neighbourhoods[x]._id;
 
-         if (id === "") {
+         if (!checkForValidMongoDbID.test(id)) {
             neighbourhood = new Neighbourhood({ name, town });
             await neighbourhood.save();
          } else {

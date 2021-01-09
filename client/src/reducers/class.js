@@ -91,7 +91,6 @@ export default function (state = initialState, action) {
             error: {},
          };
       case CLASSSTUDENT_ADDED:
-         console.log(payload);
          return {
             ...state,
             classInfo: {

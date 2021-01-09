@@ -108,7 +108,7 @@ const EditGradeType = ({
    };
 
    const addGradeType = () => {
-      let rowToAdd = new Array(15);
+      let rowToAdd = new Array(25);
 
       rowToAdd[amount] = [...newRow];
       rowToAdd[amount][0] = {

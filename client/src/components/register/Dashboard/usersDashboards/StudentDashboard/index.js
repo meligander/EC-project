@@ -113,8 +113,12 @@ const StudentDashboard = ({
                {(allowedUsers || pass) && user.active && (
                   <>
                      {/* Class */}
-                     <div className="class row bg-lighter">
-                        {classInfo !== null ? (
+                     <div
+                        className={`class row ${
+                           classInfo ? "bg-lighter" : "bg-white"
+                        }`}
+                     >
+                        {classInfo ? (
                            <>
                               <div className="title ">
                                  <p className="heading-secondary text-primary">

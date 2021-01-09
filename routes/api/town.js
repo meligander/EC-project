@@ -35,6 +35,8 @@ router.post("/", [auth, adminAuth], async (req, res) => {
    let town = {};
    let newTowns = [];
 
+   let checkForValidMongoDbID = new RegExp("^[0-9a-fA-F]{24}$");
+
    try {
       for (let x = 0; x < towns.length; x++) {
          if (towns[x].name === "")
@@ -45,7 +47,7 @@ router.post("/", [auth, adminAuth], async (req, res) => {
          let name = towns[x].name;
          let id = towns[x]._id;
 
-         if (id === "") {
+         if (!checkForValidMongoDbID.test(id)) {
             town = new Town({ name });
             await town.save();
          } else {

@@ -60,6 +60,8 @@ router.post("/", [auth, adminAuth], async (req, res) => {
    let gradeType;
    let newGradeTypes = [];
 
+   let checkForValidMongoDbID = new RegExp("^[0-9a-fA-F]{24}$");
+
    try {
       for (let x = 0; x < gradeTypes.length; x++) {
          gradeType = {
@@ -86,7 +88,7 @@ router.post("/", [auth, adminAuth], async (req, res) => {
             }
          }
          let gType;
-         if (gradeType._id === "") {
+         if (!checkForValidMongoDbID.test(gradeType._id)) {
             gType = new GradeType({
                name: gradeType.name,
                categories: gradeType.categories,

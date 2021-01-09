@@ -35,6 +35,8 @@ router.post("/", [auth, adminAuth], async (req, res) => {
    let newExpeceTypes = [];
    let expenceType = {};
 
+   let checkForValidMongoDbID = new RegExp("^[0-9a-fA-F]{24}$");
+
    try {
       for (let x = 0; x < expenceTypes.length; x++) {
          if (expenceTypes[x].name === "")
@@ -51,7 +53,7 @@ router.post("/", [auth, adminAuth], async (req, res) => {
             type: expenceTypes[x].type,
          };
 
-         if (expenceTypes[x]._id === "") {
+         if (!checkForValidMongoDbID.test(expenceTypes[x]._id)) {
             expenceType = new ExpenceType(expenceType);
 
             await expenceType.save();
