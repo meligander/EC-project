@@ -28,7 +28,7 @@ const RegisterUser = ({
    match,
    registerUser,
    history,
-   auth,
+   auth: { userLogged },
    users: {
       user,
       loading,
@@ -45,10 +45,9 @@ const RegisterUser = ({
    clearTowns,
 }) => {
    const isOwner =
-      auth.userLogged.type === "Administrador" ||
-      auth.userLogged.type === "Admin/Profesor";
+      userLogged.type === "admin" || userLogged.type === "admin&teacher";
 
-   const isAdmin = auth.userLogged.type === "Secretaria" || isOwner;
+   const isAdmin = userLogged.type === "secretary" || isOwner;
 
    const [otherValues, setOtherValues] = useState({
       isEditing: false,
@@ -295,7 +294,7 @@ const RegisterUser = ({
 
    const changeType = () => {
       switch (type) {
-         case "Alumno":
+         case "student":
             return (
                <StudentInfo
                   isAdmin={isAdmin}
@@ -306,8 +305,8 @@ const RegisterUser = ({
                   onChange={onChange}
                />
             );
-         case "Profesor":
-         case "Secretaria":
+         case "teacher":
+         case "secretary":
             return (
                <EmployeeInfo
                   isAdmin={isAdmin}
@@ -322,7 +321,7 @@ const RegisterUser = ({
                   onChange={onChange}
                />
             );
-         case "Tutor":
+         case "guardian":
             return (
                <TutorInfo
                   setChildren={setChildren}
@@ -357,9 +356,9 @@ const RegisterUser = ({
                   text={{
                      question: "¿Está seguro que desea inactivar al usuario?",
                      info: `No se le permitirá el ingreso a la página${
-                        type === "Alumno"
+                        type === "student"
                            ? ", se borrarán notas, asistencias, cuotas, inscripción y se lo quitará de la clase."
-                           : type === "Profesor"
+                           : type === "teacher"
                            ? " y se borrarán todas las clases en las que está asignado como profesor."
                            : "."
                      }`,
@@ -419,18 +418,16 @@ const RegisterUser = ({
                                  <option value="">
                                     * Seleccione el tipo de usuario
                                  </option>
-                                 <option value="Alumno">Alumno</option>
-                                 <option value="Tutor">Tutor</option>
-                                 <option value="Profesor">Profesor</option>
-                                 <option value="Secretaria">Secretaria</option>
-                                 {(auth.userLogged.type === "Administrador" ||
-                                    auth.userLogged.type ===
-                                       "Admin/Profesor") && (
+                                 <option value="student">Alumno</option>
+                                 <option value="guardian">Tutor</option>
+                                 <option value="teacher">Profesor</option>
+                                 <option value="secretary">Secretaria</option>
+                                 {isOwner && (
                                     <>
-                                       <option value="Administrador">
+                                       <option value="admin">
                                           Administrador
                                        </option>
-                                       <option value="Admin/Profesor">
+                                       <option value="admin&teacher">
                                           Admin/Profesor
                                        </option>
                                     </>
@@ -446,7 +443,7 @@ const RegisterUser = ({
                               </label>
                            </div>
 
-                           {type === "Alumno" && (
+                           {type === "student" && (
                               <div className="form-group">
                                  <input
                                     className="form-input"
@@ -465,25 +462,23 @@ const RegisterUser = ({
                               </div>
                            )}
 
-                           {type !== "Administrador" &&
-                              type !== "Admin/Profesor" &&
-                              type !== "Tutor" && (
-                                 <div className="form-group">
-                                    <input
-                                       className="form-input"
-                                       type="number"
-                                       value={dni}
-                                       disabled={!isAdmin}
-                                       onChange={(e) => onChange(e)}
-                                       name="dni"
-                                       id="dni"
-                                       placeholder="DNI"
-                                    />
-                                    <label htmlFor="dni" className="form-label">
-                                       DNI
-                                    </label>
-                                 </div>
-                              )}
+                           {!isOwner && type !== "guardian" && (
+                              <div className="form-group">
+                                 <input
+                                    className="form-input"
+                                    type="number"
+                                    value={dni}
+                                    disabled={!isAdmin}
+                                    onChange={(e) => onChange(e)}
+                                    name="dni"
+                                    id="dni"
+                                    placeholder="DNI"
+                                 />
+                                 <label htmlFor="dni" className="form-label">
+                                    DNI
+                                 </label>
+                              </div>
+                           )}
                         </>
                      )}
 
@@ -597,7 +592,7 @@ const RegisterUser = ({
                                  Seleccione el sexo
                               </label>
                            </div>
-                           {type !== "Tutor" && type !== "" && (
+                           {type !== "guardian" && (
                               <div className="form-group">
                                  <input
                                     className="form-input"
@@ -711,8 +706,7 @@ const RegisterUser = ({
                                     Barrio donde vive
                                  </label>
                               </div>
-                              {(auth.userLogged.type === "Administrador" ||
-                                 auth.userLogged.type === "Admin/Profesor") && (
+                              {isOwner && (
                                  <div className="btn-right">
                                     <Link
                                        to="/edit-towns-neighbourhoods"
@@ -733,7 +727,7 @@ const RegisterUser = ({
                         </>
                      )}
 
-                     {type !== "Alumno" && type !== "Tutor" && (
+                     {type !== "student" && type !== "guardian" && (
                         <div className="form-group">
                            <textarea
                               className="form-input"

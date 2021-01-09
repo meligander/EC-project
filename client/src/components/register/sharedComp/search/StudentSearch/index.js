@@ -4,9 +4,9 @@ import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import moment from "moment";
 
-import { loadUsers } from "../../../../actions/user";
+import { loadUsers } from "../../../../../actions/user";
 
-import Alert from "../../Alert";
+import Alert from "../../../../sharedComp/Alert";
 import NameField from "../../NameField";
 
 import "./style.scss";
@@ -24,7 +24,7 @@ const StudentSearch = ({
       name: "",
       lastname: "",
       active: true,
-      type: typeSearch === "Tutor/Student" ? "Alumno y Tutor" : "Alumno",
+      type: typeSearch === "guardian/student" ? "guardian/student" : "student",
    });
 
    const onChangeFilter = (e) => {
@@ -40,8 +40,8 @@ const StudentSearch = ({
 
    return (
       <div className="my-2">
-         <h3>{`Búsqueda de ${
-            typeSearch === "Tutor/Student" ? "Usuarios" : "Alumnos"
+         <h3 className="text-dark">{`Búsqueda de ${
+            typeSearch === "guardian/student" ? "Usuarios" : "Alumnos"
          }`}</h3>
          <div className="border my-2">
             <Alert type="3" />
@@ -54,12 +54,12 @@ const StudentSearch = ({
             <div className="btn-right mb-2">
                <button
                   className={`btn ${
-                     typeSearch === "Installment" && block
+                     typeSearch === "installment" && block
                         ? "btn-black"
                         : "btn-light"
                   }`}
-                  type="submit"
-                  disabled={typeSearch === "Installment" && block}
+                  type="button"
+                  disabled={typeSearch === "installment" && block}
                   onClick={(e) => searchStudents(e)}
                >
                   <i className="fas fa-filter"></i>
@@ -69,13 +69,13 @@ const StudentSearch = ({
             <table className="search">
                <thead>
                   <tr>
-                     {(typeSearch === "Installment" ||
-                        typeSearch === "Student") && <th>Legajo</th>}
+                     {(typeSearch === "installment" ||
+                        typeSearch === "student") && <th>Legajo</th>}
                      <th>Nombre</th>
-                     {typeSearch === "Tutor/Student" && <th>Tipo</th>}
-                     {(typeSearch === "Installment" ||
-                        typeSearch === "Student") && <th>Categoría</th>}
-                     {typeSearch === "Enrollment" && <th>Edad</th>}
+                     {typeSearch === "guardian/student" && <th>Tipo</th>}
+                     {(typeSearch === "installment" ||
+                        typeSearch === "student") && <th>Categoría</th>}
+                     {typeSearch === "enrollment" && <th>Edad</th>}
                   </tr>
                </thead>
                <tbody>
@@ -92,19 +92,21 @@ const StudentSearch = ({
                                  : ""
                            }
                         >
-                           {(typeSearch === "Installment" ||
-                              typeSearch === "Student") && (
+                           {(typeSearch === "installment" ||
+                              typeSearch === "student") && (
                               <td>{user.studentnumber}</td>
                            )}
                            <td>{user.lastname + ", " + user.name}</td>
-                           {typeSearch === "Tutor/Student" && (
-                              <td>{user.type}</td>
+                           {typeSearch === "guardian/student" && (
+                              <td>
+                                 {user.type === "student" ? "Alumno" : "Tutor"}
+                              </td>
                            )}
-                           {(typeSearch === "Installment" ||
-                              typeSearch === "Student") && (
+                           {(typeSearch === "installment" ||
+                              typeSearch === "student") && (
                               <td>{user.category && user.category}</td>
                            )}
-                           {typeSearch === "Enrollment" && (
+                           {typeSearch === "enrollment" && (
                               <td>{moment().diff(user.dob, "years", false)}</td>
                            )}
                         </tr>
@@ -113,6 +115,7 @@ const StudentSearch = ({
             </table>
             <div className="btn-right">
                <button
+                  type="button"
                   className="btn"
                   onClick={(e) => {
                      setFilterForm({
@@ -123,7 +126,7 @@ const StudentSearch = ({
                      actionForSelected(e);
                   }}
                >
-                  {typeSearch !== "Installment" ? (
+                  {typeSearch !== "installment" ? (
                      <>
                         <i className="fas fa-plus"></i>
                         <span className="hide-md">&nbsp; Agregar</span>

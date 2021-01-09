@@ -128,15 +128,16 @@ const EditExpenceType = ({
                                     <option value="">
                                        Seleccione el tipo de movimiento
                                     </option>
-                                    <option value="Gasto">Gasto</option>
-                                    <option value="Ingreso Especial">
+                                    <option value="expence">Gasto</option>
+                                    <option value="special-income">
                                        Ingreso Especial
                                     </option>
-                                    <option value="Retiro">Retiro</option>
+                                    <option value="withdrawal">Retiro</option>
                                  </select>
                               </td>
                               <td>
                                  <button
+                                    type="button"
                                     onClick={() => setToggleDelete(exptyp)}
                                     className="btn btn-danger"
                                  >

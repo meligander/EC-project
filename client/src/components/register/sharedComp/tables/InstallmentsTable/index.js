@@ -3,7 +3,7 @@ import { withRouter } from "react-router-dom";
 import moment from "moment";
 import PropTypes from "prop-types";
 
-import Alert from "../../sharedComp/Alert";
+import Alert from "../../../../sharedComp/Alert";
 
 import "./style.scss";
 
@@ -142,6 +142,7 @@ const InstallmentsTable = ({
          {forAdmin && (
             <div className={`btn-right ${!invoice ? "next-btn" : ""}`}>
                <button
+                  type="button"
                   className={`btn ${
                      !invoice ? "btn-mix-secondary" : "btn-light"
                   } `}

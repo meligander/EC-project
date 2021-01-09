@@ -8,10 +8,11 @@ import { clearProfile } from "../../../../../actions/user";
 import "./style.scss";
 
 const RelativeDashboard = ({
-   users: { user, users, usersLoading },
+   users: { user, usersBK, loadingUsersBK },
+   auth: { userLogged },
    clearProfile,
 }) => {
-   const student = user.studentnumber;
+   const student = user.type === "student";
 
    const relatives = (user) => {
       return (
@@ -24,7 +25,7 @@ const RelativeDashboard = ({
                to={`/dashboard/${user._id}`}
                onClick={() => {
                   window.scroll(0, 0);
-                  clearProfile();
+                  clearProfile(userLogged.type !== "student");
                }}
             >
                Ver Info
@@ -35,12 +36,12 @@ const RelativeDashboard = ({
 
    return (
       <>
-         {!usersLoading && (
+         {!loadingUsersBK && (
             <div className=" p-3 bg-lightest-secondary">
                <h3 className="heading-tertiary text-primary text-center">
                   {student ? "Tutores" : "Alumnos a Cargo"}
                </h3>
-               {users.length !== 0 || user.children.length !== 0 ? (
+               {usersBK.length !== 0 || user.children.length !== 0 ? (
                   <div className="relatives">
                      {!student
                         ? user.children.map((child, index) => (
@@ -48,7 +49,7 @@ const RelativeDashboard = ({
                                 {relatives(child)}
                              </div>
                           ))
-                        : users.map((parent, index) => (
+                        : usersBK.map((parent, index) => (
                              <div key={index} className="relative">
                                 {relatives(parent)}
                              </div>
@@ -67,11 +68,13 @@ const RelativeDashboard = ({
 
 RelativeDashboard.propTypes = {
    users: PropTypes.object.isRequired,
+   auth: PropTypes.object.isRequired,
    clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    users: state.users,
+   auth: state.auth,
 });
 
 export default connect(mapStateToProps, {

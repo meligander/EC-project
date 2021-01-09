@@ -3,17 +3,17 @@ import { connect } from "react-redux";
 import { withRouter, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { setAlert } from "../../../../actions/alert";
+import { setAlert } from "../../../../../actions/alert";
 import {
    loadStudentInstallments,
    clearUserInstallments,
    clearInstallment,
    addInstallment,
-} from "../../../../actions/installment";
-import { clearSearch, clearProfile } from "../../../../actions/user";
+} from "../../../../../actions/installment";
+import { clearSearch, clearProfile } from "../../../../../actions/user";
 
 import StudentSearch from "../StudentSearch";
-import InstallmentsTable from "../../../tables/InstallmentsTable";
+import InstallmentsTable from "../../tables/InstallmentsTable";
 
 import "./style.scss";
 
@@ -148,7 +148,7 @@ const InstallmentsSearch = ({
                selectedStudent={selectedStudent}
                actionForSelected={searchInstallments}
                selectStudent={selectStudent}
-               typeSearch={"Installment"}
+               typeSearch={"installment"}
                block={block}
             />
          </div>
@@ -168,7 +168,7 @@ const InstallmentsSearch = ({
             </p>
 
             {selectedStudent._id !== "" && (
-               <button className="btn-cancel" onClick={restore}>
+               <button className="btn-cancel" type="button" onClick={restore}>
                   <i className="fas fa-times"></i>
                </button>
             )}

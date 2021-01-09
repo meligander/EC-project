@@ -38,6 +38,18 @@ const PostSchema = new Schema({
          },
       },
    ],
+   seenArray: [
+      {
+         user: {
+            type: Schema.Types.ObjectId,
+            ref: "users",
+         },
+         seen: {
+            type: Boolean,
+            default: true,
+         },
+      },
+   ],
    date: {
       type: Date,
       default: Date.now,

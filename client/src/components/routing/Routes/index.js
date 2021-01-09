@@ -52,7 +52,7 @@ const Routes = () => {
             <PrivateRoutes
                exact
                path="/register"
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                component={RegisterUser}
             />
             <PrivateRoutes
@@ -69,24 +69,19 @@ const Routes = () => {
             />
             <PrivateRoutes
                exact
-               types={[
-                  "Administrador",
-                  "Secretaria",
-                  "Profesor",
-                  "Admin/Profesor",
-               ]}
+               types={["admin", "secretary", "teacher", "admin&teacher"]}
                path="/search"
                component={Search}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/cashregister-info"
                component={RegisterInfo}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/categories"
                component={Categories}
             />
@@ -104,136 +99,121 @@ const Routes = () => {
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/register-class"
                component={RegisterClass}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/edit-class/:class_id/:category_id"
                component={RegisterClass}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/installments/:user_id"
                component={Installments}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/edit-installment/:type/:installment_id"
                component={EditInstallment}
             />
             <PrivateRoutes
                exact
-               types={[
-                  "Administrador",
-                  "Secretaria",
-                  "Profesor",
-                  "Admin/Profesor",
-               ]}
+               types={["admin", "secretary", "teacher", "admin&teacher"]}
                path="/classes"
                component={Classes}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/invoice-generation"
                component={InvoiceGeneration}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/invoice/:invoice_id"
                component={Invoice}
             />
             <PrivateRoutes
                exact
-               types={[
-                  "Administrador",
-                  "Secretaria",
-                  "Profesor",
-                  "Admin/Profesor",
-               ]}
+               types={["admin", "secretary", "teacher", "admin&teacher"]}
                path="/attendances/:class_id"
                component={Attendance}
             />
             <PrivateRoutes
                exact
-               types={[
-                  "Administrador",
-                  "Secretaria",
-                  "Profesor",
-                  "Admin/Profesor",
-               ]}
+               types={["admin", "secretary", "teacher", "admin&teacher"]}
                path="/grades/:class_id"
                component={Grades}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/enrollment"
                component={Enrollment}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/edit-enrollment/:enrollment_id"
                component={Enrollment}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/edit-towns-neighbourhoods"
                component={EditNeigTowns}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/edit-expencetypes"
                component={EditExpenceType}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/edit-gradetypes"
                component={EditGradeType}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/enrollment-list"
                component={EnrollmentList}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/income-list"
                component={IncomeList}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/transaction-list"
                component={TransactionList}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/installment-list"
                component={InstallmentList}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/register-list"
                component={RegisterList}
             />
             <PrivateRoutes
                exact
-               types={["Administrador", "Secretaria", "Admin/Profesor"]}
+               types={["admin", "secretary", "admin&teacher"]}
                path="/mention-list"
                component={MentionList}
             />

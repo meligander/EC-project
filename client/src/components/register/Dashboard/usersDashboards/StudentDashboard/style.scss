@@ -11,7 +11,7 @@
    }
 
    & > * {
-      padding: 4rem;
+      padding: 3rem;
    }
 
    .title {
@@ -27,6 +27,14 @@
          margin-bottom: 3rem;
       }
    }
+
+   .no-class {
+      width: 100%;
+
+      h3 {
+         text-align: start;
+      }
+   }
 }
 
 .absence {
@@ -34,4 +42,14 @@
    flex-wrap: wrap;
    text-align: center;
    padding: 0 2rem;
+}
+
+.badge {
+   font-size: $default-font-size;
+   padding: 0.3rem 0.5rem;
+   text-align: center;
+   border-radius: 50%;
+   margin-left: 0.5rem;
+   backface-visibility: hidden;
+   @include background($light-color);
 }

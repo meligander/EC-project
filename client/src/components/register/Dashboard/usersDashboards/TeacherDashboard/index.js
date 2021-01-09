@@ -2,22 +2,22 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { clearClasses, loadClasses } from "../../../../../actions/class";
+import { clearClass, loadClasses } from "../../../../../actions/class";
 import { clearSearch } from "../../../../../actions/user";
 
-import ClassesTable from "../../../../tables/ClassesTable";
+import ClassesTable from "../../../sharedComp/tables/ClassesTable";
 import Loading from "../../../../modal/Loading";
 
 const TeacherDashboard = ({
-   loadClasses,
    classes: { classes, loadingClasses },
    users: { user },
-   clearClasses,
+   loadClasses,
+   clearClass,
    clearSearch,
 }) => {
    useEffect(() => {
-      loadClasses({ teacher: user._id });
-   }, [user._id, loadClasses]);
+      if (loadingClasses) loadClasses({ teacher: user._id });
+   }, [user._id, loadClasses, loadingClasses]);
 
    return (
       <div className="p-4 bg-white">
@@ -28,7 +28,7 @@ const TeacherDashboard = ({
                   <ClassesTable
                      classes={classes}
                      all={false}
-                     clearClass={clearClasses}
+                     clearClass={clearClass}
                      clearSearch={clearSearch}
                   />
                ) : (
@@ -48,7 +48,7 @@ TeacherDashboard.propTypes = {
    classes: PropTypes.object.isRequired,
    users: PropTypes.object.isRequired,
    loadClasses: PropTypes.func.isRequired,
-   clearClasses: PropTypes.func.isRequired,
+   clearClass: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
 };
 
@@ -59,6 +59,6 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    loadClasses,
-   clearClasses,
+   clearClass,
    clearSearch,
 })(TeacherDashboard);

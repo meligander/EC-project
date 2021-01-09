@@ -76,6 +76,9 @@
    &-lighter {
       @include background(lighten($light-color, 15%));
    }
+   &-unseen {
+      @include background(lighten($success-color, 63%));
+   }
    &-dark {
       @include background($dark-color);
    }

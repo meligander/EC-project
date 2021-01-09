@@ -155,6 +155,7 @@ const Categories = ({
                         <span className="hide-sm">&nbsp; Actualizar</span>
                      </button>
                      <button
+                        type="button"
                         className="btn btn-secondary"
                         onClick={pdfGeneratorSave}
                      >

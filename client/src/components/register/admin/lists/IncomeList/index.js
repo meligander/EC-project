@@ -17,7 +17,7 @@ import Loading from "../../../../modal/Loading";
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
 import Confirm from "../../../../modal/Confirm";
-import NameField from "../../../../sharedComp/NameField";
+import NameField from "../../../sharedComp/NameField";
 
 import "./style.scss";
 
@@ -31,6 +31,9 @@ const IncomeList = ({
    invoicesPDF,
    deleteInvoice,
 }) => {
+   const isAdmin =
+      userLogged.type === "admin" || userLogged.type === "admin&teacher";
+
    const [filterData, setFilterData] = useState({
       startDate: "",
       endDate: "",
@@ -119,7 +122,7 @@ const IncomeList = ({
                               <th>Nombre</th>
                               <th>Total</th>
                               <th>&nbsp;</th>
-                              {userLogged.type === "Administrador" &&
+                              {isAdmin &&
                                  moment(invoices[0].date).date() ===
                                     moment().date() && <th>&nbsp;</th>}
                            </tr>
@@ -160,8 +163,7 @@ const IncomeList = ({
                                                 Ver más &rarr;
                                              </Link>
                                           </td>
-                                          {userLogged.type ===
-                                             "Administrador" &&
+                                          {isAdmin &&
                                              moment(arr[0].date).date() ===
                                                 moment().date() && (
                                                 <td>
@@ -170,6 +172,7 @@ const IncomeList = ({
                                                    ).date() ===
                                                       moment().date() && (
                                                       <button
+                                                         type="button"
                                                          onClick={() =>
                                                             setToggle(
                                                                invoice._id

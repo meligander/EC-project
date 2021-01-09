@@ -1,39 +1,58 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
 import { toggleMenu } from "../../../actions/navbar";
 import { clearProfile } from "../../../actions/user";
+import { loadStudentClass } from "../../../actions/class";
+import { getUnseenPosts } from "../../../actions/post";
 
 import GuestNavbar from "./usersLinks/GuestNavbar";
 import AdminNavbar from "./usersLinks/AdminNavbar";
 import StudentNavbar from "./usersLinks/StudentNavbar";
 import TeacherNavbar from "./usersLinks/TeacherNavbar";
-import TutorNavbar from "./usersLinks/TutorNavbar";
+import GuardianNavbar from "./usersLinks/GuardianNavbar";
 
 import onlyLogo from "../../../img/logoSinLetras.png";
 import logo from "../../../img/logo.png";
 import "./style.scss";
 
 const Navbar = ({
-   auth: { userLogged, loading, isAuthenticated, visitor },
+   auth: { userLogged, loading, isAuthenticated },
    navbar: { showMenu },
+   getUnseenPosts,
+   loadStudentClass,
    toggleMenu,
    clearProfile,
 }) => {
+   useEffect(() => {
+      if (userLogged) {
+         if (userLogged.type === "student") {
+            loadStudentClass(userLogged._id);
+            getUnseenPosts(userLogged.classroom);
+         } else {
+            if (
+               userLogged.type === "teacher" ||
+               userLogged.type === "admin&teacher"
+            )
+               getUnseenPosts();
+         }
+      }
+   }, [userLogged, loadStudentClass, getUnseenPosts]);
+
    const type = () => {
       if (isAuthenticated) {
          switch (userLogged.type) {
-            case "Alumno":
+            case "student":
                return <StudentNavbar />;
-            case "Profesor":
+            case "teacher":
                return <TeacherNavbar />;
-            case "Tutor":
-               return <TutorNavbar />;
-            case "Administrador":
-            case "Secretaria":
-            case "Admin/Profesor":
+            case "guardian":
+               return <GuardianNavbar />;
+            case "admin":
+            case "secretary":
+            case "admin&teacher":
                return <AdminNavbar />;
             default:
                return <GuestNavbar />;
@@ -50,7 +69,7 @@ const Navbar = ({
             to={isAuthenticated ? `/dashboard/${userLogged._id}` : "/"}
             onClick={() => {
                window.scroll(0, 0);
-               clearProfile();
+               clearProfile(userLogged.type !== "student");
             }}
          >
             <div className="navbar-logo">
@@ -86,29 +105,21 @@ const Navbar = ({
                   </p>
                </div>
             </div>
-            {!visitor ? (
-               <>
-                  {!loading || !isAuthenticated ? (
-                     type()
-                  ) : (
-                     <ul className={!showMenu ? "menu-nav" : "menu-nav show"}>
-                        <li
-                           className={
-                              !showMenu ? "nav-item" : "nav-item show current"
-                           }
-                        >
-                           <p className="lead">
-                              <i className="far fa-clock"></i>
-                              <span className="hide-md">
-                                 &nbsp; Cargando...
-                              </span>
-                           </p>
-                        </li>
-                     </ul>
-                  )}
-               </>
+            {!loading ? (
+               type()
             ) : (
-               <GuestNavbar />
+               <ul className={!showMenu ? "menu-nav" : "menu-nav show"}>
+                  <li
+                     className={
+                        !showMenu ? "nav-item" : "nav-item show current"
+                     }
+                  >
+                     <p className="heading-tertiary">
+                        <i className="far fa-clock"></i>
+                        <span className="hide-md">&nbsp; Cargando...</span>
+                     </p>
+                  </li>
+               </ul>
             )}
          </div>
       </nav>
@@ -120,6 +131,8 @@ Navbar.prototypes = {
    navbar: PropTypes.object.isRequired,
    toggleMenu: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
+   getUnseenPosts: PropTypes.func.isRequired,
+   loadStudentClass: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -127,4 +140,9 @@ const mapStateToProps = (state) => ({
    navbar: state.navbar,
 });
 
-export default connect(mapStateToProps, { toggleMenu, clearProfile })(Navbar);
+export default connect(mapStateToProps, {
+   toggleMenu,
+   clearProfile,
+   getUnseenPosts,
+   loadStudentClass,
+})(Navbar);

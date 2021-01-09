@@ -74,7 +74,7 @@ const IncomeExpenceTab = ({
             ...otherValues,
             show: true,
          });
-         loadUsers({ active: true, type: "Team" });
+         loadUsers({ active: true, type: "team" });
       } else {
          if (
             e.target.value !== employeePaymentID &&
@@ -201,7 +201,7 @@ const IncomeExpenceTab = ({
                                  {!users.loadingUsers &&
                                     users.users.map((user) => (
                                        <React.Fragment key={user._id}>
-                                          {user.type !== "Admin/Profesor" && (
+                                          {user.type !== "admin&teacher" && (
                                              <option value={user._id}>
                                                 {user.lastname}, {user.name}
                                              </option>
@@ -262,8 +262,8 @@ const IncomeExpenceTab = ({
                   <span className="hide-sm">&nbsp; Guardar</span>
                </button>
 
-               {(userLogged.type === "Administrador" ||
-                  userLogged.type === "Admin/Profesor") && (
+               {(userLogged.type === "admin" ||
+                  userLogged.type === "admin&teacher") && (
                   <Link
                      to="/edit-expencetypes"
                      onClick={() => {

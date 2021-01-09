@@ -21,7 +21,7 @@ import { clearProfile } from "../../../../../actions/user";
 import Loading from "../../../../modal/Loading";
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
-import NameFilter from "../../../../sharedComp/NameField";
+import NameFilter from "../../../sharedComp/NameField";
 import Confirm from "../../../../modal/Confirm";
 
 const EnrollmentList = ({

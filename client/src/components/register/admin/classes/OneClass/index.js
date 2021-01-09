@@ -1,41 +1,62 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import Moment from "react-moment";
 import { Link, withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import { loadClass, deleteClass, classPDF } from "../../../../../actions/class";
 import { clearAttendances } from "../../../../../actions/attendance";
-import { clearPosts } from "../../../../../actions/post";
+import { clearPosts, getUnseenPosts } from "../../../../../actions/post";
 import { clearGrades, clearGradeTypes } from "../../../../../actions/grade";
 import { clearProfile, clearSearch } from "../../../../../actions/user";
 import { updatePreviousPage } from "../../../../../actions/mixvalues";
 
 import Loading from "../../../../modal/Loading";
-import ClassInfo from "../../../../sharedComp/ClassInfo";
+import ClassInfo from "../../../sharedComp/ClassInfo";
 import Confirm from "../../../../modal/Confirm";
+import StudentTable from "../../../sharedComp/tables/StudentTable";
+
+import "./style.scss";
 
 const OneClass = ({
    history,
    match,
    classes: { classInfo, loading, loadingStudents },
+   posts: { unseenPosts },
    auth: { userLogged },
    loadClass,
+   clearPosts,
    deleteClass,
    updatePreviousPage,
+   getUnseenPosts,
    clearAttendances,
    clearGrades,
    clearGradeTypes,
-   clearPosts,
    clearSearch,
    clearProfile,
    classPDF,
 }) => {
+   const userCanSeeButtons =
+      userLogged.type !== "student" && userLogged.type !== "guardian";
+   const userCanMarkSeen =
+      userLogged.type === "student" ||
+      userLogged.type === "admin&teacher" ||
+      userLogged.type === "teacher";
+
    const [toggleModal, setToggleModal] = useState(false);
 
    useEffect(() => {
-      if (loading) loadClass(match.params.class_id);
-   }, [loadClass, match.params.class_id, loading]);
+      if (userLogged.type !== "student" && loading) {
+         loadClass(match.params.class_id);
+         if (userCanMarkSeen) getUnseenPosts(match.params.class_id);
+      }
+   }, [
+      loadClass,
+      match.params.class_id,
+      getUnseenPosts,
+      userLogged,
+      loading,
+      userCanMarkSeen,
+   ]);
 
    const setToggle = () => {
       setToggleModal(!toggleModal);
@@ -56,7 +77,7 @@ const OneClass = ({
    return (
       <>
          {!loadingStudents ? (
-            <>
+            <div className="classInfo">
                <Confirm
                   toggleModal={toggleModal}
                   setToggleModal={setToggle}
@@ -66,6 +87,7 @@ const OneClass = ({
                <h1 className="pt-3 text-center light-font">Clase</h1>
                <ClassInfo classInfo={classInfo} />
                {classInfo.students.length !== 0 ? (
+<<<<<<< HEAD
                   <table>
                      <thead>
                         <tr>
@@ -109,13 +131,22 @@ const OneClass = ({
                            ))}
                      </tbody>
                   </table>
+=======
+                  <StudentTable
+                     clearProfile={clearProfile}
+                     clearAll={userLogged.type !== "student"}
+                     type="class-students"
+                     loadingUsers={loadingStudents}
+                     users={classInfo.students}
+                  />
+>>>>>>> 4b949520082df1964d49d29abbd3029f5096b0a5
                ) : (
                   <p className="heading-tertiary text-secondary my-5 text-center">
                      No hay ningun alumno anotado en esta clase
                   </p>
                )}
                <div className="btn-ctr">
-                  {userLogged.type !== "Alumno" && userLogged.type !== "Tutor" && (
+                  {userCanSeeButtons && (
                      <>
                         <Link
                            to={
@@ -172,47 +203,68 @@ const OneClass = ({
                            : "btn btn-black"
                      }
                      onClick={() => {
-                        clearPosts();
                         updatePreviousPage("");
+                        clearPosts();
                         window.scroll(0, 0);
                      }}
                   >
-                     <i className="far fa-comments"></i>
-                     <span className="hide-sm">&nbsp; Chat</span>
+                     <div className="notification">
+                        <i className="far fa-comments"></i>
+                        {unseenPosts > 0 && (
+                           <span className="post-notification light">
+                              {unseenPosts}
+                           </span>
+                        )}
+                     </div>
+                     <span
+                        className={`hide-sm ${unseenPosts > 0 ? "text" : ""}`}
+                     >
+                        &nbsp; Chat
+                     </span>
                   </Link>
                </div>
                <br />
-               {userLogged.type !== "Alumno" && userLogged.type !== "Tutor" && (
+               {userCanSeeButtons && (
                   <div className="btn-right">
                      <button
+                        type="button"
                         className="btn btn-secondary"
                         onClick={pdfGeneratorSave}
                      >
                         <i className="fas fa-file-pdf"></i>
                      </button>
                      <button
+                        type="button"
                         className="btn btn-secondary"
                         onClick={blankPdfGenerator}
                      >
                         <i className="fas fa-scroll"></i>
                      </button>
-                     <Link
-                        to={`/edit-class/${classInfo._id}/${classInfo.category._id}`}
-                        className="btn btn-mix-secondary"
-                        onClick={() => {
-                           window.scroll(0, 0);
-                           updatePreviousPage("");
-                           clearSearch();
-                        }}
-                     >
-                        <i className="far fa-edit"></i>
-                     </Link>
-                     <button className="btn btn-danger" onClick={setToggle}>
-                        <i className="far fa-trash-alt"></i>
-                     </button>
+                     {userLogged.type !== "teacher" && (
+                        <>
+                           <Link
+                              to={`/edit-class/${classInfo._id}/${classInfo.category._id}`}
+                              className="btn btn-mix-secondary"
+                              onClick={() => {
+                                 window.scroll(0, 0);
+                                 updatePreviousPage("");
+                                 clearSearch();
+                              }}
+                           >
+                              <i className="far fa-edit"></i>
+                           </Link>
+                           <button
+                              type="button"
+                              className="btn btn-danger"
+                              onClick={setToggle}
+                           >
+                              <i className="far fa-trash-alt"></i>
+                           </button>
+                        </>
+                     )}
                   </div>
                )}
-            </>
+            </div>
          ) : (
             <Loading />
          )}
@@ -222,32 +274,37 @@ const OneClass = ({
 
 OneClass.propTypes = {
    classes: PropTypes.object.isRequired,
+   auth: PropTypes.object.isRequired,
+   posts: PropTypes.object.isRequired,
    loadClass: PropTypes.func.isRequired,
+   clearPosts: PropTypes.func.isRequired,
    deleteClass: PropTypes.func.isRequired,
    updatePreviousPage: PropTypes.func.isRequired,
+   getUnseenPosts: PropTypes.func.isRequired,
+   classPDF: PropTypes.func.isRequired,
    clearAttendances: PropTypes.func.isRequired,
    clearGrades: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
    clearGradeTypes: PropTypes.func.isRequired,
-   clearPosts: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
-   classPDF: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    classes: state.classes,
    auth: state.auth,
+   posts: state.posts,
 });
 
 export default connect(mapStateToProps, {
    loadClass,
+   clearPosts,
    deleteClass,
    updatePreviousPage,
+   getUnseenPosts,
+   classPDF,
    clearGrades,
    clearAttendances,
-   clearPosts,
    clearProfile,
    clearSearch,
    clearGradeTypes,
-   classPDF,
 })(withRouter(OneClass));

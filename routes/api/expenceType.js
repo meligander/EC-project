@@ -41,7 +41,7 @@ router.post("/", [auth, adminAuth], async (req, res) => {
             return res
                .status(400)
                .json({ msg: "El nombre debe estar definido" });
-         if (expenceTypes[x].type === 0)
+         if (expenceTypes[x].type === "")
             return res.status(400).json({ msg: "El tipo debe estar definido" });
       }
 

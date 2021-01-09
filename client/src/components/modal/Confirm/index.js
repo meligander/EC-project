@@ -13,6 +13,7 @@ const Confirm = ({
    setToggleModal,
    confirm,
    text,
+   users,
    type,
    penalties: { loading, penalty },
    loadPenalty,
@@ -99,6 +100,28 @@ const Confirm = ({
                   <p>{text.info}</p>
                </div>
             );
+         case "post-likes":
+            return (
+               <div className="popup-text wrapper both">
+                  {users.length > 0 &&
+                     users.map((user, i) => (
+                        <div className="user" key={i}>
+                           <img
+                              className="round-img"
+                              src={
+                                 user.user.noImg !== ""
+                                    ? user.user.noImg
+                                    : user.user.img.url
+                              }
+                              alt="English Centre User"
+                           />
+                           <h4 className="text-dark">
+                              {user.user.name + " " + user.user.lastname}
+                           </h4>
+                        </div>
+                     ))}
+               </div>
+            );
          default:
             return (
                <div className="popup-text">
@@ -114,6 +137,7 @@ const Confirm = ({
             <div className="popup-img">
                <img src={logo} alt="logo" />
                <button
+                  type="button"
                   onClick={(e) => {
                      e.preventDefault();
                      setToggleModal();
@@ -124,39 +148,45 @@ const Confirm = ({
                </button>
             </div>
             {chooseType(type)}
-            <div className="btn-ctr">
-               <button
-                  className="btn btn-success"
-                  onClick={(e) => {
-                     e.preventDefault();
-                     switch (type) {
-                        case "penalty":
-                           confirm(percentage);
-                           setFormData({ ...formData, percentage: "" });
-                           break;
-                        case "certificate-date":
-                           confirm(date);
-                           setFormData({ ...formData, date: "" });
-                           break;
-                        default:
-                           confirm();
-                           break;
-                     }
-                     setToggleModal();
-                  }}
-               >
-                  Aceptar
-               </button>
-               <button
-                  className="btn btn-danger"
-                  onClick={(e) => {
-                     e.preventDefault();
-                     setToggleModal();
-                  }}
-               >
-                  Cancelar
-               </button>
-            </div>
+            {type !== "post-likes" && (
+               <>
+                  <div className="btn-ctr">
+                     <button
+                        type="button"
+                        className="btn btn-success"
+                        onClick={(e) => {
+                           e.preventDefault();
+                           switch (type) {
+                              case "penalty":
+                                 confirm(percentage);
+                                 setFormData({ ...formData, percentage: "" });
+                                 break;
+                              case "certificate-date":
+                                 confirm(date);
+                                 setFormData({ ...formData, date: "" });
+                                 break;
+                              default:
+                                 confirm();
+                                 break;
+                           }
+                           setToggleModal();
+                        }}
+                     >
+                        Aceptar
+                     </button>
+                     <button
+                        type="button"
+                        className="btn btn-danger"
+                        onClick={(e) => {
+                           e.preventDefault();
+                           setToggleModal();
+                        }}
+                     >
+                        Cancelar
+                     </button>
+                  </div>
+               </>
+            )}
          </div>
       </div>
    );
@@ -165,6 +195,7 @@ const Confirm = ({
 Confirm.propTypes = {
    penalties: PropTypes.object.isRequired,
    type: PropTypes.string,
+   users: PropTypes.array,
    toggleModal: PropTypes.bool.isRequired,
    setToggleModal: PropTypes.func.isRequired,
    loadPenalty: PropTypes.func.isRequired,

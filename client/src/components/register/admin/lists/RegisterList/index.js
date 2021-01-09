@@ -24,6 +24,9 @@ const RegisterList = ({
    deleteRegister,
    registerPDF,
 }) => {
+   const isAdmin =
+      userLogged.type === "admin" || userLogged.type === "admin&teacher";
+
    const [filterData, setFilterData] = useState({
       startDate: "",
       endDate: "",
@@ -99,8 +102,9 @@ const RegisterList = ({
                            <th>Plata Caja</th>
                            <th>Diferencia</th>
                            <th>Detalles</th>
-                           {userLogged.type === "Administrador" &&
-                              !registers[0].temporary && <th>&nbsp;</th>}
+                           {isAdmin && !registers[0].temporary && (
+                              <th>&nbsp;</th>
+                           )}
                         </tr>
                      </thead>
                      <tbody>
@@ -152,16 +156,15 @@ const RegisterList = ({
                                        </td>
                                        {!registers[0].temporary && (
                                           <td>
-                                             {userLogged.type ===
-                                                "Administrador" &&
-                                                i === 0 && (
-                                                   <button
-                                                      className="btn btn-danger"
-                                                      onClick={setToggle}
-                                                   >
-                                                      <i className="far fa-trash-alt"></i>
-                                                   </button>
-                                                )}
+                                             {isAdmin && i === 0 && (
+                                                <button
+                                                   type="button"
+                                                   className="btn btn-danger"
+                                                   onClick={setToggle}
+                                                >
+                                                   <i className="far fa-trash-alt"></i>
+                                                </button>
+                                             )}
                                           </td>
                                        )}
                                     </tr>

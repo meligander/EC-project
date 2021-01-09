@@ -10,7 +10,7 @@ import {
    clearOtherValues,
 } from "../../../actions/user";
 
-import Tabs from "../../sharedComp/Tabs";
+import Tabs from "../sharedComp/Tabs";
 import SearchTab from "./tabs/SearchTab";
 
 const Search = ({
@@ -23,9 +23,9 @@ const Search = ({
    return (
       <>
          <h1>Búsqueda</h1>
-         {(userLogged.type === "Administrador" ||
-            userLogged.type === "Secretaria" ||
-            userLogged.type === "Admin/Profesor") && (
+         {(userLogged.type === "admin" ||
+            userLogged.type === "secretary" ||
+            userLogged.type === "admin&teacher") && (
             <div className="btn-right">
                <Link
                   to="/register"

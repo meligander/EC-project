@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 
 import { loadCategories } from "../../../../../actions/category";
 
-import Tabs from "../../../../sharedComp/Tabs";
+import Tabs from "../../../sharedComp/Tabs";
 import Average from "./tabs/AverageTab";
 import Attendance from "./tabs/AttendanceTab";
 

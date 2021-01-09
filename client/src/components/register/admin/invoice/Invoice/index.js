@@ -157,6 +157,7 @@ const Invoice = ({
                </div>
                <div className="btn-ctr">
                   <button
+                     type="button"
                      className="btn btn-secondary"
                      onClick={pdfGeneratorSave}
                   >

@@ -19,7 +19,7 @@ const GoBack = ({
    clearProfile,
 }) => {
    const goBack = () => {
-      if (match.params.user_id) clearProfile();
+      if (match.params.user_id) clearProfile(userLogged.type !== "student");
 
       switch (prevPage) {
          case "dashboard":
@@ -38,7 +38,7 @@ const GoBack = ({
 
    return (
       <>
-         <button onClick={goBack} className="btn btn-goback">
+         <button onClick={goBack} type="button" className="btn btn-goback">
             <i className="fas fa-chevron-left"></i> Volver
          </button>
          {loadingSpinner && <Loading />}

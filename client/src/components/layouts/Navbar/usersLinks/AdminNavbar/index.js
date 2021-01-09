@@ -19,6 +19,7 @@ import "./style.scss";
 const AdminNavbar = ({
    location,
    navbar: { showMenu, currentNav },
+   posts: { allUnseenPosts },
    auth: { userLogged },
    logOutAndToggle,
    changePage,
@@ -152,7 +153,18 @@ const AdminNavbar = ({
                   changePageAndMenu("classes");
                }}
             >
-               <i className="fas fa-chalkboard-teacher"></i>
+               <div className="notification">
+                  <i className="fas fa-chalkboard-teacher"></i>
+                  {allUnseenPosts > 0 && (
+                     <span
+                        className={`post-notification teacher ${
+                           currentNav === "classes" ? "white" : "light"
+                        }`}
+                     >
+                        {allUnseenPosts}
+                     </span>
+                  )}
+               </div>
                <span className="hide-md">&nbsp; Clases</span>
             </Link>
          </li>
@@ -231,7 +243,10 @@ const AdminNavbar = ({
             <Link
                className="nav-link"
                to="/login"
-               onClick={() => logOutAndToggle()}
+               onClick={() => {
+                  window.scroll(0, 0);
+                  logOutAndToggle();
+               }}
             >
                <i className="fas fa-sign-out-alt"></i>
                <span className="hide-md">&nbsp; Cerrar Sesión</span>
@@ -244,6 +259,7 @@ const AdminNavbar = ({
 AdminNavbar.propTypes = {
    navbar: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
+   posts: PropTypes.object.isRequired,
    logOutAndToggle: PropTypes.func.isRequired,
    changePage: PropTypes.func.isRequired,
    changePageAndMenu: PropTypes.func.isRequired,
@@ -258,6 +274,7 @@ AdminNavbar.propTypes = {
 const mapStateToProps = (state) => ({
    navbar: state.navbar,
    auth: state.auth,
+   posts: state.posts,
 });
 
 export default connect(mapStateToProps, {

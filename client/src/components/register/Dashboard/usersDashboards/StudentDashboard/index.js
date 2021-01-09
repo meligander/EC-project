@@ -4,65 +4,96 @@ import { Link } from "react-router-dom";
 import Moment from "react-moment";
 import PropTypes from "prop-types";
 
-import { clearClass, loadUserClass } from "../../../../../actions/class";
 import { loadUsersGrades } from "../../../../../actions/grade";
 import { loadStudentAttendance } from "../../../../../actions/attendance";
 import { loadStudentInstallments } from "../../../../../actions/installment";
 import { clearProfile, loadRelatives } from "../../../../../actions/user";
+import { loadStudentClass } from "../../../../../actions/class";
 
 import RelativeDashboard from "../RelativeDashboard";
-import StudentGradesTable from "../../../../tables/StudentGradesTable";
-import InstallmentsTable from "../../../../tables/InstallmentsTable";
+import StudentGradesTable from "../../../sharedComp/tables/StudentGradesTable";
+import InstallmentsTable from "../../../sharedComp/tables/InstallmentsTable";
 import Loading from "../../../../modal/Loading";
 
 import "./style.scss";
 
 const StudentDashboard = ({
-   loadUserClass,
    loadUsersGrades,
    loadStudentAttendance,
    loadStudentInstallments,
+   loadStudentClass,
    loadRelatives,
-   clearClass,
    clearProfile,
    auth: { userLogged },
    classes: { classInfo, loading },
-   users: { user, loadingUsers },
+   users: { user, loadingUsersBK },
    attendances: { studentAttendances, loadingStudentAttendances },
    installments: { usersInstallments, loadingUsersInstallments },
    grades: { studentGrades, loadingStudentGrades },
 }) => {
-   const [pass, setPass] = useState(false);
+   const [otherValues, setOtherValues] = useState({
+      pass: false,
+      firstLoad: true,
+      secondLoad: true,
+   });
+
+   const { pass, firstLoad, secondLoad } = otherValues;
 
    const date = new Date();
    const year = date.getFullYear();
 
+   const allowedUsers =
+      userLogged.type === "secretary" ||
+      userLogged.type === "admin&teacher" ||
+      userLogged.type === "admin" ||
+      (userLogged.type === "student" && user._id === userLogged._id);
+
    useEffect(() => {
-      if (userLogged.type === "Tutor" && user.type === "Alumno") {
-         for (let x = 0; x < userLogged.children.length; x++) {
-            if (userLogged.children[x]._id === user._id) {
-               setPass(true);
-               break;
+      if (firstLoad) {
+         let pass = false;
+         if (userLogged.type === "guardian" && user.type === "student") {
+            for (let x = 0; x < userLogged.children.length; x++) {
+               if (userLogged.children[x]._id === user._id) {
+                  pass = true;
+                  setOtherValues((prev) => ({
+                     ...prev,
+                     pass: true,
+                  }));
+                  break;
+               }
             }
          }
-      }
-
-      if (loading) {
          loadRelatives(user._id);
-         loadUserClass(user._id, year);
-         loadStudentInstallments(user._id, false);
+         if ((allowedUsers || pass) && userLogged.type !== "student") {
+            loadStudentClass(user._id);
+         }
+         setOtherValues((prev) => ({
+            ...prev,
+            firstLoad: false,
+         }));
       } else {
-         loadUsersGrades(user._id, classInfo._id);
-         loadStudentAttendance(user._id, classInfo._id);
+         if ((allowedUsers || pass) && !loading && secondLoad) {
+            loadUsersGrades(user._id, classInfo && classInfo._id);
+            loadStudentAttendance(user._id, classInfo && classInfo._id);
+            loadStudentInstallments(user._id, false);
+            setOtherValues((prev) => ({
+               ...prev,
+               secondLoad: false,
+            }));
+         }
       }
    }, [
       userLogged,
       user,
       classInfo,
-      year,
       loading,
-      loadUserClass,
+      firstLoad,
+      secondLoad,
+      year,
+      allowedUsers,
+      pass,
       loadUsersGrades,
+      loadStudentClass,
       loadRelatives,
       loadStudentAttendance,
       loadStudentInstallments,
@@ -70,20 +101,16 @@ const StudentDashboard = ({
 
    return (
       <>
-         {!loading &&
-         !loadingStudentAttendances &&
-         !loadingUsers &&
-         !loadingStudentGrades &&
-         !loadingUsersInstallments ? (
+         {(!allowedUsers && !loadingUsersBK) ||
+         ((allowedUsers || pass) &&
+            !loadingUsersBK &&
+            !loading &&
+            !loadingStudentAttendances &&
+            !loadingStudentGrades &&
+            !loadingUsersInstallments) ? (
             <>
-               {" "}
                <RelativeDashboard />
-               {(userLogged.type === "Secretaria" ||
-                  userLogged.type === "Admin/Profesor" ||
-                  userLogged.type === "Administrador" ||
-                  (userLogged.type === "Alumno" &&
-                     user._id === userLogged._id) ||
-                  pass) && (
+               {(allowedUsers || pass) && user.active && (
                   <>
                      {/* Class */}
                      <div className="class row bg-lighter">
@@ -91,7 +118,7 @@ const StudentDashboard = ({
                            <>
                               <div className="title ">
                                  <p className="heading-secondary text-primary">
-                                    Curso
+                                    Clase
                                  </p>
                                  <p className="heading-tertiary text-dark m-1">
                                     Categoría:{" "}
@@ -101,7 +128,6 @@ const StudentDashboard = ({
                                     className="btn-text"
                                     onClick={() => {
                                        window.scroll(0, 0);
-                                       clearClass();
                                     }}
                                     to={`/class/${classInfo._id}`}
                                  >
@@ -122,7 +148,9 @@ const StudentDashboard = ({
                                        to={`/dashboard/${classInfo.teacher._id}`}
                                        onClick={() => {
                                           window.scroll(0, 0);
-                                          clearProfile();
+                                          clearProfile(
+                                             userLogged.type !== "student"
+                                          );
                                        }}
                                     >
                                        Ver Info
@@ -199,7 +227,10 @@ const StudentDashboard = ({
                               </div>
                            </>
                         ) : (
-                           <div>
+                           <div className="no-class">
+                              <h3 className="heading-tertiary p-1 text-primary">
+                                 Clase
+                              </h3>
                               <p className="heading-tertiary pt-1 text-center">
                                  El alumno no está registrado en ningua clase
                               </p>
@@ -228,12 +259,11 @@ const StudentDashboard = ({
                         )}
                      </div>
                      {/* Attendance */}
-                     <div className="bg-white p-2">
-                        <h3 className="heading-tertiary text-primary p-1 m-1">
+                     <div className="bg-white p-3">
+                        <h3 className="heading-tertiary text-primary p-1">
                            Inasistencias{" "}
                            {studentAttendances.length > 0 && (
                               <span className="badge">
-                                 {" "}
                                  {studentAttendances.length}
                               </span>
                            )}
@@ -260,7 +290,7 @@ const StudentDashboard = ({
                         )}
                      </div>
                      {/* Installments */}
-                     <div className="bg-lightest-secondary p-2">
+                     <div className="bg-lightest-secondary p-3">
                         <h3 className="heading-tertiary text-primary p-1">
                            Cuotas
                         </h3>
@@ -307,12 +337,11 @@ StudentDashboard.prototypes = {
    attendances: PropTypes.object.isRequired,
    installments: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
-   loadUserClass: PropTypes.func.isRequired,
    loadUsersGrades: PropTypes.func.isRequired,
    loadStudentAttendance: PropTypes.func.isRequired,
    loadStudentInstallments: PropTypes.func.isRequired,
+   loadStudentClass: PropTypes.func.isRequired,
    loadRelatives: PropTypes.func.isRequired,
-   clearClass: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
 };
 
@@ -326,11 +355,10 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps, {
-   loadUserClass,
    loadUsersGrades,
    loadStudentAttendance,
    loadStudentInstallments,
+   loadStudentClass,
    loadRelatives,
-   clearClass,
    clearProfile,
 })(StudentDashboard);

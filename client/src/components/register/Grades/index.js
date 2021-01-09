@@ -11,9 +11,9 @@ import {
 import { loadClass } from "../../../actions/class";
 
 import GradesTab from "./tabs/GradesTab";
-import ClassInfo from "../../sharedComp/ClassInfo";
+import ClassInfo from "../sharedComp/ClassInfo";
 import Loading from "../../modal/Loading";
-import Tabs from "../../sharedComp/Tabs";
+import Tabs from "../sharedComp/Tabs";
 
 const Grades = ({
    match,

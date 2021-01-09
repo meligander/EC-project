@@ -13,6 +13,7 @@ const Class = require("../../models/Class");
 const Enrollment = require("../../models/Enrollment");
 const Attendance = require("../../models/Attendance");
 const Grade = require("../../models/Grade");
+const Post = require("../../models/Post");
 
 //@route    GET api/class
 //@desc     Get all classes || with filter
@@ -93,10 +94,10 @@ router.get("/:class_id", auth, async (req, res) => {
    }
 });
 
-//@route    GET api/class/user/:id
-//@desc     Get a user's class
+//@route    GET api/class/student/:id
+//@desc     Get a student's class
 //@access   Private
-router.get("/user/:id", auth, async (req, res) => {
+router.get("/student/:id", auth, async (req, res) => {
    try {
       const date = new Date();
 
@@ -588,12 +589,8 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       //Remove user
       await Class.findOneAndRemove({ _id: req.params.id });
 
-      //Delete the property classroom form students
-      const enrollments = await Enrollment.find({
-         "classroom._id": req.params.id,
-      });
-
-      await deleteInfoRelated(enrollments);
+      //Delete the property classroom form students enrollments
+      await deleteInfoRelated(req.params.id);
 
       res.json({ msg: "Class deleted" });
    } catch (err) {
@@ -602,30 +599,30 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-async function deleteInfoRelated(students) {
-   for (let x = 0; x < students.length; x++) {
+async function deleteInfoRelated(classroom) {
+   const enrollments = await Enrollment.find({
+      "classroom._id": classroom,
+   });
+   for (let x = 0; x < enrollments.length; x++) {
       await Enrollment.findOneAndUpdate(
-         {
-            student: students[x].student,
-         },
+         { _id: enrollments[x]._id },
          { "classroom._id": null }
       );
+   }
 
-      const attendances = await Attendance.find({
-         student: students[x].student,
-         classroom: req.params.id,
-      });
-      for (let y = 0; y < attendances.length; y++) {
-         await Attendance.findOneAndDelete({ _id: attendances[y] });
-      }
+   const attendances = await Attendance.find({ classroom });
+   for (let x = 0; x < attendances.length; x++) {
+      await Attendance.findOneAndDelete({ _id: attendances[x] });
+   }
 
-      const grades = await Grade.find({
-         student: students[x].student,
-         classroom: req.params.id,
-      });
-      for (let y = 0; y < grades.length; y++) {
-         await Attendance.findOneAndDelete({ _id: grades[y] });
-      }
+   const grades = await Grade.find({ classroom });
+   for (let x = 0; x < grades.length; x++) {
+      await Attendance.findOneAndDelete({ _id: grades[x] });
+   }
+
+   const posts = await Post.find({ classroom });
+   for (let x = 0; x < posts.length; x++) {
+      await Post.findOneAndDelete({ _id: posts[x] });
    }
 }
 

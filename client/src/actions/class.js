@@ -24,7 +24,7 @@ import {
    CLASSSTUDENTS_ERROR,
 } from "./types";
 
-export const loadClass = (class_id, post = false) => async (dispatch) => {
+export const loadClass = (class_id) => async (dispatch) => {
    try {
       if (class_id === "0") {
          dispatch({
@@ -37,7 +37,7 @@ export const loadClass = (class_id, post = false) => async (dispatch) => {
             type: CLASS_LOADED,
             payload: res.data,
          });
-         if (!post) dispatch(loadClassStudents(class_id));
+         dispatch(loadClassStudents(class_id));
       }
    } catch (err) {
       dispatch({
@@ -72,13 +72,14 @@ export const getActiveClasses = () => async (dispatch) => {
    }
 };
 
-export const loadUserClass = (user_id) => async (dispatch) => {
+export const loadStudentClass = (user_id) => async (dispatch) => {
    try {
-      const res = await axios.get(`/api/class/user/${user_id}`);
+      const res = await axios.get(`/api/class/student/${user_id}`);
       dispatch({
          type: CLASS_LOADED,
          payload: res.data,
       });
+      dispatch(loadClassStudents(res.data._id));
    } catch (err) {
       dispatch({
          type: CLASS_ERROR,
@@ -94,7 +95,7 @@ export const loadUserClass = (user_id) => async (dispatch) => {
 export const loadClassStudents = (class_id) => async (dispatch) => {
    try {
       const res = await axios.get(
-         `/api/user?type=Alumno&classroom=${class_id}`
+         `/api/user?type=student&classroom=${class_id}`
       );
       dispatch({
          type: CLASSSTUDENTS_LOADED,

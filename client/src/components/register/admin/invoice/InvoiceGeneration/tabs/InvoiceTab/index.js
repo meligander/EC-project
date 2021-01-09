@@ -9,7 +9,7 @@ import { registerInvoice } from "../../../../../../../actions/invoice";
 import { removeInstallmentFromList } from "../../../../../../../actions/installment";
 
 import Alert from "../../../../../../sharedComp/Alert";
-import StudentSearch from "../../../../../../sharedComp/search/StudentSearch";
+import StudentSearch from "../../../../../sharedComp/search/StudentSearch";
 import Confirm from "../../../../../../modal/Confirm";
 
 import "./style.scss";
@@ -232,7 +232,11 @@ const InvoiceTab = ({
             </div>
             <div className="paying-user">
                <h3 className="paragraph text-primary ">Usuario a Pagar</h3>
-               <button onClick={setToggleSearch} className="btn-cancel search">
+               <button
+                  onClick={setToggleSearch}
+                  type="button"
+                  className="btn-cancel search"
+               >
                   <i className="fas fa-search"></i>
                </button>
             </div>
@@ -317,6 +321,7 @@ const InvoiceTab = ({
                               <i className="fas fa-user-circle"></i>
                            </Link>
                            <button
+                              type="button"
                               onClick={(e) => {
                                  e.preventDefault();
                                  setOtherValues({
@@ -335,15 +340,16 @@ const InvoiceTab = ({
                      </div>
                      <div className="form-group">
                         <input
-                           className="form-input"
-                           type="email"
-                           name="email-user"
+                           className="form-input text-danger"
                            id="email-user"
-                           value={user.email}
+                           value={
+                              user.email
+                                 ? user.email
+                                 : "No tiene email registrado"
+                           }
                            disabled
-                           placeholder="Email"
                         />
-                        <label htmlFor="email-user" className="form-label">
+                        <label htmlFor="email-user" className="form-label show">
                            Email
                         </label>
                      </div>
@@ -355,7 +361,7 @@ const InvoiceTab = ({
                   selectStudent={selectUser}
                   selectedStudent={selectedUser}
                   actionForSelected={addUser}
-                  typeSearch="Tutor/Student"
+                  typeSearch="guardian/student"
                />
             )}
             <h3 className="text-primary heading-tertiary">
@@ -403,6 +409,7 @@ const InvoiceTab = ({
                                  </td>
                                  <td>
                                     <button
+                                       type="button"
                                        onClick={(e) => {
                                           e.preventDefault();
                                           removeItem(invoice.item);

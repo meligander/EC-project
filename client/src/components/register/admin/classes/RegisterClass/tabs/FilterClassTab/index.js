@@ -7,10 +7,10 @@ import {
    updateClassCategory,
    addStudent,
 } from "../../../../../../../actions/class";
-import { loadUsers } from "../../../../../../../actions/user";
+import { loadUsers, clearProfile } from "../../../../../../../actions/user";
 import { setAlert } from "../../../../../../../actions/alert";
 
-import StudentTable from "../../../../../../tables/StudentTable";
+import StudentTable from "../../../../../sharedComp/tables/StudentTable";
 import Alert from "../../../../../../sharedComp/Alert";
 import Loading from "../../../../../../modal/Loading";
 
@@ -20,6 +20,7 @@ const FilterClassTab = ({
    loadUsers,
    updateClassCategory,
    addStudent,
+   clearProfile,
    categories,
    classes: { classInfo, loading, loadingStudents },
    users: { users, loadingUsers },
@@ -47,7 +48,7 @@ const FilterClassTab = ({
          window.scroll(0, 0);
       } else {
          loadUsers({
-            type: "Alumno",
+            type: "student",
             active: true,
             category: category._id,
             classroom: "null",
@@ -115,6 +116,7 @@ const FilterClassTab = ({
                   </div>
                   <div className="text-right">
                      <button
+                        type="submit"
                         className={`btn ${
                            registerClass ? "btn-light" : "btn-black"
                         } my-1`}
@@ -128,10 +130,10 @@ const FilterClassTab = ({
                   <Alert type="3" />
                   <StudentTable
                      users={users}
+                     clearProfile={clearProfile}
                      loadingUsers={loadingUsers}
-                     search={false}
-                     addChild={addChild}
-                     type="Alumno"
+                     actionWChild={addChild}
+                     type="add-child"
                   />
                </div>
             </>
@@ -150,6 +152,7 @@ FilterClassTab.propTypes = {
    updateClassCategory: PropTypes.func.isRequired,
    loadUsers: PropTypes.func.isRequired,
    addStudent: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -163,4 +166,5 @@ export default connect(mapStateToProps, {
    loadUsers,
    updateClassCategory,
    addStudent,
+   clearProfile,
 })(withRouter(FilterClassTab));

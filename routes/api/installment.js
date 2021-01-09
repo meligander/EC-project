@@ -329,11 +329,18 @@ router.put("/", [auth], async (req, res) => {
    try {
       const date = new Date();
       const month = date.getMonth() + 1;
+      const year = date.getFullYear();
       const day = date.getDate();
+
+      let lessDay = false;
+      const thirtyDays = [4, 6, 9, 11];
+      for (let x = 0; x < thirtyDays.length; x++) {
+         if (thirtyDays[x] === month) lessDay = true;
+      }
 
       let installments = await Installment.find({
          number: { $lte: month, $ne: 0 },
-         year: date.getFullYear(),
+         year,
          value: { $ne: 0 },
       }).populate({
          path: "student",
@@ -342,7 +349,7 @@ router.put("/", [auth], async (req, res) => {
       });
 
       let previusYearsInstallments = await Installment.find({
-         year: { $lt: date.getFullYear() },
+         year: { $lt: year },
          value: { $ne: 0 },
       }).populate({
          path: "student",
@@ -357,11 +364,13 @@ router.put("/", [auth], async (req, res) => {
 
       if (penalty) {
          for (let x = 0; x < installments.length; x++) {
+            const chargeDay =
+               installments[x].student.chargeday - lessDay ? 1 : 0;
             if (
-               (installments[x].number < month && !installments[x].expired) ||
-               (installments[x].number === month &&
-                  installments[x].student.chargeday < day &&
-                  !installments[x].expired)
+               (installments[x].year < year ||
+                  installments[x].number < month ||
+                  chargeDay < day) &&
+               !installments[x].expired
             ) {
                const charge =
                   (installments[x].value * penalty.percentage) / 100 +

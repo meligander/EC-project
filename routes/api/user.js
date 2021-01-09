@@ -17,6 +17,7 @@ const Enrollment = require("../../models/Enrollment");
 const Installment = require("../../models/Installment");
 const Grade = require("../../models/Grade");
 const Attendance = require("../../models/Attendance");
+const Post = require("../../models/Post");
 const Class = require("../../models/Class");
 
 //@route    GET api/user
@@ -40,13 +41,11 @@ router.get("/", async (req, res) => {
                lastname: { $regex: `.*${req.query.lastname}.*`, $options: "i" },
             }),
          };
-
          if (req.query.type) {
             switch (req.query.type) {
-               case "Alumno":
+               case "student":
                   search = false;
                   const classroom = req.query.classroom;
-
                   if (req.query.category) {
                      const date = new Date();
                      const enrollments = await Enrollment.find({
@@ -129,7 +128,7 @@ router.get("/", async (req, res) => {
                      }
                   }
                   break;
-               case "Tutor":
+               case "guardian":
                   const name = req.query.studentname;
                   const lastname = req.query.studentlastname;
 
@@ -166,21 +165,20 @@ router.get("/", async (req, res) => {
                      }
                   }
                   break;
-               case "Secretaria":
-               case "Administrador":
+               case "admin":
                   filter.type = {
-                     $in: ["Administrador", "Secretaria", "Admin/Profesor"],
+                     $in: ["admin", "secretary", "admin&teacher"],
                   };
                   break;
-               case "Profesor":
-                  filter.type = { $in: ["Profesor", "Admin/Profesor"] };
+               case "teacher":
+                  filter.type = { $in: ["teacher", "admin&teacher"] };
                   break;
-               case "Alumno y Tutor":
-                  filter.type = { $in: ["Alumno", "Tutor"] };
+               case "guardian/student":
+                  filter.type = { $in: ["student", "guardian"] };
                   break;
-               case "Team":
+               case "team":
                   filter.type = {
-                     $in: ["Admin/Profesor", "Profesor", "Secretaria"],
+                     $in: ["admin&teacher", "teacher", "secretary"],
                   };
                   break;
                default:
@@ -262,7 +260,7 @@ router.get("/tutor/:id", auth, async (req, res) => {
 router.get("/register/number", [auth, adminAuth], async (req, res) => {
    try {
       let studentnumber = 1;
-      const number = await User.find({ type: "Alumno" })
+      const number = await User.find({ type: "student" })
          .sort({ $natural: -1 })
          .limit(1);
 
@@ -348,7 +346,7 @@ router.post(
                   .json({ msg: "Ya existe un usuario con ese mail" });
          }
 
-         const number = await User.find({ type: "Alumno" })
+         const number = await User.find({ type: "student" })
             .sort({ $natural: -1 })
             .limit(1);
 
@@ -380,13 +378,13 @@ router.post(
             description,
          };
 
-         if (type === "Alumno") {
+         if (type === "student") {
             data = {
                ...data,
                studentnumber,
             };
          }
-         if (type === "Tutor") {
+         if (type === "guardian") {
             let childrenList = [];
             for (let x = 0; x < children.length; x++) {
                childrenList.push(children[x]._id);
@@ -774,19 +772,71 @@ function deletePictures(img) {
 
 async function inactivateUser(user_id, type, completeDeletion) {
    switch (type) {
-      case "Alumno":
+      case "student":
          const date = new Date();
          const month = date.getMonth() + 1;
          const year = date.getFullYear();
 
-         const grades = await Grade.find({ student: user_id });
+         const enrollment = await Enrollment.findOneAndRemove({
+            student: user_id,
+            year,
+         });
+         await Enrollment.findOneAndRemove({
+            student: user_id,
+            year: year + 1,
+         });
+
+         const grades = await Grade.find({
+            student: user_id,
+            classroom: enrollment.classroom._id,
+         });
          for (let x = 0; x < grades.length; x++) {
             await Grade.findOneAndRemove({ _id: grades[x]._id });
          }
 
-         const attendances = await Attendance.find({ student: user_id });
+         const attendances = await Attendance.find({
+            student: user_id,
+            classroom: enrollment.classroom._id,
+         });
          for (let x = 0; x < attendances.length; x++) {
             await Attendance.findOneAndRemove({ _id: attendances[x]._id });
+         }
+
+         if (completeDeletion) {
+            let posts = await Post.find({
+               classroom: enrollment.classroom._id,
+               user: user_id,
+            });
+            for (let x = 0; x < posts.length; x++) {
+               await Post.findOneAndDelete({ _id: posts[x] });
+            }
+            posts = await Post.find({
+               classroom: enrollment.classroom._id,
+               "comments.user": user_id,
+            });
+            let position = [];
+            for (let x = 0; x < posts.length; x++) {
+               for (let y = 0; y < posts[x].comments.length; y++) {
+                  if (posts[x].comments[y].user === user_id) {
+                     position.unshift(y);
+                  }
+               }
+               for (let y = 0; y < position.length; y++) {
+                  posts[x].comments.splice(position, 1);
+               }
+            }
+            posts = await Post.find({
+               classroom: enrollment.classroom._id,
+               "likes.user": user_id,
+            });
+            for (let x = 0; x < posts.length; x++) {
+               for (let y = 0; y < posts[x].likes.length; y++) {
+                  if (posts[x].likes[y].user === user_id) {
+                     posts[x].likes.splice(y, 1);
+                     break;
+                  }
+               }
+            }
          }
 
          let installments = await Installment.find({
@@ -799,22 +849,18 @@ async function inactivateUser(user_id, type, completeDeletion) {
          for (let x = 0; x < installments.length; x++) {
             await Installment.findOneAndRemove({ _id: installments[x]._id });
          }
-         installments = await Installment.find({
-            student: user_id,
-            year: year + 1,
-         });
-         for (let x = 0; x < installments.length; x++) {
-            await Installment.findOneAndRemove({ _id: installments[x]._id });
+         if (!completeDeletion) {
+            installments = await Installment.find({
+               student: user_id,
+               year: year + 1,
+            });
+            for (let x = 0; x < installments.length; x++) {
+               await Installment.findOneAndRemove({ _id: installments[x]._id });
+            }
          }
 
-         await Enrollment.findOneAndRemove({ student: user_id, year });
-         await Enrollment.findOneAndRemove({
-            student: user_id,
-            year: year + 1,
-         });
-
          break;
-      case "Profesor":
+      case "teacher":
          const classes = await Class.find({ teacher: user_id });
 
          for (let x = 0; x < classes.length; x++) {
@@ -830,6 +876,11 @@ async function inactivateUser(user_id, type, completeDeletion) {
                await Grade.findOneAndRemove({ _id: grades[y]._id });
             }
 
+            const posts = await Post.find({ classroom: classes[x]._id });
+            for (let y = 0; y < posts.length; y++) {
+               await Post.findOneAndDelete({ _id: posts[y] });
+            }
+
             const enrollments = await Enrollment.find({
                "classroom._id": classes[x]._id,
             });
@@ -841,6 +892,8 @@ async function inactivateUser(user_id, type, completeDeletion) {
                         _id: null,
                         periodAbsence: [],
                         periodAverage: [],
+                        average: null,
+                        absence: null,
                      },
                   }
                );

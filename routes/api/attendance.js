@@ -49,6 +49,12 @@ router.get("/:class_id", [auth], async (req, res) => {
 //@access   Private
 router.get("/student/:class_id/:user_id", [auth], async (req, res) => {
    try {
+      if (req.params.class_id === "null") {
+         return res.status(400).json({
+            msg: "No está registrado en ninguna clase",
+         });
+      }
+
       const attendances = await Attendance.find({
          student: req.params.user_id,
          classroom: req.params.class_id,

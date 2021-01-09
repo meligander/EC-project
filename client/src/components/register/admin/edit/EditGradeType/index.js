@@ -216,6 +216,7 @@ const EditGradeType = ({
                                  )}
                                  <td>
                                     <button
+                                       type="button"
                                        onClick={() => setToggleDelete(row)}
                                        className="btn btn-danger"
                                     >

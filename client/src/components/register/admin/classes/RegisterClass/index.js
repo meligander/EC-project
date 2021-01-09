@@ -7,7 +7,7 @@ import { loadClass } from "../../../../../actions/class";
 import { loadCategories } from "../../../../../actions/category";
 import { loadUsers } from "../../../../../actions/user";
 
-import Tabs from "../../../../sharedComp/Tabs";
+import Tabs from "../../../sharedComp/Tabs";
 import FilterClassTab from "./tabs/FilterClassTab";
 import NewClass from "./tabs/NewClassTab";
 
@@ -30,10 +30,10 @@ const RegisterClass = ({
 
       if (loadingUsersBK) {
          loadCategories();
-         loadUsers({ type: "Profesor", active: true }, false);
+         loadUsers({ type: "teacher", active: true }, false);
          if (!registerClass && loadingUsers) {
             loadUsers({
-               type: "Alumno",
+               type: "student",
                active: true,
                classroom: "null",
                category: match.params.category_id,

@@ -12,7 +12,7 @@ import { updatePreviousPage } from "../../../../actions/mixvalues";
 import { clearPenalty, updatePenalty } from "../../../../actions/penalty";
 import { clearUser } from "../../../../actions/user";
 
-import InstallmentsSearch from "../../../sharedComp/search/InstallmentsSearch";
+import InstallmentsSearch from "../../sharedComp/search/InstallmentsSearch";
 import Confirm from "../../../modal/Confirm";
 
 const Installments = ({
@@ -85,11 +85,16 @@ const Installments = ({
                confirm={confirm}
             />
             <div className="btn-right my-3">
-               {userLogged.type === "Administrador" ||
-                  userLogged.type === "Admin/Profesor"}
-               <button className="btn btn-secondary" onClick={setToggle}>
-                  <i className="fas fa-dollar-sign"></i>&nbsp; Recargo
-               </button>
+               {(userLogged.type === "admin" ||
+                  userLogged.type === "admin&teacher") && (
+                  <button
+                     className="btn btn-secondary"
+                     type="button"
+                     onClick={setToggle}
+                  >
+                     <i className="fas fa-dollar-sign"></i>&nbsp; Recargo
+                  </button>
+               )}
                <Link
                   to="/installment-list"
                   onClick={() => {

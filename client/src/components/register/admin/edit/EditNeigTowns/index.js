@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import { loadTowns } from "../../../../../actions/town";
 import { loadNeighbourhoods } from "../../../../../actions/neighbourhood";
 
-import Tabs from "../../../../sharedComp/Tabs";
+import Tabs from "../../../sharedComp/Tabs";
 import Loading from "../../../../modal/Loading";
 import TownsTab from "./tabs/TownsTab";
 import NeighbourhoodTab from "./tabs/NeighbourhoodTab";

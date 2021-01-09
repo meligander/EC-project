@@ -5,12 +5,12 @@ import PropTypes from "prop-types";
 import { loadCategories } from "../../../../../actions/category";
 import { clearProfile, loadUsers, userPDF } from "../../../../../actions/user";
 
-import StudentTable from "../../../../tables/StudentTable";
-import RestTable from "../../../../tables/RestTable";
-import NameField from "../../../../sharedComp/NameField";
+import StudentTable from "../../../sharedComp/tables/StudentTable";
+import RestTable from "../../../sharedComp/tables/RestTable";
+import NameField from "../../../sharedComp/NameField";
 
 const SearchTab = ({
-   users: { users, loadingUsers, usersType },
+   users: { users, loadingUsers, userSearchType },
    categories,
    loadCategories,
    loadUsers,
@@ -18,6 +18,21 @@ const SearchTab = ({
    typeF,
    userPDF,
 }) => {
+   const searchType = () => {
+      switch (typeF) {
+         case "Alumnos":
+            return "student";
+         case "Tutores":
+            return "guardian";
+         case "Profesores":
+            return "teacher";
+         case "Administradores":
+            return "admin";
+         default:
+            break;
+      }
+   };
+
    const [filterForm, setFilterForm] = useState({
       name: "",
       lastname: "",
@@ -25,7 +40,7 @@ const SearchTab = ({
       category: "",
       studentname: "",
       studentlastname: "",
-      type: typeF.substring(0, typeF.length - (typeF === "Alumnos" ? 1 : 2)),
+      type: searchType(),
    });
 
    const {
@@ -37,6 +52,10 @@ const SearchTab = ({
       studentname,
       type,
    } = filterForm;
+
+   useEffect(() => {
+      if (type === "student") loadCategories();
+   }, [loadCategories, type]);
 
    const onChange = (e) => {
       setFilterForm({
@@ -58,16 +77,12 @@ const SearchTab = ({
    };
 
    const pdfGeneratorSave = () => {
-      userPDF(users, usersType);
+      userPDF(users, userSearchType);
    };
-
-   useEffect(() => {
-      if (type === "Alumno") loadCategories();
-   }, [loadCategories, type]);
 
    return (
       <>
-         <form className="form">
+         <form className="form" onClick={(e) => searchUsers(e)}>
             <NameField
                name={name}
                lastname={lastname}
@@ -77,7 +92,7 @@ const SearchTab = ({
                lastnamePlaceholder="Apellido"
                namePlaceholder="Nombre"
             />
-            {type === "Alumno" && (
+            {type === "student" && (
                <div className="form-group">
                   <select
                      className="form-input"
@@ -105,7 +120,7 @@ const SearchTab = ({
                   </label>
                </div>
             )}
-            {type === "Tutor" && (
+            {type === "guardian" && (
                <NameField
                   name={studentname}
                   lastname={studentlastname}
@@ -130,21 +145,17 @@ const SearchTab = ({
                </label>
             </div>
             <div className="btn-right mb-1">
-               <button
-                  type="submit"
-                  onClick={(e) => searchUsers(e)}
-                  className="btn btn-light"
-               >
+               <button type="submit" className="btn btn-light">
                   <i className="fas fa-filter"></i>&nbsp; Buscar
                </button>
             </div>
          </form>
          <div className="mt-2">
-            {type === "Alumno" ? (
+            {type === "student" ? (
                <StudentTable
                   clearProfile={clearProfile}
-                  search={true}
-                  type={usersType}
+                  type="search"
+                  userSearchType={userSearchType}
                   loadingUsers={loadingUsers}
                   users={users}
                />
@@ -154,12 +165,16 @@ const SearchTab = ({
                   loadingUsers={loadingUsers}
                   users={users}
                   type={type}
-                  usersType={usersType}
+                  userSearchType={userSearchType}
                />
             )}
          </div>
          <div className="btn-right">
-            <button className="btn btn-secondary" onClick={pdfGeneratorSave}>
+            <button
+               className="btn btn-secondary"
+               type="button"
+               onClick={pdfGeneratorSave}
+            >
                <i className="fas fa-file-pdf"></i>
             </button>
          </div>

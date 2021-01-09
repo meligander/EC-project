@@ -301,6 +301,7 @@ const GradesTab = ({
                                        />
                                     ) : (
                                        <button
+                                          type="button"
                                           className="btn btn-danger"
                                           onClick={() => {
                                              setOtherValues({
@@ -322,16 +323,25 @@ const GradesTab = ({
             </div>
          )}
          <div className="btn-right">
-            <button className="btn btn-primary" onClick={setToggleSave}>
+            <button
+               className="btn btn-primary"
+               type="button"
+               onClick={setToggleSave}
+            >
                <i className="far fa-save"></i>
                <span className="hide-md">&nbsp; Guardar Cambios</span>
             </button>
-            <button className="btn btn-light" onClick={clickAddGrade}>
+            <button
+               className="btn btn-dark"
+               type="button"
+               onClick={clickAddGrade}
+            >
                <i className="fas fa-plus"></i>
                <span className="hide-md">&nbsp; Nota</span>
             </button>
             <button
                className="btn btn-secondary"
+               type="button"
                onClick={() => pdfGeneratorSave(false)}
             >
                <i className="fas fa-file-pdf"></i>
@@ -341,6 +351,7 @@ const GradesTab = ({
                period !== 6) ||
                (classInfo.category.name === "Kinder" && period !== 4)) && (
                <button
+                  type="button"
                   className="btn btn-secondary"
                   onClick={() => pdfGeneratorSave(true)}
                >
@@ -351,13 +362,17 @@ const GradesTab = ({
             {(period === 5 ||
                period === 6 ||
                (classInfo.category.name === "Kinder" && period === 4)) && (
-               <button className="btn btn-secondary" onClick={setToggleDate}>
+               <button
+                  className="btn btn-secondary"
+                  type="button"
+                  onClick={setToggleDate}
+               >
                   <i className="fas fa-graduation-cap"></i>
                </button>
             )}
          </div>
          {gradePlus && (
-            <div className="form smaller pt-5">
+            <form className="form smaller pt-5">
                <div className="border">
                   <div className="form-group">
                      <select
@@ -392,8 +407,8 @@ const GradesTab = ({
                         <i className="fas fa-plus"></i>
                         <span className="hide-md">&nbsp; Agregar</span>
                      </button>
-                     {(userLogged.type === "Administrador" ||
-                        userLogged.type === "Admin/Profesor") && (
+                     {(userLogged.type === "admin" ||
+                        userLogged.type === "admin&teacher") && (
                         <Link
                            to="/edit-gradetypes"
                            onClick={() => {
@@ -408,7 +423,7 @@ const GradesTab = ({
                      )}
                   </div>
                </div>
-            </div>
+            </form>
          )}
       </>
    );

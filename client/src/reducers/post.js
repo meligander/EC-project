@@ -5,6 +5,9 @@ import {
    COMMENT_ADDED,
    COMMENT_DELETED,
    LIKES_UPDATED,
+   POST_SEEN,
+   UNSEENPOSTS_CHANGED,
+   ALLUNSEENPOSTS_CHANGED,
    POSTS_CLEARED,
    POST_ERROR,
 } from "../actions/types";
@@ -12,6 +15,8 @@ import {
 const initialState = {
    posts: [],
    loading: true,
+   unseenPosts: 0,
+   allUnseenPosts: 0,
    error: {},
 };
 
@@ -50,11 +55,32 @@ export default function (state = initialState, action) {
       case COMMENT_DELETED:
          return {
             ...state,
-            posts: state.posts.map((post) => {
-               if (payload._id === post._id) return payload;
-               else return post;
-            }),
+            posts: state.posts.map((post) =>
+               post._id === payload.post_id
+                  ? { ...post, comments: payload.comments }
+                  : post
+            ),
             loading: false,
+         };
+      case POST_SEEN:
+         return {
+            ...state,
+            posts: state.posts.map((post) =>
+               post._id === payload.post_id
+                  ? { ...post, seenArray: payload.seenArray }
+                  : post
+            ),
+            loading: false,
+         };
+      case UNSEENPOSTS_CHANGED:
+         return {
+            ...state,
+            unseenPosts: payload,
+         };
+      case ALLUNSEENPOSTS_CHANGED:
+         return {
+            ...state,
+            allUnseenPosts: payload,
          };
       case POSTS_CLEARED:
          return initialState;

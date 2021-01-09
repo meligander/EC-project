@@ -7,9 +7,9 @@ import { loadClass } from "../../../actions/class";
 import { loadAttendances } from "../../../actions/attendance";
 
 import AttendanceTab from "./tabs/AttendanceTab";
-import ClassInfo from "../../sharedComp/ClassInfo";
+import ClassInfo from "../sharedComp/ClassInfo";
 import Loading from "../../modal/Loading";
-import Tabs from "../../sharedComp/Tabs";
+import Tabs from "../sharedComp/Tabs";
 
 const Attendance = ({
    match,

@@ -28,16 +28,16 @@ export default function (state = initialState, action) {
       case DATES_DELETED:
          return {
             ...state,
-            attendances: payload,
             loading: false,
+            attendances: payload,
             error: {},
          };
 
       case STUDENTATTENDANCES_LOADED:
          return {
             ...state,
-            studentAttendances: payload,
             loadingStudentAttendances: false,
+            studentAttendances: payload,
             error: {},
          };
       case ATTENDANCES_UPDATED:
@@ -47,8 +47,8 @@ export default function (state = initialState, action) {
       case ATTENDANCES_ERROR:
          return {
             ...state,
-            studentAttendances: [],
             loadingStudentAttendances: false,
+            studentAttendances: [],
             error: payload,
          };
       default:

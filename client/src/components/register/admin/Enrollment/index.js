@@ -10,9 +10,9 @@ import {
    loadEnrollment,
    clearEnrollments,
 } from "../../../../actions/enrollment";
-import { clearSearch } from "../../../../actions/user";
+import { clearSearch, clearProfile } from "../../../../actions/user";
 
-import StudentSearch from "../../../sharedComp/search/StudentSearch";
+import StudentSearch from "../../sharedComp/search/StudentSearch";
 import Loading from "../../../modal/Loading";
 import Confirm from "../../../modal/Confirm";
 
@@ -24,6 +24,7 @@ const Enrollment = ({
    loadEnrollment,
    clearEnrollments,
    clearSearch,
+   clearProfile,
    auth: { userLogged },
    categories,
    enrollments: { enrollment, loading },
@@ -44,12 +45,18 @@ const Enrollment = ({
          name: "",
       },
       enrollmentValue: 0,
+      hideSearch: false,
       toggleModal: false,
    });
 
-   const { toggleModal, enrollmentValue, selectedStudent } = otherValues;
+   const {
+      toggleModal,
+      enrollmentValue,
+      selectedStudent,
+      hideSearch,
+   } = otherValues;
 
-   const { student, year, category, currentMonth } = formData;
+   const { year, category, currentMonth } = formData;
 
    const enroll_id = match.params.enrollment_id;
 
@@ -100,6 +107,10 @@ const Enrollment = ({
          student: selectedStudent._id,
       });
       clearSearch();
+      setOtherValues({
+         ...otherValues,
+         hideSearch: true,
+      });
    };
 
    const onChange = (e) => {
@@ -132,6 +143,18 @@ const Enrollment = ({
          toggleModal: !toggleModal,
       });
    };
+
+   const restore = () => {
+      setOtherValues({
+         ...otherValues,
+         hideSearch: false,
+         selectedStudent: {
+            _id: "",
+            name: "",
+         },
+      });
+   };
+
    return (
       <>
          {(!loading || !enroll_id) && !categories.loading ? (
@@ -163,19 +186,36 @@ const Enrollment = ({
                   </div>
                )}
                <form className="form" onSubmit={setToggle}>
-                  {!enroll_id && (
+                  {!enroll_id && !hideSearch && (
                      <StudentSearch
                         selectStudent={selectStudent}
                         selectedStudent={selectedStudent}
                         actionForSelected={addStudent}
-                        typeSearch="Enrollment"
+                        typeSearch="enrollment"
                      />
                   )}
                   <p className={`heading-tertiary ${!enroll_id && "mt-3"}`}>
-                     Alumno:{" "}
-                     <span className="text-secondary">
-                        {student !== "" && selectedStudent.name}
-                     </span>
+                     <span className="text-dark">Alumno: </span> &nbsp;
+                     <Link
+                        to={`/dashboard/${selectedStudent._id}`}
+                        className="text-secondary"
+                        onClick={() => {
+                           clearProfile();
+                           window.scroll(0, 0);
+                        }}
+                     >
+                        {selectedStudent.name}
+                     </Link>
+                     &nbsp;
+                     {selectedStudent._id !== "" && (
+                        <button
+                           className="btn-cancel"
+                           type="button"
+                           onClick={restore}
+                        >
+                           <i className="fas fa-times"></i>
+                        </button>
+                     )}
                   </p>
                   <div className="form-group mt-3">
                      <select
@@ -297,6 +337,7 @@ Enrollment.propTypes = {
    loadEnrollment: PropTypes.func.isRequired,
    clearEnrollments: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
+   clearProfile: PropTypes.func.isRequired,
    categories: PropTypes.object.isRequired,
    enrollments: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
@@ -314,4 +355,5 @@ export default connect(mapStateToProps, {
    loadEnrollment,
    clearEnrollments,
    clearSearch,
+   clearProfile,
 })(withRouter(Enrollment));
