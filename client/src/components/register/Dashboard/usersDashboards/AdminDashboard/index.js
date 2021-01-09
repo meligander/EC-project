@@ -64,8 +64,8 @@ const AdminDashboard = ({
 
       if (oneLoadInfoAdmin) {
          if (yearEnrollments.year === "") getYearEnrollments();
-         if (activeUsers.activeStudents === "") getActiveUsers("Alumno");
-         if (activeUsers.activeTeachers === "") getActiveUsers("Profesor");
+         if (activeUsers.activeStudents === "") getActiveUsers("student");
+         if (activeUsers.activeTeachers === "") getActiveUsers("teacher");
          if (totalDebt === "") getTotalDebt();
          if (activeClasses === "") getActiveClasses();
          if (loading || !register) loadRegister();
@@ -120,6 +120,33 @@ const AdminDashboard = ({
                         </li>
                         <li className="side-nav-item">
                            <Link
+                              to="/installments/0"
+                              onClick={() => {
+                                 clearSearch();
+                                 clearInstallments();
+                                 window.scroll(0, 0);
+                              }}
+                              className="side-nav-link"
+                           >
+                              <i className="far fa-calendar-alt side-nav-icon"></i>
+                              <span className="hide-sm"> Cuotas</span>
+                           </Link>
+                        </li>
+                        <li className="side-nav-item">
+                           <Link
+                              to="/categories"
+                              onClick={() => {
+                                 clearCategories();
+                                 window.scroll(0, 0);
+                              }}
+                              className="side-nav-link"
+                           >
+                              <i className="fas fa-layer-group side-nav-icon"></i>
+                              <span className="hide-sm"> Categorías</span>
+                           </Link>
+                        </li>
+                        <li className="side-nav-item">
+                           <Link
                               className="side-nav-link"
                               to="/cashregister-info"
                               onClick={() => {
@@ -139,7 +166,7 @@ const AdminDashboard = ({
                         <i className="fas fa-calendar-day"></i> &nbsp;
                         <Moment format="LLLL" locale="es" date={dateR} />
                      </h3>
-                     <div className="register-info-money my-5 text-center">
+                     <div className="register-info-money my-5 pt-2 text-center">
                         <p className=" heading-tertiary">
                            <span className="text-dark">Ingresos: </span>$
                            {register && register.income && register.temporary
@@ -173,20 +200,6 @@ const AdminDashboard = ({
                         </li>
                         <li className="side-nav-item">
                            <Link
-                              to="/installments/0"
-                              onClick={() => {
-                                 clearSearch();
-                                 clearInstallments();
-                                 window.scroll(0, 0);
-                              }}
-                              className="side-nav-link"
-                           >
-                              <i className="far fa-calendar-alt side-nav-icon"></i>
-                              <span className="hide-sm"> Cuotas</span>
-                           </Link>
-                        </li>
-                        <li className="side-nav-item">
-                           <Link
                               to="/classes"
                               onClick={() => {
                                  clearClasses();
@@ -211,19 +224,7 @@ const AdminDashboard = ({
                               <span className="hide-sm"> Inscripción</span>
                            </Link>
                         </li>
-                        <li className="side-nav-item">
-                           <Link
-                              to="/categories"
-                              onClick={() => {
-                                 clearCategories();
-                                 window.scroll(0, 0);
-                              }}
-                              className="side-nav-link"
-                           >
-                              <i className="fas fa-layer-group side-nav-icon"></i>
-                              <span className="hide-sm"> Categorías</span>
-                           </Link>
-                        </li>
+
                         <li className="side-nav-item">
                            <Link
                               to="/mention-list"
@@ -244,7 +245,7 @@ const AdminDashboard = ({
                         <i className="fas fa-user-cog"></i>&nbsp; Administración
                         de Usuarios
                      </h3>
-                     <div className="text-center my-4 py-3">
+                     <div className="text-center mt-4">
                         <p className="heading-tertiary">
                            <span className="text-dark">Deuda: </span>$
                            {totalDebt}

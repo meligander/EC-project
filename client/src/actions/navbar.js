@@ -1,4 +1,5 @@
 import { logOut } from "./auth";
+import { clearProfile } from "./user";
 
 import { MENU_TOGGLED, PAGE_CHANGED } from "./types";
 
@@ -23,5 +24,6 @@ export const changePage = (page) => (dispatch) => {
 
 export const logOutAndToggle = () => (dispatch) => {
    dispatch(changePageAndMenu("login"));
+   dispatch(clearProfile(true));
    dispatch(logOut());
 };

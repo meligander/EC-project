@@ -10,8 +10,8 @@ import {
 } from "../../../../../../../actions/class";
 import { clearProfile } from "../../../../../../../actions/user";
 
-import ChosenChildrenTable from "../../../../../../tables/ChosenChildrenTable";
 import Confirm from "../../../../../../modal/Confirm";
+import StudentTable from "../../../../../sharedComp/tables/StudentTable";
 
 const NewClassTab = ({
    history,
@@ -259,10 +259,12 @@ const NewClassTab = ({
             {!loading && classInfo.students ? (
                <>
                   {classInfo.students.length > 0 ? (
-                     <ChosenChildrenTable
-                        children={classInfo.students}
-                        deleteChild={deleteChild}
+                     <StudentTable
+                        users={classInfo.students}
                         clearProfile={clearProfile}
+                        loadingUsers={true}
+                        actionWChild={deleteChild}
+                        type="chosen-child"
                      />
                   ) : (
                      <p className="text-secondary paragraph">

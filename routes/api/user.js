@@ -41,13 +41,11 @@ router.get("/", async (req, res) => {
                lastname: { $regex: `.*${req.query.lastname}.*`, $options: "i" },
             }),
          };
-
          if (req.query.type) {
             switch (req.query.type) {
-               case "Alumno":
+               case "student":
                   search = false;
                   const classroom = req.query.classroom;
-
                   if (req.query.category) {
                      const date = new Date();
                      const enrollments = await Enrollment.find({
@@ -130,7 +128,7 @@ router.get("/", async (req, res) => {
                      }
                   }
                   break;
-               case "Tutor":
+               case "guardian":
                   const name = req.query.studentname;
                   const lastname = req.query.studentlastname;
 
@@ -167,21 +165,20 @@ router.get("/", async (req, res) => {
                      }
                   }
                   break;
-               case "Secretaria":
-               case "Administrador":
+               case "admin":
                   filter.type = {
-                     $in: ["Administrador", "Secretaria", "Admin/Profesor"],
+                     $in: ["admin", "secretary", "admin&teacher"],
                   };
                   break;
-               case "Profesor":
-                  filter.type = { $in: ["Profesor", "Admin/Profesor"] };
+               case "teacher":
+                  filter.type = { $in: ["teacher", "admin&teacher"] };
                   break;
-               case "Alumno y Tutor":
-                  filter.type = { $in: ["Alumno", "Tutor"] };
+               case "guardian/student":
+                  filter.type = { $in: ["student", "guardian"] };
                   break;
-               case "Team":
+               case "team":
                   filter.type = {
-                     $in: ["Admin/Profesor", "Profesor", "Secretaria"],
+                     $in: ["admin&teacher", "teacher", "secretary"],
                   };
                   break;
                default:
@@ -263,7 +260,7 @@ router.get("/tutor/:id", auth, async (req, res) => {
 router.get("/register/number", [auth, adminAuth], async (req, res) => {
    try {
       let studentnumber = 1;
-      const number = await User.find({ type: "Alumno" })
+      const number = await User.find({ type: "student" })
          .sort({ $natural: -1 })
          .limit(1);
 
@@ -349,7 +346,7 @@ router.post(
                   .json({ msg: "Ya existe un usuario con ese mail" });
          }
 
-         const number = await User.find({ type: "Alumno" })
+         const number = await User.find({ type: "student" })
             .sort({ $natural: -1 })
             .limit(1);
 
@@ -381,13 +378,13 @@ router.post(
             description,
          };
 
-         if (type === "Alumno") {
+         if (type === "student") {
             data = {
                ...data,
                studentnumber,
             };
          }
-         if (type === "Tutor") {
+         if (type === "guardian") {
             let childrenList = [];
             for (let x = 0; x < children.length; x++) {
                childrenList.push(children[x]._id);
@@ -775,7 +772,7 @@ function deletePictures(img) {
 
 async function inactivateUser(user_id, type, completeDeletion) {
    switch (type) {
-      case "Alumno":
+      case "student":
          const date = new Date();
          const month = date.getMonth() + 1;
          const year = date.getFullYear();
@@ -863,7 +860,7 @@ async function inactivateUser(user_id, type, completeDeletion) {
          }
 
          break;
-      case "Profesor":
+      case "teacher":
          const classes = await Class.find({ teacher: user_id });
 
          for (let x = 0; x < classes.length; x++) {

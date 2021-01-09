@@ -241,6 +241,7 @@ const EditInstallment = ({
                      </button>
                      {edit && (
                         <button
+                           type="button"
                            onClick={setToggleDelete}
                            className="btn btn-danger"
                         >

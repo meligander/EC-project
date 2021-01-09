@@ -73,7 +73,7 @@ const EmployeeInfo = ({
                Localidad de Nacimiento
             </label>
          </div>
-         {type === "Profesor" && (
+         {type === "teacher" && (
             <>
                <div className="form-group">
                   <input

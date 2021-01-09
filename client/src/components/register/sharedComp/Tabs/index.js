@@ -29,6 +29,7 @@ const Tabs = ({ tablist, panellist }) => {
          <div className="tab-header">
             {tablist.map((tab, index) => (
                <button
+                  type="button"
                   className="tab-header-btn"
                   key={index}
                   onClick={() => changeActive(index)}

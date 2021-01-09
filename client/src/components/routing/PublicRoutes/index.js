@@ -3,27 +3,22 @@ import { Route, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { clearProfile } from "../../../actions/user";
-
 const PublicRoutes = ({
    component: Component,
    auth: { isAuthenticated, userLogged },
-   clearProfile,
    path,
 }) => {
    if (isAuthenticated) {
-      clearProfile();
       return <Redirect to={`/dashboard/${userLogged._id}`} />;
    } else return <Route exact path={path} component={Component} />;
 };
 
 PublicRoutes.propTypes = {
    auth: PropTypes.object.isRequired,
-   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    auth: state.auth,
 });
 
-export default connect(mapStateToProps, { clearProfile })(PublicRoutes);
+export default connect(mapStateToProps)(PublicRoutes);

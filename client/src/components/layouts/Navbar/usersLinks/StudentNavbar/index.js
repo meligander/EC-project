@@ -8,23 +8,20 @@ import {
    changePage,
    changePageAndMenu,
 } from "../../../../../actions/navbar";
-import { loadEnrollments } from "../../../../../actions/enrollment";
 import { clearProfile } from "../../../../../actions/user";
-import { clearClass } from "../../../../../actions/class";
 import { clearPosts } from "../../../../../actions/post";
 
 const StudentNavbar = ({
+   location,
    navbar: { showMenu, currentNav },
-   logOutAndToggle,
    auth: { userLogged },
-   enrollments: { enrollments, loadingEnrollments },
+   classes: { classInfo, loading },
+   posts: { unseenPosts },
+   clearPosts,
+   clearProfile,
    changePage,
    changePageAndMenu,
-   clearPosts,
-   clearClass,
-   clearProfile,
-   loadEnrollments,
-   location,
+   logOutAndToggle,
 }) => {
    const string = location.pathname.substring(1, location.pathname.length);
    const path =
@@ -37,16 +34,11 @@ const StudentNavbar = ({
    }
 
    useEffect(() => {
-      if (loadingEnrollments) {
-         const date = new Date();
-         loadEnrollments({ student: userLogged._id, year: date.getFullYear() });
-      }
-
       switch (path) {
          case "chat":
             changePage("chat");
             break;
-         case "classinfo":
+         case "class":
             changePage("classmates");
             break;
          case "dashboard":
@@ -60,18 +52,11 @@ const StudentNavbar = ({
             changePage("index");
             break;
       }
-   }, [
-      changePage,
-      userLogged._id,
-      id,
-      path,
-      loadEnrollments,
-      loadingEnrollments,
-   ]);
+   }, [changePage, userLogged._id, id, path]);
 
    return (
       <>
-         {!loadingEnrollments && (
+         {!loading && (
             <ul className={!showMenu ? "menu-nav" : "menu-nav show"}>
                <li
                   className={
@@ -87,7 +72,7 @@ const StudentNavbar = ({
                      to={`/dashboard/${userLogged._id}`}
                      onClick={() => {
                         window.scroll(0, 0);
-                        clearProfile();
+                        clearProfile(false);
                         changePageAndMenu("index");
                      }}
                   >
@@ -95,7 +80,7 @@ const StudentNavbar = ({
                      <span className="hide-md">&nbsp; Página Principal</span>
                   </Link>
                </li>
-               {enrollments[0] && enrollments[0].classroom._id && (
+               {classInfo && (
                   <>
                      <li
                         className={
@@ -108,10 +93,9 @@ const StudentNavbar = ({
                      >
                         <Link
                            className="nav-link"
-                           to={`/class/${enrollments[0].classroom._id}`}
+                           to={`/class/${classInfo._id}`}
                            onClick={() => {
                               window.scroll(0, 0);
-                              clearClass();
                               changePageAndMenu("classmates");
                            }}
                         >
@@ -130,15 +114,25 @@ const StudentNavbar = ({
                      >
                         <Link
                            className="nav-link"
-                           to={`/chat/${enrollments[0].classroom._id}`}
+                           to={`/chat/${classInfo._id}`}
                            onClick={() => {
                               window.scroll(0, 0);
                               clearPosts();
-                              clearClass();
                               changePageAndMenu("chat");
                            }}
                         >
-                           <i className="far fa-comments"></i>
+                           <div className="notification">
+                              <i className="far fa-comments"></i>
+                              {unseenPosts > 0 && (
+                                 <span
+                                    className={`post-notification ${
+                                       currentNav === "chat" ? "white" : "light"
+                                    }`}
+                                 >
+                                    {unseenPosts}
+                                 </span>
+                              )}
+                           </div>
                            <span className="hide-md">&nbsp; Posteo Grupal</span>
                         </Link>
                      </li>
@@ -167,19 +161,19 @@ const StudentNavbar = ({
 StudentNavbar.propTypes = {
    navbar: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
-   enrollments: PropTypes.object.isRequired,
+   classes: PropTypes.object.isRequired,
+   posts: PropTypes.object.isRequired,
    logOutAndToggle: PropTypes.func.isRequired,
    changePage: PropTypes.func.isRequired,
    changePageAndMenu: PropTypes.func.isRequired,
-   clearClass: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
-   loadEnrollments: PropTypes.func.isRequired,
    clearPosts: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    navbar: state.navbar,
-   enrollments: state.enrollments,
+   classes: state.classes,
+   posts: state.posts,
    auth: state.auth,
 });
 
@@ -187,8 +181,6 @@ export default connect(mapStateToProps, {
    logOutAndToggle,
    changePage,
    changePageAndMenu,
-   clearProfile,
-   loadEnrollments,
    clearPosts,
-   clearClass,
+   clearProfile,
 })(withRouter(StudentNavbar));

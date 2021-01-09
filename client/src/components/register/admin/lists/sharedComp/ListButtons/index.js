@@ -12,6 +12,7 @@ const ListButtons = ({ changePage, items, page, pdfGeneratorSave }) => {
             <div className="btn-list btn-ctr">
                {page !== 0 && (
                   <button
+                     type="button"
                      onClick={() => changePage(page - 1)}
                      className="btn btn-primary"
                   >
@@ -21,6 +22,7 @@ const ListButtons = ({ changePage, items, page, pdfGeneratorSave }) => {
 
                {sub >= 10 && (
                   <button
+                     type="button"
                      onClick={() => changePage(page + 1)}
                      className="btn btn-primary"
                   >
@@ -31,7 +33,11 @@ const ListButtons = ({ changePage, items, page, pdfGeneratorSave }) => {
          )}
 
          <div className="btn-right">
-            <button className="btn btn-secondary" onClick={pdfGeneratorSave}>
+            <button
+               type="button"
+               className="btn btn-secondary"
+               onClick={pdfGeneratorSave}
+            >
                <i className="fas fa-file-pdf"></i>
             </button>
          </div>

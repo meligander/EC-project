@@ -6,7 +6,7 @@ import PropTypes from "prop-types";
 import { loadRegister, allowNewRegister } from "../../../../actions/register";
 import { loadExpenceTypes } from "../../../../actions/expence";
 
-import Tabs from "../../../sharedComp/Tabs";
+import Tabs from "../../sharedComp/Tabs";
 import RegisterTab from "./tabs/RegisterTab";
 import IncomeExpenceTab from "./tabs/IncomeExpenceTab";
 

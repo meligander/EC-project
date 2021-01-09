@@ -94,10 +94,10 @@ router.get("/:class_id", auth, async (req, res) => {
    }
 });
 
-//@route    GET api/class/user/:id
-//@desc     Get a user's class
+//@route    GET api/class/student/:id
+//@desc     Get a student's class
 //@access   Private
-router.get("/user/:id", auth, async (req, res) => {
+router.get("/student/:id", auth, async (req, res) => {
    try {
       const date = new Date();
 

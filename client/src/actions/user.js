@@ -16,7 +16,7 @@ import {
    USERSBK_LOADED,
    STUDENTNUMBER_LOADED,
    ACTIVEUSERS_LOADED,
-   USERSTYPE_CHANGED,
+   USERSEARCHTYPE_CHANGED,
    REGISTER_SUCCESS,
    USER_UPDATED,
    SEARCH_CLEARED,
@@ -77,12 +77,12 @@ export const getActiveUsers = (type) => async (dispatch) => {
       let res;
       let payload = {};
 
-      if (type === "Alumno") {
-         res = await axios.get("/api/user?active=true&type=Alumno");
+      if (type === "student") {
+         res = await axios.get("/api/user?active=true&type=student");
          payload.type = "activeStudents";
          payload.info = res.data.length;
       } else {
-         res = await axios.get("/api/user?active=true&type=Profesor");
+         res = await axios.get("/api/user?active=true&type=teacher");
          payload.type = "activeTeachers";
          payload.info = res.data.length;
       }
@@ -136,7 +136,7 @@ export const loadUsers = (
 
       if (search) {
          dispatch({
-            type: USERSTYPE_CHANGED,
+            type: USERSEARCHTYPE_CHANGED,
             payload: filterData.type,
          });
       }
@@ -164,12 +164,12 @@ export const loadRelatives = (user_id) => async (dispatch) => {
       let res = await axios.get(`/api/user/tutor/${user_id}`);
 
       dispatch({
-         type: USERS_LOADED,
+         type: USERSBK_LOADED,
          payload: res.data,
       });
    } catch (err) {
       dispatch({
-         type: USERS_ERROR,
+         type: USERSBK_ERROR,
          payload: {
             type: err.response.statusText,
             status: err.response.status,
@@ -309,10 +309,11 @@ export const deleteUser = (user, history, userLogged_id) => async (
    try {
       await axios.delete(`/api/user/${user._id}/${user.type}`);
 
-      dispatch(clearProfile());
-
       if (user._id === userLogged_id) dispatch(logOutAndToggle());
-      else history.push(`/dashboard/${userLogged_id}`);
+      else {
+         dispatch(clearProfile());
+         history.push(`/dashboard/${userLogged_id}`);
+      }
 
       dispatch({
          type: USER_DELETED,
@@ -338,11 +339,11 @@ export const deleteUser = (user, history, userLogged_id) => async (
    if (user._id === userLogged_id) dispatch(updateLoadingSpinner(false));
 };
 
-export const userPDF = (users, usersType) => async (dispatch) => {
+export const userPDF = (users, userSearchType) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.post("/api/user/create-list", { users, usersType });
+      await axios.post("/api/user/create-list", { users, userSearchType });
 
       const pdf = await axios.get("/api/user/lista/fetch-list", {
          responseType: "blob",
@@ -352,10 +353,26 @@ export const userPDF = (users, usersType) => async (dispatch) => {
 
       const date = moment().format("DD-MM-YY");
 
-      saveAs(
-         pdfBlob,
-         `${usersType === "Alumno" ? "Alumnos" : usersType + "es"} ${date}.pdf`
-      );
+      let type = "";
+
+      switch (userSearchType) {
+         case "student":
+            type = "Alumno";
+            break;
+         case "guardian":
+            type = "Tutores";
+            break;
+         case "teacher":
+            type = "Profesores";
+            break;
+         case "admin":
+            type = "Administradores";
+            break;
+         default:
+            break;
+      }
+
+      saveAs(pdfBlob, `${type} ${date}.pdf`);
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
@@ -376,14 +393,14 @@ export const userPDF = (users, usersType) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const clearProfile = () => (dispatch) => {
+export const clearProfile = (all = true) => (dispatch) => {
    dispatch({
       type: USER_CLEARED,
    });
    dispatch(clearGrades());
    dispatch(clearInstallments());
-   dispatch(clearAttendances);
-   dispatch(clearClass());
+   dispatch(clearAttendances());
+   if (all) dispatch(clearClass());
 };
 
 export const clearUser = () => (dispatch) => {

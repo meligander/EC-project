@@ -14,7 +14,7 @@ import { clearProfile } from "../../../../../actions/user";
 
 import Loading from "../../../../modal/Loading";
 import ListButtons from "../sharedComp/ListButtons";
-import NameField from "../../../../sharedComp/NameField";
+import NameField from "../../../sharedComp/NameField";
 
 const InstallmentList = ({
    installments: {

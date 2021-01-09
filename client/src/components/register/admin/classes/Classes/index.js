@@ -6,7 +6,6 @@ import PropTypes from "prop-types";
 import {
    loadClasses,
    clearClass,
-   clearClasses,
    classPDF,
 } from "../../../../../actions/class";
 import { loadCategories } from "../../../../../actions/category";
@@ -16,7 +15,7 @@ import {
    clearProfile,
 } from "../../../../../actions/user";
 
-import ClassesTable from "../../../../tables/ClassesTable";
+import ClassesTable from "../../../sharedComp/tables/ClassesTable";
 import Loading from "../../../../modal/Loading";
 
 const Classes = ({
@@ -29,10 +28,11 @@ const Classes = ({
    loadCategories,
    classPDF,
    clearClass,
-   clearClasses,
    clearProfile,
    clearSearch,
 }) => {
+   const isTeacher = userLogged.type === "teacher";
+
    const [otherValues, setOtherValues] = useState({
       condition: true,
       oneLoad: true,
@@ -48,22 +48,15 @@ const Classes = ({
    const { teacher, category } = filterForm;
 
    useEffect(() => {
-      if (userLogged.type === "Profesor") {
-         if (oneLoad) {
-            loadClasses({ teacher: userLogged._id });
-            setOtherValues((prev) => ({
-               ...prev,
-               oneLoad: false,
-            }));
-         } else
-            setOtherValues((prev) => ({
-               ...prev,
-               condition: !loadingClasses,
-            }));
+      if (isTeacher) {
+         setOtherValues((prev) => ({
+            ...prev,
+            condition: !loadingClasses,
+         }));
       } else {
          if (oneLoad) {
             loadClasses({});
-            loadUsers({ type: "Profesor", active: true });
+            loadUsers({ type: "teacher", active: true });
             loadCategories();
 
             setOtherValues((prev) => ({
@@ -83,6 +76,7 @@ const Classes = ({
       loadCategories,
       loadClasses,
       userLogged,
+      isTeacher,
       oneLoad,
       loadingClasses,
       categories.loading,
@@ -110,7 +104,7 @@ const Classes = ({
          {condition ? (
             <>
                <h1>Clases</h1>
-               {userLogged.type !== "Profesor" && (
+               {!isTeacher && (
                   <form className="form" onSubmit={onSearch}>
                      <div className="form-group">
                         <select
@@ -122,9 +116,9 @@ const Classes = ({
                         >
                            <option value="">* Seleccione Profesor</option>
                            {users.users.length > 0 &&
-                              users.users.map((teacher) => (
-                                 <option key={teacher._id} value={teacher._id}>
-                                    {teacher.lastname + " " + teacher.name}
+                              users.users.map((user) => (
+                                 <option key={user._id} value={user._id}>
+                                    {user.lastname + " " + user.name}
                                  </option>
                               ))}
                         </select>
@@ -176,19 +170,19 @@ const Classes = ({
                <div className="pt-4">
                   <ClassesTable
                      classes={classes}
-                     all={userLogged.type !== "Profesor" ? true : false}
+                     all={!isTeacher}
                      clearClass={clearClass}
                      clearProfile={clearProfile}
                   />
                </div>
 
                <div className="btn-right">
-                  {userLogged.type !== "Profesor" && (
+                  {!isTeacher && (
                      <Link
                         to={users.users.length !== 0 ? "/register-class" : "#"}
                         onClick={() => {
                            window.scroll(0, 0);
-                           clearClasses();
+                           clearClass();
                            clearSearch();
                         }}
                         className={`btn ${
@@ -201,6 +195,7 @@ const Classes = ({
                      </Link>
                   )}
                   <button
+                     type="button"
                      className="btn btn-secondary"
                      onClick={pdfGeneratorSave}
                   >
@@ -226,7 +221,6 @@ Classes.propTypes = {
    classPDF: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
    clearClass: PropTypes.func.isRequired,
-   clearClasses: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
 };
 
@@ -243,7 +237,6 @@ export default connect(mapStateToProps, {
    loadUsers,
    classPDF,
    clearClass,
-   clearClasses,
    clearSearch,
    clearProfile,
 })(Classes);

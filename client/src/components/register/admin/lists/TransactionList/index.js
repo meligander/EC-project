@@ -84,15 +84,19 @@ const TransactionList = ({
    const type = (transaction) => {
       if (transaction.expencetype) {
          let trClass = "";
+         let nameType = "";
          switch (transaction.expencetype.type) {
-            case "Ingreso Especial":
+            case "special-income":
                trClass = "bg-refund";
+               nameType = "Ingreso Especial";
                break;
-            case "Retiro":
+            case "withdrawal":
                trClass = "bg-withdrawal";
+               nameType = "Retiro";
                break;
-            case "Gasto":
+            case "expence":
                trClass = "bg-expence";
+               nameType = "Gasto";
                break;
             default:
                break;
@@ -103,7 +107,7 @@ const TransactionList = ({
                <td>
                   <Moment date={transaction.date} format="DD/MM/YY" />
                </td>
-               <td>{`${transaction.expencetype.type} - ${transaction.expencetype.name}`}</td>
+               <td>{`${nameType} - ${transaction.expencetype.name}`}</td>
                <td>${transaction.value}</td>
                <td>{transaction.description}</td>
                <td>
@@ -180,12 +184,10 @@ const TransactionList = ({
                         <option value="">
                            Seleccione el tipo de movimiento
                         </option>
-                        <option value="Ingreso">Ingreso</option>
-                        <option value="Gasto">Gasto</option>
-                        <option value="Retiro">Retiro</option>
-                        <option value="Ingreso Especial">
-                           Ingreso Especial
-                        </option>
+                        <option value="income">Ingreso</option>
+                        <option value="expence">Gasto</option>
+                        <option value="withdrawal">Retiro</option>
+                        <option value="special-income">Ingreso Especial</option>
                      </select>
                      <label
                         htmlFor="transactionType"

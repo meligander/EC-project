@@ -5,8 +5,8 @@ import PropTypes from "prop-types";
 import { clearSearch, clearProfile } from "../../../../../../../actions/user";
 import { setAlert } from "../../../../../../../actions/alert";
 
-import ChosenChildrenTable from "../../../../../../tables/ChosenChildrenTable";
-import StudentSearch from "../../../../../../sharedComp/search/StudentSearch";
+import StudentSearch from "../../../../../sharedComp/search/StudentSearch";
+import StudentTable from "../../../../../sharedComp/tables/StudentTable";
 
 const TutorInfo = ({
    setChildren,
@@ -58,17 +58,19 @@ const TutorInfo = ({
                actionForSelected={addToList}
                selectedStudent={selectedStudent}
                selectStudent={selectStudent}
-               typeSearch="Student"
+               typeSearch="student"
             />
          )}
          <h3 className="heading-tertiary text-primary">
             Lista de Alumnos a Cargo
          </h3>
          {children.length > 0 && (
-            <ChosenChildrenTable
-               children={children}
-               deleteChild={deleteChild}
+            <StudentTable
+               users={children}
                clearProfile={clearProfile}
+               loadingUsers={true}
+               actionWChild={deleteChild}
+               type="chosen-child"
             />
          )}
       </div>

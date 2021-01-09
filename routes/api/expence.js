@@ -29,7 +29,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
       } else {
          const filter = req.query;
 
-         if (!filter.transactionType || filter.transactionType === "Ingreso") {
+         if (!filter.transactionType || filter.transactionType === "income") {
             invoices = await Invoice.find({
                ...((filter.startDate || filter.endDate) && {
                   date: {
@@ -43,7 +43,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
                }),
             }).populate("user");
          }
-         if (filter.transactionType !== "Ingreso") {
+         if (filter.transactionType !== "income") {
             expences = await Expence.find({
                ...((filter.startDate || filter.endDate) && {
                   date: {
@@ -60,7 +60,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
             });
          }
 
-         if (filter.transactionType && filter.transactionType !== "Ingreso") {
+         if (filter.transactionType && filter.transactionType !== "income") {
             let filteredExpences = [];
             for (let x = 0; x < expences.length; x++) {
                if (expences[x].expencetype.type === filter.transactionType)
@@ -135,7 +135,10 @@ router.post(
                msg,
             });
 
-         if (expencetypeinfo.type !== "Ingreso" && last.registermoney < value)
+         if (
+            expencetypeinfo.type !== "special-income" &&
+            last.registermoney < value
+         )
             return res.status(400).json({
                msg: "No se puede utilizar más dinero del que hay en caja",
             });
@@ -163,19 +166,19 @@ router.post(
             await Register.findOneAndUpdate(
                { _id: last.id },
                {
-                  ...(expencetypeinfo.type === "Gasto" && {
+                  ...(expencetypeinfo.type === "expence" && {
                      expence: !last.expence
                         ? value
                         : Math.floor((last.expence + value) * 100) / 100,
                      registermoney: minusvalue,
                   }),
-                  ...(expencetypeinfo.type === "Ingreso" && {
+                  ...(expencetypeinfo.type === "special-income" && {
                      cheatincome: !last.cheatincome
                         ? value
                         : Math.floor((last.cheatincome + value) * 100) / 100,
                      registermoney: plusvalue,
                   }),
-                  ...(expencetypeinfo.type === "Retiro" && {
+                  ...(expencetypeinfo.type === "withdrawal" && {
                      withdrawal: !last.withdrawal
                         ? value
                         : Math.floor((last.withdrawal + value) * 100) / 100,
@@ -187,15 +190,15 @@ router.post(
             const data = {
                temporary: true,
                difference: 0,
-               ...(expencetypeinfo.type === "Gasto" && {
+               ...(expencetypeinfo.type === "expence" && {
                   expence: value,
                   registermoney: minusvalue,
                }),
-               ...(expencetypeinfo.type === "Ingreso" && {
+               ...(expencetypeinfo.type === "special-income" && {
                   cheatincome: value,
                   registermoney: plusvalue,
                }),
-               ...(expencetypeinfo.type === "Retiro" && {
+               ...(expencetypeinfo.type === "withdrawal" && {
                   withdrawal: value,
                   registermoney: minusvalue,
                }),
@@ -236,16 +239,27 @@ router.post("/create-list", (req, res) => {
          }
       }
 
+      const typeName = "";
+      if (transactions[x].expencetype) {
+         switch (transactions[x].expencetype.type) {
+            case "special-income":
+               typeName = "Ingreso Especial";
+               break;
+            case "expence":
+               typeName = "Gasto";
+               break;
+            case "withdrawal":
+               typeName = "Retiro";
+               break;
+            default:
+               break;
+         }
+      } else typeName = "Ingreso";
+
       const date =
          "<td>" + moment(transactions[x].date).format("DD/MM/YY") + "</td>";
-      const type =
-         "<td>" +
-         (transactions[x].expencetype
-            ? transactions[x].expencetype.type +
-              " - " +
-              transactions[x].expencetype.name
-            : "Ingreso") +
-         "</td>";
+
+      const type = "<td>" + typeName + "</td>";
       const value =
          "<td> $" +
          (transactions[x].expencetype
@@ -320,15 +334,15 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       await Register.findByIdAndUpdate(
          { _id: last.id },
          {
-            ...(expencetypeinfo.type === "Gasto" && {
+            ...(expencetypeinfo.type === "expence" && {
                expence: last.expence - expence.value,
                registermoney: last.registermoney + expence.value,
             }),
-            ...(expencetypeinfo.type === "Ingreso" && {
+            ...(expencetypeinfo.type === "special-income" && {
                cheatincome: last.cheatincome - expence.value,
                registermoney: last.registermoney - expence.value,
             }),
-            ...(expencetypeinfo.type === "Retiro" && {
+            ...(expencetypeinfo.type === "withdrawal" && {
                withdrawal: last.withdrawal - expence.value,
                registermoney: last.registermoney + expence.value,
             }),

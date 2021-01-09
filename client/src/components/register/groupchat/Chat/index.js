@@ -3,7 +3,12 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { loadPosts, deletePost } from "../../../../actions/post";
+import {
+   loadPosts,
+   deletePost,
+   changeUnseenPosts,
+   getUnseenPosts,
+} from "../../../../actions/post";
 import { loadClass } from "../../../../actions/class";
 
 import Loading from "../../../modal/Loading";
@@ -16,13 +21,34 @@ const Chat = ({
    loadClass,
    loadPosts,
    deletePost,
+   changeUnseenPosts,
+   getUnseenPosts,
+   auth: { userLogged },
    posts: { posts, loading },
-   classes,
+   classes: { classInfo, loading: loadingClass },
 }) => {
    useEffect(() => {
-      if (classes.loading) loadClass(match.params.class_id, true);
-      if (classes.classInfo && loading) loadPosts(match.params.class_id);
-   }, [loadPosts, loadClass, match.params.class_id, classes, loading]);
+      if (loading) {
+         loadPosts(match.params.class_id);
+         if (loadingClass) loadClass(match.params.class_id);
+      } else {
+         changeUnseenPosts(0);
+         if (
+            userLogged.type === "teacher" ||
+            userLogged.type === "admin&teacher"
+         )
+            getUnseenPosts();
+      }
+   }, [
+      loadPosts,
+      loadClass,
+      match.params.class_id,
+      loading,
+      loadingClass,
+      changeUnseenPosts,
+      userLogged,
+      getUnseenPosts,
+   ]);
 
    const [otherValues, setOtherValues] = useState({
       toggleModal: false,
@@ -47,7 +73,7 @@ const Chat = ({
       <>
          <h1 className="py-4">Posteos Grupales</h1>
 
-         {!classes.loading && !loading ? (
+         {!loadingClass && !loading ? (
             <>
                <Confirm
                   toggleModal={toggleModal}
@@ -56,11 +82,10 @@ const Chat = ({
                   text="¿Está seguro que desea eliminar la publicación?"
                />
                <p className="heading-tertiary">
-                  Bienvenido al chat de {classes.classInfo.category.name} del
-                  profesor {classes.classInfo.teacher.lastname},{" "}
-                  {classes.classInfo.teacher.name}
+                  Bienvenido al chat de {classInfo.category.name} del profesor{" "}
+                  {classInfo.teacher.lastname}, {classInfo.teacher.name}
                </p>
-               <PostForm class_id={classes.classInfo._id} />
+               <PostForm class_id={classInfo._id} />
 
                {posts.length > 0 ? (
                   posts.map((post) => (
@@ -82,18 +107,24 @@ const Chat = ({
 Chat.propTypes = {
    posts: PropTypes.object.isRequired,
    classes: PropTypes.object.isRequired,
+   auth: PropTypes.object.isRequired,
    loadClass: PropTypes.func.isRequired,
    loadPosts: PropTypes.func.isRequired,
    deletePost: PropTypes.func.isRequired,
+   getUnseenPosts: PropTypes.func.isRequired,
+   changeUnseenPosts: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    posts: state.posts,
    classes: state.classes,
+   auth: state.auth,
 });
 
 export default connect(mapStateToProps, {
    loadPosts,
    loadClass,
    deletePost,
+   getUnseenPosts,
+   changeUnseenPosts,
 })(withRouter(Chat));

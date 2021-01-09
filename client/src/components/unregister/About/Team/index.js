@@ -12,7 +12,7 @@ const Team = ({ users: { loadingUsers, users }, loadUsers }) => {
 
    useEffect(() => {
       if (loadingUsers) {
-         loadUsers({ active: true, type: "Team" });
+         loadUsers({ active: true, type: "team" });
       }
    }, [loadingUsers, loadUsers]);
 
@@ -45,6 +45,7 @@ const Team = ({ users: { loadingUsers, users }, loadUsers }) => {
                   <div className="row">
                      <div className="btns">
                         <button
+                           type="button"
                            className={`btn-icon ${
                               teamNumber === 0 ? "text-dark" : "text-primary"
                            }`}
@@ -56,6 +57,7 @@ const Team = ({ users: { loadingUsers, users }, loadUsers }) => {
                         </button>
                         <div className="show-md">
                            <button
+                              type="button"
                               className={`btn-icon ${
                                  teamNumber === users.length - 1
                                     ? "text-dark"
@@ -79,7 +81,7 @@ const Team = ({ users: { loadingUsers, users }, loadUsers }) => {
                               }
                               alt={
                                  users[teamNumber].type +
-                                 " de Villa de Merlo English Centre"
+                                 " of Villa de Merlo English Centre"
                               }
                               className="person-img"
                            />
@@ -91,9 +93,11 @@ const Team = ({ users: { loadingUsers, users }, loadUsers }) => {
                         </figure>
                         <div className="person-text">
                            <h3 className="heading-tertiary text-dark">
-                              {users[teamNumber].type === "Admin/Profesor"
+                              {users[teamNumber].type === "admin&teacher"
                                  ? "Directora y Profesora"
-                                 : users[teamNumber].type}
+                                 : users[teamNumber].type === "teacher"
+                                 ? "Profesor"
+                                 : "Secretaria"}
                            </h3>
                            <p className="paragraph">
                               {users[teamNumber].description}
@@ -102,6 +106,7 @@ const Team = ({ users: { loadingUsers, users }, loadUsers }) => {
                      </div>
                      <div className="hide-md">
                         <button
+                           type="button"
                            className={`btn-icon ${
                               teamNumber === users.length - 1
                                  ? "text-dark"

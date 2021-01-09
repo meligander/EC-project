@@ -37,7 +37,13 @@ const Post = ({
       hasNotSeen,
    } = otherValues;
 
-   const isAdmin = userLogged.type !== "Alumno" && userLogged.type !== "Tutor";
+   const isAdmin =
+      userLogged.type !== "student" && userLogged.type !== "guardian";
+
+   const canMarkSeenUser =
+      userLogged.type === "student" ||
+      userLogged.type === "teacher" ||
+      userLogged.type === "admin&teacher";
 
    useEffect(() => {
       if (oneLoad) {
@@ -51,14 +57,11 @@ const Post = ({
             }
          }
 
-         if (userLogged.type !== "Administrador") {
+         if (canMarkSeenUser) {
             let seen = false;
             let newOne = true;
             for (let x = 0; x < post.seenArray.length; x++) {
-               if (
-                  post.seenArray[x] &&
-                  post.seenArray[x].user === userLogged._id
-               ) {
+               if (post.seenArray[x].user === userLogged._id) {
                   if (post.seenArray[x].seen) seen = true;
                   else newOne = false;
                   break;
@@ -85,7 +88,7 @@ const Post = ({
             oneLoad: false,
          }));
       }
-   }, [post, userLogged, oneLoad, seenPost]);
+   }, [post, userLogged, oneLoad, canMarkSeenUser, seenPost]);
 
    const setToggleComments = () => {
       setotherValues({
@@ -125,7 +128,7 @@ const Post = ({
             to={`/dashboards/${post.user}`}
             onClick={() => {
                window.scroll(0, 0);
-               clearProfile();
+               clearProfile(userLogged.type !== "student");
             }}
          >
             <figure className="post-shape">
@@ -166,6 +169,7 @@ const Post = ({
                </p>
 
                <button
+                  type="button"
                   onClick={() => {
                      addRemoveLike(post._id);
                      setotherValues({ ...otherValues, isLiked: !isLiked });
@@ -175,6 +179,7 @@ const Post = ({
                   <i className="fas fa-heart"></i>
                </button>
                <button
+                  type="button"
                   className="btn btn-mix-secondary"
                   onClick={setToggleUsersLiked}
                >
@@ -189,6 +194,7 @@ const Post = ({
                   )}
                </button>
                <button
+                  type="button"
                   className="btn btn-light"
                   onClick={() => {
                      setToggleComments(!toggleComments);

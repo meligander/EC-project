@@ -31,9 +31,9 @@ const ChangeCredentials = ({
    const { email, password, password2 } = formData;
 
    const isAdmin =
-      userLogged.type === "Administrador" ||
-      userLogged.type === "Admin/Profesor" ||
-      userLogged.type === "Secretaria";
+      userLogged.type === "admin" ||
+      userLogged.type === "admin&teacher" ||
+      userLogged.type === "secretary";
 
    useEffect(() => {
       if (!loading)
@@ -131,7 +131,7 @@ const ChangeCredentials = ({
                      </label>
                   </div>
                   <div className="btn-right">
-                     <button className="btn btn-primary">
+                     <button type="submit" className="btn btn-primary">
                         <i className="fas fa-user-check"></i>&nbsp; Guardar
                         Cambios
                      </button>

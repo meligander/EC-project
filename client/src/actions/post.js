@@ -11,6 +11,8 @@ import {
    COMMENT_DELETED,
    LIKES_UPDATED,
    POST_SEEN,
+   UNSEENPOSTS_CHANGED,
+   ALLUNSEENPOSTS_CHANGED,
    POSTS_CLEARED,
    POST_ERROR,
 } from "./types";
@@ -18,9 +20,34 @@ import {
 //Get all posts
 export const loadPosts = (class_id) => async (dispatch) => {
    try {
-      const res = await axios.get(`/api/post/class/${class_id}`);
+      let res = await axios.get(`/api/post/class/${class_id}`);
+
       dispatch({
          type: POSTS_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      dispatch({
+         type: POST_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+   }
+};
+
+export const getUnseenPosts = (class_id = false) => async (dispatch) => {
+   try {
+      let res = [];
+      if (!class_id) {
+         res = await axios.get(`/api/post/unseen/teacher`);
+      } else {
+         res = await axios.get(`/api/post/unseen/class/${class_id}`);
+      }
+      dispatch({
+         type: !class_id ? ALLUNSEENPOSTS_CHANGED : UNSEENPOSTS_CHANGED,
          payload: res.data,
       });
    } catch (err) {
@@ -247,6 +274,13 @@ export const seenPost = (post_id, data) => async (dispatch) => {
       });
       dispatch(setAlert(msg ? msg : type, "danger", post_id));
    }
+};
+
+export const changeUnseenPosts = (count, all = false) => async (dispatch) => {
+   dispatch({
+      type: all ? ALLUNSEENPOSTS_CHANGED : UNSEENPOSTS_CHANGED,
+      payload: count,
+   });
 };
 
 export const clearPosts = () => (dispatch) => {

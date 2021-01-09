@@ -4,8 +4,50 @@ const auth = require("../../middleware/auth");
 const { check, validationResult } = require("express-validator");
 
 //Models
-const User = require("../../models/User");
 const Post = require("../../models/Post");
+const Class = require("../../models/Class");
+
+//@route    GET api/posts/unseen/teacher
+//@desc     Get the unseen posts in all the teacher's classes
+//@access   Private
+router.get("/unseen/teacher", auth, async (req, res) => {
+   try {
+      const classes = await Class.find({ teacher: req.user.id });
+
+      const classes_id = classes.map((oneClass) => oneClass._id);
+
+      const posts = await Post.find().populate({
+         path: "classroom",
+         model: "class",
+         match: {
+            _id: { $in: classes_id },
+         },
+      });
+
+      const count = countUnseenPosts(posts, req.user.id);
+
+      return res.json(count);
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server error");
+   }
+});
+
+//@route    GET api/posts/unseen/class/:class_id
+//@desc     Get the unseen posts in a class
+//@access   Private
+router.get("/unseen/class/:class_id", auth, async (req, res) => {
+   try {
+      const posts = await Post.find({ classroom: req.params.class_id });
+
+      const count = countUnseenPosts(posts, req.user.id);
+
+      return res.json(count);
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server error");
+   }
+});
 
 //@route    GET api/posts/class/:class_id
 //@desc     Get all posts made in a class
@@ -54,13 +96,9 @@ router.post(
       }
 
       try {
-         const user = await User.findById(req.user.id).select("-password");
-
          const newPost = new Post({
             text: req.body.text,
             classroom: req.params.class_id,
-            name: user.name,
-            lastname: user.lastname,
             user: req.user.id,
             seenArray: [
                {
@@ -119,11 +157,13 @@ router.post(
 
          post.comments.unshift(newComment);
 
-         post.seenArray = post.seenArray.map((seen) =>
-            seen.user === req.user.id ? seen : { user: seen.user, seen: false }
+         const newSeenArray = post.seenArray.map((userWhoSeen) =>
+            userWhoSeen.user.toString() === req.user.id
+               ? userWhoSeen
+               : { user: userWhoSeen.user, _id: userWhoSeen._id, seen: false }
          );
 
-         console.log(post);
+         post.seenArray = newSeenArray;
 
          await post.save();
 
@@ -187,10 +227,10 @@ router.put("/seen/:id", auth, async (req, res) => {
 
       let seenArray = [];
 
-      if (newOne) seenArray = [...seenArray, newSeen];
+      if (newOne) seenArray = [...post.seenArray, newSeen];
       else
-         seenArray = post.seenArray.map((seen) =>
-            seen.user === newSeen.user ? newSeen : seen
+         seenArray = post.seenArray.map((userWhoSeen) =>
+            userWhoSeen.user.toString() === req.user.id ? newSeen : userWhoSeen
          );
 
       post = await Post.findOneAndUpdate(
@@ -198,8 +238,6 @@ router.put("/seen/:id", auth, async (req, res) => {
          { seenArray },
          { new: true }
       );
-
-      console.log(post);
 
       res.json(post.seenArray);
    } catch (err) {
@@ -265,5 +303,25 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
       res.status(500).send("Server error");
    }
 });
+
+function countUnseenPosts(posts, user) {
+   let count = 0;
+
+   for (let x = 0; x < posts.length; x++) {
+      if (posts[x].classroom) {
+         let exist = false;
+         for (let y = 0; y < posts[x].seenArray.length; y++) {
+            if (posts[x].seenArray[y].user.toString() === user) {
+               exist = true;
+               if (!posts[x].seenArray[y].seen) count++;
+               break;
+            }
+         }
+         if (!exist) count++;
+      }
+   }
+
+   return count;
+}
 
 module.exports = router;

@@ -4,6 +4,8 @@ import { setAlert } from "./alert";
 import { changePage } from "./navbar";
 import { updateLoadingSpinner } from "./mixvalues";
 import { updateExpiredIntallments } from "./installment";
+import { clearProfile } from "./user";
+import { clearClasses } from "./class";
 
 import {
    USERAUTH_LOADED,
@@ -78,6 +80,8 @@ export const expireSesion = (history) => (dispatch) => {
    dispatch({
       type: STARTLOGOUT,
    });
+   dispatch(clearProfile(false));
+   dispatch(clearClasses());
    history.push("/login");
    dispatch(changePage("login"));
    dispatch({

@@ -15,6 +15,7 @@ const TeacherNavbar = ({
    location,
    navbar: { showMenu, currentNav },
    auth: { userLogged },
+   posts: { allUnseenPosts },
    logOutAndToggle,
    changePage,
    changePageAndMenu,
@@ -81,26 +82,6 @@ const TeacherNavbar = ({
             className={
                !showMenu
                   ? "nav-item"
-                  : `nav-item show ${currentNav === "classes" ? "current" : ""}`
-            }
-         >
-            <Link
-               className="nav-link"
-               to="/classes"
-               onClick={() => {
-                  window.scroll(0, 0);
-                  clearClasses();
-                  changePageAndMenu("classes");
-               }}
-            >
-               <i className="fas fa-chalkboard-teacher"></i>
-               <span className="hide-md">&nbsp; Clases</span>
-            </Link>
-         </li>
-         <li
-            className={
-               !showMenu
-                  ? "nav-item"
                   : `nav-item show ${currentNav === "search" ? "current" : ""}`
             }
          >
@@ -117,12 +98,43 @@ const TeacherNavbar = ({
                <span className="hide-md">&nbsp; Búsqueda</span>
             </Link>
          </li>
+         <li
+            className={
+               !showMenu
+                  ? "nav-item"
+                  : `nav-item show ${currentNav === "classes" ? "current" : ""}`
+            }
+         >
+            <Link
+               className="nav-link"
+               to="/classes"
+               onClick={() => {
+                  window.scroll(0, 0);
+                  changePageAndMenu("classes");
+               }}
+            >
+               <div className="notification">
+                  <i className="fas fa-chalkboard-teacher"></i>
+                  {allUnseenPosts > 0 && (
+                     <span
+                        className={`post-notification teacher ${
+                           currentNav === "classes" ? "white" : "light"
+                        }`}
+                     >
+                        {allUnseenPosts}
+                     </span>
+                  )}
+               </div>
+               <span className="hide-md">&nbsp; Clases</span>
+            </Link>
+         </li>
          <li className={!showMenu ? "nav-item" : "nav-item show"}>
             <Link
                className="nav-link"
                to="/login"
                onClick={() => {
                   window.scroll(0, 0);
+                  clearClasses();
                   logOutAndToggle();
                }}
             >
@@ -136,6 +148,7 @@ const TeacherNavbar = ({
 
 TeacherNavbar.propTypes = {
    navbar: PropTypes.object.isRequired,
+   posts: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
    logOutAndToggle: PropTypes.func.isRequired,
    changePage: PropTypes.func.isRequired,
@@ -148,6 +161,7 @@ TeacherNavbar.propTypes = {
 const mapStateToProps = (state) => ({
    navbar: state.navbar,
    auth: state.auth,
+   posts: state.posts,
 });
 
 export default connect(mapStateToProps, {

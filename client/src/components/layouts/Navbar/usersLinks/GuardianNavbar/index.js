@@ -10,7 +10,7 @@ import {
 } from "../../../../../actions/navbar";
 import { clearProfile } from "../../../../../actions/user";
 
-const TutorNavbar = ({
+const GuardianNavbar = ({
    location,
    navbar: { showMenu, currentNav },
    auth: { userLogged },
@@ -120,7 +120,7 @@ const TutorNavbar = ({
    );
 };
 
-TutorNavbar.propTypes = {
+GuardianNavbar.propTypes = {
    navbar: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
    posts: PropTypes.object.isRequired,
@@ -141,4 +141,4 @@ export default connect(mapStateToProps, {
    changePageAndMenu,
    changePage,
    clearProfile,
-})(withRouter(TutorNavbar));
+})(withRouter(GuardianNavbar));

@@ -77,29 +77,6 @@
       backface-visibility: hidden;
    }
 
-   &-notification {
-      font-size: 1rem;
-      height: 1.75rem;
-      width: 1.75rem;
-      border-radius: 50%;
-      position: absolute;
-      top: 0.5rem;
-      right: 0.6rem;
-      color: $white-color;
-
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      &.primary {
-         background-color: $primary-color;
-      }
-
-      &.secondary {
-         background-color: darken($secondary-color, 20%);
-      }
-   }
-
    &:hover &-caption {
       opacity: 1;
       transform: translate(-50%, -50%);

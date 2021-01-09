@@ -137,6 +137,7 @@ const Confirm = ({
             <div className="popup-img">
                <img src={logo} alt="logo" />
                <button
+                  type="button"
                   onClick={(e) => {
                      e.preventDefault();
                      setToggleModal();
@@ -151,6 +152,7 @@ const Confirm = ({
                <>
                   <div className="btn-ctr">
                      <button
+                        type="button"
                         className="btn btn-success"
                         onClick={(e) => {
                            e.preventDefault();
@@ -173,6 +175,7 @@ const Confirm = ({
                         Aceptar
                      </button>
                      <button
+                        type="button"
                         className="btn btn-danger"
                         onClick={(e) => {
                            e.preventDefault();

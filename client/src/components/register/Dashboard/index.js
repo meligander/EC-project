@@ -41,38 +41,62 @@ const Dashboard = ({
 }) => {
    const [otherValues, setOtherValues] = useState({
       toggleModal: false,
+      type: "",
    });
 
-   const { toggleModal } = otherValues;
+   const { toggleModal, type } = otherValues;
 
    const isOwner =
-      userLogged.type === "Administrador" ||
-      userLogged.type === "Admin/Profesor";
+      userLogged.type === "admin" || userLogged.type === "admin&teacher";
 
-   const isAdmin = userLogged.type === "Secretaria" || isOwner;
+   const isAdmin = userLogged.type === "secretary" || isOwner;
 
    useEffect(() => {
+      const userTypeName = () => {
+         switch (user.type) {
+            case "student":
+               return "Alumno";
+            case "teacher":
+               return "Profesor";
+            case "guardian":
+               return "Tutor";
+            case "secretary":
+               return "Secretaria";
+            case "admin":
+               return "Administrador";
+            case "admin&teacher":
+               return "Administrador y Profesor";
+            default:
+               return "";
+         }
+      };
+
       if (loading) {
          loadUser(match.params.user_id);
+      } else {
+         setOtherValues((prev) => ({
+            ...prev,
+            type: userTypeName(),
+         }));
       }
-   }, [loadUser, match.params.user_id, loading]);
+   }, [loadUser, match.params.user_id, loading, user]);
 
-   const type = () => {
+   const dashboardType = () => {
       switch (user.type) {
-         case "Alumno":
+         case "student":
             return <StudentDashboard />;
-         case "Profesor":
+         case "teacher":
             return (
                <>
-                  {userLogged.type !== "Alumno" &&
-                     userLogged.type !== "Tutor" && <TeacherDashboard />}
+                  {userLogged.type !== "student" &&
+                     userLogged.type !== "guardian" && <TeacherDashboard />}
                </>
             );
-         case "Tutor":
+         case "guardian":
             return <RelativeDashboard />;
-         case "Secretaria":
-         case "Administrador":
-         case "Admin/Profesor":
+         case "secretary":
+         case "admin":
+         case "admin&teacher":
             return <>{userLogged._id === user._id && <AdminDashboard />}</>;
          default:
             return <h1>Dashboard</h1>;
@@ -124,9 +148,7 @@ const Dashboard = ({
 
                      <div className="about p-2">
                         <div className="about-info">
-                           <h4 className="heading-tertiary">
-                              Info {user.type}:
-                           </h4>
+                           <h4 className="heading-tertiary">Info {type}:</h4>
                            {user.dni && (
                               <p>
                                  <span className="text-dark">DNI: </span>
@@ -167,7 +189,14 @@ const Dashboard = ({
                                     Fecha de Nacimiento:{" "}
                                  </span>
                                  <Moment
-                                    format="DD/MM/YYYY"
+                                    format={
+                                       isOwner ||
+                                       userLogged._id === user._id ||
+                                       user.type !== "admin" ||
+                                       user.type !== "admin&teacher"
+                                          ? "DD/MM/YYYY"
+                                          : "DD/MM"
+                                    }
                                     utc
                                     date={user.dob}
                                  />
@@ -186,7 +215,7 @@ const Dashboard = ({
                                  }`}
                               </p>
                            )}
-                           {user.type === "Profesor" && (
+                           {user.type === "teacher" && (
                               <>
                                  <p>
                                     <span className="text-dark">Título: </span>
@@ -216,23 +245,22 @@ const Dashboard = ({
                               </p>
                            )}
 
-                           {user.type === "Alumno" &&
-                              (isAdmin || userLogged.type === "Secretaria") && (
-                                 <>
-                                    <p>
-                                       <span className="text-dark">
-                                          Descuento:{" "}
-                                       </span>
-                                       {user.discount}%
-                                    </p>
-                                    <p>
-                                       <span className="text-dark">
-                                          Día recargo:{" "}
-                                       </span>
-                                       {user.chargeday}
-                                    </p>
-                                 </>
-                              )}
+                           {user.type === "student" && isAdmin && (
+                              <>
+                                 <p>
+                                    <span className="text-dark">
+                                       Descuento:{" "}
+                                    </span>
+                                    {user.discount}%
+                                 </p>
+                                 <p>
+                                    <span className="text-dark">
+                                       Día recargo:{" "}
+                                    </span>
+                                    {user.chargeday}
+                                 </p>
+                              </>
+                           )}
                         </div>
                         <div className="btn-right">
                            {(isAdmin || userLogged._id === user._id) && (
@@ -256,6 +284,7 @@ const Dashboard = ({
                                  </Link>
                                  {isAdmin && (
                                     <button
+                                       type="button"
                                        className="btn btn-danger"
                                        onClick={setToggle}
                                     >
@@ -270,7 +299,7 @@ const Dashboard = ({
                         </div>
                      </div>
                   </div>
-                  {!loading && type()}
+                  {!loading && dashboardType()}
                </div>
             </>
          ) : (

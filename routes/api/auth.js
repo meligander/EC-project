@@ -24,9 +24,12 @@ router.get("/", auth, async (req, res) => {
             select: ["name", "lastname", "studentnumber"],
          });
 
-      if (user.type === "Alumno") {
+      if (user.type === "student") {
+         const date = new Date();
+
          enrollment = await Enrollment.findOne({
             student: req.user.id,
+            year: date.getFullYear(),
          }).populate({
             path: "student",
             model: "user",
@@ -38,7 +41,7 @@ router.get("/", auth, async (req, res) => {
             name: enrollment.student.name,
             lastname: enrollment.student.lastname,
             studentnumber: enrollment.student.studentnumber,
-            type: "Alumno",
+            type: "student",
             classroom: enrollment.classroom._id,
          };
       }

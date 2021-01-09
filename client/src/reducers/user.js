@@ -4,7 +4,7 @@ import {
    USERSBK_LOADED,
    STUDENTNUMBER_LOADED,
    ACTIVEUSERS_LOADED,
-   USERSTYPE_CHANGED,
+   USERSEARCHTYPE_CHANGED,
    REGISTER_SUCCESS,
    USER_UPDATED,
    USER_DELETED,
@@ -24,7 +24,7 @@ const initialState = {
    loadingUsers: true,
    user: null,
    users: [],
-   usersType: "",
+   userSearchType: "",
    usersBK: [],
    loadingUsersBK: true,
    otherValues: {
@@ -76,10 +76,10 @@ export default function (state = initialState, action) {
       case REGISTER_SUCCESS:
       case USER_UPDATED:
          return state;
-      case USERSTYPE_CHANGED:
+      case USERSEARCHTYPE_CHANGED:
          return {
             ...state,
-            usersType: payload,
+            userSearchType: payload,
          };
       case USER_DELETED:
          return {
@@ -115,7 +115,7 @@ export default function (state = initialState, action) {
             loadingUsers: true,
             usersBK: [],
             loadingUsersBK: true,
-            usersType: "",
+            userSearchType: "",
          };
       case OTHERVALUES_CLEARED:
          return {
@@ -130,7 +130,7 @@ export default function (state = initialState, action) {
             ...state,
             loadingUsers: true,
             users: [],
-            usersType: "",
+            userSearchType: "",
             usersBK: [],
             loadingUsersBK: true,
             error: payload,
@@ -150,7 +150,7 @@ export default function (state = initialState, action) {
          return {
             ...state,
             usersBK: [],
-            loadingUsersBK: true,
+            loadingUsersBK: false,
             error: payload,
          };
       default:

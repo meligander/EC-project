@@ -197,6 +197,7 @@ const AttendanceTab = ({
                                        />
                                     ) : (
                                        <button
+                                          type="button"
                                           className="btn btn-danger"
                                           onClick={() => {
                                              setOtherValues({
@@ -218,20 +219,32 @@ const AttendanceTab = ({
             </div>
          )}
          <div className="btn-right">
-            <button className="btn btn-primary" onClick={setToggleSave}>
+            <button
+               className="btn btn-primary"
+               type="button"
+               onClick={setToggleSave}
+            >
                <i className="far fa-save"></i>
                <span className="hide-md">&nbsp; Guardar</span>
             </button>
-            <button className="btn btn-light" onClick={clickAddDate}>
+            <button
+               className="btn btn-dark"
+               type="button"
+               onClick={clickAddDate}
+            >
                <i className="fas fa-plus"></i>
                <span className="hide-md">&nbsp; Día</span>
             </button>
-            <button className="btn btn-secondary" onClick={pdfGeneratorSave}>
+            <button
+               className="btn btn-secondary"
+               type="button"
+               onClick={pdfGeneratorSave}
+            >
                <i className="fas fa-file-pdf"></i>
             </button>
          </div>
          {dayPlus && (
-            <div className="form smaller pt-5">
+            <form className="form smaller pt-5">
                <div className="border">
                   <div className="form-group">
                      <input
@@ -247,13 +260,17 @@ const AttendanceTab = ({
                      </label>
                   </div>
                   <div className="btn-ctr">
-                     <button className="btn btn-dark" onClick={addDate}>
+                     <button
+                        type="submit"
+                        onClick={addDate}
+                        className="btn btn-dark"
+                     >
                         <i className="fas fa-plus"></i>
                         <span className="hide-sm">&nbsp; Agregar</span>
                      </button>
                   </div>
                </div>
-            </div>
+            </form>
          )}
       </>
    );

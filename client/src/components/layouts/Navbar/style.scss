@@ -227,8 +227,21 @@
          background-position: 100%;
          transform: translateX(1rem);
 
+         .notification .post-notification {
+            background-color: $light-color;
+         }
+
          @include respond(small-phone) {
             transform: none;
+         }
+      }
+
+      .notification .post-notification {
+         right: -0.8rem;
+         top: 0.8rem;
+
+         &.teacher {
+            top: 0;
          }
       }
    }

@@ -24,7 +24,7 @@ const ExpireAuthToken = ({ expireSesion, history }) => {
    useEffect(() => {
       window.onunload = function () {
          if (window.performance && performance.navigation.type !== 1) {
-            localStorage.clear();
+            expireSesion(history);
          }
       };
    }, [expireSesion, history]);

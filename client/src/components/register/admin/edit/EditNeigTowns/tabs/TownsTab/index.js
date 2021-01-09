@@ -110,6 +110,7 @@ const TownsTab = ({
                            </td>
                            <td>
                               <button
+                                 type="button"
                                  onClick={() => setToggleDelete(town)}
                                  className="btn btn-danger"
                               >

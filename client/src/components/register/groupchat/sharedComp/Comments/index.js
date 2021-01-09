@@ -16,7 +16,8 @@ const Comments = ({
    addComment,
    deleteComment,
 }) => {
-   const isAdmin = userLogged.type !== "Alumno" && userLogged.type !== "Tutor";
+   const isAdmin =
+      userLogged.type !== "student" && userLogged.type !== "guardian";
 
    const commentsArray = comments;
 
@@ -111,7 +112,7 @@ const Comments = ({
                </div>
             ))
             .reverse()}
-         <form className="paragraph form">
+         <form className="form paragraph" onClick={registerComment}>
             <textarea
                className="form-input"
                rows="3"
@@ -119,11 +120,7 @@ const Comments = ({
                value={text}
                placeholder="Comenta..."
             ></textarea>
-            <button
-               type="submit"
-               onClick={registerComment}
-               className="btn-comment"
-            >
+            <button type="submit" className="btn-comment">
                <i className="far fa-paper-plane"></i>
             </button>
          </form>

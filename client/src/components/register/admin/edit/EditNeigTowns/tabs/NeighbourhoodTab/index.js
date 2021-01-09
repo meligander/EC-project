@@ -134,6 +134,7 @@ const NeighbourhoodTab = ({
                         </td>
                         <td>
                            <button
+                              type="button"
                               onClick={() => setToggleDelete(item)}
                               className="btn btn-danger"
                            >
