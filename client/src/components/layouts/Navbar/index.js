@@ -69,7 +69,7 @@ const Navbar = ({
             to={isAuthenticated ? `/dashboard/${userLogged._id}` : "/"}
             onClick={() => {
                window.scroll(0, 0);
-               clearProfile(userLogged.type !== "student");
+               if (isAuthenticated) clearProfile(userLogged.type !== "student");
             }}
          >
             <div className="navbar-logo">
