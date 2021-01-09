@@ -307,13 +307,13 @@ export const deleteUser = (user, history, userLogged_id) => async (
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.delete(`/api/user/${user._id}/${user.type}`);
-
       if (user._id === userLogged_id) dispatch(logOutAndToggle());
       else {
          dispatch(clearProfile());
          history.push(`/dashboard/${userLogged_id}`);
       }
+
+      await axios.delete(`/api/user/${user._id}/${user.type}`);
 
       dispatch({
          type: USER_DELETED,

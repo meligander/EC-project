@@ -25,7 +25,10 @@ const TutorInfo = ({
       setSelectedStudent({
          ...selectedStudent,
          _id: user._id,
-         name: user.lastname + " " + user.name,
+         name: user.name,
+         lastname: user.lastname,
+         dob: user.dob,
+         studentnumber: user.studentnumber,
       });
    };
 
