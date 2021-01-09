@@ -87,51 +87,6 @@ const OneClass = ({
                <h1 className="pt-3 text-center light-font">Clase</h1>
                <ClassInfo classInfo={classInfo} />
                {classInfo.students.length !== 0 ? (
-<<<<<<< HEAD
-                  <table>
-                     <thead>
-                        <tr>
-                           <th>Legajo</th>
-                           <th>Nombre</th>
-                           <th>Fecha Nac.</th>
-                           <th>Celular</th>
-                           <th>&nbsp;</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        {classInfo.students.length > 0 &&
-                           classInfo.students.map((user) => (
-                              <tr key={user._id}>
-                                 <td>{user.studentnumber}</td>
-                                 <td>{user.lastname + ", " + user.name}</td>
-                                 <td>
-                                    {user.dob && (
-                                       <Moment
-                                          format="DD/MM/YY"
-                                          utc
-                                          date={user.dob}
-                                       />
-                                    )}
-                                 </td>
-                                 <td>{user.cel && user.cel}</td>
-                                 <td>
-                                    <Link
-                                       to={`/dashboard/${user._id}`}
-                                       className="btn-text"
-                                       onClick={() => {
-                                          updatePreviousPage("");
-                                          window.scroll(0, 0);
-                                          clearProfile();
-                                       }}
-                                    >
-                                       Info &rarr;
-                                    </Link>
-                                 </td>
-                              </tr>
-                           ))}
-                     </tbody>
-                  </table>
-=======
                   <StudentTable
                      clearProfile={clearProfile}
                      clearAll={userLogged.type !== "student"}
@@ -139,7 +94,6 @@ const OneClass = ({
                      loadingUsers={loadingStudents}
                      users={classInfo.students}
                   />
->>>>>>> 4b949520082df1964d49d29abbd3029f5096b0a5
                ) : (
                   <p className="heading-tertiary text-secondary my-5 text-center">
                      No hay ningun alumno anotado en esta clase
