@@ -1,9 +1,9 @@
 @import "../../../style/abstract.scss";
 
 .header {
-   height: 85vh;
+   height: 98vh;
    display: flex;
-   margin-top: 5.4rem;
+   padding-top: 5.4rem;
    justify-content: center;
    align-items: center;
    text-align: center;
@@ -15,16 +15,8 @@
       url(../../../img/claseAfuer.jpg);
    background-size: cover;
    background-position: center;
-   -webkit-clip-path: polygon(0 0, 100% 0, 100% 75vh, 0 100%);
-   clip-path: polygon(0 0, 100% 0, 100% 75vh, 0 100%);
-
-   @include respond(tab-port) {
-      margin-top: 6.4rem;
-   }
-
-   @include respond(tab-land) {
-      margin-top: 5.4rem;
-   }
+   -webkit-clip-path: polygon(0 0, 100% 0, 100% 85vh, 0 100%);
+   clip-path: polygon(0 0, 100% 0, 100% 85vh, 0 100%);
 
    h2,
    p {
@@ -56,6 +48,7 @@
       @include respond(phone) {
          background-position: 50% 50%;
          background-repeat: no-repeat;
+         background-size: cover;
          background-image: linear-gradient(
                to right,
                rgba($white-color, 0.9) 0%,
@@ -82,7 +75,7 @@
 
 .section {
    &-history {
-      padding: 10rem 0;
+      padding: 7rem 0 6rem 0;
    }
 
    &-cambridge {

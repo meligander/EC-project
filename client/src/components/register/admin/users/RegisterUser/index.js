@@ -533,7 +533,7 @@ const RegisterUser = ({
                            <div className="form-group">
                               <input
                                  className="form-input"
-                                 type="text"
+                                 type="tel"
                                  name="tel"
                                  id="tel"
                                  value={tel}
@@ -547,7 +547,7 @@ const RegisterUser = ({
                            <div className="form-group">
                               <input
                                  className="form-input"
-                                 type="text"
+                                 type="tel"
                                  name="cel"
                                  id="cel"
                                  value={cel}
