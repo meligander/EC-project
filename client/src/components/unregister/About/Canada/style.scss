@@ -26,6 +26,7 @@
          position: relative;
          width: 33.33333333%;
          box-shadow: 0 1.5rem 3rem rgba($black-color, 0.2);
+         outline-offset: 0.45rem;
       }
 
       &--p1 {
@@ -38,7 +39,6 @@
 
             &:hover {
                left: 33%;
-               transform: scale(2.5) !important;
             }
          }
       }
@@ -52,7 +52,7 @@
             z-index: 100;
 
             &:hover {
-               transform: scale(2.5) !important;
+               top: 0;
             }
          }
       }
@@ -68,7 +68,6 @@
             &:hover {
                left: -33% !important;
                top: 0 !important;
-               transform: scale(2.5) !important;
             }
          }
       }
@@ -80,7 +79,8 @@
          box-shadow: 0 2.5rem 4rem rgba($black-color, 0.5);
 
          @include respond(phone) {
-            transform: scale(1.4) translateY(-0.5rem);
+            outline: 0.6rem solid $primary-color;
+            transform: scale(2.9);
          }
       }
    }

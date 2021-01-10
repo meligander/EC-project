@@ -7,7 +7,11 @@
       url(../../../img/entrada.PNG);
    background-size: cover;
    background-position: top;
-   height: 95vh;
+   height: 93.5vh;
+
+   @include respond(phone) {
+      height: 90.5vh;
+   }
 
    .main-text {
       height: 100%;
