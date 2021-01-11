@@ -19,11 +19,13 @@ const TutorInfo = ({
    const [selectedStudent, setSelectedStudent] = useState({
       _id: "",
       name: "",
+      lastname: "",
+      dob: "",
+      studentnumber: "",
    });
 
    const selectStudent = (user) => {
       setSelectedStudent({
-         ...selectedStudent,
          _id: user._id,
          name: user.name,
          lastname: user.lastname,
@@ -43,6 +45,9 @@ const TutorInfo = ({
          setSelectedStudent({
             _id: "",
             name: "",
+            lastname: "",
+            dob: "",
+            studentnumber: "",
          });
          clearSearch();
       } else {

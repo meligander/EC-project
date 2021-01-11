@@ -123,6 +123,12 @@ const InvoiceTab = ({
          ...otherValues,
          registeredUser: true,
          toggleSearch: !toggleSearch,
+         selectedUser: {
+            _id: "",
+            lastname: "",
+            name: "",
+            email: "",
+         },
       });
 
       setInvoice({

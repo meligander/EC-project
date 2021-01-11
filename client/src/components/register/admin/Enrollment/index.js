@@ -11,6 +11,7 @@ import {
    clearEnrollments,
 } from "../../../../actions/enrollment";
 import { clearSearch, clearProfile } from "../../../../actions/user";
+import { setAlert } from "../../../../actions/alert";
 
 import StudentSearch from "../../sharedComp/search/StudentSearch";
 import Loading from "../../../modal/Loading";
@@ -25,6 +26,7 @@ const Enrollment = ({
    clearEnrollments,
    clearSearch,
    clearProfile,
+   setAlert,
    auth: { userLogged },
    categories,
    enrollments: { enrollment, loading },
@@ -101,16 +103,20 @@ const Enrollment = ({
    };
 
    const addStudent = (e) => {
-      e.preventDefault();
-      setFormData({
-         ...formData,
-         student: selectedStudent._id,
-      });
-      clearSearch();
-      setOtherValues({
-         ...otherValues,
-         hideSearch: true,
-      });
+      if (selectedStudent._id === "") {
+         setAlert("Primero debe seleccionar un alumno.", "danger", "3");
+      } else {
+         e.preventDefault();
+         setFormData({
+            ...formData,
+            student: selectedStudent._id,
+         });
+         clearSearch();
+         setOtherValues({
+            ...otherValues,
+            hideSearch: true,
+         });
+      }
    };
 
    const onChange = (e) => {
@@ -196,25 +202,27 @@ const Enrollment = ({
                   )}
                   <p className={`heading-tertiary ${!enroll_id && "mt-3"}`}>
                      <span className="text-dark">Alumno: </span> &nbsp;
-                     <Link
-                        to={`/dashboard/${selectedStudent._id}`}
-                        className="text-secondary"
-                        onClick={() => {
-                           clearProfile();
-                           window.scroll(0, 0);
-                        }}
-                     >
-                        {selectedStudent.name}
-                     </Link>
-                     &nbsp;
-                     {selectedStudent._id !== "" && (
-                        <button
-                           className="btn-cancel"
-                           type="button"
-                           onClick={restore}
-                        >
-                           <i className="fas fa-times"></i>
-                        </button>
+                     {hideSearch && (
+                        <>
+                           <Link
+                              to={`/dashboard/${selectedStudent._id}`}
+                              className="text-secondary"
+                              onClick={() => {
+                                 clearProfile();
+                                 window.scroll(0, 0);
+                              }}
+                           >
+                              {selectedStudent.name}
+                           </Link>
+                           &nbsp;
+                           <button
+                              className="btn-cancel"
+                              type="button"
+                              onClick={restore}
+                           >
+                              <i className="fas fa-times"></i>
+                           </button>
+                        </>
                      )}
                   </p>
                   <div className="form-group mt-3">
@@ -338,6 +346,7 @@ Enrollment.propTypes = {
    clearEnrollments: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
+   setAlert: PropTypes.func.isRequired,
    categories: PropTypes.object.isRequired,
    enrollments: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
@@ -356,4 +365,5 @@ export default connect(mapStateToProps, {
    clearEnrollments,
    clearSearch,
    clearProfile,
+   setAlert,
 })(withRouter(Enrollment));
