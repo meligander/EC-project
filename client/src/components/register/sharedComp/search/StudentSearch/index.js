@@ -116,7 +116,9 @@ const StudentSearch = ({
             <div className="btn-right">
                <button
                   type="button"
-                  className="btn"
+                  className={`btn ${
+                     typeSearch !== "installment" ? "btn-dark" : ""
+                  }`}
                   onClick={(e) => {
                      setFilterForm({
                         ...filterForm,

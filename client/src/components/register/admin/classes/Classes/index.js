@@ -186,9 +186,7 @@ const Classes = ({
                            clearSearch();
                         }}
                         className={`btn ${
-                           users.users.length !== 0
-                              ? "btn-primary"
-                              : "btn-black"
+                           users.users.length !== 0 ? "btn-dark" : "btn-black"
                         }`}
                      >
                         <i className="fas fa-plus"></i>&nbsp; Nueva Clase

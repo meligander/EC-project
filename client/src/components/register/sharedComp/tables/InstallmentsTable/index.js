@@ -144,7 +144,7 @@ const InstallmentsTable = ({
                <button
                   type="button"
                   className={`btn ${
-                     !invoice ? "btn-mix-secondary" : "btn-light"
+                     !invoice ? "btn-mix-secondary" : "btn-dark"
                   } `}
                   onClick={actionForSelected}
                >

@@ -29,7 +29,7 @@ const Search = ({
             <div className="btn-right">
                <Link
                   to="/register"
-                  className="btn btn-primary"
+                  className="btn btn-dark"
                   onClick={() => {
                      window.scroll(0, 0);
                      clearOtherValues("studentNumber");

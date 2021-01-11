@@ -67,7 +67,7 @@ const StudentTable = ({
                                  type="button"
                                  className={`btn ${
                                     type === "add-child"
-                                       ? "btn-success"
+                                       ? "btn-dark"
                                        : "btn-danger"
                                  } `}
                                  onClick={(e) => actionWChild(e, user)}
