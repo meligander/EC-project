@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { connect } from "react-redux";
+import React, { useState } from "react";
 import Moment from "react-moment";
 import PropTypes from "prop-types";
-
-import { loadPenalty } from "../../../actions/penalty";
 
 import logo from "../../../img/logoSinLetras.png";
 import "./style.scss";
@@ -14,9 +11,8 @@ const Confirm = ({
    confirm,
    text,
    users,
+   penalty,
    type,
-   penalties: { loading, penalty },
-   loadPenalty,
 }) => {
    const [formData, setFormData] = useState({
       percentage: "",
@@ -24,10 +20,6 @@ const Confirm = ({
    });
 
    const { percentage, date } = formData;
-
-   useEffect(() => {
-      if (type === "penalty" && loading) loadPenalty();
-   }, [loadPenalty, type, loading]);
 
    const onChange = (e) => {
       setFormData({
@@ -38,45 +30,40 @@ const Confirm = ({
    const chooseType = (type) => {
       switch (type) {
          case "penalty":
-            if (!loading)
-               return (
-                  <div className="popup-penalty">
-                     {penalty && (
-                        <p className="posted-date">
-                           Última Actualización:{" "}
-                           <Moment format="DD/MM/YY" date={penalty.date} />
-                        </p>
+            return (
+               <div className="popup-penalty">
+                  {penalty && (
+                     <p className="posted-date">
+                        Última Actualización:{" "}
+                        <Moment format="DD/MM/YY" date={penalty.date} />
+                     </p>
+                  )}
+
+                  <h3>Actualización de Recargo</h3>
+
+                  <div className="pt-2">
+                     <h4> Recargo Actual: {penalty && penalty.percentage}%</h4>
+
+                     {!penalty && (
+                        <h5 className="paragraph text-danger text-center">
+                           No hay ningún recargo registrado
+                        </h5>
                      )}
-
-                     <h3>Actualización de Recargo</h3>
-
-                     <div className="pt-2">
-                        <h4>
-                           {" "}
-                           Recargo Actual: {penalty && penalty.percentage}%
-                        </h4>
-
-                        {!penalty && (
-                           <h5 className="paragraph text-danger text-center">
-                              No hay ningún recargo registrado
-                           </h5>
-                        )}
-                     </div>
-
-                     <h4>
-                        <input
-                           id="percentage"
-                           type="number"
-                           name="percentage"
-                           placeholder="Nuevo Recargo"
-                           value={percentage}
-                           onChange={onChange}
-                        />
-                        %
-                     </h4>
                   </div>
-               );
-            break;
+
+                  <h4>
+                     <input
+                        id="percentage"
+                        type="number"
+                        name="percentage"
+                        placeholder="Nuevo Recargo"
+                        value={percentage}
+                        onChange={onChange}
+                     />
+                     %
+                  </h4>
+               </div>
+            );
          case "certificate-date":
             return (
                <div className="popup-date">
@@ -193,16 +180,12 @@ const Confirm = ({
 };
 
 Confirm.propTypes = {
-   penalties: PropTypes.object.isRequired,
+   penalty: PropTypes.object,
    type: PropTypes.string,
    users: PropTypes.array,
    toggleModal: PropTypes.bool.isRequired,
    setToggleModal: PropTypes.func.isRequired,
-   loadPenalty: PropTypes.func.isRequired,
+   confirm: PropTypes.func,
 };
 
-const mapStateToProps = (state) => ({
-   penalties: state.penalties,
-});
-
-export default connect(mapStateToProps, { loadPenalty })(Confirm);
+export default Confirm;

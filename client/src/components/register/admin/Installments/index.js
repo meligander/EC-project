@@ -9,7 +9,7 @@ import {
    loadStudentInstallments,
 } from "../../../../actions/installment";
 import { updatePreviousPage } from "../../../../actions/mixvalues";
-import { clearPenalty, updatePenalty } from "../../../../actions/penalty";
+import { loadPenalty, updatePenalty } from "../../../../actions/penalty";
 import { clearUser } from "../../../../actions/user";
 
 import InstallmentsSearch from "../../sharedComp/search/InstallmentsSearch";
@@ -18,13 +18,14 @@ import Confirm from "../../../modal/Confirm";
 const Installments = ({
    match,
    installments: { usersInstallments, loadingUsersInstallments },
+   penalties: { loading, penalty },
    auth: { userLogged },
    clearInstallments,
    clearInstallment,
    clearUser,
-   clearPenalty,
    updatePreviousPage,
    updatePenalty,
+   loadPenalty,
    loadStudentInstallments,
 }) => {
    const _id = match.params.user_id;
@@ -40,6 +41,7 @@ const Installments = ({
    const { toggleModal, student } = otherValues;
 
    useEffect(() => {
+      if (loading) loadPenalty();
       if (_id !== "0" && loadingUsersInstallments) {
          loadStudentInstallments(_id, true);
       } else {
@@ -59,6 +61,8 @@ const Installments = ({
       updatePreviousPage("dashboard");
    }, [
       _id,
+      loadPenalty,
+      loading,
       updatePreviousPage,
       loadStudentInstallments,
       loadingUsersInstallments,
@@ -71,19 +75,22 @@ const Installments = ({
 
    const confirm = (percentage) => {
       updatePenalty({ percentage });
-      clearPenalty();
    };
 
    return (
       <>
          <div>
             <h1>Cuotas</h1>
-            <Confirm
-               toggleModal={toggleModal}
-               setToggleModal={setToggle}
-               type="penalty"
-               confirm={confirm}
-            />
+            {toggleModal && !loading && (
+               <Confirm
+                  toggleModal={toggleModal}
+                  setToggleModal={setToggle}
+                  type="penalty"
+                  confirm={confirm}
+                  penalty={penalty}
+               />
+            )}
+
             <div className="btn-right my-3">
                {(userLogged.type === "admin" ||
                   userLogged.type === "admin&teacher") && (
@@ -137,9 +144,10 @@ const Installments = ({
 Installments.propTypes = {
    installments: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
+   penalties: PropTypes.object.isRequired,
    clearInstallments: PropTypes.func.isRequired,
    clearInstallment: PropTypes.func.isRequired,
-   clearPenalty: PropTypes.func.isRequired,
+   loadPenalty: PropTypes.func.isRequired,
    clearUser: PropTypes.func.isRequired,
    updatePenalty: PropTypes.func.isRequired,
    updatePreviousPage: PropTypes.func.isRequired,
@@ -148,13 +156,14 @@ Installments.propTypes = {
 
 const mapStateToProps = (state) => ({
    installments: state.installments,
+   penalties: state.penalties,
    auth: state.auth,
 });
 
 export default connect(mapStateToProps, {
    clearInstallments,
    clearInstallment,
-   clearPenalty,
+   loadPenalty,
    clearUser,
    updatePenalty,
    updatePreviousPage,

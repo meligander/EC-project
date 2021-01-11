@@ -15,13 +15,12 @@ export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
       case PENALTY_LOADED:
+      case PENALTY_REGISTERED:
          return {
             ...state,
             loading: false,
             penalty: payload,
          };
-      case PENALTY_REGISTERED:
-         return state;
       case PENALTY_CLEARED:
          return initialState;
       case PENALTY_ERROR:

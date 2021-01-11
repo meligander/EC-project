@@ -5,7 +5,6 @@ const adminAuth = require("../../middleware/adminAuth");
 const { check, validationResult } = require("express-validator");
 
 const Penalty = require("../../models/Penalty");
-const { findOneAndRemove } = require("../../models/Penalty");
 
 //@route    GET api/penalty/last
 //@desc     get last penalty
@@ -56,15 +55,16 @@ router.post(
 
          await penalty.save();
 
-         penalty = await Penalty.find().sort({ $natural: -1 });
+         let penaltyToRemove = await Penalty.find().sort({ $natural: -1 });
 
-         penalty = penalty[1];
+         penalty = penaltyToRemove[0];
+         penaltyToRemove = penaltyToRemove[1];
 
-         if (penalty) {
-            await Penalty.findOneAndRemove({ _id: penalty._id });
+         if (penaltyToRemove) {
+            await Penalty.findOneAndRemove({ _id: penaltyToRemove._id });
          }
 
-         res.json({ msg: "Penalty Registered" });
+         res.json(penalty);
       } catch (err) {
          console.error(err.message);
          return res.status(500).send("Server Error");
