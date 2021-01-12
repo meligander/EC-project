@@ -183,7 +183,7 @@ export const registerEnrollment = (
 
    let enrollment = {};
    for (const prop in formData) {
-      if (formData[prop] !== "" && formData[prop] !== 0) {
+      if (formData[prop] !== "") {
          enrollment[prop] = formData[prop];
       }
    }

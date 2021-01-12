@@ -462,23 +462,26 @@ const RegisterUser = ({
                               </div>
                            )}
 
-                           {!isOwner && type !== "guardian" && (
-                              <div className="form-group">
-                                 <input
-                                    className="form-input"
-                                    type="number"
-                                    value={dni}
-                                    disabled={!isAdmin}
-                                    onChange={(e) => onChange(e)}
-                                    name="dni"
-                                    id="dni"
-                                    placeholder="DNI"
-                                 />
-                                 <label htmlFor="dni" className="form-label">
-                                    DNI
-                                 </label>
-                              </div>
-                           )}
+                           {isAdmin &&
+                              (type === "student" ||
+                                 type === "secretary" ||
+                                 type === "teacher") && (
+                                 <div className="form-group">
+                                    <input
+                                       className="form-input"
+                                       type="number"
+                                       value={dni}
+                                       disabled={!isAdmin}
+                                       onChange={(e) => onChange(e)}
+                                       name="dni"
+                                       id="dni"
+                                       placeholder="DNI"
+                                    />
+                                    <label htmlFor="dni" className="form-label">
+                                       DNI
+                                    </label>
+                                 </div>
+                              )}
                         </>
                      )}
 

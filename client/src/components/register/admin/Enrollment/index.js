@@ -33,12 +33,20 @@ const Enrollment = ({
 }) => {
    const day = moment();
    const thisYear = day.year();
+   const currentMonthName = day
+      .format("MMMM")
+      .replace(/\b\w/, (c) => c.toUpperCase());
+   const nextMonthName = moment()
+      .add(1, "M")
+      .format("MMMM")
+      .replace(/\b\w/, (c) => c.toUpperCase());
+   const currentMonthNumber = day.month() + 1;
 
    const [formData, setFormData] = useState({
       student: "",
-      year: thisYear,
       category: "",
-      currentMonth: true,
+      year: "",
+      month: "",
    });
 
    const [otherValues, setOtherValues] = useState({
@@ -58,7 +66,7 @@ const Enrollment = ({
       hideSearch,
    } = otherValues;
 
-   const { year, category, currentMonth } = formData;
+   const { year, category, month } = formData;
 
    const enroll_id = match.params.enrollment_id;
 
@@ -126,20 +134,17 @@ const Enrollment = ({
       });
    };
 
-   const onChangeCheckbox = (e) => {
-      setFormData({
-         ...formData,
-         [e.target.name]:
-            e.target.name === "year"
-               ? e.target.checked
-                  ? thisYear
-                  : thisYear + 1
-               : e.target.checked,
-      });
-   };
-
    const onSubmit = () => {
-      registerEnrollment(formData, history, userLogged._id, enroll_id);
+      registerEnrollment(
+         {
+            ...formData,
+            month:
+               thisYear === Number(year) && currentMonthNumber > 2 ? month : 0,
+         },
+         history,
+         userLogged._id,
+         enroll_id
+      );
    };
 
    const setToggle = (e) => {
@@ -254,6 +259,57 @@ const Enrollment = ({
                         Categoría
                      </label>
                   </div>
+                  <div className="form-group">
+                     <select
+                        className="form-input"
+                        id="year"
+                        name="year"
+                        onChange={onChange}
+                        value={year}
+                        disabled={enroll_id}
+                     >
+                        <option value="">
+                           * Seleccione el año al que lo va a inscribir
+                        </option>
+                        <option value={thisYear}>{thisYear}</option>
+                        <option value={thisYear + 1}>{thisYear + 1}</option>
+                     </select>
+                     <label
+                        htmlFor="year"
+                        className={`form-label ${year === "" && "lbl"}`}
+                     >
+                        Año
+                     </label>
+                  </div>
+                  {Number(year) === thisYear && currentMonthNumber > 2 && (
+                     <div className="form-group">
+                        <select
+                           className="form-input"
+                           id="month"
+                           name="month"
+                           onChange={onChange}
+                           value={month}
+                        >
+                           <option value="">{`* Seleccione el mes a partir del cuál ${
+                              enroll_id
+                                 ? "cambiará la inscripción"
+                                 : "lo va a inscribir"
+                           }`}</option>
+                           <option value={currentMonthNumber}>
+                              {currentMonthName}
+                           </option>
+                           <option value={currentMonthNumber + 1}>
+                              {nextMonthName}
+                           </option>
+                        </select>
+                        <label
+                           htmlFor="month"
+                           className={`form-label ${month === "" && "lbl"}`}
+                        >
+                           Mes
+                        </label>
+                     </div>
+                  )}
                   {!enroll_id && (
                      <div className="form-group">
                         <input
@@ -265,61 +321,6 @@ const Enrollment = ({
                         />
                         <label htmlFor="value" className="form-label show">
                            Importe
-                        </label>
-                     </div>
-                  )}
-                  {enroll_id && (
-                     <div className="form-group">
-                        <input
-                           className="form-input"
-                           id="year"
-                           type="text"
-                           value={enrollment.year}
-                           disabled
-                        />
-                        <label htmlFor="value" className="form-label show">
-                           Año
-                        </label>
-                     </div>
-                  )}
-                  {!enroll_id && (
-                     <div className="form-group text-right py-1">
-                        <input
-                           className="form-checkbox"
-                           type="checkbox"
-                           onChange={onChangeCheckbox}
-                           checked={!(year !== thisYear)}
-                           name="year"
-                           id="cb1"
-                        />
-                        <label
-                           className="checkbox-lbl"
-                           id="check"
-                           htmlFor="cb1"
-                        >
-                           {year !== thisYear
-                              ? "Siguiente Año"
-                              : "Año en Curso"}
-                        </label>
-                     </div>
-                  )}
-                  {(year === thisYear ||
-                     (enroll_id && Number(enrollment.year) === thisYear)) && (
-                     <div className="form-group text-right">
-                        <input
-                           className="form-checkbox"
-                           type="checkbox"
-                           onChange={onChangeCheckbox}
-                           checked={currentMonth}
-                           name="currentMonth"
-                           id="cb2"
-                        />
-                        <label
-                           className="checkbox-lbl"
-                           id="check"
-                           htmlFor="cb2"
-                        >
-                           {!currentMonth ? "Mes Siguiente" : "Mes en Curso"}
                         </label>
                      </div>
                   )}

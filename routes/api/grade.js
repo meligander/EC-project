@@ -262,7 +262,7 @@ router.post("/create-list", (req, res) => {
 
    let thead = "<tr><th>Nombre</th>";
 
-   const title = "Notas de " + periodName[period];
+   const title = "Notas " + periodName[period];
 
    for (let x = 0; x < header.length; x++) {
       thead += "<th>" + header[x] + "</th>";

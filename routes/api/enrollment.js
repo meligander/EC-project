@@ -262,11 +262,13 @@ router.post(
    [
       auth,
       adminAuth,
-      check("student", "El alumno es necesario").not().isEmpty(),
-      check("category", "La categoría es necesaria").not().isEmpty(),
+      check("student", "El alumno es necesario.").not().isEmpty(),
+      check("category", "La categoría es necesaria.").not().isEmpty(),
+      check("year", "El año es necesario.").not().isEmpty(),
+      check("month", "El mes es necesario.").not().isEmpty(),
    ],
    async (req, res) => {
-      const { student, year, category, currentMonth } = req.body;
+      const { student, category, year, month } = req.body;
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -318,29 +320,25 @@ router.post(
          });
          installment.save();
 
-         const date = new Date();
-         if (date.getFullYear() === year && date.getMonth() > 2) {
-            number = date.getMonth() + (currentMonth ? 1 : 2);
-         } else {
-            number = 3;
+         if (month !== 0) number = month;
+         else number = 3;
+
+         let value = enrollment.category.value;
+         const half = value / 2;
+
+         const discount = enrollment.student.discount;
+         if (discount && discount !== 0) {
+            const disc = (value * discount) / 100;
+            value = Math.round((value - disc) / 10) * 10;
          }
 
          const amount = 13 - number;
-
          for (let x = 0; x < amount; x++) {
-            let value = enrollment.category.value;
-            const discount = enrollment.student.discount;
-
-            if (discount && discount !== 0) {
-               const disc = (value * discount) / 100;
-               value = Math.round((value - disc) / 10) * 10;
-            }
-
             installment = new Installment({
                number,
                year,
                student,
-               value,
+               value: x === 0 && number === 3 ? half : value,
                expired: false,
                enrollment: enrollment.id,
             });
@@ -607,10 +605,11 @@ router.put(
    [
       auth,
       adminAuth,
-      check("category", "La categoría es necesaria").not().isEmpty(),
+      check("category", "La categoría es necesaria.").not().isEmpty(),
+      check("month", "El mes es necesario.").not().isEmpty(),
    ],
    async (req, res) => {
-      const { year, category, currentMonth } = req.body;
+      const { category, month } = req.body;
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -630,8 +629,6 @@ router.put(
          );
 
          if (enrollment.category._id.toString() !== category) {
-            const date = new Date();
-
             await deleteInfoRelated(
                enrollment.classroom._id,
                enrollment.student
@@ -661,15 +658,14 @@ router.put(
                   model: "category",
                });
 
-            let number = 3;
-
-            if (date.getFullYear() === year && date.getMonth() > 2) {
-               number = date.getMonth() + (currentMonth ? 1 : 2);
-            }
+            let number = 0;
+            if (month !== 0) number = month;
+            else number = 3;
 
             let value = enrollment.category.value;
-            const discount = enrollment.student.discount;
+            const half = value / 2;
 
+            const discount = enrollment.student.discount;
             if (discount && discount !== 0) {
                const disc = (value * discount) / 100;
                value = Math.round((value - disc) / 10) * 10;
@@ -679,7 +675,7 @@ router.put(
             for (let x = 0; x < amount; x++) {
                await Installment.findOneAndUpdate(
                   { enrollment: req.params.id, number, value: { $ne: 0 } },
-                  { value }
+                  { value: x === 0 && number === 3 ? half : value }
                );
                number++;
             }
