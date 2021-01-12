@@ -44,7 +44,7 @@ const StudentInfo = ({
                      onChange={(e) => onChange(e)}
                   >
                      <option value="">
-                        * Seleccione día de recargo en que se aplica el recargo
+                        * Seleccione el día en que se aplicará el recargo
                      </option>
                      <option value="10">10</option>
                      <option value="15">15</option>

@@ -345,7 +345,7 @@ router.put("/", [auth], async (req, res) => {
       }).populate({
          path: "student",
          model: "user",
-         select: "chargeday",
+         select: ["chargeday", "discount"],
       });
 
       let previusYearsInstallments = await Installment.find({
@@ -354,7 +354,7 @@ router.put("/", [auth], async (req, res) => {
       }).populate({
          path: "student",
          model: "user",
-         select: "chargeday",
+         select: ["chargeday", "discount"],
       });
 
       installments = installments.concat(previusYearsInstallments);
@@ -372,9 +372,15 @@ router.put("/", [auth], async (req, res) => {
                   chargeDay < day) &&
                !installments[x].expired
             ) {
-               const charge =
-                  (installments[x].value * penalty.percentage) / 100 +
-                  installments[x].value;
+               let charge = 0;
+
+               if (installments[x].student.discount === 10) {
+                  charge = installments[x].value * 1.1112;
+               } else {
+                  charge =
+                     (installments[x].value * penalty.percentage) / 100 +
+                     installments[x].value;
+               }
                const value = Math.round(charge / 10) * 10;
 
                await Installment.findOneAndUpdate(

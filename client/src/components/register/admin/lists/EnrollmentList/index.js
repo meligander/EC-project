@@ -218,29 +218,38 @@ const EnrollmentList = ({
                                        </td>
                                        <td>{enroll.category.name}</td>
                                        <td>{enroll.year}</td>
-                                       <td>
-                                          <Link
-                                             to={`/edit-enrollment/${enroll._id}`}
-                                             className="btn-text"
-                                             onClick={() => {
-                                                window.scroll(0, 0);
-                                                clearEnrollment();
-                                                clearCategories();
-                                             }}
-                                          >
-                                             <i className="far fa-edit"></i>
-                                          </Link>
-                                       </td>
-                                       <td>
-                                          <button
-                                             className="btn btn-danger"
-                                             onClick={(e) =>
-                                                setToggle(e, enroll._id)
-                                             }
-                                          >
-                                             <i className="far fa-trash-alt"></i>
-                                          </button>
-                                       </td>
+                                       {Number(enroll.year) >= thisYear ? (
+                                          <>
+                                             <td>
+                                                <Link
+                                                   to={`/edit-enrollment/${enroll._id}`}
+                                                   className="btn-text"
+                                                   onClick={() => {
+                                                      window.scroll(0, 0);
+                                                      clearEnrollment();
+                                                      clearCategories();
+                                                   }}
+                                                >
+                                                   <i className="far fa-edit"></i>
+                                                </Link>
+                                             </td>
+                                             <td>
+                                                <button
+                                                   className="btn btn-danger"
+                                                   onClick={(e) =>
+                                                      setToggle(e, enroll._id)
+                                                   }
+                                                >
+                                                   <i className="far fa-trash-alt"></i>
+                                                </button>
+                                             </td>
+                                          </>
+                                       ) : (
+                                          <>
+                                             <td></td>
+                                             <td></td>
+                                          </>
+                                       )}
                                     </tr>
                                  )
                            )}
