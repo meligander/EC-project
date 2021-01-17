@@ -84,8 +84,7 @@ const InstallmentsSearch = ({
          });
    };
 
-   const searchInstallments = (e) => {
-      e.preventDefault();
+   const searchInstallments = () => {
       if (!selectedStudent._id)
          setAlert("Debe seleccionar un usuario primero", "danger", "3");
       else {
@@ -122,8 +121,7 @@ const InstallmentsSearch = ({
    };
 
    //Inside Invoice to add them
-   const addToList = (e) => {
-      e.preventDefault();
+   const addToList = () => {
       if (selectedItem._id === 0) {
          setAlert("No se ha seleccionado ninguna cuota", "danger", "4");
       } else {
@@ -168,7 +166,14 @@ const InstallmentsSearch = ({
             </p>
 
             {selectedStudent._id !== "" && (
-               <button className="btn-cancel" type="button" onClick={restore}>
+               <button
+                  className="btn-cancel"
+                  type="button"
+                  onClick={(e) => {
+                     e.preventDefault();
+                     restore();
+                  }}
+               >
                   <i className="fas fa-times"></i>
                </button>
             )}

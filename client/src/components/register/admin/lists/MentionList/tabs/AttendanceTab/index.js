@@ -35,18 +35,15 @@ function AttendanceTab({
       });
    };
 
-   const search = (e) => {
-      e.preventDefault();
-      loadStudentAttendance(filterData);
-   };
-
-   const pdfGeneratorSave = () => {
-      enrollmentsPDF(enrollments, "attendances");
-   };
-
    return (
       <>
-         <form className="form" onSubmit={search}>
+         <form
+            className="form"
+            onSubmit={(e) => {
+               e.preventDefault();
+               loadStudentAttendance(filterData);
+            }}
+         >
             <div className="form-group">
                <select
                   className="form-input"
@@ -139,7 +136,7 @@ function AttendanceTab({
          <ListButtons
             page={page}
             items={enrollments}
-            pdfGeneratorSave={pdfGeneratorSave}
+            pdfGenerator={() => enrollmentsPDF(enrollments, "attendances")}
             changePage={updatePageNumber}
          />
       </>

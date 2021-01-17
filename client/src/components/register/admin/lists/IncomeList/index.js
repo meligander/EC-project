@@ -16,7 +16,7 @@ import { updatePageNumber } from "../../../../../actions/mixvalues";
 import Loading from "../../../../modal/Loading";
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
-import Confirm from "../../../../modal/Confirm";
+import PopUp from "../../../../modal/PopUp";
 import NameField from "../../../sharedComp/NameField";
 
 import "./style.scss";
@@ -43,16 +43,16 @@ const IncomeList = ({
 
    const [otherValues, setOtherValues] = useState({
       toggleModal: false,
-      invoiceDelete: "",
+      toDelete: "",
    });
 
    const { startDate, endDate, name, lastname } = filterData;
-   const { toggleModal, invoiceDelete } = otherValues;
+   const { toggleModal, toDelete } = otherValues;
 
    useEffect(() => {
       if (loadingInvoices) {
          updatePageNumber(0);
-         loadInvoices({ startDate: "", endDate: "", name: "", lastname: "" });
+         loadInvoices({});
       }
    }, [loadingInvoices, loadInvoices, updatePageNumber]);
 
@@ -64,34 +64,30 @@ const IncomeList = ({
    };
 
    const setToggle = (invoice_id) => {
-      setOtherValues({ invoiceDelete: invoice_id, toggleModal: !toggleModal });
-   };
-
-   const confirm = () => {
-      deleteInvoice(invoiceDelete);
-   };
-
-   const search = (e) => {
-      e.preventDefault();
-      loadInvoices(filterData);
-   };
-
-   const pdfGeneratorSave = () => {
-      invoicesPDF(invoices);
+      setOtherValues({
+         toDelete: invoice_id ? invoice_id : "",
+         toggleModal: !toggleModal,
+      });
    };
 
    return (
       <>
          {!loadingInvoices ? (
             <>
-               <Confirm
+               <PopUp
                   toggleModal={toggleModal}
                   setToggleModal={setToggle}
                   text="¿Está seguro que desea eliminar la factura?"
-                  confirm={confirm}
+                  confirm={() => deleteInvoice(toDelete)}
                />
                <h2>Listado Ingresos</h2>
-               <form className="form bigger" onSubmit={search}>
+               <form
+                  className="form bigger"
+                  onSubmit={(e) => {
+                     e.preventDefault();
+                     loadInvoices(filterData);
+                  }}
+               >
                   <DateFilter
                      endDate={endDate}
                      startDate={startDate}
@@ -142,7 +138,9 @@ const IncomeList = ({
                                           </td>
                                           <td>{invoice.invoiceid}</td>
                                           <td>
-                                             {invoice.user
+                                             {invoice.user === null
+                                                ? "Usuario Eliminado"
+                                                : invoice.user
                                                 ? invoice.user.lastname +
                                                   ", " +
                                                   invoice.user.name
@@ -173,11 +171,12 @@ const IncomeList = ({
                                                       moment().date() && (
                                                       <button
                                                          type="button"
-                                                         onClick={() =>
+                                                         onClick={(e) => {
+                                                            e.preventDefault();
                                                             setToggle(
                                                                invoice._id
-                                                            )
-                                                         }
+                                                            );
+                                                         }}
                                                          className="btn btn-danger"
                                                       >
                                                          <i className="far fa-trash-alt"></i>
@@ -197,7 +196,7 @@ const IncomeList = ({
                   page={page}
                   items={invoices}
                   changePage={updatePageNumber}
-                  pdfGeneratorSave={pdfGeneratorSave}
+                  pdfGenerator={() => invoicesPDF(invoices)}
                />
             </>
          ) : (

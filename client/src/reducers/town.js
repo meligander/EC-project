@@ -25,7 +25,7 @@ export default function (state = initialState, action) {
       case TOWN_DELETED:
          return {
             ...state,
-            towns: state.towns.map((town) => town._id !== payload),
+            towns: state.towns.filter((town) => town._id !== payload),
             loading: false,
          };
       case TOWNS_ERROR:

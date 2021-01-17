@@ -786,54 +786,56 @@ async function inactivateUser(user_id, type, completeDeletion) {
             year: year + 1,
          });
 
-         const grades = await Grade.find({
-            student: user_id,
-            classroom: enrollment.classroom._id,
-         });
-         for (let x = 0; x < grades.length; x++) {
-            await Grade.findOneAndRemove({ _id: grades[x]._id });
-         }
-
-         const attendances = await Attendance.find({
-            student: user_id,
-            classroom: enrollment.classroom._id,
-         });
-         for (let x = 0; x < attendances.length; x++) {
-            await Attendance.findOneAndRemove({ _id: attendances[x]._id });
-         }
-
-         if (completeDeletion) {
-            let posts = await Post.find({
+         if (enrollment && enrollment.classroom._id) {
+            const grades = await Grade.find({
+               student: user_id,
                classroom: enrollment.classroom._id,
-               user: user_id,
             });
-            for (let x = 0; x < posts.length; x++) {
-               await Post.findOneAndDelete({ _id: posts[x] });
+            for (let x = 0; x < grades.length; x++) {
+               await Grade.findOneAndRemove({ _id: grades[x]._id });
             }
-            posts = await Post.find({
+
+            const attendances = await Attendance.find({
+               student: user_id,
                classroom: enrollment.classroom._id,
-               "comments.user": user_id,
             });
-            let position = [];
-            for (let x = 0; x < posts.length; x++) {
-               for (let y = 0; y < posts[x].comments.length; y++) {
-                  if (posts[x].comments[y].user === user_id) {
-                     position.unshift(y);
+            for (let x = 0; x < attendances.length; x++) {
+               await Attendance.findOneAndRemove({ _id: attendances[x]._id });
+            }
+
+            if (completeDeletion) {
+               let posts = await Post.find({
+                  classroom: enrollment.classroom._id,
+                  user: user_id,
+               });
+               for (let x = 0; x < posts.length; x++) {
+                  await Post.findOneAndDelete({ _id: posts[x] });
+               }
+               posts = await Post.find({
+                  classroom: enrollment.classroom._id,
+                  "comments.user": user_id,
+               });
+               let position = [];
+               for (let x = 0; x < posts.length; x++) {
+                  for (let y = 0; y < posts[x].comments.length; y++) {
+                     if (posts[x].comments[y].user === user_id) {
+                        position.unshift(y);
+                     }
+                  }
+                  for (let y = 0; y < position.length; y++) {
+                     posts[x].comments.splice(position, 1);
                   }
                }
-               for (let y = 0; y < position.length; y++) {
-                  posts[x].comments.splice(position, 1);
-               }
-            }
-            posts = await Post.find({
-               classroom: enrollment.classroom._id,
-               "likes.user": user_id,
-            });
-            for (let x = 0; x < posts.length; x++) {
-               for (let y = 0; y < posts[x].likes.length; y++) {
-                  if (posts[x].likes[y].user === user_id) {
-                     posts[x].likes.splice(y, 1);
-                     break;
+               posts = await Post.find({
+                  classroom: enrollment.classroom._id,
+                  "likes.user": user_id,
+               });
+               for (let x = 0; x < posts.length; x++) {
+                  for (let y = 0; y < posts[x].likes.length; y++) {
+                     if (posts[x].likes[y].user === user_id) {
+                        posts[x].likes.splice(y, 1);
+                        break;
+                     }
                   }
                }
             }

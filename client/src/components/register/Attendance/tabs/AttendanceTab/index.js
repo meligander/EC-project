@@ -11,7 +11,8 @@ import {
    attendancesPDF,
 } from "../../../../../actions/attendance";
 
-import Confirm from "../../../../modal/Confirm";
+import PopUp from "../../../../modal/PopUp";
+import Alert from "../../../../sharedComp/Alert";
 
 const AttendanceTab = ({
    history,
@@ -31,12 +32,15 @@ const AttendanceTab = ({
       newAttendances: [],
       newDay: {
          date: "",
+         fromDate: "",
+         toDate: "",
          period,
-         classroom: classInfo._id,
+         classroom: classInfo,
       },
    });
    const [otherValues, setOtherValues] = useState({
       dayPlus: false,
+      addBimester: false,
       toggleModalSave: false,
       toggleModalDelete: false,
       toDelete: null,
@@ -44,6 +48,7 @@ const AttendanceTab = ({
 
    const {
       dayPlus,
+      addBimester,
       toggleModalDelete,
       toggleModalSave,
       toDelete,
@@ -56,6 +61,13 @@ const AttendanceTab = ({
             ...prev,
             newAttendances: periods[period - 1] ? periods[period - 1] : [],
          }));
+
+         if (!periods[period - 1]) {
+            setOtherValues((prev) => ({
+               ...prev,
+               addBimester: true,
+            }));
+         }
       };
 
       setInput();
@@ -84,22 +96,28 @@ const AttendanceTab = ({
          ...formData,
          newDay: {
             ...newDay,
-            date: e.target.value,
+            [e.target.name]: e.target.value,
          },
       });
    };
 
    const addDate = () => {
-      registerNewDate({ ...newDay, periods });
-      setOtherValues({ ...otherValues, dayPlus: !dayPlus });
-      setFormData({
-         ...formData,
-         newAttendances: periods[period - 1],
-      });
-   };
+      registerNewDate(
+         { ...newDay, ...(addBimester && { periods }) },
+         addBimester
+      );
 
-   const clickAddDate = () => {
-      setOtherValues({ ...otherValues, dayPlus: !dayPlus });
+      if (periods[period - 1]) {
+         setFormData({
+            ...formData,
+            newAttendances: periods[period - 1],
+         });
+         setOtherValues({
+            ...otherValues,
+            addBimester: false,
+            dayPlus: false,
+         });
+      }
    };
 
    const deleteDateAc = () => {
@@ -107,11 +125,15 @@ const AttendanceTab = ({
          setAlert(
             "No puede eliminar la última fecha del bimestre",
             "danger",
-            "2"
+            "4"
          );
-         window.scroll(0, 0);
       } else {
-         deleteDate(toDelete.date, toDelete.classroom);
+         deleteDate(
+            toDelete.date,
+            typeof toDelete.classroom === "object"
+               ? toDelete.classroom._id
+               : toDelete.classroom
+         );
          setOtherValues({ ...otherValues, dayPlus: false });
          setFormData({
             ...formData,
@@ -127,23 +149,15 @@ const AttendanceTab = ({
       updateAttendances(AttendancePeriod, history, classInfo._id);
    };
 
-   const setToggleSave = (e) => {
-      if (e) e.preventDefault();
+   const setToggle = () => {
       setOtherValues({
          ...otherValues,
-         toggleModalSave: !toggleModalSave,
+         toggleModalDelete: false,
+         toggleModalSave: false,
       });
    };
 
-   const setToggleDelete = (e) => {
-      if (e) e.preventDefault();
-      setOtherValues({
-         ...otherValues,
-         toggleModalDelete: !toggleModalDelete,
-      });
-   };
-
-   const pdfGeneratorSave = () => {
+   const pdfGenerator = () => {
       attendancesPDF(
          header[period - 1],
          students,
@@ -155,20 +169,21 @@ const AttendanceTab = ({
 
    return (
       <>
+         <Alert type="4" />
+         <PopUp
+            toggleModal={toggleModalSave}
+            setToggleModal={setToggle}
+            confirm={saveAttendances}
+            text="¿Está seguro que desea guardar los cambios?"
+         />
+         <PopUp
+            toggleModal={toggleModalDelete}
+            setToggleModal={setToggle}
+            confirm={deleteDateAc}
+            text="¿Está seguro que desea eliminar la fecha?"
+         />
          {!loading && (
-            <div className="wrapper both">
-               <Confirm
-                  toggleModal={toggleModalSave}
-                  setToggleModal={setToggleSave}
-                  confirm={saveAttendances}
-                  text="¿Está seguro que desea guardar los cambios?"
-               />
-               <Confirm
-                  toggleModal={toggleModalDelete}
-                  setToggleModal={setToggleDelete}
-                  confirm={deleteDateAc}
-                  text="¿Está seguro que desea eliminar la fecha?"
-               />
+            <div className="wrapper both mt-2">
                <table className="stick">
                   <thead>
                      <tr>
@@ -199,10 +214,11 @@ const AttendanceTab = ({
                                        <button
                                           type="button"
                                           className="btn btn-danger"
-                                          onClick={() => {
+                                          onClick={(e) => {
+                                             e.preventDefault();
                                              setOtherValues({
                                                 ...otherValues,
-                                                toggleModalDelete: !toggleModalDelete,
+                                                toggleModalDelete: true,
                                                 toDelete: row,
                                              });
                                           }}
@@ -222,7 +238,13 @@ const AttendanceTab = ({
             <button
                className="btn btn-primary"
                type="button"
-               onClick={setToggleSave}
+               onClick={(e) => {
+                  e.preventDefault();
+                  setOtherValues({
+                     ...otherValues,
+                     toggleModalSave: true,
+                  });
+               }}
             >
                <i className="far fa-save"></i>
                <span className="hide-md">&nbsp; Guardar</span>
@@ -230,7 +252,10 @@ const AttendanceTab = ({
             <button
                className="btn btn-dark"
                type="button"
-               onClick={clickAddDate}
+               onClick={(e) => {
+                  e.preventDefault();
+                  setOtherValues({ ...otherValues, dayPlus: !dayPlus });
+               }}
             >
                <i className="fas fa-plus"></i>
                <span className="hide-md">&nbsp; Día</span>
@@ -238,33 +263,74 @@ const AttendanceTab = ({
             <button
                className="btn btn-secondary"
                type="button"
-               onClick={pdfGeneratorSave}
+               onClick={(e) => {
+                  e.preventDefault();
+                  pdfGenerator();
+               }}
             >
                <i className="fas fa-file-pdf"></i>
             </button>
          </div>
          {dayPlus && (
-            <form className="form smaller pt-5">
+            <form
+               className="form smaller pt-5"
+               onSubmit={(e) => {
+                  e.preventDefault();
+                  addDate();
+               }}
+            >
                <div className="border">
-                  <div className="form-group">
-                     <input
-                        className="form-input center"
-                        id="date"
-                        type="date"
-                        name="newDate"
-                        onChange={onChangeDate}
-                        value={newDay.day}
-                     />
-                     <label htmlFor="date" className="form-label show">
-                        Nuevo día
-                     </label>
-                  </div>
+                  <Alert type="3" />
+                  {addBimester ? (
+                     <>
+                        <div className="form-group">
+                           <input
+                              className="form-input center"
+                              id="fromDate"
+                              type="date"
+                              name="fromDate"
+                              onChange={onChangeDate}
+                              value={newDay.fromDate}
+                           />
+                           <label
+                              htmlFor="fromDate"
+                              className="form-label show"
+                           >
+                              Comienzo del bimestre
+                           </label>
+                        </div>
+                        <div className="form-group">
+                           <input
+                              className="form-input center"
+                              id="toDate"
+                              type="date"
+                              name="toDate"
+                              onChange={onChangeDate}
+                              value={newDay.toDate}
+                           />
+                           <label htmlFor="toDate" className="form-label show">
+                              Fin del bimestre
+                           </label>
+                        </div>
+                     </>
+                  ) : (
+                     <div className="form-group">
+                        <input
+                           className="form-input center"
+                           id="date"
+                           type="date"
+                           name="date"
+                           onChange={onChangeDate}
+                           value={newDay.day}
+                        />
+                        <label htmlFor="date" className="form-label show">
+                           Nuevo día
+                        </label>
+                     </div>
+                  )}
+
                   <div className="btn-ctr">
-                     <button
-                        type="submit"
-                        onClick={addDate}
-                        className="btn btn-dark"
-                     >
+                     <button type="submit" className="btn btn-dark">
                         <i className="fas fa-plus"></i>
                         <span className="hide-sm">&nbsp; Agregar</span>
                      </button>

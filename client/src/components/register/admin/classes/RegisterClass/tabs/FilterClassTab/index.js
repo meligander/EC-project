@@ -64,8 +64,7 @@ const FilterClassTab = ({
       });
    };
 
-   const addChild = (e, studentInfo) => {
-      e.preventDefault();
+   const addChild = (studentInfo) => {
       let exist = false;
       for (let x = 0; x < classInfo.students.length; x++) {
          if (classInfo.students[x]._id === studentInfo._id) exist = true;

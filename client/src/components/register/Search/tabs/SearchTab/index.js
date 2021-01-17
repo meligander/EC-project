@@ -18,19 +18,11 @@ const SearchTab = ({
    typeF,
    userPDF,
 }) => {
-   const searchType = () => {
-      switch (typeF) {
-         case "Alumnos":
-            return "student";
-         case "Tutores":
-            return "guardian";
-         case "Profesores":
-            return "teacher";
-         case "Administradores":
-            return "admin";
-         default:
-            break;
-      }
+   const searchType = {
+      Alumnos: "student",
+      Tutores: "guardian",
+      Profesores: "teacher",
+      Administradores: "admin",
    };
 
    const [filterForm, setFilterForm] = useState({
@@ -40,7 +32,7 @@ const SearchTab = ({
       category: "",
       studentname: "",
       studentlastname: "",
-      type: searchType(),
+      type: searchType[typeF],
    });
 
    const {
@@ -71,18 +63,15 @@ const SearchTab = ({
       });
    };
 
-   const searchUsers = (e) => {
-      e.preventDefault();
-      loadUsers(filterForm, true, false, true);
-   };
-
-   const pdfGeneratorSave = () => {
-      userPDF(users, userSearchType);
-   };
-
    return (
       <>
-         <form className="form">
+         <form
+            className="form"
+            onSubmit={(e) => {
+               e.preventDefault();
+               loadUsers(filterForm, true, false, true);
+            }}
+         >
             <NameField
                name={name}
                lastname={lastname}
@@ -145,11 +134,7 @@ const SearchTab = ({
                </label>
             </div>
             <div className="btn-right mb-1">
-               <button
-                  type="submit"
-                  className="btn btn-light"
-                  onClick={(e) => searchUsers(e)}
-               >
+               <button type="submit" className="btn btn-light">
                   <i className="fas fa-filter"></i>&nbsp; Buscar
                </button>
             </div>
@@ -177,7 +162,10 @@ const SearchTab = ({
             <button
                className="btn btn-secondary"
                type="button"
-               onClick={pdfGeneratorSave}
+               onClick={(e) => {
+                  e.preventDefault();
+                  userPDF(users, userSearchType);
+               }}
             >
                <i className="fas fa-file-pdf"></i>
             </button>

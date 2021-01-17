@@ -90,6 +90,23 @@
             width: 6rem;
          }
       }
+
+      .student {
+         font-size: 1.5rem;
+         text-align: left;
+
+         &:not(:last-child) {
+            margin-bottom: 2rem;
+         }
+         .name {
+            color: $dark-color;
+         }
+         .form-input {
+            margin: 1rem;
+            width: 96%;
+            margin-bottom: 0;
+         }
+      }
    }
 
    &-penalty {

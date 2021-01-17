@@ -49,7 +49,10 @@ const Team = ({ users: { loadingUsers, users }, loadUsers }) => {
                            className={`btn-icon ${
                               teamNumber === 0 ? "text-dark" : "text-primary"
                            }`}
-                           onClick={moveDown}
+                           onClick={(e) => {
+                              e.preventDefault();
+                              moveDown();
+                           }}
                         >
                            <h2>
                               <i className="fas fa-chevron-circle-left"></i>
@@ -63,7 +66,10 @@ const Team = ({ users: { loadingUsers, users }, loadUsers }) => {
                                     ? "text-dark"
                                     : "text-primary"
                               }`}
-                              onClick={moveUp}
+                              onClick={(e) => {
+                                 e.preventDefault();
+                                 moveUp();
+                              }}
                            >
                               <h2>
                                  <i className="fas fa-chevron-circle-right"></i>
@@ -112,7 +118,10 @@ const Team = ({ users: { loadingUsers, users }, loadUsers }) => {
                                  ? "text-dark"
                                  : "text-primary"
                            }`}
-                           onClick={moveUp}
+                           onClick={(e) => {
+                              e.preventDefault();
+                              moveUp();
+                           }}
                         >
                            <h2>
                               <i className="fas fa-chevron-circle-right"></i>

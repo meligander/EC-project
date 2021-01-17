@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 
 import { addComment, deleteComment } from "../../../../../actions/post";
 
-import Confirm from "../../../../modal/Confirm";
+import PopUp from "../../../../modal/PopUp";
 
 import "./style.scss";
 
@@ -46,8 +46,7 @@ const Comments = ({
       deleteComment(post_id, toDelete, -screen);
    };
 
-   const registerComment = (e) => {
-      e.preventDefault();
+   const registerComment = () => {
       let screen = 100 + commentsArray.length * 100;
       addComment(post_id, postForm, -screen);
       setPostForm({
@@ -55,19 +54,18 @@ const Comments = ({
       });
    };
 
-   const setToggle = (e, comment_id, index) => {
-      if (e) e.preventDefault();
+   const setToggle = (comment_id, index) => {
       setOtherValues({
          ...otherValues,
          toDelete: comment_id ? comment_id : "",
          toggleModal: !toggleModal,
-         index,
+         index: index ? index : 0,
       });
    };
 
    return (
       <div className="comments">
-         <Confirm
+         <PopUp
             toggleModal={toggleModal}
             setToggleModal={setToggle}
             confirm={deletePostComment}
@@ -102,7 +100,10 @@ const Comments = ({
                      <div className="btn-close">
                         <button
                            type="button"
-                           onClick={(e) => setToggle(e, comment._id, index)}
+                           onClick={(e) => {
+                              e.preventDefault();
+                              setToggle(comment._id, index);
+                           }}
                            className="btn btn-danger"
                         >
                            <i className="fas fa-times"></i>
@@ -112,7 +113,13 @@ const Comments = ({
                </div>
             ))
             .reverse()}
-         <form className="form paragraph" onClick={registerComment}>
+         <form
+            className="form paragraph"
+            onSubmit={(e) => {
+               e.preventDefault();
+               registerComment();
+            }}
+         >
             <textarea
                className="form-input"
                rows="3"

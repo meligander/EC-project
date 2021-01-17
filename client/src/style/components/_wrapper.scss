@@ -7,6 +7,10 @@
    &.both {
       overflow-y: auto;
       max-height: 80vh;
+
+      &.smaller {
+         max-height: 65vh;
+      }
    }
 
    &::-webkit-scrollbar {

@@ -6,6 +6,10 @@ const jwt = require("jsonwebtoken");
 const router = express.Router();
 const auth = require("../../middleware/auth");
 
+/* const accountSid = config.get("twilioAccountSid");
+const authToken = config.get("twilioAuthToken");
+const client = require("twilio")(accountSid, authToken); */
+
 const User = require("../../models/User");
 const Enrollment = require("../../models/Enrollment");
 
@@ -96,6 +100,14 @@ router.post(
                id: user.id,
             },
          };
+
+         /* const message = await client.messages.create({
+            body:
+               "La cuota del alumno Polio García, Mateo Junior está por vencerse",
+            from: "whatsapp:+14155238886",
+            to: "whatsapp:+18608741335",
+         });
+         console.log(message.sid); */
 
          jwt.sign(
             payload,

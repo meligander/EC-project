@@ -10,7 +10,7 @@ import {
 } from "../../../../actions/category";
 
 import Loading from "../../../modal/Loading";
-import Confirm from "../../../modal/Confirm";
+import PopUp from "../../../modal/PopUp";
 
 import "./style.scss";
 
@@ -63,8 +63,7 @@ const Categories = ({
       }
    }, [loadCategories, loading, categories]);
 
-   const setToggle = (e) => {
-      if (e) e.preventDefault();
+   const setToggle = () => {
       setOtherValues({
          ...otherValues,
          toggleModal: !toggleModal,
@@ -87,26 +86,24 @@ const Categories = ({
       });
    };
 
-   const onSubmit = () => {
-      updateCategories({ categories: formData, date }, history, userLogged._id);
-   };
-
-   const pdfGeneratorSave = () => {
-      categoriesPDF(categories);
-   };
-
    return (
       <>
          {!loading ? (
             <>
                <h2>Categorías y Precios</h2>
-               <Confirm
+               <PopUp
                   text="¿Está seguro que los datos son correctos?"
-                  confirm={onSubmit}
+                  confirm={() =>
+                     updateCategories(
+                        { categories: formData, date },
+                        history,
+                        userLogged._id
+                     )
+                  }
                   setToggleModal={setToggle}
                   toggleModal={toggleModal}
                />
-               <form className="form " onSubmit={setToggle}>
+               <div className="form ">
                   <div className="form-group">
                      <input
                         className="form-input"
@@ -123,46 +120,56 @@ const Categories = ({
                         precio.
                      </label>
                   </div>
+               </div>
 
-                  <table className="smaller category">
-                     <thead>
-                        <tr>
-                           <th>Nombre</th>
-                           <th>Valor</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        {formData.length > 0 &&
-                           formData.map((category, index) => (
-                              <tr key={index}>
-                                 <td>{category.name}</td>
-                                 <td>
-                                    <input
-                                       type="number"
-                                       name={`value${index}`}
-                                       value={category.value}
-                                       placeholder="Valor"
-                                       onChange={(e) => onChange(e, index)}
-                                    />
-                                 </td>
-                              </tr>
-                           ))}
-                     </tbody>
-                  </table>
-                  <div className="btn-right p-2">
-                     <button type="submit" className="btn btn-primary">
-                        <i className="far fa-save"></i>
-                        <span className="hide-sm">&nbsp; Actualizar</span>
-                     </button>
-                     <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={pdfGeneratorSave}
-                     >
-                        <i className="fas fa-file-pdf"></i>
-                     </button>
-                  </div>
-               </form>
+               <table className="smaller category">
+                  <thead>
+                     <tr>
+                        <th>Nombre</th>
+                        <th>Valor</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     {formData.length > 0 &&
+                        formData.map((category, index) => (
+                           <tr key={index}>
+                              <td>{category.name}</td>
+                              <td>
+                                 <input
+                                    type="number"
+                                    name={`value${index}`}
+                                    value={category.value}
+                                    placeholder="Valor"
+                                    onChange={(e) => onChange(e, index)}
+                                 />
+                              </td>
+                           </tr>
+                        ))}
+                  </tbody>
+               </table>
+               <div className="btn-right p-2">
+                  <button
+                     type="button"
+                     onClick={(e) => {
+                        e.preventDefault();
+                        setToggle();
+                     }}
+                     className="btn btn-primary"
+                  >
+                     <i className="far fa-save"></i>
+                     <span className="hide-sm">&nbsp; Actualizar</span>
+                  </button>
+                  <button
+                     type="button"
+                     className="btn btn-secondary"
+                     onClick={(e) => {
+                        e.preventDefault();
+                        categoriesPDF(categories);
+                     }}
+                  >
+                     <i className="fas fa-file-pdf"></i>
+                  </button>
+               </div>
             </>
          ) : (
             <Loading />

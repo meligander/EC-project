@@ -10,7 +10,7 @@ import {
 } from "../../../../../../../actions/class";
 import { clearProfile } from "../../../../../../../actions/user";
 
-import Confirm from "../../../../../../modal/Confirm";
+import PopUp from "../../../../../../modal/PopUp";
 import StudentTable from "../../../../../sharedComp/tables/StudentTable";
 
 const NewClassTab = ({
@@ -85,17 +85,11 @@ const NewClassTab = ({
       });
    };
 
-   const deleteChild = (e, studentToDelete) => {
-      e.preventDefault();
-      removeStudent(studentToDelete);
-   };
-
-   const setToggle = (e) => {
-      if (e) e.preventDefault();
+   const setToggle = () => {
       setOtherValues({ ...otherValues, toggleModal: !toggleModal });
    };
 
-   const onSubmit = () => {
+   const confirm = () => {
       registerUpdateClass(
          {
             ...formData,
@@ -109,13 +103,19 @@ const NewClassTab = ({
 
    return (
       <>
-         <Confirm
+         <PopUp
             toggleModal={toggleModal}
             setToggleModal={setToggle}
-            confirm={onSubmit}
+            confirm={confirm}
             text="¿Está seguro que los datos son correctos?"
          />
-         <form className="form" onSubmit={setToggle}>
+         <form
+            className="form"
+            onSubmit={(e) => {
+               e.preventDefault();
+               setToggle();
+            }}
+         >
             <div className="form-group my-3 heading-tertiary">
                <p>Categoría: &nbsp; {!loading && classInfo.category.name}</p>
             </div>
@@ -263,7 +263,9 @@ const NewClassTab = ({
                         users={classInfo.students}
                         clearProfile={clearProfile}
                         loadingUsers={true}
-                        actionWChild={deleteChild}
+                        actionWChild={(studentToDelete) =>
+                           removeStudent(studentToDelete)
+                        }
                         type="chosen-child"
                      />
                   ) : (

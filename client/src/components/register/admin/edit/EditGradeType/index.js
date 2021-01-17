@@ -11,7 +11,7 @@ import { loadCategories } from "../../../../../actions/category";
 
 import Loading from "../../../../modal/Loading";
 import EditButtons from "../sharedComp/EditButtons";
-import Confirm from "../../../../modal/Confirm";
+import PopUp from "../../../../modal/PopUp";
 
 const EditGradeType = ({
    loadGradeTypes,
@@ -140,18 +140,11 @@ const EditGradeType = ({
       });
    };
 
-   const setToggleSave = () => {
+   const setToggle = () => {
       setOtherValues({
          ...otherValues,
-         toggleModalSave: !toggleModalSave,
-      });
-   };
-
-   const setToggleDelete = (row) => {
-      setOtherValues({
-         ...otherValues,
-         ...(row && { toDelete: row }),
-         toggleModalDelete: !toggleModalDelete,
+         toggleModalSave: false,
+         toggleModalDelete: false,
       });
    };
 
@@ -159,15 +152,15 @@ const EditGradeType = ({
       <>
          {!loadingGT ? (
             <>
-               <Confirm
+               <PopUp
                   toggleModal={toggleModalSave}
-                  setToggleModal={setToggleSave}
+                  setToggleModal={setToggle}
                   confirm={saveGradeTypes}
                   text="¿Está seguro que desea guardar los cambios?"
                />
-               <Confirm
+               <PopUp
                   toggleModal={toggleModalDelete}
-                  setToggleModal={setToggleDelete}
+                  setToggleModal={setToggle}
                   confirm={deleteGradeTypeConfirm}
                   text="¿Está seguro que desea eliminar el tipo de nota?"
                />
@@ -217,7 +210,14 @@ const EditGradeType = ({
                                  <td>
                                     <button
                                        type="button"
-                                       onClick={() => setToggleDelete(row)}
+                                       onClick={(e) => {
+                                          e.preventDefault();
+                                          setOtherValues({
+                                             ...otherValues,
+                                             toDelete: row,
+                                             toggleModalDelete: true,
+                                          });
+                                       }}
                                        className="btn btn-danger"
                                     >
                                        <i className="far fa-trash-alt"></i>
@@ -229,7 +229,12 @@ const EditGradeType = ({
                   </table>
                </div>
                <EditButtons
-                  save={setToggleSave}
+                  save={() =>
+                     setOtherValues({
+                        ...otherValues,
+                        toggleModalSave: true,
+                     })
+                  }
                   add={addGradeType}
                   type="Tipo de Nota"
                />

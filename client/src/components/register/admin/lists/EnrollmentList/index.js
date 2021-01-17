@@ -22,7 +22,7 @@ import Loading from "../../../../modal/Loading";
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
 import NameFilter from "../../../sharedComp/NameField";
-import Confirm from "../../../../modal/Confirm";
+import PopUp from "../../../../modal/PopUp";
 
 const EnrollmentList = ({
    mixvalues: { page },
@@ -77,25 +77,11 @@ const EnrollmentList = ({
       });
    };
 
-   const search = (e) => {
-      e.preventDefault();
-      loadEnrollments(filterData);
-   };
-
-   const pdfGeneratorSave = () => {
-      enrollmentsPDF(enrollments, "enrollments");
-   };
-
-   const setToggle = (e, enroll_id) => {
-      if (e) e.preventDefault();
+   const setToggle = (enroll_id) => {
       setOtherValues({
          toDelete: enroll_id ? enroll_id : "",
          toggleModal: !toggleModal,
       });
-   };
-
-   const deleteEnroll = () => {
-      deleteEnrollment(toDelete);
    };
 
    return (
@@ -103,13 +89,19 @@ const EnrollmentList = ({
          {!loadingEnrollments && !loading ? (
             <>
                <h2>Listado Inscripciones</h2>
-               <Confirm
+               <PopUp
                   setToggleModal={setToggle}
                   toggleModal={toggleModal}
-                  confirm={deleteEnroll}
+                  confirm={() => deleteEnrollment(toDelete)}
                   text="¿Está seguro que desea eliminar la inscripción?"
                />
-               <form className="form" onSubmit={search}>
+               <form
+                  className="form"
+                  onSubmit={(e) => {
+                     e.preventDefault();
+                     loadEnrollments(filterData);
+                  }}
+               >
                   <DateFilter
                      endDate={endDate}
                      startDate={startDate}
@@ -236,9 +228,10 @@ const EnrollmentList = ({
                                              <td>
                                                 <button
                                                    className="btn btn-danger"
-                                                   onClick={(e) =>
-                                                      setToggle(e, enroll._id)
-                                                   }
+                                                   onClick={(e) => {
+                                                      e.preventDefault();
+                                                      setToggle(enroll._id);
+                                                   }}
                                                 >
                                                    <i className="far fa-trash-alt"></i>
                                                 </button>
@@ -259,7 +252,9 @@ const EnrollmentList = ({
                <ListButtons
                   page={page}
                   items={enrollments}
-                  pdfGeneratorSave={pdfGeneratorSave}
+                  pdfGenerator={() =>
+                     enrollmentsPDF(enrollments, "enrollments")
+                  }
                   changePage={updatePageNumber}
                />
             </>

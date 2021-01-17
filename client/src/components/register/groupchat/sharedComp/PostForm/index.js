@@ -15,11 +15,10 @@ const PostForm = ({ addPost, class_id }) => {
       });
    };
 
-   const onSubmit = (e) => {
+   const onSubmit = () => {
       setPostForm({
          text: "",
       });
-      e.preventDefault();
       addPost(postForm, class_id);
    };
 
@@ -30,7 +29,13 @@ const PostForm = ({ addPost, class_id }) => {
                Realiza un comentario para que lo vea la clase
             </h3>
          </div>
-         <form className="paragraph" onSubmit={onSubmit}>
+         <form
+            className="paragraph"
+            onSubmit={(e) => {
+               e.preventDefault();
+               onSubmit();
+            }}
+         >
             <textarea
                className="form-input"
                cols="30"

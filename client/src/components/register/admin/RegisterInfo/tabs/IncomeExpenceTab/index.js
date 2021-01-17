@@ -10,7 +10,7 @@ import {
 import { loadUsers } from "../../../../../../actions/user";
 import { setAlert } from "../../../../../../actions/alert";
 
-import Confirm from "../../../../../modal/Confirm";
+import PopUp from "../../../../../modal/PopUp";
 import Alert from "../../../../../sharedComp/Alert";
 
 import "./style.scss";
@@ -105,7 +105,7 @@ const IncomeExpenceTab = ({
       });
    };
 
-   const onSubmit = () => {
+   const confirm = () => {
       let des = description;
       if (teacher._id !== "") des = "Pago a " + teacher.name + ". " + des;
       registerExpence(
@@ -142,10 +142,10 @@ const IncomeExpenceTab = ({
    return (
       <>
          <Alert type="3" />
-         <Confirm
+         <PopUp
             toggleModal={toggleModal}
             setToggleModal={setToggle}
-            confirm={onSubmit}
+            confirm={confirm}
             text="¿Está seguro que desea registrar un nuevo movimiento?"
          />
          {!register && (

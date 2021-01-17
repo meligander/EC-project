@@ -36,20 +36,17 @@ function AverageTab({
       });
    };
 
-   const search = (e) => {
-      e.preventDefault();
-      loadStudentAverage(filterData);
-   };
-
-   const pdfGeneratorSave = () => {
-      enrollmentsPDF(enrollments, "averages");
-   };
-
    return (
       <>
          {!loading ? (
             <>
-               <form className="form" onSubmit={search}>
+               <form
+                  className="form"
+                  onSubmit={(e) => {
+                     e.preventDefault();
+                     loadStudentAverage(filterData);
+                  }}
+               >
                   <div className="form-group">
                      <select
                         className="form-input"
@@ -144,7 +141,7 @@ function AverageTab({
                <ListButtons
                   page={page}
                   items={enrollments}
-                  pdfGeneratorSave={pdfGeneratorSave}
+                  pdfGenerator={() => enrollmentsPDF(enrollments, "averages")}
                   changePage={updatePageNumber}
                />
             </>

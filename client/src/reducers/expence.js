@@ -45,7 +45,7 @@ export default function (state = initialState, action) {
       case EXPENCE_DELETED:
          return {
             ...state,
-            transactions: state.transactions.map(
+            transactions: state.transactions.filter(
                (expence) => expence._id !== payload
             ),
             loadingTransactions: false,
@@ -53,7 +53,7 @@ export default function (state = initialState, action) {
       case EXPENCETYPE_DELETED:
          return {
             ...state,
-            expencetypes: state.expencetypes.map(
+            expencetypes: state.expencetypes.filter(
                (expencetypes) => expencetypes._id !== payload
             ),
             loadingET: false,

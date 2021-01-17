@@ -96,16 +96,22 @@ export const loadGradeTypesByCategory = (category_id) => async (dispatch) => {
    }
 };
 
-export const registerNewGrade = (newGrade) => async (dispatch) => {
+export const registerNewGrade = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
+      let newGrade = {};
+      for (const prop in formData) {
+         if (formData[prop] !== "") {
+            newGrade[prop] = formData[prop];
+         }
+      }
       const res = await axios.post("/api/grade", newGrade);
 
       dispatch({
          type: NEWGRADE_REGISTERED,
          payload: res.data,
       });
-      dispatch(setAlert("Nuevo Tipo de Nota Agregado", "success", "2"));
+      dispatch(setAlert("Nuevo Tipo de Nota Agregado", "success", "3"));
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;
@@ -117,10 +123,9 @@ export const registerNewGrade = (newGrade) => async (dispatch) => {
             msg,
          },
       });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "3"));
    }
 
-   window.scrollTo(0, 0);
    dispatch(updateLoadingSpinner(false));
 };
 
@@ -172,7 +177,7 @@ export const deleteGrades = (grade) => async (dispatch) => {
          payload: res.data,
       });
 
-      dispatch(setAlert("Tipo de Nota Eliminado", "success", "2"));
+      dispatch(setAlert("Tipo de Nota Eliminado", "success", "4"));
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;
@@ -184,10 +189,9 @@ export const deleteGrades = (grade) => async (dispatch) => {
             msg,
          },
       });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "4"));
    }
 
-   window.scrollTo(0, 0);
    dispatch(updateLoadingSpinner(false));
 };
 
@@ -251,42 +255,83 @@ export const deleteGradeType = (toDelete) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const gradesPDF = (
-   header,
-   students,
-   periods,
-   classInfo,
-   period,
-   all
-) => async (dispatch) => {
+export const gradesPDF = (info, classInfo, type) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    let tableInfo = {
-      students,
-      header,
-      periods,
+      students: classInfo.students,
+      header: info.header,
+      period: info.period,
       classInfo,
-      period,
+      ...(type === "bimester" && { periodNumber: info.periodNumber }),
    };
 
    try {
-      if (all) await axios.post("/api/grade/all/create-list", tableInfo);
-      else await axios.post("/api/grade/create-list", tableInfo);
-
-      const pdf = await axios.get("/api/grade/list/fetch-list", {
-         responseType: "blob",
-      });
-
-      const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
-
+      let pdf;
+      let name = "";
       const date = moment().format("DD-MM-YY");
 
-      saveAs(
-         pdfBlob,
-         `Notas de ${classInfo.category.name} de ${
+      switch (type) {
+         case "bimester":
+            await axios.post("/api/grade/create-list", tableInfo);
+            break;
+         case "all":
+            await axios.post("/api/grade/all/create-list", tableInfo);
+            break;
+         case "report-cards":
+            for (let x = 0; x < classInfo.students.length; x++) {
+               const reportInfo = {
+                  student: {
+                     _id: classInfo.students[x]._id,
+                     name:
+                        classInfo.students[x].lastname +
+                        ", " +
+                        classInfo.students[x].name,
+                  },
+                  observation: info[x],
+                  classInfo: {
+                     _id: classInfo._id,
+                     teacher:
+                        classInfo.teacher.lastname +
+                        ", " +
+                        classInfo.teacher.name,
+                     category: classInfo.category.name,
+                  },
+               };
+
+               await axios.post("/api/grade/report-card", reportInfo);
+
+               pdf = await axios.get("/api/grade/pdf/report-card", {
+                  responseType: "blob",
+               });
+
+               name = `Libreta de ${reportInfo.student.name} de ${reportInfo.classInfo.category}`;
+
+               const pdfBlob = new Blob([pdf.data], {
+                  type: "application/pdf",
+               });
+
+               saveAs(pdfBlob, `${name} ${date}.pdf`);
+            }
+            break;
+         default:
+            break;
+      }
+
+      if (type !== "report-cards") {
+         name = `Notas de ${classInfo.category.name} de ${
             classInfo.teacher.lastname + ", " + classInfo.teacher.name
-         }  ${date}.pdf`
-      );
+         }  ${date}.pdf`;
+
+         pdf = await axios.get("/api/grade/list/fetch-list", {
+            responseType: "blob",
+         });
+
+         const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
+
+         saveAs(pdfBlob, name);
+      }
+
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
       const msg = err.response.data.msg;
@@ -353,6 +398,7 @@ export const certificatePDF = (
       }
 
       dispatch(setAlert("Certificados Generados", "success", "2"));
+      window.scrollTo(0, 0);
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;
@@ -364,10 +410,9 @@ export const certificatePDF = (
             msg,
          },
       });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "4"));
    }
 
-   window.scrollTo(0, 0);
    dispatch(updateLoadingSpinner(false));
 };
 

@@ -323,12 +323,19 @@ router.post(
          else number = 3;
 
          let value = enrollment.category.value;
-         const half = value / 2;
+         let half = value / 2;
 
          const discount = enrollment.student.discount;
          if (discount && discount !== 0) {
-            const disc = (value * discount) / 100;
+            let disc = (value * discount) / 100;
             value = Math.round((value - disc) / 10) * 10;
+            if (number === 3) {
+               if (discount === 50) number = 4;
+               else {
+                  disc = (half * discount) / 100;
+                  half = Math.round((half - disc) / 10) * 10;
+               }
+            }
          }
 
          const amount = 13 - number;
@@ -536,9 +543,14 @@ router.post("/absences/create-list", (req, res) => {
             type = "Perfecta";
             break;
          case 1:
-         case 2:
-            type = "Casi Perfecta";
+            type = "Excelente";
             break;
+         case 2:
+            type = "Muy Buena";
+            break;
+         case 3:
+         case 4:
+            "Buena";
          default:
             type = "Regular";
             break;
@@ -662,12 +674,19 @@ router.put(
             else number = 3;
 
             let value = enrollment.category.value;
-            const half = value / 2;
+            let half = value / 2;
 
             const discount = enrollment.student.discount;
             if (discount && discount !== 0) {
-               const disc = (value * discount) / 100;
+               let disc = (value * discount) / 100;
                value = Math.round((value - disc) / 10) * 10;
+               if (number === 3) {
+                  if (discount === 50) number = 4;
+                  else {
+                     disc = (half * discount) / 100;
+                     half = Math.round((half - disc) / 10) * 10;
+                  }
+               }
             }
 
             const amount = 13 - number;

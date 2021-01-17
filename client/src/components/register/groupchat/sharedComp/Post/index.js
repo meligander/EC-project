@@ -8,7 +8,7 @@ import { clearProfile } from "../../../../../actions/user";
 import { addRemoveLike, seenPost } from "../../../../../actions/post";
 
 import Comments from "../Comments";
-import Confirm from "../../../../modal/Confirm";
+import PopUp from "../../../../modal/PopUp";
 import Alert from "../../../../sharedComp/Alert";
 
 import "./style.scss";
@@ -21,9 +21,9 @@ const Post = ({
    clearProfile,
    setToggle,
 }) => {
-   const [otherValues, setotherValues] = useState({
+   const [otherValues, setOtherValues] = useState({
       toggleComments: false,
-      toggleUsersLiked: false,
+      toggleModalLikes: false,
       isLiked: false,
       oneLoad: true,
       hasNotSeen: false,
@@ -33,7 +33,7 @@ const Post = ({
       toggleComments,
       isLiked,
       oneLoad,
-      toggleUsersLiked,
+      toggleModalLikes,
       hasNotSeen,
    } = otherValues;
 
@@ -49,7 +49,7 @@ const Post = ({
       if (oneLoad) {
          for (let x = 0; x < post.likes.length; x++) {
             if (post.likes[x].user._id === userLogged._id) {
-               setotherValues((prev) => ({
+               setOtherValues((prev) => ({
                   ...prev,
                   isLiked: true,
                }));
@@ -76,39 +76,32 @@ const Post = ({
 
                seenPost(post._id, { newSeen, newOne });
 
-               setotherValues((prev) => ({
+               setOtherValues((prev) => ({
                   ...prev,
                   hasNotSeen: true,
                }));
             }
          }
 
-         setotherValues((prev) => ({
+         setOtherValues((prev) => ({
             ...prev,
             oneLoad: false,
          }));
       }
    }, [post, userLogged, oneLoad, canMarkSeenUser, seenPost]);
 
-   const setToggleComments = () => {
-      setotherValues({
+   const setToggleModalLikes = () => {
+      setOtherValues({
          ...otherValues,
-         toggleComments: !toggleComments,
-      });
-   };
-
-   const setToggleUsersLiked = () => {
-      setotherValues({
-         ...otherValues,
-         toggleUsersLiked: !toggleUsersLiked,
+         toggleModalLikes: !toggleModalLikes,
       });
    };
 
    return (
       <div className={`post ${hasNotSeen ? "bg-unseen" : "bg-white"} `}>
-         <Confirm
-            toggleModal={toggleUsersLiked}
-            setToggleModal={setToggleUsersLiked}
+         <PopUp
+            toggleModal={toggleModalLikes}
+            setToggleModal={setToggleModalLikes}
             type="post-likes"
             users={post.likes}
          />
@@ -116,7 +109,10 @@ const Post = ({
             {(post.user._id === userLogged._id || isAdmin) && (
                <button
                   type="button"
-                  onClick={(e) => setToggle(e, post._id)}
+                  onClick={(e) => {
+                     e.preventDefault();
+                     setToggle(post._id);
+                  }}
                   className="btn btn-danger"
                >
                   <i className="fas fa-times"></i>
@@ -153,7 +149,10 @@ const Post = ({
                   {(post.user._id === userLogged._id || isAdmin) && (
                      <button
                         type="button"
-                        onClick={(e) => setToggle(e, post._id)}
+                        onClick={(e) => {
+                           e.preventDefault();
+                           setToggle(post._id);
+                        }}
                         className="btn btn-danger"
                      >
                         <i className="fas fa-times"></i>
@@ -170,9 +169,10 @@ const Post = ({
 
                <button
                   type="button"
-                  onClick={() => {
+                  onClick={(e) => {
+                     e.preventDefault();
                      addRemoveLike(post._id);
-                     setotherValues({ ...otherValues, isLiked: !isLiked });
+                     setOtherValues({ ...otherValues, isLiked: !isLiked });
                   }}
                   className={`btn btn-mix-secondary ${isLiked ? "liked" : ""}`}
                >
@@ -181,7 +181,7 @@ const Post = ({
                <button
                   type="button"
                   className="btn btn-mix-secondary"
-                  onClick={setToggleUsersLiked}
+                  onClick={setToggleModalLikes}
                >
                   <span className="heart">
                      <i className="fas fa-heart"></i>
@@ -196,8 +196,12 @@ const Post = ({
                <button
                   type="button"
                   className="btn btn-light"
-                  onClick={() => {
-                     setToggleComments(!toggleComments);
+                  onClick={(e) => {
+                     e.preventDefault();
+                     setOtherValues({
+                        ...otherValues,
+                        toggleComments: !toggleComments,
+                     });
                   }}
                >
                   <i className="far fa-comments"></i>

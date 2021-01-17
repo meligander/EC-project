@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 import "./style.scss";
 
-const ListButtons = ({ changePage, items, page, pdfGeneratorSave }) => {
+const ListButtons = ({ changePage, items, page, pdfGenerator }) => {
    const itemsNumber = page * 10;
    const sub = items.length - itemsNumber;
    return (
@@ -13,7 +13,10 @@ const ListButtons = ({ changePage, items, page, pdfGeneratorSave }) => {
                {page !== 0 && (
                   <button
                      type="button"
-                     onClick={() => changePage(page - 1)}
+                     onClick={(e) => {
+                        e.preventDefault();
+                        changePage(page - 1);
+                     }}
                      className="btn btn-primary"
                   >
                      <i className="fas fa-angle-double-left"></i>
@@ -23,7 +26,10 @@ const ListButtons = ({ changePage, items, page, pdfGeneratorSave }) => {
                {sub >= 10 && (
                   <button
                      type="button"
-                     onClick={() => changePage(page + 1)}
+                     onClick={(e) => {
+                        e.preventDefault();
+                        changePage(page + 1);
+                     }}
                      className="btn btn-primary"
                   >
                      <i className="fas fa-angle-double-right"></i>
@@ -36,7 +42,10 @@ const ListButtons = ({ changePage, items, page, pdfGeneratorSave }) => {
             <button
                type="button"
                className="btn btn-secondary"
-               onClick={pdfGeneratorSave}
+               onClick={(e) => {
+                  e.preventDefault();
+                  pdfGenerator();
+               }}
             >
                <i className="fas fa-file-pdf"></i>
             </button>
@@ -49,6 +58,7 @@ ListButtons.propTypes = {
    page: PropTypes.number.isRequired,
    items: PropTypes.array.isRequired,
    changePage: PropTypes.func.isRequired,
+   pdfGenerator: PropTypes.func.isRequired,
 };
 
 export default ListButtons;

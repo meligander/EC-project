@@ -14,7 +14,7 @@ import { clearTowns } from "../../../actions/town";
 import { clearUser } from "../../../actions/user";
 import { clearNeighbourhoods } from "../../../actions/neighbourhood";
 
-import Confirm from "../../modal/Confirm";
+import PopUp from "../../modal/PopUp";
 import GoBack from "../../sharedComp/GoBack";
 import Alert from "../../sharedComp/Alert";
 import Loading from "../../modal/Loading";
@@ -51,35 +51,26 @@ const Dashboard = ({
 
    const isAdmin = userLogged.type === "secretary" || isOwner;
 
-   useEffect(() => {
-      const userTypeName = () => {
-         switch (user.type) {
-            case "student":
-               return "Alumno";
-            case "teacher":
-               return "Profesor";
-            case "guardian":
-               return "Tutor";
-            case "secretary":
-               return "Secretaria";
-            case "admin":
-               return "Administrador";
-            case "admin&teacher":
-               return "Administrador y Profesor";
-            default:
-               return "";
-         }
-      };
+   const userTypeName = {
+      student: "Alumno",
+      teacher: "Profesor",
+      guardian: "Tutor",
+      secretary: "Secretaria",
+      admin: "Administrador",
+      "admin&teacher": "Administrador y Profesor",
+   };
 
+   useEffect(() => {
       if (loading) {
          loadUser(match.params.user_id);
       } else {
-         setOtherValues((prev) => ({
-            ...prev,
-            type: userTypeName(),
-         }));
+         if (type === "")
+            setOtherValues((prev) => ({
+               ...prev,
+               type: userTypeName[user.type],
+            }));
       }
-   }, [loadUser, match.params.user_id, loading, user]);
+   }, [loadUser, match.params.user_id, loading, user, userTypeName, type]);
 
    const dashboardType = () => {
       switch (user.type) {
@@ -107,19 +98,15 @@ const Dashboard = ({
       setOtherValues({ ...otherValues, toggleModal: !toggleModal });
    };
 
-   const confirm = () => {
-      deleteUser(user, history, userLogged._id);
-   };
-
    return (
       <>
          {!loading ? (
             <>
                <ExpireAuthToken />
-               <Confirm
+               <PopUp
                   setToggleModal={setToggle}
                   toggleModal={toggleModal}
-                  confirm={confirm}
+                  confirm={() => deleteUser(user, history, userLogged._id)}
                   text="¿Está seguro que desea eliminar el usuario?"
                />
                {user._id !== userLogged._id && <GoBack />}
@@ -286,7 +273,10 @@ const Dashboard = ({
                                     <button
                                        type="button"
                                        className="btn btn-danger"
-                                       onClick={setToggle}
+                                       onClick={(e) => {
+                                          e.preventDefault();
+                                          setToggle();
+                                       }}
                                     >
                                        <i className="fas fa-user-minus"></i>
                                        <span className="hide-md">

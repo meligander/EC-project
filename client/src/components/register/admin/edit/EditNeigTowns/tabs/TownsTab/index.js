@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 
 import { deleteTown, updateTowns } from "../../../../../../../actions/town";
 
-import Confirm from "../../../../../../modal/Confirm";
+import PopUp from "../../../../../../modal/PopUp";
 import EditButtons from "../../../sharedComp/EditButtons";
 
 const TownsTab = ({
@@ -53,38 +53,27 @@ const TownsTab = ({
       } else deleteTown(toDelete._id);
    };
 
-   const saveTowns = () => {
-      updateTowns(newTowns);
-   };
-
-   const setToggleDelete = (town) => {
+   const setToggle = () => {
       setOtherValues({
          ...otherValues,
-         toggleModalDelete: !toggleModalDelete,
-         toDelete: town,
-      });
-   };
-
-   const setToggleSave = () => {
-      setOtherValues({
-         ...otherValues,
-         toggleModalSave: !toggleModalSave,
+         toggleModalSave: false,
+         toggleModalDelete: false,
       });
    };
 
    return (
       <>
          <div className="mt-3">
-            <Confirm
+            <PopUp
                toggleModal={toggleModalDelete}
                confirm={deleteTownConfirm}
-               setToggleModal={setToggleDelete}
+               setToggleModal={setToggle}
                text="¿Está seguro que desea eliminar la localidad?"
             />
-            <Confirm
+            <PopUp
                toggleModal={toggleModalSave}
-               confirm={saveTowns}
-               setToggleModal={setToggleSave}
+               confirm={() => updateTowns(newTowns)}
+               setToggleModal={setToggle}
                text="¿Está seguro que desea guardar los cambios?"
             />
             <table className="smaller">
@@ -111,7 +100,14 @@ const TownsTab = ({
                            <td>
                               <button
                                  type="button"
-                                 onClick={() => setToggleDelete(town)}
+                                 onClick={(e) => {
+                                    e.preventDefault();
+                                    setOtherValues({
+                                       ...otherValues,
+                                       toDelete: town,
+                                       toggleModalDelete: true,
+                                    });
+                                 }}
                                  className="btn btn-danger"
                               >
                                  <i className="far fa-trash-alt"></i>
@@ -126,7 +122,16 @@ const TownsTab = ({
                   {error.msg}
                </p>
             )}
-            <EditButtons add={addTown} save={setToggleSave} type="Localidad" />
+            <EditButtons
+               add={addTown}
+               save={() =>
+                  setOtherValues({
+                     ...otherValues,
+                     toggleModalSave: true,
+                  })
+               }
+               type="Localidad"
+            />
          </div>
       </>
    );

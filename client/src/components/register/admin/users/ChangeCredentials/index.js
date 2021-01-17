@@ -6,7 +6,7 @@ import PropTypes from "prop-types";
 import { updateCredentials, loadUser } from "../../../../../actions/user";
 
 import Loading from "../../../../modal/Loading";
-import Confirm from "../../../../modal/Confirm";
+import PopUp from "../../../../modal/PopUp";
 
 const ChangeCredentials = ({
    match,
@@ -53,10 +53,6 @@ const ChangeCredentials = ({
       });
    };
 
-   const onSubmit = () => {
-      updateCredentials(formData, history, user._id);
-   };
-
    const setToggle = () => {
       setOtherValues({ ...otherValues, toggleModal: !toggleModal });
    };
@@ -65,10 +61,10 @@ const ChangeCredentials = ({
       <>
          {!loading ? (
             <div className="p-4">
-               <Confirm
+               <PopUp
                   toggleModal={toggleModal}
                   setToggleModal={setToggle}
-                  confirm={onSubmit}
+                  confirm={() => updateCredentials(formData, history, user._id)}
                   text="¿Está seguro que desea aplicar los cambios?"
                />
                <h3 className="heading-secondary text-primary">

@@ -25,7 +25,7 @@ export default function (state = initialState, action) {
       case NEIGHBOURHOOD_DELETED:
          return {
             ...state,
-            neighbourhoods: state.neighbourhoods.map(
+            neighbourhoods: state.neighbourhoods.filter(
                (neighbourhood) => neighbourhood._id !== payload
             ),
             loading: false,
