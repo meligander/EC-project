@@ -25,7 +25,7 @@
 
 .subtitle {
    text-align: left;
-   font-size: 1.3rem !important;
+   font-size: 1.4rem !important;
 }
 
 .info-about {
@@ -35,6 +35,7 @@
 
 .info-about h4 {
    margin-top: 3rem;
+   font-size: 1.3rem !important;
 }
 
 .info-about h3 {
@@ -56,7 +57,7 @@ table {
 
 .final-grades {
    table-layout: fixed;
-   font-size: 1.1rem !important;
+   font-size: 1.15rem !important;
    width: 100%;
 }
 
@@ -69,7 +70,7 @@ table {
    position: absolute;
    bottom: 2rem;
    text-align: center;
-   font-size: 1rem !important;
+   font-size: 1.1rem !important;
 }
 
 .signature.teacher {
