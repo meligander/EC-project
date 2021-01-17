@@ -392,7 +392,7 @@ export const certificatePDF = (
          saveAs(
             pdfBlob,
             `Certificado ${classInfo.category.name} ${
-               periodNumber === 6 && "Cambridge"
+               periodNumber === 6 ? "Cambridge" : ""
             }  ${student.name}.pdf`
          );
       }
