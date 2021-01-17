@@ -64,7 +64,7 @@ table.header .logo img {
 }
 
 .grades p {
-   margin-bottom: 1.8rem;
+   margin-bottom: 1.7rem;
 }
 
 .student {
@@ -131,7 +131,7 @@ table.header .logo img {
 }
 
 .date {
-   font-size: 1.3rem !important;
+   font-size: 1.25rem !important;
    position: absolute;
    bottom: 12rem;
 }
