@@ -1,6 +1,6 @@
 html {
    /* deploy */
-   font-size: 50%;
+   font-size: 49.9%;
    font-family: "Times New Roman", Times, serif;
 }
 
@@ -34,6 +34,7 @@ table {
 
 table.header {
    width: 100%;
+   font-size: 1.5rem !important;
 }
 
 table.header td {
@@ -125,14 +126,14 @@ table.header .logo img {
 }
 
 .date {
-   font-size: 1.5rem;
+   font-size: 1.4rem !important;
    position: absolute;
    bottom: 12rem;
 }
 
 .signature {
    position: absolute;
-   font-size: 1.4rem;
+   font-size: 1.3rem !important;
    bottom: 2rem;
    left: 35%;
    text-align: center;
