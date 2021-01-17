@@ -15,7 +15,6 @@
    margin-top: -8rem;
    padding: 4rem;
    text-align: left;
-   font-size: 1.4rem !important;
 }
 
 .student {
@@ -31,6 +30,7 @@
 
 .info-about {
    margin-top: 2rem;
+   font-size: 1.3rem !important;
 }
 
 .info-about h4 {
@@ -56,7 +56,7 @@ table {
 
 .final-grades {
    table-layout: fixed;
-   font-size: 1.4rem !important;
+   font-size: 1.3rem !important;
    width: 100%;
 }
 
@@ -69,7 +69,7 @@ table {
    position: absolute;
    bottom: 2rem;
    text-align: center;
-   font-size: 1.4rem;
+   font-size: 1.2rem;
 }
 
 .signature.teacher {
