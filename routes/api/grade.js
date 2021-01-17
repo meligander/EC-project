@@ -859,7 +859,7 @@ router.post("/report-card", async (req, res) => {
 
          if (
             ((x + 1) % 3 === 0 && higherExams) ||
-            (!higherExams && (count + 1) % 2 === 0)
+            (!higherExams && (x + 1) % 2 === 0)
          ) {
             finalGrades += "<tr>" + header + "</tr><tr>" + body + "</tr>";
             header = "";
