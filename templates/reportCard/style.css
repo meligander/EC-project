@@ -2,7 +2,7 @@
 
 html {
    /* deploy */
-   font-size: 40%;
+   font-size: 48%;
 }
 
 .border {
@@ -24,12 +24,13 @@ html {
 
 .student {
    margin-bottom: 4rem;
+   font-size: 1.7rem;
    text-align: center;
 }
 
 .subtitle {
    text-align: left;
-   font-size: 1.7rem;
+   font-size: 1.5rem;
 }
 
 .info-about {
@@ -55,7 +56,7 @@ table {
 
 .final-grades {
    table-layout: fixed;
-   font-size: 1.5rem !important;
+   font-size: 1.4rem !important;
    width: 100%;
 }
 
