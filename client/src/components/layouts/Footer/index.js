@@ -8,7 +8,7 @@ const Footer = () => {
          <footer className="footer bg-primary">
             <p>
                <span className="hide-sm">Villa de Merlo</span> English Centre
-               Copyright &copy; 2020
+               Copyright &copy;{new Date().getFullYear()}
             </p>
          </footer>
       </Fragment>
