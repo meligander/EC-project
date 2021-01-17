@@ -25,25 +25,24 @@
 
 .subtitle {
    text-align: left;
-   font-size: 1.5rem;
+   font-size: 1.4rem;
 }
 
 .info-about {
    margin-top: 2rem;
+   font-size: 1.3rem !important;
 }
 
 .info-about h4 {
    margin-top: 3rem;
-   font-size: 1.3rem !important;
 }
 
 .info-about h3 {
-   font-size: 1.5rem !important;
+   font-size: 1.4rem !important;
 }
 
 table {
    text-align: center;
-   font-size: 1.2rem !important;
 }
 
 .no-border {
