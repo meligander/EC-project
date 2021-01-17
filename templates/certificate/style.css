@@ -63,6 +63,10 @@ table.header .logo img {
    font-weight: bold;
 }
 
+.body p {
+   margin-bottom: 0.5rem;
+}
+
 .student {
    padding-bottom: 1rem;
 }
@@ -126,14 +130,14 @@ table.header .logo img {
 }
 
 .date {
-   font-size: 1.4rem !important;
+   font-size: 1.3rem !important;
    position: absolute;
    bottom: 12rem;
 }
 
 .signature {
    position: absolute;
-   font-size: 1.3rem !important;
+   font-size: 1.15rem !important;
    bottom: 2rem;
    left: 35%;
    text-align: center;
