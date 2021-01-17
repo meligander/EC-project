@@ -1,10 +1,5 @@
 @import "../list/style.css";
 
-html {
-   /* deploy */
-   font-size: 49.5%;
-}
-
 .border {
    border: 2px solid #333;
    margin: 4rem 3rem;
@@ -42,8 +37,13 @@ html {
    font-size: 1.3rem !important;
 }
 
+.info-about h3 {
+   font-size: 1.5rem !important;
+}
+
 table {
    text-align: center;
+   font-size: 1.3rem !important;
 }
 
 .no-border {
