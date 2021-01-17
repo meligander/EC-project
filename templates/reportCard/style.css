@@ -43,7 +43,7 @@
 
 table {
    text-align: center;
-   font-size: 1.3rem !important;
+   font-size: 1.2rem !important;
 }
 
 .no-border {
@@ -57,7 +57,6 @@ table {
 
 .final-grades {
    table-layout: fixed;
-   font-size: 1.3rem !important;
    width: 100%;
 }
 
