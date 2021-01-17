@@ -1,5 +1,10 @@
 @import "../list/style.css";
 
+html {
+   /* deploy */
+   font-size: 40%;
+}
+
 .border {
    border: 2px solid #333;
    margin: 4rem 3rem;
