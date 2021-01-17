@@ -52,10 +52,10 @@ table.header .logo img {
 }
 
 .body {
-   padding: 5rem 1rem 2rem 1rem;
+   padding: 5rem 2rem 2rem;
 
    /* deploy */
-   font-size: 85%;
+   font-size: 80%;
 }
 
 .body .capital {
