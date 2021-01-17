@@ -317,6 +317,7 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
+      console.log(err);
       const msg = err.response.data.msg;
       const type = err.response.statusText;
       dispatch({

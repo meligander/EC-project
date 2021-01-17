@@ -12,7 +12,7 @@ import {
 import { loadClass } from "../../../../actions/class";
 
 import Loading from "../../../modal/Loading";
-import Confirm from "../../../modal/Confirm";
+import PopUp from "../../../modal/PopUp";
 import PostForm from "../sharedComp/PostForm";
 import Post from "../sharedComp/Post";
 
@@ -57,15 +57,10 @@ const Chat = ({
 
    const { toggleModal, toDelete } = otherValues;
 
-   const deletePostC = () => {
-      deletePost(toDelete);
-   };
-
-   const setToggle = (e, post_id) => {
-      if (e) e.preventDefault();
+   const setToggle = (post_id) => {
       setOtherValues({
          toDelete: post_id ? post_id : "",
-         toggleModal: !toggleModal,
+         toggleModal: true,
       });
    };
 
@@ -75,10 +70,10 @@ const Chat = ({
 
          {!loadingClass && !loading ? (
             <>
-               <Confirm
+               <PopUp
                   toggleModal={toggleModal}
                   setToggleModal={setToggle}
-                  confirm={deletePostC}
+                  confirm={() => deletePost(toDelete)}
                   text="¿Está seguro que desea eliminar la publicación?"
                />
                <p className="heading-tertiary">

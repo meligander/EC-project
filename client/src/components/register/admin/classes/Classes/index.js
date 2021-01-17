@@ -6,6 +6,7 @@ import PropTypes from "prop-types";
 import {
    loadClasses,
    clearClass,
+   clearClasses,
    classPDF,
 } from "../../../../../actions/class";
 import { loadCategories } from "../../../../../actions/category";
@@ -28,6 +29,7 @@ const Classes = ({
    loadCategories,
    classPDF,
    clearClass,
+   clearClasses,
    clearProfile,
    clearSearch,
 }) => {
@@ -90,22 +92,19 @@ const Classes = ({
       });
    };
 
-   const onSearch = (e) => {
-      e.preventDefault();
-      loadClasses(filterForm);
-   };
-
-   const pdfGeneratorSave = () => {
-      classPDF(classes, "classes");
-   };
-
    return (
       <>
          {condition ? (
             <>
                <h1>Clases</h1>
                {!isTeacher && (
-                  <form className="form" onSubmit={onSearch}>
+                  <form
+                     className="form"
+                     onSubmit={(e) => {
+                        e.preventDefault();
+                        loadClasses(filterForm);
+                     }}
+                  >
                      <div className="form-group">
                         <select
                            id="teacher"
@@ -172,6 +171,7 @@ const Classes = ({
                      classes={classes}
                      all={!isTeacher}
                      clearClass={clearClass}
+                     clearClasses={clearClasses}
                      clearProfile={clearProfile}
                   />
                </div>
@@ -195,7 +195,10 @@ const Classes = ({
                   <button
                      type="button"
                      className="btn btn-secondary"
-                     onClick={pdfGeneratorSave}
+                     onClick={(e) => {
+                        e.preventDefault();
+                        classPDF(classes, "classes");
+                     }}
                   >
                      <i className="fas fa-file-pdf"></i>
                   </button>
@@ -219,6 +222,7 @@ Classes.propTypes = {
    classPDF: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
    clearClass: PropTypes.func.isRequired,
+   clearClasses: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
 };
 
@@ -235,6 +239,7 @@ export default connect(mapStateToProps, {
    loadUsers,
    classPDF,
    clearClass,
+   clearClasses,
    clearSearch,
    clearProfile,
 })(Classes);

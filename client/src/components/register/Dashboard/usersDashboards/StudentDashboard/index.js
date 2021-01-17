@@ -256,6 +256,7 @@ const StudentDashboard = ({
                                  ) : (
                                     <StudentGradesTable
                                        studentGrades={studentGrades}
+                                       category={classInfo.category.name}
                                     />
                                  )}
                               </div>

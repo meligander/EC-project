@@ -14,7 +14,8 @@ import {
    clearGradeTypes,
 } from "../../../../../actions/grade";
 
-import Confirm from "../../../../modal/Confirm";
+import PopUp from "../../../../modal/PopUp";
+import Alert from "../../../../sharedComp/Alert";
 
 const GradesTab = ({
    history,
@@ -124,26 +125,20 @@ const GradesTab = ({
       });
    };
 
-   const clickAddGrade = () => {
-      setOtherValues({
-         ...otherValues,
-         gradePlus: !gradePlus,
-      });
-   };
-
    const addGradeType = () => {
       registerNewGrade({ ...newGradeType, periods });
-      setOtherValues({
-         ...otherValues,
-         gradePlus: !gradePlus,
-         gradetypes: gradetypes.filter(
-            (gt) => gt._id !== newGradeType.gradetype
-         ),
-      });
-      setFormData({
-         ...formData,
-         newGrades: periods[period - 1],
-      });
+      if (periods[period - 1]) {
+         setOtherValues({
+            ...otherValues,
+            gradetypes: gradetypes.filter(
+               (gt) => gt._id !== newGradeType.gradetype
+            ),
+         });
+         setFormData({
+            ...formData,
+            newGrades: periods[period - 1],
+         });
+      }
    };
 
    const deleteGradeType = () => {
@@ -151,9 +146,8 @@ const GradesTab = ({
          setAlert(
             "No puede eliminar la última nota del bimestre",
             "danger",
-            "2"
+            "4"
          );
-         window.scroll(0, 0);
       } else {
          setOtherValues({
             ...otherValues,
@@ -173,106 +167,61 @@ const GradesTab = ({
 
    const saveGrades = () => {
       const gradesPeriod = newGrades.filter((grade) => grade[0].student);
-
       updateGrades(gradesPeriod, history, classInfo._id);
    };
 
-   const setToggleSave = (e) => {
-      if (e) e.preventDefault();
+   const setToggle = () => {
       setOtherValues({
          ...otherValues,
-         toggleModalSave: !toggleModalSave,
+         toggleModalDate: false,
+         toggleModalSave: false,
+         toggleModalDelete: false,
       });
    };
 
-   const setToggleDelete = (e) => {
-      if (e) e.preventDefault();
-      setOtherValues({
-         ...otherValues,
-         toggleModalDelete: !toggleModalDelete,
-      });
-   };
-
-   const setToggleDate = (e) => {
-      if (e) e.preventDefault();
-      setOtherValues({
-         ...otherValues,
-         toggleModalDate: !toggleModalDate,
-      });
-   };
-
-   const pdfGeneratorSave = (all) => {
-      if (!all) {
-         gradesPDF(
-            header[period - 1],
-            students,
-            periods[period - 1],
-            classInfo,
-            period - 1,
-            all
+   const certificatePdfGenerator = (date) => {
+      if (!periods[4])
+         setAlert("Las notas del final deben estar cargadas", "danger", "4");
+      else {
+         const studentsPeriod = periods[period - 1].filter(
+            (item) => item[0].student
          );
-      } else {
-         gradesPDF(header, students, periods, classInfo, null, all);
-      }
-   };
 
-   const certificatePdfGeneratorSave = (date) => {
-      const studentsPeriods = periods[period - 1].filter(
-         (item) => item[0].student
-      );
-      let pass = true;
-      for (let x = 0; x < studentsPeriods.length; x++) {
-         for (let y = 0; y < studentsPeriods[x].length; y++) {
-            if (studentsPeriods[x][y].value === "") {
-               pass = false;
-               break;
-            }
-         }
-         if (!pass) break;
-      }
-
-      if (pass) {
          const stringDate = moment(date).format("DD [de] MMMM [de] YYYY");
          certificatePDF(
             students.filter((student) => student.name !== ""),
             header[period - 1],
-            studentsPeriods,
+            studentsPeriod,
             classInfo,
-            stringDate,
+            date !== "" ? stringDate : null,
             period
          );
-      } else {
-         setAlert(
-            "Todos los alumnos deben tener cargadas las notas",
-            "danger",
-            "2"
-         );
-         window.scroll(0, 0);
       }
    };
 
    return (
       <>
+         <Alert type="4" />
+         <PopUp
+            toggleModal={toggleModalSave}
+            setToggleModal={setToggle}
+            confirm={saveGrades}
+            text="¿Está seguro que desea guardar los cambios?"
+         />
+         <PopUp
+            toggleModal={toggleModalDelete}
+            setToggleModal={setToggle}
+            confirm={deleteGradeType}
+            text="¿Está seguro que desea eliminar el tipo de nota?"
+         />
+         <PopUp
+            toggleModal={toggleModalDate}
+            setToggleModal={setToggle}
+            type="certificate-date"
+            confirm={certificatePdfGenerator}
+         />
          {!loading && (
-            <div className="wrapper both">
-               <Confirm
-                  toggleModal={toggleModalSave}
-                  setToggleModal={setToggleSave}
-                  confirm={saveGrades}
-                  text="¿Está seguro que desea guardar los cambios?"
-               />
-               <Confirm
-                  toggleModal={toggleModalDelete}
-                  setToggleModal={setToggleDelete}
-                  confirm={deleteGradeType}
-                  text="¿Está seguro que desea eliminar el tipo de nota?"
-               />
-               <Confirm
-                  toggleModal={toggleModalDate}
-                  setToggleModal={setToggleDate}
-                  type="certificate-date"
-                  confirm={certificatePdfGeneratorSave}
-               />
+            <div className="wrapper both mt-2">
                <table className="stick">
                   <thead>
                      <tr>
@@ -303,10 +252,11 @@ const GradesTab = ({
                                        <button
                                           type="button"
                                           className="btn btn-danger"
-                                          onClick={() => {
+                                          onClick={(e) => {
+                                             e.preventDefault();
                                              setOtherValues({
                                                 ...otherValues,
-                                                toggleModalDelete: !toggleModalDelete,
+                                                toggleModalDelete: true,
                                                 toDelete: row,
                                              });
                                           }}
@@ -326,7 +276,10 @@ const GradesTab = ({
             <button
                className="btn btn-primary"
                type="button"
-               onClick={setToggleSave}
+               onClick={(e) => {
+                  e.preventDefault();
+                  setOtherValues({ ...otherValues, toggleModalSave: true });
+               }}
             >
                <i className="far fa-save"></i>
                <span className="hide-md">&nbsp; Guardar Cambios</span>
@@ -334,7 +287,13 @@ const GradesTab = ({
             <button
                className="btn btn-dark"
                type="button"
-               onClick={clickAddGrade}
+               onClick={(e) => {
+                  e.preventDefault();
+                  setOtherValues({
+                     ...otherValues,
+                     gradePlus: !gradePlus,
+                  });
+               }}
             >
                <i className="fas fa-plus"></i>
                <span className="hide-md">&nbsp; Nota</span>
@@ -342,38 +301,51 @@ const GradesTab = ({
             <button
                className="btn btn-secondary"
                type="button"
-               onClick={() => pdfGeneratorSave(false)}
+               onClick={(e) => {
+                  e.preventDefault();
+                  gradesPDF(
+                     {
+                        header: header[period - 1],
+                        period: periods[period - 1],
+                        periodNumber: period - 1,
+                     },
+                     classInfo,
+                     "bimester"
+                  );
+               }}
             >
                <i className="fas fa-file-pdf"></i>
             </button>
-            {((classInfo.category.name !== "Kinder" &&
-               period !== 5 &&
-               period !== 6) ||
-               (classInfo.category.name === "Kinder" && period !== 4)) && (
-               <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => pdfGeneratorSave(true)}
-               >
-                  <i className="fas fa-file-pdf"></i>&nbsp; Todas
-                  <span className="hide-md"> las notas</span>
-               </button>
-            )}
+
             {(period === 5 ||
                period === 6 ||
                (classInfo.category.name === "Kinder" && period === 4)) && (
                <button
                   className="btn btn-secondary"
                   type="button"
-                  onClick={setToggleDate}
+                  onClick={(e) => {
+                     e.preventDefault();
+                     setOtherValues({
+                        ...setOtherValues,
+                        toggleModalDate: true,
+                     });
+                  }}
                >
                   <i className="fas fa-graduation-cap"></i>
                </button>
             )}
          </div>
+
          {gradePlus && (
-            <form className="form smaller pt-5">
+            <form
+               className="form smaller pt-5"
+               onSubmit={(e) => {
+                  e.preventDefault();
+                  addGradeType();
+               }}
+            >
                <div className="border">
+                  <Alert type="3" />
                   <div className="form-group">
                      <select
                         className="form-input center"
@@ -399,11 +371,7 @@ const GradesTab = ({
                      </label>
                   </div>
                   <div className="btn-ctr mt-1">
-                     <button
-                        type="submit"
-                        onClick={addGradeType}
-                        className="btn btn-dark"
-                     >
+                     <button type="submit" className="btn btn-dark">
                         <i className="fas fa-plus"></i>
                         <span className="hide-md">&nbsp; Agregar</span>
                      </button>

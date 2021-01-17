@@ -10,7 +10,7 @@ import {
 
 import EditButtons from "../sharedComp/EditButtons";
 import Loading from "../../../../modal/Loading";
-import Confirm from "../../../../modal/Confirm";
+import PopUp from "../../../../modal/PopUp";
 
 const EditExpenceType = ({
    expences: { expencetypes, loadingET },
@@ -58,25 +58,16 @@ const EditExpenceType = ({
       if (typeof toDelete._id === "number") {
          const array = newET.filter((et) => et._id !== toDelete._id);
          setNewET(array);
-      } else deleteExpenceType(toDelete._id);
+      } else {
+         deleteExpenceType(toDelete._id);
+      }
    };
 
-   const saveExpenceTypes = () => {
-      updateExpenceTypes(newET);
-   };
-
-   const setToggleSave = () => {
+   const setToggle = () => {
       setOtherValues({
          ...otherValues,
-         toggleModalSave: !toggleModalSave,
-      });
-   };
-
-   const setToggleDelete = (exptyp) => {
-      setOtherValues({
-         ...otherValues,
-         ...(exptyp && { toDelete: exptyp }),
-         toggleModalDelete: !toggleModalDelete,
+         toggleModalSave: false,
+         toggleModalDelete: false,
       });
    };
 
@@ -85,15 +76,15 @@ const EditExpenceType = ({
          {!loadingET ? (
             <>
                <h2>Tipo de Movimiento</h2>
-               <Confirm
+               <PopUp
                   toggleModal={toggleModalSave}
-                  setToggleModal={setToggleSave}
-                  confirm={saveExpenceTypes}
+                  setToggleModal={setToggle}
+                  confirm={() => updateExpenceTypes(newET)}
                   text="¿Está seguro que desea guardar los cambios?"
                />
-               <Confirm
+               <PopUp
                   toggleModal={toggleModalDelete}
-                  setToggleModal={setToggleDelete}
+                  setToggleModal={setToggle}
                   confirm={deleteExpenceTypeConfirm}
                   text="¿Está seguro que desea eliminar el tipo de movimiento?"
                />
@@ -138,7 +129,14 @@ const EditExpenceType = ({
                               <td>
                                  <button
                                     type="button"
-                                    onClick={() => setToggleDelete(exptyp)}
+                                    onClick={(e) => {
+                                       e.preventDefault();
+                                       setOtherValues({
+                                          ...otherValues,
+                                          toDelete: exptyp,
+                                          toggleModalDelete: true,
+                                       });
+                                    }}
                                     className="btn btn-danger"
                                  >
                                     <i className="far fa-trash-alt"></i>
@@ -149,7 +147,12 @@ const EditExpenceType = ({
                   </tbody>
                </table>
                <EditButtons
-                  save={setToggleSave}
+                  save={() =>
+                     setOtherValues({
+                        ...otherValues,
+                        toggleModalSave: true,
+                     })
+                  }
                   add={addExpenceType}
                   type="Tipo de Gasto"
                />

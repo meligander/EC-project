@@ -12,7 +12,7 @@ import {
 import { loadUser } from "../../../../../actions/user";
 
 import Loading from "../../../../modal/Loading";
-import Confirm from "../../../../modal/Confirm";
+import PopUp from "../../../../modal/PopUp";
 
 const EditInstallment = ({
    match,
@@ -108,44 +108,38 @@ const EditInstallment = ({
       );
    };
 
-   const setToggleDelete = (e) => {
-      if (e) e.preventDefault();
+   const setToggle = () => {
       setOtherValues({
          ...otherValues,
-         toggleModalDelete: !toggleModalDelete,
+         toggleModalSave: false,
+         toggleModalDelete: false,
       });
-   };
-
-   const setToggleSave = (e) => {
-      if (e) e.preventDefault();
-      setOtherValues({
-         ...otherValues,
-         toggleModalSave: !toggleModalSave,
-      });
-   };
-
-   const onDelete = () => {
-      deleteInstallment(_id, history, student._id);
    };
 
    return (
       <>
          {(!loading && edit) || (!edit && !users.loading) ? (
             <>
-               <Confirm
+               <PopUp
                   text="¿Está seguro que desea eliminar la cuota?"
-                  confirm={onDelete}
-                  setToggleModal={setToggleDelete}
+                  confirm={() => deleteInstallment(_id, history, student._id)}
+                  setToggleModal={setToggle}
                   toggleModal={toggleModalDelete}
                />
-               <Confirm
+               <PopUp
                   text="¿Está seguro que desea guardar los cambios?"
                   confirm={confirm}
-                  setToggleModal={setToggleSave}
+                  setToggleModal={setToggle}
                   toggleModal={toggleModalSave}
                />
                <h2>{edit ? "Editar Cuota" : "Crear Cuota"}</h2>
-               <form className="form" onSubmit={setToggleSave}>
+               <form
+                  className="form"
+                  onSubmit={(e) => {
+                     e.preventDefault();
+                     setOtherValues({ ...otherValues, toggleModalSave: true });
+                  }}
+               >
                   <p className="heading-tertiary">
                      <span className="text-dark">Alumno:</span>
                      &nbsp;&nbsp;&nbsp;
@@ -242,7 +236,13 @@ const EditInstallment = ({
                      {edit && (
                         <button
                            type="button"
-                           onClick={setToggleDelete}
+                           onClick={(e) => {
+                              e.preventDefault();
+                              setOtherValues({
+                                 ...otherValues,
+                                 toggleModalDelete: true,
+                              });
+                           }}
                            className="btn btn-danger"
                         >
                            <i className="far fa-trash-alt"></i>&nbsp; Eliminar

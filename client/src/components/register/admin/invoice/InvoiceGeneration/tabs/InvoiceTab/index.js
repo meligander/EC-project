@@ -10,7 +10,7 @@ import { removeInstallmentFromList } from "../../../../../../../actions/installm
 
 import Alert from "../../../../../../sharedComp/Alert";
 import StudentSearch from "../../../../../sharedComp/search/StudentSearch";
-import Confirm from "../../../../../../modal/Confirm";
+import PopUp from "../../../../../../modal/PopUp";
 
 import "./style.scss";
 
@@ -117,8 +117,7 @@ const InvoiceTab = ({
       });
    };
 
-   const addUser = (e) => {
-      e.preventDefault();
+   const addUser = () => {
       setOtherValues({
          ...otherValues,
          registeredUser: true,
@@ -187,16 +186,6 @@ const InvoiceTab = ({
       setOtherValues({ ...otherValues, toggleModal: !toggleModal });
    };
 
-   const setToggleSearch = (e) => {
-      e.preventDefault();
-      setOtherValues({ ...otherValues, toggleSearch: !toggleSearch });
-   };
-
-   const beforeToggle = (e) => {
-      e.preventDefault();
-      setOtherValues({ ...otherValues, toggleModal: !toggleModal });
-   };
-
    const confirm = () => {
       registerInvoice(
          { ...invoice, invoiceid: invoiceNumber },
@@ -208,13 +197,19 @@ const InvoiceTab = ({
 
    return (
       <div className="invoice-tab">
-         <Confirm
+         <PopUp
             toggleModal={toggleModal}
             setToggleModal={setToggle}
             confirm={confirm}
             text="¿Está seguro que la factura es correcta?"
          />
-         <form className="form bigger" onSubmit={beforeToggle}>
+         <form
+            className="form bigger"
+            onSubmit={(e) => {
+               e.preventDefault();
+               setToggle();
+            }}
+         >
             <div className="form-group mb-2">
                <div className="two-in-row">
                   <input
@@ -239,7 +234,13 @@ const InvoiceTab = ({
             <div className="paying-user">
                <h3 className="paragraph text-primary ">Usuario a Pagar</h3>
                <button
-                  onClick={setToggleSearch}
+                  onClick={(e) => {
+                     e.preventDefault();
+                     setOtherValues({
+                        ...otherValues,
+                        toggleSearch: !toggleSearch,
+                     });
+                  }}
                   type="button"
                   className="btn-cancel search"
                >

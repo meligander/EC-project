@@ -15,7 +15,7 @@ import { setAlert } from "../../../../actions/alert";
 
 import StudentSearch from "../../sharedComp/search/StudentSearch";
 import Loading from "../../../modal/Loading";
-import Confirm from "../../../modal/Confirm";
+import PopUp from "../../../modal/PopUp";
 
 const Enrollment = ({
    history,
@@ -110,11 +110,10 @@ const Enrollment = ({
       });
    };
 
-   const addStudent = (e) => {
+   const addStudent = () => {
       if (selectedStudent._id === "") {
          setAlert("Primero debe seleccionar un alumno.", "danger", "3");
       } else {
-         e.preventDefault();
          setFormData({
             ...formData,
             student: selectedStudent._id,
@@ -134,7 +133,7 @@ const Enrollment = ({
       });
    };
 
-   const onSubmit = () => {
+   const confirm = () => {
       registerEnrollment(
          {
             ...formData,
@@ -147,8 +146,7 @@ const Enrollment = ({
       );
    };
 
-   const setToggle = (e) => {
-      if (e) e.preventDefault();
+   const setToggle = () => {
       setOtherValues({
          ...otherValues,
          toggleModal: !toggleModal,
@@ -171,10 +169,10 @@ const Enrollment = ({
          {(!loading || !enroll_id) && !categories.loading ? (
             <>
                {!enroll_id ? <h1>Inscripción</h1> : <h2>Editar inscripción</h2>}
-               <Confirm
+               <PopUp
                   toggleModal={toggleModal}
                   setToggleModal={setToggle}
-                  confirm={onSubmit}
+                  confirm={confirm}
                   text={`¿Está seguro que ${
                      enroll_id
                         ? "desea modificar la inscripción"
@@ -196,7 +194,13 @@ const Enrollment = ({
                      </Link>
                   </div>
                )}
-               <form className="form" onSubmit={setToggle}>
+               <form
+                  className="form"
+                  onSubmit={(e) => {
+                     e.preventDefault();
+                     setToggle();
+                  }}
+               >
                   {!enroll_id && !hideSearch && (
                      <StudentSearch
                         selectStudent={selectStudent}
@@ -223,7 +227,10 @@ const Enrollment = ({
                            <button
                               className="btn-cancel"
                               type="button"
-                              onClick={restore}
+                              onClick={(e) => {
+                                 e.preventDefault();
+                                 restore();
+                              }}
                            >
                               <i className="fas fa-times"></i>
                            </button>

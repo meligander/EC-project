@@ -1,7 +1,25 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-const StudentGradesTable = ({ studentGrades: { headers, rows } }) => {
+const StudentGradesTable = ({ studentGrades: { headers, rows }, category }) => {
+   const kinderGrade = (value) => {
+      switch (true) {
+         case value === "":
+            return <></>;
+         case value < 4:
+            return <>M</>;
+         case value >= 4 && value < 6:
+            return <>R</>;
+         case value >= 6 && value < 7.5:
+            return <>B</>;
+         case value >= 7.5 && value < 9:
+            return <>MB</>;
+         case value >= 9 && value <= 10:
+            return <>S</>;
+         default:
+            return "";
+      }
+   };
    return (
       <table>
          <thead>
@@ -19,9 +37,6 @@ const StudentGradesTable = ({ studentGrades: { headers, rows } }) => {
                <th>
                   4° B<span className="hide-sm">imestre</span>
                </th>
-               <th>
-                  F<span className="hide-sm">inal</span>
-               </th>
             </tr>
          </thead>
          <tbody>
@@ -29,9 +44,22 @@ const StudentGradesTable = ({ studentGrades: { headers, rows } }) => {
                return (
                   <tr key={index}>
                      <th>{headers[index]}</th>
-                     {row.map((item, i) => {
-                        return <td key={i}>{item.value}</td>;
-                     })}
+                     {row.map((item, i) => (
+                        <td key={i}>
+                           {category === "Kinder"
+                              ? kinderGrade(item.value)
+                              : item.gradetype &&
+                                (item.gradetype.name === "Ket" ||
+                                   item.gradetype.name === "Pet" ||
+                                   item.gradetype.name === "First" ||
+                                   item.gradetype.name === "CAE" ||
+                                   item.gradetype.name === "Proficiency")
+                              ? item.value * 10 + "%"
+                              : item.value
+                              ? item.value.toFixed(2)
+                              : ""}
+                        </td>
+                     ))}
                   </tr>
                );
             })}
@@ -42,6 +70,7 @@ const StudentGradesTable = ({ studentGrades: { headers, rows } }) => {
 
 StudentGradesTable.prototypes = {
    studentGrades: PropTypes.object.isRequired,
+   category: PropTypes.string.isRequired,
 };
 
 export default StudentGradesTable;

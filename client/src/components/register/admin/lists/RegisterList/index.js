@@ -13,7 +13,7 @@ import {
 import Loading from "../../../../modal/Loading";
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
-import Confirm from "../../../../modal/Confirm";
+import PopUp from "../../../../modal/PopUp";
 
 const RegisterList = ({
    auth: { userLogged },
@@ -50,35 +50,28 @@ const RegisterList = ({
       });
    };
 
-   const search = (e) => {
-      e.preventDefault();
-      loadRegisters(filterData);
-   };
-
    const setToggle = () => {
       setToggleModal(!toggleModal);
-   };
-
-   const confirm = () => {
-      deleteRegister(registers[0]._id);
-   };
-
-   const pdfGeneratorSave = () => {
-      registerPDF(registers);
    };
 
    return (
       <>
          {!loadingRegisters ? (
             <>
-               <Confirm
+               <PopUp
                   toggleModal={toggleModal}
-                  confirm={confirm}
+                  confirm={() => deleteRegister(registers[0]._id)}
                   text="¿Está seguro que desea eliminar el cierre de caja?"
                   setToggleModal={setToggle}
                />
                <h2>Caja Diaria</h2>
-               <form className="form" onSubmit={search}>
+               <form
+                  className="form"
+                  onSubmit={(e) => {
+                     e.preventDefault();
+                     loadRegisters(filterData);
+                  }}
+               >
                   <DateFilter
                      endDate={endDate}
                      startDate={startDate}
@@ -160,7 +153,10 @@ const RegisterList = ({
                                                 <button
                                                    type="button"
                                                    className="btn btn-danger"
-                                                   onClick={setToggle}
+                                                   onClick={(e) => {
+                                                      e.preventDefault();
+                                                      setToggle();
+                                                   }}
                                                 >
                                                    <i className="far fa-trash-alt"></i>
                                                 </button>
@@ -177,7 +173,7 @@ const RegisterList = ({
                   items={registers}
                   page={page}
                   changePage={updatePageNumber}
-                  pdfGeneratorSave={pdfGeneratorSave}
+                  pdfGenerator={() => registerPDF(registers)}
                />
             </>
          ) : (

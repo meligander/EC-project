@@ -102,10 +102,6 @@ table.header .logo img {
    table-layout: fixed;
 }
 
-.grades .grades-table.no-border-top th {
-   border-top: none;
-}
-
 .grades .full {
    width: 100% !important;
 }

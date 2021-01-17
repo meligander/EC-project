@@ -23,7 +23,8 @@
       "html-pdf": "^2.2.0",
       "jsonwebtoken": "^8.5.1",
       "moment": "^2.27.0",
-      "mongoose": "^5.9.11"
+      "mongoose": "^5.9.11",
+      "twilio": "^3.54.2"
    },
    "devDependencies": {
       "concurrently": "^5.2.0",

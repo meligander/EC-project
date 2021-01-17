@@ -16,7 +16,7 @@ import { updatePageNumber } from "../../../../../actions/mixvalues";
 import Loading from "../../../../modal/Loading";
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
-import Confirm from "../../../../modal/Confirm";
+import PopUp from "../../../../modal/PopUp";
 
 import "./style.scss";
 
@@ -31,6 +31,21 @@ const TransactionList = ({
    registers: { register, loading },
    mixvalues: { page },
 }) => {
+   const expenceType = {
+      "special-income": {
+         trClass: "bg-refund",
+         nameType: "Ingreso Especial",
+      },
+      withdrawal: {
+         trClass: "bg-withdrawal",
+         nameType: "Retiro",
+      },
+      expence: {
+         trClass: "bg-expence",
+         nameType: "Gasto",
+      },
+   };
+
    const [filterData, setFilterData] = useState({
       startDate: "",
       endDate: "",
@@ -40,11 +55,11 @@ const TransactionList = ({
    const { startDate, endDate, transactionType } = filterData;
 
    const [otherValues, setOtherValues] = useState({
-      expenceDelete: "",
+      toDelete: "",
       toggleModal: false,
    });
 
-   const { expenceDelete, toggleModal } = otherValues;
+   const { toDelete, toggleModal } = otherValues;
 
    useEffect(() => {
       if (loadingTransactions) {
@@ -63,57 +78,33 @@ const TransactionList = ({
 
    const setToggle = (expence_id) => {
       setOtherValues({
-         expenceDelete: expence_id,
+         toDelete: expence_id ? expence_id : "",
          toggleModal: !toggleModal,
       });
    };
 
-   const search = (e) => {
-      e.preventDefault();
-      loadTransactions(filterData);
-   };
-
-   const confirm = () => {
-      deleteExpence(expenceDelete);
-   };
-
-   const pdfGeneratorSave = () => {
-      transactionsPDF(transactions);
-   };
-
    const type = (transaction) => {
       if (transaction.expencetype) {
-         let trClass = "";
-         let nameType = "";
-         switch (transaction.expencetype.type) {
-            case "special-income":
-               trClass = "bg-refund";
-               nameType = "Ingreso Especial";
-               break;
-            case "withdrawal":
-               trClass = "bg-withdrawal";
-               nameType = "Retiro";
-               break;
-            case "expence":
-               trClass = "bg-expence";
-               nameType = "Gasto";
-               break;
-            default:
-               break;
-         }
-
          return (
-            <tr key={transaction._id} className={trClass}>
+            <tr
+               key={transaction._id}
+               className={expenceType[transaction.expencetype.type].trClass}
+            >
                <td>
                   <Moment date={transaction.date} format="DD/MM/YY" />
                </td>
-               <td>{`${nameType} - ${transaction.expencetype.name}`}</td>
+               <td>{`${expenceType[transaction.expencetype.type].nameType} - ${
+                  transaction.expencetype.name
+               }`}</td>
                <td>${transaction.value}</td>
                <td>{transaction.description}</td>
                <td>
                   {register.date < transaction.date && (
                      <button
-                        onClick={() => setToggle(transaction._id)}
+                        onClick={(e) => {
+                           e.preventDefault();
+                           setToggle(transaction._id);
+                        }}
                         className="btn btn-danger"
                      >
                         <i className="far fa-trash-alt"></i>
@@ -161,13 +152,19 @@ const TransactionList = ({
          {!loadingTransactions && !loading ? (
             <div>
                <h2>Listado Movimientos</h2>
-               <Confirm
+               <PopUp
                   toggleModal={toggleModal}
                   setToggleModal={setToggle}
                   text="¿Está seguro que desea eliminar el movimiento?"
-                  confirm={confirm}
+                  confirm={() => deleteExpence(toDelete)}
                />
-               <form className="form">
+               <form
+                  className="form"
+                  onSubmit={(e) => {
+                     e.preventDefault();
+                     loadTransactions(filterData);
+                  }}
+               >
                   <DateFilter
                      endDate={endDate}
                      startDate={startDate}
@@ -199,7 +196,7 @@ const TransactionList = ({
                      </label>
                   </div>
                   <div className="btn-right mb-1">
-                     <button onClick={search} className="btn btn-light">
+                     <button type="submit" className="btn btn-light">
                         <i className="fas fa-filter"></i>&nbsp; Buscar
                      </button>
                   </div>
@@ -234,7 +231,7 @@ const TransactionList = ({
                   page={page}
                   items={transactions}
                   changePage={updatePageNumber}
-                  pdfGeneratorSave={pdfGeneratorSave}
+                  pdfGenerator={() => transactionsPDF(transactions)}
                />
             </div>
          ) : (

@@ -367,12 +367,14 @@ router.post("/create-list", (req, res) => {
          name =
             "<td>" + invoices[x].lastname + ", " + invoices[x].name + "</td>";
       } else {
-         name =
-            "<td>" +
-            invoices[x].user.lastname +
-            ", " +
-            invoices[x].user.name +
-            "</td>";
+         if (invoices[x].user === null) name = "<td>Usuario Eliminado</td>";
+         else
+            name =
+               "<td>" +
+               invoices[x].user.lastname +
+               ", " +
+               invoices[x].user.name +
+               "</td>";
       }
       const total = "<td> $" + invoices[x].total + "</td>";
 

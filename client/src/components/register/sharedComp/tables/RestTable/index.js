@@ -12,6 +12,12 @@ const RestTable = ({
    userSearchType,
    clearProfile,
 }) => {
+   const userType = {
+      secretary: "Secretaria",
+      admin: "Administrador",
+      "admin&teacher": "Admin y Profesor",
+   };
+
    return (
       <table>
          <thead>
@@ -60,15 +66,7 @@ const RestTable = ({
                               )}
                            </td>
                         )}
-                        {type === "admin" && (
-                           <td>
-                              {user.type === "secretary"
-                                 ? "Secretaria"
-                                 : user.type === "admin"
-                                 ? "Administrador"
-                                 : "Admin y Profesor"}
-                           </td>
-                        )}
+                        {type === "admin" && <td>{userType[user.type]}</td>}
                         {type === "guardian" && <td>{name}</td>}
                      </tr>
                   );

@@ -57,17 +57,33 @@ export const loadAttendances = (class_id) => async (dispatch) => {
    }
 };
 
-export const registerNewDate = (newDate) => async (dispatch) => {
+export const registerNewDate = (formData, addBimester) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      const res = await axios.post("/api/attendance", newDate);
+      let newDate = {};
+      for (const prop in formData) {
+         if (formData[prop] !== "") {
+            newDate[prop] = formData[prop];
+         }
+      }
+
+      let res;
+      if (addBimester)
+         res = await axios.post("/api/attendance/bimester", newDate);
+      else res = await axios.post("/api/attendance", newDate);
 
       dispatch({
          type: NEWDATE_REGISTERED,
          payload: res.data,
       });
 
-      dispatch(setAlert("Día Agregado", "success", "2"));
+      dispatch(
+         setAlert(
+            addBimester ? "Días del Bimestre Agregados" : "Día Agregado",
+            "success",
+            "3"
+         )
+      );
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;
@@ -79,10 +95,9 @@ export const registerNewDate = (newDate) => async (dispatch) => {
             msg,
          },
       });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "3"));
    }
 
-   window.scroll(0, 0);
    dispatch(updateLoadingSpinner(false));
 };
 
@@ -128,7 +143,7 @@ export const deleteDate = (date, classroom) => async (dispatch) => {
          payload: res.data,
       });
 
-      dispatch(setAlert("Fecha eliminada", "success", "2"));
+      dispatch(setAlert("Fecha eliminada", "success", "4"));
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;
@@ -140,10 +155,9 @@ export const deleteDate = (date, classroom) => async (dispatch) => {
             msg,
          },
       });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      dispatch(setAlert(msg ? msg : type, "danger", "4"));
    }
 
-   window.scroll(0, 0);
    dispatch(updateLoadingSpinner(false));
 };
 

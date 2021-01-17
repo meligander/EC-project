@@ -45,10 +45,6 @@ const Invoice = ({
       "Dic",
    ];
 
-   const pdfGeneratorSave = () => {
-      invoicePDF(invoice, remaining);
-   };
-
    return (
       <>
          {!loading ? (
@@ -73,7 +69,9 @@ const Invoice = ({
                      <div>
                         <p className="paragraph text-dark">Cliente:</p>
                         <p className="paragraph">
-                           {invoice.user
+                           {invoice.user === null
+                              ? "Usuario Eliminado"
+                              : invoice.user
                               ? invoice.user.lastname + ", " + invoice.user.name
                               : invoice.lastname + ", " + invoice.name}
                         </p>
@@ -159,7 +157,10 @@ const Invoice = ({
                   <button
                      type="button"
                      className="btn btn-secondary"
-                     onClick={pdfGeneratorSave}
+                     onClick={(e) => {
+                        e.preventDefault();
+                        invoicePDF(invoice, remaining);
+                     }}
                   >
                      <i className="fas fa-file-pdf"></i>
                   </button>

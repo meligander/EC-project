@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import logo from "../../../img/logoSinLetras.png";
 import "./style.scss";
 
-const Confirm = ({
+const PopUp = ({
    toggleModal,
    setToggleModal,
    confirm,
@@ -17,14 +17,24 @@ const Confirm = ({
    const [formData, setFormData] = useState({
       percentage: "",
       date: "",
+      ...(users &&
+         type === "report-cards" && {
+            observations: Array.from(Array(users.length), () => ""),
+         }),
    });
 
-   const { percentage, date } = formData;
+   const { percentage, date, observations } = formData;
 
    const onChange = (e) => {
       setFormData({
          [e.target.name]: e.target.value,
       });
+   };
+
+   const onChangeObservations = (e, index) => {
+      let newObservations = [...observations];
+      newObservations[index] = e.target.value;
+      setFormData({ ...formData, observations: newObservations });
    };
 
    const chooseType = (type) => {
@@ -109,6 +119,28 @@ const Confirm = ({
                      ))}
                </div>
             );
+         case "report-cards":
+            return (
+               <div className="popup-text wrapper both smaller">
+                  {users.length > 0 &&
+                     users.map((student, i) => (
+                        <div className="student" key={i}>
+                           <label htmlFor="observation" className="name">
+                              {student.lastname + ", " + student.name}
+                           </label>
+                           <textarea
+                              className="form-input"
+                              name={student._id}
+                              id="observation"
+                              rows="4"
+                              onChange={(e) => onChangeObservations(e, i)}
+                              value={observations[i]}
+                              placeholder="Observaciones"
+                           ></textarea>
+                        </div>
+                     ))}
+               </div>
+            );
          default:
             return (
                <div className="popup-text">
@@ -152,6 +184,16 @@ const Confirm = ({
                                  confirm(date);
                                  setFormData({ ...formData, date: "" });
                                  break;
+                              case "report-cards":
+                                 confirm(observations);
+                                 setFormData({
+                                    ...formData,
+                                    observations: Array.from(
+                                       Array(users.length),
+                                       () => ""
+                                    ),
+                                 });
+                                 break;
                               default:
                                  confirm();
                                  break;
@@ -179,7 +221,7 @@ const Confirm = ({
    );
 };
 
-Confirm.propTypes = {
+PopUp.propTypes = {
    penalty: PropTypes.object,
    type: PropTypes.string,
    users: PropTypes.array,
@@ -188,4 +230,4 @@ Confirm.propTypes = {
    confirm: PropTypes.func,
 };
 
-export default Confirm;
+export default PopUp;

@@ -6,13 +6,17 @@ import PropTypes from "prop-types";
 import { loadClass, deleteClass, classPDF } from "../../../../../actions/class";
 import { clearAttendances } from "../../../../../actions/attendance";
 import { clearPosts, getUnseenPosts } from "../../../../../actions/post";
-import { clearGrades, clearGradeTypes } from "../../../../../actions/grade";
+import {
+   clearGrades,
+   clearGradeTypes,
+   gradesPDF,
+} from "../../../../../actions/grade";
 import { clearProfile, clearSearch } from "../../../../../actions/user";
 import { updatePreviousPage } from "../../../../../actions/mixvalues";
 
 import Loading from "../../../../modal/Loading";
 import ClassInfo from "../../../sharedComp/ClassInfo";
-import Confirm from "../../../../modal/Confirm";
+import PopUp from "../../../../modal/PopUp";
 import StudentTable from "../../../sharedComp/tables/StudentTable";
 
 import "./style.scss";
@@ -34,6 +38,7 @@ const OneClass = ({
    clearSearch,
    clearProfile,
    classPDF,
+   gradesPDF,
 }) => {
    const userCanSeeButtons =
       userLogged.type !== "student" && userLogged.type !== "guardian";
@@ -42,7 +47,12 @@ const OneClass = ({
       userLogged.type === "admin&teacher" ||
       userLogged.type === "teacher";
 
-   const [toggleModal, setToggleModal] = useState(false);
+   const [otherValues, setOtherValues] = useState({
+      toggleModalDelete: false,
+      toggleModalReportCards: false,
+   });
+
+   const { toggleModalDelete, toggleModalReportCards } = otherValues;
 
    useEffect(() => {
       if (userLogged.type !== "student" && loading) {
@@ -59,30 +69,31 @@ const OneClass = ({
    ]);
 
    const setToggle = () => {
-      setToggleModal(!toggleModal);
-   };
-
-   const confirm = () => {
-      deleteClass(classInfo._id, history);
-   };
-
-   const pdfGeneratorSave = () => {
-      classPDF(classInfo, "class");
-   };
-
-   const blankPdfGenerator = () => {
-      classPDF(classInfo, "blank");
+      setOtherValues({
+         ...otherValues,
+         toggleModalDelete: false,
+         toggleModalReportCards: false,
+      });
    };
 
    return (
       <>
          {!loadingStudents ? (
             <div className="classInfo">
-               <Confirm
-                  toggleModal={toggleModal}
+               <PopUp
+                  toggleModal={toggleModalDelete}
                   setToggleModal={setToggle}
                   text="¿Está seguro que desea eliminar el curso?"
-                  confirm={confirm}
+                  confirm={() => deleteClass(classInfo._id, history)}
+               />
+               <PopUp
+                  toggleModal={toggleModalReportCards}
+                  setToggleModal={setToggle}
+                  users={classInfo.students}
+                  type="report-cards"
+                  confirm={(observations) =>
+                     gradesPDF(observations, classInfo, "report-cards")
+                  }
                />
                <h1 className="pt-3 text-center light-font">Clase</h1>
                <ClassInfo classInfo={classInfo} />
@@ -183,16 +194,35 @@ const OneClass = ({
                      <button
                         type="button"
                         className="btn btn-secondary"
-                        onClick={pdfGeneratorSave}
+                        onClick={(e) => {
+                           e.preventDefault();
+                           classPDF(classInfo, "class");
+                        }}
                      >
                         <i className="fas fa-file-pdf"></i>
                      </button>
                      <button
                         type="button"
                         className="btn btn-secondary"
-                        onClick={blankPdfGenerator}
+                        onClick={(e) => {
+                           e.preventDefault();
+                           classPDF(classInfo, "blank");
+                        }}
                      >
                         <i className="fas fa-scroll"></i>
+                     </button>
+                     <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={(e) => {
+                           e.preventDefault();
+                           setOtherValues({
+                              ...otherValues,
+                              toggleModalReportCards: true,
+                           });
+                        }}
+                     >
+                        <i className="fas fa-address-card"></i>
                      </button>
                      {userLogged.type !== "teacher" && (
                         <>
@@ -210,7 +240,13 @@ const OneClass = ({
                            <button
                               type="button"
                               className="btn btn-danger"
-                              onClick={setToggle}
+                              onClick={(e) => {
+                                 e.preventDefault();
+                                 setOtherValues({
+                                    ...otherValues,
+                                    toggleModalDelete: true,
+                                 });
+                              }}
                            >
                               <i className="far fa-trash-alt"></i>
                            </button>
@@ -236,6 +272,7 @@ OneClass.propTypes = {
    updatePreviousPage: PropTypes.func.isRequired,
    getUnseenPosts: PropTypes.func.isRequired,
    classPDF: PropTypes.func.isRequired,
+   gradesPDF: PropTypes.func.isRequired,
    clearAttendances: PropTypes.func.isRequired,
    clearGrades: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
@@ -256,6 +293,7 @@ export default connect(mapStateToProps, {
    updatePreviousPage,
    getUnseenPosts,
    classPDF,
+   gradesPDF,
    clearGrades,
    clearAttendances,
    clearProfile,

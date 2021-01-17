@@ -17,7 +17,7 @@ import {
 } from "../../../../../actions/neighbourhood";
 
 import Loading from "../../../../modal/Loading";
-import Confirm from "../../../../modal/Confirm";
+import PopUp from "../../../../modal/PopUp";
 import TutorInfo from "./usersInfo/TutorInfo";
 import EmployeeInfo from "./usersInfo/EmployeeInfo";
 import StudentInfo from "./usersInfo/StudentInfo";
@@ -274,14 +274,14 @@ const RegisterUser = ({
    };
 
    const setToggle = () => {
-      setOtherValues({ ...otherValues, toggleModal: !toggleModal });
+      setOtherValues({
+         ...otherValues,
+         toggleModal: false,
+         toggleActive: false,
+      });
    };
 
-   const setToggleActive = () => {
-      setOtherValues({ ...otherValues, toggleActive: !toggleActive });
-   };
-
-   const onSubmit = () => {
+   const confirm = () => {
       registerUser(
          {
             ...formData,
@@ -338,19 +338,19 @@ const RegisterUser = ({
       <>
          {condition ? (
             <>
-               <Confirm
+               <PopUp
                   toggleModal={toggleModal}
                   setToggleModal={setToggle}
-                  confirm={onSubmit}
+                  confirm={confirm}
                   text={`¿Está seguro que desea ${
                      isEditing
                         ? "aplicar los cambios"
                         : "registrar al nuevo usuario"
                   }?`}
                />
-               <Confirm
+               <PopUp
                   toggleModal={toggleActive}
-                  setToggleModal={setToggleActive}
+                  setToggleModal={setToggle}
                   confirm={onChangeCheckbox}
                   type="active"
                   text={{
@@ -753,7 +753,11 @@ const RegisterUser = ({
                               className="form-checkbox"
                               onChange={() => {
                                  if (!active) onChangeCheckbox();
-                                 else setToggleActive();
+                                 else
+                                    setOtherValues({
+                                       ...otherValues,
+                                       toggleActive: true,
+                                    });
                               }}
                               type="checkbox"
                               checked={active}

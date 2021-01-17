@@ -13,7 +13,7 @@ import { loadPenalty, updatePenalty } from "../../../../actions/penalty";
 import { clearUser } from "../../../../actions/user";
 
 import InstallmentsSearch from "../../sharedComp/search/InstallmentsSearch";
-import Confirm from "../../../modal/Confirm";
+import PopUp from "../../../modal/PopUp";
 
 const Installments = ({
    match,
@@ -73,20 +73,16 @@ const Installments = ({
       setOtherValues({ ...otherValues, toggleModal: !toggleModal });
    };
 
-   const confirm = (percentage) => {
-      updatePenalty({ percentage });
-   };
-
    return (
       <>
          <div>
             <h1>Cuotas</h1>
             {toggleModal && !loading && (
-               <Confirm
+               <PopUp
                   toggleModal={toggleModal}
                   setToggleModal={setToggle}
                   type="penalty"
-                  confirm={confirm}
+                  confirm={(percentage) => updatePenalty({ percentage })}
                   penalty={penalty}
                />
             )}
@@ -97,7 +93,10 @@ const Installments = ({
                   <button
                      className="btn btn-secondary"
                      type="button"
-                     onClick={setToggle}
+                     onClick={(e) => {
+                        e.preventDefault();
+                        setToggle();
+                     }}
                   >
                      <i className="fas fa-dollar-sign"></i>&nbsp; Recargo
                   </button>

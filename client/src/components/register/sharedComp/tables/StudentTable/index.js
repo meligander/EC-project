@@ -70,7 +70,10 @@ const StudentTable = ({
                                        ? "btn-dark"
                                        : "btn-danger"
                                  } `}
-                                 onClick={(e) => actionWChild(e, user)}
+                                 onClick={(e) => {
+                                    e.preventDefault();
+                                    actionWChild(user);
+                                 }}
                               >
                                  <i
                                     className={

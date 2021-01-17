@@ -146,7 +146,10 @@ const InstallmentsTable = ({
                   className={`btn ${
                      !invoice ? "btn-mix-secondary" : "btn-dark"
                   } `}
-                  onClick={actionForSelected}
+                  onClick={(e) => {
+                     e.preventDefault();
+                     actionForSelected();
+                  }}
                >
                   {!invoice ? (
                      <>

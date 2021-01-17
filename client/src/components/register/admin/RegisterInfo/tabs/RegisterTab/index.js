@@ -11,7 +11,7 @@ import {
 import { clearInvoices } from "../../../../../../actions/invoice";
 import { clearExpences } from "../../../../../../actions/expence";
 
-import Confirm from "../../../../../modal/Confirm";
+import PopUp from "../../../../../modal/PopUp";
 import Loading from "../../../../../modal/Loading";
 
 import "./style.scss";
@@ -43,15 +43,15 @@ const RegisterTab = ({
       });
    };
 
-   const setToggle = () => {
-      setToggleModal(!toggleModal);
-   };
-
    const onChangeCheckBox = (e) => {
       setFormData({
          ...formData,
          negative: e.target.checked,
       });
+   };
+
+   const setToggle = () => {
+      setToggleModal(!toggleModal);
    };
 
    const confirm = () => {
@@ -64,7 +64,7 @@ const RegisterTab = ({
       <>
          {!loading ? (
             <div className="register register-tab">
-               <Confirm
+               <PopUp
                   toggleModal={toggleModal}
                   setToggleModal={setToggle}
                   confirm={confirm}

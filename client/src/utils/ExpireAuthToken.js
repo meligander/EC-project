@@ -6,13 +6,13 @@ import PropTypes from "prop-types";
 
 import { expireSesion } from "../actions/auth";
 
-import Confirm from "../components/modal/Confirm";
+import PopUp from "../components/modal/PopUp";
 
 const ExpireAuthToken = ({ expireSesion, history }) => {
    const idleTimerRef = createRef(null);
 
-   const timeIdle = 900;
-   const timeLogOut = 300;
+   const timeIdle = 15;
+   const timeLogOut = 5;
 
    const [otherValues, setOtherValues] = useState({
       timer: null,
@@ -33,7 +33,7 @@ const ExpireAuthToken = ({ expireSesion, history }) => {
       setOtherValues({
          ...otherValues,
          toggleModal: true,
-         timer: setTimeout(logOut, timeLogOut * 1000),
+         timer: setTimeout(logOut, timeLogOut * 1000 * 60),
       });
    };
 
@@ -54,7 +54,7 @@ const ExpireAuthToken = ({ expireSesion, history }) => {
 
    return (
       <React.Fragment>
-         <Confirm
+         <PopUp
             type="active"
             text={{
                question:
@@ -69,7 +69,7 @@ const ExpireAuthToken = ({ expireSesion, history }) => {
          <IdleTimer
             ref={idleTimerRef}
             onIdle={onIdle}
-            timeout={timeIdle * 1000}
+            timeout={timeIdle * 1000 * 60}
          ></IdleTimer>
       </React.Fragment>
    );

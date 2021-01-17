@@ -7,6 +7,7 @@ import {
    clearGradeTypes,
    loadGrades,
    loadGradeTypesByCategory,
+   gradesPDF,
 } from "../../../actions/grade";
 import { loadClass } from "../../../actions/class";
 
@@ -17,11 +18,16 @@ import Tabs from "../sharedComp/Tabs";
 
 const Grades = ({
    match,
-   classes,
-   grades: { loadingGT, loading },
+   classes: { loading: loadingClass, classInfo },
+   grades: {
+      loadingGT,
+      loading,
+      grades: { header, periods },
+   },
    loadGrades,
    loadGradeTypesByCategory,
    loadClass,
+   gradesPDF,
    clearGradeTypes,
 }) => {
    const [oneLoad, setOneLoad] = useState(true);
@@ -29,21 +35,21 @@ const Grades = ({
    useEffect(() => {
       if (oneLoad) {
          if (loading) loadGrades(match.params.class_id);
-         if (classes.loading) loadClass(match.params.class_id);
+         if (loadingClass) loadClass(match.params.class_id);
          clearGradeTypes();
          setOneLoad(false);
       } else {
-         if (loadingGT && !classes.loading) {
-            loadGradeTypesByCategory(classes.classInfo.category._id);
+         if (loadingGT && !loadingClass) {
+            loadGradeTypesByCategory(classInfo.category._id);
          }
       }
    }, [
       loading,
       loadingGT,
-      classes.loading,
+      loadingClass,
       oneLoad,
       loadGradeTypesByCategory,
-      classes.classInfo,
+      classInfo,
       loadClass,
       loadGrades,
       clearGradeTypes,
@@ -113,14 +119,29 @@ const Grades = ({
 
    return (
       <>
-         {!loading && !classes.loading ? (
+         {!loading && !loadingClass ? (
             <>
                <h1 className="text-center light-font p-1 mt-2">Notas</h1>
-
-               <ClassInfo classInfo={classes.classInfo} />
-               <div className="few-tabs">
-                  {tabs(classes.classInfo.category.name)}
+               <div className="btn-right">
+                  <button
+                     type="button"
+                     className="btn btn-secondary"
+                     onClick={(e) => {
+                        e.preventDefault();
+                        gradesPDF(
+                           { header, period: periods },
+                           classInfo,
+                           "all"
+                        );
+                     }}
+                  >
+                     <i className="fas fa-file-pdf"></i>&nbsp; Todas
+                     <span className="hide-md"> las notas</span>
+                  </button>
                </div>
+               <ClassInfo classInfo={classInfo} />
+
+               <div className="few-tabs">{tabs(classInfo.category.name)}</div>
             </>
          ) : (
             <Loading />
@@ -135,6 +156,7 @@ Grades.propTypes = {
    loadGrades: PropTypes.func.isRequired,
    loadGradeTypesByCategory: PropTypes.func.isRequired,
    loadClass: PropTypes.func.isRequired,
+   gradesPDF: PropTypes.func.isRequired,
    clearGradeTypes: PropTypes.func.isRequired,
 };
 
@@ -147,5 +169,6 @@ export default connect(mapStateToProps, {
    loadGrades,
    loadClass,
    loadGradeTypesByCategory,
+   gradesPDF,
    clearGradeTypes,
 })(withRouter(Grades));

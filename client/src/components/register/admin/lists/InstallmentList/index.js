@@ -72,17 +72,6 @@ const InstallmentList = ({
       });
    };
 
-   const search = (e) => {
-      e.preventDefault();
-      loadInstallments({
-         ...filterData,
-      });
-   };
-
-   const pdfGeneratorSave = () => {
-      installmentsPDF(installments);
-   };
-
    return (
       <>
          {!loadingInstallments ? (
@@ -92,7 +81,13 @@ const InstallmentList = ({
                   Total: {totalDebt !== "" ? "$" + totalDebt : "$"}
                </p>
 
-               <form className="form" onSubmit={search}>
+               <form
+                  className="form"
+                  onSubmit={(e) => {
+                     e.preventDefault();
+                     loadInstallments(filterData);
+                  }}
+               >
                   <div className="form-group">
                      <select
                         className="form-input"
@@ -204,7 +199,7 @@ const InstallmentList = ({
                   page={page}
                   changePage={updatePageNumber}
                   items={installments}
-                  pdfGeneratorSave={pdfGeneratorSave}
+                  pdfGenerator={() => installmentsPDF(installments)}
                />
             </>
          ) : (

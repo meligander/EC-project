@@ -3,9 +3,10 @@ const router = express.Router();
 const auth = require("../../middleware/auth");
 const path = require("path");
 const pdf = require("html-pdf");
-const pdfTemplate = require("../../templates/assistanceGrades");
-const pdfTemplate1 = require("../../templates/certificate");
-const pdfTemplate2 = require("../../templates/cambridgeCertificate");
+const pdfTemplateAssitanceGrades = require("../../templates/assistanceGrades");
+const pdfTemplateCertificate = require("../../templates/certificate");
+const pdfTemplateCambridgeCertificate = require("../../templates/cambridgeCertificate");
+const pdfTemplateReportCard = require("../../templates/reportCard");
 
 const Grade = require("../../models/Grade");
 const Enrollment = require("../../models/Enrollment");
@@ -56,6 +57,7 @@ router.get("/student/:class_id/:user_id", [auth], async (req, res) => {
       const grades = await Grade.find({
          classroom: req.params.class_id,
          student: req.params.user_id,
+         period: { $in: [1, 2, 3, 4] },
       })
          .populate({
             path: "gradetype",
@@ -91,6 +93,13 @@ router.get("/list/fetch-list", (req, res) => {
 //@access   Private
 router.get("/certificate/fetch-list", (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/certificate.pdf"));
+});
+
+//@route    GET api/grade/certificate/fetch-list
+//@desc     Get the pdf of a student report card
+//@access   Private
+router.get("/pdf/report-card", (req, res) => {
+   res.sendFile(path.join(__dirname, "../../reports/reportcard.pdf"));
 });
 
 //@route    POST api/grade/period
@@ -198,9 +207,9 @@ router.post("/period", auth, async (req, res) => {
 //@desc     Add a grade
 //@access   Private
 router.post("/", auth, async (req, res) => {
-   const { student, period, classroom, gradetype, value, periods } = req.body;
+   const { period, classroom, gradetype, periods } = req.body;
 
-   if (gradetype === "")
+   if (!gradetype)
       return res.status(400).json({
          msg: "Primero debe elegir un tipo de nota",
       });
@@ -210,7 +219,7 @@ router.post("/", auth, async (req, res) => {
          msg: "Debe agregar por lo menos una nota en los bimestres anteriores",
       });
 
-   const data = { student, period, classroom, gradetype, value };
+   const data = { period, classroom, gradetype };
    let grade;
 
    try {
@@ -248,7 +257,7 @@ router.post("/", auth, async (req, res) => {
 router.post("/create-list", (req, res) => {
    const name = "reports/grades.pdf";
 
-   const { students, header, periods, classInfo, period } = req.body;
+   const { students, header, period, classInfo, periodNumber } = req.body;
 
    const periodName = [
       "1° Bimestre",
@@ -262,7 +271,7 @@ router.post("/create-list", (req, res) => {
 
    let thead = "<tr><th>Nombre</th>";
 
-   const title = "Notas " + periodName[period];
+   const title = "Notas " + periodName[periodNumber];
 
    for (let x = 0; x < header.length; x++) {
       thead += "<th>" + header[x] + "</th>";
@@ -274,28 +283,10 @@ router.post("/create-list", (req, res) => {
       if (students[x].name !== "") {
          tbody += "<tr> <td>" + students[x].name + "</td>";
 
-         for (let y = 0; y < periods[x].length; y++) {
-            if (classInfo.category.name === "Kinder") {
-               switch (true) {
-                  case periods[x][y].value < 4:
-                     tbody += "<td> Malo </td>";
-                     break;
-                  case periods[x][y].value >= 4 && periods[x][y].value < 6:
-                     tbody += "<td> Regular </td>";
-                     break;
-                  case periods[x][y].value >= 6 && periods[x][y].value < 7.5:
-                     tbody += "<td> Bueno </td>";
-                     break;
-                  case periods[x][y].value >= 7.5 && periods[x][y].value < 9:
-                     tbody += "<td> Muy Bueno </td>";
-                     break;
-                  case periods[x][y].value >= 9 && periods[x][y].value <= 10:
-                     tbody += "<td> Sobresaliente </td>";
-                     break;
-                  default:
-                     break;
-               }
-            } else tbody += "<td>" + periods[x][y].value + "</td>";
+         for (let y = 0; y < period[x].length; y++) {
+            if (classInfo.category.name === "Kinder")
+               tbody += `<td>${kinderGrade(period[x][y].value)}</td>`;
+            else tbody += "<td>" + period[x][y].value + "</td>";
          }
 
          tbody += "</tr>";
@@ -327,7 +318,7 @@ router.post("/create-list", (req, res) => {
    };
 
    pdf.create(
-      pdfTemplate(css, img, title, thead, tbody, classInfo),
+      pdfTemplateAssitanceGrades(css, img, title, thead, tbody, classInfo),
       options
    ).toFile(name, (err) => {
       if (err) {
@@ -344,11 +335,11 @@ router.post("/create-list", (req, res) => {
 router.post("/all/create-list", (req, res) => {
    const name = "reports/grades.pdf";
 
-   const { students, header, periods, classInfo } = req.body;
+   const { students, header, period, classInfo } = req.body;
 
    const tableGrades = buildAllGradesTable(
       students,
-      periods,
+      period,
       classInfo.category.name
    );
 
@@ -371,7 +362,7 @@ router.post("/all/create-list", (req, res) => {
 
    thead += "</tr><tr><th class='no-border border-right'></th>";
 
-   for (let x = 0; x < 5; x++) {
+   for (let x = 0; x < periodName.length; x++) {
       if (header[x]) {
          for (let y = 0; y < header[x].length; y++) {
             thead += `<th class='${
@@ -432,7 +423,16 @@ router.post("/all/create-list", (req, res) => {
    };
 
    pdf.create(
-      pdfTemplate(css, img, title, thead, tbody, classInfo, null, true),
+      pdfTemplateAssitanceGrades(
+         css,
+         img,
+         title,
+         thead,
+         tbody,
+         classInfo,
+         null,
+         true
+      ),
       options
    ).toFile(name, (err) => {
       if (err) {
@@ -451,18 +451,36 @@ router.post("/certificate/create-list", async (req, res) => {
 
    let { student, header, period, classInfo, certificateDate } = req.body;
 
+   if (!certificateDate)
+      return res.status(400).json({
+         msg: "Debe seleccionar una fecha",
+      });
+
+   let pass = true;
+   for (let x = 0; x < period.length; x++) {
+      for (let y = 0; y < period[x].length; y++) {
+         if (period[x][y].value === "") {
+            pass = false;
+            break;
+         }
+      }
+      if (!pass) break;
+   }
+
+   if (!pass)
+      return res.status(400).json({
+         msg: "Todos los alumnos deben tener las notas cargadas",
+      });
+
    student.dni = student.dni.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
    const date = new Date();
    const year = date.getFullYear();
 
    let certificateInfo = "";
-   let finalGrades = " <tr>";
-   let finalHeader = "";
-   let finalGrade = "";
+   let finalGrades = "";
    let body = "";
    let highCertificate = false;
-   let pass = true;
    let average = 0;
 
    const high =
@@ -485,58 +503,62 @@ router.post("/certificate/create-list", async (req, res) => {
    }
 
    if (high) {
-      if (enrollment.periodAverage[4] < 6) {
+      if (enrollment.classroom.periodAverage[4] < 6) {
          pass = false;
       } else {
          highCertificate = true;
       }
    }
 
+   let fBody = "";
+   let fHeader = "";
+
    for (let x = 0; x < period.length; x++) {
       if (high) {
-         finalGrade += `<td>${period[x].value * 10}%</td>`;
-         finalHeader += `<th>${header[x]}</th>`;
+         fHeader += `<th>${header[x]}</th>`;
+         fBody += `<td>${period[x].value * 10}%</td>`;
 
-         if ((x + 1) % 3 === 0 || x + 1 === period.length) {
-            if (x + 1 === period.length) {
-               average = enrollment.periodAverage[4] * 10;
-               average = Math.round((average + Number.EPSILON) * 100) / 100;
+         if (x + 1 === period.length) {
+            average = enrollment.classroom.periodAverage[4] * 10;
+            average = Math.round((average + Number.EPSILON) * 100) / 100;
 
-               finalGrade += `<td>${average}%</td>`;
-               finalHeader += "<th>Promedio</th>";
-               finalGrades +=
-                  finalHeader + "</tr><tr>" + finalGrade + "</tr></table>";
-               break;
-            } else {
-               finalGrades +=
-                  finalHeader +
-                  "</tr><tr>" +
-                  finalGrade +
-                  "</tr></table>" +
-                  "<table class='grades-table full no-border-top'> <tr>";
-
-               finalHeader = "";
-               finalGrade = "";
+            fBody += `<td>${average}%</td>`;
+            fHeader += "<th>Promedio</th>";
+            finalGrades +=
+               "<tr>" + fHeader + "</tr><tr>" + fBody + "</tr></table>";
+         } else {
+            if ((x + 1) % 3 === 0) {
+               finalGrades += "<tr>" + fHeader + "</tr><tr>" + fBody + "</tr>";
+               fHeader = "";
+               fBody = "";
             }
          }
       } else {
          if (classInfo.category.name === "Kinder") {
-            average = enrollment.average;
+            average = enrollment.classroom.average;
          } else {
             if (period[x].value < 6) {
                pass = false;
                break;
             } else {
-               finalHeader += `<th>${header[x]}</th>`;
-               finalGrade += `<td>${period[x].value.toFixed(2)}</td>`;
+               fHeader += `<th>${header[x]}</th>`;
+               fBody += `<td>${period[x].value.toFixed(2)}</td>`;
+
                if ((x + 1) % 2 === 0) {
                   finalGrades +=
-                     finalHeader + "</tr><tr>" + finalGrade + "</tr></table>";
-                  finalHeader = "";
-                  finalGrade = "";
-                  if (x + 1 !== period.length)
+                     "<tr>" + fHeader + "</tr><tr>" + fBody + "</tr>";
+                  fHeader = "";
+                  fBody = "";
+               }
+               if (x + 1 === period.length) {
+                  if (fHeader !== "")
                      finalGrades +=
-                        "<table class='grades-table no-border-top'> <tr>";
+                        "<tr>" +
+                        fHeader +
+                        "</tr><tr>" +
+                        fBody +
+                        "</tr></table>";
+                  else finalGrades += "</table>";
                }
             }
          }
@@ -579,31 +601,11 @@ router.post("/certificate/create-list", async (req, res) => {
       }
    }
 
-   if (classInfo.category.name === "Kinder") {
-      let grade = "";
-      switch (true) {
-         case average < 4:
-            grade = "Malo";
-            break;
-         case average >= 4 && average < 6:
-            grade = "Regular";
-            break;
-         case average >= 6 && average < 7.5:
-            grade = "Bueno";
-            break;
-         case average >= 7.5 && average < 9:
-            grade = "Muy Bueno";
-            break;
-         case average >= 9 && average <= 10:
-            grade = "Sobresaliente";
-            break;
-         default:
-            break;
-      }
-      body += `<p class="mention"><span class="title">Mención:</span> &nbsp; ${grade}</p>`;
-   } else {
-      if (pass) body = certificateInfo + finalGrades + "</div>";
-   }
+   if (classInfo.category.name === "Kinder")
+      body += `<p class="mention"><span class="title">Mención:</span> &nbsp; ${kinderGrade(
+         average
+      )}</p>`;
+   else if (pass) body = certificateInfo + finalGrades + "</div>";
 
    const img = path.join(
       "file://",
@@ -616,9 +618,12 @@ router.post("/certificate/create-list", async (req, res) => {
       "../../templates/certificate/style.css"
    );
 
-   pdf.create(pdfTemplate1(css, img, student, body, certificateDate), {
-      format: "A4",
-   }).toFile(name, (err) => {
+   pdf.create(
+      pdfTemplateCertificate(css, img, student, body, certificateDate),
+      {
+         format: "A4",
+      }
+   ).toFile(name, (err) => {
       if (err) {
          res.send(Promise.reject());
       }
@@ -754,7 +759,7 @@ router.post("/certificate-cambridge/create-list", (req, res) => {
    );
 
    pdf.create(
-      pdfTemplate2(
+      pdfTemplateCambridgeCertificate(
          css,
          imgBlack,
          student,
@@ -766,6 +771,202 @@ router.post("/certificate-cambridge/create-list", (req, res) => {
       {
          format: "A4",
       }
+   ).toFile(name, (err) => {
+      if (err) {
+         res.send(Promise.reject());
+      }
+
+      res.send(Promise.resolve());
+   });
+});
+
+//@route    POST api/grade/report-card
+//@desc     Create a pdf of student's report card
+//@access   Private
+router.post("/report-card", async (req, res) => {
+   const name = "reports/reportcard.pdf";
+   const { student, observation, classInfo } = req.body;
+
+   let grades = [];
+   let finalExamGrades = [];
+   let enrollment = {};
+
+   try {
+      grades = await Grade.find({
+         classroom: classInfo._id,
+         student: student._id,
+         period: { $in: [1, 2, 3, 4] },
+      })
+         .populate({
+            path: "gradetype",
+            model: "gradetypes",
+            select: "name",
+         })
+         .sort({ gradetype: 1 });
+
+      finalExamGrades = await Grade.find({
+         classroom: classInfo._id,
+         student: student._id,
+         period: 5,
+      })
+         .populate({
+            path: "gradetype",
+            model: "gradetypes",
+            select: "name",
+         })
+         .sort({ gradetype: 1 });
+
+      if (grades.length === 0)
+         return res.status(400).json({
+            msg: "El alumno no tiene notas cargadas",
+         });
+
+      enrollment = await Enrollment.findOne({
+         "classroom._id": classInfo._id,
+         student: student._id,
+      });
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server Error");
+   }
+
+   const studentTable = buildStudentTable(grades, true);
+
+   let finalGrades = "";
+   let allGrades = "";
+   let attendance = "";
+
+   const higherExams =
+      classInfo.category === "6° Año" ||
+      classInfo.category === "CAE" ||
+      classInfo.category === "Proficency";
+
+   if (classInfo.category !== "Kinder") {
+      finalGrades = `<h3 class='center'>Exámen Final</h3> <table class='final-grades ${
+         !higherExams ? "small" : ""
+      }'><tbody>`;
+
+      let header = "";
+      let body = "";
+
+      for (let x = 0; x < finalExamGrades.length; x++) {
+         header += `<th>${finalExamGrades[x].gradetype.name}</th>`;
+         body += `<td>${
+            !higherExams
+               ? finalExamGrades[x].value.toFixed(2)
+               : finalExamGrades[x].value * 10 + "%"
+         }</td>`;
+
+         if (
+            ((x + 1) % 3 === 0 && higherExams) ||
+            (!higherExams && (count + 1) % 2 === 0)
+         ) {
+            finalGrades += "<tr>" + header + "</tr><tr>" + body + "</tr>";
+            header = "";
+            body = "";
+         }
+
+         if (x + 1 === finalExamGrades.length) {
+            if (higherExams) {
+               let average = enrollment.classroom.periodAverage[4] * 10;
+               average = Math.round((average + Number.EPSILON) * 100) / 100;
+
+               header += "<th>Promedio</th>";
+               body += `<td>${average}%</td>`;
+
+               finalGrades +=
+                  "<tr>" +
+                  header +
+                  "</tr><tr>" +
+                  body +
+                  "</tr></tbody></table>";
+            } else {
+               if (header !== "")
+                  finalGrades +=
+                     "<tr>" +
+                     header +
+                     "</tr><tr>" +
+                     body +
+                     "</tr></tbody></table>";
+               else finalGrades += "</tbody></table>";
+            }
+         }
+      }
+
+      if (finalExamGrades.length === 0) finalGrades = "";
+   }
+
+   for (let x = 0; x < studentTable.rows.length; x++) {
+      if (studentTable.headers[x]) {
+         allGrades += `<tr><th>${studentTable.headers[x]}</th>`;
+         for (let y = 0; y < studentTable.rows[x].length; y++) {
+            if (
+               studentTable.headers[x] === "Ket" ||
+               studentTable.headers[x] === "Pet" ||
+               studentTable.headers[x] === "First" ||
+               studentTable.headers[x] === "CAE" ||
+               studentTable.headers[x] === "Proficiency"
+            ) {
+               allGrades += `<td>${
+                  studentTable.rows[x][y].value
+                     ? studentTable.rows[x][y].value * 10 + "%"
+                     : ""
+               }</td>`;
+            } else {
+               let value = "";
+               if (studentTable.rows[x][y].value)
+                  value = studentTable.rows[x][y].value.toFixed(2);
+               allGrades += `<td>${
+                  classInfo.category !== "Kinder"
+                     ? value
+                     : kinderGrade(studentTable.rows[x][y].value)
+               }</td>`;
+            }
+         }
+         allGrades += "</tr>";
+      }
+   }
+
+   for (let x = 0; x < 4; x++) {
+      attendance += `<td>${
+         enrollment.classroom.periodAbsence[x]
+            ? enrollment.classroom.periodAbsence[x]
+            : ""
+      }</td>`;
+   }
+
+   attendance += `<td>${
+      enrollment.classroom.absence ? enrollment.classroom.absence : 0
+   }</td>`;
+
+   const img = path.join(
+      "file://",
+      __dirname,
+      "../../templates/assets/logo.png"
+   );
+   const css = path.join(
+      "file://",
+      __dirname,
+      "../../templates/reportCard/style.css"
+   );
+
+   const options = {
+      format: "A4",
+   };
+
+   pdf.create(
+      pdfTemplateReportCard(
+         css,
+         img,
+         student.name,
+         classInfo.teacher,
+         classInfo.category,
+         allGrades,
+         finalGrades,
+         attendance,
+         observation
+      ),
+      options
    ).toFile(name, (err) => {
       if (err) {
          res.send(Promise.reject());
@@ -818,7 +1019,7 @@ router.delete("/:type/:classroom/:period", auth, async (req, res) => {
    }
 });
 
-function buildStudentTable(grades) {
+function buildStudentTable(grades, reportCard) {
    let obj = grades.reduce((res, curr) => {
       if (res[curr.gradetype.name]) {
          res[curr.gradetype.name].push(curr);
@@ -829,18 +1030,16 @@ function buildStudentTable(grades) {
    let rows = [];
 
    for (const x in obj) {
-      if (obj[x][0].period === 6) {
-         delete obj[x];
-      } else {
-         const dividedGrades = obj[x];
-         let row = Array.from(Array(5), () => ({
-            value: "",
-         }));
-         for (let x = 0; x < dividedGrades.length; x++) {
-            row[dividedGrades[x].period - 1] = dividedGrades[x];
-         }
-         rows.push(row);
+      if (!reportCard && obj[x][0].value === "") delete obj[x];
+
+      const dividedGrades = obj[x];
+      let row = Array.from(Array(4), () => ({
+         value: "",
+      }));
+      for (let x = 0; x < dividedGrades.length; x++) {
+         row[dividedGrades[x].period - 1] = dividedGrades[x];
       }
+      rows.push(row);
    }
 
    let headers = Object.getOwnPropertyNames(obj);
@@ -1009,10 +1208,10 @@ async function buildClassTable(grades, class_id, res) {
 function buildAllGradesTable(students, periods, className) {
    let table = [];
 
-   for (let x = 0; x < students.length - 1; x++) {
+   for (let x = 0; x < students.length; x++) {
       let row = [];
       let count = 0;
-      row[count] = students[x].name;
+      row[count] = students[x].lastname + ", " + students[x].name;
       let numberOfPeriods = 5;
       if (className === "Kinder") numberOfPeriods = 4;
 
@@ -1021,33 +1220,15 @@ function buildAllGradesTable(students, periods, className) {
             for (let z = 0; z < periods[y][x].length; z++) {
                count++;
                if (periods[y][x][z]) {
-                  if (className === "Kinder") {
-                     switch (true) {
-                        case periods[y][x][z].value < 4:
-                           row[count] = "M";
-                           break;
-                        case periods[y][x][z].value >= 4 &&
-                           periods[y][x][z].value < 6:
-                           row[count] = "Reg";
-                           break;
-                        case periods[y][x][z].value >= 6 &&
-                           periods[y][x][z].value < 7.5:
-                           row[count] = "B";
-                           break;
-                        case periods[y][x][z].value >= 7.5 &&
-                           periods[y][x][z].value < 9:
-                           row[count] = "MB";
-                           break;
-                        case periods[y][x][z].value >= 9 &&
-                           periods[y][x][z].value <= 10:
-                           row[count] = "Sobr";
-                           break;
-                        default:
-                           break;
-                     }
-                  } else {
-                     if (periods[y][x]) row[count] = periods[y][x][z].value;
-                  }
+                  if (className === "Kinder")
+                     row[count] =
+                        kinderGrade(periods[y][x][z].value) === "Muy Bueno"
+                           ? "MB"
+                           : kinderGrade(periods[y][x][z].value).substring(
+                                0,
+                                1
+                             );
+                  else if (periods[y][x]) row[count] = periods[y][x][z].value;
                } else row[count] = "";
             }
          } else {
@@ -1059,6 +1240,25 @@ function buildAllGradesTable(students, periods, className) {
    }
 
    return table;
+}
+
+function kinderGrade(grade) {
+   switch (true) {
+      case grade === "":
+         return "";
+      case grade < 4:
+         return "Malo";
+      case grade >= 4 && grade < 6:
+         return "Regular";
+      case grade >= 6 && grade < 7.5:
+         return "Bueno";
+      case grade >= 7.5 && grade < 9:
+         return "Muy Bueno";
+      case grade >= 9 && grade <= 10:
+         return "Sobresaliente";
+      default:
+         return "";
+   }
 }
 
 module.exports = router;

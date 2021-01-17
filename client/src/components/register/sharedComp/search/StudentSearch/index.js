@@ -60,7 +60,10 @@ const StudentSearch = ({
                   }`}
                   type="button"
                   disabled={typeSearch === "installment" && block}
-                  onClick={(e) => searchStudents(e)}
+                  onClick={(e) => {
+                     e.preventDefault();
+                     searchStudents();
+                  }}
                >
                   <i className="fas fa-filter"></i>
                   <span className="hide-sm">&nbsp; Buscar</span>
@@ -120,12 +123,13 @@ const StudentSearch = ({
                      typeSearch !== "installment" ? "btn-dark" : ""
                   }`}
                   onClick={(e) => {
+                     e.preventDefault();
                      setFilterForm({
                         ...filterForm,
                         name: "",
                         lastname: "",
                      });
-                     actionForSelected(e);
+                     actionForSelected();
                   }}
                >
                   {typeSearch !== "installment" ? (

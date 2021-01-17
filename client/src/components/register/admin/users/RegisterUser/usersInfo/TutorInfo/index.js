@@ -34,8 +34,7 @@ const TutorInfo = ({
       });
    };
 
-   const addToList = (e) => {
-      e.preventDefault();
+   const addToList = () => {
       let exist = false;
       for (let x = 0; x < children.length; x++) {
          if (children[x]._id === selectedStudent._id) exist = true;
@@ -55,8 +54,7 @@ const TutorInfo = ({
       }
    };
 
-   const deleteChild = (e, childToDelete) => {
-      e.preventDefault();
+   const deleteChild = (childToDelete) => {
       setChildren(childToDelete, false);
    };
    return (

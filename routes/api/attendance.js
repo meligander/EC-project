@@ -157,20 +157,15 @@ router.post("/period", auth, async (req, res) => {
 //@desc     Add a date column for the period
 //@access   Private
 router.post("/", auth, async (req, res) => {
-   const { date, period, classroom, periods } = req.body;
+   const { date, period, classroom } = req.body;
 
-   if (date === "")
+   if (!date)
       return res.status(400).json({ msg: "Primero debe elegir una fecha" });
-
-   if (period !== 1 && !periods[period - 2])
-      return res.status(400).json({
-         msg: "Debe agregar por lo menos una fecha en los bimestres anteriores",
-      });
 
    const data = {
       period,
       date: new Date(date),
-      classroom,
+      classroom: classroom._id,
    };
 
    try {
@@ -182,6 +177,74 @@ router.post("/", auth, async (req, res) => {
 
       attendance = new Attendance(data);
       await attendance.save();
+
+      const date = new Date();
+      const start = new Date(date.getFullYear(), 01, 01);
+      const end = new Date(date.getFullYear(), 12, 31);
+
+      let attendances = await Attendance.find({
+         classroom,
+         date: {
+            $gte: start,
+            $lt: end,
+         },
+      })
+         .populate({
+            path: "student",
+            model: "user",
+            select: ["name", "lastname"],
+         })
+         .sort({ date: 1 });
+
+      let attendancesTable = await buildTable(attendances, classroom, res);
+
+      res.json(attendancesTable);
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server Error");
+   }
+});
+
+//@route    POST api/attendance
+//@desc     Add all dates for a bimester
+//@access   Private
+router.post("/bimester", auth, async (req, res) => {
+   const { fromDate, toDate, period, classroom, periods } = req.body;
+
+   let dates = [];
+
+   if (!fromDate || !toDate)
+      return res.status(400).json({
+         msg: "Debe seleccionar las fechas del comienzo y fin del bimestre",
+      });
+
+   if (period !== 1 && !periods[period - 2])
+      return res.status(400).json({
+         msg: "Debe agregar por lo menos una fecha en los bimestres anteriores",
+      });
+
+   if (!classroom.day1 || !classroom.day2)
+      return res.status(400).json({
+         msg:
+            "Deben estar cargadas los días en la que los alumno asisten a clases",
+      });
+
+   dates = getDaysBetweenDates(fromDate, toDate, classroom.day1);
+   const date2 = getDaysBetweenDates(fromDate, toDate, classroom.day2);
+
+   dates = dates.concat(date2);
+
+   try {
+      for (let x = 0; x < dates.length; x++) {
+         const data = {
+            period,
+            date: new Date(dates[x]),
+            classroom: classroom._id,
+         };
+
+         const attendance = new Attendance(data);
+         await attendance.save();
+      }
 
       const date = new Date();
       const start = new Date(date.getFullYear(), 01, 01);
@@ -492,6 +555,27 @@ async function buildTable(attendances, class_id, res) {
       periods.push(period);
    }
    return { header, students, periods };
+}
+
+function getDaysBetweenDates(start, end, dayName) {
+   let result = [];
+   let days = { Lunes: 1, Martes: 2, Miércoles: 3, Jueves: 4, Viernes: 5 };
+
+   let day = days[dayName];
+
+   // Copy start date
+   let current = new Date(start);
+   let endDate = new Date(end);
+
+   // Shift to next of required days
+   current.setUTCDate(current.getDate() + ((day - current.getDay() + 7) % 7));
+
+   // While less than end date, add dates to result array
+   while (current < endDate) {
+      result.push(new Date(+current));
+      current.setDate(current.getDate() + 7);
+   }
+   return result;
 }
 
 module.exports = router;
