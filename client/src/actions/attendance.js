@@ -81,7 +81,7 @@ export const registerNewDate = (formData, addBimester) => async (dispatch) => {
          setAlert(
             addBimester ? "Días del Bimestre Agregados" : "Día Agregado",
             "success",
-            "3"
+            addBimester ? "4" : "3"
          )
       );
    } catch (err) {

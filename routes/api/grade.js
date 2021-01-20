@@ -160,8 +160,10 @@ router.post("/period", auth, async (req, res) => {
             }
          }
 
-         average = average / count;
-         average = Math.round((average + Number.EPSILON) * 100) / 100;
+         if (average !== 0) {
+            average = average / count;
+            average = Math.round((average + Number.EPSILON) * 100) / 100;
+         }
 
          const filter2 = { year, student };
 
@@ -184,14 +186,19 @@ router.post("/period", auth, async (req, res) => {
             }
          }
 
-         allAverage = allAverage / full;
-         allAverage = Math.round((allAverage + Number.EPSILON) * 100) / 100;
+         if (allAverage !== 0) {
+            allAverage = allAverage / full;
+            allAverage = Math.round((allAverage + Number.EPSILON) * 100) / 100;
+         }
 
          await Enrollment.findOneAndUpdate(
             { _id: enrollment._id },
             {
-               "classroom.periodAverage": periodAverage,
-               "classroom.average": allAverage,
+               classroom: {
+                  ...enrollment.classroom,
+                  periodAverage,
+                  ...(allAverage !== 0 && { average: allAverage }),
+               },
             }
          );
       }

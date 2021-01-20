@@ -91,7 +91,6 @@ const GradesTab = ({
             ...prev,
             newGrades: periods[period - 1] ? periods[period - 1] : [],
          }));
-         setOtherValues((prev) => ({ ...prev, loaded: true }));
       };
 
       setInput();
@@ -133,10 +132,6 @@ const GradesTab = ({
             gradetypes: gradetypes.filter(
                (gt) => gt._id !== newGradeType.gradetype
             ),
-         });
-         setFormData({
-            ...formData,
-            newGrades: periods[period - 1],
          });
       }
    };

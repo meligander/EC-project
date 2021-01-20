@@ -107,11 +107,7 @@ const AttendanceTab = ({
          addBimester
       );
 
-      if (periods[period - 1]) {
-         setFormData({
-            ...formData,
-            newAttendances: periods[period - 1],
-         });
+      if (!periods[period - 1]) {
          setOtherValues({
             ...otherValues,
             addBimester: false,
