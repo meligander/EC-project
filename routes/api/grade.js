@@ -234,6 +234,13 @@ router.post("/", auth, async (req, res) => {
 
       await grade.save();
 
+      if (period === 1) {
+         for (let x = 0; x < 3; x++) {
+            grade = new Grade({ period: x + 2, classroom, gradetype });
+            await grade.save();
+         }
+      }
+
       const grades = await Grade.find({
          classroom,
       })
@@ -671,6 +678,7 @@ router.post("/certificate-cambridge/create-list", (req, res) => {
 
    switch (classInfo.category.name) {
       case "Infantil A":
+      case "Infantil B":
          level = "Starter";
          break;
       case "Preparatorio":

@@ -1,13 +1,7 @@
-html {
-   /* deploy */
-   font-size: 49.9%;
-   font-family: "Times New Roman", Times, serif;
-}
-
 .container {
    margin: 5rem;
    font-size: 1.7rem;
-   border: 1.5px solid black;
+   border: 2px solid black;
    height: 95rem;
    position: relative;
 }
@@ -27,23 +21,19 @@ html {
 table {
    border-collapse: collapse;
    text-align: center;
-
-   /* deployed */
-   font-weight: 300;
 }
 
 table.header {
    width: 100%;
-   font-size: 1.5rem !important;
 }
 
 table.header td {
-   border-bottom: 1.5px solid black;
+   border-bottom: 2px solid black;
 }
 
 table.header .logo {
    width: 35%;
-   border-right: 1.5px solid black;
+   border-right: 2px solid black;
 }
 
 table.header .logo img {
@@ -52,19 +42,12 @@ table.header .logo img {
 }
 
 .body {
-   padding: 5rem 2rem 2rem;
-
-   /* deploy */
-   font-size: 84%;
+   padding: 5rem 1rem 2rem 1rem;
 }
 
 .body .capital {
    text-transform: uppercase;
    font-weight: bold;
-}
-
-.grades p {
-   margin-bottom: 1.7rem;
 }
 
 .student {
@@ -83,7 +66,7 @@ table.header .logo img {
    text-transform: uppercase;
    font-weight: bold;
    text-align: right;
-   margin: -3.5rem 1rem -1rem 0;
+   margin: -3.7rem 1rem -1rem 0;
 }
 
 .grades .mention {
@@ -117,7 +100,6 @@ table.header .logo img {
    margin: 0 0 0 auto;
    width: 75%;
    table-layout: fixed;
-   font-size: 1.5rem;
 }
 
 .grades .full {
@@ -126,19 +108,19 @@ table.header .logo img {
 
 .grades .grades-table th,
 .grades .grades-table td {
-   border: 1.5px solid black;
+   border: 2px solid black;
    padding: 0.5rem 0;
 }
 
 .date {
-   font-size: 1.25rem !important;
+   font-size: 1.5rem;
    position: absolute;
    bottom: 12rem;
 }
 
 .signature {
    position: absolute;
-   font-size: 1.15rem !important;
+   font-size: 1.4rem;
    bottom: 2rem;
    left: 35%;
    text-align: center;

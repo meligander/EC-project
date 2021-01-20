@@ -225,8 +225,8 @@ PopUp.propTypes = {
    penalty: PropTypes.object,
    type: PropTypes.string,
    users: PropTypes.array,
-   toggleModal: PropTypes.bool.isRequired,
-   setToggleModal: PropTypes.func.isRequired,
+   toggleModal: PropTypes.bool,
+   setToggleModal: PropTypes.func,
    confirm: PropTypes.func,
 };
 

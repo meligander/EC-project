@@ -1,13 +1,7 @@
-html {
-   /* deploy */
-   font-size: 50%;
-   font-family: "Times New Roman", Times, serif;
-}
-
 .container {
    margin: 5rem;
    font-size: 1.7rem;
-   border: 1.5px solid black;
+   border: 2px solid black;
    height: 95rem;
    position: relative;
 }
@@ -48,9 +42,6 @@ html {
 
 .body {
    padding: 0.5rem 1rem;
-
-   /* deploy */
-   font-size: 85%;
 }
 
 .student {
@@ -76,9 +67,6 @@ table {
    width: 100%;
    border-collapse: collapse;
    text-align: center;
-
-   /* deployed */
-   font-weight: 300;
 }
 
 table td img {

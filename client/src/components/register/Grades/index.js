@@ -70,6 +70,7 @@ const Grades = ({
                   panellist={[GradesTab, GradesTab, GradesTab, GradesTab]}
                />
             );
+         case "Infantil B":
          case "Infantil A":
          case "Preparatorio":
          case "Junior":

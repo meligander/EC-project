@@ -1,9 +1,3 @@
-html {
-   /* deploy */
-   font-size: 49.9%;
-   font-family: "Times New Roman", Times, serif;
-}
-
 .header {
    margin-top: -0.5rem;
    text-align: end;
@@ -27,10 +21,6 @@ html {
 table {
    border-collapse: collapse;
    width: 100%;
-
-   /* deployed */
-   font-size: 80%;
-   font-weight: 300;
 }
 table.small {
    width: 60%;

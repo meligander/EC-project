@@ -1,9 +1,3 @@
-html {
-   /* deploy */
-   font-size: 50%;
-   font-family: "Times New Roman", Times, serif;
-}
-
 .container {
    margin: 5rem;
    padding: 0 3rem 3rem 3rem;
@@ -18,10 +12,6 @@ html {
 table {
    border-collapse: collapse;
    width: 100%;
-
-   /* deployed */
-   font-size: 80%;
-   font-weight: 300;
 }
 
 .business {
