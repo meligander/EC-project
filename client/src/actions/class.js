@@ -250,7 +250,7 @@ export const deleteClass = (class_id, history) => async (dispatch) => {
       dispatch(clearActiveClasses());
 
       history.push("/classes");
-      dispatch(setAlert("Clase Eliminado", "success", "2"));
+      dispatch(setAlert("Clase Eliminada", "success", "2"));
    } catch (err) {
       const msg = err.response.data.msg;
       const type = err.response.statusText;

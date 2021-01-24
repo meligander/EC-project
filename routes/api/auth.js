@@ -1,14 +1,11 @@
 const express = require("express");
 const { check, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
-const config = require("config");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
 const auth = require("../../middleware/auth");
 
-/* const accountSid = config.get("twilioAccountSid");
-const authToken = config.get("twilioAuthToken");
-const client = require("twilio")(accountSid, authToken); */
+require("dotenv").config({ path: "../../config/.env" });
 
 const User = require("../../models/User");
 const Enrollment = require("../../models/Enrollment");
@@ -101,17 +98,9 @@ router.post(
             },
          };
 
-         /* const message = await client.messages.create({
-            body:
-               "La cuota del alumno Polio García, Mateo Junior está por vencerse",
-            from: "whatsapp:+14155238886",
-            to: "whatsapp:+18608741335",
-         });
-         console.log(message.sid); */
-
          jwt.sign(
             payload,
-            config.get("jwtSecret"),
+            process.env.JWT_SECRET,
             { expiresIn: 360000 },
             (err, token) => {
                if (err) throw err;
