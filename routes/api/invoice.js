@@ -269,7 +269,7 @@ router.post(
                });
          }
 
-         if ((lastname === "" && name === "") || user._id === "") {
+         if (lastname === "" && name === "" && user._id === "") {
             return res.status(400).json({
                msg: "La factura debe estar a nombre de alguien",
             });
@@ -351,7 +351,7 @@ router.post(
 //@desc     Create a pdf list of income
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "reports/invoices.pdf";
+   const name = path.join(__dirname, "../../reports/invoices.pdf");
 
    const invoices = req.body;
 
@@ -407,23 +407,28 @@ router.post("/create-list", (req, res) => {
       },
    };
 
-   pdf.create(pdfTemplate(css, img, "ingresos", thead, tbody), options).toFile(
-      name,
-      (err) => {
+   try {
+      pdf.create(
+         pdfTemplate(css, img, "ingresos", thead, tbody),
+         options
+      ).toFile(name, (err) => {
          if (err) {
             res.send(Promise.reject());
          }
 
          res.send(Promise.resolve());
-      }
-   );
+      });
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).send("PDF error");
+   }
 });
 
 //@route    POST api/invoice/create-invoice
 //@desc     Create a pdf of an invoice
 //@access   Private
 router.post("/create-invoice", (req, res) => {
-   const name = "reports/invoice.pdf";
+   const name = path.join(__dirname, "../../reports/invoice.pdf");
 
    const { invoice, remaining } = req.body;
 
@@ -499,16 +504,21 @@ router.post("/create-invoice", (req, res) => {
       format: "A4",
    };
 
-   pdf.create(pdfTemplate2(css, img, tbody, invoiceDetails), options).toFile(
-      name,
-      (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
+   try {
+      pdf.create(pdfTemplate2(css, img, tbody, invoiceDetails), options).toFile(
+         name,
+         (err) => {
+            if (err) {
+               res.send(Promise.reject());
+            }
 
-         res.send(Promise.resolve());
-      }
-   );
+            res.send(Promise.resolve());
+         }
+      );
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).send("PDF error");
+   }
 });
 
 //@route    DELETE api/invoice/:id

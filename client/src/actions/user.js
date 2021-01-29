@@ -98,7 +98,7 @@ export const getActiveUsers = (type) => async (dispatch) => {
             type: err.response.statusText,
             status: err.response.status,
             msg: err.response.data.msg,
-            userType: type === "Alumno" ? "activeStudents" : "activeTeachers",
+            userType: type === "student" ? "activeStudents" : "activeTeachers",
          },
       });
       window.scroll(0, 0);

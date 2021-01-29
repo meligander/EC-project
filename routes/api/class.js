@@ -204,9 +204,9 @@ router.post(
          let data = {
             teacher,
             category,
-            ...(classroom && { classroom: classroom }),
-            ...(day1 && { day1: day1 }),
-            ...(day2 && { day2: day2 }),
+            ...(classroom && { classroom }),
+            ...(day1 && { day1 }),
+            ...(day2 && { day2 }),
             ...(hours[0] && { hourin1: hours[0] }),
             ...(hours[1] && { hourin2: hours[1] }),
             ...(hours[2] && { hourout1: hours[2] }),
@@ -248,7 +248,7 @@ router.post(
 //@desc     Create a pdf of classes
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "reports/classes.pdf";
+   const name = path.join(__dirname, "../../reports/classes.pdf");
 
    const classes = req.body;
 
@@ -330,23 +330,28 @@ router.post("/create-list", (req, res) => {
       },
    };
 
-   pdf.create(
-      pdfTemplate(css, img, "cursos", table, htmlstring),
-      options
-   ).toFile(name, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
+   try {
+      pdf.create(
+         pdfTemplate(css, img, "cursos", table, htmlstring),
+         options
+      ).toFile(name, (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
 
-      res.send(Promise.resolve());
-   });
+         res.send(Promise.resolve());
+      });
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("PDF Error");
+   }
 });
 
 //@route    POST api/class/oneclass/create-list
 //@desc     Create a pdf of a class
 //@access   Private
 router.post("/oneclass/create-list", (req, res) => {
-   const name = "reports/class.pdf";
+   const name = path.join(__dirname, "../../reports/class.pdf");
 
    const classInfo = req.body;
 
@@ -399,23 +404,28 @@ router.post("/oneclass/create-list", (req, res) => {
       },
    };
 
-   pdf.create(pdfTemplate2(css, img, tbody, classInfo), options).toFile(
-      name,
-      (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
+   try {
+      pdf.create(pdfTemplate2(css, img, tbody, classInfo), options).toFile(
+         name,
+         (err) => {
+            if (err) {
+               res.send(Promise.reject());
+            }
 
-         res.send(Promise.resolve());
-      }
-   );
+            res.send(Promise.resolve());
+         }
+      );
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("PDF Error");
+   }
 });
 
 //@route    POST api/class/blank/create-list
 //@desc     Create a pdf of the class  for attendances and grades
 //@access   Private
 router.post("/blank/create-list", (req, res) => {
-   const name = "reports/blank.pdf";
+   const name = path.join(__dirname, "../../reports/blank.pdf");
 
    const classInfo = req.body;
 
@@ -470,16 +480,21 @@ router.post("/blank/create-list", (req, res) => {
       },
    };
 
-   pdf.create(pdfTemplate2(css, img, tbody, classInfo, thead), options).toFile(
-      name,
-      (err) => {
+   try {
+      pdf.create(
+         pdfTemplate2(css, img, tbody, classInfo, thead),
+         options
+      ).toFile(name, (err) => {
          if (err) {
             res.send(Promise.reject());
          }
 
          res.send(Promise.resolve());
-      }
-   );
+      });
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("PDF Error");
+   }
 });
 
 //@route    PUT api/class/:id

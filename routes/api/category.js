@@ -111,16 +111,21 @@ router.post("/create-list", (req, res) => {
       },
    };
 
-   pdf.create(
-      pdfTemplate(css, img, "categorías", thead, tbody, true),
-      options
-   ).toFile("reports/categories.pdf", (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
+   try {
+      pdf.create(
+         pdfTemplate(css, img, "categorías", thead, tbody, true),
+         options
+      ).toFile(path.join(__dirname, "../../reports/categories.pdf"), (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
 
-      res.send(Promise.resolve());
-   });
+         res.send(Promise.resolve());
+      });
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("PDF Error");
+   }
 });
 
 //@route    PUT api/category

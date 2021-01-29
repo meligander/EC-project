@@ -221,7 +221,7 @@ router.post(
 //@desc     Create a pdf of transactions
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "reports/transactions.pdf";
+   const name = path.join(__dirname, "../../reports/transactions.pdf");
 
    const transactions = req.body;
 
@@ -305,16 +305,21 @@ router.post("/create-list", (req, res) => {
       },
    };
 
-   pdf.create(
-      pdfTemplate(css, img, "movimientos", thead, tbody),
-      options
-   ).toFile(name, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
+   try {
+      pdf.create(
+         pdfTemplate(css, img, "movimientos", thead, tbody),
+         options
+      ).toFile(name, (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
 
-      res.send(Promise.resolve());
-   });
+         res.send(Promise.resolve());
+      });
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).send("PDF error");
+   }
 });
 
 //@route    DELETE api/expence/:id

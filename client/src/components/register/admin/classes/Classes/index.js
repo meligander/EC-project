@@ -168,7 +168,7 @@ const Classes = ({
 
                <div className="pt-4">
                   <ClassesTable
-                     classes={classes}
+                     classes={classes ? classes : []}
                      all={!isTeacher}
                      clearClass={clearClass}
                      clearClasses={clearClasses}

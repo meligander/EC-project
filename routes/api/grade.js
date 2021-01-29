@@ -269,7 +269,7 @@ router.post("/", auth, async (req, res) => {
 //@desc     Create a pdf of the class grades during a period
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "reports/grades.pdf";
+   const name = path.join(__dirname, "../../reports/grades.pdf");
 
    const { students, header, period, classInfo, periodNumber } = req.body;
 
@@ -331,23 +331,28 @@ router.post("/create-list", (req, res) => {
       },
    };
 
-   pdf.create(
-      pdfTemplateAssitanceGrades(css, img, title, thead, tbody, classInfo),
-      options
-   ).toFile(name, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
+   try {
+      pdf.create(
+         pdfTemplateAssitanceGrades(css, img, title, thead, tbody, classInfo),
+         options
+      ).toFile(name, (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
 
-      res.send(Promise.resolve());
-   });
+         res.send(Promise.resolve());
+      });
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("PDF Error");
+   }
 });
 
 //@route    POST api/grade/all/create-list
 //@desc     Create a pdf of all the class grades
 //@access   Private
 router.post("/all/create-list", (req, res) => {
-   const name = "reports/grades.pdf";
+   const name = path.join(__dirname, "../../reports/grades.pdf");
 
    const { students, header, period, classInfo } = req.body;
 
@@ -436,32 +441,37 @@ router.post("/all/create-list", (req, res) => {
       },
    };
 
-   pdf.create(
-      pdfTemplateAssitanceGrades(
-         css,
-         img,
-         title,
-         thead,
-         tbody,
-         classInfo,
-         null,
-         true
-      ),
-      options
-   ).toFile(name, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
+   try {
+      pdf.create(
+         pdfTemplateAssitanceGrades(
+            css,
+            img,
+            title,
+            thead,
+            tbody,
+            classInfo,
+            null,
+            true
+         ),
+         options
+      ).toFile(name, (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
 
-      res.send(Promise.resolve());
-   });
+         res.send(Promise.resolve());
+      });
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("PDF Error");
+   }
 });
 
 //@route    POST api/grade/certificate/create-list
 //@desc     Create all certificate pdfs of the class
 //@access   Private
 router.post("/certificate/create-list", async (req, res) => {
-   const name = "reports/certificate.pdf";
+   const name = path.join(__dirname, "../../reports/certificate.pdf");
 
    let { student, header, period, classInfo, certificateDate } = req.body;
 
@@ -632,25 +642,30 @@ router.post("/certificate/create-list", async (req, res) => {
       "../../templates/certificate/style.css"
    );
 
-   pdf.create(
-      pdfTemplateCertificate(css, img, student, body, certificateDate),
-      {
-         format: "A4",
-      }
-   ).toFile(name, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
+   try {
+      pdf.create(
+         pdfTemplateCertificate(css, img, student, body, certificateDate),
+         {
+            format: "A4",
+         }
+      ).toFile(name, (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
 
-      res.send(Promise.resolve());
-   });
+         res.send(Promise.resolve());
+      });
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("PDF Error");
+   }
 });
 
 //@route    POST api/grade/certificate-cambridge/create-list
 //@desc     Create all cambridge certificate pdfs of the class (starter, movers, flyers)
 //@access   Private
 router.post("/certificate-cambridge/create-list", (req, res) => {
-   const name = "reports/certificate.pdf";
+   const name = path.join(__dirname, "../../reports/certificate.pdf");
 
    let { student, header, period, classInfo, certificateDate } = req.body;
 
@@ -773,33 +788,38 @@ router.post("/certificate-cambridge/create-list", (req, res) => {
       "../../templates/cambridgeCertificate/style.css"
    );
 
-   pdf.create(
-      pdfTemplateCambridgeCertificate(
-         css,
-         imgBlack,
-         student,
-         level,
-         body,
-         average,
-         certificateDate
-      ),
-      {
-         format: "A4",
-      }
-   ).toFile(name, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
+   try {
+      pdf.create(
+         pdfTemplateCambridgeCertificate(
+            css,
+            imgBlack,
+            student,
+            level,
+            body,
+            average,
+            certificateDate
+         ),
+         {
+            format: "A4",
+         }
+      ).toFile(name, (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
 
-      res.send(Promise.resolve());
-   });
+         res.send(Promise.resolve());
+      });
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("PDF Error");
+   }
 });
 
 //@route    POST api/grade/report-card
 //@desc     Create a pdf of student's report card
 //@access   Private
 router.post("/report-card", async (req, res) => {
-   const name = "reports/reportcard.pdf";
+   const name = path.join(__dirname, "../../reports/reportcard.pdf");
    const { student, observation, classInfo } = req.body;
 
    let grades = [];
@@ -969,26 +989,31 @@ router.post("/report-card", async (req, res) => {
       format: "A4",
    };
 
-   pdf.create(
-      pdfTemplateReportCard(
-         css,
-         img,
-         student.name,
-         classInfo.teacher,
-         classInfo.category,
-         allGrades,
-         finalGrades,
-         attendance,
-         observation
-      ),
-      options
-   ).toFile(name, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
+   try {
+      pdf.create(
+         pdfTemplateReportCard(
+            css,
+            img,
+            student.name,
+            classInfo.teacher,
+            classInfo.category,
+            allGrades,
+            finalGrades,
+            attendance,
+            observation
+         ),
+         options
+      ).toFile(name, (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
 
-      res.send(Promise.resolve());
-   });
+         res.send(Promise.resolve());
+      });
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("PDF Error");
+   }
 });
 
 //@route    DELETE api/grade/:type/:classroom/:period

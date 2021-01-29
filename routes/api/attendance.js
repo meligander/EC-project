@@ -277,7 +277,7 @@ router.post("/bimester", auth, async (req, res) => {
 //@desc     Create a pdf of the class attendances
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "reports/attendances.pdf";
+   const name = path.join(__dirname, "../../reports/attendances.pdf");
 
    const { header, students, attendances, period, classInfo } = req.body;
 
@@ -340,16 +340,21 @@ router.post("/create-list", (req, res) => {
       },
    };
 
-   pdf.create(
-      pdfTemplate(css, img, title, thead, tbody, classInfo, true),
-      options
-   ).toFile(name, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
+   try {
+      pdf.create(
+         pdfTemplate(css, img, title, thead, tbody, classInfo, true),
+         options
+      ).toFile(name, (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
 
-      res.send(Promise.resolve());
-   });
+         res.send(Promise.resolve());
+      });
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).send("PDF error");
+   }
 });
 
 //@route    DELETE api/attendance/date/:date

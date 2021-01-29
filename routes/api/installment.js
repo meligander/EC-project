@@ -217,7 +217,7 @@ router.post(
 //@desc     Create a pdf of installments
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "reports/debt.pdf";
+   const name = res.sendFile(path.join(__dirname, "../../reports/debt.pdf"));
 
    const debts = req.body;
 
@@ -279,16 +279,21 @@ router.post("/create-list", (req, res) => {
       },
    };
 
-   pdf.create(pdfTemplate(css, img, "deudas", thead, tbody), options).toFile(
-      name,
-      (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
+   try {
+      pdf.create(pdfTemplate(css, img, "deudas", thead, tbody), options).toFile(
+         name,
+         (err) => {
+            if (err) {
+               res.send(Promise.reject());
+            }
 
-         res.send(Promise.resolve());
-      }
-   );
+            res.send(Promise.resolve());
+         }
+      );
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("PDF Error");
+   }
 });
 
 //@route    PUT api/installment/:id

@@ -127,7 +127,7 @@ router.post(
 //@desc     Create a pdf of expences
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "reports/registers.pdf";
+   const name = path.join(__dirname, "../../reports/registers.pdf");
 
    const register = req.body;
 
@@ -208,16 +208,21 @@ router.post("/create-list", (req, res) => {
       },
    };
 
-   pdf.create(pdfTemplate(css, img, "caja", thead, tbody), options).toFile(
-      name,
-      (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
+   try {
+      pdf.create(pdfTemplate(css, img, "caja", thead, tbody), options).toFile(
+         name,
+         (err) => {
+            if (err) {
+               res.send(Promise.reject());
+            }
 
-         res.send(Promise.resolve());
-      }
-   );
+            res.send(Promise.resolve());
+         }
+      );
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("PDF Error");
+   }
 });
 
 //@route    PUT api/register

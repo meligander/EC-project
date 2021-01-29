@@ -33,8 +33,7 @@ const StudentSearch = ({
          [e.target.name]: e.target.value,
       });
    };
-   const searchStudents = (e) => {
-      e.preventDefault();
+   const searchStudents = () => {
       loadUsers(filterForm, true, true);
    };
 

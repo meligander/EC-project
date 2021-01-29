@@ -425,7 +425,7 @@ router.post(
 //@desc     Create a pdf of users
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const nameReport = "reports/users.pdf";
+   const nameReport = path.join(__dirname, "../../reports/users.pdf");
 
    const { users, usersType } = req.body;
 
@@ -529,22 +529,27 @@ router.post("/create-list", (req, res) => {
       },
    };
 
-   pdf.create(
-      pdfTemplate(
-         css,
-         img,
-         usersType === "Alumno" ? "Alumnos" : usersType + "es",
-         thead,
-         tbody
-      ),
-      options
-   ).toFile(nameReport, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
+   try {
+      pdf.create(
+         pdfTemplate(
+            css,
+            img,
+            usersType === "Alumno" ? "Alumnos" : usersType + "es",
+            thead,
+            tbody
+         ),
+         options
+      ).toFile(nameReport, (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
 
-      res.send(Promise.resolve());
-   });
+         res.send(Promise.resolve());
+      });
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("PDF Error");
+   }
 });
 
 //@route    PUT api/user/:id

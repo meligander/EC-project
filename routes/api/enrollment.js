@@ -366,7 +366,7 @@ router.post(
 //@desc     Create a pdf of enrollment
 //@access   Private
 router.post("/create-list", (req, res) => {
-   const name = "reports/enrollments.pdf";
+   const name = path.join(__dirname, "../../reports/enrollments.pdf");
 
    const enrollments = req.body;
 
@@ -428,23 +428,28 @@ router.post("/create-list", (req, res) => {
       },
    };
 
-   pdf.create(
-      pdfTemplate(css, img, "inscripciones", thead, tbody),
-      options
-   ).toFile(name, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
+   try {
+      pdf.create(
+         pdfTemplate(css, img, "inscripciones", thead, tbody),
+         options
+      ).toFile(name, (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
 
-      res.send(Promise.resolve());
-   });
+         res.send(Promise.resolve());
+      });
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("PDF Error");
+   }
 });
 
 //@route    POST api/enrollment/averages/create-list
 //@desc     Create a pdf of the students' averages
 //@access   Private
 router.post("/averages/create-list", (req, res) => {
-   const name = "reports/averages.pdf";
+   const name = path.join(__dirname, "../../reports/averages.pdf");
 
    const enrollments = req.body;
 
@@ -498,23 +503,28 @@ router.post("/averages/create-list", (req, res) => {
       },
    };
 
-   pdf.create(
-      pdfTemplate(css, img, "Mejores Promedios", thead, tbody),
-      options
-   ).toFile(name, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
+   try {
+      pdf.create(
+         pdfTemplate(css, img, "Mejores Promedios", thead, tbody),
+         options
+      ).toFile(name, (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
 
-      res.send(Promise.resolve());
-   });
+         res.send(Promise.resolve());
+      });
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("PDF Error");
+   }
 });
 
 //@route    POST api/enrollment/absences/create-list
 //@desc     Create a pdf of the students' absences
 //@access   Private
 router.post("/absences/create-list", (req, res) => {
-   const name = "reports/absences.pdf";
+   const name = path.join(__dirname, "../../reports/absences.pdf");
 
    const enrollments = req.body;
 
@@ -596,16 +606,21 @@ router.post("/absences/create-list", (req, res) => {
       },
    };
 
-   pdf.create(
-      pdfTemplate(css, img, "Mejores Asistencias", thead, tbody),
-      options
-   ).toFile(name, (err) => {
-      if (err) {
-         res.send(Promise.reject());
-      }
+   try {
+      pdf.create(
+         pdfTemplate(css, img, "Mejores Asistencias", thead, tbody),
+         options
+      ).toFile(name, (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
 
-      res.send(Promise.resolve());
-   });
+         res.send(Promise.resolve());
+      });
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("PDF Error");
+   }
 });
 
 //@route    PUT api/enrollment/:id
