@@ -1,17 +1,23 @@
 const express = require("express");
-const router = express.Router();
 const bcrypt = require("bcryptjs");
-const auth = require("../../middleware/auth");
-const adminAuth = require("../../middleware/adminAuth");
-const { check, validationResult } = require("express-validator");
 const cloudinary = require("cloudinary");
-const cloudinaryUploader = require("../../config/imageUploading");
-
+const moment = require("moment");
 const path = require("path");
 const pdf = require("html-pdf");
-const pdfTemplate = require("../../templates/list");
-const moment = require("moment");
+const { check, validationResult } = require("express-validator");
+const router = express.Router();
 
+//Uploading Img
+const cloudinaryUploader = require("../../config/imageUploading");
+
+//Middleware
+const auth = require("../../middleware/auth");
+const adminAuth = require("../../middleware/adminAuth");
+
+//PDF Templates
+const pdfTemplate = require("../../templates/list");
+
+//Models
 const User = require("../../models/User");
 const Enrollment = require("../../models/Enrollment");
 const Installment = require("../../models/Installment");
@@ -20,9 +26,9 @@ const Attendance = require("../../models/Attendance");
 const Post = require("../../models/Post");
 const Class = require("../../models/Class");
 
-//@route    GET api/user
+//@route    GET /api/user
 //@desc     Get all user || with filter
-//@access   Private
+//@access   Public
 router.get("/", async (req, res) => {
    try {
       let users = [];
@@ -209,7 +215,7 @@ router.get("/", async (req, res) => {
    }
 });
 
-//@route    GET api/user/:id
+//@route    GET /api/user/:id
 //@desc     Get a user
 //@access   Private
 router.get("/:id", auth, async (req, res) => {
@@ -233,7 +239,7 @@ router.get("/:id", auth, async (req, res) => {
    }
 });
 
-//@route    GET api/user/tutor/:id
+//@route    GET /api/user/tutor/:id
 //@desc     Get a user's tutors
 //@access   Private
 router.get("/tutor/:id", auth, async (req, res) => {
@@ -254,9 +260,9 @@ router.get("/tutor/:id", auth, async (req, res) => {
    }
 });
 
-//@route    GET api/user/register/number
+//@route    GET /api/user/register/number
 //@desc     Get last studentnumber
-//@access   Private
+//@access   Private && Admin
 router.get("/register/number", [auth, adminAuth], async (req, res) => {
    try {
       let studentnumber = 1;
@@ -274,16 +280,16 @@ router.get("/register/number", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/user/lista/fetch-list
+//@route    GET /api/user/lista/fetch-list
 //@desc     Get the pdf of users
 //@access   Private
-router.get("/lista/fetch-list", (req, res) => {
+router.get("/lista/fetch-list", auth, (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/users.pdf"));
 });
 
-//@route    POST api/user
+//@route    POST /api/user
 //@desc     Register user
-//@access   Private
+//@access   Private && Admin
 router.post(
    "/",
    [
@@ -421,10 +427,10 @@ router.post(
    }
 );
 
-//@route    POST api/user/create-list
+//@route    POST /api/user/create-list
 //@desc     Create a pdf of users
 //@access   Private
-router.post("/create-list", (req, res) => {
+router.post("/create-list", auth, (req, res) => {
    const nameReport = path.join(__dirname, "../../reports/users.pdf");
 
    const { users, usersType } = req.body;
@@ -552,8 +558,8 @@ router.post("/create-list", (req, res) => {
    }
 });
 
-//@route    PUT api/user/:id
-//@desc     Update another user
+//@route    PUT /api/user/:id
+//@desc     Update a user
 //@access   Private
 router.put(
    "/:id",
@@ -685,10 +691,10 @@ router.put(
    }
 );
 
-//@route    PUT api/user/credentials/:id
+//@route    PUT /api/user/credentials/:id
 //@desc     Update user's credentials
 //@access   Private
-router.put("/credentials/:id", [auth], async (req, res) => {
+router.put("/credentials/:id", auth, async (req, res) => {
    const { password, password2, email } = req.body;
 
    var regex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
@@ -749,9 +755,9 @@ router.put("/credentials/:id", [auth], async (req, res) => {
    }
 });
 
-//@route    DELETE api/user/:id
-//@desc     Delete another user
-//@access   Private
+//@route    DELETE /api/user/:id
+//@desc     Delete a user
+//@access   Private && Admin
 router.delete("/:id/:type", [auth, adminAuth], async (req, res) => {
    try {
       //Remove user

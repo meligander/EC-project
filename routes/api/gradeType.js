@@ -1,14 +1,17 @@
 const express = require("express");
 const router = express.Router();
+
+//Middleware
 const auth = require("../../middleware/auth");
 const adminAuth = require("../../middleware/adminAuth");
 
+//Models
 const GradeType = require("../../models/GradeType");
 const Category = require("../../models/Category");
 
-//@route    GET api/grade-type
+//@route    GET /api/grade-type
 //@desc     get all grade types
-//@access   Private
+//@access   Private && Admin
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
       let gradetypes = await GradeType.find().sort({ name: 1 });
@@ -28,10 +31,10 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/grade-type/category/:id
+//@route    GET /api/grade-type/category/:id
 //@desc     get all grade types || by categories
 //@access   Private
-router.get("/category/:id", [auth], async (req, res) => {
+router.get("/category/:id", auth, async (req, res) => {
    try {
       let gradetypes = await GradeType.find({
          "categories.category": req.params.id,
@@ -50,9 +53,9 @@ router.get("/category/:id", [auth], async (req, res) => {
    }
 });
 
-//@route    POST api/grade-type
+//@route    POST /api/grade-type
 //@desc     Update all grade types
-//@access   Private
+//@access   Private && Admin
 router.post("/", [auth, adminAuth], async (req, res) => {
    //An array of expence types
    const gradeTypes = req.body;
@@ -118,9 +121,9 @@ router.post("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    DELETE api/grade-type/:id
+//@route    DELETE /api/grade-type/:id
 //@desc     Delete a grade type
-//@access   Private
+//@access   Private && Admin
 router.delete("/:id", [auth, adminAuth], async (req, res) => {
    try {
       //Remove Town

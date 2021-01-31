@@ -1,19 +1,24 @@
 const express = require("express");
-const router = express.Router();
-const auth = require("../../middleware/auth");
-const adminAuth = require("../../middleware/adminAuth");
 const { check, validationResult } = require("express-validator");
 const path = require("path");
 const pdf = require("html-pdf");
+const router = express.Router();
+
+//PDF Templates
 const pdfTemplate = require("../../templates/list");
 
+//Middleware
+const auth = require("../../middleware/auth");
+const adminAuth = require("../../middleware/adminAuth");
+
+//Models
 const Installment = require("../../models/Installment");
 const Enrollment = require("../../models/Enrollment");
 const Penalty = require("../../models/Penalty");
 
-//@route    GET api/installment
+//@route    GET /api/installment
 //@desc     Get all installments || with filters
-//@access   Private
+//@access   Private && Admin
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
       let installments = [];
@@ -73,9 +78,9 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/installment/:id
+//@route    GET /api/installment/:id
 //@desc     Get one installment
-//@access   Private
+//@access   Private && Admin
 router.get("/:id", [auth, adminAuth], async (req, res) => {
    try {
       const installment = await Installment.findOne({
@@ -93,8 +98,8 @@ router.get("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/installment/student/:id
-//@desc     Get all users's installments
+//@route    GET /api/installment/student/:id
+//@desc     Get all student's installments
 //@access   Private
 router.get("/student/:id/:admin", auth, async (req, res) => {
    try {
@@ -124,9 +129,9 @@ router.get("/student/:id/:admin", auth, async (req, res) => {
    }
 });
 
-//@route    GET api/installment/month/debts
+//@route    GET /api/installment/month/debts
 //@desc     Get the total debt
-//@access   Private
+//@access   Private && Admin
 router.get("/month/debts", [auth, adminAuth], async (req, res) => {
    try {
       const installments = await Installment.find({
@@ -146,16 +151,16 @@ router.get("/month/debts", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/installment/fetch-list
+//@route    GET /api/installment/fetch-list
 //@desc     Get the pdf of installments
-//@access   Private
-router.get("/list/fetch-list", (req, res) => {
+//@access   Private && Admin
+router.get("/list/fetch-list", [auth, adminAuth], (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/debt.pdf"));
 });
 
-//@route    POST api/installment
+//@route    POST /api/installment
 //@desc     Add an installment
-//@access   Private
+//@access   Private && Admin
 router.post(
    "/",
    [
@@ -213,10 +218,10 @@ router.post(
    }
 );
 
-//@route    POST api/installment/create-list
+//@route    POST /api/installment/create-list
 //@desc     Create a pdf of installments
-//@access   Private
-router.post("/create-list", (req, res) => {
+//@access   Private && Admin
+router.post("/create-list", [auth, adminAuth], (req, res) => {
    const name = res.sendFile(path.join(__dirname, "../../reports/debt.pdf"));
 
    const debts = req.body;
@@ -296,9 +301,9 @@ router.post("/create-list", (req, res) => {
    }
 });
 
-//@route    PUT api/installment/:id
+//@route    PUT /api/installment/:id
 //@desc     Update an installment
-//@access   Private
+//@access   Private && Admin
 router.put(
    "/:id",
    [auth, adminAuth, check("value", "El valor es necesario").not().isEmpty()],
@@ -327,10 +332,10 @@ router.put(
    }
 );
 
-//@route    PUT api/installment
-//@desc     Update the installment's price when expired
+//@route    PUT /api/installment
+//@desc     Update the installment's price when expired (automatically)
 //@access   Private
-router.put("/", [auth], async (req, res) => {
+router.put("/", auth, async (req, res) => {
    try {
       const date = new Date();
       const month = date.getMonth() + 1;
@@ -414,9 +419,9 @@ router.put("/", [auth], async (req, res) => {
    }
 });
 
-//@route    DELETE api/installment/:id
+//@route    DELETE /api/installment/:id
 //@desc     Delete an installment
-//@access   Private
+//@access   Private && Admin
 router.delete("/:id", [auth, adminAuth], async (req, res) => {
    try {
       //Remove Installment

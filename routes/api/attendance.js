@@ -1,18 +1,23 @@
 const express = require("express");
 const router = express.Router();
 const moment = require("moment");
-const auth = require("../../middleware/auth");
 const path = require("path");
 const pdf = require("html-pdf");
+
+//PDF templates
 const pdfTemplate = require("../../templates/assistanceGrades");
 
+//Middlewares
+const auth = require("../../middleware/auth");
+
+//Models
 const Attendance = require("../../models/Attendance");
 const Enrollment = require("../../models/Enrollment");
 
-//@route    GET api/attendance/:class_id
+//@route    GET /api/attendance/:class_id
 //@desc     Get all attendances for a class
 //@access   Private
-router.get("/:class_id", [auth], async (req, res) => {
+router.get("/:class_id", auth, async (req, res) => {
    try {
       const date = new Date();
       const start = new Date(date.getFullYear(), 01, 01);
@@ -44,10 +49,10 @@ router.get("/:class_id", [auth], async (req, res) => {
    }
 });
 
-//@route    GET api/attendance/student/:id
+//@route    GET /api/attendance/student/:id
 //@desc     Get a student's attendances
 //@access   Private
-router.get("/student/:class_id/:user_id", [auth], async (req, res) => {
+router.get("/student/:class_id/:user_id", auth, async (req, res) => {
    try {
       if (req.params.class_id === "null") {
          return res.status(400).json({
@@ -73,14 +78,14 @@ router.get("/student/:class_id/:user_id", [auth], async (req, res) => {
    }
 });
 
-//@route    GET api/attendance/fetch-list
+//@route    GET /api/attendance/fetch-list
 //@desc     Get the pdf of the class attendances
 //@access   Private
-router.get("/list/fetch-list", (req, res) => {
+router.get("/list/fetch-list", auth, (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/attendances.pdf"));
 });
 
-//@route    POST api/attendance/period
+//@route    POST /api/attendance/period
 //@desc     Add or remove attendances from a period when save
 //@access   Private
 router.post("/period", auth, async (req, res) => {
@@ -153,7 +158,7 @@ router.post("/period", auth, async (req, res) => {
    }
 });
 
-//@route    POST api/attendance
+//@route    POST /api/attendance
 //@desc     Add a date column for the period
 //@access   Private
 router.post("/", auth, async (req, res) => {
@@ -205,7 +210,7 @@ router.post("/", auth, async (req, res) => {
    }
 });
 
-//@route    POST api/attendance
+//@route    POST /api/attendance
 //@desc     Add all dates for a bimester
 //@access   Private
 router.post("/bimester", auth, async (req, res) => {
@@ -273,10 +278,10 @@ router.post("/bimester", auth, async (req, res) => {
    }
 });
 
-//@route    POST api/attendance/create-list
+//@route    POST /api/attendance/create-list
 //@desc     Create a pdf of the class attendances
 //@access   Private
-router.post("/create-list", (req, res) => {
+router.post("/create-list", auth, (req, res) => {
    const name = path.join(__dirname, "../../reports/attendances.pdf");
 
    const { header, students, attendances, period, classInfo } = req.body;

@@ -1,18 +1,23 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../../middleware/auth");
-const adminAuth = require("../../middleware/adminAuth");
 const path = require("path");
 const pdf = require("html-pdf");
-const pdfTemplate = require("../../templates/list");
 const { check, validationResult } = require("express-validator");
 const moment = require("moment");
 
+//PDF Templates
+const pdfTemplate = require("../../templates/list");
+
+//Middleware
+const auth = require("../../middleware/auth");
+const adminAuth = require("../../middleware/adminAuth");
+
+//Models
 const Register = require("../../models/Register");
 
-//@route    GET api/register
+//@route    GET /api/register
 //@desc     get all cashier register || with filter
-//@access   Private
+//@access   Private && Admin
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
       let registers;
@@ -50,9 +55,9 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/register/last
+//@route    GET /api/register/last
 //@desc     get last register info
-//@access   Private
+//@access   Private && Admin
 router.get("/last", [auth, adminAuth], async (req, res) => {
    try {
       let register = await Register.find().sort({ $natural: -1 }).limit(1);
@@ -72,16 +77,16 @@ router.get("/last", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/expence/fetch-list
+//@route    GET /api/expence/fetch-list
 //@desc     Get the pdf of expences
-//@access   Private
-router.get("/fetch-list", (req, res) => {
+//@access   Private && Admin
+router.get("/fetch-list", [auth, adminAuth], (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/registers.pdf"));
 });
 
-//@route    POST api/register
+//@route    POST /api/register
 //@desc     Add first register
-//@access   Private
+//@access   Private && Admin
 router.post(
    "/",
    [
@@ -123,10 +128,10 @@ router.post(
    }
 );
 
-//@route    POST api/expence/create-list
+//@route    POST /api/expence/create-list
 //@desc     Create a pdf of expences
-//@access   Private
-router.post("/create-list", (req, res) => {
+//@access   Private && Admin
+router.post("/create-list", [auth, adminAuth], (req, res) => {
    const name = path.join(__dirname, "../../reports/registers.pdf");
 
    const register = req.body;
@@ -225,9 +230,9 @@ router.post("/create-list", (req, res) => {
    }
 });
 
-//@route    PUT api/register
+//@route    PUT /api/register
 //@desc     Update a register
-//@access   Private
+//@access   Private && Admin
 router.put("/", [auth, adminAuth], async (req, res) => {
    const { difference, negative, description } = req.body;
 
@@ -276,9 +281,9 @@ router.put("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    DELETE api/register/:id
+//@route    DELETE /api/register/:id
 //@desc     Delete a register
-//@access   Private
+//@access   Private && Admin
 router.delete("/:id", [auth, adminAuth], async (req, res) => {
    try {
       const register = await Register.findOne({ _id: req.params.id });

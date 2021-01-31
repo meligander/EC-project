@@ -1,20 +1,25 @@
 const express = require("express");
-const router = express.Router();
-const auth = require("../../middleware/auth");
 const path = require("path");
 const pdf = require("html-pdf");
+const router = express.Router();
+
+//PDF Templates
 const pdfTemplateAssitanceGrades = require("../../templates/assistanceGrades");
 const pdfTemplateCertificate = require("../../templates/certificate");
 const pdfTemplateCambridgeCertificate = require("../../templates/cambridgeCertificate");
 const pdfTemplateReportCard = require("../../templates/reportCard");
 
+//Middlewares
+const auth = require("../../middleware/auth");
+
+//Models
 const Grade = require("../../models/Grade");
 const Enrollment = require("../../models/Enrollment");
 
-//@route    GET api/grade/:class_id
+//@route    GET /api/grade/:class_id
 //@desc     Get all grades for a class
 //@access   Private
-router.get("/:class_id", [auth], async (req, res) => {
+router.get("/:class_id", auth, async (req, res) => {
    try {
       const grades = await Grade.find({
          classroom: req.params.class_id,
@@ -43,14 +48,14 @@ router.get("/:class_id", [auth], async (req, res) => {
    }
 });
 
-//@route    GET api/grade/student/:class_id/:user_id
+//@route    GET /api/grade/student/:class_id/:user_id
 //@desc     Get all grades for a user
 //@access   Private
 router.get("/student/:class_id/:user_id", [auth], async (req, res) => {
    try {
       if (req.params.class_id === "null") {
          return res.status(400).json({
-            msg: "No está registrado en ninguna clase",
+            msg: "El alumno no está registrado en ninguna clase",
          });
       }
 
@@ -81,28 +86,28 @@ router.get("/student/:class_id/:user_id", [auth], async (req, res) => {
    }
 });
 
-//@route    GET api/grade/list/fetch-list
+//@route    GET /api/grade/list/fetch-list
 //@desc     Get the pdf of the class grades during a period
 //@access   Private
-router.get("/list/fetch-list", (req, res) => {
+router.get("/list/fetch-list", auth, (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/grades.pdf"));
 });
 
-//@route    GET api/grade/certificate/fetch-list
+//@route    GET /api/grade/certificate/fetch-list
 //@desc     Get the pdf of the class grades during a period
 //@access   Private
-router.get("/certificate/fetch-list", (req, res) => {
+router.get("/certificate/fetch-list", auth, (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/certificate.pdf"));
 });
 
-//@route    GET api/grade/certificate/fetch-list
+//@route    GET /api/grade/certificate/fetch-list
 //@desc     Get the pdf of a student report card
 //@access   Private
-router.get("/pdf/report-card", (req, res) => {
+router.get("/pdf/report-card", auth, (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/reportcard.pdf"));
 });
 
-//@route    POST api/grade/period
+//@route    POST /api/grade/period
 //@desc     Add or remove grades from a period
 //@access   Private
 router.post("/period", auth, async (req, res) => {
@@ -210,7 +215,7 @@ router.post("/period", auth, async (req, res) => {
    }
 });
 
-//@route    POST api/grades
+//@route    POST /api/grades
 //@desc     Add a grade
 //@access   Private
 router.post("/", auth, async (req, res) => {
@@ -265,10 +270,10 @@ router.post("/", auth, async (req, res) => {
    }
 });
 
-//@route    POST api/grade/create-list
+//@route    POST /api/grade/create-list
 //@desc     Create a pdf of the class grades during a period
 //@access   Private
-router.post("/create-list", (req, res) => {
+router.post("/create-list", auth, (req, res) => {
    const name = path.join(__dirname, "../../reports/grades.pdf");
 
    const { students, header, period, classInfo, periodNumber } = req.body;
@@ -348,10 +353,10 @@ router.post("/create-list", (req, res) => {
    }
 });
 
-//@route    POST api/grade/all/create-list
+//@route    POST /api/grade/all/create-list
 //@desc     Create a pdf of all the class grades
 //@access   Private
-router.post("/all/create-list", (req, res) => {
+router.post("/all/create-list", auth, (req, res) => {
    const name = path.join(__dirname, "../../reports/grades.pdf");
 
    const { students, header, period, classInfo } = req.body;
@@ -467,10 +472,10 @@ router.post("/all/create-list", (req, res) => {
    }
 });
 
-//@route    POST api/grade/certificate/create-list
+//@route    POST /api/grade/certificate/create-list
 //@desc     Create all certificate pdfs of the class
 //@access   Private
-router.post("/certificate/create-list", async (req, res) => {
+router.post("/certificate/create-list", auth, async (req, res) => {
    const name = path.join(__dirname, "../../reports/certificate.pdf");
 
    let { student, header, period, classInfo, certificateDate } = req.body;
@@ -661,10 +666,10 @@ router.post("/certificate/create-list", async (req, res) => {
    }
 });
 
-//@route    POST api/grade/certificate-cambridge/create-list
+//@route    POST /api/grade/certificate-cambridge/create-list
 //@desc     Create all cambridge certificate pdfs of the class (starter, movers, flyers)
 //@access   Private
-router.post("/certificate-cambridge/create-list", (req, res) => {
+router.post("/certificate-cambridge/create-list", auth, (req, res) => {
    const name = path.join(__dirname, "../../reports/certificate.pdf");
 
    let { student, header, period, classInfo, certificateDate } = req.body;
@@ -815,10 +820,10 @@ router.post("/certificate-cambridge/create-list", (req, res) => {
    }
 });
 
-//@route    POST api/grade/report-card
+//@route    POST /api/grade/report-card
 //@desc     Create a pdf of student's report card
 //@access   Private
-router.post("/report-card", async (req, res) => {
+router.post("/report-card", auth, async (req, res) => {
    const name = path.join(__dirname, "../../reports/reportcard.pdf");
    const { student, observation, classInfo } = req.body;
 
@@ -1016,7 +1021,7 @@ router.post("/report-card", async (req, res) => {
    }
 });
 
-//@route    DELETE api/grade/:type/:classroom/:period
+//@route    DELETE /api/grade/:type/:classroom/:period
 //@desc     Delete grades of the same type
 //@access   Private
 router.delete("/:type/:classroom/:period", auth, async (req, res) => {

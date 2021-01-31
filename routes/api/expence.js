@@ -1,22 +1,26 @@
 const express = require("express");
-const router = express.Router();
-const auth = require("../../middleware/auth");
-const adminAuth = require("../../middleware/adminAuth");
-const { check, validationResult } = require("express-validator");
 const path = require("path");
 const pdf = require("html-pdf");
-const pdfTemplate = require("../../templates/list");
 const moment = require("moment");
+const { check, validationResult } = require("express-validator");
+const router = express.Router();
 
+//PDF Templates
+const pdfTemplate = require("../../templates/list");
+
+//Middlewares
+const adminAuth = require("../../middleware/adminAuth");
+const auth = require("../../middleware/auth");
+
+//Models
 const Expence = require("../../models/Expence");
 const Register = require("../../models/Register");
 const ExpenceType = require("../../models/ExpenceType");
 const Invoice = require("../../models/Invoice");
-const { type } = require("os");
 
-//@route    GET api/expence
+//@route    GET /api/expence
 //@desc     get all expences || with filter
-//@access   Private
+//@access   Private && Admin
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
       let expences = [];
@@ -86,16 +90,16 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/expence/fetch-list
+//@route    GET /api/expence/fetch-list
 //@desc     Get the pdf of transactions
-//@access   Private
-router.get("/fetch-list", (req, res) => {
+//@access   Private && Admin
+router.get("/fetch-list", [auth, adminAuth], (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/transactions.pdf"));
 });
 
-//@route    POST api/expence
+//@route    POST /api/expence
 //@desc     Add an expence
-//@access   Private
+//@access   Private && Admin
 router.post(
    "/",
    [
@@ -217,10 +221,10 @@ router.post(
    }
 );
 
-//@route    POST api/expence/create-list
+//@route    POST /api/expence/create-list
 //@desc     Create a pdf of transactions
-//@access   Private
-router.post("/create-list", (req, res) => {
+//@access   Private && Admin
+router.post("/create-list", [auth, adminAuth], (req, res) => {
    const name = path.join(__dirname, "../../reports/transactions.pdf");
 
    const transactions = req.body;
@@ -322,9 +326,9 @@ router.post("/create-list", (req, res) => {
    }
 });
 
-//@route    DELETE api/expence/:id
+//@route    DELETE /api/expence/:id
 //@desc     Delete an expence
-//@access   Private
+//@access   Private && Admin
 router.delete("/:id", [auth, adminAuth], async (req, res) => {
    try {
       //Remove Expence

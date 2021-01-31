@@ -1,15 +1,18 @@
 const express = require("express");
 const router = express.Router();
+
+//Middleware
 const auth = require("../../middleware/auth");
 const adminAuth = require("../../middleware/adminAuth");
 
+//Models
 const Town = require("../../models/Town");
 const Neighbourhood = require("../../models/Neighbourhood");
 
-//@route    GET api/town
+//@route    GET /api/town
 //@desc     get all towns
 //@access   Private
-router.get("/", [auth], async (req, res) => {
+router.get("/", auth, async (req, res) => {
    try {
       let towns = await Town.find().sort({ name: 1 });
 
@@ -26,9 +29,9 @@ router.get("/", [auth], async (req, res) => {
    }
 });
 
-//@route    POST api/town
+//@route    POST /api/town
 //@desc     Update all towns
-//@access   Private
+//@access   Private && Admin
 router.post("/", [auth, adminAuth], async (req, res) => {
    //An array of towns
    const towns = req.body;
@@ -67,9 +70,9 @@ router.post("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    DELETE api/town/:id
+//@route    DELETE /api/town/:id
 //@desc     Delete a town and all its neighbourhoods
-//@access   Private
+//@access   Private && Admin
 router.delete("/:id", [auth, adminAuth], async (req, res) => {
    try {
       //Remove Town

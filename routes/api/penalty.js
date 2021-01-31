@@ -1,14 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../../middleware/auth");
-const adminAuth = require("../../middleware/adminAuth");
 const { check, validationResult } = require("express-validator");
 
+//Middleware
+const auth = require("../../middleware/auth");
+const adminAuth = require("../../middleware/adminAuth");
+
+//Models
 const Penalty = require("../../models/Penalty");
 
-//@route    GET api/penalty/last
+//@route    GET /api/penalty/last
 //@desc     get last penalty
-//@access   Private
+//@access   Private && Admin
 router.get("/last", [auth, adminAuth], async (req, res) => {
    try {
       let penalty = await Penalty.find().sort({ $natural: -1 }).limit(1);
@@ -27,9 +30,9 @@ router.get("/last", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    POST api/penalty
+//@route    POST /api/penalty
 //@desc     Add a penalty
-//@access   Private
+//@access   Private && Admin
 router.post(
    "/",
    [

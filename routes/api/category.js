@@ -1,21 +1,25 @@
 const express = require("express");
-const router = express.Router();
-const auth = require("../../middleware/auth");
-const adminAuth = require("../../middleware/adminAuth");
 const { check, validationResult } = require("express-validator");
 const path = require("path");
 const pdf = require("html-pdf");
+const router = express.Router();
+
+//PDF Templates
 const pdfTemplate = require("../../templates/list");
 
+//Middlewares
+const adminAuth = require("../../middleware/adminAuth");
+const auth = require("../../middleware/auth");
+
+//Models
 const Category = require("../../models/Category");
 const Installment = require("../../models/Installment");
 const Enrollment = require("../../models/Enrollment");
-const { parse } = require("path");
 
-//@route    GET api/category
+//@route    GET /api/category
 //@desc     get all categories
-//@access   Private
-router.get("/", [auth], async (req, res) => {
+//@access   Private && Admin
+router.get("/", [auth, adminAuth], async (req, res) => {
    try {
       let categories = await Category.find();
 
@@ -32,16 +36,16 @@ router.get("/", [auth], async (req, res) => {
    }
 });
 
-//@route    GET api/category/fetch-list
+//@route    GET /api/category/fetch-list
 //@desc     Get the pdf of categories
-//@access   Private
-router.get("/fetch-list", (req, res) => {
+//@access   Private && Admin
+router.get("/fetch-list", [auth, adminAuth], (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/categories.pdf"));
 });
 
-//@route    POST api/category
+//@route    POST /api/category
 //@desc     Add a category
-//@access   Private
+//@access   Private && Admin
 router.post(
    "/",
    [auth, adminAuth, check("name", "El nombre es necesario").not().isEmpty()],
@@ -72,8 +76,8 @@ router.post(
 
 //@route    POST api/category/create-list
 //@desc     Create a pdf of categories
-//@access   Private
-router.post("/create-list", (req, res) => {
+//@access   Private && Admin
+router.post("/create-list", [auth, adminAuth], (req, res) => {
    const category = req.body;
 
    let tbody = "";
@@ -128,9 +132,9 @@ router.post("/create-list", (req, res) => {
    }
 });
 
-//@route    PUT api/category
+//@route    PUT /api/category
 //@desc     Update all categories
-//@access   Private
+//@access   Private && Admin
 router.put(
    "/",
    [

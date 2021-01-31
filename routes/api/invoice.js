@@ -1,21 +1,26 @@
 const express = require("express");
-const router = express.Router();
-const auth = require("../../middleware/auth");
-const adminAuth = require("../../middleware/adminAuth");
 const { check, validationResult } = require("express-validator");
+const moment = require("moment");
 const path = require("path");
 const pdf = require("html-pdf");
+const router = express.Router();
+
+//PDF Templates
 const pdfTemplate = require("../../templates/list");
 const pdfTemplate2 = require("../../templates/invoice");
-const moment = require("moment");
 
+//Middleware
+const auth = require("../../middleware/auth");
+const adminAuth = require("../../middleware/adminAuth");
+
+//Models
 const Invoice = require("../../models/Invoice");
 const Installment = require("../../models/Installment");
 const Register = require("../../models/Register");
 
-//@route    GET api/invoice
+//@route    GET /api/invoice
 //@desc     get all invoices || with filters
-//@access   Private
+//@access   Private && Admin
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
       let invoices = [];
@@ -152,9 +157,9 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/invoice/:id
+//@route    GET /api/invoice/:id
 //@desc     get one invoice
-//@access   Private
+//@access   Private && Admin
 router.get("/:id", [auth, adminAuth], async (req, res) => {
    try {
       let invoice = await Invoice.findOne({ _id: req.params.id })
@@ -185,9 +190,9 @@ router.get("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/invoice/id
+//@route    GET /api/invoice/id
 //@desc     get invoice next number
-//@access   Private
+//@access   Private && Admin
 router.get("/last/invoiceid", [auth, adminAuth], async (req, res) => {
    try {
       let number = 1;
@@ -204,23 +209,23 @@ router.get("/last/invoiceid", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/invoice/list/fetch-list
+//@route    GET /api/invoice/list/fetch-list
 //@desc     Get the pdf of income
-//@access   Private
-router.get("/list/fetch-list", (req, res) => {
+//@access   Private && Admin
+router.get("/list/fetch-list", [auth, adminAuth], (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/invoices.pdf"));
 });
 
-//@route    GET api/invoice/for-print/fetch-invoice
+//@route    GET /api/invoice/for-print/fetch-invoice
 //@desc     Get the pdf of an invoice
-//@access   Private
-router.get("/for-print/fetch-invoice", (req, res) => {
+//@access   Private && Admin
+router.get("/for-print/fetch-invoice", [auth, adminAuth], (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/invoice.pdf"));
 });
 
-//@route    POST api/invoice
+//@route    POST /api/invoice
 //@desc     Register an invoice
-//@access   Private
+//@access   Private && Admin
 router.post(
    "/",
    [
@@ -347,10 +352,10 @@ router.post(
    }
 );
 
-//@route    POST api/invoice/create-list
+//@route    POST /api/invoice/create-list
 //@desc     Create a pdf list of income
-//@access   Private
-router.post("/create-list", (req, res) => {
+//@access   Private && Admin
+router.post("/create-list", [auth, adminAuth], (req, res) => {
    const name = path.join(__dirname, "../../reports/invoices.pdf");
 
    const invoices = req.body;
@@ -424,10 +429,10 @@ router.post("/create-list", (req, res) => {
    }
 });
 
-//@route    POST api/invoice/create-invoice
+//@route    POST /api/invoice/create-invoice
 //@desc     Create a pdf of an invoice
-//@access   Private
-router.post("/create-invoice", (req, res) => {
+//@access   Private && Admin
+router.post("/create-invoice", [auth, adminAuth], (req, res) => {
    const name = path.join(__dirname, "../../reports/invoice.pdf");
 
    const { invoice, remaining } = req.body;
@@ -521,9 +526,9 @@ router.post("/create-invoice", (req, res) => {
    }
 });
 
-//@route    DELETE api/invoice/:id
+//@route    DELETE /api/invoice/:id
 //@desc     Delete an invoice
-//@access   Private
+//@access   Private && Admin
 router.delete("/:id", [auth, adminAuth], async (req, res) => {
    try {
       //Remove Expence

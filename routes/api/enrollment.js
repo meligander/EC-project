@@ -1,22 +1,27 @@
 const express = require("express");
-const router = express.Router();
-const auth = require("../../middleware/auth");
-const adminAuth = require("../../middleware/adminAuth");
 const { check, validationResult } = require("express-validator");
 const path = require("path");
 const pdf = require("html-pdf");
-const pdfTemplate = require("../../templates/list");
 const moment = require("moment");
+const router = express.Router();
 
+//PDF Templates
+const pdfTemplate = require("../../templates/list");
+
+//Middlewares
+const adminAuth = require("../../middleware/adminAuth");
+const auth = require("../../middleware/auth");
+
+//Models
 const Enrollment = require("../../models/Enrollment");
 const Installment = require("../../models/Installment");
 const Attendance = require("../../models/Attendance");
 const Grade = require("../../models/Grade");
 const Category = require("../../models/Category");
 
-//@route    GET api/enrollment
+//@route    GET /api/enrollment
 //@desc     get all enrollments || with filter
-//@access   Private
+//@access   Private && Admin
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
       let date = new Date();
@@ -92,9 +97,9 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/enrollment/average
+//@route    GET /api/enrollment/average
 //@desc     get all student's average
-//@access   Private
+//@access   Private && Admin
 router.get("/average", [auth, adminAuth], async (req, res) => {
    try {
       let date = new Date();
@@ -134,9 +139,9 @@ router.get("/average", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/enrollment/absences
+//@route    GET /api/enrollment/absences
 //@desc     get all student's absences
-//@access   Private
+//@access   Private && Admin
 router.get("/absences", [auth, adminAuth], async (req, res) => {
    try {
       let date = new Date();
@@ -174,9 +179,9 @@ router.get("/absences", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/enrollment/one/:id
+//@route    GET /api/enrollment/one/:id
 //@desc     get one enrollment
-//@access   Private
+//@access   Private && Admin
 router.get("/one/:id", [auth, adminAuth], async (req, res) => {
    try {
       let enrollment = await Enrollment.findOne({ _id: req.params.id })
@@ -202,9 +207,9 @@ router.get("/one/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/enrollment/year
+//@route    GET /api/enrollment/year
 //@desc     get year's enrollments
-//@access   Private
+//@access   Private && Admin
 router.get("/year", [auth, adminAuth], async (req, res) => {
    try {
       const date = new Date();
@@ -232,30 +237,30 @@ router.get("/year", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET api/enrollment/fetch-list
+//@route    GET /api/enrollment/fetch-list
 //@desc     Get the pdf of enrollments
-//@access   Private
-router.get("/fetch-list", (req, res) => {
+//@access   Private && Admin
+router.get("/fetch-list", [auth, adminAuth], (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/enrollments.pdf"));
 });
 
-//@route    GET api/enrollment/averages/fetch-list
+//@route    GET /api/enrollment/averages/fetch-list
 //@desc     Get the pdf of enrollments
-//@access   Private
-router.get("/averages/fetch-list", (req, res) => {
+//@access   Private && Admin
+router.get("/averages/fetch-list", [auth, adminAuth], (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/averages.pdf"));
 });
 
-//@route    GET api/enrollment/absences/fetch-list
+//@route    GET /api/enrollment/absences/fetch-list
 //@desc     Get the pdf of enrollments
-//@access   Private
-router.get("/absences/fetch-list", (req, res) => {
+//@access   Private && Admin
+router.get("/absences/fetch-list", [auth, adminAuth], (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/absences.pdf"));
 });
 
-//@route    POST api/enrollment
+//@route    POST /api/enrollment
 //@desc     Add an enrollment
-//@access   Private
+//@access   Private && Admin
 router.post(
    "/",
    [
@@ -362,10 +367,10 @@ router.post(
    }
 );
 
-//@route    POST api/enrollment/create-list
-//@desc     Create a pdf of enrollment
-//@access   Private
-router.post("/create-list", (req, res) => {
+//@route    POST /api/enrollment/create-list
+//@desc     Create a pdf of enrollments
+//@access   Private && Admin
+router.post("/create-list", [auth, adminAuth], (req, res) => {
    const name = path.join(__dirname, "../../reports/enrollments.pdf");
 
    const enrollments = req.body;
@@ -445,10 +450,10 @@ router.post("/create-list", (req, res) => {
    }
 });
 
-//@route    POST api/enrollment/averages/create-list
+//@route    POST /api/enrollment/averages/create-list
 //@desc     Create a pdf of the students' averages
-//@access   Private
-router.post("/averages/create-list", (req, res) => {
+//@access   Private && Admin
+router.post("/averages/create-list", [auth, adminAuth], (req, res) => {
    const name = path.join(__dirname, "../../reports/averages.pdf");
 
    const enrollments = req.body;
@@ -520,10 +525,10 @@ router.post("/averages/create-list", (req, res) => {
    }
 });
 
-//@route    POST api/enrollment/absences/create-list
+//@route    POST /api/enrollment/absences/create-list
 //@desc     Create a pdf of the students' absences
-//@access   Private
-router.post("/absences/create-list", (req, res) => {
+//@access   Private && Admin
+router.post("/absences/create-list", [auth, adminAuth], (req, res) => {
    const name = path.join(__dirname, "../../reports/absences.pdf");
 
    const enrollments = req.body;
@@ -623,9 +628,9 @@ router.post("/absences/create-list", (req, res) => {
    }
 });
 
-//@route    PUT api/enrollment/:id
+//@route    PUT /api/enrollment/:id
 //@desc     Update the category of the enrollment
-//@access   Private
+//@access   Private && Admin
 router.put(
    "/:id",
    [
@@ -726,9 +731,9 @@ router.put(
    }
 );
 
-//@route    DELETE api/enrollment/:id
+//@route    DELETE /api/enrollment/:id
 //@desc     Delete an enrollment
-//@access   Private
+//@access   Private && Admin
 router.delete("/:id", [auth, adminAuth], async (req, res) => {
    try {
       //Remove Enrollment

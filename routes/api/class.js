@@ -1,24 +1,29 @@
 const express = require("express");
-const router = express.Router();
 const moment = require("moment");
-const auth = require("../../middleware/auth");
-const adminAuth = require("../../middleware/adminAuth");
 const { check, validationResult } = require("express-validator");
 const path = require("path");
 const pdf = require("html-pdf");
+const router = express.Router();
+
+//PDF Templates
 const pdfTemplate = require("../../templates/list");
 const pdfTemplate2 = require("../../templates/classInfo");
 
+//Middlewares
+const adminAuth = require("../../middleware/adminAuth");
+const auth = require("../../middleware/auth");
+
+//Models
 const Class = require("../../models/Class");
 const Enrollment = require("../../models/Enrollment");
 const Attendance = require("../../models/Attendance");
 const Grade = require("../../models/Grade");
 const Post = require("../../models/Post");
 
-//@route    GET api/class
+//@route    GET /api/class
 //@desc     Get all classes || with filter
 //@access   Private
-router.get("/", [auth], async (req, res) => {
+router.get("/", auth, async (req, res) => {
    try {
       const date = new Date();
       let classes;
@@ -73,7 +78,7 @@ router.get("/", [auth], async (req, res) => {
    }
 });
 
-//@route    GET api/class/:class_id
+//@route    GET /api/class/:class_id
 //@desc     Get a class
 //@access   Private
 router.get("/:class_id", auth, async (req, res) => {
@@ -94,7 +99,7 @@ router.get("/:class_id", auth, async (req, res) => {
    }
 });
 
-//@route    GET api/class/student/:id
+//@route    GET /api/class/student/:id
 //@desc     Get a student's class
 //@access   Private
 router.get("/student/:id", auth, async (req, res) => {
@@ -129,30 +134,30 @@ router.get("/student/:id", auth, async (req, res) => {
    }
 });
 
-//@route    GET api/class/list/fetch-list
+//@route    GET /api/class/list/fetch-list
 //@desc     Get the pdf of classes
 //@access   Private
-router.get("/list/fetch-list", (req, res) => {
+router.get("/list/fetch-list", auth, (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/classes.pdf"));
 });
 
-//@route    GET api/class/oneclass/fetch-list
+//@route    GET /api/class/oneclass/fetch-list
 //@desc     Get the pdf of a class
 //@access   Private
-router.get("/oneclass/fetch-list", (req, res) => {
+router.get("/oneclass/fetch-list", auth, (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/class.pdf"));
 });
 
-//@route    GET api/attendance/blank/fetch-list
+//@route    GET /api/attendance/blank/fetch-list
 //@desc     Get the pdf of the class  for attendances and grades
 //@access   Private
-router.get("/blank/fetch-list", (req, res) => {
+router.get("/blank/fetch-list", auth, (req, res) => {
    res.sendFile(path.join(__dirname, "../../reports/blank.pdf"));
 });
 
-//@route    POST api/class
+//@route    POST /api/class
 //@desc     Register a class
-//@access   Private
+//@access   Private && Admin
 router.post(
    "/",
    [
@@ -244,10 +249,10 @@ router.post(
    }
 );
 
-//@route    POST api/class/create-list
+//@route    POST /api/class/create-list
 //@desc     Create a pdf of classes
 //@access   Private
-router.post("/create-list", (req, res) => {
+router.post("/create-list", auth, (req, res) => {
    const name = path.join(__dirname, "../../reports/classes.pdf");
 
    const classes = req.body;
@@ -347,10 +352,10 @@ router.post("/create-list", (req, res) => {
    }
 });
 
-//@route    POST api/class/oneclass/create-list
+//@route    POST /api/class/oneclass/create-list
 //@desc     Create a pdf of a class
 //@access   Private
-router.post("/oneclass/create-list", (req, res) => {
+router.post("/oneclass/create-list", auth, (req, res) => {
    const name = path.join(__dirname, "../../reports/class.pdf");
 
    const classInfo = req.body;
@@ -421,10 +426,10 @@ router.post("/oneclass/create-list", (req, res) => {
    }
 });
 
-//@route    POST api/class/blank/create-list
+//@route    POST /api/class/blank/create-list
 //@desc     Create a pdf of the class  for attendances and grades
 //@access   Private
-router.post("/blank/create-list", (req, res) => {
+router.post("/blank/create-list", auth, (req, res) => {
    const name = path.join(__dirname, "../../reports/blank.pdf");
 
    const classInfo = req.body;
@@ -497,9 +502,9 @@ router.post("/blank/create-list", (req, res) => {
    }
 });
 
-//@route    PUT api/class/:id
+//@route    PUT /api/class/:id
 //@desc     Update a class
-//@access   Private
+//@access   Private && Admin
 router.put(
    "/:id",
    [
@@ -596,9 +601,9 @@ router.put(
    }
 );
 
-//@route    DELETE api/class/:id
+//@route    DELETE /api/class/:id
 //@desc     Delete a class
-//@access   Private
+//@access   Private && Admin
 router.delete("/:id", [auth, adminAuth], async (req, res) => {
    try {
       //Remove user

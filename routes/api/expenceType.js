@@ -1,13 +1,16 @@
 const express = require("express");
 const router = express.Router();
+
+//Middlewares
 const auth = require("../../middleware/auth");
 const adminAuth = require("../../middleware/adminAuth");
 
+//Models
 const ExpenceType = require("../../models/ExpenceType");
 
-//@route    GET api/expence-type
+//@route    GET /api/expence-type
 //@desc     Get all expence types
-//@access   Private
+//@access   Private && Admin
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
       const expenceTypes = await ExpenceType.find().sort({ name: 1 });
@@ -25,9 +28,9 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    POST api/expence-type
+//@route    POST /api/expence-type
 //@desc     Update all expence types
-//@access   Private
+//@access   Private && Admin
 router.post("/", [auth, adminAuth], async (req, res) => {
    //An array of expence types
 
@@ -74,9 +77,9 @@ router.post("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    DELETE api/expence-type/:id
+//@route    DELETE /api/expence-type/:id
 //@desc     Delete an exence type
-//@access   Private
+//@access   Private && Admin
 router.delete("/:id", [auth, adminAuth], async (req, res) => {
    try {
       //Remove expencetype

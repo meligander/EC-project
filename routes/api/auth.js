@@ -1,19 +1,22 @@
 const express = require("express");
-const { check, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const router = express.Router();
-const auth = require("../../middleware/auth");
 const path = require("path");
+const router = express.Router();
+const { check, validationResult } = require("express-validator");
 
 require("dotenv").config({
    path: path.resolve(__dirname, "../../config/.env"),
 });
 
+//Middleware
+const auth = require("../../middleware/auth");
+
+//Models
 const User = require("../../models/User");
 const Enrollment = require("../../models/Enrollment");
 
-//@route    GET api/auth
+//@route    GET /api/auth
 //@desc     Get user
 //@access   Private
 router.get("/", auth, async (req, res) => {
@@ -57,7 +60,7 @@ router.get("/", auth, async (req, res) => {
    }
 });
 
-//@route    POST api/auth
+//@route    POST /api/auth
 //@desc     Authenticate user when login & get token
 //@access   Public
 router.post(
@@ -104,7 +107,7 @@ router.post(
          jwt.sign(
             payload,
             process.env.JWT_SECRET,
-            { expiresIn: 360000 },
+            { expiresIn: 60 * 60 },
             (err, token) => {
                if (err) throw err;
                res.json({ token });

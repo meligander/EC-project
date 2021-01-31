@@ -1,14 +1,16 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../../middleware/auth");
 const { check, validationResult } = require("express-validator");
+
+//Middlewares
+const auth = require("../../middleware/auth");
 
 //Models
 const Post = require("../../models/Post");
 const Class = require("../../models/Class");
 
-//@route    GET api/posts/unseen/teacher
-//@desc     Get the unseen posts in all the teacher's classes
+//@route    GET /api/posts/unseen/teacher
+//@desc     Get the unseen posts in all teacher's classes
 //@access   Private
 router.get("/unseen/teacher", auth, async (req, res) => {
    try {
@@ -33,7 +35,7 @@ router.get("/unseen/teacher", auth, async (req, res) => {
    }
 });
 
-//@route    GET api/posts/unseen/class/:class_id
+//@route    GET /api/posts/unseen/class/:class_id
 //@desc     Get the unseen posts in a class
 //@access   Private
 router.get("/unseen/class/:class_id", auth, async (req, res) => {
@@ -49,7 +51,7 @@ router.get("/unseen/class/:class_id", auth, async (req, res) => {
    }
 });
 
-//@route    GET api/posts/class/:class_id
+//@route    GET /api/posts/class/:class_id
 //@desc     Get all posts made in a class
 //@access   Private
 router.get("/class/:class_id", auth, async (req, res) => {
@@ -81,7 +83,7 @@ router.get("/class/:class_id", auth, async (req, res) => {
    }
 });
 
-//@route    POST api/posts/:class_id
+//@route    POST /api/posts/:class_id
 //@desc     Create a post
 //@access   Private
 router.post(
@@ -133,7 +135,7 @@ router.post(
    }
 );
 
-//@route    POST api/posts/comment/:id
+//@route    POST /api/posts/comment/:id
 //@desc     Comment on a post
 //@access   Private
 router.post(
@@ -181,7 +183,7 @@ router.post(
    }
 );
 
-//@route    PUT api/posts/like/:id
+//@route    PUT /api/posts/like/:id
 //@desc     Add or remove like of a post
 //@access   Private
 router.put("/like/:id", auth, async (req, res) => {
@@ -216,7 +218,7 @@ router.put("/like/:id", auth, async (req, res) => {
    }
 });
 
-//@route    PUT api/posts/seen/:id
+//@route    PUT /api/posts/seen/:id
 //@desc     Mark a post as seen by a user
 //@access   Private
 router.put("/seen/:id", auth, async (req, res) => {
@@ -246,7 +248,7 @@ router.put("/seen/:id", auth, async (req, res) => {
    }
 });
 
-//@route    DELETE api/posts
+//@route    DELETE /api/posts
 //@desc     Delete a post
 //@access   Private
 router.delete("/:id", auth, async (req, res) => {
@@ -268,7 +270,7 @@ router.delete("/:id", auth, async (req, res) => {
    }
 });
 
-//@route    DELETE api/posts/comment/:id/:comment_id
+//@route    DELETE /api/posts/comment/:id/:comment_id
 //@desc     Delete a comment on a post
 //@access   Private
 router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
