@@ -115,7 +115,11 @@ const Dashboard = ({
                   <div className="profile-top bg-primary">
                      <div className="img-about m-1">
                         <img
-                           src={user.noImg !== "" ? user.noImg : user.img.url}
+                           src={
+                              user.img.public_id === ""
+                                 ? "https://pngimage.net/wp-content/uploads/2018/06/no-user-image-png-3-300x200.png"
+                                 : user.img.url
+                           }
                            alt="Perfil Usuario"
                            className="round-img p-1"
                         />

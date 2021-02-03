@@ -610,7 +610,7 @@ router.put(
          let user = await User.findOne({ _id: req.params.id });
 
          if (img.public_id !== user.img.public_id) {
-            if (user.noImg === "") deletePictures(user.img);
+            if (user.img.public_id !== "") deletePictures(user.img);
             const uploadResponse = await cloudinaryUploader.uploader.upload(
                img,
                {
@@ -647,7 +647,7 @@ router.put(
             ...(salary && { salary }),
             ...(children && { children }),
             ...(description && { description }),
-            ...(imgObject.public_id !== "" && { img: imgObject, noImg: "" }),
+            ...(imgObject.public_id !== "" && { img: imgObject }),
          };
 
          if (discount && discount !== user.discount) {

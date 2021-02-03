@@ -106,8 +106,8 @@ const PopUp = ({
                            <img
                               className="round-img"
                               src={
-                                 user.user.noImg !== ""
-                                    ? user.user.noImg
+                                 user.user.img.public_id === ""
+                                    ? "https://pngimage.net/wp-content/uploads/2018/06/no-user-image-png-3-300x200.png"
                                     : user.user.img.url
                               }
                               alt="English Centre User"

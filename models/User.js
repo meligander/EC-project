@@ -83,15 +83,6 @@ const UserSchema = new mongoose.Schema({
       type: Boolean,
       default: true,
    },
-   classroom: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "class",
-   },
-   noImg: {
-      type: String,
-      default:
-         "https://pngimage.net/wp-content/uploads/2018/06/no-user-image-png-3-300x200.png",
-   },
    img: {
       type: Object,
       default: {

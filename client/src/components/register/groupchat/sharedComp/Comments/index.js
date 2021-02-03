@@ -78,6 +78,8 @@ const Comments = ({
                      src={
                         typeof comment.user.img === "string"
                            ? comment.user.img
+                           : comment.user.img.public_id === ""
+                           ? "https://pngimage.net/wp-content/uploads/2018/06/no-user-image-png-3-300x200.png"
                            : comment.user.img.url
                      }
                      alt="Imagen Usuario English Center"
