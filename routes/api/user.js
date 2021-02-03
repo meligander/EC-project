@@ -619,7 +619,7 @@ router.put(
             );
             imgObject = {
                public_id: uploadResponse.public_id,
-               url: uploadResponse.url,
+               url: uploadResponse.secure_url,
             };
          }
 
