@@ -293,41 +293,46 @@ const GradesTab = ({
                <i className="fas fa-plus"></i>
                <span className="hide-md">&nbsp; Nota</span>
             </button>
-            <button
-               className="btn btn-secondary"
-               type="button"
-               onClick={(e) => {
-                  e.preventDefault();
-                  gradesPDF(
-                     {
-                        header: header[period - 1],
-                        period: periods[period - 1],
-                        periodNumber: period - 1,
-                     },
-                     classInfo,
-                     "bimester"
-                  );
-               }}
-            >
-               <i className="fas fa-file-pdf"></i>
-            </button>
-
-            {(period === 5 ||
-               period === 6 ||
-               (classInfo.category.name === "Kinder" && period === 4)) && (
+            <div className="tooltip">
                <button
                   className="btn btn-secondary"
                   type="button"
                   onClick={(e) => {
                      e.preventDefault();
-                     setOtherValues({
-                        ...setOtherValues,
-                        toggleModalDate: true,
-                     });
+                     gradesPDF(
+                        {
+                           header: header[period - 1],
+                           period: periods[period - 1],
+                           periodNumber: period - 1,
+                        },
+                        classInfo,
+                        "bimester"
+                     );
                   }}
                >
-                  <i className="fas fa-graduation-cap"></i>
+                  <i className="fas fa-file-pdf"></i>
                </button>
+               <span className="tooltiptext">PDF notas del bimestre</span>
+            </div>
+            {(period === 5 ||
+               period === 6 ||
+               (classInfo.category.name === "Kinder" && period === 4)) && (
+               <div className="tooltip">
+                  <button
+                     className="btn btn-secondary"
+                     type="button"
+                     onClick={(e) => {
+                        e.preventDefault();
+                        setOtherValues({
+                           ...setOtherValues,
+                           toggleModalDate: true,
+                        });
+                     }}
+                  >
+                     <i className="fas fa-graduation-cap"></i>
+                  </button>
+                  <span className="tooltiptext">PDF certificados</span>
+               </div>
             )}
          </div>
 
@@ -372,17 +377,21 @@ const GradesTab = ({
                      </button>
                      {(userLogged.type === "admin" ||
                         userLogged.type === "admin&teacher") && (
-                        <Link
-                           to="/edit-gradetypes"
-                           onClick={() => {
-                              window.scroll(0, 0);
-                              clearGradeTypes();
-                           }}
-                           className="btn btn-mix-secondary"
-                        >
-                           <i className="fas fa-edit"></i>
-                           <span className="hide-md">&nbsp; Tipo Nota</span>
-                        </Link>
+                        <div className="tooltip">
+                           <Link
+                              to="/edit-gradetypes"
+                              onClick={() => {
+                                 window.scroll(0, 0);
+                                 clearGradeTypes();
+                              }}
+                              className="btn btn-mix-secondary"
+                           >
+                              <i className="fas fa-edit"></i>
+                           </Link>
+                           <span className="tooltiptext">
+                              Editar tipo de nota
+                           </span>
+                        </div>
                      )}
                   </div>
                </div>

@@ -227,19 +227,22 @@ const InvoiceTab = ({
             </div>
             <div className="paying-user">
                <h3 className="paragraph text-primary ">Usuario a Pagar</h3>
-               <button
-                  onClick={(e) => {
-                     e.preventDefault();
-                     setOtherValues({
-                        ...otherValues,
-                        toggleSearch: !toggleSearch,
-                     });
-                  }}
-                  type="button"
-                  className="btn-cancel search"
-               >
-                  <i className="fas fa-search"></i>
-               </button>
+               <div className="tooltip">
+                  <button
+                     onClick={(e) => {
+                        e.preventDefault();
+                        setOtherValues({
+                           ...otherValues,
+                           toggleSearch: !toggleSearch,
+                        });
+                     }}
+                     type="button"
+                     className="btn-cancel search"
+                  >
+                     <i className="fas fa-search"></i>
+                  </button>
+                  <span className="tooltiptext">Buscar usuario registrado</span>
+               </div>
             </div>
             <div className="mb-2">
                {!registeredUser ? (
@@ -311,29 +314,37 @@ const InvoiceTab = ({
                               disabled
                               id="full-name"
                            />
-                           <Link
-                              onClick={() => {
-                                 window.scroll(0, 0);
-                                 clearProfile();
-                              }}
-                              className="btn-cancel search"
-                              to={`/dashboard/${selectedUser._id}`}
-                           >
-                              <i className="fas fa-user-circle"></i>
-                           </Link>
-                           <button
-                              type="button"
-                              onClick={(e) => {
-                                 e.preventDefault();
-                                 setOtherValues({
-                                    ...otherValues,
-                                    registeredUser: !registeredUser,
-                                 });
-                              }}
-                              className="btn-cancel"
-                           >
-                              <i className="fas fa-times"></i>
-                           </button>
+                           <div className="tooltip">
+                              <Link
+                                 onClick={() => {
+                                    window.scroll(0, 0);
+                                    clearProfile();
+                                 }}
+                                 className="btn-cancel search"
+                                 to={`/dashboard/${selectedUser._id}`}
+                              >
+                                 <i className="fas fa-user-circle"></i>
+                              </Link>
+                              <span className="tooltiptext">Ver perfil</span>
+                           </div>
+                           <div className="tooltip">
+                              <button
+                                 type="button"
+                                 onClick={(e) => {
+                                    e.preventDefault();
+                                    setOtherValues({
+                                       ...otherValues,
+                                       registeredUser: !registeredUser,
+                                    });
+                                 }}
+                                 className="btn-cancel"
+                              >
+                                 <i className="fas fa-times"></i>
+                              </button>
+                              <span className="tooltiptext">
+                                 Quitar usuario
+                              </span>
+                           </div>
                         </div>
                         <label htmlFor="full-name" className="form-label">
                            Nombre Completo

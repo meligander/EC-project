@@ -159,16 +159,19 @@ const SearchTab = ({
             )}
          </div>
          <div className="btn-right">
-            <button
-               className="btn btn-secondary"
-               type="button"
-               onClick={(e) => {
-                  e.preventDefault();
-                  userPDF(users, userSearchType);
-               }}
-            >
-               <i className="fas fa-file-pdf"></i>
-            </button>
+            <div className="tooltip">
+               <button
+                  className="btn btn-secondary"
+                  type="button"
+                  onClick={(e) => {
+                     e.preventDefault();
+                     userPDF(users, userSearchType);
+                  }}
+               >
+                  <i className="fas fa-file-pdf"></i>
+               </button>
+               <span className="tooltiptext">PDF lista de alumnos</span>
+            </div>
          </div>
       </>
    );

@@ -194,6 +194,7 @@ const IncomeList = ({
 
                <ListButtons
                   page={page}
+                  type="ingresos"
                   items={invoices}
                   changePage={updatePageNumber}
                   pdfGenerator={() => invoicesPDF(invoices)}

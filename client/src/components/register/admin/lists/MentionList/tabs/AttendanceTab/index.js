@@ -134,6 +134,7 @@ function AttendanceTab({
             </table>
          </div>
          <ListButtons
+            type="asistencias"
             page={page}
             items={enrollments}
             pdfGenerator={() => enrollmentsPDF(enrollments, "attendances")}

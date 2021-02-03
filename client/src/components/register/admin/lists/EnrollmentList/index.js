@@ -252,6 +252,7 @@ const EnrollmentList = ({
                <ListButtons
                   page={page}
                   items={enrollments}
+                  type="inscripciones"
                   pdfGenerator={() =>
                      enrollmentsPDF(enrollments, "enrollments")
                   }

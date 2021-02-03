@@ -191,65 +191,84 @@ const OneClass = ({
                <br />
                {userCanSeeButtons && (
                   <div className="btn-right">
-                     <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={(e) => {
-                           e.preventDefault();
-                           classPDF(classInfo, "class");
-                        }}
-                     >
-                        <i className="fas fa-file-pdf"></i>
-                     </button>
-                     <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={(e) => {
-                           e.preventDefault();
-                           classPDF(classInfo, "blank");
-                        }}
-                     >
-                        <i className="fas fa-scroll"></i>
-                     </button>
-                     <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={(e) => {
-                           e.preventDefault();
-                           setOtherValues({
-                              ...otherValues,
-                              toggleModalReportCards: true,
-                           });
-                        }}
-                     >
-                        <i className="fas fa-address-card"></i>
-                     </button>
+                     <div className="tooltip">
+                        <button
+                           type="button"
+                           className="btn btn-secondary"
+                           onClick={(e) => {
+                              e.preventDefault();
+                              classPDF(classInfo, "class");
+                           }}
+                        >
+                           <i className="fas fa-file-pdf"></i>
+                        </button>
+                        <span className="tooltiptext">
+                           PDF lista de alumnos de la clase e info
+                        </span>
+                     </div>
+                     <div className="tooltip">
+                        <button
+                           type="button"
+                           className="btn btn-secondary"
+                           onClick={(e) => {
+                              e.preventDefault();
+                              classPDF(classInfo, "blank");
+                           }}
+                        >
+                           <i className="fas fa-scroll"></i>
+                        </button>
+                        <span className="tooltiptext">
+                           PDF en blanco para notas y asistencias
+                        </span>
+                     </div>
+                     <div className="tooltip">
+                        <button
+                           type="button"
+                           className="btn btn-secondary"
+                           onClick={(e) => {
+                              e.preventDefault();
+                              setOtherValues({
+                                 ...otherValues,
+                                 toggleModalReportCards: true,
+                              });
+                           }}
+                        >
+                           <i className="fas fa-address-card"></i>
+                        </button>
+                        <span className="tooltiptext">PDF libretas</span>
+                     </div>
                      {userLogged.type !== "teacher" && (
                         <>
-                           <Link
-                              to={`/edit-class/${classInfo._id}/${classInfo.category._id}`}
-                              className="btn btn-mix-secondary"
-                              onClick={() => {
-                                 window.scroll(0, 0);
-                                 updatePreviousPage("");
-                                 clearSearch();
-                              }}
-                           >
-                              <i className="far fa-edit"></i>
-                           </Link>
-                           <button
-                              type="button"
-                              className="btn btn-danger"
-                              onClick={(e) => {
-                                 e.preventDefault();
-                                 setOtherValues({
-                                    ...otherValues,
-                                    toggleModalDelete: true,
-                                 });
-                              }}
-                           >
-                              <i className="far fa-trash-alt"></i>
-                           </button>
+                           <div className="tooltip">
+                              <Link
+                                 to={`/edit-class/${classInfo._id}/${classInfo.category._id}`}
+                                 className="btn btn-mix-secondary"
+                                 onClick={() => {
+                                    window.scroll(0, 0);
+                                    updatePreviousPage("");
+                                    clearSearch();
+                                 }}
+                              >
+                                 <i className="far fa-edit"></i>
+                              </Link>
+                              <span className="tooltiptext">Editar</span>
+                           </div>
+                           <div className="tooltip">
+                              <button
+                                 type="button"
+                                 className="btn btn-danger"
+                                 onClick={(e) => {
+                                    e.preventDefault();
+                                    setOtherValues({
+                                       ...otherValues,
+                                       toggleModalDelete: true,
+                                    });
+                                 }}
+                              >
+                                 <i className="far fa-trash-alt"></i>
+                              </button>
+                              <span className="tooltiptext">Eliminar</span>
+                           </div>
                         </>
                      )}
                   </div>

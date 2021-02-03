@@ -139,6 +139,7 @@ function AverageTab({
                   </table>
                </div>
                <ListButtons
+                  type="mejores promedios"
                   page={page}
                   items={enrollments}
                   pdfGenerator={() => enrollmentsPDF(enrollments, "averages")}

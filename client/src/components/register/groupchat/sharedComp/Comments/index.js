@@ -100,16 +100,19 @@ const Comments = ({
                   </div>
                   {(comment.user._id === userLogged._id || isAdmin) && (
                      <div className="btn-close">
-                        <button
-                           type="button"
-                           onClick={(e) => {
-                              e.preventDefault();
-                              setToggle(comment._id, index);
-                           }}
-                           className="btn btn-danger"
-                        >
-                           <i className="fas fa-times"></i>
-                        </button>
+                        <div className="tooltip">
+                           <button
+                              type="button"
+                              onClick={(e) => {
+                                 e.preventDefault();
+                                 setToggle(comment._id, index);
+                              }}
+                              className="btn btn-danger"
+                           >
+                              <i className="fas fa-times"></i>
+                           </button>
+                           <span className="tooltiptext">Eliminar</span>
+                        </div>
                      </div>
                   )}
                </div>
@@ -129,9 +132,12 @@ const Comments = ({
                value={text}
                placeholder="Comenta..."
             ></textarea>
-            <button type="submit" className="btn-comment">
-               <i className="far fa-paper-plane"></i>
-            </button>
+            <div className="tooltip">
+               <button type="submit" className="btn-comment">
+                  <i className="far fa-paper-plane"></i>
+               </button>
+               <span className="tooltiptext">Enviar comentario</span>
+            </div>
          </form>
       </div>
    );

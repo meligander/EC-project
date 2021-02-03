@@ -197,6 +197,7 @@ const InstallmentList = ({
                </div>
                <ListButtons
                   page={page}
+                  type="deudas"
                   changePage={updatePageNumber}
                   items={installments}
                   pdfGenerator={() => installmentsPDF(installments)}

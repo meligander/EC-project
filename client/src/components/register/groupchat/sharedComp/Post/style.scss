@@ -126,4 +126,14 @@
          margin-right: 1.5rem;
       }
    }
+
+   .tooltip .tooltiptext {
+      top: 5rem;
+      left: 40%;
+
+      &.close {
+         top: 3.8rem;
+         left: 35%;
+      }
+   }
 }

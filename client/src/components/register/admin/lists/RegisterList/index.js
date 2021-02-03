@@ -171,6 +171,7 @@ const RegisterList = ({
                </div>
                <ListButtons
                   items={registers}
+                  type="cajas diarias"
                   page={page}
                   changePage={updatePageNumber}
                   pdfGenerator={() => registerPDF(registers)}

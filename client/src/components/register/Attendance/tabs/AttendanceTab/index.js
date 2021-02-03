@@ -256,16 +256,19 @@ const AttendanceTab = ({
                <i className="fas fa-plus"></i>
                <span className="hide-md">&nbsp; Día</span>
             </button>
-            <button
-               className="btn btn-secondary"
-               type="button"
-               onClick={(e) => {
-                  e.preventDefault();
-                  pdfGenerator();
-               }}
-            >
-               <i className="fas fa-file-pdf"></i>
-            </button>
+            <div className="tooltip">
+               <button
+                  className="btn btn-secondary"
+                  type="button"
+                  onClick={(e) => {
+                     e.preventDefault();
+                     pdfGenerator();
+                  }}
+               >
+                  <i className="fas fa-file-pdf"></i>
+               </button>
+               <span className="tooltiptext">PDF asistencias del bimestre</span>
+            </div>
          </div>
          {dayPlus && (
             <form

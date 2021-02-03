@@ -192,16 +192,21 @@ const Classes = ({
                         <i className="fas fa-plus"></i>&nbsp; Nueva Clase
                      </Link>
                   )}
-                  <button
-                     type="button"
-                     className="btn btn-secondary"
-                     onClick={(e) => {
-                        e.preventDefault();
-                        classPDF(classes, "classes");
-                     }}
-                  >
-                     <i className="fas fa-file-pdf"></i>
-                  </button>
+                  <div className="tooltip">
+                     <button
+                        type="button"
+                        className="btn btn-secondary tooltip"
+                        onClick={(e) => {
+                           e.preventDefault();
+                           classPDF(classes, "classes");
+                        }}
+                     >
+                        <i className="fas fa-file-pdf"></i>
+                     </button>
+                     <span className="tooltiptext">
+                        PDF con clases y su info
+                     </span>
+                  </div>
                </div>
             </>
          ) : (

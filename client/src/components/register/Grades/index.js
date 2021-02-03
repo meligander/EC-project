@@ -124,21 +124,25 @@ const Grades = ({
             <>
                <h1 className="text-center light-font p-1 mt-2">Notas</h1>
                <div className="btn-right">
-                  <button
-                     type="button"
-                     className="btn btn-secondary"
-                     onClick={(e) => {
-                        e.preventDefault();
-                        gradesPDF(
-                           { header, period: periods },
-                           classInfo,
-                           "all"
-                        );
-                     }}
-                  >
-                     <i className="fas fa-file-pdf"></i>&nbsp; Todas
-                     <span className="hide-md"> las notas</span>
-                  </button>
+                  <div className="tooltip">
+                     <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={(e) => {
+                           e.preventDefault();
+                           gradesPDF(
+                              { header, period: periods },
+                              classInfo,
+                              "all"
+                           );
+                        }}
+                     >
+                        <i className="fas fa-file-pdf"></i>&nbsp; Todas
+                     </button>
+                     <span className="tooltiptext">
+                        PDF notas de todo el año
+                     </span>
+                  </div>
                </div>
                <ClassInfo classInfo={classInfo} />
 

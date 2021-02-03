@@ -48,6 +48,11 @@
          }
       }
 
+      .tooltip .tooltiptext {
+         top: 3.8rem;
+         left: 35%;
+      }
+
       .btn-close {
          width: auto;
          margin-left: -3rem;
@@ -89,6 +94,10 @@
             transform: scale(1.1);
             color: $success-color;
          }
+      }
+
+      .tooltip .tooltiptext {
+         top: 4rem;
       }
 
       .btn-comment {

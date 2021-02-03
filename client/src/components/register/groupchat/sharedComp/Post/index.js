@@ -149,16 +149,19 @@ const Post = ({
             <div>
                <div className="hide-sm btn-close">
                   {(post.user._id === userLogged._id || isAdmin) && (
-                     <button
-                        type="button"
-                        onClick={(e) => {
-                           e.preventDefault();
-                           setToggle(post._id);
-                        }}
-                        className="btn btn-danger"
-                     >
-                        <i className="fas fa-times"></i>
-                     </button>
+                     <div className="tooltip">
+                        <button
+                           type="button"
+                           onClick={(e) => {
+                              e.preventDefault();
+                              setToggle(post._id);
+                           }}
+                           className="btn btn-danger"
+                        >
+                           <i className="fas fa-times"></i>
+                        </button>
+                        <span className="tooltiptext close">Eliminar</span>
+                     </div>
                   )}
                </div>
                <p className="mt-2">{post.text}</p>
@@ -168,51 +171,61 @@ const Post = ({
                   Publicado el{" "}
                   <Moment format="DD/MM/YYYY [a las] HH:mm" date={post.date} />
                </p>
-
-               <button
-                  type="button"
-                  onClick={(e) => {
-                     e.preventDefault();
-                     addRemoveLike(post._id);
-                     setOtherValues({ ...otherValues, isLiked: !isLiked });
-                  }}
-                  className={`btn btn-mix-secondary ${isLiked ? "liked" : ""}`}
-               >
-                  <i className="fas fa-heart"></i>
-               </button>
-               <button
-                  type="button"
-                  className="btn btn-mix-secondary"
-                  onClick={setToggleModalLikes}
-               >
-                  <span className="heart">
+               <div className="tooltip">
+                  <button
+                     type="button"
+                     onClick={(e) => {
+                        e.preventDefault();
+                        addRemoveLike(post._id);
+                        setOtherValues({ ...otherValues, isLiked: !isLiked });
+                     }}
+                     className={`btn btn-mix-secondary ${
+                        isLiked ? "liked" : ""
+                     }`}
+                  >
                      <i className="fas fa-heart"></i>
-                  </span>
-                  <i className="fas fa-users"></i>
-                  {post.likes.length > 0 && (
-                     <span className="post-notification secondary">
-                        {post.likes.length}
+                  </button>
+                  <span className="tooltiptext">Me Gusta</span>
+               </div>
+               <div className="tooltip">
+                  <button
+                     type="button"
+                     className="btn btn-mix-secondary"
+                     onClick={setToggleModalLikes}
+                  >
+                     <span className="heart">
+                        <i className="fas fa-heart"></i>
                      </span>
-                  )}
-               </button>
-               <button
-                  type="button"
-                  className="btn btn-light"
-                  onClick={(e) => {
-                     e.preventDefault();
-                     setOtherValues({
-                        ...otherValues,
-                        toggleComments: !toggleComments,
-                     });
-                  }}
-               >
-                  <i className="far fa-comments"></i>
-                  {post.comments.length > 0 && (
-                     <span className="post-notification primary">
-                        {post.comments.length}
-                     </span>
-                  )}
-               </button>
+                     <i className="fas fa-users"></i>
+                     {post.likes.length > 0 && (
+                        <span className="post-notification secondary">
+                           {post.likes.length}
+                        </span>
+                     )}
+                  </button>
+                  <span className="tooltiptext">Listado de "Me Gusta"</span>
+               </div>
+               <div className="tooltip">
+                  <button
+                     type="button"
+                     className="btn btn-light"
+                     onClick={(e) => {
+                        e.preventDefault();
+                        setOtherValues({
+                           ...otherValues,
+                           toggleComments: !toggleComments,
+                        });
+                     }}
+                  >
+                     <i className="far fa-comments"></i>
+                     {post.comments.length > 0 && (
+                        <span className="post-notification primary">
+                           {post.comments.length}
+                        </span>
+                     )}
+                  </button>
+                  <span className="tooltiptext">Comentarios</span>
+               </div>
             </div>
          </div>
          {toggleComments && (

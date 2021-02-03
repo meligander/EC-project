@@ -168,7 +168,7 @@ const IncomeExpenceTab = ({
                      <td>${register ? register.registermoney : 0}</td>
                   </tr>
                   <tr>
-                     <td>Tipo de Gasto</td>
+                     <td>Tipo de Movimiento</td>
                      <td>
                         <select
                            name="expencetype"
@@ -264,17 +264,20 @@ const IncomeExpenceTab = ({
 
                {(userLogged.type === "admin" ||
                   userLogged.type === "admin&teacher") && (
-                  <Link
-                     to="/edit-expencetypes"
-                     onClick={() => {
-                        window.scroll(0, 0);
-                        clearExpenceTypes();
-                     }}
-                     className="btn btn-mix-secondary"
-                  >
-                     <i className="fas fa-edit"></i>
-                     <span className="hide-sm">&nbsp; Tipo Movimiento</span>
-                  </Link>
+                  <div className="tooltip">
+                     <Link
+                        to="/edit-expencetypes"
+                        onClick={() => {
+                           window.scroll(0, 0);
+                           clearExpenceTypes();
+                        }}
+                        className="btn btn-mix-secondary"
+                     >
+                        <i className="fas fa-edit"></i>
+                        <span className="hide-sm">&nbsp; Tipo Movimiento</span>
+                     </Link>
+                     <span className="tooltiptext">Editar</span>
+                  </div>
                )}
             </div>
          </form>

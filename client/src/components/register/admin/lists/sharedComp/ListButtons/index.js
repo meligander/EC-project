@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 import "./style.scss";
 
-const ListButtons = ({ changePage, items, page, pdfGenerator }) => {
+const ListButtons = ({ changePage, items, page, pdfGenerator, type }) => {
    const itemsNumber = page * 10;
    const sub = items.length - itemsNumber;
    return (
@@ -39,16 +39,19 @@ const ListButtons = ({ changePage, items, page, pdfGenerator }) => {
          )}
 
          <div className="btn-right">
-            <button
-               type="button"
-               className="btn btn-secondary"
-               onClick={(e) => {
-                  e.preventDefault();
-                  pdfGenerator();
-               }}
-            >
-               <i className="fas fa-file-pdf"></i>
-            </button>
+            <div className="tooltip">
+               <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={(e) => {
+                     e.preventDefault();
+                     pdfGenerator();
+                  }}
+               >
+                  <i className="fas fa-file-pdf"></i>
+               </button>
+               <span className="tooltiptext">PDF lista de {type}</span>
+            </div>
          </div>
       </>
    );
@@ -59,6 +62,7 @@ ListButtons.propTypes = {
    items: PropTypes.array.isRequired,
    changePage: PropTypes.func.isRequired,
    pdfGenerator: PropTypes.func.isRequired,
+   type: PropTypes.string.isRequired,
 };
 
 export default ListButtons;

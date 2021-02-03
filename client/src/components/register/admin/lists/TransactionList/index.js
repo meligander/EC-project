@@ -229,6 +229,7 @@ const TransactionList = ({
                </div>
                <ListButtons
                   page={page}
+                  type="transacciones"
                   items={transactions}
                   changePage={updatePageNumber}
                   pdfGenerator={() => transactionsPDF(transactions)}

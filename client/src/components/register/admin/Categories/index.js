@@ -159,16 +159,21 @@ const Categories = ({
                      <i className="far fa-save"></i>
                      <span className="hide-sm">&nbsp; Actualizar</span>
                   </button>
-                  <button
-                     type="button"
-                     className="btn btn-secondary"
-                     onClick={(e) => {
-                        e.preventDefault();
-                        categoriesPDF(categories);
-                     }}
-                  >
-                     <i className="fas fa-file-pdf"></i>
-                  </button>
+                  <div className="tooltip">
+                     <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={(e) => {
+                           e.preventDefault();
+                           categoriesPDF(categories);
+                        }}
+                     >
+                        <i className="fas fa-file-pdf"></i>
+                     </button>
+                     <span className="tooltiptext">
+                        PDF con categorías y precios
+                     </span>
+                  </div>
                </div>
             </>
          ) : (

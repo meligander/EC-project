@@ -42,6 +42,16 @@
    }
 
    .btn-end {
+      .tooltip {
+         display: flex;
+
+         .tooltiptext {
+            left: 40%;
+            top: 4rem;
+            transform: translateX(-50%);
+         }
+      }
+
       .form-input {
          margin-right: -7.9rem;
       }
@@ -49,5 +59,9 @@
          font-size: 2rem;
          padding: 0 0.7rem;
       }
+   }
+
+   .tooltip .tooltiptext {
+      top: 3rem;
    }
 }

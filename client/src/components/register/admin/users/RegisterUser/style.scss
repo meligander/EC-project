@@ -42,4 +42,16 @@ form {
          }
       }
    }
+
+   .townNeigh {
+      margin-top: 0;
+   }
+
+   .tooltip.form {
+      width: 100%;
+
+      .tooltiptext {
+         top: 13rem;
+      }
+   }
 }

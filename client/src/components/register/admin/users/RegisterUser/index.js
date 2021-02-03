@@ -317,7 +317,6 @@ const RegisterUser = ({
                   degree={degree}
                   salary={salary}
                   school={school}
-                  description={description}
                   onChange={onChange}
                />
             );
@@ -710,19 +709,23 @@ const RegisterUser = ({
                                  </label>
                               </div>
                               {isOwner && (
-                                 <div className="btn-right">
-                                    <Link
-                                       to="/edit-towns-neighbourhoods"
-                                       className="btn btn-mix-secondary"
-                                       onClick={() => {
-                                          window.scroll(0, 0);
-                                          clearNeighbourhoods();
-                                          clearTowns();
-                                       }}
-                                    >
-                                       <i className="far fa-edit"></i>&nbsp;
-                                       Editar
-                                    </Link>
+                                 <div className="btn-right townNeigh">
+                                    <div className="tooltip">
+                                       <Link
+                                          to="/edit-towns-neighbourhoods"
+                                          className="btn btn-mix-secondary"
+                                          onClick={() => {
+                                             window.scroll(0, 0);
+                                             clearNeighbourhoods();
+                                             clearTowns();
+                                          }}
+                                       >
+                                          <i className="far fa-edit"></i>
+                                       </Link>
+                                       <span className="tooltiptext">
+                                          Editar localidades y/o barrios
+                                       </span>
+                                    </div>
                                  </div>
                               )}
                            </div>
@@ -731,19 +734,28 @@ const RegisterUser = ({
                      )}
 
                      {type !== "student" && type !== "guardian" && (
-                        <div className="form-group">
-                           <textarea
-                              className="form-input"
-                              name="description"
-                              id="description"
-                              rows="4"
-                              onChange={(e) => onChange(e)}
-                              value={description}
-                              placeholder="Descripción"
-                           ></textarea>
-                           <label htmlFor="description" className="form-label">
-                              Descripción
-                           </label>
+                        <div className="tooltip form">
+                           <div className="form-group">
+                              <textarea
+                                 className="form-input"
+                                 name="description"
+                                 id="description"
+                                 rows="4"
+                                 onChange={(e) => onChange(e)}
+                                 value={description}
+                                 placeholder="Descripción"
+                              ></textarea>
+                              <label
+                                 htmlFor="description"
+                                 className="form-label"
+                              >
+                                 Descripción
+                              </label>
+                           </div>
+                           <span className="tooltiptext">
+                              Descripción que aparecerá en la página "Acerca de
+                              Nosotros"
+                           </span>
                         </div>
                      )}
 
