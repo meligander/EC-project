@@ -241,8 +241,12 @@ router.post("/", auth, async (req, res) => {
 
       if (period === 1) {
          for (let x = 0; x < 3; x++) {
-            grade = new Grade({ period: x + 2, classroom, gradetype });
-            await grade.save();
+            const info = { period: x + 2, classroom, gradetype };
+            grade = await Grade.findOne(info);
+            if (!grade) {
+               grade = new Grade(info);
+               await grade.save();
+            }
          }
       }
 

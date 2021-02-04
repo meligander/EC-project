@@ -27,24 +27,24 @@ const About = () => {
             <div className="row">
                <div className="history-container">
                   <div className="history-text">
-                     <h2 className="heading-secondary text-primary">
+                     <h2 className="heading-secondary text-primary mb-3">
                         Un poco de historia...
                      </h2>
                      <p className="paragraph">
                         <span className="indentation">
                            Nuestro instituto comienza en el año 1988, aunque
                            como un simple emprendimiento de una docente que en
-                           su propia casa arma grupo de alumnos ya que Merlo en
-                           ese momento era muy pequeño y no había muchas
-                           opciones para el aprendizaje de idioma. Luego fueron
-                           dos las docentes trabajando en sus propias casas,
-                           pero compartiendo los grupos de alumnos que seguían
-                           creciendo día a día, además contaban con algunas
-                           otras docentes que asistían en la enseñanza de los
-                           diferentes cursos. Surgió entonces la necesidad de
-                           aunar todos los cursos en un mismo edificio y con
-                           mucho esfuerzo se compra el actual inmueble en el año
-                           1997.
+                           su propia casa arma grupos de alumnos, ya que, en ese
+                           momento, Merlo era muy pequeño y no habían muchas
+                           opciones para el aprendizaje de idioma. Más adelante,
+                           como los grupos de alumnos seguían creciendo día a
+                           día, fueron dos las docentes que trabajaban desde sus
+                           propias casas trabajando en conjunto, con la
+                           asistencia de otras profesoras que las ayudaban en la
+                           enseñanza de los diferentes cursos. Surgió entonces
+                           la necesidad de aunar todos los cursos en un mismo
+                           edificio y con mucho esfuerzo se compró el actual
+                           inmueble en el año 1997.
                         </span>
                         <br />
                         <span className="indentation">

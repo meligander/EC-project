@@ -14,17 +14,16 @@ const Canada = () => {
          <div className="row">
             <div className="text-left section-canada-text">
                <p className="paragraph">
-                  Desde el año 1998 se organizan viajes a Canadá en el mes de
+                  Desde el año 1998 organizamos viajes a Canadá en el mes de
                   julio. Los alumnos tienen la posibilidad de vivir un mes en
-                  casas de familia, compartir con ellos el idioma, la cultura,
-                  las costumbres mientras perfeccionan el idioma inglés. Además,
-                  cursan en la prestigiosa escuela ILAC clases diarias acordes a
-                  su nivel. Esta experiencia se convierte en imborrable para los
-                  alumnos tanto desde el punto de vista personal por el trato
-                  con personas de todo el mundo que amplía los horizontes de los
-                  adolescentes, sino también desde el punto de vista del idioma
-                  que se incorpora en sus vidas de una manera integral y
-                  natural.
+                  casas de familia, compartir con ellos el idioma, la cultura y
+                  las costumbres mientras perfeccionan el idioma. Además, cursan
+                  clases diarias, acordes a su nivel de inglés, en la
+                  prestigiosa escuela ILAC. Esta experiencia se convierte en
+                  imborrable para los alumnos tanto desde el punto de vista
+                  personal por el trato con personas de todo el mundo, como
+                  desde el punto de vista del idioma ya que se incorpora en sus
+                  vidas de una manera integral y natural.
                </p>
             </div>
             <div className="composition">

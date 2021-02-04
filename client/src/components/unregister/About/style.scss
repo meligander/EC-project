@@ -34,58 +34,54 @@
    }
 }
 
-.history {
-   &-container {
-      background-image: linear-gradient(
-            103deg,
-            $white-color 0%,
-            $white-color 60%,
-            transparent 50%
-         ),
-         url(../../../img/viejo.jpg);
-      background-size: contain;
-      background-position: right top;
-      border-radius: 3px;
-      box-shadow: 0 1.5rem 4rem rgba($black-color, 0.5);
-
-      @include respond(phone) {
-         background-position: 50% 50%;
-         background-repeat: no-repeat;
-         background-image: linear-gradient(
-               to right,
-               rgba($white-color, 0.9) 0%,
-               rgba($white-color, 0.9) 100%
-            ),
-            url(../../../img/viejo.jpg);
-      }
-
-      @include respond(tab-port) {
-         background-size: cover;
-      }
-   }
-
-   &-text {
-      padding: 5rem 6rem 4rem 5rem;
-      width: 60%;
-
-      @include respond(phone) {
-         padding: 5rem;
-         width: 100%;
-
-         .text-moved-right {
-            margin: 0 !important;
-         }
-      }
-
-      .indentation {
-         text-indent: 2rem;
-      }
-   }
-}
-
 .section {
    &-history {
       padding: 7rem 0 6rem 0;
+
+      .history {
+         &-container {
+            background-image: linear-gradient(
+                  103deg,
+                  $white-color 0%,
+                  $white-color 60%,
+                  transparent 50%
+               ),
+               url(../../../img/viejo.jpg);
+            background-size: contain;
+            background-position: right top;
+            border-radius: 3px;
+            box-shadow: 0 1.5rem 4rem rgba($black-color, 0.5);
+
+            @include respond(phone) {
+               background-position: 50% 50%;
+               background-repeat: no-repeat;
+               background-image: linear-gradient(
+                     to right,
+                     rgba($white-color, 0.9) 0%,
+                     rgba($white-color, 0.9) 100%
+                  ),
+                  url(../../../img/viejo.jpg);
+            }
+
+            @include respond(tab-port) {
+               background-size: cover;
+            }
+         }
+
+         &-text {
+            padding: 5rem 7rem 5rem 6rem;
+            width: 60%;
+
+            @include respond(phone) {
+               padding: 5rem;
+               width: 100%;
+
+               .text-moved-right {
+                  margin: 0 !important;
+               }
+            }
+         }
+      }
    }
 
    &-cambridge {

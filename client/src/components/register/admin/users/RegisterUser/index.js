@@ -288,7 +288,7 @@ const RegisterUser = ({
             ...(selectedFile && { img: previewSource }),
          },
          history,
-         user && user._id
+         user && user
       );
    };
 

@@ -6,7 +6,7 @@ import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
 import { logOutAndToggle } from "./navbar";
 import { clearInstallments } from "./installment";
-import { clearClass } from "./class";
+import { clearClass, clearClasses } from "./class";
 import { clearAttendances } from "./attendance";
 import { clearGrades } from "./grade";
 
@@ -180,7 +180,7 @@ export const loadRelatives = (user_id) => async (dispatch) => {
 };
 
 //Update or register a user
-export const registerUser = (formData, history, user_id) => async (
+export const registerUser = (formData, history, userToUpdate) => async (
    dispatch
 ) => {
    dispatch(updateLoadingSpinner(true));
@@ -194,31 +194,33 @@ export const registerUser = (formData, history, user_id) => async (
 
    try {
       let res;
-      if (!user_id) {
+      if (!userToUpdate) {
          res = await axios.post("/api/user", user);
       } else {
          //Update user
-         await axios.put(`/api/user/${user_id}`, user);
+         await axios.put(`/api/user/${userToUpdate._id}`, user);
       }
 
       dispatch({
-         type: !user_id ? REGISTER_SUCCESS : USER_UPDATED,
+         type: !userToUpdate ? REGISTER_SUCCESS : USER_UPDATED,
       });
 
       dispatch(
          setAlert(
-            user_id ? "Usuario modificado" : "Usuario registrado",
+            userToUpdate ? "Usuario modificado" : "Usuario registrado",
             "success",
             "1",
             7000
          )
       );
 
+      if (userToUpdate.type === "student") dispatch(clearClass());
+      if (userToUpdate.type === "teacher") dispatch(clearClasses());
       dispatch(clearProfile());
-      dispatch(clearClass());
+
       dispatch(clearOtherValues("activeStudents"));
 
-      history.push(`/dashboard/${user_id ? user_id : res.data}`);
+      history.push(`/dashboard/${userToUpdate ? userToUpdate._id : res.data}`);
    } catch (err) {
       if (err.response.data.errors) {
          const errors = err.response.data.errors;
