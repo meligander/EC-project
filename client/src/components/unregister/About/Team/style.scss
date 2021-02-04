@@ -1,101 +1,122 @@
 @import "../../../../style/abstract.scss";
 
-.bg-video {
-   position: absolute;
-   top: 0;
-   left: 0;
-   height: 100%;
-   width: 100%;
-   z-index: -1;
-   opacity: 0.1;
-   //cuando una imagen o video es mas grade que el padre, usamos overflow: hidden
-   overflow: hidden;
-
-   &-content {
-      height: 100%;
-      width: 100%;
-      //como background-size: cover; pero con videos
-      object-fit: cover;
-   }
-}
-
-.person {
-   width: 75%;
-   box-shadow: 0 3rem 6rem rgba($black-color, 0.1);
-   background-color: rgba($white-color, 0.7);
-   border-radius: 3px;
-   padding: 6rem 6rem 6rem 9rem;
-   font-size: $default-font-size;
-   transform: skewX(-12deg);
+.section-team {
+   padding: 10rem 1rem 15rem 1rem;
+   position: relative;
 
    @include respond(phone) {
-      width: 88%;
-   }
+      padding: 6rem 1rem 3rem 1rem;
 
-   @include respond(small-phone) {
-      transform: skewX(0);
-   }
-
-   &-shape {
-      float: left;
-      -webkit-shape-outside: circle(50% at 50% 50%);
-      shape-outside: circle(50% at 50% 50%);
-      overflow: hidden;
-      border-radius: 50%;
-
-      //elementos que usa float no utilizar margin para moverlo sino transform
-      transform: translate(-4rem, -1rem) skewX(12deg);
-      position: relative;
-
-      @include respond(small-phone) {
-         transform: translateX(-3rem) skewX(0);
+      .btns {
+         order: 2;
+         display: flex;
+         width: 50%;
+         justify-content: space-around;
+         margin-top: 2rem;
       }
    }
 
-   &-img {
-      object-fit: cover;
-      border-radius: 50%;
-      width: 15rem;
-      height: 15rem;
-      transform: /* translateX(-4rem) */ scale(1.1);
-      background-color: #fff;
-      @include easeOut;
-      backface-visibility: hidden;
-
-      @include respond(small-phone) {
-         width: 13rem;
-         height: 13rem;
-      }
+   & .row {
+      justify-content: space-evenly;
    }
 
-   &-text {
-      transform: skewX(12deg);
-
-      @include respond(small-phone) {
-         transform: translateY(1rem) skewX(0);
-      }
-   }
-
-   &-caption {
+   .bg-video {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, 20%);
-      color: $white-color;
-      text-align: center;
-      opacity: 0;
-      @include easeOut;
-      //para anular cambio extrano que hace transform con las animaciones
-      backface-visibility: hidden;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      z-index: -1;
+      opacity: 0.1;
+      //cuando una imagen o video es mas grade que el padre, usamos overflow: hidden
+      overflow: hidden;
+
+      &-content {
+         height: 100%;
+         width: 100%;
+         //como background-size: cover; pero con videos
+         object-fit: cover;
+      }
    }
 
-   &:hover &-caption {
-      opacity: 1;
-      transform: translate(-50%, -50%);
-   }
+   .person {
+      width: 75%;
+      box-shadow: 0 3rem 6rem rgba($black-color, 0.1);
+      background-color: rgba($white-color, 0.7);
+      border-radius: 3px;
+      padding: 6rem 6rem 6rem 9rem;
+      font-size: $default-font-size;
+      transform: skewX(-12deg);
 
-   &:hover &-img {
-      transform: /* translateX(-4rem) */ scale(1);
-      filter: blur(3px) brightness(80%);
+      @include respond(phone) {
+         width: 88%;
+      }
+
+      @include respond(small-phone) {
+         transform: skewX(0);
+      }
+
+      &-shape {
+         float: left;
+         -webkit-shape-outside: circle(50% at 50% 50%);
+         shape-outside: circle(50% at 50% 50%);
+         overflow: hidden;
+         border-radius: 50%;
+
+         //elementos que usa float no utilizar margin para moverlo sino transform
+         transform: translate(-4rem, -1rem) skewX(12deg);
+         position: relative;
+
+         @include respond(small-phone) {
+            transform: translateX(-3rem) skewX(0);
+         }
+      }
+
+      &-img {
+         object-fit: cover;
+         border-radius: 50%;
+         width: 15rem;
+         height: 15rem;
+         transform: /* translateX(-4rem) */ scale(1.1);
+         background-color: #fff;
+         @include easeOut;
+         backface-visibility: hidden;
+
+         @include respond(small-phone) {
+            width: 13rem;
+            height: 13rem;
+         }
+      }
+
+      &-text {
+         transform: skewX(12deg);
+
+         @include respond(small-phone) {
+            transform: translateY(1rem) skewX(0);
+         }
+      }
+
+      &-caption {
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, 20%);
+         color: $white-color;
+         text-align: center;
+         opacity: 0;
+         @include easeOut;
+         //para anular cambio extrano que hace transform con las animaciones
+         backface-visibility: hidden;
+      }
+
+      &:hover &-caption {
+         opacity: 1;
+         transform: translate(-50%, -50%);
+      }
+
+      &:hover &-img {
+         transform: /* translateX(-4rem) */ scale(1);
+         filter: blur(3px) brightness(80%);
+      }
    }
 }

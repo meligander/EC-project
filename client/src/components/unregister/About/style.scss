@@ -132,25 +132,4 @@
          }
       }
    }
-
-   &-team {
-      padding: 10rem 1rem 15rem 1rem;
-      position: relative;
-
-      @include respond(phone) {
-         padding: 6rem 1rem 3rem 1rem;
-
-         .btns {
-            order: 2;
-            display: flex;
-            width: 50%;
-            justify-content: space-around;
-            margin-top: 2rem;
-         }
-      }
-
-      & .row {
-         justify-content: space-evenly;
-      }
-   }
 }

@@ -142,6 +142,7 @@
          //border-bottom: 1px solid $primary-color;
          padding: 0.5rem 1rem;
          transition: all 0.2s;
+         backface-visibility: hidden;
       }
 
       &:hover {
