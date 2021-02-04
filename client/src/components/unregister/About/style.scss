@@ -20,23 +20,26 @@
 
    h2,
    p {
-      padding: 0 1rem;
+      padding: 0 5rem;
    }
 
    h2 {
       animation: moveInLeft 1s ease-out;
+      margin-bottom: 4rem;
    }
    p {
       animation: moveInRight 1s ease-out;
+      line-height: 3.5rem;
+      margin-bottom: 4rem;
    }
 }
 
 .history {
    &-container {
       background-image: linear-gradient(
-            105deg,
+            103deg,
             $white-color 0%,
-            $white-color 50%,
+            $white-color 60%,
             transparent 50%
          ),
          url(../../../img/viejo.jpg);
@@ -48,7 +51,6 @@
       @include respond(phone) {
          background-position: 50% 50%;
          background-repeat: no-repeat;
-         background-size: cover;
          background-image: linear-gradient(
                to right,
                rgba($white-color, 0.9) 0%,
@@ -56,11 +58,15 @@
             ),
             url(../../../img/viejo.jpg);
       }
+
+      @include respond(tab-port) {
+         background-size: cover;
+      }
    }
 
    &-text {
-      padding: 6rem;
-      width: 50%;
+      padding: 5rem 6rem 4rem 5rem;
+      width: 60%;
 
       @include respond(phone) {
          padding: 5rem;
@@ -69,6 +75,10 @@
          .text-moved-right {
             margin: 0 !important;
          }
+      }
+
+      .indentation {
+         text-indent: 2rem;
       }
    }
 }
@@ -108,39 +118,17 @@
       }
 
       .cmb-text {
-         text-align: right;
+         h2 {
+            text-align: right;
+         }
+
+         text-align: center;
          padding-left: 4rem;
 
          @include respond(phone) {
             text-align: left;
             margin-bottom: 3rem;
             padding: 2rem;
-         }
-      }
-   }
-
-   &-canada {
-      padding: 8rem 3rem 5rem 3rem;
-
-      h2 {
-         padding-bottom: 7rem;
-      }
-
-      & > .row {
-         justify-content: space-around;
-         height: 30rem;
-
-         @include respond(phone) {
-            height: 100%;
-         }
-      }
-
-      &-text {
-         width: 40%;
-         align-self: center;
-
-         @include respond(phone) {
-            width: 100%;
          }
       }
    }

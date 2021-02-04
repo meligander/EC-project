@@ -81,8 +81,8 @@ const Team = ({ users: { loadingUsers, users }, loadUsers }) => {
                         <figure className="person-shape">
                            <img
                               src={
-                                 users[teamNumber].noImg !== ""
-                                    ? users[teamNumber].noImg
+                                 users[teamNumber].img.url === ""
+                                    ? "https://pngimage.net/wp-content/uploads/2018/06/no-user-image-png-3-300x200.png"
                                     : users[teamNumber].img.url
                               }
                               alt={

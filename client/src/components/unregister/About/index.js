@@ -12,11 +12,13 @@ const About = () => {
       <>
          <header className="header">
             <div className="header-textbox">
-               <h2 className="heading-secondary text-white mb-4">
+               <h2 className="heading-secondary text-white">
                   Instituto de Inglés en la Villa de Merlo
                </h2>
-               <p className="heading-tertiary text-light mb-5">
-                  Clases de inglés para todas las edades. bla bla bla
+               <p className="heading-tertiary text-light">
+                  Cursos de Inglés para todas las edades, con amplitud de
+                  horarios y con reconocido prestigio en la enseñanza del
+                  idioma.
                </p>
             </div>
          </header>
@@ -26,17 +28,37 @@ const About = () => {
                <div className="history-container">
                   <div className="history-text">
                      <h2 className="heading-secondary text-primary">
-                        Un poco de{" "}
-                        <span className="indentation">historia...</span>
+                        Un poco de historia...
                      </h2>
-                     <p className="paragraph py-3">
-                        Nuestro instituto comenzo... bla bla bla Lorem, ipsum
-                        dolor sit amet consectetur adipisicing elit. Voluptatem
-                        totam cupiditate consequatur velit ut optio corporis
-                        beatae, illum tempora necessitatibus et eligendi ad
-                        exercitationem magnam eaque ullam ea corrupti porro unde
-                        excepturi non voluptas. Dolor illum nostrum suscipit
-                        repudiandae itaque?
+                     <p className="paragraph">
+                        <span className="indentation">
+                           Nuestro instituto comienza en el año 1988, aunque
+                           como un simple emprendimiento de una docente que en
+                           su propia casa arma grupo de alumnos ya que Merlo en
+                           ese momento era muy pequeño y no había muchas
+                           opciones para el aprendizaje de idioma. Luego fueron
+                           dos las docentes trabajando en sus propias casas,
+                           pero compartiendo los grupos de alumnos que seguían
+                           creciendo día a día, además contaban con algunas
+                           otras docentes que asistían en la enseñanza de los
+                           diferentes cursos. Surgió entonces la necesidad de
+                           aunar todos los cursos en un mismo edificio y con
+                           mucho esfuerzo se compra el actual inmueble en el año
+                           1997.
+                        </span>
+                        <br />
+                        <span className="indentation">
+                           Desde marzo del 1998 el actual edificio comenzó a
+                           funcionar y dos años después la totalidad de las
+                           aulas estuvieron terminadas.
+                        </span>
+                        <br />
+                        <span className="indentation">
+                           Las paredes del instituto muestran pinturas de muchas
+                           de las promociones que egresaron y dejaron sus
+                           recuerdos en las paredes para ser vistas por futuras
+                           generaciones.
+                        </span>
                      </p>
                   </div>
                </div>
@@ -57,15 +79,20 @@ const About = () => {
                   </h2>
                   <br />
                   <p className="paragraph text-secondary">
-                     Cada año los estudiantes tienen la posibilidad de rendir
-                     examenes internacionales, los cuales les ayudaran en futuro
-                     para ampliar su curriculum... bla bla bla Lorem, ipsum
-                     dolor sit amet consectetur adipisicing elit. Voluptatem
-                     totam cupiditate consequatur velit ut optio corporis
-                     beatae, illum tempora necessitatibus et eligendi ad
-                     exercitationem magnam eaque ullam ea corrupti porro unde
-                     excepturi non voluptas. Dolor illum nostrum suscipit
-                     repudiandae itaque?
+                     <span className="indentation">
+                        Nuestra institución es el único centro de exámenes
+                        Cambridge en la zona. Todos los años en el mes de
+                        diciembre nuestros alumnos y también los de otras
+                        entidades cercanas rinden los exámenes main suite de la
+                        Universidad de Cambridge (Ket, Pet, First y Cae).
+                     </span>
+                     <br />
+                     <span className="indentation">
+                        Consideramos que la posibilidad que los alumnos tienen
+                        de poseer tales certificaciones son de vital importancia
+                        para incluir en sus CVs y para la obtención de puestos
+                        de trabajo meritorios en el futuro.
+                     </span>
                   </p>
                </div>
             </div>
