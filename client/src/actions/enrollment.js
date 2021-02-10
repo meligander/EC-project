@@ -1,5 +1,5 @@
 import moment from "moment";
-import axios from "axios";
+import api from "../utils/api";
 import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
@@ -22,7 +22,7 @@ import {
 
 export const loadEnrollment = (enrollment_id) => async (dispatch) => {
    try {
-      const res = await axios.get(`/api/enrollment/one/${enrollment_id}`);
+      const res = await api.get(`/enrollment/one/${enrollment_id}`);
       dispatch({
          type: ENROLLMENT_LOADED,
          payload: res.data,
@@ -41,7 +41,7 @@ export const loadEnrollment = (enrollment_id) => async (dispatch) => {
 
 export const getYearEnrollments = () => async (dispatch) => {
    try {
-      let res = await axios.get("/api/enrollment/year");
+      let res = await api.get("/enrollment/year");
 
       dispatch({
          type: YEARENROLLMENTS_LOADED,
@@ -73,7 +73,7 @@ export const loadEnrollments = (filterData) => async (dispatch) => {
             filter = filter + filternames[x] + "=" + filterData[name];
          }
       }
-      const res = await axios.get(`/api/enrollment?${filter}`);
+      const res = await api.get(`/enrollment?${filter}`);
       dispatch({
          type: ENROLLMENTS_LOADED,
          payload: { enrollments: res.data, type: "enrollments" },
@@ -111,7 +111,7 @@ export const loadStudentAttendance = (filterData) => async (dispatch) => {
          }
       }
 
-      const res = await axios.get(`/api/enrollment/absences?${filter}`);
+      const res = await api.get(`/enrollment/absences?${filter}`);
 
       dispatch({
          type: ENROLLMENTS_LOADED,
@@ -149,7 +149,7 @@ export const loadStudentAverage = (filterData) => async (dispatch) => {
          }
       }
 
-      const res = await axios.get(`/api/enrollment/average?${filter}`);
+      const res = await api.get(`/enrollment/average?${filter}`);
       dispatch({
          type: ENROLLMENTS_LOADED,
          payload: { enrollments: res.data, type: "average" },
@@ -190,9 +190,9 @@ export const registerEnrollment = (
    try {
       let res;
       if (!enroll_id) {
-         res = await axios.post("/api/enrollment", enrollment);
+         res = await api.post("/enrollment", enrollment);
       } else {
-         res = await axios.put(`/api/enrollment/${enroll_id}`, enrollment);
+         res = await api.put(`/enrollment/${enroll_id}`, enrollment);
       }
 
       dispatch({
@@ -253,7 +253,7 @@ export const deleteEnrollment = (enroll_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.delete(`/api/enrollment/${enroll_id}`);
+      await api.delete(`/enrollment/${enroll_id}`);
 
       dispatch({
          type: ENROLLMENT_DELETED,
@@ -287,31 +287,25 @@ export const enrollmentsPDF = (enrollments, average) => async (dispatch) => {
 
       switch (average) {
          case "enrollments":
-            await axios.post("/api/enrollment/create-list", enrollments);
+            await api.post("/enrollment/create-list", enrollments);
 
-            pdf = await axios.get("/api/enrollment/fetch-list", {
+            pdf = await api.get("/enrollment/fetch-list", {
                responseType: "blob",
             });
             name = "Inscripciones";
             break;
          case "averages":
-            await axios.post(
-               "/api/enrollment/averages/create-list",
-               enrollments
-            );
+            await api.post("/enrollment/averages/create-list", enrollments);
 
-            pdf = await axios.get("/api/enrollment/averages/fetch-list", {
+            pdf = await api.get("/enrollment/averages/fetch-list", {
                responseType: "blob",
             });
             name = "Mejores Promedios";
             break;
          case "attendances":
-            await axios.post(
-               "/api/enrollment/absences/create-list",
-               enrollments
-            );
+            await api.post("/enrollment/absences/create-list", enrollments);
 
-            pdf = await axios.get("/api/enrollment/absences/fetch-list", {
+            pdf = await api.get("/enrollment/absences/fetch-list", {
                responseType: "blob",
             });
             name = "Mejores Asistencias";

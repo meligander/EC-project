@@ -1,6 +1,6 @@
 import moment from "moment";
 import { saveAs } from "file-saver";
-import axios from "axios";
+import api from "../utils/api";
 
 import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
@@ -34,7 +34,7 @@ import {
 //Load User
 export const loadUser = (user_id) => async (dispatch) => {
    try {
-      const res = await axios.get(`/api/user/${user_id}`);
+      const res = await api.get(`/user/${user_id}`);
       dispatch({
          type: USER_LOADED,
          payload: res.data,
@@ -54,7 +54,7 @@ export const loadUser = (user_id) => async (dispatch) => {
 
 export const getStudentNumber = () => async (dispatch) => {
    try {
-      let res = await axios.get("/api/user/register/number");
+      let res = await api.get("/user/register/number");
       dispatch({
          type: STUDENTNUMBER_LOADED,
          payload: res.data,
@@ -78,11 +78,11 @@ export const getActiveUsers = (type) => async (dispatch) => {
       let payload = {};
 
       if (type === "student") {
-         res = await axios.get("/api/user?active=true&type=student");
+         res = await api.get("/user?active=true&type=student");
          payload.type = "activeStudents";
          payload.info = res.data.length;
       } else {
-         res = await axios.get("/api/user?active=true&type=teacher");
+         res = await api.get("/user?active=true&type=teacher");
          payload.type = "activeTeachers";
          payload.info = res.data.length;
       }
@@ -127,7 +127,7 @@ export const loadUsers = (
             filter = filter + filternames[x] + "=" + filterData[name];
          }
       }
-      let res = await axios.get(`/api/user?${filter}`);
+      let res = await api.get(`/user?${filter}`);
 
       dispatch({
          type: primary ? USERS_LOADED : USERSBK_LOADED,
@@ -161,7 +161,7 @@ export const loadUsers = (
 //Load Relatives
 export const loadRelatives = (user_id) => async (dispatch) => {
    try {
-      let res = await axios.get(`/api/user/tutor/${user_id}`);
+      let res = await api.get(`/user/tutor/${user_id}`);
 
       dispatch({
          type: USERSBK_LOADED,
@@ -195,10 +195,10 @@ export const registerUser = (formData, history, userToUpdate) => async (
    try {
       let res;
       if (!userToUpdate) {
-         res = await axios.post("/api/user", user);
+         res = await api.post("/user", user);
       } else {
          //Update user
-         await axios.put(`/api/user/${userToUpdate._id}`, user);
+         await api.put(`/user/${userToUpdate._id}`, user);
       }
 
       dispatch({
@@ -214,8 +214,10 @@ export const registerUser = (formData, history, userToUpdate) => async (
          )
       );
 
-      if (userToUpdate.type === "student") dispatch(clearClass());
-      if (userToUpdate.type === "teacher") dispatch(clearClasses());
+      if (userToUpdate && userToUpdate.type === "student")
+         dispatch(clearClass());
+      if (userToUpdate && userToUpdate.type === "teacher")
+         dispatch(clearClasses());
       dispatch(clearProfile());
 
       dispatch(clearOtherValues("activeStudents"));
@@ -262,7 +264,7 @@ export const updateCredentials = (formData, history, user_id) => async (
    }
 
    try {
-      let res = await axios.put(`/api/user/credentials/${user_id}`, user);
+      let res = await api.put(`/user/credentials/${user_id}`, user);
 
       dispatch({
          type: USER_UPDATED,
@@ -315,7 +317,7 @@ export const deleteUser = (user, history, userLogged_id) => async (
          history.push(`/dashboard/${userLogged_id}`);
       }
 
-      await axios.delete(`/api/user/${user._id}/${user.type}`);
+      await api.delete(`/user/${user._id}/${user.type}`);
 
       dispatch({
          type: USER_DELETED,
@@ -345,9 +347,9 @@ export const userPDF = (users, userSearchType) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.post("/api/user/create-list", { users, userSearchType });
+      await api.post("/user/create-list", { users, userSearchType });
 
-      const pdf = await axios.get("/api/user/lista/fetch-list", {
+      const pdf = await api.get("/user/lista/fetch-list", {
          responseType: "blob",
       });
 

@@ -1,5 +1,5 @@
 import moment from "moment";
-import axios from "axios";
+import api from "../utils/api";
 import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
@@ -22,7 +22,7 @@ import {
 
 export const loadUsersGrades = (user_id, class_id) => async (dispatch) => {
    try {
-      const res = await axios.get(`/api/grade/student/${class_id}/${user_id}`);
+      const res = await api.get(`/grade/student/${class_id}/${user_id}`);
       dispatch({
          type: STUDENTGRADES_LOADED,
          payload: res.data,
@@ -41,7 +41,7 @@ export const loadUsersGrades = (user_id, class_id) => async (dispatch) => {
 
 export const loadGrades = (class_id) => async (dispatch) => {
    try {
-      const res = await axios.get(`/api/grade/${class_id}`);
+      const res = await api.get(`/grade/${class_id}`);
       dispatch({
          type: GRADES_LOADED,
          payload: res.data,
@@ -60,7 +60,7 @@ export const loadGrades = (class_id) => async (dispatch) => {
 
 export const loadGradeTypes = () => async (dispatch) => {
    try {
-      const res = await axios.get("/api/grade-type");
+      const res = await api.get("/grade-type");
       dispatch({
          type: GRADETYPES_LOADED,
          payload: res.data,
@@ -79,7 +79,7 @@ export const loadGradeTypes = () => async (dispatch) => {
 
 export const loadGradeTypesByCategory = (category_id) => async (dispatch) => {
    try {
-      const res = await axios.get(`/api/grade-type/category/${category_id}`);
+      const res = await api.get(`/grade-type/category/${category_id}`);
       dispatch({
          type: GRADETYPES_LOADED,
          payload: res.data,
@@ -105,7 +105,7 @@ export const registerNewGrade = (formData) => async (dispatch) => {
             newGrade[prop] = formData[prop];
          }
       }
-      const res = await axios.post("/api/grade", newGrade);
+      const res = await api.post("/grade", newGrade);
 
       dispatch({
          type: NEWGRADE_REGISTERED,
@@ -134,7 +134,7 @@ export const updateGrades = (formData, history, class_id) => async (
 ) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      const res = await axios.post("/api/grade/period", formData);
+      const res = await api.post("/grade/period", formData);
       dispatch({
          type: GRADES_UPDATED,
          payload: res.data,
@@ -168,8 +168,8 @@ export const deleteGrades = (grade) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      const res = await axios.delete(
-         `/api/grade/${grade.gradetype}/${grade.classroom}/${grade.period}`
+      const res = await api.delete(
+         `/grade/${grade.gradetype}/${grade.classroom}/${grade.period}`
       );
 
       dispatch({
@@ -199,7 +199,7 @@ export const updateGradeTypes = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      const res = await axios.post("/api/grade-type", formData);
+      const res = await api.post("/grade-type", formData);
 
       dispatch({
          type: GRADETYPES_UPDATED,
@@ -229,7 +229,7 @@ export const deleteGradeType = (toDelete) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.delete(`/api/grade-type/${toDelete}`);
+      await api.delete(`/grade-type/${toDelete}`);
 
       dispatch({
          type: GRADETYPE_DELETED,
@@ -273,10 +273,10 @@ export const gradesPDF = (info, classInfo, type) => async (dispatch) => {
 
       switch (type) {
          case "bimester":
-            await axios.post("/api/grade/create-list", tableInfo);
+            await api.post("/grade/create-list", tableInfo);
             break;
          case "all":
-            await axios.post("/api/grade/all/create-list", tableInfo);
+            await api.post("/grade/all/create-list", tableInfo);
             break;
          case "report-cards":
             for (let x = 0; x < classInfo.students.length; x++) {
@@ -299,9 +299,9 @@ export const gradesPDF = (info, classInfo, type) => async (dispatch) => {
                   },
                };
 
-               await axios.post("/api/grade/report-card", reportInfo);
+               await api.post("/grade/report-card", reportInfo);
 
-               pdf = await axios.get("/api/grade/pdf/report-card", {
+               pdf = await api.get("/grade/pdf/report-card", {
                   responseType: "blob",
                });
 
@@ -323,7 +323,7 @@ export const gradesPDF = (info, classInfo, type) => async (dispatch) => {
             classInfo.teacher.lastname + ", " + classInfo.teacher.name
          }  ${date}.pdf`;
 
-         pdf = await axios.get("/api/grade/list/fetch-list", {
+         pdf = await api.get("/grade/list/fetch-list", {
             responseType: "blob",
          });
 
@@ -375,15 +375,12 @@ export const certificatePDF = (
          };
 
          if (periodNumber === 6) {
-            await axios.post(
-               "/api/grade/certificate-cambridge/create-list",
-               info
-            );
+            await api.post("/grade/certificate-cambridge/create-list", info);
          } else {
-            await axios.post("/api/grade/certificate/create-list", info);
+            await api.post("/grade/certificate/create-list", info);
          }
 
-         const pdf = await axios.get("/api/grade/certificate/fetch-list", {
+         const pdf = await api.get("/grade/certificate/fetch-list", {
             responseType: "blob",
          });
 

@@ -1,5 +1,5 @@
 import moment from "moment";
-import axios from "axios";
+import api from "../utils/api";
 import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
@@ -25,7 +25,7 @@ import {
 
 export const loadInstallment = (installment_id) => async (dispatch) => {
    try {
-      const res = await axios.get(`/api/installment/${installment_id}`);
+      const res = await api.get(`/installment/${installment_id}`);
       dispatch({
          type: INSTALLMENT_LOADED,
          payload: res.data,
@@ -44,7 +44,7 @@ export const loadInstallment = (installment_id) => async (dispatch) => {
 
 export const getTotalDebt = () => async (dispatch) => {
    try {
-      let res = await axios.get("/api/installment/month/debts");
+      let res = await api.get("/installment/month/debts");
 
       dispatch({
          type: TOTALDEBT_LOADED,
@@ -69,9 +69,7 @@ export const loadStudentInstallments = (user_id, admin = false) => async (
    //admin: if is for the dashboard, dont do it... only when is the admin loading the installments
    if (admin) dispatch(updateLoadingSpinner(true));
    try {
-      const res = await axios.get(
-         `/api/installment/student/${user_id}/${admin}`
-      );
+      const res = await api.get(`/installment/student/${user_id}/${admin}`);
       dispatch({
          type: STUDENTINSTALLMENTS_LOADED,
          payload: res.data,
@@ -103,7 +101,7 @@ export const loadInstallments = (filterData) => async (dispatch) => {
             filter = filter + filternames[x] + "=" + filterData[name];
          }
       }
-      const res = await axios.get(`/api/installment?${filter}`);
+      const res = await api.get(`/installment?${filter}`);
       dispatch({
          type: INSTALLMENTS_LOADED,
          payload: res.data,
@@ -151,10 +149,10 @@ export const updateIntallment = (formData, history, user_id, inst_id) => async (
    try {
       let res;
       if (!inst_id) {
-         res = await axios.post("/api/installment", installment);
+         res = await api.post("/installment", installment);
       } else {
          //Update installment
-         res = await axios.put(`/api/installment/${inst_id}`, installment);
+         res = await api.put(`/installment/${inst_id}`, installment);
       }
       dispatch({
          type: inst_id ? INSTALLMENT_UPDATED : INSTALLMENT_REGISTERED,
@@ -197,7 +195,7 @@ export const updateIntallment = (formData, history, user_id, inst_id) => async (
 
 export const updateExpiredIntallments = () => async (dispatch) => {
    try {
-      await axios.put("/api/installment");
+      await api.put("/installment");
 
       dispatch({
          type: EXPIREDINSTALLMENTS_UPDATED,
@@ -224,7 +222,7 @@ export const deleteInstallment = (inst_id, history, user_id) => async (
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.delete(`/api/installment/${inst_id}`);
+      await api.delete(`/installment/${inst_id}`);
 
       dispatch({
          type: INSTALLMENT_DELETED,
@@ -280,9 +278,9 @@ export const installmentsPDF = (installments) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.post("/api/installment/create-list", installments);
+      await api.post("/installment/create-list", installments);
 
-      const pdf = await axios.get("/api/installment/list/fetch-list", {
+      const pdf = await api.get("/installment/list/fetch-list", {
          responseType: "blob",
       });
 

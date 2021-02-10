@@ -1,5 +1,5 @@
 import moment from "moment";
-import axios from "axios";
+import api from "../utils/api";
 import { saveAs } from "file-saver";
 
 import { updateLoadingSpinner } from "./mixvalues";
@@ -32,7 +32,7 @@ export const loadClass = (class_id) => async (dispatch) => {
             payload: null,
          });
       } else {
-         const res = await axios.get(`/api/class/${class_id}`);
+         const res = await api.get(`/class/${class_id}`);
          dispatch({
             type: CLASS_LOADED,
             payload: res.data,
@@ -53,7 +53,7 @@ export const loadClass = (class_id) => async (dispatch) => {
 
 export const getActiveClasses = () => async (dispatch) => {
    try {
-      let res = await axios.get("/api/class");
+      let res = await api.get("/class");
 
       dispatch({
          type: ACTIVECLASSES_LOADED,
@@ -74,7 +74,7 @@ export const getActiveClasses = () => async (dispatch) => {
 
 export const loadStudentClass = (user_id) => async (dispatch) => {
    try {
-      const res = await axios.get(`/api/class/student/${user_id}`);
+      const res = await api.get(`/class/student/${user_id}`);
       dispatch({
          type: CLASS_LOADED,
          payload: res.data,
@@ -94,9 +94,7 @@ export const loadStudentClass = (user_id) => async (dispatch) => {
 
 export const loadClassStudents = (class_id) => async (dispatch) => {
    try {
-      const res = await axios.get(
-         `/api/user?type=student&classroom=${class_id}`
-      );
+      const res = await api.get(`/user?type=student&classroom=${class_id}`);
       dispatch({
          type: CLASSSTUDENTS_LOADED,
          payload: res.data,
@@ -127,7 +125,7 @@ export const loadClasses = (filterData) => async (dispatch) => {
    }
 
    try {
-      const res = await axios.get(`/api/class?${filter}`);
+      const res = await api.get(`/class?${filter}`);
 
       dispatch({
          type: CLASSES_LOADED,
@@ -166,9 +164,9 @@ export const registerUpdateClass = (formData, history, class_id) => async (
    try {
       let res = {};
       if (!class_id) {
-         res = await axios.post("/api/class", newClass);
+         res = await api.post("/class", newClass);
       } else {
-         res = await axios.put(`/api/class/${class_id}`, formData);
+         res = await api.put(`/class/${class_id}`, formData);
       }
 
       dispatch({
@@ -240,7 +238,7 @@ export const deleteClass = (class_id, history) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.delete(`/api/class/${class_id}`);
+      await api.delete(`/class/${class_id}`);
 
       dispatch({
          type: CLASS_DELETED,
@@ -278,17 +276,17 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
 
       switch (type) {
          case "classes":
-            await axios.post("/api/class/create-list", classInfo);
+            await api.post("/class/create-list", classInfo);
 
-            pdf = await axios.get("/api/class/list/fetch-list", {
+            pdf = await api.get("/class/list/fetch-list", {
                responseType: "blob",
             });
             name = "Clases";
             break;
          case "class":
-            await axios.post("/api/class/oneclass/create-list", classInfo);
+            await api.post("/class/oneclass/create-list", classInfo);
 
-            pdf = await axios.get("/api/class/oneclass/fetch-list", {
+            pdf = await api.get("/class/oneclass/fetch-list", {
                responseType: "blob",
             });
             name = `Clase ${
@@ -296,9 +294,9 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
             } ${classInfo.category.name} `;
             break;
          case "blank":
-            await axios.post("/api/class/blank/create-list", classInfo);
+            await api.post("/class/blank/create-list", classInfo);
 
-            pdf = await axios.get("/api/class/blank/fetch-list", {
+            pdf = await api.get("/class/blank/fetch-list", {
                responseType: "blob",
             });
             name = `${classInfo.category.name} de ${

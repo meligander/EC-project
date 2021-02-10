@@ -1,5 +1,5 @@
 import moment from "moment";
-import axios from "axios";
+import api from "../utils/api";
 import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
@@ -16,7 +16,7 @@ import {
 
 export const loadCategories = () => async (dispatch) => {
    try {
-      const res = await axios.get("/api/category");
+      const res = await api.get("/category");
       dispatch({
          type: CATEGORIES_LOADED,
          payload: res.data,
@@ -39,7 +39,7 @@ export const updateCategories = (formData, history, user_id) => async (
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.put("/api/category", formData);
+      await api.put("/category", formData);
 
       dispatch({
          type: CATEGORIES_UPDATED,
@@ -85,9 +85,9 @@ export const categoriesPDF = (categories) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.post("/api/category/create-list", categories);
+      await api.post("/category/create-list", categories);
 
-      const pdf = await axios.get("/api/category/fetch-list", {
+      const pdf = await api.get("/category/fetch-list", {
          responseType: "blob",
       });
 

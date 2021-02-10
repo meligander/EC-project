@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../utils/api";
 
 import { setAlert } from "./alert";
 import { changePage } from "./navbar";
@@ -19,7 +19,7 @@ import {
 
 export const loadUser = () => async (dispatch) => {
    try {
-      const res = await axios.get("/api/auth");
+      const res = await api.get("/auth");
       dispatch({
          type: USERAUTH_LOADED,
          payload: res.data,
@@ -41,7 +41,7 @@ export const loginUser = (formData) => async (dispatch) => {
    }
 
    try {
-      const res = await axios.post("/api/auth", user);
+      const res = await api.post("/auth", user);
       dispatch({
          type: LOGIN_SUCCESS,
          payload: res.data,

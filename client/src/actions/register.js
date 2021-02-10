@@ -1,5 +1,5 @@
 import moment from "moment";
-import axios from "axios";
+import api from "../utils/api";
 import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
@@ -19,7 +19,7 @@ import {
 
 export const loadRegister = () => async (dispatch) => {
    try {
-      const res = await axios.get(`/api/register/last`);
+      const res = await api.get(`/register/last`);
       dispatch({
          type: REGISTER_LOADED,
          payload: res.data,
@@ -49,7 +49,7 @@ export const loadRegisters = (filterData) => async (dispatch) => {
       }
    }
    try {
-      const res = await axios.get(`/api/register?${filter}`);
+      const res = await api.get(`/register?${filter}`);
       dispatch({
          type: REGISTERS_LOADED,
          payload: res.data,
@@ -84,7 +84,7 @@ export const createRegister = (formData, user_id, history) => async (
       }
    }
    try {
-      await axios.post("/api/register", register);
+      await api.post("/register", register);
 
       dispatch({ type: NEWREGISTER_ADDED });
       dispatch(clearRegisters());
@@ -136,7 +136,7 @@ export const closeRegister = (formData, user_id, history) => async (
             register[prop] = formData[prop];
       }
 
-      await axios.put("/api/register", register);
+      await api.put("/register", register);
 
       dispatch({
          type: REGISTER_CLOSED,
@@ -168,7 +168,7 @@ export const deleteRegister = (register_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.delete(`/api/register/${register_id}`);
+      await api.delete(`/register/${register_id}`);
 
       dispatch({
          type: REGISTER_DELETED,
@@ -199,9 +199,9 @@ export const registerPDF = (registers) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.post("/api/register/create-list", registers);
+      await api.post("/register/create-list", registers);
 
-      const pdf = await axios.get("/api/register/fetch-list", {
+      const pdf = await api.get("/register/fetch-list", {
          responseType: "blob",
       });
 

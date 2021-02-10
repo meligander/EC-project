@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../utils/api";
 import moment from "moment";
 import { saveAs } from "file-saver";
 
@@ -22,7 +22,7 @@ import {
 
 export const loadInvoice = (invoice_id) => async (dispatch) => {
    try {
-      const res = await axios.get(`/api/invoice/${invoice_id}`);
+      const res = await api.get(`/invoice/${invoice_id}`);
 
       dispatch({
          type: INVOICE_LOADED,
@@ -42,7 +42,7 @@ export const loadInvoice = (invoice_id) => async (dispatch) => {
 
 export const getInvoiceNumber = () => async (dispatch) => {
    try {
-      let res = await axios.get("/api/invoice/last/invoiceid");
+      let res = await api.get("/invoice/last/invoiceid");
 
       dispatch({
          type: INVOICENUMBER_LOADED,
@@ -74,7 +74,7 @@ export const loadInvoices = (filterData) => async (dispatch) => {
             filter = filter + filternames[x] + "=" + filterData[name];
          }
       }
-      const res = await axios.get(`/api/invoice?${filter}`);
+      const res = await api.get(`/invoice?${filter}`);
       dispatch({
          type: INVOICES_LOADED,
          payload: res.data,
@@ -112,7 +112,7 @@ export const registerInvoice = (
    }
 
    try {
-      await axios.post("/api/invoice", invoice);
+      await api.post("/invoice", invoice);
 
       dispatch({
          type: INVOICE_REGISTERED,
@@ -159,7 +159,7 @@ export const deleteInvoice = (invoice_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.delete(`/api/invoice/${invoice_id}`);
+      await api.delete(`/invoice/${invoice_id}`);
 
       dispatch({
          type: INVOICE_DELETED,
@@ -192,9 +192,9 @@ export const invoicesPDF = (invoices) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.post("/api/invoice/create-list", invoices);
+      await api.post("/invoice/create-list", invoices);
 
-      const pdf = await axios.get("/api/invoice/list/fetch-list", {
+      const pdf = await api.get("/invoice/list/fetch-list", {
          responseType: "blob",
       });
 
@@ -232,9 +232,9 @@ export const invoicePDF = (invoice, remaining) => async (dispatch) => {
          : `${invoice.lastname}, ${invoice.name}`;
 
    try {
-      await axios.post("/api/invoice/create-invoice", { invoice, remaining });
+      await api.post("/invoice/create-invoice", { invoice, remaining });
 
-      const pdf = await axios.get("/api/invoice/for-print/fetch-invoice", {
+      const pdf = await api.get("/invoice/for-print/fetch-invoice", {
          responseType: "blob",
       });
 

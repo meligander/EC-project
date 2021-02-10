@@ -1,5 +1,5 @@
 import moment from "moment";
-import axios from "axios";
+import api from "../utils/api";
 import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
@@ -19,9 +19,7 @@ export const loadStudentAttendance = (user_id, class_id) => async (
    dispatch
 ) => {
    try {
-      const res = await axios.get(
-         `/api/attendance/student/${class_id}/${user_id}`
-      );
+      const res = await api.get(`/attendance/student/${class_id}/${user_id}`);
       dispatch({
          type: STUDENTATTENDANCES_LOADED,
          payload: res.data,
@@ -40,7 +38,7 @@ export const loadStudentAttendance = (user_id, class_id) => async (
 
 export const loadAttendances = (class_id) => async (dispatch) => {
    try {
-      const res = await axios.get(`/api/attendance/${class_id}`);
+      const res = await api.get(`/attendance/${class_id}`);
       dispatch({
          type: ATTENDANCES_LOADED,
          payload: res.data,
@@ -68,9 +66,8 @@ export const registerNewDate = (formData, addBimester) => async (dispatch) => {
       }
 
       let res;
-      if (addBimester)
-         res = await axios.post("/api/attendance/bimester", newDate);
-      else res = await axios.post("/api/attendance", newDate);
+      if (addBimester) res = await api.post("/attendance/bimester", newDate);
+      else res = await api.post("/attendance", newDate);
 
       dispatch({
          type: NEWDATE_REGISTERED,
@@ -106,7 +103,7 @@ export const updateAttendances = (formData, history, class_id) => async (
 ) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      await axios.post("/api/attendance/period", formData);
+      await api.post("/attendance/period", formData);
       dispatch({
          type: ATTENDANCES_UPDATED,
       });
@@ -134,9 +131,7 @@ export const updateAttendances = (formData, history, class_id) => async (
 export const deleteDate = (date, classroom) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      const res = await axios.delete(
-         `/api/attendance/date/${date}/${classroom}`
-      );
+      const res = await api.delete(`/attendance/date/${date}/${classroom}`);
 
       dispatch({
          type: DATES_DELETED,
@@ -178,9 +173,9 @@ export const attendancesPDF = (
    };
 
    try {
-      await axios.post("/api/attendance/create-list", tableInfo);
+      await api.post("/attendance/create-list", tableInfo);
 
-      const pdf = await axios.get("/api/attendance/list/fetch-list", {
+      const pdf = await api.get("/attendance/list/fetch-list", {
          responseType: "blob",
       });
 

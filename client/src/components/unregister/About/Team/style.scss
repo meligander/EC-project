@@ -109,12 +109,12 @@
          backface-visibility: hidden;
       }
 
-      &:hover &-caption {
+      &:hover .person-caption {
          opacity: 1;
          transform: translate(-50%, -50%);
       }
 
-      &:hover &-img {
+      &:hover .person-img {
          transform: /* translateX(-4rem) */ scale(1);
          filter: blur(3px) brightness(80%);
       }

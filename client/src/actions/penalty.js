@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../utils/api";
 
 import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
@@ -12,7 +12,7 @@ import {
 
 export const loadPenalty = () => async (dispatch) => {
    try {
-      const res = await axios.get("/api/penalty/last");
+      const res = await api.get("/penalty/last");
       dispatch({
          type: PENALTY_LOADED,
          payload: res.data,
@@ -34,7 +34,7 @@ export const updatePenalty = (penalty) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.post("/api/penalty", penalty);
+      await api.post("/penalty", penalty);
       dispatch({
          type: PENALTY_REGISTERED,
       });

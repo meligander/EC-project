@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../utils/api";
 
 import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
@@ -20,7 +20,7 @@ import {
 //Get all posts
 export const loadPosts = (class_id) => async (dispatch) => {
    try {
-      let res = await axios.get(`/api/post/class/${class_id}`);
+      let res = await api.get(`/post/class/${class_id}`);
 
       dispatch({
          type: POSTS_LOADED,
@@ -42,9 +42,9 @@ export const getUnseenPosts = (class_id = false) => async (dispatch) => {
    try {
       let res = [];
       if (!class_id) {
-         res = await axios.get(`/api/post/unseen/teacher`);
+         res = await api.get(`/post/unseen/teacher`);
       } else {
-         res = await axios.get(`/api/post/unseen/class/${class_id}`);
+         res = await api.get(`/post/unseen/class/${class_id}`);
       }
       dispatch({
          type: !class_id ? ALLUNSEENPOSTS_CHANGED : UNSEENPOSTS_CHANGED,
@@ -74,7 +74,7 @@ export const addPost = (formData, class_id) => async (dispatch) => {
    }
 
    try {
-      const res = await axios.post(`/api/post/${class_id}`, post);
+      const res = await api.post(`/post/${class_id}`, post);
 
       dispatch({
          type: POST_ADDED,
@@ -116,7 +116,7 @@ export const deletePost = (post_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.delete(`/api/post/${post_id}`);
+      await api.delete(`/post/${post_id}`);
 
       dispatch({
          type: POST_DELETED,
@@ -157,7 +157,7 @@ export const addComment = (post_id, formData, screen) => async (dispatch) => {
    }
 
    try {
-      const res = await axios.post(`/api/post/comment/${post_id}`, comment);
+      const res = await api.post(`/post/comment/${post_id}`, comment);
 
       dispatch({
          type: COMMENT_ADDED,
@@ -200,9 +200,7 @@ export const deleteComment = (post_id, comment_id, screen) => async (
 ) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      const res = await axios.delete(
-         `/api/post/comment/${post_id}/${comment_id}`
-      );
+      const res = await api.delete(`/post/comment/${post_id}/${comment_id}`);
 
       dispatch({
          type: COMMENT_DELETED,
@@ -231,7 +229,7 @@ export const deleteComment = (post_id, comment_id, screen) => async (
 export const addRemoveLike = (post_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      const res = await axios.put(`/api/post/like/${post_id}`);
+      const res = await api.put(`/post/like/${post_id}`);
 
       dispatch({
          type: LIKES_UPDATED,
@@ -255,7 +253,7 @@ export const addRemoveLike = (post_id) => async (dispatch) => {
 
 export const seenPost = (post_id, data) => async (dispatch) => {
    try {
-      const res = await axios.put(`/api/post/seen/${post_id}`, data);
+      const res = await api.put(`/post/seen/${post_id}`, data);
 
       dispatch({
          type: POST_SEEN,

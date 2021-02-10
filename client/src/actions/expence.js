@@ -1,5 +1,5 @@
 import moment from "moment";
-import axios from "axios";
+import api from "../utils/api";
 import { saveAs } from "file-saver";
 
 import { updateLoadingSpinner } from "./mixvalues";
@@ -36,7 +36,7 @@ export const loadTransactions = (filterData) => async (dispatch) => {
             filter = filter + filternames[x] + "=" + filterData[name];
          }
       }
-      const res = await axios.get(`/api/expence?${filter}`);
+      const res = await api.get(`/expence?${filter}`);
       dispatch({
          type: TRANSACTIONS_LOADED,
          payload: res.data,
@@ -61,7 +61,7 @@ export const loadTransactions = (filterData) => async (dispatch) => {
 
 export const loadExpenceTypes = () => async (dispatch) => {
    try {
-      const res = await axios.get("/api/expence-type");
+      const res = await api.get("/expence-type");
       dispatch({
          type: EXPENCETYPES_LOADED,
          payload: res.data,
@@ -92,7 +92,7 @@ export const registerExpence = (formData, history, user_id) => async (
    }
 
    try {
-      await axios.post("/api/expence", expence);
+      await api.post("/expence", expence);
 
       dispatch({
          type: EXPENCE_REGISTERED,
@@ -137,7 +137,7 @@ export const deleteExpence = (expence_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.delete(`/api/expence/${expence_id}`);
+      await api.delete(`/expence/${expence_id}`);
 
       dispatch({
          type: EXPENCE_DELETED,
@@ -169,7 +169,7 @@ export const updateExpenceTypes = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      const res = await axios.post("/api/expence-type", formData);
+      const res = await api.post("/expence-type", formData);
 
       dispatch({
          type: EXPENCETYPES_UPDATED,
@@ -199,7 +199,7 @@ export const deleteExpenceType = (toDelete) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.delete(`/api/expence-type/${toDelete}`);
+      await api.delete(`/expence-type/${toDelete}`);
 
       dispatch({
          type: EXPENCETYPE_DELETED,
@@ -228,9 +228,9 @@ export const deleteExpenceType = (toDelete) => async (dispatch) => {
 export const transactionsPDF = (transactions) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      await axios.post("/api/expence/create-list", transactions);
+      await api.post("/expence/create-list", transactions);
 
-      const pdf = await axios.get("/api/expence/fetch-list", {
+      const pdf = await api.get("/expence/fetch-list", {
          responseType: "blob",
       });
 

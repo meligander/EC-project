@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../utils/api";
 
 import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
@@ -14,7 +14,7 @@ import {
 
 export const loadTowns = () => async (dispatch) => {
    try {
-      const res = await axios.get("/api/town");
+      const res = await api.get("/town");
       dispatch({
          type: TOWNS_LOADED,
          payload: res.data,
@@ -36,7 +36,7 @@ export const updateTowns = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      const res = await axios.post("/api/town", formData);
+      const res = await api.post("/town", formData);
 
       dispatch({
          type: TOWNS_UPDATED,
@@ -68,7 +68,7 @@ export const deleteTown = (toDelete) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.delete(`/api/town/${toDelete}`);
+      await api.delete(`/town/${toDelete}`);
 
       dispatch(clearNeighbourhoods());
 

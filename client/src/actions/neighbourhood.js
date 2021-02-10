@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../utils/api";
 
 import { updateLoadingSpinner } from "./mixvalues";
 import { setAlert } from "./alert";
@@ -13,7 +13,7 @@ import {
 
 export const loadNeighbourhoods = () => async (dispatch) => {
    try {
-      const res = await axios.get("/api/neighbourhood");
+      const res = await api.get("/neighbourhood");
       dispatch({
          type: NEIGHBOURHOODS_LOADED,
          payload: res.data,
@@ -34,7 +34,7 @@ export const loadNeighbourhoods = () => async (dispatch) => {
 export const loadTownNeighbourhoods = (town_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      const res = await axios.get(`/api/neighbourhood/town/${town_id}`);
+      const res = await api.get(`/neighbourhood/town/${town_id}`);
       dispatch({
          type: NEIGHBOURHOODS_LOADED,
          payload: res.data,
@@ -58,7 +58,7 @@ export const updateNeighbourhoods = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      const res = await axios.post("/api/neighbourhood", formData);
+      const res = await api.post("/neighbourhood", formData);
 
       dispatch({
          type: NEIGHBOURHOODS_UPDATED,
@@ -88,7 +88,7 @@ export const deleteNeighbourhood = (toDelete) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await axios.delete(`/api/neighbourhood/${toDelete}`);
+      await api.delete(`/neighbourhood/${toDelete}`);
 
       dispatch({
          type: NEIGHBOURHOOD_DELETED,
