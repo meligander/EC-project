@@ -4,6 +4,9 @@ const path = require("path");
 const pdf = require("html-pdf");
 const router = express.Router();
 
+//Sending Email
+const emailSender = require("../../config/emailSender");
+
 //PDF Templates
 const pdfTemplate = require("../../templates/list");
 
@@ -376,6 +379,25 @@ router.put("/", auth, async (req, res) => {
          for (let x = 0; x < installments.length; x++) {
             const chargeDay =
                installments[x].student.chargeday - lessDay ? 1 : 0;
+
+            if (
+               chargeDay - 3 <= day &&
+               !installments[x].emailSent &&
+               !installments[x].expired
+            ) {
+               emailSender(
+                  installments[x].student.email,
+                  "Cuota por vencer",
+                  `La cuota del corriente mes está proxima a su vencimiento.
+                  <br/>
+                  El día ${chargeDay} se le aplicará un recargo del ${penalty.percentage}%.`
+               );
+               await Installment.findOneAndUpdate(
+                  { _id: installments[x].id },
+                  { emailSent: true }
+               );
+            }
+
             if (
                (installments[x].year < year ||
                   installments[x].number < month ||

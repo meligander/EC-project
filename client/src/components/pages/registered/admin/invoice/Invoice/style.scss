@@ -1,0 +1,68 @@
+@import "../../../../../../style/abstract.scss";
+
+.invoice {
+   border: 1px solid $black-color;
+   padding: 5rem;
+
+   @include respond(phone) {
+      padding: 2rem;
+   }
+
+   .row {
+      justify-content: space-between;
+      align-items: flex-end;
+
+      @include respond(phone) {
+         align-items: start;
+      }
+
+      .logo {
+         img {
+            width: 16rem;
+            height: 16rem;
+         }
+
+         @include respond(phone) {
+            order: -1;
+            margin-bottom: 4rem;
+            align-self: center;
+         }
+      }
+
+      .invoice-info {
+         margin-right: 3rem;
+
+         @include respond(phone) {
+            margin: 2rem 0;
+            order: -1;
+         }
+      }
+   }
+
+   .details {
+      min-height: 20rem;
+
+      table {
+         th,
+         td {
+            border: 1px solid $black-color;
+         }
+
+         tr {
+            background-color: inherit;
+         }
+
+         th {
+            background-color: lighten($secondary-color, 20%);
+            color: $black-color;
+         }
+      }
+   }
+
+   .value {
+      width: 10rem;
+      text-align: end;
+      border: none;
+      background-color: $white-color;
+   }
+}

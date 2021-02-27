@@ -9,9 +9,9 @@ import setAuthToken from "./utils/setAuthToken";
 import { loadUser } from "./actions/auth";
 
 //Unregister Pages
-import About from "./components/unregister/About";
-import Landing from "./components/unregister/Landing";
-import Contact from "./components/unregister/Contact";
+import About from "./components/pages/guest/About";
+import Landing from "./components/pages/guest/Landing";
+import Contact from "./components/pages/guest/Contact";
 
 //Layout Items
 import Navbar from "./components/layouts/Navbar";

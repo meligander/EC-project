@@ -1,0 +1,32 @@
+@import "../../../../../../../style/abstract.scss";
+
+.register-tab {
+   .form {
+      width: 100%;
+   }
+
+   table td {
+      padding: 2rem 1rem;
+
+      .checkbox-lbl {
+         margin: 0;
+      }
+
+      @include respond(small-phone) {
+         padding: 1rem 0.5rem;
+      }
+
+      &:last-child {
+         width: 25%;
+         font-size: $default-font-size;
+
+         @include respond(small-phone) {
+            width: 31%;
+
+            .checkbox-lbl {
+               padding: 0.7rem 1.3rem 0 2.5rem;
+            }
+         }
+      }
+   }
+}

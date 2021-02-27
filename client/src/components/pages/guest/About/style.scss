@@ -1,0 +1,131 @@
+@import "../../../../style/abstract.scss";
+
+.header {
+   height: 98vh;
+   display: flex;
+   padding-top: 5.4rem;
+   justify-content: center;
+   align-items: center;
+   text-align: center;
+   background-image: linear-gradient(
+         to right bottom,
+         rgba($primary-color, 0.75),
+         rgba($dark-color, 0.75)
+      ),
+      url(../../../../img/claseAfuer.jpg);
+   background-size: cover;
+   background-position: center;
+   -webkit-clip-path: polygon(0 0, 100% 0, 100% 85vh, 0 100%);
+   clip-path: polygon(0 0, 100% 0, 100% 85vh, 0 100%);
+
+   h2,
+   p {
+      padding: 0 5rem;
+   }
+
+   h2 {
+      animation: moveInLeft 1s ease-out;
+      margin-bottom: 4rem;
+   }
+   p {
+      animation: moveInRight 1s ease-out;
+      line-height: 3.5rem;
+      margin-bottom: 4rem;
+   }
+}
+
+.section {
+   &-history {
+      padding: 7rem 0 6rem 0;
+
+      .history {
+         &-container {
+            background-image: linear-gradient(
+                  103deg,
+                  $white-color 0%,
+                  $white-color 60%,
+                  transparent 50%
+               ),
+               url(../../../../img/viejo.jpg);
+            background-size: contain;
+            background-position: right top;
+            border-radius: 3px;
+            box-shadow: 0 1.5rem 4rem rgba($black-color, 0.5);
+
+            @include respond(phone) {
+               background-position: 50% 50%;
+               background-repeat: no-repeat;
+               background-image: linear-gradient(
+                     to right,
+                     rgba($white-color, 0.9) 0%,
+                     rgba($white-color, 0.9) 100%
+                  ),
+                  url(../../../../img/viejo.jpg);
+            }
+
+            @include respond(tab-port) {
+               background-size: cover;
+            }
+         }
+
+         &-text {
+            padding: 5rem 7rem 5rem 6rem;
+            width: 60%;
+
+            @include respond(phone) {
+               padding: 5rem;
+               width: 100%;
+
+               .text-moved-right {
+                  margin: 0 !important;
+               }
+            }
+         }
+      }
+   }
+
+   &-cambridge {
+      margin-top: 4.5rem;
+      padding: 15rem 4rem;
+      background-image: linear-gradient(
+            to right bottom,
+            rgba($primary-color, 0.75),
+            rgba($dark-color, 0.75)
+         ),
+         url(../../../../img/cambr2.jpg);
+      background-size: cover;
+      transform: skewY(-4deg);
+
+      @include respond(phone) {
+         padding: 8rem 4rem;
+      }
+
+      & > * {
+         transform: skewY(4deg);
+      }
+
+      .cmb-img {
+         width: 40rem;
+
+         @include respond(phone) {
+            order: 2;
+            width: 30rem;
+         }
+      }
+
+      .cmb-text {
+         h2 {
+            text-align: right;
+         }
+
+         text-align: center;
+         padding-left: 4rem;
+
+         @include respond(phone) {
+            text-align: left;
+            margin-bottom: 3rem;
+            padding: 2rem;
+         }
+      }
+   }
+}

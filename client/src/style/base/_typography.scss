@@ -56,26 +56,34 @@ body {
    }
 }
 
-.text-primary {
-   color: $primary-color;
-}
-.text-lighter-primary {
-   color: lighten($primary-color, 30%);
-}
-.text-secondary {
-   color: $secondary-color;
-}
-.text-dark {
-   color: $dark-color;
-}
-.text-light {
-   color: $light-color;
-}
-.text-danger {
-   color: $danger-color;
-}
-.text-white {
-   color: $white-color;
+.text {
+   &-primary {
+      color: $primary-color;
+   }
+
+   &-lighter-primary {
+      color: lighten($primary-color, 30%);
+   }
+
+   &-secondary {
+      color: $secondary-color;
+   }
+
+   &-dark {
+      color: $dark-color;
+   }
+
+   &-light {
+      color: $light-color;
+   }
+
+   &-danger {
+      color: $danger-color;
+   }
+
+   &-white {
+      color: $white-color;
+   }
 }
 
 button,

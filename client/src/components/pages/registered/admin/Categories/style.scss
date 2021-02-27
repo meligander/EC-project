@@ -1,0 +1,19 @@
+@import "../../../../../style/abstract.scss";
+
+table.category {
+   th:last-child,
+   td:last-child {
+      width: 40% !important;
+      font-size: 2.1rem !important;
+   }
+
+   @include respond(small-phone) {
+      .form-group {
+         width: 100%;
+
+         .form-input {
+            width: 100%;
+         }
+      }
+   }
+}

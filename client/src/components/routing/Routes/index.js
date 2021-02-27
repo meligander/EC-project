@@ -2,37 +2,37 @@ import React from "react";
 import { Switch, Route } from "react-router-dom";
 
 //Unregister Pages
-import Login from "../../unregister/Login";
+import Login from "../../pages/guest/Login";
 
 //Register Pages
-import Dashboard from "../../register/Dashboard";
-import ChangeCredentials from "../../register/admin/users/ChangeCredentials";
-import Chat from "../../register/groupchat/Chat";
-import OneClass from "../../register/admin/classes/OneClass";
-import Attendance from "../../register/Attendance";
-import Grades from "../../register/Grades";
+import Dashboard from "../../pages/registered/Dashboard";
+import Credentials from "../../pages/registered/admin/users/Credentials";
+import Chat from "../../pages/registered/Chat";
+import OneClass from "../../pages/registered/admin/classes/OneClass";
+import Attendance from "../../pages/registered/Attendance";
+import Grades from "../../pages/registered/Grades";
 
 //Admin Pages
-import RegisterUser from "../../register/admin/users/RegisterUser";
-import Search from "../../register/Search";
-import RegisterInfo from "../../register/admin/RegisterInfo";
-import Categories from "../../register/admin/Categories";
-import RegisterClass from "../../register/admin/classes/RegisterClass";
-import Installments from "../../register/admin/Installments";
-import EditInstallment from "../../register/admin/edit/EditInstallment";
-import Classes from "../../register/admin/classes/Classes";
-import InvoiceGeneration from "../../register/admin/invoice/InvoiceGeneration";
-import Invoice from "../../register/admin/invoice/Invoice";
-import Enrollment from "../../register/admin/Enrollment";
-import EditNeigTowns from "../../register/admin/edit/EditNeigTowns";
-import EditExpenceType from "../../register/admin/edit/EditExpenceType";
-import EditGradeType from "../../register/admin/edit/EditGradeType";
-import EnrollmentList from "../../register/admin/lists/EnrollmentList";
-import IncomeList from "../../register/admin/lists/IncomeList";
-import TransactionList from "../../register/admin/lists/TransactionList";
-import InstallmentList from "../../register/admin/lists/InstallmentList";
-import RegisterList from "../../register/admin/lists/RegisterList";
-import MentionList from "../../register/admin/lists/MentionList";
+import RegisterUser from "../../pages/registered/admin/users/RegisterUser";
+import Search from "../../pages/registered/Search";
+import RegisterInfo from "../../pages/registered/admin/RegisterInfo";
+import Categories from "../../pages/registered/admin/Categories";
+import RegisterClass from "../../pages/registered/admin/classes/RegisterClass";
+import Installments from "../../pages/registered/admin/Installments";
+import EditInstallment from "../../pages/registered/admin/edit/EditInstallment";
+import Classes from "../../pages/registered/admin/classes/Classes";
+import InvoiceGeneration from "../../pages/registered/admin/invoice/InvoiceGeneration";
+import Invoice from "../../pages/registered/admin/invoice/Invoice";
+import Enrollment from "../../pages/registered/admin/Enrollment";
+import EditNeigTowns from "../../pages/registered/admin/edit/EditNeigTowns";
+import EditExpenceType from "../../pages/registered/admin/edit/EditExpenceType";
+import EditGradeType from "../../pages/registered/admin/edit/EditGradeType";
+import EnrollmentList from "../../pages/registered/admin/lists/EnrollmentList";
+import IncomeList from "../../pages/registered/admin/lists/IncomeList";
+import TransactionList from "../../pages/registered/admin/lists/TransactionList";
+import InstallmentList from "../../pages/registered/admin/lists/InstallmentList";
+import RegisterList from "../../pages/registered/admin/lists/RegisterList";
+import MentionList from "../../pages/registered/admin/lists/MentionList";
 
 import PrivateRoutes from "../PrivateRoutes";
 import PublicRoutes from "../PublicRoutes";
@@ -65,7 +65,7 @@ const Routes = () => {
                exact
                types={[]}
                path="/credentials/:user_id"
-               component={ChangeCredentials}
+               component={Credentials}
             />
             <PrivateRoutes
                exact

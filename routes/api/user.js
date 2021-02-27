@@ -10,6 +10,9 @@ const router = express.Router();
 //Uploading Img
 const cloudinaryUploader = require("../../config/imageUploading");
 
+//Sending Email
+const emailSender = require("../../config/emailSender");
+
 //Middleware
 const auth = require("../../middleware/auth");
 const adminAuth = require("../../middleware/adminAuth");
@@ -410,6 +413,8 @@ router.post(
 
          await user.save();
 
+         if (email) newUserEmail(type, email);
+
          user = await User.find()
             .sort({ $natural: -1 })
             .select("-password")
@@ -707,6 +712,13 @@ router.put("/credentials/:id", auth, async (req, res) => {
       });
 
    try {
+      const oldCredentials = await User.findOne({ _id: req.params.id });
+
+      if (!password && email === oldCredentials.email)
+         return res.status(400).json({
+            msg: "Modifique alguno de los datos para poder guardar los cambios",
+         });
+
       if ((password !== "" || password2 !== "") && password !== password2)
          return res
             .status(400)
@@ -747,6 +759,34 @@ router.put("/credentials/:id", auth, async (req, res) => {
          .populate({ path: "town", select: "name" })
          .populate({ path: "neighbourhood", select: "name" })
          .populate({ path: "children", select: "-password" });
+
+      if (password || email !== oldCredentials.email) {
+         if (password && email !== oldCredentials.email)
+            emailSender(
+               email,
+               "Cambio de credenciales",
+               `El email y la constraseña se han modificado correctamente. 
+               Desde ahora en más utilice este email para poder ingresar a nuestra página web.`
+            );
+         else {
+            if (password)
+               emailSender(
+                  email,
+                  "Cambio de contraseña",
+                  "Se ha modificado correctamente la constraseña para poder ingresar a nuestra página web."
+               );
+            else {
+               if (oldCredentials.email === "")
+                  newUserEmail(oldCredentials.type, email);
+               else
+                  emailSender(
+                     email,
+                     "Cambio de email",
+                     `Ahora puede ingresar a nuestra página web utilizando este email.`
+                  );
+            }
+         }
+      }
 
       res.json(user);
    } catch (err) {
@@ -918,6 +958,38 @@ async function inactivateUser(user_id, type, completeDeletion) {
       default:
          break;
    }
+}
+
+function newUserEmail(type, email) {
+   let text = "";
+
+   switch (type) {
+      case "teacher":
+         text = `revisar los cursos que tiene asignado, agregar notas e inasistencias como 
+         también ver la información tanto de sus alumnos como de todas las personas involucradas 
+         en la academia.`;
+         break;
+      case "student":
+         text = `revisar sus notas, inasistencias y cuotas a pagar, ver información para contactar a 
+      compañeros y profesor e ingresar a un chat para comunicarse con los miembros de la clase.`;
+         break;
+      case "guardian":
+         text = `revisar las notas, inasistencias y cuotas a pagar de sus hijos, ver información 
+         para contactar a los profesores e ingresar a un chat para comunicarse con 
+         los miembros de la clases.`;
+         break;
+      default:
+         text = `realizar todo lo relacionado a la administración de la acamedia.`;
+         break;
+   }
+
+   emailSender(
+      email,
+      "¡Bienvenido!",
+      `¡Bienvenido a Villa de Merlo English Centre! <br/>Ahora podrá ingresar a nuestra página web
+      utilizando este mail y la contraseña '12345678'. Le recomendamos que cambie la contraseña
+       para que sea más seguro. <br/>En la página podrá ${text}`
+   );
 }
 
 module.exports = router;

@@ -1,0 +1,32 @@
+@import "../../../../../../style/abstract.scss";
+
+.installment-search {
+   .btn-end {
+      justify-content: flex-start;
+      margin-bottom: 3rem;
+
+      @include respond(small-phone) {
+         margin-bottom: 0;
+      }
+
+      .btn-text {
+         font-size: 2.2rem;
+         line-height: 3rem;
+
+         @include respond(small-phone) {
+            display: block;
+            margin-left: 1rem;
+            margin-top: 1rem;
+         }
+      }
+
+      .btn-cancel {
+         margin-left: 1.5rem;
+         margin-bottom: 1.3rem;
+
+         @include respond(small-phone) {
+            margin-bottom: -2rem;
+         }
+      }
+   }
+}

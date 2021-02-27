@@ -21,6 +21,9 @@ const InstallmentSchema = new mongoose.Schema({
    expired: {
       type: Boolean,
    },
+   emailSent: {
+      type: Boolean,
+   },
    enrollment: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "enrollment",

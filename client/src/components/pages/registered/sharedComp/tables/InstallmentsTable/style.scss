@@ -1,0 +1,22 @@
+@import "../../../../../../style/abstract.scss";
+
+table.installments {
+   &.modify td {
+      &:hover {
+         background-color: lighten($secondary-color, 25%);
+      }
+
+      &.selected {
+         background-color: $light-color !important;
+      }
+   }
+}
+
+.next-btn {
+   margin-right: 19rem;
+   margin-bottom: -6.75rem;
+
+   @include respond(phone) {
+      margin-bottom: -5.8rem;
+   }
+}

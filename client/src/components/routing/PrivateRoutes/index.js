@@ -4,9 +4,9 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
 import Loading from "../../modal/Loading";
-import Dashboard from "../../register/Dashboard";
-import GoBack from "../../sharedComp/GoBack";
-import Alert from "../../sharedComp/Alert";
+import Dashboard from "../../pages/registered/Dashboard";
+import GoBack from "../../pages/sharedComp/GoBack";
+import Alert from "../../pages/sharedComp/Alert";
 import ExpireAuthToken from "../../../utils/ExpireAuthToken";
 
 const PrivateRoutes = ({

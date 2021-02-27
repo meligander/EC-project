@@ -1,0 +1,28 @@
+@import "../../../../style/abstract.scss";
+
+.alert {
+   text-align: center;
+   padding: 0.8rem;
+   font-size: $default-font-size;
+   margin-bottom: 2rem;
+   opacity: 0.8;
+   background: $light-color;
+   color: $black-color;
+
+   @include respond(small-phone) {
+      margin: 1rem 0;
+   }
+
+   &.alert-primary {
+      @include background($primary-color);
+   }
+   &.alert-secondary {
+      @include background($secondary-color);
+   }
+   &.alert-danger {
+      @include background($danger-color);
+   }
+   &.alert-success {
+      @include background($success-color);
+   }
+}
