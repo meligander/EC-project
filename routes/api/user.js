@@ -760,7 +760,7 @@ router.put("/credentials/:id", auth, async (req, res) => {
          .populate({ path: "neighbourhood", select: "name" })
          .populate({ path: "children", select: "-password" });
 
-      if (password || email !== oldCredentials.email) {
+      if ((email && password) || email !== oldCredentials.email) {
          if (password && email !== oldCredentials.email)
             emailSender(
                email,

@@ -381,6 +381,7 @@ router.put("/", auth, async (req, res) => {
                installments[x].student.chargeday - lessDay ? 1 : 0;
 
             if (
+               installments[x].student.email &&
                chargeDay - 3 <= day &&
                !installments[x].emailSent &&
                !installments[x].expired

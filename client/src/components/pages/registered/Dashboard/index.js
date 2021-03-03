@@ -165,14 +165,16 @@ const Dashboard = ({
                               <span className="text-dark">Teléfono: </span>
                               {user.tel}
                            </p>
-                           <p>
-                              <span className="text-dark">Dirección: </span>
-                              {user.address ? user.address + ", " : ""}
-                              {user.neighbourhood
-                                 ? user.neighbourhood.name + ", "
-                                 : ""}
-                              {user.town && user.town.name}
-                           </p>
+                           {(user._id === userLogged._id || isAdmin) && (
+                              <p>
+                                 <span className="text-dark">Dirección: </span>
+                                 {user.address ? user.address + ", " : ""}
+                                 {user.neighbourhood
+                                    ? user.neighbourhood.name + ", "
+                                    : ""}
+                                 {user.town && user.town.name}
+                              </p>
+                           )}
 
                            {user.dob && (
                               <p>
