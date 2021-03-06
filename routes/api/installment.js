@@ -378,7 +378,7 @@ router.put("/", auth, async (req, res) => {
       if (penalty) {
          for (let x = 0; x < installments.length; x++) {
             const chargeDay =
-               installments[x].student.chargeday - lessDay ? 1 : 0;
+               installments[x].student.chargeday - (lessDay ? 1 : 0);
 
             if (
                installments[x].student.email &&
@@ -405,6 +405,7 @@ router.put("/", auth, async (req, res) => {
                   chargeDay < day) &&
                !installments[x].expired
             ) {
+               if (installments[x].number === 3 && month === 3) continue;
                let charge = 0;
 
                if (installments[x].student.discount === 10) {

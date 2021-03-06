@@ -334,7 +334,7 @@ router.post(
          if (discount && discount !== 0) {
             let disc = (value * discount) / 100;
             value = Math.round((value - disc) / 10) * 10;
-            if (number === 3) {
+            if (Number(number) === 3) {
                if (discount === 50) number = 4;
                else {
                   disc = (half * discount) / 100;
@@ -349,7 +349,7 @@ router.post(
                number,
                year,
                student,
-               value: x === 0 && number === 3 ? half : value,
+               value: Number(number) === 3 ? half : value,
                expired: false,
                enrollment: enrollment.id,
             });

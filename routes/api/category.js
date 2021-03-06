@@ -177,7 +177,7 @@ router.put(
             const enrollments = await Enrollment.find({
                year: { $in: [year, year + 1] },
                category: categories[x]._id,
-            });
+            }).populate({ path: "student", select: "-password" });
 
             if (x === 0) {
                const installmentsInsc = await Installment.find({
@@ -198,7 +198,7 @@ router.put(
 
             if (enrollments.length !== 0) {
                for (let y = 0; y < enrollments.length; y++) {
-                  //chenged
+                  //changed
                   const installments = await Installment.find({
                      enrollment: enrollments[y]._id,
                      number:
@@ -210,18 +210,20 @@ router.put(
                              },
                      year: { $in: [year, year + 1] },
                      value: { $ne: 0 },
-                  }).populate({ path: "student", select: "-password" });
+                  });
+
+                  let newValue = enrollments[y].student.discount
+                     ? value - (value * enrollments[y].student.discount) / 100
+                     : value;
 
                   for (let z = 0; z < installments.length; z++) {
-                     let newValue = installments[z].student.discount
-                        ? value -
-                          (value * installments[z].student.discount) / 100
-                        : value;
-
                      await Installment.findOneAndUpdate(
                         { _id: installments[z]._id },
                         {
-                           value: newValue,
+                           value:
+                              installments[z].number === 3
+                                 ? value / 2
+                                 : newValue,
                            expired: false,
                         }
                      );

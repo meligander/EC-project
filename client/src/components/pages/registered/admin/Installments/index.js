@@ -46,15 +46,23 @@ const Installments = ({
          loadStudentInstallments(_id, true);
       } else {
          if (!loadingUsersInstallments && usersInstallments.rows.length > 0) {
+            let student;
+
+            for (let x = 0; x < usersInstallments.rows[0].length; x++) {
+               if (usersInstallments.rows[0][x].student) {
+                  student = {
+                     _id: usersInstallments.rows[0][x].student._id,
+                     name:
+                        usersInstallments.rows[0][x].student.lastname +
+                        ", " +
+                        usersInstallments.rows[0][x].student.name,
+                  };
+                  break;
+               }
+            }
             setOtherValues((prev) => ({
                ...prev,
-               student: {
-                  _id: usersInstallments.rows[0][0].student._id,
-                  name:
-                     usersInstallments.rows[0][0].student.lastname +
-                     ", " +
-                     usersInstallments.rows[0][0].student.name,
-               },
+               student,
             }));
          }
       }

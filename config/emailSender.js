@@ -6,17 +6,17 @@ require("dotenv").config();
 const sendEmail = (user_email, subject, text) => {
    const transporter = nodemailer.createTransport({
       service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
          user: process.env.EMAIL,
          pass: process.env.EMAIL_PASSWORD,
       },
-      tls: {
-         rejectUnauthorized: false,
-      },
    });
 
    const mailOptions = {
-      from: process.env.EMAIL,
+      from: `Villa de Merlo English Center <${process.env.EMAIL}>`,
       to: user_email,
       subject,
       text,
@@ -29,6 +29,7 @@ const sendEmail = (user_email, subject, text) => {
         <h3>Villa de Merlo English Centre</h3>
         <p>Dir: Coronel Mercau 783</p>
         <p>Tel: (02656) 476-661</p>
+        <a href="www.vmenglishcentre.com.ar">www.vmenglishcentre.com.ar</a>
     </div> 
       `,
       attachments: [
@@ -43,7 +44,6 @@ const sendEmail = (user_email, subject, text) => {
    transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
          console.error(error.message);
-         return res.status(500).send("Error while sending email");
       } else console.log(info.response);
    });
 };
