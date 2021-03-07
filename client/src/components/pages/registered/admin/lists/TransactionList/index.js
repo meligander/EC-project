@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import Moment from "react-moment";
+import moment from "moment";
 import PropTypes from "prop-types";
 
 import {
@@ -85,6 +86,9 @@ const TransactionList = ({
 
    const type = (transaction) => {
       if (transaction.expencetype) {
+         let registerDate = moment(register.date).format("DD/MM/YY");
+         let transactionDate = moment(transaction.date).format("DD/MM/YY");
+
          return (
             <tr
                key={transaction._id}
@@ -99,7 +103,7 @@ const TransactionList = ({
                <td>${transaction.value}</td>
                <td>{transaction.description}</td>
                <td>
-                  {register.date < transaction.date && register.temporary && (
+                  {registerDate === transactionDate && register.temporary && (
                      <button
                         onClick={(e) => {
                            e.preventDefault();

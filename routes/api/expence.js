@@ -243,7 +243,7 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
          }
       }
 
-      const typeName = "";
+      let typeName = "";
       if (transactions[x].expencetype) {
          switch (transactions[x].expencetype.type) {
             case "special-income":

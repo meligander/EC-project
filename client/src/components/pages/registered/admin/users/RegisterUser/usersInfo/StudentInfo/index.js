@@ -28,9 +28,7 @@ const StudentInfo = ({
                   </select>
                   <label
                      htmlFor="discount"
-                     className={`form-label ${
-                        discount === "" || discount === 0 ? "lbl" : ""
-                     }`}
+                     className={`form-label ${discount === "" ? "lbl" : ""}`}
                   >
                      Tipo de descuento
                   </label>

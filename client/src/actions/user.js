@@ -127,6 +127,7 @@ export const loadUsers = (
             filter = filter + filternames[x] + "=" + filterData[name];
          }
       }
+
       let res = await api.get(`/user?${filter}`);
 
       dispatch({

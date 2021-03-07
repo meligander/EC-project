@@ -212,18 +212,23 @@ router.put(
                      value: { $ne: 0 },
                   });
 
-                  let newValue = enrollments[y].student.discount
-                     ? value - (value * enrollments[y].student.discount) / 100
-                     : value;
+                  let newValue =
+                     enrollments[y].student.discount &&
+                     enrollments[y].student.discount !== 0
+                        ? value -
+                          (value * enrollments[y].student.discount) / 100
+                        : value;
 
                   for (let z = 0; z < installments.length; z++) {
                      await Installment.findOneAndUpdate(
                         { _id: installments[z]._id },
                         {
                            value:
-                              installments[z].number === 3
-                                 ? value / 2
-                                 : newValue,
+                              installments[z].number !== 3
+                                 ? newValue
+                                 : enrollments[y].student.discount === 10
+                                 ? newValue / 2
+                                 : value / 2,
                            expired: false,
                         }
                      );

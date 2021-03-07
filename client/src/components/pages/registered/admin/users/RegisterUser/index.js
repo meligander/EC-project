@@ -163,7 +163,10 @@ const RegisterUser = ({
             ...(user.salary && { salary: user.salary }),
             ...(user.description && { description: user.description }),
             ...(user.img.public_id !== "" && { img: user.img }),
-            ...(user.discount && { discount: user.discount.toString() }),
+            ...(user.discount !== undefined &&
+               user.discount !== null && {
+                  discount: user.discount.toString(),
+               }),
             ...(user.chargeday && { chargeday: user.chargeday.toString() }),
          }));
       };

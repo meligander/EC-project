@@ -225,8 +225,7 @@ router.post(
 //@desc     Create a pdf of installments
 //@access   Private && Admin
 router.post("/create-list", [auth, adminAuth], (req, res) => {
-   const name = res.sendFile(path.join(__dirname, "../../reports/debt.pdf"));
-
+   const name = path.join(__dirname, "../../reports/debt.pdf");
    const debts = req.body;
 
    const installments = [

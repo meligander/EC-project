@@ -28,6 +28,7 @@ const NewClassTab = ({
 
    const [otherValues, setOtherValues] = useState({
       toggleModal: false,
+      sameSchedule: true,
    });
 
    const [formData, setFormData] = useState({
@@ -41,7 +42,7 @@ const NewClassTab = ({
       hourout2: "",
    });
 
-   const { toggleModal } = otherValues;
+   const { toggleModal, sameSchedule } = otherValues;
 
    const {
       teacher,
@@ -56,6 +57,15 @@ const NewClassTab = ({
 
    useEffect(() => {
       if (!registerClass && !loading) {
+         const timein1 = moment(classInfo.hourin1).utc().format("HH:mm");
+         const timein2 = moment(classInfo.hourin2).utc().format("HH:mm");
+         const timeout1 = moment(classInfo.hourout1).utc().format("HH:mm");
+         const timeout2 = moment(classInfo.hourout2).utc().format("HH:mm");
+
+         if (timein1 === timein2 && timeout1 === timeout2)
+            setOtherValues((prev) => ({ ...prev, sameSchedule: true }));
+         else setOtherValues((prev) => ({ ...prev, sameSchedule: false }));
+
          setFormData((prev) => ({
             ...prev,
             teacher: classInfo.teacher._id,
@@ -63,16 +73,16 @@ const NewClassTab = ({
             ...(classInfo.day1 && { day1: classInfo.day1 }),
             ...(classInfo.day2 && { day2: classInfo.day2 }),
             ...(classInfo.hourin1 && {
-               hourin1: moment(classInfo.hourin1).utc().format("HH:mm"),
+               hourin1: timein1,
             }),
             ...(classInfo.hourin2 && {
-               hourin2: moment(classInfo.hourin2).utc().format("HH:mm"),
+               hourin2: timein2,
             }),
             ...(classInfo.hourout1 && {
-               hourout1: moment(classInfo.hourout1).utc().format("HH:mm"),
+               hourout1: timeout1,
             }),
             ...(classInfo.hourout2 && {
-               hourout2: moment(classInfo.hourout2).utc().format("HH:mm"),
+               hourout2: timeout2,
             }),
          }));
       }
@@ -82,7 +92,18 @@ const NewClassTab = ({
       setFormData({
          ...formData,
          [e.target.name]: e.target.value,
+         ...(e.target.name === "hourin1" &&
+            sameSchedule && { hourin2: e.target.value }),
+         ...(e.target.name === "hourout1" &&
+            sameSchedule && { hourout2: e.target.value }),
       });
+   };
+
+   const onChangeCheckbox = () => {
+      setOtherValues((prev) => ({
+         ...prev,
+         sameSchedule: !sameSchedule,
+      }));
    };
 
    const setToggle = () => {
@@ -227,32 +248,48 @@ const NewClassTab = ({
                   Día 2
                </label>
             </div>
-            <div className="form-group">
-               <div className="two-in-row">
-                  <input
-                     className="form-input"
-                     type="time"
-                     name="hourin2"
-                     value={hourin2}
-                     onChange={onChange}
-                     min="08:00"
-                     max="22:00"
-                  />
-                  <input
-                     className="form-input"
-                     type="time"
-                     name="hourout2"
-                     onChange={onChange}
-                     value={hourout2}
-                     min="08:00"
-                     max="22:00"
-                  />
-               </div>
-               <div className="two-in-row">
-                  <label className="form-label show">Entrada</label>
-                  <label className="form-label show">Salida</label>
-               </div>
+            <div className="form-group mb-2">
+               <input
+                  className="form-checkbox"
+                  onChange={onChangeCheckbox}
+                  type="checkbox"
+                  checked={sameSchedule}
+                  name="sameSchedule"
+                  id="sameSchedule"
+               />
+               <label className="checkbox-lbl" htmlFor="sameSchedule">
+                  {sameSchedule ? "Mismo Horario" : "Distinto Horario"}
+               </label>
             </div>
+            {!sameSchedule && (
+               <div className="form-group">
+                  <div className="two-in-row">
+                     <input
+                        className="form-input"
+                        type="time"
+                        name="hourin2"
+                        value={hourin2}
+                        onChange={onChange}
+                        min="08:00"
+                        max="22:00"
+                     />
+                     <input
+                        className="form-input"
+                        type="time"
+                        name="hourout2"
+                        onChange={onChange}
+                        value={hourout2}
+                        min="08:00"
+                        max="22:00"
+                     />
+                  </div>
+                  <div className="two-in-row">
+                     <label className="form-label show">Entrada</label>
+                     <label className="form-label show">Salida</label>
+                  </div>
+               </div>
+            )}
+
             <h3 className="text-primary heading-tertiary my-3">
                Lista de Alumnos
             </h3>

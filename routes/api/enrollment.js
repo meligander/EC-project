@@ -334,13 +334,7 @@ router.post(
          if (discount && discount !== 0) {
             let disc = (value * discount) / 100;
             value = Math.round((value - disc) / 10) * 10;
-            if (Number(number) === 3) {
-               if (discount === 50) number = 4;
-               else {
-                  disc = (half * discount) / 100;
-                  half = Math.round((half - disc) / 10) * 10;
-               }
-            }
+            if (Number(number) === 3 && discount === 10) half = value / 2;
          }
 
          const amount = 13 - number;
@@ -697,23 +691,18 @@ router.put(
             let half = value / 2;
 
             const discount = enrollment.student.discount;
+
             if (discount && discount !== 0) {
                let disc = (value * discount) / 100;
                value = Math.round((value - disc) / 10) * 10;
-               if (number === 3) {
-                  if (discount === 50) number = 4;
-                  else {
-                     disc = (half * discount) / 100;
-                     half = Math.round((half - disc) / 10) * 10;
-                  }
-               }
+               if (Number(number) === 3 && discount === 10) half = value / 2;
             }
 
             const amount = 13 - number;
             for (let x = 0; x < amount; x++) {
                await Installment.findOneAndUpdate(
                   { enrollment: req.params.id, number, value: { $ne: 0 } },
-                  { value: x === 0 && number === 3 ? half : value }
+                  { value: Number(number) === 3 ? half : value }
                );
                number++;
             }

@@ -98,6 +98,8 @@ router.get("/", async (req, res) => {
                            users.push(user);
                         }
                      }
+
+                     users = sortArray(users);
                   } else {
                      const students = await User.find(filter)
                         .select("-password")
@@ -674,13 +676,22 @@ router.put(
                   }),
                });
                let value = enrollments[x].category.value;
-               const disc = (value * discount) / 100;
-               value = Math.round((value - disc) / 10) * 10;
+               let half = value / 2;
+
+               if (discount && discount !== 0) {
+                  const disc = (value * discount) / 100;
+                  value = Math.round((value - disc) / 10) * 10;
+                  half = value / 2;
+               }
+
                for (let y = 0; y < installments.length; y++) {
                   if (installments[y].number === 0) continue;
                   await Installment.findOneAndUpdate(
                      { _id: installments[y]._id },
-                     { value, expired: false }
+                     {
+                        value: installments[y].number === 3 ? half : value,
+                        expired: false,
+                     }
                   );
                }
             }
@@ -990,6 +1001,18 @@ function newUserEmail(type, email) {
       utilizando este mail y la contraseña '12345678'. Le recomendamos que cambie la contraseña
        para que sea más seguro. <br/>En la página podrá ${text}`
    );
+}
+
+function sortArray(array) {
+   const sortedArray = array.sort((a, b) => {
+      if (a.lastname > b.lastname) return 1;
+      if (a.lastname < b.lastname) return -1;
+
+      if (a.name > b.name) return 1;
+      if (a.name < b.name) return -1;
+   });
+
+   return sortedArray;
 }
 
 module.exports = router;
