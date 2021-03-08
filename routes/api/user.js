@@ -448,51 +448,72 @@ router.post("/create-list", auth, (req, res) => {
       });
 
    let tbody = "";
-   let thead = "";
+   let nameList = "";
 
-   if (usersType === "Alumno") {
-      thead =
-         "<th>Legajo</th><th>Nombre</th><th>Edad</th><th>Celular</th><th>Categoría</th>";
-   } else {
-      thead = "<th>Nombre</th><th>Email</th><th>Celular</th>";
-      switch (usersType) {
-         case "Tutor":
-            thead += "<th>Nombre Alumno</th>";
-            break;
-         case "Profesor":
-         case "Administrador":
-            thead += "<th>Fecha Nacimiento</th>";
-            if (usersType === "Administrador") thead += "<th>Rol</th>";
-            break;
-         default:
-            break;
-      }
+   let thead = "<th>Nombre</th><th>Email</th><th>Celular</th>";
+   switch (usersType) {
+      case "student":
+         thead =
+            "<th>Legajo</th><th>Nombre</th><th>Edad</th><th>Celular</th><th>Categoría</th>";
+         nameList = "Alumnos";
+         break;
+      case "guardian":
+         thead += "<th>Nombre Alumno</th>";
+         nameList = "Tutores";
+         break;
+      case "teacher":
+         thead += "<th>Fecha Nacimiento</th>";
+         nameList = "Profesores";
+         break;
+      case "admin":
+         thead += "<th>Fecha Nacimiento</th><th>Rol</th>";
+         nameList = "Administradores";
+         break;
+      default:
+         break;
    }
 
    let name = "";
    let cel = "";
+   let email = "";
+   let years = "";
+   let studentnumber = "";
+   let category = "";
+   let studentname = "";
+   let dob = "";
+   let type = "";
 
    for (let x = 0; x < users.length; x++) {
       name = "<td>" + users[x].lastname + ", " + users[x].name + "</td>";
       cel = "<td>" + (users[x].cel ? users[x].cel : "") + "</td>";
 
-      if (usersType === "Alumno") {
-         const years =
+      if (usersType !== "student")
+         email = "<td>" + (users[x].email ? users[x].email : "") + "</td>";
+      if (usersType === "admin" || usersType === "teacher")
+         dob =
             "<td>" +
-            (users[x].dob ? moment().diff(users[x].dob, "years", false) : "") +
+            (users[x].dob
+               ? moment(users[x].dob).utc().format("DD/MM/YY")
+               : "") +
             "</td>";
-         const studentnumber = "<td>" + users[x].studentnumber + "</td>";
-         category =
-            "<td>" + (users[x].category ? users[x].category : "") + "</td>";
 
-         tbody +=
-            "<tr>" + studentnumber + name + years + cel + category + "</tr>";
-      } else {
-         const email =
-            "<td>" + (users[x].email ? users[x].email : "") + "</td>";
+      switch (usersType) {
+         case "student":
+            years =
+               "<td>" +
+               (users[x].dob
+                  ? moment().diff(users[x].dob, "years", false)
+                  : "") +
+               "</td>";
+            studentnumber = "<td>" + users[x].studentnumber + "</td>";
+            category =
+               "<td>" + (users[x].category ? users[x].category : "") + "</td>";
 
-         if (usersType === "Tutor") {
-            const studentname =
+            tbody +=
+               "<tr>" + studentnumber + name + years + cel + category + "</tr>";
+            break;
+         case "guardian":
+            studentname =
                "<td>" +
                (users[x].children.length > 0
                   ? users[x].children[0].user.lastname +
@@ -501,20 +522,22 @@ router.post("/create-list", auth, (req, res) => {
                   : "") +
                "</td>";
             tbody += "<tr>" + name + email + cel + studentname + "</tr>";
-         } else {
-            const dob =
-               "<td>" +
-               (users[x].dob
-                  ? moment(users[x].dob).utc().format("DD/MM/YY")
-                  : "") +
-               "</td>";
-            if (usersType === "Profesor")
-               tbody += "<tr>" + name + email + cel + dob + "</tr>";
-            else {
-               const type = "<td>" + users[x].type + "</td>";
-               tbody += "<tr>" + name + email + cel + dob + type + "</tr>";
-            }
-         }
+            break;
+         case "teacher":
+            tbody += "<tr>" + name + email + cel + dob + "</tr>";
+            break;
+         case "admin":
+            const typeName =
+               users[x].type === "admin"
+                  ? "Administrador"
+                  : users[x].type === "admin&teacher"
+                  ? "Profesor y Admin"
+                  : "Secretari@";
+            type = "<td>" + typeName + "</td>";
+            tbody += "<tr>" + name + email + cel + dob + type + "</tr>";
+            break;
+         default:
+            break;
       }
    }
 
@@ -543,22 +566,16 @@ router.post("/create-list", auth, (req, res) => {
    };
 
    try {
-      pdf.create(
-         pdfTemplate(
-            css,
-            img,
-            usersType === "Alumno" ? "Alumnos" : usersType + "es",
-            thead,
-            tbody
-         ),
-         options
-      ).toFile(nameReport, (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
+      pdf.create(pdfTemplate(css, img, nameList, thead, tbody), options).toFile(
+         nameReport,
+         (err) => {
+            if (err) {
+               res.send(Promise.reject());
+            }
 
-         res.send(Promise.resolve());
-      });
+            res.send(Promise.resolve());
+         }
+      );
    } catch (err) {
       console.error(err.message);
       return res.status(500).send("PDF Error");
@@ -685,7 +702,9 @@ router.put(
                }
 
                for (let y = 0; y < installments.length; y++) {
-                  if (installments[y].number === 0) continue;
+                  if (installments[y].number === 0 || installments[y].halfPayed)
+                     continue;
+
                   await Installment.findOneAndUpdate(
                      { _id: installments[y]._id },
                      {

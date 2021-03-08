@@ -245,7 +245,7 @@ const RegisterTab = ({
                         }`}
                      >
                         <i className="far fa-save"></i>
-                        <span className="hide-sm">&nbsp; Guardar</span>
+                        <span className="hide-sm">&nbsp; Cerrar Caja</span>
                      </button>
                   </div>
                </form>

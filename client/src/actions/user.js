@@ -348,7 +348,7 @@ export const userPDF = (users, userSearchType) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      await api.post("/user/create-list", { users, userSearchType });
+      await api.post("/user/create-list", { users, usersType: userSearchType });
 
       const pdf = await api.get("/user/lista/fetch-list", {
          responseType: "blob",
@@ -362,7 +362,7 @@ export const userPDF = (users, userSearchType) => async (dispatch) => {
 
       switch (userSearchType) {
          case "student":
-            type = "Alumno";
+            type = "Alumnos";
             break;
          case "guardian":
             type = "Tutores";

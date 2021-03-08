@@ -175,7 +175,7 @@ router.post(
       check("value", "El valor es necesario").not().isEmpty(),
    ],
    async (req, res) => {
-      const { number, year, student, value, expired } = req.body;
+      const { number, year, student, value, expired, halfPayed } = req.body;
 
       try {
          let errors = [];
@@ -204,6 +204,7 @@ router.post(
             number,
             value,
             ...(enrollment && { enrollment: enrollment.id }),
+            ...(halfPayed && { halfPayed }),
             student,
             year,
             expired,
@@ -310,7 +311,7 @@ router.put(
    "/:id",
    [auth, adminAuth, check("value", "El valor es necesario").not().isEmpty()],
    async (req, res) => {
-      const { value, expired } = req.body;
+      const { value, expired, halfPayed } = req.body;
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -322,7 +323,13 @@ router.put(
       try {
          await Installment.findOneAndUpdate(
             { _id: req.params.id },
-            { $set: { value, expired } },
+            {
+               $set: {
+                  value,
+                  expired,
+                  ...(halfPayed !== undefined && { halfPayed }),
+               },
+            },
             { new: true }
          );
 

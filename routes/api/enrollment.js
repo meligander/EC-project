@@ -700,8 +700,15 @@ router.put(
 
             const amount = 13 - number;
             for (let x = 0; x < amount; x++) {
+               const installment = await Installment.findOne({
+                  enrollment: req.params.id,
+                  number,
+                  value: { $ne: 0 },
+               });
+               if (installment.halfPayed || !installment) continue;
+
                await Installment.findOneAndUpdate(
-                  { enrollment: req.params.id, number, value: { $ne: 0 } },
+                  { _id: installment._id },
                   { value: Number(number) === 3 ? half : value }
                );
                number++;

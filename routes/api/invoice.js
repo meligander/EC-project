@@ -300,9 +300,11 @@ router.post(
                _id: details[x].item._id,
             });
 
+            const newValue = installment.value - details[x].payment;
+
             await Installment.findOneAndUpdate(
                { _id: installment._id },
-               { value: installment.value - details[x].payment }
+               { value: newValue, ...(newValue !== 0 && { halfPayed: true }) }
             );
          }
 

@@ -30,6 +30,7 @@ const EditInstallment = ({
       value: "",
       expired: false,
       student: "",
+      halfPayed: false,
    });
 
    const [otherValues, setOtherValues] = useState({
@@ -39,7 +40,7 @@ const EditInstallment = ({
 
    const { toggleModalDelete, toggleModalSave } = otherValues;
 
-   const { year, number, value, expired, student } = formData;
+   const { year, number, value, expired, student, halfPayed } = formData;
 
    const _id = match.params.installment_id;
 
@@ -56,16 +57,14 @@ const EditInstallment = ({
             value: installment.value,
             expired: installment.expired,
             student: installment.student,
+            halfPayed: installment.halfPayed ? installment.halfPayed : false,
          });
       };
       const loadNewData = () => {
-         setformData({
-            year: 0,
-            number: 1,
-            value: "",
-            expired: false,
+         setformData((prev) => ({
+            ...prev,
             student: users.user,
-         });
+         }));
       };
       if (edit) {
          if (loading) loadInstallment(_id);
@@ -95,7 +94,7 @@ const EditInstallment = ({
    const onChangeCheckbox = (e) => {
       setformData({
          ...formData,
-         expired: e.target.checked,
+         [e.target.name]: e.target.checked,
       });
    };
 
@@ -221,12 +220,25 @@ const EditInstallment = ({
                         className="form-checkbox"
                         type="checkbox"
                         checked={expired}
-                        onChange={onChangeCheckbox}
+                        onChange={(e) => onChangeCheckbox(e)}
                         name="expired"
-                        id="cb1"
+                        id="expired"
                      />
-                     <label className="checkbox-lbl" htmlFor="cb1">
+                     <label className="checkbox-lbl" htmlFor="expired">
                         {expired ? "Vencida" : "Vigente"}
+                     </label>
+                  </div>
+                  <div className="form-group">
+                     <input
+                        className="form-checkbox"
+                        type="checkbox"
+                        checked={halfPayed}
+                        onChange={(e) => onChangeCheckbox(e)}
+                        name="halfPayed"
+                        id="halfPayed"
+                     />
+                     <label className="checkbox-lbl" htmlFor="halfPayed">
+                        {halfPayed ? "No Actualizar" : "Permitir actualizar"}
                      </label>
                   </div>
                   <div className="btn-ctr py-2">

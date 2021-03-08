@@ -220,6 +220,8 @@ router.put(
                         : value;
 
                   for (let z = 0; z < installments.length; z++) {
+                     if (installments[z].halfPayed) continue;
+
                      await Installment.findOneAndUpdate(
                         { _id: installments[z]._id },
                         {

@@ -32,6 +32,9 @@ const InstallmentSchema = new mongoose.Schema({
       type: Boolean,
       default: false,
    },
+   halfPayed: {
+      type: Boolean,
+   },
 });
 
 const Installment = mongoose.model("installment", InstallmentSchema);
