@@ -154,6 +154,32 @@ router.get("/month/debts", [auth, adminAuth], async (req, res) => {
    }
 });
 
+//@route    GET /api/installment/month/:month_id
+//@desc     Get the debt of the month
+//@access   Private && Admin
+router.get("/month/:month_id", [auth, adminAuth], async (req, res) => {
+   try {
+      const date = new Date();
+      const year = date.getFullYear();
+
+      const installments = await Installment.find({
+         value: { $ne: 0 },
+         number: req.params.month_id,
+         year,
+      });
+
+      let totalDebt = 0;
+      for (let x = 0; x < installments.length; x++) {
+         totalDebt = totalDebt + installments[x].value;
+      }
+
+      res.json(totalDebt);
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server Error");
+   }
+});
+
 //@route    GET /api/installment/fetch-list
 //@desc     Get the pdf of installments
 //@access   Private && Admin

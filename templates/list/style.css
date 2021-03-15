@@ -39,6 +39,12 @@ table th {
    font-weight: bold;
    padding: 1rem 2rem;
 }
+
+table th.blank {
+   border-top: none;
+   border-left: none;
+}
+
 table td {
    padding: 0.5rem 1rem;
 }

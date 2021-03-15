@@ -77,6 +77,110 @@ router.get("/last", [auth, adminAuth], async (req, res) => {
    }
 });
 
+//@route    GET /api/register/year/bymonth
+//@desc     get money collected every month
+//@access   Private && Admin
+router.get("/year/bymonth", [auth, adminAuth], async (req, res) => {
+   try {
+      let registerByMonth = [];
+      const months = [
+         "Enero",
+         "Febrero",
+         "Marzo",
+         "Abril",
+         "Mayo",
+         "Junio",
+         "Julio",
+         "Agosto",
+         "Septiembre",
+         "Octubre",
+         "Noviembre",
+         "Diciembre",
+      ];
+      let firstDay = new Date();
+      firstDay.setUTCMonth(0);
+      firstDay.setUTCDate(1);
+      firstDay.setUTCHours(0, 0, 0, 0);
+
+      let lastDate = new Date();
+      lastDate.setUTCMonth(11);
+      lastDate.setUTCDate(31);
+      lastDate.setUTCHours(23, 59, 59);
+
+      let registers = await Register.find({
+         date: {
+            $gte: firstDay,
+            $lte: lastDate,
+         },
+      });
+
+      let monthCount = 0;
+      let monthRegister = {
+         month: "",
+         income: 0,
+         expence: 0,
+         withdrawal: 0,
+         cheatincome: 0,
+         difference: 0,
+      };
+
+      for (let x = 0; x < registers.length; x++) {
+         const date = new Date(registers[x].date);
+         if (date.getMonth() === monthCount) {
+            monthRegister.income += registers[x].income
+               ? registers[x].income
+               : 0;
+            monthRegister.expence += registers[x].expence
+               ? registers[x].expence
+               : 0;
+            monthRegister.withdrawal += registers[x].withdrawal
+               ? registers[x].withdrawal
+               : 0;
+            monthRegister.cheatincome += registers[x].cheatincome
+               ? registers[x].cheatincome
+               : 0;
+            monthRegister.difference += registers[x].difference
+               ? registers[x].difference
+               : 0;
+         } else {
+            monthRegister.month = months[monthCount];
+            registerByMonth.push(monthRegister);
+            monthRegister = {
+               month: "",
+               income: 0,
+               expence: 0,
+               withdrawal: 0,
+               cheatincome: 0,
+               difference: 0,
+            };
+            monthCount++;
+            x--;
+         }
+      }
+      monthRegister.month = months[monthCount];
+      registerByMonth.push(monthRegister);
+      monthCount++;
+
+      for (let x = monthCount; x < 12; x++) {
+         monthRegister = {
+            month: months[x],
+            income: 0,
+            expence: 0,
+            withdrawal: 0,
+            cheatincome: 0,
+            difference: 0,
+         };
+
+         registerByMonth.push(monthRegister);
+      }
+
+      res.json(registerByMonth);
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server Error");
+   }
+});
+
 //@route    GET /api/expence/fetch-list
 //@desc     Get the pdf of expences
 //@access   Private && Admin
@@ -140,8 +244,7 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
 
    for (let x = 0; x < register.length; x++) {
       if (register[x].temporary) continue;
-      const date =
-         "<td>" + moment(register[x].date).format("DD/MM/YY") + "</td>";
+
       const income =
          "<td>" +
          (register[x].income ? " $" + register[x].income : "") +
@@ -158,7 +261,6 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
          "<td>" +
          (register[x].withdrawal ? " $" + register[x].withdrawal : "") +
          "</td>";
-      const registermoney = "<td> $" + register[x].registermoney + "</td>";
       const diference =
          "<td>" +
          (register[x].difference !== 0 && register[x].difference
@@ -167,26 +269,49 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
                : "+$" + register[x].difference
             : "") +
          "</td>";
-      const description =
-         "<td>" +
-         (register[x].description ? register[x].description : "") +
-         "</td>";
+      if (register[x].temporary !== undefined) {
+         const date =
+            "<td>" + moment(register[x].date).format("DD/MM/YY") + "</td>";
+         const registermoney = "<td> $" + register[x].registermoney + "</td>";
 
-      tbody +=
-         "<tr>" +
-         date +
-         income +
-         expence +
-         cheatincome +
-         withdrawal +
-         registermoney +
-         diference +
-         description +
-         "</tr>";
+         const description =
+            "<td>" +
+            (register[x].description ? register[x].description : "") +
+            "</td>";
+
+         tbody +=
+            "<tr>" +
+            date +
+            income +
+            expence +
+            cheatincome +
+            withdrawal +
+            registermoney +
+            diference +
+            description +
+            "</tr>";
+      } else {
+         const month = "<th>" + register[x].month + "</th>";
+         tbody +=
+            "<tr>" +
+            month +
+            income +
+            expence +
+            cheatincome +
+            withdrawal +
+            diference +
+            "</tr>";
+      }
    }
 
-   const thead =
-      "<th>Fecha</th> <th>Ingresos</th> <th>Egresos</th> <th>Otros Ing</th> <th>Retiro</th> <th>Plata Caja</th> <th>Diferencia</th> <th>Detalles</th>";
+   let thead = "";
+
+   if (register[0].temporary !== undefined)
+      thead =
+         "<th>Fecha</th> <th>Ingresos</th> <th>Egresos</th> <th>Otros Ing</th> <th>Retiro</th> <th>Plata Caja</th> <th>Diferencia</th> <th>Detalles</th>";
+   else
+      thead =
+         "<th class='blank'></th> <th>Ingresos</th> <th>Egresos</th> <th>Otros Ing</th> <th>Retiro</th><th>Diferencia</th>";
 
    const img = path.join(
       "file://",
@@ -205,7 +330,7 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
          height: "15mm",
          contents: `<div></div>`,
       },
-      orientation: "landscape",
+      ...(register[0].temporary !== undefined && { orientation: "landscape" }),
       footer: {
          height: "17mm",
          contents:
@@ -214,16 +339,22 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
    };
 
    try {
-      pdf.create(pdfTemplate(css, img, "caja", thead, tbody), options).toFile(
-         name,
-         (err) => {
-            if (err) {
-               res.send(Promise.reject());
-            }
-
-            res.send(Promise.resolve());
+      pdf.create(
+         pdfTemplate(
+            css,
+            img,
+            register[0].temporary !== undefined ? "caja" : "cajas mensuales",
+            thead,
+            tbody
+         ),
+         options
+      ).toFile(name, (err) => {
+         if (err) {
+            res.send(Promise.reject());
          }
-      );
+
+         res.send(Promise.resolve());
+      });
    } catch (err) {
       console.error(err.message);
       return res.status(500).send("PDF Error");

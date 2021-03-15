@@ -223,7 +223,19 @@ router.post(
 
          await classinfo.save();
 
-         let lastClass = await Class.find().sort({ $natural: -1 }).limit(1);
+         let lastClass = await Class.find()
+            .sort({ $natural: -1 })
+            .limit(1)
+            .populate({
+               path: "category",
+               model: "category",
+               select: "name",
+            })
+            .populate({
+               path: "teacher",
+               model: "user",
+               select: ["lastname", "name"],
+            });
          const newClass = lastClass[0];
          for (let x = 0; x < students.length; x++) {
             await Enrollment.findOneAndUpdate(
@@ -591,7 +603,17 @@ router.put(
             { _id: req.params.id },
             { $set: data },
             { new: true }
-         );
+         )
+            .populate({
+               path: "category",
+               model: "category",
+               select: "name",
+            })
+            .populate({
+               path: "teacher",
+               model: "user",
+               select: ["lastname", "name"],
+            });
 
          res.json(classinfo);
       } catch (err) {
