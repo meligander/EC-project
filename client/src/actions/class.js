@@ -184,7 +184,6 @@ export const registerUpdateClass = (formData, history, class_id) => async (
 
       history.push("/classes");
       dispatch(clearActiveClasses());
-      dispatch(clearClasses());
    } catch (err) {
       if (err.response.data.errors) {
          const errors = err.response.data.errors;

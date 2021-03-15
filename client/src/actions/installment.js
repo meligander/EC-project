@@ -8,6 +8,7 @@ import { updateLoadingSpinner, updatePreviousPage } from "./mixvalues";
 import {
    INSTALLMENT_LOADED,
    TOTALDEBT_LOADED,
+   ESTIMATEDPROFIT_LOADED,
    INSTALLMENTS_LOADED,
    STUDENTINSTALLMENTS_LOADED,
    INSTALLMENT_UPDATED,
@@ -21,6 +22,7 @@ import {
    INSTALLMENTS_CLEARED,
    STUDENTINSTALLMENTS_CLEARED,
    INSTALLMENTS_ERROR,
+   MONTHLYDEBT_LOADED,
 } from "./types";
 
 export const loadInstallment = (installment_id) => async (dispatch) => {
@@ -48,6 +50,27 @@ export const getTotalDebt = () => async (dispatch) => {
 
       dispatch({
          type: TOTALDEBT_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      dispatch({
+         type: INSTALLMENTS_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+      window.scroll(0, 0);
+   }
+};
+
+export const getMonthlyDebt = (month) => async (dispatch) => {
+   try {
+      let res = await api.get(`/installment/month/${month}`);
+
+      dispatch({
+         type: month === 12 ? ESTIMATEDPROFIT_LOADED : MONTHLYDEBT_LOADED,
          payload: res.data,
       });
    } catch (err) {

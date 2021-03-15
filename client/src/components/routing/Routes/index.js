@@ -33,6 +33,7 @@ import TransactionList from "../../pages/registered/admin/lists/TransactionList"
 import InstallmentList from "../../pages/registered/admin/lists/InstallmentList";
 import RegisterList from "../../pages/registered/admin/lists/RegisterList";
 import MentionList from "../../pages/registered/admin/lists/MentionList";
+import RegisterByMonth from "../../pages/registered/admin/lists/RegisterByMonth";
 
 import PrivateRoutes from "../PrivateRoutes";
 import PublicRoutes from "../PublicRoutes";
@@ -210,6 +211,12 @@ const Routes = () => {
                types={["admin", "secretary", "admin&teacher"]}
                path="/register-list"
                component={RegisterList}
+            />
+            <PrivateRoutes
+               exact
+               types={["admin", "admin&teacher"]}
+               path="/monthlyregister-list"
+               component={RegisterByMonth}
             />
             <PrivateRoutes
                exact

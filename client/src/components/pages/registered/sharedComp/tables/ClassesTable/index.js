@@ -117,7 +117,7 @@ ClassesTable.propTypes = {
    classes: PropTypes.array.isRequired,
    all: PropTypes.bool,
    clearClass: PropTypes.func.isRequired,
-   clearClasses: PropTypes.func.isRequired,
+   clearClasses: PropTypes.func,
    clearProfile: PropTypes.func,
 };
 

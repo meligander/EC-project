@@ -8,6 +8,7 @@ import {
    loadInstallments,
    installmentsPDF,
    getTotalDebt,
+   getMonthlyDebt,
 } from "../../../../../../actions/installment";
 import { updatePageNumber } from "../../../../../../actions/mixvalues";
 import { clearProfile } from "../../../../../../actions/user";
@@ -20,17 +21,24 @@ const InstallmentList = ({
    installments: {
       installments,
       loadingInstallments,
-      otherValues: { totalDebt },
+      otherValues: { totalDebt, estimatedProfit, monthlyDebt },
    },
    mixvalues: { page },
    loadInstallments,
    getTotalDebt,
+   getMonthlyDebt,
    updatePageNumber,
    clearProfile,
    installmentsPDF,
 }) => {
    const date = moment();
    const thisYear = date.year();
+
+   const [adminValues, setAdminValues] = useState({
+      oneLoad: true,
+   });
+
+   const { oneLoad } = adminValues;
 
    const [filterData, setFilterData] = useState({
       number: "",
@@ -39,7 +47,7 @@ const InstallmentList = ({
       lastname: "",
    });
 
-   const [installmentName] = useState([
+   const installmentName = [
       "Inscripción",
       "",
       "",
@@ -53,17 +61,27 @@ const InstallmentList = ({
       "Octubre",
       "Noviembre",
       "Diciembre",
-   ]);
+   ];
 
    const { number, year, name, lastname } = filterData;
 
    useEffect(() => {
-      if (loadingInstallments) {
+      if (oneLoad) {
          updatePageNumber(0);
          loadInstallments({});
          getTotalDebt();
+         getMonthlyDebt(12);
+         getMonthlyDebt(date.month() + 1);
+         setAdminValues((prev) => ({ ...prev, oneLoad: false }));
       }
-   }, [loadingInstallments, loadInstallments, getTotalDebt, updatePageNumber]);
+   }, [
+      oneLoad,
+      date,
+      loadInstallments,
+      getTotalDebt,
+      getMonthlyDebt,
+      updatePageNumber,
+   ]);
 
    const onChange = (e) => {
       setFilterData({
@@ -74,12 +92,41 @@ const InstallmentList = ({
 
    return (
       <>
-         {!loadingInstallments ? (
+         {!loadingInstallments &&
+         totalDebt !== "" &&
+         monthlyDebt !== "" &&
+         estimatedProfit !== "" ? (
             <>
                <h2 className="p-1">Lista de Deudas</h2>
                <p className="heading-tertiary text-moved-right">
-                  Total: {totalDebt !== "" ? "$" + totalDebt : "$"}
+                  Total:{" "}
+                  {totalDebt !== 0
+                     ? "$" +
+                       totalDebt
+                          .toString()
+                          .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                     : "$"}
                </p>
+               <p className="heading-tertiary text-moved-right">
+                  Deuda del Mes:{" "}
+                  {monthlyDebt !== 0
+                     ? "$" +
+                       monthlyDebt
+                          .toString()
+                          .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                     : "$"}
+               </p>
+               {date.month + 1 !== 12 && (
+                  <p className="heading-tertiary text-moved-right">
+                     Ganancia Estimada por Mes:{" "}
+                     {estimatedProfit !== 0
+                        ? "$" +
+                          estimatedProfit
+                             .toString()
+                             .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                        : "$"}
+                  </p>
+               )}
 
                <form
                   className="form"
@@ -215,6 +262,7 @@ InstallmentList.propTypes = {
    mixvalues: PropTypes.object.isRequired,
    loadInstallments: PropTypes.func.isRequired,
    getTotalDebt: PropTypes.func.isRequired,
+   getMonthlyDebt: PropTypes.func.isRequired,
    updatePageNumber: PropTypes.func.isRequired,
    installmentsPDF: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
@@ -228,6 +276,7 @@ const mapStatetoProps = (state) => ({
 export default connect(mapStatetoProps, {
    loadInstallments,
    getTotalDebt,
+   getMonthlyDebt,
    updatePageNumber,
    installmentsPDF,
    clearProfile,

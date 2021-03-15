@@ -55,7 +55,7 @@ const StudentTable = ({
                         <td className="hide-sm">
                            {user.dob && type !== "class-students"
                               ? years
-                              : moment(user.dob).format("DD/MM/YY")}
+                              : moment(user.dob).utc().format("DD/MM/YY")}
                         </td>
                         {type !== "add-child" && type !== "chosen-child" && (
                            <td className="hide-sm">{user.cel}</td>

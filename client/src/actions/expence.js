@@ -5,7 +5,6 @@ import { saveAs } from "file-saver";
 import { updateLoadingSpinner } from "./mixvalues";
 import { clearRegisters } from "./register";
 import { setAlert } from "./alert";
-import { clearProfile } from "./user";
 
 import {
    TRANSACTIONS_LOADED,
@@ -79,9 +78,7 @@ export const loadExpenceTypes = () => async (dispatch) => {
 };
 
 //Update or register a user
-export const registerExpence = (formData, history, user_id) => async (
-   dispatch
-) => {
+export const registerExpence = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    let expence = {};
@@ -101,9 +98,7 @@ export const registerExpence = (formData, history, user_id) => async (
       dispatch(clearTransactions());
       dispatch(clearRegisters());
 
-      dispatch(setAlert("Gasto/Ingreso Registrado", "success", "1", 7000));
-      dispatch(clearProfile());
-      history.push(`/dashboard/${user_id}`);
+      dispatch(setAlert("Gasto/Ingreso Registrado", "success", "2", 7000));
    } catch (err) {
       if (err.response.data.errors) {
          const errors = err.response.data.errors;

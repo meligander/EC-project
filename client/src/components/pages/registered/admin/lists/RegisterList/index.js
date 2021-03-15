@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from "react";
 import Moment from "react-moment";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { updatePageNumber } from "../../../../../../actions/mixvalues";
+import {
+   updatePageNumber,
+   updatePreviousPage,
+} from "../../../../../../actions/mixvalues";
 import {
    loadRegisters,
    deleteRegister,
    registerPDF,
+   clearRegisters,
 } from "../../../../../../actions/register";
 
 import ListButtons from "../sharedComp/ListButtons";
@@ -21,7 +26,9 @@ const RegisterList = ({
    mixvalues: { page },
    loadRegisters,
    updatePageNumber,
+   updatePreviousPage,
    deleteRegister,
+   clearRegisters,
    registerPDF,
 }) => {
    const isAdmin =
@@ -65,6 +72,23 @@ const RegisterList = ({
                   setToggleModal={setToggle}
                />
                <h2>Caja Diaria</h2>
+               {isAdmin && (
+                  <div className="btn-right my-3">
+                     <Link
+                        to="/monthlyregister-list"
+                        onClick={() => {
+                           window.scroll(0, 0);
+                           clearRegisters();
+                           updatePreviousPage("register");
+                        }}
+                        className="btn btn-light"
+                     >
+                        <i className="fas fa-list-ul"></i>&nbsp;{" "}
+                        <span className="hide-sm">Listado</span> Mensual
+                     </Link>
+                  </div>
+               )}
+
                <form
                   className="form"
                   onSubmit={(e) => {
@@ -190,7 +214,9 @@ RegisterList.propTypes = {
    mixvalues: PropTypes.object.isRequired,
    loadRegisters: PropTypes.func.isRequired,
    updatePageNumber: PropTypes.func.isRequired,
+   updatePreviousPage: PropTypes.func.isRequired,
    deleteRegister: PropTypes.func.isRequired,
+   clearRegisters: PropTypes.func.isRequired,
    registerPDF: PropTypes.func.isRequired,
 };
 
@@ -203,6 +229,8 @@ const mapStatetoProps = (state) => ({
 export default connect(mapStatetoProps, {
    loadRegisters,
    updatePageNumber,
+   updatePreviousPage,
    deleteRegister,
+   clearRegisters,
    registerPDF,
 })(RegisterList);

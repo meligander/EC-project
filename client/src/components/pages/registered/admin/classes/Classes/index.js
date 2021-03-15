@@ -57,7 +57,7 @@ const Classes = ({
          }));
       } else {
          if (oneLoad) {
-            loadClasses({});
+            if (loadingClasses) loadClasses({});
             loadUsers({ type: "teacher", active: true });
             loadCategories();
 

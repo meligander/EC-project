@@ -103,7 +103,7 @@ const TransactionList = ({
                <td>${transaction.value}</td>
                <td>{transaction.description}</td>
                <td>
-                  {registerDate === transactionDate && register.temporary && (
+                  {registerDate <= transactionDate && register.temporary && (
                      <button
                         onClick={(e) => {
                            e.preventDefault();

@@ -72,6 +72,33 @@ export const loadRegisters = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
+export const loadRegistersByMonth = () => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
+   try {
+      const res = await api.get("/register/year/bymonth");
+      dispatch({
+         type: REGISTERS_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
+      dispatch({
+         type: REGISTER_ERROR,
+         payload: {
+            type,
+            status: err.response.status,
+            msg,
+         },
+      });
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      window.scrollTo(0, 0);
+   }
+
+   dispatch(updateLoadingSpinner(false));
+};
+
 export const createRegister = (formData, user_id, history) => async (
    dispatch
 ) => {
@@ -209,7 +236,14 @@ export const registerPDF = (registers) => async (dispatch) => {
 
       const date = moment().format("DD-MM-YY");
 
-      saveAs(pdfBlob, `Caja Diaria ${date}.pdf`);
+      saveAs(
+         pdfBlob,
+         `${
+            registers[0].temporary !== undefined
+               ? "Caja Diaria"
+               : "Cajas Mensuales"
+         } ${date}.pdf`
+      );
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {

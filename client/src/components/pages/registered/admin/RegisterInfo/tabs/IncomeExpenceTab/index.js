@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { Link, withRouter } from "react-router-dom";
+import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import {
@@ -17,14 +17,13 @@ import "./style.scss";
 
 const IncomeExpenceTab = ({
    auth: { userLogged },
-   registers: { register },
+   registers: { register, loading },
    expences,
    users,
    clearExpenceTypes,
    loadUsers,
    registerExpence,
    setAlert,
-   history,
 }) => {
    const [otherValues, setOtherValues] = useState({
       show: false,
@@ -108,11 +107,24 @@ const IncomeExpenceTab = ({
    const confirm = () => {
       let des = description;
       if (teacher._id !== "") des = "Pago a " + teacher.name + ". " + des;
-      registerExpence(
-         { expencetype, value, description: des },
-         history,
-         userLogged._id
-      );
+      registerExpence({ expencetype, value, description: des });
+      if (
+         expencetype !== "" &&
+         value !== "" &&
+         register &&
+         register.registermoney >= value
+      )
+         setFormData({
+            expencetype: "",
+            value: "",
+            description: "",
+            hours: "",
+            teacher: {
+               _id: "",
+               name: "",
+               salary: "",
+            },
+         });
    };
 
    const setToggle = () => {
@@ -148,7 +160,7 @@ const IncomeExpenceTab = ({
             confirm={confirm}
             text="¿Está seguro que desea registrar un nuevo movimiento?"
          />
-         {!register && (
+         {!loading && !register && (
             <p className="bg-secondary paragraph mb-3 p-2">
                Debe ingresar dinero en la caja para registrar un nuevo
                Movimiento
@@ -308,4 +320,4 @@ export default connect(mapStateToProps, {
    loadUsers,
    clearExpenceTypes,
    setAlert,
-})(withRouter(IncomeExpenceTab));
+})(IncomeExpenceTab);
