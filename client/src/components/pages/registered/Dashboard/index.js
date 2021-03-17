@@ -13,6 +13,7 @@ import {
 import { clearTowns } from "../../../../actions/town";
 import { clearUser } from "../../../../actions/user";
 import { clearNeighbourhoods } from "../../../../actions/neighbourhood";
+import { updateExpiredIntallments } from "../../../../actions/installment";
 
 import PopUp from "../../../modal/PopUp";
 import Loading from "../../../modal/Loading";
@@ -38,6 +39,7 @@ const Dashboard = ({
    clearUser,
    deleteUser,
    clearOtherValues,
+   updateExpiredIntallments,
 }) => {
    const [otherValues, setOtherValues] = useState({
       toggleModal: false,
@@ -63,6 +65,7 @@ const Dashboard = ({
    useEffect(() => {
       if (loading) {
          loadUser(match.params.user_id);
+         updateExpiredIntallments();
       } else {
          if (type === "")
             setOtherValues((prev) => ({
@@ -70,7 +73,15 @@ const Dashboard = ({
                type: userTypeName[user.type],
             }));
       }
-   }, [loadUser, match.params.user_id, loading, user, userTypeName, type]);
+   }, [
+      loadUser,
+      match.params.user_id,
+      loading,
+      user,
+      userTypeName,
+      type,
+      updateExpiredIntallments,
+   ]);
 
    const dashboardType = () => {
       switch (user.type) {
@@ -315,6 +326,7 @@ Dashboard.prototypes = {
    clearOtherValues: PropTypes.func.isRequired,
    clearUser: PropTypes.func.isRequired,
    clearNeighbourhoods: PropTypes.func.isRequired,
+   updateExpiredIntallments: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -330,4 +342,5 @@ export default connect(mapStateToProps, {
    clearOtherValues,
    clearNeighbourhoods,
    clearUser,
+   updateExpiredIntallments,
 })(withRouter(Dashboard));

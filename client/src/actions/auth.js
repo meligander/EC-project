@@ -3,7 +3,6 @@ import api from "../utils/api";
 import { setAlert } from "./alert";
 import { changePage } from "./navbar";
 import { updateLoadingSpinner } from "./mixvalues";
-import { updateExpiredIntallments } from "./installment";
 import { clearProfile } from "./user";
 import { clearClasses } from "./class";
 
@@ -48,7 +47,6 @@ export const loginUser = (formData) => async (dispatch) => {
       });
 
       dispatch(loadUser());
-      dispatch(updateExpiredIntallments());
    } catch (err) {
       if (err.response.data.errors) {
          const errors = err.response.data.errors;

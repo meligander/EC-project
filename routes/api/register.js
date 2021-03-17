@@ -139,9 +139,11 @@ router.get("/year/bymonth", [auth, adminAuth], async (req, res) => {
             monthRegister.cheatincome += registers[x].cheatincome
                ? registers[x].cheatincome
                : 0;
-            monthRegister.difference += registers[x].difference
-               ? registers[x].difference
-               : 0;
+            monthRegister.difference = !registers[x].difference
+               ? monthRegister.difference
+               : registers[x].negative
+               ? monthRegister.difference - registers[x].difference
+               : monthRegister.difference + registers[x].difference;
          } else {
             monthRegister.month = months[monthCount];
             registerByMonth.push(monthRegister);

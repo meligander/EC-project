@@ -653,24 +653,40 @@ router.put(
             name,
             lastname,
             active,
-            ...(tel && { tel }),
-            ...(cel && { cel }),
+            sex,
+            ...(tel ? { tel } : !tel && user.tel && { tel: "" }),
+            ...(cel ? { cel } : !cel && user.cel && { cel: "" }),
             ...(type && { type }),
-            ...(dni && { dni }),
-            ...(town && { town }),
-            ...(neighbourhood && { neighbourhood }),
-            ...(address && { address }),
-            ...(dob && { dob }),
-            ...(discount && { discount }),
-            ...(chargeday && { chargeday }),
-            ...(birthprov && { birthprov }),
-            ...(birthtown && { birthtown }),
-            ...(sex && { sex }),
-            ...(degree && { degree }),
-            ...(school && { school }),
-            ...(salary && { salary }),
-            ...(children && { children }),
-            ...(description && { description }),
+            ...(dni ? { dni } : !dni && user.dni && { dni: "" }),
+            ...(town ? { town } : !town && user.town && { town: "" }),
+            ...(neighbourhood
+               ? { neighbourhood }
+               : !neighbourhood && user.neighbourhood && { neighbourhood: "" }),
+            ...(address
+               ? { address }
+               : !address && user.address && { address: "" }),
+            ...(dob ? { dob } : !dob && user.dob && { dob: "" }),
+            ...(discount
+               ? { discount }
+               : !discount && user.discount && { discount: "" }),
+            ...(chargeday
+               ? { chargeday }
+               : !chargeday && user.chargeday && { chargeday: "" }),
+            ...(birthprov
+               ? { birthprov }
+               : !birthprov && user.birthprov && { birthprov: "" }),
+            ...(birthtown
+               ? { birthtown }
+               : !birthtown && user.birthtown && { birthtown: "" }),
+            ...(degree ? { degree } : !tel && user.tel && { tel: "" }),
+            ...(school ? { school } : !school && user.school && { school: "" }),
+            ...(salary ? { salary } : !salary && user.tel && { tel: "" }),
+            ...(children
+               ? { children }
+               : !children && user.children.length > 0 && { children: [] }),
+            ...(description
+               ? { description }
+               : !description && user.description && { description: "" }),
             ...(imgObject.public_id !== "" && { img: imgObject }),
          };
 
@@ -764,7 +780,9 @@ router.put("/credentials/:id", auth, async (req, res) => {
       }
 
       let data = {
-         ...(email && { email }),
+         ...(email
+            ? { email }
+            : !email && oldCredentials.email && { email: "" }),
       };
 
       if (password) {

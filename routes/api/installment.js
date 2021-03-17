@@ -202,7 +202,7 @@ router.post(
    ],
    async (req, res) => {
       const { number, year, student, value, expired, halfPayed } = req.body;
-
+      console.log(number, year, value);
       try {
          let errors = [];
          const errorsResult = validationResult(req);
@@ -437,7 +437,16 @@ router.put("/", auth, async (req, res) => {
                   chargeDay < day) &&
                !installments[x].expired
             ) {
-               if (installments[x].number === 3 && month === 3) continue;
+               if (installments[x].number === 3 && month === 3) {
+                  if (!installments[x].debt) {
+                     await Installment.findOneAndUpdate(
+                        { _id: installments[x].id },
+                        { debt: true }
+                     );
+                  }
+                  continue;
+               }
+
                let charge = 0;
 
                if (installments[x].student.discount === 10) {

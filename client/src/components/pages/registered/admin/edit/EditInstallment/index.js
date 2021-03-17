@@ -100,7 +100,11 @@ const EditInstallment = ({
 
    const confirm = () => {
       updateIntallment(
-         { ...formData, value: value !== "" ? value : 0 },
+         {
+            ...formData,
+            value: value !== "" ? value : 0,
+            number: number === 1 ? 0 : number,
+         },
          history,
          student._id,
          edit && _id
@@ -163,9 +167,7 @@ const EditInstallment = ({
                      </select>
                      <label
                         htmlFor="year"
-                        className={`form-label ${
-                           year === "" || year === "0" ? "lbl" : ""
-                        }`}
+                        className={`form-label ${year === 0 ? "lbl" : ""}`}
                      >
                         Año
                      </label>
@@ -179,24 +181,22 @@ const EditInstallment = ({
                         disabled={edit}
                         onChange={onChange}
                      >
-                        <option value="1">* Seleccione la cuota</option>
-                        <option value="0">Inscripción</option>
-                        <option value="3">Marzo</option>
-                        <option value="4">Abril</option>
-                        <option value="5">Mayo</option>
-                        <option value="6">Junio</option>
-                        <option value="7">Julio</option>
-                        <option value="8">Agosto</option>
-                        <option value="9">Septiembre</option>
-                        <option value="10">Octubre</option>
-                        <option value="11">Noviembre</option>
-                        <option value="12">Diciembre</option>
+                        <option value={1}>* Seleccione la cuota</option>
+                        <option value={0}>Inscripción</option>
+                        <option value={3}>Marzo</option>
+                        <option value={4}>Abril</option>
+                        <option value={5}>Mayo</option>
+                        <option value={6}>Junio</option>
+                        <option value={7}>Julio</option>
+                        <option value={8}>Agosto</option>
+                        <option value={9}>Septiembre</option>
+                        <option value={10}>Octubre</option>
+                        <option value={11}>Noviembre</option>
+                        <option value={12}>Diciembre</option>
                      </select>
                      <label
                         htmlFor="number"
-                        className={`form-label ${
-                           number === "" || number === "1" ? "lbl" : ""
-                        }`}
+                        className={`form-label ${number === 1 ? "lbl" : ""}`}
                      >
                         Cuota
                      </label>

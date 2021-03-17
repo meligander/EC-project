@@ -299,6 +299,11 @@ router.post("/create-list", auth, (req, res) => {
 
    const title = "Asistencias " + periodName[period];
 
+   if (!header)
+      return res.status(400).json({
+         msg: "Debe registrar fechas antes de generar el PDF",
+      });
+
    for (let x = 0; x < header.length; x++) {
       thead += "<th>" + header[x] + "</th>";
    }
