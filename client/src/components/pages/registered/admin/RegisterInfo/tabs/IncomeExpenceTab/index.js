@@ -151,6 +151,10 @@ const IncomeExpenceTab = ({
       }
    };
 
+   const formatNumber = (number) => {
+      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+   };
+
    return (
       <>
          <Alert type="3" />
@@ -177,7 +181,9 @@ const IncomeExpenceTab = ({
                <tbody>
                   <tr>
                      <td>Dinero en Caja</td>
-                     <td>${register ? register.registermoney : 0}</td>
+                     <td>
+                        ${register ? formatNumber(register.registermoney) : 0}
+                     </td>
                   </tr>
                   <tr>
                      <td>Tipo de Movimiento</td>

@@ -223,13 +223,32 @@ export const invoicesPDF = (invoices) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const invoicePDF = (invoice, remaining) => async (dispatch) => {
+export const invoicePDF = (formData, remaining) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
-   const name =
-      !invoice.lastname || invoice.lastname === ""
-         ? `${invoice.user.lastname}, ${invoice.user.name}`
-         : `${invoice.lastname}, ${invoice.name}`;
+   let invoice = {};
+   for (const prop in formData) {
+      if (formData[prop] !== "" && formData[prop] !== 0) {
+         invoice[prop] = formData[prop];
+      }
+   }
+
+   let name = "";
+   switch (invoice.user) {
+      case null:
+         name = "Usuario Eliminado";
+         break;
+      case undefined:
+         if (invoice.lastname) {
+            name = invoice.lastname + ", " + invoice.name;
+         } else {
+            name = "Usuario no definido";
+         }
+         break;
+      default:
+         name = invoice.user.lastname + ", " + invoice.user.name;
+         break;
+   }
 
    try {
       await api.post("/invoice/create-invoice", { invoice, remaining });

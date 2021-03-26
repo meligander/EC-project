@@ -274,12 +274,6 @@ router.post(
                });
          }
 
-         if (lastname === "" && name === "" && user._id === "") {
-            return res.status(400).json({
-               msg: "La factura debe estar a nombre de alguien",
-            });
-         }
-
          let last = await Register.find().sort({ $natural: -1 }).limit(1);
          last = last[0];
 
@@ -308,21 +302,6 @@ router.post(
             );
          }
 
-         let data = {
-            invoiceid,
-            ...(user._id !== "" && { user: user._id }),
-            ...(name !== "" && { name }),
-            ...(lastname !== "" && { lastname }),
-            ...(email !== "" && { email }),
-            total,
-            details: newDetails,
-            remaining,
-         };
-
-         let invoice = new Invoice(data);
-
-         await invoice.save();
-
          const plusvalue = Math.floor((last.registermoney + total) * 100) / 100;
 
          if (last.temporary) {
@@ -344,7 +323,26 @@ router.post(
             const register = new Register(data);
 
             await register.save();
+
+            last = await Register.find().sort({ $natural: -1 }).limit(1);
+            last = last[0];
          }
+
+         let data = {
+            invoiceid,
+            ...(user && { user: user._id }),
+            ...(name && { name }),
+            ...(lastname && { lastname }),
+            ...(email && { email }),
+            total,
+            details: newDetails,
+            remaining,
+            register: last._id,
+         };
+
+         let invoice = new Invoice(data);
+
+         await invoice.save();
 
          res.json({ msg: "Invoice Registered" });
       } catch (err) {
@@ -368,22 +366,24 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
       const date =
          " <td>" + moment(invoices[x].date).format("DD/MM/YY") + "</td>";
       const id = "<td>" + invoices[x].invoiceid + "</td>";
-      let name = "";
 
-      if (invoices[x].user === undefined) {
-         name =
-            "<td>" + invoices[x].lastname + ", " + invoices[x].name + "</td>";
-      } else {
-         if (invoices[x].user === null) name = "<td>Usuario Eliminado</td>";
-         else
-            name =
-               "<td>" +
-               invoices[x].user.lastname +
-               ", " +
-               invoices[x].user.name +
-               "</td>";
+      let name = "";
+      switch (invoice.user) {
+         case null:
+            name = "Usuario Eliminado";
+            break;
+         case undefined:
+            if (invoice.lastname) {
+               name = invoice.lastname + ", " + invoice.name;
+            } else {
+               name = "Usuario no definido";
+            }
+            break;
+         default:
+            name = invoice.user.lastname + ", " + invoice.user.name;
+            break;
       }
-      const total = "<td> $" + invoices[x].total + "</td>";
+      const total = "<td> $" + formatNumber(invoices[x].total) + "</td>";
 
       tbody += "<tr>" + date + id + name + total + "</tr>";
    }
@@ -473,27 +473,39 @@ router.post("/create-invoice", [auth, adminAuth], (req, res) => {
          year = `<td>${invoice.details[x].item.year}</td>`;
       }
 
-      const value = `<td> $${invoice.details[x].value} </td>`;
-      const payment = `<td> $${invoice.details[x].payment} </td>`;
+      const value = `<td> $${formatNumber(invoice.details[x].value)} </td>`;
+      const payment = `<td> $${formatNumber(invoice.details[x].payment)} </td>`;
       tbody += "<tr>" + userName + instName + year + value + payment + "</tr>";
    }
 
+   let userName = "";
+   let email = "";
+   switch (invoice.user) {
+      case null:
+         userName = "Usuario Eliminado";
+         break;
+      case undefined:
+         if (invoice.lastname) {
+            userName = invoice.lastname + ", " + invoice.name;
+            email = invoice.email ? invoice.email : "";
+         } else {
+            userName = "Usuario no definido";
+         }
+         break;
+      default:
+         userName = invoice.user.lastname + ", " + invoice.user.name;
+         email = invoice.user.email ? invoice.user.email : "";
+         break;
+   }
+
    let invoiceDetails = {
-      user: invoice.lastname
-         ? `${invoice.lastname}, ${invoice.name}`
-         : `${invoice.user.lastname}, ${invoice.user.name}`,
-      email: invoice.user
-         ? invoice.user.email
-            ? invoice.user.email
-            : ""
-         : invoice.email
-         ? invoice.email
-         : "",
+      user: userName,
+      email,
       cel: invoice.user ? (invoice.user.cel ? invoice.user.cel : "") : "",
       invoiceid: invoice.invoiceid,
       date: moment(invoice.date).format("DD/MM/YY"),
-      total: invoice.total,
-      remaining,
+      total: formatNumber(invoice.total),
+      remaining: formatNumber(remaining),
    };
 
    const img = path.join(
@@ -575,6 +587,10 @@ Array.prototype.unique = function () {
    }
 
    return a;
+};
+
+const formatNumber = (number) => {
+   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
 module.exports = router;

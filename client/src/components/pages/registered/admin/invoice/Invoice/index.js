@@ -18,6 +18,7 @@ const Invoice = ({
    invoices: { invoice, loading },
 }) => {
    const [remaining, setRemaining] = useState(0);
+   const [name, setName] = useState("");
 
    useEffect(() => {
       if (!loading) {
@@ -26,6 +27,24 @@ const Invoice = ({
             rem += invoice.details[x].value - invoice.details[x].payment;
          }
          setRemaining(rem);
+
+         let name = "";
+         switch (invoice.user) {
+            case null:
+               name = "Usuario Eliminado";
+               break;
+            case undefined:
+               if (invoice.lastname) {
+                  name = invoice.lastname + ", " + invoice.name;
+               } else {
+                  name = "Usuario no definido";
+               }
+               break;
+            default:
+               name = invoice.user.lastname + ", " + invoice.user.name;
+               break;
+         }
+         setName(name);
       } else loadInvoice(match.params.invoice_id);
    }, [loadInvoice, match.params, invoice, loading]);
 
@@ -44,6 +63,10 @@ const Invoice = ({
       "Nov",
       "Dic",
    ];
+
+   const formatNumber = (number) => {
+      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+   };
 
    return (
       <>
@@ -68,13 +91,7 @@ const Invoice = ({
                   <div className="row mt-3">
                      <div>
                         <p className="paragraph text-dark">Cliente:</p>
-                        <p className="paragraph">
-                           {invoice.user === null
-                              ? "Usuario Eliminado"
-                              : invoice.user
-                              ? invoice.user.lastname + ", " + invoice.user.name
-                              : invoice.lastname + ", " + invoice.name}
-                        </p>
+                        <p className="paragraph">{name}</p>
                         <p className="paragraph">
                            {!invoice.email
                               ? invoice.user
@@ -122,8 +139,8 @@ const Invoice = ({
                                     <td>
                                        {installment[invoice.installment.number]}
                                     </td>
-                                    <td>${invoice.value}</td>
-                                    <td>${invoice.payment}</td>
+                                    <td>${formatNumber(invoice.value)}</td>
+                                    <td>${formatNumber(invoice.payment)}</td>
                                  </tr>
                               ))}
                         </tbody>
@@ -136,7 +153,7 @@ const Invoice = ({
                         </span>
                         <input
                            className="value paragraph"
-                           value={`$${remaining}`}
+                           value={`$${formatNumber(remaining)}`}
                            disabled
                         />
                      </p>
@@ -147,7 +164,7 @@ const Invoice = ({
 
                         <input
                            className="value paragraph"
-                           value={`$${invoice.total}`}
+                           value={`$${formatNumber(invoice.total)}`}
                            disabled
                         />
                      </p>

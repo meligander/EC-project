@@ -97,6 +97,10 @@ const AdminDashboard = ({
       getActiveClasses,
    ]);
 
+   const formatNumber = (number) => {
+      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+   };
+
    return (
       <>
          {!loading &&
@@ -176,13 +180,13 @@ const AdminDashboard = ({
                         <p className=" heading-tertiary">
                            <span className="text-dark">Ingresos: </span>$
                            {register && register.income && register.temporary
-                              ? register.income
+                              ? formatNumber(register.income)
                               : 0}
                         </p>
                         <p className=" heading-tertiary">
                            <span className="text-dark">Egresos: </span>$
                            {register && register.expence && register.temporary
-                              ? register.expence
+                              ? formatNumber(register.expence)
                               : 0}
                         </p>
                      </div>
@@ -254,7 +258,7 @@ const AdminDashboard = ({
                      <div className="text-center mt-4">
                         <p className="heading-tertiary">
                            <span className="text-dark">Deuda: </span>$
-                           {totalDebt}
+                           {formatNumber(totalDebt)}
                         </p>
                         <p className="heading-tertiary">
                            <span className="text-dark">Alumnos Activos: </span>

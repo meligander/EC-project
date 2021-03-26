@@ -147,12 +147,6 @@ router.post(
                msg: "No se puede utilizar más dinero del que hay en caja",
             });
 
-         let data = { value, expencetype, description };
-
-         let expence = new Expence(data);
-
-         await expence.save();
-
          //search for the last expence
          let expences = await Expence.find()
             .populate("expencetype")
@@ -211,7 +205,16 @@ router.post(
             const register = new Register(data);
 
             await register.save();
+
+            last = await Register.find().sort({ $natural: -1 }).limit(1);
+            last = last[0];
          }
+
+         let data = { value, expencetype, description, register: last._id };
+
+         let expence = new Expence(data);
+
+         await expence.save();
 
          res.json({ msg: "Expence Register" });
       } catch (err) {

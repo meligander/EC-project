@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import Moment from "react-moment";
-import moment from "moment";
 import PropTypes from "prop-types";
 
 import {
@@ -11,6 +10,7 @@ import {
    deleteInvoice,
    invoicesPDF,
 } from "../../../../../../actions/invoice";
+import { loadRegister } from "../../../../../../actions/register";
 import { updatePageNumber } from "../../../../../../actions/mixvalues";
 
 import ListButtons from "../sharedComp/ListButtons";
@@ -24,8 +24,10 @@ import "./style.scss";
 const IncomeList = ({
    auth: { userLogged },
    invoices: { loadingInvoices, invoices },
+   registers: { register, loading },
    mixvalues: { page },
    loadInvoices,
+   loadRegister,
    clearInvoice,
    updatePageNumber,
    invoicesPDF,
@@ -54,7 +56,8 @@ const IncomeList = ({
          updatePageNumber(0);
          loadInvoices({});
       }
-   }, [loadingInvoices, loadInvoices, updatePageNumber]);
+      if (loading) loadRegister();
+   }, [loadingInvoices, loadInvoices, loadRegister, updatePageNumber, loading]);
 
    const onChange = (e) => {
       setFilterData({
@@ -70,9 +73,33 @@ const IncomeList = ({
       });
    };
 
+   const formatNumber = (number) => {
+      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+   };
+
+   const setName = (invoice) => {
+      let name = "";
+      switch (invoice.user) {
+         case null:
+            name = "Usuario Eliminado";
+            break;
+         case undefined:
+            if (invoice.lastname) {
+               name = invoice.lastname + ", " + invoice.name;
+            } else {
+               name = "Usuario no definido";
+            }
+            break;
+         default:
+            name = invoice.user.lastname + ", " + invoice.user.name;
+            break;
+      }
+      return name;
+   };
+
    return (
       <>
-         {!loadingInvoices ? (
+         {!loadingInvoices && !loading ? (
             <>
                <PopUp
                   toggleModal={toggleModal}
@@ -119,8 +146,9 @@ const IncomeList = ({
                               <th>Total</th>
                               <th>&nbsp;</th>
                               {isAdmin &&
-                                 moment(invoices[0].date).date() ===
-                                    moment().date() && <th>&nbsp;</th>}
+                                 invoices[0].register &&
+                                 invoices[0].register === register._id &&
+                                 register.temporary && <th>&nbsp;</th>}
                            </tr>
                         </thead>
                         <tbody>
@@ -137,18 +165,10 @@ const IncomeList = ({
                                              />
                                           </td>
                                           <td>{invoice.invoiceid}</td>
+                                          <td>{setName(invoice)}</td>
                                           <td>
-                                             {invoice.user === null
-                                                ? "Usuario Eliminado"
-                                                : invoice.user
-                                                ? invoice.user.lastname +
-                                                  ", " +
-                                                  invoice.user.name
-                                                : invoice.lastname +
-                                                  ", " +
-                                                  invoice.name}
+                                             ${formatNumber(invoice.total)}
                                           </td>
-                                          <td>{invoice.total}</td>
                                           <td>
                                              <Link
                                                 to={`/invoice/${invoice._id}`}
@@ -162,26 +182,27 @@ const IncomeList = ({
                                              </Link>
                                           </td>
                                           {isAdmin &&
-                                             moment(arr[0].date).date() ===
-                                                moment().date() && (
+                                             arr[0].register &&
+                                             arr[0].register === register._id &&
+                                             register.temporary && (
                                                 <td>
-                                                   {moment(
-                                                      invoice.date
-                                                   ).date() ===
-                                                      moment().date() && (
-                                                      <button
-                                                         type="button"
-                                                         onClick={(e) => {
-                                                            e.preventDefault();
-                                                            setToggle(
-                                                               invoice._id
-                                                            );
-                                                         }}
-                                                         className="btn btn-danger"
-                                                      >
-                                                         <i className="far fa-trash-alt"></i>
-                                                      </button>
-                                                   )}
+                                                   {invoice.register &&
+                                                      invoice.register ===
+                                                         register._id &&
+                                                      register.temporary && (
+                                                         <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                               e.preventDefault();
+                                                               setToggle(
+                                                                  invoice._id
+                                                               );
+                                                            }}
+                                                            className="btn btn-danger"
+                                                         >
+                                                            <i className="far fa-trash-alt"></i>
+                                                         </button>
+                                                      )}
                                                 </td>
                                              )}
                                        </tr>
@@ -209,8 +230,10 @@ const IncomeList = ({
 
 IncomeList.propTypes = {
    auth: PropTypes.object.isRequired,
+   registers: PropTypes.object.isRequired,
    invoices: PropTypes.object.isRequired,
    loadInvoices: PropTypes.func.isRequired,
+   loadRegister: PropTypes.func.isRequired,
    updatePageNumber: PropTypes.func.isRequired,
    deleteInvoice: PropTypes.func.isRequired,
    clearInvoice: PropTypes.func.isRequired,
@@ -221,6 +244,7 @@ const mapStatetoProps = (state) => ({
    auth: state.auth,
    invoices: state.invoices,
    mixvalues: state.mixvalues,
+   registers: state.registers,
 });
 
 export default connect(mapStatetoProps, {
@@ -229,4 +253,5 @@ export default connect(mapStatetoProps, {
    deleteInvoice,
    invoicesPDF,
    clearInvoice,
+   loadRegister,
 })(IncomeList);

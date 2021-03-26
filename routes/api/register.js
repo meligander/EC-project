@@ -145,7 +145,7 @@ router.get("/year/bymonth", [auth, adminAuth], async (req, res) => {
                ? monthRegister.difference - registers[x].difference
                : monthRegister.difference + registers[x].difference;
          } else {
-            monthRegister.month = months[monthCount];
+            monthRegister = roundData(monthRegister, monthCount, months);
             registerByMonth.push(monthRegister);
             monthRegister = {
                month: "",
@@ -159,7 +159,8 @@ router.get("/year/bymonth", [auth, adminAuth], async (req, res) => {
             x--;
          }
       }
-      monthRegister.month = months[monthCount];
+
+      monthRegister = roundData(monthRegister, monthCount, months);
       registerByMonth.push(monthRegister);
       monthCount++;
 
@@ -457,5 +458,18 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       res.status(500).send("Server error");
    }
 });
+
+const roundData = (monthRegister, monthCount, months) => {
+   const monthRegisters = {
+      month: months[monthCount],
+      income: Math.floor(monthRegister.income * 100) / 100,
+      expence: Math.floor(monthRegister.expence * 100) / 100,
+      withdrawal: Math.floor(monthRegister.withdrawal * 100) / 100,
+      cheatincome: Math.floor(monthRegister.cheatincome * 100) / 100,
+      difference: Math.floor(monthRegister.difference * 100) / 100,
+   };
+
+   return monthRegisters;
+};
 
 module.exports = router;

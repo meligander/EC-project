@@ -23,6 +23,10 @@ const RegisterByMonth = ({
       }
    }, [loadingRegisters, loadRegistersByMonth, updatePreviousPage]);
 
+   const formatNumber = (number) => {
+      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+   };
+
    return (
       <>
          {!loadingRegisters ? (
@@ -48,19 +52,19 @@ const RegisterByMonth = ({
                                  <th>{register.month}</th>
                                  <td>
                                     {register.income !== 0 &&
-                                       "$" + register.income}
+                                       "$" + formatNumber(register.income)}
                                  </td>
                                  <td>
                                     {register.expence !== 0 &&
-                                       "$" + register.expence}
+                                       "$" + formatNumber(register.expence)}
                                  </td>
                                  <td>
                                     {register.cheatincome !== 0 &&
-                                       "$" + register.cheatincome}
+                                       "$" + formatNumber(register.cheatincome)}
                                  </td>
                                  <td>
                                     {register.withdrawal !== 0 &&
-                                       "$" + register.withdrawal}
+                                       "$" + formatNumber(register.withdrawal)}
                                  </td>
                                  <td
                                     className={
@@ -69,8 +73,10 @@ const RegisterByMonth = ({
                                  >
                                     {register.difference !== 0
                                        ? register.difference < 0
-                                          ? "-$" + register.difference
-                                          : "+$" + register.difference
+                                          ? "-$" +
+                                            formatNumber(register.difference)
+                                          : "+$" +
+                                            formatNumber(register.difference)
                                        : ""}
                                  </td>
                               </tr>

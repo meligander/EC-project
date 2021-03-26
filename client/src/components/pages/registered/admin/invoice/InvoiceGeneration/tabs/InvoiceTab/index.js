@@ -185,11 +185,19 @@ const InvoiceTab = ({
 
    const confirm = () => {
       registerInvoice(
-         { ...invoice, invoiceid: invoiceNumber },
+         {
+            ...invoice,
+            invoiceid: invoiceNumber,
+            user: user._id !== "" ? user : "",
+         },
          remaining,
          history,
          userLogged._id
       );
+   };
+
+   const formatNumber = (number) => {
+      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
    };
 
    return (
@@ -410,7 +418,7 @@ const InvoiceTab = ({
                                  </td>
                                  <td>{installment[invoice.item.number]}</td>
                                  <td>{invoice.item.year}</td>
-                                 <td>{invoice.item.value}</td>
+                                 <td>${formatNumber(invoice.item.value)}</td>
                                  <td>
                                     <input
                                        type="number"

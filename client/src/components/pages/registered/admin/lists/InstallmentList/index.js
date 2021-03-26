@@ -23,6 +23,7 @@ const InstallmentList = ({
       loadingInstallments,
       otherValues: { totalDebt, estimatedProfit, monthlyDebt },
    },
+   auth: { userLogged },
    mixvalues: { page },
    loadInstallments,
    getTotalDebt,
@@ -90,6 +91,10 @@ const InstallmentList = ({
       });
    };
 
+   const formatNumber = (number) => {
+      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+   };
+
    return (
       <>
          {!loadingInstallments &&
@@ -99,34 +104,22 @@ const InstallmentList = ({
             <>
                <h2 className="p-1">Lista de Deudas</h2>
                <p className="heading-tertiary text-moved-right">
-                  Total:{" "}
-                  {totalDebt !== 0
-                     ? "$" +
-                       totalDebt
-                          .toString()
-                          .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-                     : "$"}
+                  Total: {totalDebt !== 0 ? "$" + formatNumber(totalDebt) : "$"}
                </p>
                <p className="heading-tertiary text-moved-right">
                   Deuda del Mes:{" "}
-                  {monthlyDebt !== 0
-                     ? "$" +
-                       monthlyDebt
-                          .toString()
-                          .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-                     : "$"}
+                  {monthlyDebt !== 0 ? "$" + formatNumber(monthlyDebt) : "$"}
                </p>
-               {date.month + 1 !== 12 && (
-                  <p className="heading-tertiary text-moved-right">
-                     Ganancia Estimada por Mes:{" "}
-                     {estimatedProfit !== 0
-                        ? "$" +
-                          estimatedProfit
-                             .toString()
-                             .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-                        : "$"}
-                  </p>
-               )}
+               {date.month + 1 !== 12 &&
+                  (userLogged.type === "admin" ||
+                     userLogged.type === "admin&teacher") && (
+                     <p className="heading-tertiary text-moved-right">
+                        Ganancia Estimada por Mes:{" "}
+                        {estimatedProfit !== 0
+                           ? "$" + formatNumber(estimatedProfit)
+                           : "$"}
+                     </p>
+                  )}
 
                <form
                   className="form"
@@ -234,7 +227,8 @@ const InstallmentList = ({
                                                 : ""
                                           }
                                        >
-                                          {"$" + installment.value}
+                                          {"$" +
+                                             formatNumber(installment.value)}
                                        </td>
                                     </tr>
                                  )
@@ -260,6 +254,7 @@ const InstallmentList = ({
 InstallmentList.propTypes = {
    installments: PropTypes.object.isRequired,
    mixvalues: PropTypes.object.isRequired,
+   auth: PropTypes.object.isRequired,
    loadInstallments: PropTypes.func.isRequired,
    getTotalDebt: PropTypes.func.isRequired,
    getMonthlyDebt: PropTypes.func.isRequired,
@@ -271,6 +266,7 @@ InstallmentList.propTypes = {
 const mapStatetoProps = (state) => ({
    installments: state.installments,
    mixvalues: state.mixvalues,
+   auth: state.auth,
 });
 
 export default connect(mapStatetoProps, {

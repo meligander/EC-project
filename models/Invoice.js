@@ -48,6 +48,10 @@ const InvoiceSchema = new mongoose.Schema({
          },
       },
    ],
+   register: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "register",
+   },
 });
 
 const Invoice = mongoose.model("invoice", InvoiceSchema);

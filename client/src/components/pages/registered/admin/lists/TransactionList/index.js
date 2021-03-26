@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import Moment from "react-moment";
-import moment from "moment";
 import PropTypes from "prop-types";
 
 import {
@@ -84,11 +83,12 @@ const TransactionList = ({
       });
    };
 
+   const formatNumber = (number) => {
+      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+   };
+
    const type = (transaction) => {
       if (transaction.expencetype) {
-         let registerDate = moment(register.date).format("DD/MM/YY");
-         let transactionDate = moment(transaction.date).format("DD/MM/YY");
-
          return (
             <tr
                key={transaction._id}
@@ -100,39 +100,50 @@ const TransactionList = ({
                <td>{`${expenceType[transaction.expencetype.type].nameType} - ${
                   transaction.expencetype.name
                }`}</td>
-               <td>${transaction.value}</td>
+               <td>${formatNumber(transaction.value)}</td>
                <td>{transaction.description}</td>
                <td>
-                  {registerDate <= transactionDate && register.temporary && (
-                     <button
-                        onClick={(e) => {
-                           e.preventDefault();
-                           setToggle(transaction._id);
-                        }}
-                        className="btn btn-danger"
-                     >
-                        <i className="far fa-trash-alt"></i>
-                     </button>
-                  )}
+                  {transaction.register &&
+                     transaction.register === register._id &&
+                     register.temporary && (
+                        <button
+                           onClick={(e) => {
+                              e.preventDefault();
+                              setToggle(transaction._id);
+                           }}
+                           className="btn btn-danger"
+                        >
+                           <i className="far fa-trash-alt"></i>
+                        </button>
+                     )}
                </td>
             </tr>
          );
       } else {
          let name = "";
 
-         if (transaction.user) {
-            name = transaction.user.lastname + ", " + transaction.user.name;
-         } else {
-            name = transaction.lastname + ", " + transaction.name;
+         switch (transaction.user) {
+            case null:
+               name = "Usuario Eliminado";
+               break;
+            case undefined:
+               if (transaction.lastname) {
+                  name = transaction.lastname + ", " + transaction.name;
+               } else {
+                  name = "Usuario no definido";
+               }
+               break;
+            default:
+               name = transaction.user.lastname + ", " + transaction.user.name;
+               break;
          }
-
          return (
             <tr key={transaction._id} className="bg-income">
                <td>
                   <Moment date={transaction.date} format="DD/MM/YY" />
                </td>
                <td>Ingreso</td>
-               <td>${transaction.total}</td>
+               <td>${formatNumber(transaction.total)}</td>
                <td>Factura {name}</td>
                <td>
                   <Link

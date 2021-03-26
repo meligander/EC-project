@@ -61,6 +61,10 @@ const RegisterList = ({
       setToggleModal(!toggleModal);
    };
 
+   const formatNumber = (number) => {
+      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+   };
+
    return (
       <>
          {!loadingRegisters ? (
@@ -141,21 +145,32 @@ const RegisterList = ({
                                        </td>
                                        <td>
                                           {register.income &&
-                                             "$" + register.income}
+                                             "$" +
+                                                formatNumber(register.income)}
                                        </td>
                                        <td>
                                           {register.expence &&
-                                             "$" + register.expence}
+                                             "$" +
+                                                formatNumber(register.expence)}
                                        </td>
                                        <td>
                                           {register.cheatincome &&
-                                             "$" + register.cheatincome}
+                                             "$" +
+                                                formatNumber(
+                                                   register.cheatincome
+                                                )}
                                        </td>
                                        <td>
                                           {register.withdrawal &&
-                                             "$" + register.withdrawal}
+                                             "$" +
+                                                formatNumber(
+                                                   register.withdrawal
+                                                )}
                                        </td>
-                                       <td>${register.registermoney}</td>
+                                       <td>
+                                          $
+                                          {formatNumber(register.registermoney)}
+                                       </td>
                                        <td
                                           className={
                                              register.negative ? "debt" : ""
@@ -164,8 +179,14 @@ const RegisterList = ({
                                           {register.difference !== 0 &&
                                              register.difference &&
                                              (register.negative
-                                                ? "-$" + register.difference
-                                                : "+$" + register.difference)}
+                                                ? "-$" +
+                                                  formatNumber(
+                                                     register.difference
+                                                  )
+                                                : "+$" +
+                                                  formatNumber(
+                                                     register.difference
+                                                  ))}
                                        </td>
                                        <td>
                                           {register.description &&

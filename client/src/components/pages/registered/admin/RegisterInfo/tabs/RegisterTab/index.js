@@ -60,6 +60,10 @@ const RegisterTab = ({
       else closeRegister(formData, userLogged._id, history);
    };
 
+   const formatNumber = (number) => {
+      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+   };
+
    return (
       <>
          {!loading ? (
@@ -89,7 +93,7 @@ const RegisterTab = ({
                                     {register &&
                                     register.temporary &&
                                     register.income
-                                       ? register.income
+                                       ? formatNumber(register.income)
                                        : 0}
                                  </td>
                                  <td>
@@ -115,7 +119,7 @@ const RegisterTab = ({
                                     {register &&
                                     register.temporary &&
                                     register.expence
-                                       ? register.expence
+                                       ? formatNumber(register.expence)
                                        : 0}
                                  </td>
                                  <td>
@@ -141,7 +145,7 @@ const RegisterTab = ({
                                     {register &&
                                     register.temporary &&
                                     register.cheatincome
-                                       ? register.cheatincome
+                                       ? formatNumber(register.cheatincome)
                                        : 0}
                                  </td>
                                  <td>&nbsp;</td>
@@ -153,14 +157,18 @@ const RegisterTab = ({
                                     {register &&
                                     register.temporary &&
                                     register.withdrawal
-                                       ? register.withdrawal
+                                       ? formatNumber(register.withdrawal)
                                        : 0}
                                  </td>
                                  <td>&nbsp;</td>
                               </tr>
                               <tr>
                                  <td>Plata Caja</td>
-                                 <td>${register && register.registermoney}</td>
+                                 <td>
+                                    $
+                                    {register &&
+                                       formatNumber(register.registermoney)}
+                                 </td>
                                  <td>
                                     <Link
                                        to="/register-list"
