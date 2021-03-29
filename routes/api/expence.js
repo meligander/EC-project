@@ -148,11 +148,11 @@ router.post(
             });
 
          //search for the last expence
-         let expences = await Expence.find()
+         let expence = await Expence.find()
             .populate("expencetype")
             .sort({ $natural: -1 })
             .limit(1);
-         expence = expences[0];
+         expence = expence[0];
 
          value = Number(value);
 
@@ -212,7 +212,7 @@ router.post(
 
          let data = { value, expencetype, description, register: last._id };
 
-         let expence = new Expence(data);
+         expence = new Expence(data);
 
          await expence.save();
 
