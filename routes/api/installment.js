@@ -282,7 +282,7 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
          "</td>";
       const installment = "<td>" + installments[debts[x].number] + "</td>";
       const year = "<td>" + debts[x].year + "</td>";
-      const value = "<td> $" + debts[x].value + "</td>";
+      const value = "<td> $" + formatNumber(debts[x].value) + "</td>";
 
       tbody += "<tr>" + studentname + installment + year + value + "</tr>";
    }
@@ -499,7 +499,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-function buildTable(installments, admin) {
+const buildTable = (installments, admin) => {
    let rows = [];
    let years = [];
 
@@ -560,9 +560,9 @@ function buildTable(installments, admin) {
    }
    if (newYears.length > 0) years = newYears;
    return { years, rows };
-}
+};
 
-function sortArray(array) {
+const sortArray = (array) => {
    const sortedArray = array.sort((a, b) => {
       if (a.student.lastname > b.student.lastname) return 1;
       if (a.student.lastname < b.student.lastname) return -1;
@@ -578,6 +578,10 @@ function sortArray(array) {
    });
 
    return sortedArray;
-}
+};
+
+const formatNumber = (number) => {
+   return new Intl.NumberFormat("de-DE").format(number);
+};
 
 module.exports = router;

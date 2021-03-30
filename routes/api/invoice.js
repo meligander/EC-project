@@ -590,7 +590,7 @@ Array.prototype.unique = function () {
 };
 
 const formatNumber = (number) => {
-   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+   return new Intl.NumberFormat("de-DE").format(number);
 };
 
 module.exports = router;

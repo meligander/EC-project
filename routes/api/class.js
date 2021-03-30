@@ -641,7 +641,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-async function deleteInfoRelated(classroom, enrollmentsToDelete) {
+const deleteInfoRelated = async (classroom, enrollmentsToDelete) => {
    let enrollments = [];
    if (classroom) {
       enrollments = await Enrollment.find({
@@ -685,6 +685,6 @@ async function deleteInfoRelated(classroom, enrollmentsToDelete) {
          }
       }
    }
-}
+};
 
 module.exports = router;

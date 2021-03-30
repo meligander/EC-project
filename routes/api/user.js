@@ -860,16 +860,16 @@ router.delete("/:id/:type", [auth, adminAuth], async (req, res) => {
    }
 });
 
-function deletePictures(img) {
+const deletePictures = (img) => {
    cloudinary.v2.uploader.destroy(img.public_id, function (error, result) {
       if (error) {
          return result.status(400).json(error);
       }
       console.log(result);
    });
-}
+};
 
-async function inactivateUser(user_id, type, completeDeletion) {
+const inactivateUser = async (user_id, type, completeDeletion) => {
    switch (type) {
       case "student":
          const date = new Date();
@@ -1006,9 +1006,9 @@ async function inactivateUser(user_id, type, completeDeletion) {
       default:
          break;
    }
-}
+};
 
-function newUserEmail(type, email) {
+const newUserEmail = (type, email) => {
    let text = "";
 
    switch (type) {
@@ -1038,9 +1038,9 @@ function newUserEmail(type, email) {
       utilizando este mail y la contraseña '12345678'. Le recomendamos que cambie la contraseña
        para que sea más seguro. <br/>En la página podrá ${text}`
    );
-}
+};
 
-function sortArray(array) {
+const sortArray = (array) => {
    const sortedArray = array.sort((a, b) => {
       if (a.lastname > b.lastname) return 1;
       if (a.lastname < b.lastname) return -1;
@@ -1050,6 +1050,6 @@ function sortArray(array) {
    });
 
    return sortedArray;
-}
+};
 
 module.exports = router;

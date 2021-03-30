@@ -410,7 +410,7 @@ router.delete("/date/:date/:classroom", auth, async (req, res) => {
    }
 });
 
-async function buildTable(attendances, class_id, res) {
+const buildTable = async (attendances, class_id, res) => {
    let users = [];
    let enrollments = [];
    try {
@@ -570,9 +570,9 @@ async function buildTable(attendances, class_id, res) {
       periods.push(period);
    }
    return { header, students, periods };
-}
+};
 
-function getDaysBetweenDates(start, end, dayName) {
+const getDaysBetweenDates = (start, end, dayName) => {
    let result = [];
    let days = { Lunes: 1, Martes: 2, Miércoles: 3, Jueves: 4, Viernes: 5 };
 
@@ -591,6 +591,6 @@ function getDaysBetweenDates(start, end, dayName) {
       current.setDate(current.getDate() + 7);
    }
    return result;
-}
+};
 
 module.exports = router;

@@ -84,7 +84,7 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
 
    for (let x = 0; x < category.length; x++) {
       const name = "<td>" + category[x].name + "</td>";
-      const value = "<td>" + category[x].value + "</td>";
+      const value = "<td>$" + formatNumber(category[x].value) + "</td>";
 
       tbody += "<tr>" + name + value + "</tr>";
    }
@@ -246,5 +246,9 @@ router.put(
       }
    }
 );
+
+const formatNumber = (number) => {
+   return new Intl.NumberFormat("de-DE").format(number);
+};
 
 module.exports = router;

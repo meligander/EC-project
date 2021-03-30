@@ -1068,7 +1068,7 @@ router.delete("/:type/:classroom/:period", auth, async (req, res) => {
    }
 });
 
-function buildStudentTable(grades, reportCard) {
+const buildStudentTable = (grades, reportCard) => {
    let obj = grades.reduce((res, curr) => {
       if (res[curr.gradetype.name]) {
          res[curr.gradetype.name].push(curr);
@@ -1094,9 +1094,9 @@ function buildStudentTable(grades, reportCard) {
    let headers = Object.getOwnPropertyNames(obj);
 
    return { headers, rows };
-}
+};
 
-async function buildClassTable(grades, class_id, res) {
+const buildClassTable = async (grades, class_id, res) => {
    let users = [];
 
    try {
@@ -1252,9 +1252,9 @@ async function buildClassTable(grades, class_id, res) {
    }
 
    return { header, students, periods };
-}
+};
 
-function buildAllGradesTable(students, periods, className) {
+const buildAllGradesTable = (students, periods, className) => {
    let table = [];
 
    for (let x = 0; x < students.length; x++) {
@@ -1289,9 +1289,9 @@ function buildAllGradesTable(students, periods, className) {
    }
 
    return table;
-}
+};
 
-function kinderGrade(grade) {
+const kinderGrade = (grade) => {
    switch (true) {
       case grade === "":
          return "";
@@ -1308,6 +1308,6 @@ function kinderGrade(grade) {
       default:
          return "";
    }
-}
+};
 
 module.exports = router;

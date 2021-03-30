@@ -270,8 +270,8 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
       const value =
          "<td> $" +
          (transactions[x].expencetype
-            ? transactions[x].value
-            : transactions[x].total) +
+            ? formatNumber(transactions[x].value)
+            : formatNumber(transactions[x].total)) +
          "</td>";
       const description =
          "<td>" +
@@ -368,13 +368,17 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-function sortArray(array) {
+const sortArray = (array) => {
    let sortedArray = array.sort((a, b) => {
       if (a.date > b.date) return -1;
       if (a.date < b.date) return 1;
    });
 
    return sortedArray;
-}
+};
+
+const formatNumber = (number) => {
+   return new Intl.NumberFormat("de-DE").format(number);
+};
 
 module.exports = router;

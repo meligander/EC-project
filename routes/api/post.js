@@ -306,7 +306,7 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
    }
 });
 
-function countUnseenPosts(posts, user) {
+const countUnseenPosts = (posts, user) => {
    let count = 0;
 
    for (let x = 0; x < posts.length; x++) {
@@ -324,6 +324,6 @@ function countUnseenPosts(posts, user) {
    }
 
    return count;
-}
+};
 
 module.exports = router;

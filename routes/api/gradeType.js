@@ -136,7 +136,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-async function buildTable(gradetypes) {
+const buildTable = async (gradetypes) => {
    let categories = [];
 
    try {
@@ -179,6 +179,6 @@ async function buildTable(gradetypes) {
       if (x !== gradetypes.length) rows.push(row);
    }
    return rows;
-}
+};
 
 module.exports = router;

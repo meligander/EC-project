@@ -753,7 +753,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-async function deleteInfoRelated(classroom, student) {
+const deleteInfoRelated = async (classroom, student) => {
    const attendances = await Attendance.find({
       student: student,
       classroom: classroom,
@@ -769,6 +769,6 @@ async function deleteInfoRelated(classroom, student) {
    for (let x = 0; x < grades.length; x++) {
       await Grade.findOneAndRemove({ _id: grades[x]._id });
    }
-}
+};
 
 module.exports = router;
