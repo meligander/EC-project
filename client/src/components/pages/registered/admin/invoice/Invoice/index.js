@@ -5,6 +5,7 @@ import Moment from "react-moment";
 import PropTypes from "prop-types";
 
 import { loadInvoice, invoicePDF } from "../../../../../../actions/invoice";
+import { formatNumber } from "../../../../../../actions/mixvalues";
 
 import Loading from "../../../../../modal/Loading";
 import logo from "../../../../../../img/fondoBlanco.png";
@@ -63,10 +64,6 @@ const Invoice = ({
       "Nov",
       "Dic",
    ];
-
-   const formatNumber = (number) => {
-      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-   };
 
    return (
       <>

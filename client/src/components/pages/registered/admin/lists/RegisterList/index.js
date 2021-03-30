@@ -7,6 +7,7 @@ import PropTypes from "prop-types";
 import {
    updatePageNumber,
    updatePreviousPage,
+   formatNumber,
 } from "../../../../../../actions/mixvalues";
 import {
    loadRegisters,
@@ -59,12 +60,6 @@ const RegisterList = ({
 
    const setToggle = () => {
       setToggleModal(!toggleModal);
-   };
-
-   const formatNumber = (number) => {
-      if (number)
-         return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      else return null;
    };
 
    return (

@@ -11,7 +11,10 @@ import {
    invoicesPDF,
 } from "../../../../../../actions/invoice";
 import { loadRegister } from "../../../../../../actions/register";
-import { updatePageNumber } from "../../../../../../actions/mixvalues";
+import {
+   updatePageNumber,
+   formatNumber,
+} from "../../../../../../actions/mixvalues";
 
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
@@ -71,10 +74,6 @@ const IncomeList = ({
          toDelete: invoice_id ? invoice_id : "",
          toggleModal: !toggleModal,
       });
-   };
-
-   const formatNumber = (number) => {
-      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
    };
 
    const setName = (invoice) => {

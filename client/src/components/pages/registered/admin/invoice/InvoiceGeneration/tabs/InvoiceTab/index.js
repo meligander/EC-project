@@ -10,6 +10,7 @@ import {
 } from "../../../../../../../../actions/user";
 import { registerInvoice } from "../../../../../../../../actions/invoice";
 import { removeInstallmentFromList } from "../../../../../../../../actions/installment";
+import { formatNumber } from "../../../../../../../../actions/mixvalues";
 
 import Alert from "../../../../../../sharedComp/Alert";
 import StudentSearch from "../../../../../sharedComp/search/StudentSearch";
@@ -194,10 +195,6 @@ const InvoiceTab = ({
          history,
          userLogged._id
       );
-   };
-
-   const formatNumber = (number) => {
-      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
    };
 
    return (

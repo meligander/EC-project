@@ -11,7 +11,10 @@ import {
 } from "../../../../../../actions/expence";
 import { clearInvoice } from "../../../../../../actions/invoice";
 import { loadRegister } from "../../../../../../actions/register";
-import { updatePageNumber } from "../../../../../../actions/mixvalues";
+import {
+   updatePageNumber,
+   formatNumber,
+} from "../../../../../../actions/mixvalues";
 
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
@@ -81,10 +84,6 @@ const TransactionList = ({
          toDelete: expence_id ? expence_id : "",
          toggleModal: !toggleModal,
       });
-   };
-
-   const formatNumber = (number) => {
-      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
    };
 
    const type = (transaction) => {

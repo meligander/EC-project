@@ -22,6 +22,7 @@ import {
    getActiveClasses,
 } from "../../../../../../actions/class";
 import { clearCategories } from "../../../../../../actions/category";
+import { formatNumber } from "../../../../../../actions/mixvalues";
 
 import Loading from "../../../../../modal/Loading";
 
@@ -96,10 +97,6 @@ const AdminDashboard = ({
       getTotalDebt,
       getActiveClasses,
    ]);
-
-   const formatNumber = (number) => {
-      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-   };
 
    return (
       <>

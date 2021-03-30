@@ -10,6 +10,7 @@ import {
 } from "../../../../../../../actions/register";
 import { clearInvoices } from "../../../../../../../actions/invoice";
 import { clearExpences } from "../../../../../../../actions/expence";
+import { formatNumber } from "../../../../../../../actions/mixvalues";
 
 import PopUp from "../../../../../../modal/PopUp";
 import Loading from "../../../../../../modal/Loading";
@@ -58,10 +59,6 @@ const RegisterTab = ({
       if (addNew)
          createRegister({ difference, description }, userLogged._id, history);
       else closeRegister(formData, userLogged._id, history);
-   };
-
-   const formatNumber = (number) => {
-      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
    };
 
    return (

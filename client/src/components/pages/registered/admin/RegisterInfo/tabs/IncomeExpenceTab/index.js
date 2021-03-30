@@ -9,6 +9,7 @@ import {
 } from "../../../../../../../actions/expence";
 import { loadUsers } from "../../../../../../../actions/user";
 import { setAlert } from "../../../../../../../actions/alert";
+import { formatNumber } from "../../../../../../../actions/mixvalues";
 
 import PopUp from "../../../../../../modal/PopUp";
 import Alert from "../../../../../sharedComp/Alert";
@@ -149,10 +150,6 @@ const IncomeExpenceTab = ({
             "3"
          );
       }
-   };
-
-   const formatNumber = (number) => {
-      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
    };
 
    return (

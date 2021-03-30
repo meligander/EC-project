@@ -6,7 +6,10 @@ import {
    loadRegistersByMonth,
    registerPDF,
 } from "../../../../../../actions/register";
-import { updatePreviousPage } from "../../../../../../actions/mixvalues";
+import {
+   updatePreviousPage,
+   formatNumber,
+} from "../../../../../../actions/mixvalues";
 
 import Loading from "../../../../../modal/Loading";
 
@@ -22,10 +25,6 @@ const RegisterByMonth = ({
          updatePreviousPage("register");
       }
    }, [loadingRegisters, loadRegistersByMonth, updatePreviousPage]);
-
-   const formatNumber = (number) => {
-      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-   };
 
    return (
       <>

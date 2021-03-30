@@ -10,7 +10,10 @@ import {
    getTotalDebt,
    getMonthlyDebt,
 } from "../../../../../../actions/installment";
-import { updatePageNumber } from "../../../../../../actions/mixvalues";
+import {
+   updatePageNumber,
+   formatNumber,
+} from "../../../../../../actions/mixvalues";
 import { clearProfile } from "../../../../../../actions/user";
 
 import Loading from "../../../../../modal/Loading";
@@ -89,10 +92,6 @@ const InstallmentList = ({
          ...filterData,
          [e.target.name]: e.target.value,
       });
-   };
-
-   const formatNumber = (number) => {
-      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
    };
 
    return (

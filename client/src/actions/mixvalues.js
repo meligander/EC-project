@@ -24,3 +24,8 @@ export const updatePreviousPage = (page) => (dispatch) => {
       payload: page,
    });
 };
+
+export const formatNumber = (number) => {
+   if (number) return new Intl.NumberFormat("de-DE").format(number);
+   else return null;
+};

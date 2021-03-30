@@ -3,6 +3,8 @@ import { withRouter } from "react-router-dom";
 import moment from "moment";
 import PropTypes from "prop-types";
 
+import { formatNumber } from "../../../../../../actions/mixvalues";
+
 import Alert from "../../../../sharedComp/Alert";
 
 import "./style.scss";
@@ -128,7 +130,9 @@ const InstallmentsTable = ({
                                              : ""
                                        }`}
                                     >
-                                       {item.value}
+                                       {item.value
+                                          ? "$" + formatNumber(item.value)
+                                          : ""}
                                     </td>
                                  )}
                               </React.Fragment>
