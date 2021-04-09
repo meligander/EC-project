@@ -235,14 +235,30 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
    let tbody = "";
 
    for (let x = 0; x < transactions.length; x++) {
-      let name = "";
-
+      let userName = "";
       if (!transactions[x].expencetype) {
-         if (transactions[x].user) {
-            name =
-               transactions[x].user.lastname + ", " + transactions[x].user.name;
-         } else {
-            name = transactions[x].lastname + ", " + transactions[x].name;
+         switch (transactions[x].user) {
+            case null:
+               userName += "Usuario Eliminado </td>";
+               break;
+            case undefined:
+               if (transactions[x].lastname) {
+                  userName +=
+                     transactions[x].lastname +
+                     ", " +
+                     transactions[x].name +
+                     "</td>";
+               } else {
+                  userName += "Usuario no definido </td>";
+               }
+               break;
+            default:
+               userName +=
+                  transactions[x].user.lastname +
+                  ", " +
+                  transactions[x].user.name +
+                  "</td>";
+               break;
          }
       }
 
@@ -276,10 +292,12 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
       const description =
          "<td>" +
          (!transactions[x].expencetype
-            ? "Factura " + name
-            : transactions[x].description
-            ? transactions[x].description
-            : "") +
+            ? "Factura " + userName
+            : `${transactions[x].expencetype.name} ${
+                 transactions[x].description
+                    ? "- " + transactions[x].description
+                    : ""
+              }`) +
          "</td>";
 
       tbody += "<tr>" + date + type + value + description + "</tr>";

@@ -8,6 +8,7 @@ import {
    loadUsers,
    userPDF,
 } from "../../../../../../actions/user";
+import { clearClasses } from "../../../../../../actions/class";
 
 import StudentTable from "../../../sharedComp/tables/StudentTable";
 import RestTable from "../../../sharedComp/tables/RestTable";
@@ -19,6 +20,7 @@ const SearchTab = ({
    loadCategories,
    loadUsers,
    clearProfile,
+   clearClasses,
    typeF,
    userPDF,
 }) => {
@@ -158,6 +160,7 @@ const SearchTab = ({
                   loadingUsers={loadingUsers}
                   users={users}
                   type={type}
+                  clearClasses={clearClasses}
                   userSearchType={userSearchType}
                />
             )}
@@ -188,6 +191,7 @@ SearchTab.propTypes = {
    loadCategories: PropTypes.func.isRequired,
    userPDF: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
+   clearClasses: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -200,4 +204,5 @@ export default connect(mapStateToProps, {
    loadUsers,
    userPDF,
    clearProfile,
+   clearClasses,
 })(SearchTab);

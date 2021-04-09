@@ -1,6 +1,7 @@
 //Media Query Manager
 /*
-0 		-	600px 		Phone
+0     -  500px       Small Phone
+500px	-	600px 		Phone
 600px	-	900px		Tablet portrait
 900px	-	1200px		Tablet landscape
 [1200-1800] 	is where our normal styles apply
@@ -19,8 +20,8 @@ ORDER: Base + typography > general layout + grid > page layout > components
 //only screen and usamos para que no aplique cuando se imprime la pagina, solo en pantalla
 @mixin respond($breakpoint) {
    @if $breakpoint == small-phone {
-      @media only screen and (max-width: 25em) {
-         //400px - iphone
+      @media only screen and (max-width: 31em) {
+         //500px - iphone
          @content;
       }
    }

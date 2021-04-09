@@ -11,6 +11,7 @@ const RestTable = ({
    type,
    userSearchType,
    clearProfile,
+   clearClasses,
 }) => {
    const userType = {
       secretary: "Secretaria",
@@ -50,6 +51,7 @@ const RestTable = ({
                               onClick={() => {
                                  window.scroll(0, 0);
                                  clearProfile();
+                                 if (type === "teacher") clearClasses();
                               }}
                            >
                               {user.lastname}, {user.name}
@@ -81,6 +83,7 @@ RestTable.propTypes = {
    loadingUsers: PropTypes.bool,
    type: PropTypes.string.isRequired,
    clearProfile: PropTypes.func.isRequired,
+   clearClasses: PropTypes.func.isRequired,
 };
 
 export default RestTable;

@@ -367,25 +367,30 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
          " <td>" + moment(invoices[x].date).format("DD/MM/YY") + "</td>";
       const id = "<td>" + invoices[x].invoiceid + "</td>";
 
-      let name = "";
-      switch (invoice.user) {
+      let userName = "<td>";
+      switch (invoices[x].user) {
          case null:
-            name = "Usuario Eliminado";
+            userName += "Usuario Eliminado </td>";
             break;
          case undefined:
-            if (invoice.lastname) {
-               name = invoice.lastname + ", " + invoice.name;
+            if (invoices[x].lastname) {
+               userName +=
+                  invoices[x].lastname + ", " + invoices[x].name + "</td>";
             } else {
-               name = "Usuario no definido";
+               userName += "Usuario no definido </td>";
             }
             break;
          default:
-            name = invoice.user.lastname + ", " + invoice.user.name;
+            userName +=
+               invoices[x].user.lastname +
+               ", " +
+               invoices[x].user.name +
+               "</td>";
             break;
       }
       const total = "<td> $" + formatNumber(invoices[x].total) + "</td>";
 
-      tbody += "<tr>" + date + id + name + total + "</tr>";
+      tbody += "<tr>" + date + id + userName + total + "</tr>";
    }
 
    const thead =
