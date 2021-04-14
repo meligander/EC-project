@@ -245,7 +245,7 @@ const IncomeExpenceTab = ({
                      <td>Importe</td>
                      <td>
                         <input
-                           type="number"
+                           type="text"
                            placeholder="Importe"
                            name="value"
                            onChange={onChange}

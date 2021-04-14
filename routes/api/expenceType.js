@@ -28,6 +28,28 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
+//@route    GET /api/expence-type/withdrawal
+//@desc     Get all withdrawal types
+//@access   Private && Admin
+router.get("/withdrawal", [auth, adminAuth], async (req, res) => {
+   try {
+      const expenceTypes = await ExpenceType.find({ type: "withdrawal" }).sort({
+         name: 1,
+      });
+
+      if (expenceTypes.length === 0) {
+         return res.status(400).json({
+            msg: "No se encontraron retiros de dinero con dichas descripciones",
+         });
+      }
+
+      res.json(expenceTypes);
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server Error");
+   }
+});
+
 //@route    POST /api/expence-type
 //@desc     Update all expence types
 //@access   Private && Admin

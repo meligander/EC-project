@@ -22,6 +22,7 @@ api.interceptors.response.use(
    (err) => {
       if (err.response.status === 401) {
          store.dispatch({ type: LOGOUT });
+         window.location.replace("https://vmenglishcentre.com.ar/login");
       }
       return Promise.reject(err);
    }

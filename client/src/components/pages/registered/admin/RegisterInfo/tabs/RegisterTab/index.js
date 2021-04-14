@@ -157,7 +157,21 @@ const RegisterTab = ({
                                        ? formatNumber(register.withdrawal)
                                        : 0}
                                  </td>
-                                 <td>&nbsp;</td>
+                                 <td>
+                                    <Link
+                                       to="/withdrawal-list"
+                                       onClick={() => {
+                                          window.scroll(0, 0);
+                                          clearRegisters();
+                                       }}
+                                       className="btn btn-light"
+                                    >
+                                       <i className="fas fa-list-ul"></i>
+                                       <span className="hide-sm">
+                                          &nbsp; Listado
+                                       </span>
+                                    </Link>
+                                 </td>
                               </tr>
                               <tr>
                                  <td>Plata Caja</td>

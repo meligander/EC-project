@@ -90,6 +90,63 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    }
 });
 
+//@route    GET /api/expence/withdrawals
+//@desc     get all withdrawals || with filter
+//@access   Private && Admin
+router.get("/withdrawal", [auth, adminAuth], async (req, res) => {
+   try {
+      let allWithdrawals = [];
+      let withdrawals = [];
+
+      if (Object.entries(req.query).length === 0) {
+         allWithdrawals = await Expence.find().populate({
+            path: "expencetype",
+            model: "expencetype",
+            match: {
+               type: "withdrawal",
+            },
+         });
+      } else {
+         const filter = req.query;
+
+         allWithdrawals = await Expence.find({
+            ...((filter.startDate || filter.endDate) && {
+               date: {
+                  ...(filter.startDate && {
+                     $gte: new Date(filter.startDate).setHours(00, 00, 00),
+                  }),
+                  ...(filter.endDate && {
+                     $lte: new Date(filter.endDate).setHours(23, 59, 59),
+                  }),
+               },
+            }),
+         }).populate({
+            path: "expencetype",
+            model: "expencetype",
+            match: {
+               type: "withdrawal",
+               ...(filter.expencetype && { _id: filter.expencetype }),
+            },
+         });
+      }
+
+      for (let x = 0; x < allWithdrawals.length; x++) {
+         if (allWithdrawals[x].expencetype) withdrawals.push(allWithdrawals[x]);
+      }
+
+      if (withdrawals.length === 0) {
+         return res.status(400).json({
+            msg: "No se encontraron retiros de dinero con dichas descripciones",
+         });
+      }
+
+      res.json(withdrawals);
+   } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server Error");
+   }
+});
+
 //@route    GET /api/expence/fetch-list
 //@desc     Get the pdf of transactions
 //@access   Private && Admin
@@ -154,7 +211,14 @@ router.post(
             .limit(1);
          expence = expence[0];
 
+         value = value.replace(/,/g, ".");
+
          value = Number(value);
+
+         if (Number.isNaN(value))
+            return res.status(400).json({
+               msg: "Ingrese un número válido",
+            });
 
          const plusvalue = Math.floor((last.registermoney + value) * 100) / 100;
          const minusvalue =
@@ -333,6 +397,80 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
    try {
       pdf.create(
          pdfTemplate(css, img, "movimientos", thead, tbody),
+         options
+      ).toFile(name, (err) => {
+         if (err) {
+            res.send(Promise.reject());
+         }
+
+         res.send(Promise.resolve());
+      });
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).send("PDF error");
+   }
+});
+
+//@route    POST /api/expence/create-list
+//@desc     Create a pdf of transactions
+//@access   Private && Admin
+router.post("/withdrawal/create-list", [auth, adminAuth], (req, res) => {
+   const name = path.join(__dirname, "../../reports/transactions.pdf");
+
+   const { transactions, total } = req.body;
+
+   let tbody = "";
+
+   for (let x = 0; x < transactions.length; x++) {
+      const date =
+         "<td>" + moment(transactions[x].date).format("DD/MM/YY") + "</td>";
+
+      const type = "<td>" + transactions[x].expencetype.name + "</td>";
+      const value = "<td> $" + formatNumber(transactions[x].value) + "</td>";
+      const description =
+         "<td>" +
+         (transactions[x].description ? transactions[x].description : "") +
+         "</td>";
+
+      tbody += "<tr>" + date + type + value + description + "</tr>";
+   }
+
+   const thead =
+      "<th>Fecha</th> <th>Tipo</th> <th>Importe</th> <th>Descripción</th>";
+
+   const img = path.join(
+      "file://",
+      __dirname,
+      "../../templates/assets/logo.png"
+   );
+   const css = path.join(
+      "file://",
+      __dirname,
+      "../../templates/list/style.css"
+   );
+
+   const options = {
+      format: "A4",
+      header: {
+         height: "15mm",
+         contents: `<div></div>`,
+      },
+      footer: {
+         height: "17mm",
+         contents:
+            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
+      },
+   };
+
+   try {
+      pdf.create(
+         pdfTemplate(
+            css,
+            img,
+            "Retiros - $" + formatNumber(total),
+            thead,
+            tbody
+         ),
          options
       ).toFile(name, (err) => {
          if (err) {

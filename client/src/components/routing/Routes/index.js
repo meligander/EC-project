@@ -33,6 +33,7 @@ import TransactionList from "../../pages/registered/admin/lists/TransactionList"
 import InstallmentList from "../../pages/registered/admin/lists/InstallmentList";
 import RegisterList from "../../pages/registered/admin/lists/RegisterList";
 import MentionList from "../../pages/registered/admin/lists/MentionList";
+import WithdrawalList from "../../pages/registered/admin/lists/WithdrawalList";
 import RegisterByMonth from "../../pages/registered/admin/lists/RegisterByMonth";
 
 import PrivateRoutes from "../PrivateRoutes";
@@ -223,6 +224,12 @@ const Routes = () => {
                types={["admin", "secretary", "admin&teacher"]}
                path="/mention-list"
                component={MentionList}
+            />
+            <PrivateRoutes
+               exact
+               types={["admin", "secretary", "admin&teacher"]}
+               path="/withdrawal-list"
+               component={WithdrawalList}
             />
             <Route component={NotFound} />
          </Switch>

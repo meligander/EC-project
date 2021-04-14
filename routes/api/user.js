@@ -773,7 +773,8 @@ router.put("/credentials/:id", auth, async (req, res) => {
       //See if users exists
       if (email) {
          user = await User.findOne({ email });
-         if (user && user.id !== req.user.id && user.email !== email)
+
+         if (user && user.id !== req.params.id)
             return res
                .status(400)
                .json({ msg: "Ya existe un usuario con ese mail" });

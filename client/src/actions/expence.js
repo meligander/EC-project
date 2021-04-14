@@ -58,9 +58,66 @@ export const loadTransactions = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
+export const loadWithdrawals = (filterData) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
+   try {
+      let filter = "";
+
+      const filternames = Object.keys(filterData);
+
+      for (let x = 0; x < filternames.length; x++) {
+         const name = filternames[x];
+         if (filterData[name] !== "") {
+            if (filter !== "") filter = filter + "&";
+            filter = filter + filternames[x] + "=" + filterData[name];
+         }
+      }
+      const res = await api.get(`/expence/withdrawal?${filter}`);
+      dispatch({
+         type: TRANSACTIONS_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      const msg = err.response.data.msg;
+      const type = err.response.statusText;
+
+      dispatch({
+         type: EXPENCE_ERROR,
+         payload: {
+            type,
+            status: err.response.status,
+            msg,
+         },
+      });
+      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      window.scroll(0, 0);
+   }
+   dispatch(updateLoadingSpinner(false));
+};
+
 export const loadExpenceTypes = () => async (dispatch) => {
    try {
       const res = await api.get("/expence-type");
+      dispatch({
+         type: EXPENCETYPES_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      dispatch({
+         type: EXPENCETYPE_ERROR,
+         payload: {
+            type: err.response.statusText,
+            status: err.response.status,
+            msg: err.response.data.msg,
+         },
+      });
+   }
+};
+
+export const loadWithdrawalTypes = () => async (dispatch) => {
+   try {
+      const res = await api.get("/expence-type/withdrawal");
       dispatch({
          type: EXPENCETYPES_LOADED,
          payload: res.data,
@@ -220,10 +277,15 @@ export const deleteExpenceType = (toDelete) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const transactionsPDF = (transactions) => async (dispatch) => {
+export const transactionsPDF = (transactions, total) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    try {
-      await api.post("/expence/create-list", transactions);
+      if (total)
+         await api.post("/expence/withdrawal/create-list", {
+            transactions,
+            total,
+         });
+      else await api.post("/expence/create-list", transactions);
 
       const pdf = await api.get("/expence/fetch-list", {
          responseType: "blob",
