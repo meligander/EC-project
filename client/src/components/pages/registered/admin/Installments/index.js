@@ -10,22 +10,24 @@ import {
 } from "../../../../../actions/installment";
 import { updatePreviousPage } from "../../../../../actions/mixvalues";
 import { loadPenalty, updatePenalty } from "../../../../../actions/penalty";
-import { clearUser } from "../../../../../actions/user";
+import { clearUser, loadUser } from "../../../../../actions/user";
 
 import InstallmentsSearch from "../../sharedComp/search/InstallmentsSearch";
 import PopUp from "../../../../modal/PopUp";
 
 const Installments = ({
    match,
-   installments: { usersInstallments, loadingUsersInstallments },
    penalties: { loading, penalty },
+   installments: { loadingUsersInstallments },
    auth: { userLogged },
+   users: { user, loading: userLoading },
    clearInstallments,
    clearInstallment,
    clearUser,
    updatePreviousPage,
    updatePenalty,
    loadPenalty,
+   loadUser,
    loadStudentInstallments,
 }) => {
    const _id = match.params.user_id;
@@ -44,22 +46,14 @@ const Installments = ({
       if (loading) loadPenalty();
       if (_id !== "0" && loadingUsersInstallments) {
          loadStudentInstallments(_id, true);
+         loadUser(_id);
       } else {
-         if (!loadingUsersInstallments && usersInstallments.rows.length > 0) {
-            let student;
+         if (!userLoading) {
+            const student = {
+               _id: user._id,
+               name: user.lastname + ", " + user.name,
+            };
 
-            for (let x = 0; x < usersInstallments.rows[0].length; x++) {
-               if (usersInstallments.rows[0][x].student) {
-                  student = {
-                     _id: usersInstallments.rows[0][x].student._id,
-                     name:
-                        usersInstallments.rows[0][x].student.lastname +
-                        ", " +
-                        usersInstallments.rows[0][x].student.name,
-                  };
-                  break;
-               }
-            }
             setOtherValues((prev) => ({
                ...prev,
                student,
@@ -69,16 +63,25 @@ const Installments = ({
       updatePreviousPage("dashboard");
    }, [
       _id,
+      loadingUsersInstallments,
       loadPenalty,
+      user,
+      userLoading,
+      loadUser,
       loading,
       updatePreviousPage,
       loadStudentInstallments,
-      loadingUsersInstallments,
-      usersInstallments.rows,
    ]);
 
    const setToggle = () => {
       setOtherValues({ ...otherValues, toggleModal: !toggleModal });
+   };
+
+   const changeStudent = (student) => {
+      setOtherValues((prev) => ({
+         ...prev,
+         student,
+      }));
    };
 
    return (
@@ -121,16 +124,17 @@ const Installments = ({
                   <span className="hide-sm">Listado</span> Deudas
                </Link>
             </div>
-            <InstallmentsSearch student={student} />
+            <InstallmentsSearch
+               student={_id !== "0" ? student : null}
+               changeStudent={changeStudent}
+            />
             <div className="btn-right">
                <Link
                   className={`btn ${
-                     usersInstallments.rows.length > 0
-                        ? "btn-primary"
-                        : "btn-black"
+                     !loadingUsersInstallments ? "btn-primary" : "btn-black"
                   }`}
                   to={
-                     usersInstallments.rows.length > 0
+                     !loadingUsersInstallments
                         ? `/edit-installment/2/${student._id}`
                         : "#"
                   }
@@ -152,9 +156,11 @@ Installments.propTypes = {
    installments: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
    penalties: PropTypes.object.isRequired,
+   users: PropTypes.object.isRequired,
    clearInstallments: PropTypes.func.isRequired,
    clearInstallment: PropTypes.func.isRequired,
    loadPenalty: PropTypes.func.isRequired,
+   loadUser: PropTypes.func.isRequired,
    clearUser: PropTypes.func.isRequired,
    updatePenalty: PropTypes.func.isRequired,
    updatePreviousPage: PropTypes.func.isRequired,
@@ -164,6 +170,7 @@ Installments.propTypes = {
 const mapStateToProps = (state) => ({
    installments: state.installments,
    penalties: state.penalties,
+   users: state.users,
    auth: state.auth,
 });
 
@@ -171,6 +178,7 @@ export default connect(mapStateToProps, {
    clearInstallments,
    clearInstallment,
    loadPenalty,
+   loadUser,
    clearUser,
    updatePenalty,
    updatePreviousPage,

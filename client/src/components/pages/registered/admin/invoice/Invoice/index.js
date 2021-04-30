@@ -150,7 +150,7 @@ const Invoice = ({
                         </span>
                         <input
                            className="value paragraph"
-                           value={`$${formatNumber(remaining)}`}
+                           value={`$${remaining ? formatNumber(remaining) : 0}`}
                            disabled
                         />
                      </p>

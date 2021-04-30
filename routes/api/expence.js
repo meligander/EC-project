@@ -17,6 +17,7 @@ const Expence = require("../../models/Expence");
 const Register = require("../../models/Register");
 const ExpenceType = require("../../models/ExpenceType");
 const Invoice = require("../../models/Invoice");
+const { type } = require("os");
 
 //@route    GET /api/expence
 //@desc     get all expences || with filter
@@ -99,13 +100,15 @@ router.get("/withdrawal", [auth, adminAuth], async (req, res) => {
       let withdrawals = [];
 
       if (Object.entries(req.query).length === 0) {
-         allWithdrawals = await Expence.find().populate({
-            path: "expencetype",
-            model: "expencetype",
-            match: {
-               type: "withdrawal",
-            },
-         });
+         allWithdrawals = await Expence.find()
+            .populate({
+               path: "expencetype",
+               model: "expencetype",
+               match: {
+                  type: "withdrawal",
+               },
+            })
+            .sort({ date: -1 });
       } else {
          const filter = req.query;
 
@@ -120,14 +123,16 @@ router.get("/withdrawal", [auth, adminAuth], async (req, res) => {
                   }),
                },
             }),
-         }).populate({
-            path: "expencetype",
-            model: "expencetype",
-            match: {
-               type: "withdrawal",
-               ...(filter.expencetype && { _id: filter.expencetype }),
-            },
-         });
+         })
+            .populate({
+               path: "expencetype",
+               model: "expencetype",
+               match: {
+                  type: "withdrawal",
+                  ...(filter.expencetype && { _id: filter.expencetype }),
+               },
+            })
+            .sort({ date: -1 });
       }
 
       for (let x = 0; x < allWithdrawals.length; x++) {
@@ -211,9 +216,10 @@ router.post(
             .limit(1);
          expence = expence[0];
 
-         value = value.replace(/,/g, ".");
-
-         value = Number(value);
+         if (typeof value === "string") {
+            value = value.replace(/,/g, ".");
+            value = Number(value);
+         }
 
          if (Number.isNaN(value))
             return res.status(400).json({

@@ -163,6 +163,7 @@ const RegisterTab = ({
                                        onClick={() => {
                                           window.scroll(0, 0);
                                           clearRegisters();
+                                          clearExpences();
                                        }}
                                        className="btn btn-light"
                                     >

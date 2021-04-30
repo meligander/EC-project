@@ -22,6 +22,7 @@ const InstallmentsSearch = ({
    location,
    installments: { usersInstallments, loadingUsersInstallments, installments },
    loadStudentInstallments,
+   changeStudent,
    clearUserInstallments,
    clearInstallment,
    clearSearch,
@@ -43,30 +44,29 @@ const InstallmentsSearch = ({
 
    useEffect(() => {
       if (student) {
-         if (student._id !== "") {
-            setOtherValues((prev) => ({
-               ...prev,
-               selectedStudent: {
-                  _id: student._id,
-                  name: student.name,
-               },
-               block: true,
-            }));
-         }
+         setOtherValues((prev) => ({
+            ...prev,
+            selectedStudent: {
+               _id: student._id,
+               name: student.name,
+            },
+            block: true,
+         }));
       }
    }, [student]);
 
    const invoice = location.pathname === "/invoice-generation";
 
    const selectStudent = (user) => {
+      const student = {
+         _id: user._id,
+         name: user.lastname + ", " + user.name,
+      };
       setOtherValues({
          ...otherValues,
-         selectedStudent: {
-            _id: user._id,
-            name: user.lastname + ", " + user.name,
-         },
+         selectedStudent: student,
       });
-      clearUserInstallments();
+      changeStudent(student);
    };
 
    const selectItem = (item) => {
@@ -106,6 +106,7 @@ const InstallmentsSearch = ({
             name: "",
          },
       });
+      clearProfile();
       clearUserInstallments();
       if (!invoice) history.push("/installments/0");
    };
@@ -164,7 +165,6 @@ const InstallmentsSearch = ({
                   {selectedStudent.name}
                </Link>
             </p>
-
             {selectedStudent._id !== "" && (
                <button
                   className="btn-cancel"
@@ -209,6 +209,7 @@ InstallmentsSearch.propTypes = {
    clearInstallment: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
+   changeStudent: PropTypes.func,
 };
 
 const mapStateToProps = (state) => ({

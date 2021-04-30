@@ -7,7 +7,6 @@ import PropTypes from "prop-types";
 import {
    loadInstallments,
    installmentsPDF,
-   getTotalDebt,
    getMonthlyDebt,
 } from "../../../../../../actions/installment";
 import {
@@ -24,12 +23,11 @@ const InstallmentList = ({
    installments: {
       installments,
       loadingInstallments,
-      otherValues: { totalDebt, estimatedProfit, monthlyDebt },
+      otherValues: { estimatedProfit },
    },
    auth: { userLogged },
    mixvalues: { page },
    loadInstallments,
-   getTotalDebt,
    getMonthlyDebt,
    updatePageNumber,
    clearProfile,
@@ -38,18 +36,18 @@ const InstallmentList = ({
    const date = moment();
    const thisYear = date.year();
 
-   const [adminValues, setAdminValues] = useState({
-      oneLoad: true,
-   });
-
-   const { oneLoad } = adminValues;
-
    const [filterData, setFilterData] = useState({
       number: "",
       year: "",
       name: "",
       lastname: "",
    });
+
+   const [adminValues, setAdminValues] = useState({
+      total: 0,
+   });
+
+   const { total } = adminValues;
 
    const installmentName = [
       "Inscripción",
@@ -70,19 +68,25 @@ const InstallmentList = ({
    const { number, year, name, lastname } = filterData;
 
    useEffect(() => {
-      if (oneLoad) {
+      if (loadingInstallments) {
          updatePageNumber(0);
          loadInstallments({});
-         getTotalDebt();
          getMonthlyDebt(12);
-         getMonthlyDebt(date.month() + 1);
-         setAdminValues((prev) => ({ ...prev, oneLoad: false }));
+      } else {
+         if (installments.length > 0) {
+            let total = 0;
+
+            for (let x = 0; x < installments.length; x++) {
+               total += installments[x].value;
+            }
+
+            setAdminValues((prev) => ({ ...prev, total }));
+         } else setAdminValues((prev) => ({ ...prev, total: 0 }));
       }
    }, [
-      oneLoad,
-      date,
+      installments,
+      loadingInstallments,
       loadInstallments,
-      getTotalDebt,
       getMonthlyDebt,
       updatePageNumber,
    ]);
@@ -96,27 +100,21 @@ const InstallmentList = ({
 
    return (
       <>
-         {!loadingInstallments &&
-         totalDebt !== "" &&
-         monthlyDebt !== "" &&
-         estimatedProfit !== "" ? (
+         {!loadingInstallments && estimatedProfit !== "" ? (
             <>
                <h2 className="p-1">Lista de Deudas</h2>
+
                <p className="heading-tertiary text-moved-right">
-                  Total: {totalDebt !== 0 ? "$" + formatNumber(totalDebt) : "$"}
+                  Total: ${total !== 0 ? formatNumber(total) : 0}
                </p>
-               <p className="heading-tertiary text-moved-right">
-                  Deuda del Mes:{" "}
-                  {monthlyDebt !== 0 ? "$" + formatNumber(monthlyDebt) : "$"}
-               </p>
-               {date.month + 1 !== 12 &&
+               {date.month !== 11 &&
                   (userLogged.type === "admin" ||
                      userLogged.type === "admin&teacher") && (
                      <p className="heading-tertiary text-moved-right">
-                        Ganancia Estimada por Mes:{" "}
+                        Ganancia Estimada por Mes: $
                         {estimatedProfit !== 0
-                           ? "$" + formatNumber(estimatedProfit)
-                           : "$"}
+                           ? formatNumber(estimatedProfit)
+                           : 0}
                      </p>
                   )}
 
@@ -255,7 +253,6 @@ InstallmentList.propTypes = {
    mixvalues: PropTypes.object.isRequired,
    auth: PropTypes.object.isRequired,
    loadInstallments: PropTypes.func.isRequired,
-   getTotalDebt: PropTypes.func.isRequired,
    getMonthlyDebt: PropTypes.func.isRequired,
    updatePageNumber: PropTypes.func.isRequired,
    installmentsPDF: PropTypes.func.isRequired,
@@ -270,7 +267,6 @@ const mapStatetoProps = (state) => ({
 
 export default connect(mapStatetoProps, {
    loadInstallments,
-   getTotalDebt,
    getMonthlyDebt,
    updatePageNumber,
    installmentsPDF,
