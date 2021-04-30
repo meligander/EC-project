@@ -107,6 +107,7 @@ router.get("/:id", [auth, adminAuth], async (req, res) => {
 router.get("/student/:id/:admin", auth, async (req, res) => {
    try {
       const student = req.params.id;
+
       let installments = await Installment.find({
          student,
       })
@@ -202,7 +203,7 @@ router.post(
    ],
    async (req, res) => {
       const { number, year, student, value, expired, halfPayed } = req.body;
-      console.log(number, year, value);
+
       try {
          let errors = [];
          const errorsResult = validationResult(req);
