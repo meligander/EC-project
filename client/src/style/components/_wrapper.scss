@@ -43,12 +43,15 @@
          z-index: 1999;
          position: sticky;
          left: 0;
-         opacity: 1;
          top: 0;
       }
 
       &.stick th:first-child {
          z-index: 2999;
+
+         @include respond(small-phone) {
+            opacity: 1;
+         }
       }
       &.stick td:first-child {
          z-index: 1799;

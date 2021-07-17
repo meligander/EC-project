@@ -10,7 +10,11 @@ import {
    clearInstallment,
    addInstallment,
 } from "../../../../../../actions/installment";
-import { clearSearch, clearProfile } from "../../../../../../actions/user";
+import {
+   clearSearch,
+   clearProfile,
+   clearUser,
+} from "../../../../../../actions/user";
 
 import StudentSearch from "../StudentSearch";
 import InstallmentsTable from "../../tables/InstallmentsTable";
@@ -27,6 +31,7 @@ const InstallmentsSearch = ({
    clearInstallment,
    clearSearch,
    clearProfile,
+   clearUser,
    addInstallment,
    student,
    setAlert,
@@ -66,7 +71,7 @@ const InstallmentsSearch = ({
          ...otherValues,
          selectedStudent: student,
       });
-      changeStudent(student);
+      if (changeStudent) changeStudent(student);
    };
 
    const selectItem = (item) => {
@@ -106,7 +111,7 @@ const InstallmentsSearch = ({
             name: "",
          },
       });
-      clearProfile();
+      clearUser();
       clearUserInstallments();
       if (!invoice) history.push("/installments/0");
    };
@@ -209,6 +214,7 @@ InstallmentsSearch.propTypes = {
    clearInstallment: PropTypes.func.isRequired,
    clearSearch: PropTypes.func.isRequired,
    clearProfile: PropTypes.func.isRequired,
+   clearUser: PropTypes.func.isRequired,
    changeStudent: PropTypes.func,
 };
 
@@ -223,5 +229,6 @@ export default connect(mapStateToProps, {
    clearInstallment,
    clearSearch,
    clearProfile,
+   clearUser,
    addInstallment,
 })(withRouter(InstallmentsSearch));

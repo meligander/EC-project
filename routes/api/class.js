@@ -27,49 +27,36 @@ router.get("/", auth, async (req, res) => {
    try {
       const date = new Date();
       let classes;
-      if (Object.entries(req.query).length === 0) {
-         classes = await Class.find({ year: date.getFullYear() })
-            .populate({
-               path: "category",
-               model: "category",
-               select: "name",
-            })
-            .populate({
-               path: "teacher",
-               model: "user",
-               select: ["lastname", "name"],
-            });
-      } else {
-         let filter = {
-            ...(req.query.teacher && {
-               teacher: req.query.teacher,
-            }),
-            ...(req.query.category && {
-               category: req.query.category,
-            }),
-            year: date.getFullYear(),
-         };
 
-         classes = await Class.find(
-            (filter.teacher || filter.category) && filter
-         )
-            .populate({
-               path: "category",
-               model: "category",
-               select: "name",
-            })
-            .populate({
-               path: "teacher",
-               model: "user",
-               select: ["lastname", "name"],
-            });
-      }
+      let filter = {
+         ...(req.query.teacher && {
+            teacher: req.query.teacher,
+         }),
+         ...(req.query.category && {
+            category: req.query.category,
+         }),
+         year: date.getFullYear(),
+      };
+
+      classes = await Class.find(filter)
+         .populate({
+            path: "category",
+            model: "category",
+            select: "name",
+         })
+         .populate({
+            path: "teacher",
+            model: "user",
+            select: ["lastname", "name"],
+         });
 
       if (classes.length === 0) {
          return res
             .status(400)
             .json({ msg: "No se encontraron clases con dichas descripciones" });
       }
+
+      classes = sortArray(classes);
 
       res.json(classes);
    } catch (err) {
@@ -685,6 +672,21 @@ const deleteInfoRelated = async (classroom, enrollmentsToDelete) => {
          }
       }
    }
+};
+
+const sortArray = (array) => {
+   const sortedArray = array.sort((a, b) => {
+      if (a.teacher.lastname > b.teacher.lastname) return 1;
+      if (a.teacher.lastname < b.teacher.lastname) return -1;
+
+      if (a.teacher.name > b.teacher.name) return 1;
+      if (a.teacher.name < b.teacher.name) return -1;
+
+      if (a.category.name > b.category.name) return 1;
+      if (a.category.name < b.category.name) return -1;
+   });
+
+   return sortedArray;
 };
 
 module.exports = router;

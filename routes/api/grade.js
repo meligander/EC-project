@@ -16,6 +16,17 @@ const auth = require("../../middleware/auth");
 const Grade = require("../../models/Grade");
 const Enrollment = require("../../models/Enrollment");
 
+const cambridgeTests = [
+   "Starters",
+   "Movers",
+   "Flyers",
+   "Ket",
+   "Pet",
+   "First",
+   "CAE",
+   "Proficiency",
+];
+
 //@route    GET /api/grade/:class_id
 //@desc     Get all grades for a class
 //@access   Private
@@ -304,12 +315,24 @@ router.post("/create-list", auth, (req, res) => {
 
    for (let x = 0; x < students.length; x++) {
       if (students[x].name !== "") {
-         tbody += "<tr> <td>" + students[x].name + "</td>";
+         tbody +=
+            "<tr> <td>" +
+            students[x].lastname +
+            ", " +
+            students[x].name +
+            "</td>";
 
          for (let y = 0; y < period[x].length; y++) {
             if (classInfo.category.name === "Kinder")
                tbody += `<td>${kinderGrade(period[x][y].value)}</td>`;
-            else tbody += "<td>" + period[x][y].value + "</td>";
+            else
+               tbody += `<td> ${
+                  cambridgeTests.some(
+                     (test) => test === period[x][y].gradetype.name
+                  ) && period[x][y].value !== ""
+                     ? period[x][y].value * 10 + "%"
+                     : period[x][y].value
+               }</td>`;
          }
 
          tbody += "</tr>";
@@ -860,11 +883,6 @@ router.post("/report-card", auth, async (req, res) => {
          })
          .sort({ gradetype: 1 });
 
-      if (grades.length === 0)
-         return res.status(400).json({
-            msg: "El alumno no tiene notas cargadas",
-         });
-
       enrollment = await Enrollment.findOne({
          "classroom._id": classInfo._id,
          student: student._id,
@@ -874,154 +892,156 @@ router.post("/report-card", auth, async (req, res) => {
       return res.status(500).send("Server Error");
    }
 
-   const studentTable = buildStudentTable(grades, true);
+   if (grades.length > 0) {
+      const studentTable = buildStudentTable(grades, true);
 
-   let finalGrades = "";
-   let allGrades = "";
-   let attendance = "";
+      let finalGrades = "";
+      let allGrades = "";
+      let attendance = "";
 
-   const higherExams =
-      classInfo.category === "6° Año" ||
-      classInfo.category === "CAE" ||
-      classInfo.category === "Proficency";
+      const higherExams =
+         classInfo.category === "6° Año" ||
+         classInfo.category === "CAE" ||
+         classInfo.category === "Proficency";
 
-   if (classInfo.category !== "Kinder") {
-      finalGrades = `<h3 class='center'>Exámen Final</h3> <table class='final-grades ${
-         !higherExams ? "small" : ""
-      }'><tbody>`;
+      if (classInfo.category !== "Kinder") {
+         finalGrades = `<h3 class='center'>Exámen Final</h3> <table class='final-grades ${
+            !higherExams ? "small" : ""
+         }'><tbody>`;
 
-      let header = "";
-      let body = "";
+         let header = "";
+         let body = "";
 
-      for (let x = 0; x < finalExamGrades.length; x++) {
-         header += `<th>${finalExamGrades[x].gradetype.name}</th>`;
-         body += `<td>${
-            !higherExams
-               ? finalExamGrades[x].value.toFixed(2)
-               : finalExamGrades[x].value * 10 + "%"
-         }</td>`;
+         for (let x = 0; x < finalExamGrades.length; x++) {
+            header += `<th>${finalExamGrades[x].gradetype.name}</th>`;
+            body += `<td>${
+               !higherExams
+                  ? finalExamGrades[x].value.toFixed(2)
+                  : finalExamGrades[x].value * 10 + "%"
+            }</td>`;
 
-         if (
-            ((x + 1) % 3 === 0 && higherExams) ||
-            (!higherExams && (x + 1) % 2 === 0)
-         ) {
-            finalGrades += "<tr>" + header + "</tr><tr>" + body + "</tr>";
-            header = "";
-            body = "";
-         }
+            if (
+               ((x + 1) % 3 === 0 && higherExams) ||
+               (!higherExams && (x + 1) % 2 === 0)
+            ) {
+               finalGrades += "<tr>" + header + "</tr><tr>" + body + "</tr>";
+               header = "";
+               body = "";
+            }
 
-         if (x + 1 === finalExamGrades.length) {
-            if (higherExams) {
-               let average = enrollment.classroom.periodAverage[4] * 10;
-               average = Math.round((average + Number.EPSILON) * 100) / 100;
+            if (x + 1 === finalExamGrades.length) {
+               if (higherExams) {
+                  let average = enrollment.classroom.periodAverage[4] * 10;
+                  average = Math.round((average + Number.EPSILON) * 100) / 100;
 
-               header += "<th>Promedio</th>";
-               body += `<td>${average}%</td>`;
+                  header += "<th>Promedio</th>";
+                  body += `<td>${average}%</td>`;
 
-               finalGrades +=
-                  "<tr>" +
-                  header +
-                  "</tr><tr>" +
-                  body +
-                  "</tr></tbody></table>";
-            } else {
-               if (header !== "")
                   finalGrades +=
                      "<tr>" +
                      header +
                      "</tr><tr>" +
                      body +
                      "</tr></tbody></table>";
-               else finalGrades += "</tbody></table>";
+               } else {
+                  if (header !== "")
+                     finalGrades +=
+                        "<tr>" +
+                        header +
+                        "</tr><tr>" +
+                        body +
+                        "</tr></tbody></table>";
+                  else finalGrades += "</tbody></table>";
+               }
             }
+         }
+
+         if (finalExamGrades.length === 0) finalGrades = "";
+      }
+
+      for (let x = 0; x < studentTable.rows.length; x++) {
+         if (studentTable.headers[x]) {
+            allGrades += `<tr><th>${studentTable.headers[x]}</th>`;
+            for (let y = 0; y < studentTable.rows[x].length; y++) {
+               if (
+                  cambridgeTests.some(
+                     (test) => test === studentTable.headers[x]
+                  )
+               ) {
+                  allGrades += `<td>${
+                     studentTable.rows[x][y].value
+                        ? studentTable.rows[x][y].value * 10 + "%"
+                        : ""
+                  }</td>`;
+               } else {
+                  let value = "";
+                  if (studentTable.rows[x][y].value)
+                     value = studentTable.rows[x][y].value.toFixed(2);
+                  allGrades += `<td>${
+                     classInfo.category !== "Kinder"
+                        ? value
+                        : kinderGrade(studentTable.rows[x][y].value)
+                  }</td>`;
+               }
+            }
+            allGrades += "</tr>";
          }
       }
 
-      if (finalExamGrades.length === 0) finalGrades = "";
-   }
-
-   for (let x = 0; x < studentTable.rows.length; x++) {
-      if (studentTable.headers[x]) {
-         allGrades += `<tr><th>${studentTable.headers[x]}</th>`;
-         for (let y = 0; y < studentTable.rows[x].length; y++) {
-            if (
-               studentTable.headers[x] === "Ket" ||
-               studentTable.headers[x] === "Pet" ||
-               studentTable.headers[x] === "First" ||
-               studentTable.headers[x] === "CAE" ||
-               studentTable.headers[x] === "Proficiency"
-            ) {
-               allGrades += `<td>${
-                  studentTable.rows[x][y].value
-                     ? studentTable.rows[x][y].value * 10 + "%"
-                     : ""
-               }</td>`;
-            } else {
-               let value = "";
-               if (studentTable.rows[x][y].value)
-                  value = studentTable.rows[x][y].value.toFixed(2);
-               allGrades += `<td>${
-                  classInfo.category !== "Kinder"
-                     ? value
-                     : kinderGrade(studentTable.rows[x][y].value)
-               }</td>`;
-            }
-         }
-         allGrades += "</tr>";
+      for (let x = 0; x < 4; x++) {
+         attendance += `<td>${
+            enrollment.classroom.periodAbsence[x]
+               ? enrollment.classroom.periodAbsence[x]
+               : ""
+         }</td>`;
       }
-   }
 
-   for (let x = 0; x < 4; x++) {
       attendance += `<td>${
-         enrollment.classroom.periodAbsence[x]
-            ? enrollment.classroom.periodAbsence[x]
-            : ""
+         enrollment.classroom.absence ? enrollment.classroom.absence : 0
       }</td>`;
-   }
 
-   attendance += `<td>${
-      enrollment.classroom.absence ? enrollment.classroom.absence : 0
-   }</td>`;
+      const img = path.join(
+         "file://",
+         __dirname,
+         "../../templates/assets/logo.png"
+      );
+      const css = path.join(
+         "file://",
+         __dirname,
+         "../../templates/reportCard/style.css"
+      );
 
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/reportCard/style.css"
-   );
+      const options = {
+         format: "A4",
+      };
 
-   const options = {
-      format: "A4",
-   };
+      try {
+         pdf.create(
+            pdfTemplateReportCard(
+               css,
+               img,
+               student.name,
+               classInfo.teacher,
+               classInfo.category,
+               allGrades,
+               finalGrades,
+               attendance,
+               observation
+            ),
+            options
+         ).toFile(name, (err) => {
+            if (err) {
+               res.send(Promise.reject());
+            }
 
-   try {
-      pdf.create(
-         pdfTemplateReportCard(
-            css,
-            img,
-            student.name,
-            classInfo.teacher,
-            classInfo.category,
-            allGrades,
-            finalGrades,
-            attendance,
-            observation
-         ),
-         options
-      ).toFile(name, (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
-      });
-   } catch (err) {
-      console.error(err.message);
-      return res.status(500).send("PDF Error");
+            res.send(Promise.resolve());
+         });
+      } catch (err) {
+         console.error(err.message);
+         return res.status(500).send("PDF Error");
+      }
+   } else {
+      res.json({ msg: "Alumno sin notas" });
    }
 });
 
@@ -1199,7 +1219,7 @@ const buildClassTable = async (grades, class_id, res) => {
 
          //Add or modify the info that is in every item in the array row
          for (const index in gradeType) {
-            row[rowNumber].gradetype = gradeType[index][0].gradetype._id;
+            row[rowNumber].gradetype = gradeType[index][0].gradetype;
             row[rowNumber].name = "input" + count;
 
             //For the items that are buttons (doesnt have a user related)
@@ -1277,7 +1297,14 @@ const buildAllGradesTable = (students, periods, className) => {
                                 0,
                                 1
                              );
-                  else if (periods[y][x]) row[count] = periods[y][x][z].value;
+                  else if (periods[y][x]) {
+                     row[count] =
+                        cambridgeTests.some(
+                           (test) => test === periods[y][x][z].gradetype.name
+                        ) && periods[y][x][z].value !== ""
+                           ? periods[y][x][z].value * 10 + "%"
+                           : periods[y][x][z].value;
+                  }
                } else row[count] = "";
             }
          } else {

@@ -48,7 +48,7 @@ const Installments = ({
          loadStudentInstallments(_id, true);
          loadUser(_id);
       } else {
-         if (!userLoading) {
+         if (!userLoading && userLogged._id !== user._id) {
             const student = {
                _id: user._id,
                name: user.lastname + ", " + user.name,
@@ -66,6 +66,7 @@ const Installments = ({
       loadingUsersInstallments,
       loadPenalty,
       user,
+      userLogged,
       userLoading,
       loadUser,
       loading,

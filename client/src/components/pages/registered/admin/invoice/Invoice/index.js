@@ -129,12 +129,12 @@ const Invoice = ({
                               invoice.details.map((invoice, index) => (
                                  <tr key={index}>
                                     <td>
-                                       {invoice.installment.student.lastname +
+                                       {invoice.installment ? invoice.installment.student.lastname +
                                           ", " +
-                                          invoice.installment.student.name}
+                                          invoice.installment.student.name : 'Cuota eliminada'}
                                     </td>
                                     <td>
-                                       {installment[invoice.installment.number]}
+                                       {invoice.installment ? installment[invoice.installment.number] : 'Indefinida'}
                                     </td>
                                     <td>${formatNumber(invoice.value)}</td>
                                     <td>${formatNumber(invoice.payment)}</td>

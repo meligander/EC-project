@@ -149,12 +149,10 @@ export const loadInstallments = (filterData) => async (dispatch) => {
 };
 
 export const addInstallment = (installment) => (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
    dispatch({
       type: INVOICEDETAIL_ADDED,
       payload: installment,
    });
-   dispatch(updateLoadingSpinner(false));
 };
 
 export const updateIntallment = (formData, history, user_id, inst_id) => async (

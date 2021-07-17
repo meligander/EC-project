@@ -129,47 +129,46 @@ export const registerNewGrade = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const updateGrades = (formData, history, class_id) => async (
-   dispatch
-) => {
-   dispatch(updateLoadingSpinner(true));
-   try {
-      const res = await api.post("/grade/period", formData);
-      dispatch({
-         type: GRADES_UPDATED,
-         payload: res.data,
-      });
+export const updateGrades =
+   (formData, history, class_id) => async (dispatch) => {
+      dispatch(updateLoadingSpinner(true));
+      try {
+         const res = await api.post("/grade/period", formData);
+         dispatch({
+            type: GRADES_UPDATED,
+            payload: res.data,
+         });
 
-      dispatch(setAlert("Calificaciones Modificadas", "success", "2"));
-      dispatch({
-         type: GRADES_CLEARED,
-      });
+         dispatch(setAlert("Calificaciones Modificadas", "success", "2"));
+         dispatch({
+            type: GRADES_CLEARED,
+         });
 
-      history.push(`/class/${class_id}`);
-   } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: GRADES_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-   }
+         history.push(`/class/${class_id}`);
+      } catch (err) {
+         const msg = err.response.data.msg;
+         const type = err.response.statusText;
+         dispatch({
+            type: GRADES_ERROR,
+            payload: {
+               type,
+               status: err.response.status,
+               msg,
+            },
+         });
+         dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      }
 
-   dispatch(updateLoadingSpinner(false));
-   window.scrollTo(0, 0);
-};
+      dispatch(updateLoadingSpinner(false));
+      window.scrollTo(0, 0);
+   };
 
 export const deleteGrades = (grade) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
       const res = await api.delete(
-         `/grade/${grade.gradetype}/${grade.classroom}/${grade.period}`
+         `/grade/${grade.gradetype._id}/${grade.classroom}/${grade.period}`
       );
 
       dispatch({
@@ -299,19 +298,21 @@ export const gradesPDF = (info, classInfo, type) => async (dispatch) => {
                   },
                };
 
-               await api.post("/grade/report-card", reportInfo);
+               const res = await api.post("/grade/report-card", reportInfo);
 
-               pdf = await api.get("/grade/pdf/report-card", {
-                  responseType: "blob",
-               });
+               if (res.data.msg !== "Alumno sin notas") {
+                  pdf = await api.get("/grade/pdf/report-card", {
+                     responseType: "blob",
+                  });
 
-               name = `Libreta de ${reportInfo.student.name} de ${reportInfo.classInfo.category}`;
+                  name = `Libreta de ${reportInfo.student.name} de ${reportInfo.classInfo.category}`;
 
-               const pdfBlob = new Blob([pdf.data], {
-                  type: "application/pdf",
-               });
+                  const pdfBlob = new Blob([pdf.data], {
+                     type: "application/pdf",
+                  });
 
-               saveAs(pdfBlob, `${name} ${date}.pdf`);
+                  saveAs(pdfBlob, `${name} ${date}.pdf`);
+               }
             }
             break;
          default:
@@ -351,67 +352,62 @@ export const gradesPDF = (info, classInfo, type) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const certificatePDF = (
-   students,
-   header,
-   periods,
-   classInfo,
-   certificateDate,
-   periodNumber
-) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
+export const certificatePDF =
+   (students, header, periods, classInfo, certificateDate, periodNumber) =>
+   async (dispatch) => {
+      dispatch(updateLoadingSpinner(true));
 
-   try {
-      for (let x = 0; x < students.length; x++) {
-         const period = periods[x];
-         const student = students[x];
+      try {
+         for (let x = 0; x < students.length; x++) {
+            const period = periods[x];
+            const student = students[x];
 
-         const info = {
-            student,
-            header,
-            period,
-            classInfo,
-            certificateDate,
-         };
+            const info = {
+               student,
+               header,
+               period,
+               classInfo,
+               certificateDate,
+            };
 
-         if (periodNumber === 6) {
-            await api.post("/grade/certificate-cambridge/create-list", info);
-         } else {
-            await api.post("/grade/certificate/create-list", info);
+            if (periodNumber === 6) {
+               await api.post("/grade/certificate-cambridge/create-list", info);
+            } else {
+               await api.post("/grade/certificate/create-list", info);
+            }
+
+            const pdf = await api.get("/grade/certificate/fetch-list", {
+               responseType: "blob",
+            });
+
+            const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
+
+            saveAs(
+               pdfBlob,
+               `Certificado ${classInfo.category.name} ${
+                  periodNumber === 6 ? "Cambridge" : ""
+               }  ${student.name}.pdf`
+            );
          }
 
-         const pdf = await api.get("/grade/certificate/fetch-list", {
-            responseType: "blob",
+         dispatch(setAlert("Certificados Generados", "success", "2"));
+         window.scrollTo(0, 0);
+      } catch (err) {
+         const msg = err.response.data.msg;
+         const type = err.response.statusText;
+         dispatch({
+            type: GRADES_ERROR,
+            payload: {
+               type,
+               status: err.response.status,
+               msg,
+            },
          });
-
-         const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
-
-         saveAs(
-            pdfBlob,
-            `Certificado ${classInfo.category.name} ${
-               periodNumber === 6 ? "Cambridge" : ""
-            }  ${student.name}.pdf`
-         );
+         dispatch(setAlert(msg ? msg : type, "danger", "4"));
       }
 
-      dispatch(setAlert("Certificados Generados", "success", "2"));
-      window.scrollTo(0, 0);
-   } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: GRADES_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "4"));
-   }
-
-   dispatch(updateLoadingSpinner(false));
-};
+      dispatch(updateLoadingSpinner(false));
+   };
 
 export const clearGrades = () => (dispatch) => {
    dispatch({

@@ -45,7 +45,7 @@ router.post("/", [auth, adminAuth], async (req, res) => {
          if (towns[x].name === "")
             return res
                .status(400)
-               .json({ msg: "El nombre debe estar definidor" });
+               .json({ msg: "El nombre debe estar definido" });
 
          let name = towns[x].name;
          let id = towns[x]._id;
