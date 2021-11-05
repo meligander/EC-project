@@ -93,7 +93,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
       res.json(enrollments);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -135,14 +135,14 @@ router.get("/average", [auth, adminAuth], async (req, res) => {
       res.json(enrollments);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
-//@route    GET /api/enrollment/absences
-//@desc     get all student's absences
+//@route    GET /api/enrollment/attendance
+//@desc     get all student's attendance
 //@access   Private && Admin
-router.get("/absences", [auth, adminAuth], async (req, res) => {
+router.get("/attendance", [auth, adminAuth], async (req, res) => {
    try {
       let date = new Date();
 
@@ -175,7 +175,7 @@ router.get("/absences", [auth, adminAuth], async (req, res) => {
       res.json(enrollments);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -203,7 +203,7 @@ router.get("/one/:id", [auth, adminAuth], async (req, res) => {
       res.json(enrollment);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -233,7 +233,7 @@ router.get("/year", [auth, adminAuth], async (req, res) => {
       res.json(yearEnrollments);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -356,7 +356,7 @@ router.post(
          res.json({ msg: "Enrollment Registered" });
       } catch (err) {
          console.error(err.message);
-         return res.status(500).send("Server Error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 );
@@ -432,15 +432,12 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
          pdfTemplate(css, img, "inscripciones", thead, tbody),
          options
       ).toFile(name, (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
+         if (err) res.send(Promise.reject());
+         else res.send(Promise.resolve());
       });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("PDF Error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -507,15 +504,12 @@ router.post("/averages/create-list", [auth, adminAuth], (req, res) => {
          pdfTemplate(css, img, "Mejores Promedios", thead, tbody),
          options
       ).toFile(name, (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
+         if (err) res.send(Promise.reject());
+         else res.send(Promise.resolve());
       });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("PDF Error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -610,15 +604,12 @@ router.post("/absences/create-list", [auth, adminAuth], (req, res) => {
          pdfTemplate(css, img, "Mejores Asistencias", thead, tbody),
          options
       ).toFile(name, (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
+         if (err) res.send(Promise.reject());
+         else res.send(Promise.resolve());
       });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("PDF Error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -722,7 +713,7 @@ router.put(
          res.json(enrollment);
       } catch (err) {
          console.error(err.message);
-         return res.status(500).send("Server Error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 );
@@ -749,7 +740,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       res.json({ msg: "Enrollment deleted" });
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 

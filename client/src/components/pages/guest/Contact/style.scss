@@ -1,7 +1,6 @@
 @import "../../../../style/abstract.scss";
 
 .contact {
-   padding-top: 5.4rem;
    background-image: linear-gradient(
          to right bottom,
          rgba($light-color, 0.75),
@@ -9,7 +8,6 @@
       ),
       url(../../../../img/gallery-5.png);
    background-size: cover;
-   min-height: 90vh;
 
    h1 {
       padding: 6rem 0;

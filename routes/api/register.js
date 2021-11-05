@@ -43,15 +43,14 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 
       if (registers.length === 0) {
          return res.status(400).json({
-            msg:
-               "No se encontró información de la caja con dichas descripciones",
+            msg: "No se encontró información de la caja con dichas descripciones",
          });
       }
 
       res.json(registers);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -65,15 +64,14 @@ router.get("/last", [auth, adminAuth], async (req, res) => {
 
       if (!register) {
          return res.status(400).json({
-            msg:
-               "No se encontró información de la caja con dichas descripciones",
+            msg: "No se encontró información de la caja con dichas descripciones",
          });
       }
 
       res.json(register);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -180,7 +178,7 @@ router.get("/year/bymonth", [auth, adminAuth], async (req, res) => {
       res.json(registerByMonth);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -230,7 +228,7 @@ router.post(
          res.json(register);
       } catch (err) {
          console.error(err.message);
-         return res.status(500).send("Server Error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 );
@@ -352,15 +350,12 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
          ),
          options
       ).toFile(name, (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
+         if (err) res.send(Promise.reject());
+         else res.send(Promise.resolve());
       });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("PDF Error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -411,7 +406,7 @@ router.put("/", [auth, adminAuth], async (req, res) => {
       res.json({ msg: "Register Closed" });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -455,7 +450,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       res.json({ msg: "Register deleted" });
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 

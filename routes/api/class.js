@@ -19,6 +19,7 @@ const Enrollment = require("../../models/Enrollment");
 const Attendance = require("../../models/Attendance");
 const Grade = require("../../models/Grade");
 const Post = require("../../models/Post");
+const classInfo = require("../../templates/classInfo");
 
 //@route    GET /api/class
 //@desc     Get all classes || with filter
@@ -61,7 +62,7 @@ router.get("/", auth, async (req, res) => {
       res.json(classes);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -73,16 +74,34 @@ router.get("/:class_id", auth, async (req, res) => {
       let classinfo = await Class.findOne({ _id: req.params.class_id })
          .populate("category", ["name"])
          .populate("teacher", ["name", "lastname"]);
-      if (!classinfo) {
+
+      if (!classinfo)
          return res
             .status(400)
             .json({ msg: "No se encontró una clase con dichas descripciones" });
-      }
+
+      const enrollments = await Enrollment.find({
+         "classroom._id": req.params.class_id,
+      }).populate({
+         path: "student",
+         model: "user",
+         select: "-password",
+      });
+
+      classinfo.students = enrollments
+         .map((item) => item.student)
+         .sort((a, b) => {
+            if (a.lastname > b.lastname) return 1;
+            if (a.lastname < b.lastname) return -1;
+
+            if (a.name > b.name) return 1;
+            if (a.name < b.name) return -1;
+         });
 
       res.json(classinfo);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -117,7 +136,7 @@ router.get("/student/:id", auth, async (req, res) => {
       res.json(classinfo);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -243,7 +262,7 @@ router.post(
          res.json(newClass);
       } catch (err) {
          console.error(err.message);
-         return res.status(500).send("Server Error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 );
@@ -339,15 +358,12 @@ router.post("/create-list", auth, (req, res) => {
          pdfTemplate(css, img, "cursos", table, htmlstring),
          options
       ).toFile(name, (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
+         if (err) res.send(Promise.reject());
+         else res.send(Promise.resolve());
       });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("PDF Error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -412,16 +428,13 @@ router.post("/oneclass/create-list", auth, (req, res) => {
       pdf.create(pdfTemplate2(css, img, tbody, classInfo), options).toFile(
          name,
          (err) => {
-            if (err) {
-               res.send(Promise.reject());
-            }
-
-            res.send(Promise.resolve());
+            if (err) res.send(Promise.reject());
+            else res.send(Promise.resolve());
          }
       );
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("PDF Error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -489,15 +502,12 @@ router.post("/blank/create-list", auth, (req, res) => {
          pdfTemplate2(css, img, tbody, classInfo, thead),
          options
       ).toFile(name, (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
+         if (err) res.send(Promise.reject());
+         else res.send(Promise.resolve());
       });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("PDF Error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -605,7 +615,7 @@ router.put(
          res.json(classinfo);
       } catch (err) {
          console.error(err.message);
-         return res.status(500).send("Server Error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 );
@@ -624,7 +634,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       res.json({ msg: "Class deleted" });
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 

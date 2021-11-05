@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { withRouter, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import moment from "moment";
-import PropTypes from "prop-types";
+import {
+   FaFileInvoiceDollar,
+   FaTimes,
+   FaTrashAlt,
+   FaUserCircle,
+} from "react-icons/fa";
+import { ImSearch } from "react-icons/im";
 
 import {
    clearProfile,
    clearSearch,
 } from "../../../../../../../../actions/user";
-import { registerInvoice } from "../../../../../../../../actions/invoice";
-import { removeInstallmentFromList } from "../../../../../../../../actions/installment";
+import {
+   registerInvoice,
+   removeDetail,
+} from "../../../../../../../../actions/invoice";
 import { formatNumber } from "../../../../../../../../actions/mixvalues";
 
 import Alert from "../../../../../../sharedComp/Alert";
@@ -19,34 +27,25 @@ import PopUp from "../../../../../../../modal/PopUp";
 import "./style.scss";
 
 const InvoiceTab = ({
-   history,
-   installments: { installments },
    invoices: {
+      invoice,
       otherValues: { invoiceNumber },
    },
-   auth: { userLogged },
    clearSearch,
    registerInvoice,
    clearProfile,
-   removeInstallmentFromList,
+   removeDetail,
 }) => {
-   const [otherValues, setOtherValues] = useState({
+   const [adminValues, setAdminValues] = useState({
       day: moment().format("DD/MM/YYYY"),
-      selectedUser: {
-         _id: "",
-         lastname: "",
-         name: "",
-         email: "",
-      },
+      selectedUser: {},
       registeredUser: false,
       toggleModal: false,
       toggleSearch: false,
+      toDelete: "",
    });
 
-   const [invoice, setInvoice] = useState({
-      name: "",
-      lastname: "",
-      email: "",
+   const [formData, setFormData] = useState({
       user: {
          _id: "",
          lastname: "",
@@ -56,7 +55,7 @@ const InvoiceTab = ({
       invoiceid: "",
       total: 0,
       details: [],
-      remaining: 0,
+      paid: 0,
    });
 
    const installment = [
@@ -75,16 +74,9 @@ const InvoiceTab = ({
       "Dic",
    ];
 
-   const {
-      name,
-      lastname,
-      email,
-      user,
-      invoiceid,
-      details,
-      total,
-      remaining,
-   } = invoice;
+   const { invoiceid, details, total, paid, user } = formData;
+
+   const { _id, email, name, lastname } = user;
 
    const {
       day,
@@ -92,109 +84,95 @@ const InvoiceTab = ({
       registeredUser,
       toggleModal,
       toggleSearch,
-   } = otherValues;
+      toDelete,
+   } = adminValues;
 
    useEffect(() => {
-      const initInput = () => {
-         if (installments.length > details.length) {
-            const newItem = {
-               item: installments[installments.length - 1],
-               payment: "",
-            };
-
-            setInvoice((prev) => ({
+      if (invoice) {
+         if (invoice.details.length > details.length) {
+            const newItem = invoice.details[invoice.details.length - 1];
+            setFormData((prev) => ({
                ...prev,
                details: [...prev.details, newItem],
-               remaining:
-                  prev.remaining + installments[installments.length - 1].value,
+               total: prev.total + newItem.value,
             }));
+         } else if (invoice.details.length < details.length) {
+            setFormData((prev) => ({
+               ...prev,
+               paid: prev.paid - toDelete.payment,
+               total: prev.total - toDelete.value,
+               details: prev.details.filter(
+                  (detail) => detail.installment !== toDelete.installment
+               ),
+            }));
+            setAdminValues((prev) => ({ ...prev, toDelete: "" }));
          }
-      };
-
-      if (installments.length > 0) initInput();
-   }, [installments, invoiceid, details.length]);
-
-   const selectUser = (user) => {
-      setOtherValues({
-         ...otherValues,
-         selectedUser: user,
-      });
-   };
+      }
+   }, [invoice, invoiceid, details.length, toDelete]);
 
    const addUser = () => {
-      setOtherValues({
-         ...otherValues,
+      setAdminValues((prev) => ({
+         ...prev,
          registeredUser: true,
          toggleSearch: !toggleSearch,
-      });
-
-      setInvoice({
-         ...invoice,
-         user: {
-            _id: selectedUser._id,
-            lastname: selectedUser.lastname,
-            name: selectedUser.name,
-            email: selectedUser.email,
-         },
-      });
+      }));
+      setFormData((prev) => ({
+         ...prev,
+         user: selectedUser,
+      }));
       clearSearch();
    };
 
    const onChange = (e) => {
-      setInvoice({
-         ...invoice,
-         [e.target.name]: e.target.value,
-      });
+      setFormData((prev) => ({
+         ...prev,
+         ...(e.target.id === "user"
+            ? {
+                 user: {
+                    ...user,
+                    [e.target.name]: e.target.value,
+                 },
+              }
+            : { [e.target.name]: e.target.value }),
+      }));
    };
 
-   const onChangeValue = (e, item, index) => {
+   const onChangeValue = (e) => {
       let newDetails = [...details];
-      newDetails[index] = {
-         item,
-         payment: e.target.value,
-         value: item.value,
-      };
-      const totalAmount = newDetails.reduce(
-         (accum, item) => accum + Number(item.payment),
-         0
-      );
-      const totalRemaining = newDetails.reduce(
-         (accum, item) => accum + (item.item.value - Number(item.payment)),
-         0
-      );
-      setInvoice({
-         ...invoice,
-         details: newDetails,
-         total: totalAmount,
-         remaining: totalRemaining,
-      });
-      setOtherValues({ ...otherValues });
+
+      if (newDetails[e.target.id].value >= e.target.value) {
+         newDetails[e.target.id] = {
+            ...newDetails[e.target.id],
+            payment: e.target.value,
+         };
+
+         setFormData((prev) => ({
+            ...prev,
+            details: newDetails,
+            paid: newDetails.reduce(
+               (accum, item) => accum + Number(item.payment),
+               0
+            ),
+         }));
+      }
    };
 
    const removeItem = (item) => {
-      removeInstallmentFromList(item._id);
-      setInvoice({
-         ...invoice,
-         remaining: remaining - item.value,
-         details: details.filter((detail) => detail.item._id !== item._id),
-      });
+      removeDetail(item.installment);
+      setAdminValues((prev) => ({ ...prev, toDelete: item }));
    };
 
    const setToggle = () => {
-      setOtherValues({ ...otherValues, toggleModal: !toggleModal });
+      setAdminValues((prev) => ({ ...prev, toggleModal: !toggleModal }));
    };
 
    const confirm = () => {
-      registerInvoice(
-         {
-            ...invoice,
-            invoiceid: invoiceNumber,
-            user: user._id !== "" ? user : "",
-         },
-         remaining,
-         history,
-         userLogged._id
-      );
+      registerInvoice({
+         ...formData,
+         invoiceid: invoiceNumber,
+         remaining: total - paid,
+         total: paid,
+      });
    };
 
    return (
@@ -239,29 +217,30 @@ const InvoiceTab = ({
                   <button
                      onClick={(e) => {
                         e.preventDefault();
-                        setOtherValues({
-                           ...otherValues,
+                        setAdminValues((prev) => ({
+                           ...prev,
                            toggleSearch: !toggleSearch,
-                        });
+                        }));
                      }}
                      type="button"
                      className="btn-cancel search"
                   >
-                     <i className="fas fa-search"></i>
+                     <ImSearch />
                   </button>
                   <span className="tooltiptext">Buscar usuario registrado</span>
                </div>
             </div>
             <div className="mb-2">
-               {!registeredUser ? (
-                  <>
-                     <div className="form-group">
+               <div className="form-group">
+                  {!registeredUser ? (
+                     <>
                         <div className="two-in-row">
                            <input
                               className="form-input"
                               type="text"
                               onChange={onChange}
                               name="name"
+                              id="user"
                               value={name}
                               placeholder="Nombre"
                            />
@@ -269,6 +248,7 @@ const InvoiceTab = ({
                               className="form-input"
                               type="text"
                               onChange={onChange}
+                              id="user"
                               value={lastname}
                               name="lastname"
                               placeholder="Apellido"
@@ -290,34 +270,14 @@ const InvoiceTab = ({
                               Apellido
                            </label>
                         </div>
-                     </div>
-                     <div className="form-group">
-                        <input
-                           className="form-input"
-                           type="email"
-                           name="email"
-                           id="email"
-                           onChange={onChange}
-                           value={email}
-                           placeholder="Email"
-                        />
-                        <label htmlFor="email" className="form-label">
-                           Email
-                        </label>
-                     </div>
-                  </>
-               ) : (
-                  <>
-                     <div className="form-group">
+                     </>
+                  ) : (
+                     <>
                         <div className="btn-end">
                            <input
                               className="form-input"
                               type="text"
-                              value={
-                                 selectedUser.lastname +
-                                 ", " +
-                                 selectedUser.name
-                              }
+                              value={lastname + ", " + name}
                               placeholder="Alumno"
                               disabled
                               id="full-name"
@@ -329,9 +289,9 @@ const InvoiceTab = ({
                                     clearProfile();
                                  }}
                                  className="btn-cancel search"
-                                 to={`/dashboard/${selectedUser._id}`}
+                                 to={`/dashboard/${_id}`}
                               >
-                                 <i className="fas fa-user-circle"></i>
+                                 <FaUserCircle />
                               </Link>
                               <span className="tooltiptext">Ver perfil</span>
                            </div>
@@ -340,14 +300,14 @@ const InvoiceTab = ({
                                  type="button"
                                  onClick={(e) => {
                                     e.preventDefault();
-                                    setOtherValues({
-                                       ...otherValues,
+                                    setAdminValues((prev) => ({
+                                       ...prev,
                                        registeredUser: !registeredUser,
-                                    });
+                                    }));
                                  }}
                                  className="btn-cancel"
                               >
-                                 <i className="fas fa-times"></i>
+                                 <FaTimes />
                               </button>
                               <span className="tooltiptext">
                                  Quitar usuario
@@ -355,32 +315,43 @@ const InvoiceTab = ({
                            </div>
                         </div>
                         <label htmlFor="full-name" className="form-label">
-                           Nombre Completo
+                           Nombre
                         </label>
-                     </div>
-                     <div className="form-group">
-                        <input
-                           className={`form-input ${
-                              !user.email ? "text-danger" : ""
-                           }`}
-                           id="email-user"
-                           value={
-                              user.email
-                                 ? user.email
-                                 : "No tiene email registrado"
-                           }
-                           disabled
-                        />
-                        <label htmlFor="email-user" className="form-label show">
-                           Email
-                        </label>
-                     </div>
-                  </>
-               )}
+                     </>
+                  )}
+               </div>
+               <div className="form-group">
+                  <input
+                     className={`form-input ${
+                        registeredUser && !user.email ? "text-danger" : ""
+                     }`}
+                     type="email"
+                     name="email"
+                     id="user"
+                     onChange={onChange}
+                     disabled={registeredUser}
+                     value={
+                        !registeredUser
+                           ? email
+                           : email
+                           ? email
+                           : "No tiene email registrado"
+                     }
+                     placeholder="Email"
+                  />
+                  <label htmlFor="user" className="form-label">
+                     Email
+                  </label>
+               </div>
             </div>
             {toggleSearch && (
                <StudentSearch
-                  selectStudent={selectUser}
+                  selectStudent={(user) => {
+                     setAdminValues((prev) => ({
+                        ...prev,
+                        selectedUser: user,
+                     }));
+                  }}
                   selectedStudent={selectedUser}
                   actionForSelected={addUser}
                   typeSearch="guardian/student"
@@ -404,46 +375,44 @@ const InvoiceTab = ({
                         </tr>
                      </thead>
                      <tbody>
-                        {details.map((invoice, index) => {
-                           const name = "payment" + index;
-                           return (
-                              <tr key={index}>
-                                 <td>
-                                    {invoice.item.student.lastname +
-                                       ", " +
-                                       invoice.item.student.name}
-                                 </td>
-                                 <td>{installment[invoice.item.number]}</td>
-                                 <td>{invoice.item.year}</td>
-                                 <td>${formatNumber(invoice.item.value)}</td>
-                                 <td>
-                                    <input
-                                       type="number"
-                                       onChange={(e) =>
-                                          onChangeValue(e, invoice.item, index)
-                                       }
-                                       placeholder="Monto"
-                                       min="0"
-                                       max={invoice.item.value}
-                                       name={name}
-                                       value={invoice.payment}
-                                    />
-                                 </td>
-                                 <td>
-                                    <button
-                                       type="button"
-                                       onClick={(e) => {
-                                          e.preventDefault();
-                                          removeItem(invoice.item);
-                                       }}
-                                       className="btn btn-danger"
-                                    >
-                                       <i className="far fa-trash-alt"></i>
-                                    </button>
-                                 </td>
-                              </tr>
-                           );
-                        })}
+                        {details.length > 0 &&
+                           details.map((install, index) => {
+                              return (
+                                 <tr key={index}>
+                                    <td>
+                                       {install.student.lastname +
+                                          ", " +
+                                          install.student.name}
+                                    </td>
+                                    <td>{installment[install.number]}</td>
+                                    <td>{install.year}</td>
+                                    <td>${formatNumber(install.value)}</td>
+                                    <td>
+                                       <input
+                                          type="number"
+                                          onChange={onChangeValue}
+                                          id={index}
+                                          placeholder="Monto"
+                                          min="0"
+                                          max={install.value}
+                                          value={install.payment}
+                                       />
+                                    </td>
+                                    <td>
+                                       <button
+                                          type="button"
+                                          onClick={(e) => {
+                                             e.preventDefault();
+                                             removeItem(install);
+                                          }}
+                                          className="btn btn-danger"
+                                       >
+                                          <FaTrashAlt />
+                                       </button>
+                                    </td>
+                                 </tr>
+                              );
+                           })}
                      </tbody>
                   </table>
                </div>
@@ -453,36 +422,28 @@ const InvoiceTab = ({
                   <label htmlFor="remaining">Saldo</label>
                   <input
                      type="number"
-                     value={remaining}
+                     value={total - paid}
                      disabled
                      name="remaining"
                   />
                </div>
                <div className="invoice-detail">
                   <label htmlFor="total">Total a Pagar</label>
-                  <input type="number" name="total" value={total} disabled />
+                  <input type="number" name="total" value={paid} disabled />
                </div>
-               <button type="submit" className="btn btn-primary mt-3">
-                  <i className="fas fa-file-invoice-dollar"></i>&nbsp; Pagar
-               </button>
+               <div className="btn-center">
+                  <button type="submit" className="btn btn-primary">
+                     <FaFileInvoiceDollar />
+                     &nbsp;Pagar
+                  </button>
+               </div>
             </div>
          </form>
       </div>
    );
 };
 
-InvoiceTab.propTypes = {
-   installments: PropTypes.object.isRequired,
-   invoices: PropTypes.object.isRequired,
-   auth: PropTypes.object.isRequired,
-   clearSearch: PropTypes.func.isRequired,
-   registerInvoice: PropTypes.func.isRequired,
-   removeInstallmentFromList: PropTypes.func.isRequired,
-   clearProfile: PropTypes.func.isRequired,
-};
-
 const mapStateToProps = (state) => ({
-   installments: state.installments,
    invoices: state.invoices,
    auth: state.auth,
 });
@@ -490,6 +451,6 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    clearSearch,
    registerInvoice,
-   removeInstallmentFromList,
    clearProfile,
-})(withRouter(InvoiceTab));
+   removeDetail,
+})(InvoiceTab);

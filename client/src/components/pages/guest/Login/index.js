@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
+import { RiLoginCircleLine } from "react-icons/ri";
+import { FaUserAlt } from "react-icons/fa";
 
 import { loginUser } from "../../../../actions/auth";
 
 import Alert from "../../sharedComp/Alert";
 import Loading from "../../../modal/Loading";
 
-const Login = ({ loginUser, mixvalues: { loadingSpinner } }) => {
+import "./style.scss";
+
+const Login = ({ loginUser }) => {
    const [formData, setFormData] = useState({
       email: "",
       password: "",
@@ -28,14 +31,14 @@ const Login = ({ loginUser, mixvalues: { loadingSpinner } }) => {
    };
 
    return (
-      <div className="inner-container">
-         <Alert type="2" />
-         {loadingSpinner && <Loading />}
+      <div className="inner-container login">
+         <Loading />
          <h3 className="heading-secondary text-primary">Iniciar Sesión</h3>
          <p className="heading-tertiary text-lighter-primary text-moved-right">
-            <i className="fas fa-user"></i> Inicie sesión en su cuenta
+            <FaUserAlt /> Inicie sesión en su cuenta
          </p>
          <form onSubmit={onSubmit} className="form">
+            <Alert type="1" />
             <div className="form-group">
                <input
                   className="form-input"
@@ -64,7 +67,8 @@ const Login = ({ loginUser, mixvalues: { loadingSpinner } }) => {
             </div>
             <div className="btn-right">
                <button type="submit" className="btn btn-primary">
-                  <i className="fas fa-sign-in-alt"></i>&nbsp; Iniciar Sesión
+                  <RiLoginCircleLine />
+                  &nbsp;Iniciar Sesión
                </button>
             </div>
          </form>
@@ -72,16 +76,6 @@ const Login = ({ loginUser, mixvalues: { loadingSpinner } }) => {
    );
 };
 
-Login.prototypes = {
-   mixvalues: PropTypes.object.isRequired,
-   loginUser: PropTypes.func.isRequired,
-   loadUser: PropTypes.func.isRequired,
-};
-
-const mapStateToProps = (state) => ({
-   mixvalues: state.mixvalues,
-});
-
-export default connect(mapStateToProps, {
+export default connect(null, {
    loginUser,
 })(Login);

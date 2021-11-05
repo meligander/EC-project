@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
+import { FaTrashAlt } from "react-icons/fa";
 
 import { deleteTown, updateTowns } from "../../../../../../../../actions/town";
 
@@ -12,53 +12,47 @@ const TownsTab = ({
    updateTowns,
    deleteTown,
 }) => {
-   const [newTowns, setNewTowns] = useState([]);
-   const [otherValues, setOtherValues] = useState({
+   const [formData, setFormData] = useState([]);
+   const [adminValues, setAdminValues] = useState({
       toggleModalDelete: false,
       toggleModalSave: false,
       toDelete: "",
-      count: 0,
    });
 
-   const { toggleModalDelete, toggleModalSave, toDelete, count } = otherValues;
+   const { toggleModalDelete, toggleModalSave, toDelete } = adminValues;
 
    useEffect(() => {
-      if (!loading) setNewTowns(towns);
+      if (!loading) setFormData(towns);
    }, [loading, towns]);
 
    const onChange = (e) => {
       const number = Number(e.target.name.substring(5, e.target.name.length));
-      let newValue = [...newTowns];
-      newValue[number] = {
-         ...newValue[number],
+
+      let newArray = [...formData];
+
+      newArray[number] = {
+         ...formData[number],
          name: e.target.value,
       };
-      setNewTowns(newValue);
+      setFormData(newArray);
    };
 
    const addTown = () => {
-      let newValue = [...newTowns];
-      newValue.push({
-         _id: count,
+      let newArray = [...formData];
+
+      newArray.push({
+         _id: "",
          name: "",
       });
-      setNewTowns(newValue);
-      setOtherValues({ ...otherValues, count: count + 1 });
+      setFormData(newArray);
    };
 
    const deleteTownConfirm = () => {
-      if (typeof toDelete._id === "number") {
-         const array = newTowns.filter((town) => town._id !== toDelete._id);
-         setNewTowns(array);
-      } else deleteTown(toDelete._id);
-   };
-
-   const setToggle = () => {
-      setOtherValues({
-         ...otherValues,
-         toggleModalSave: false,
-         toggleModalDelete: false,
-      });
+      if (formData[toDelete]._id === "") {
+         let newArray = [...formData];
+         newArray.splice(toDelete, 1);
+         setFormData(newArray);
+      } else deleteTown(formData[toDelete]._id);
    };
 
    return (
@@ -67,13 +61,23 @@ const TownsTab = ({
             <PopUp
                toggleModal={toggleModalDelete}
                confirm={deleteTownConfirm}
-               setToggleModal={setToggle}
+               setToggleModal={() =>
+                  setAdminValues((prev) => ({
+                     ...prev,
+                     toggleModalDelete: !toggleModalDelete,
+                  }))
+               }
                text="¿Está seguro que desea eliminar la localidad?"
             />
             <PopUp
                toggleModal={toggleModalSave}
-               confirm={() => updateTowns(newTowns)}
-               setToggleModal={setToggle}
+               confirm={() => updateTowns(formData)}
+               setToggleModal={() =>
+                  setAdminValues((prev) => ({
+                     ...prev,
+                     toggleModalSave: !toggleModalSave,
+                  }))
+               }
                text="¿Está seguro que desea guardar los cambios?"
             />
             <table className="smaller">
@@ -84,11 +88,11 @@ const TownsTab = ({
                   </tr>
                </thead>
                <tbody>
-                  {newTowns &&
-                     newTowns.length > 0 &&
-                     newTowns.map((town, i) => (
+                  {formData &&
+                     formData.length > 0 &&
+                     formData.map((town, i) => (
                         <tr key={i}>
-                           <td>
+                           <td data-th="Nombre">
                               <input
                                  type="text"
                                  name={`input${i}`}
@@ -102,22 +106,22 @@ const TownsTab = ({
                                  type="button"
                                  onClick={(e) => {
                                     e.preventDefault();
-                                    setOtherValues({
-                                       ...otherValues,
-                                       toDelete: town,
-                                       toggleModalDelete: true,
-                                    });
+                                    setAdminValues((prev) => ({
+                                       ...prev,
+                                       toDelete: i,
+                                       toggleModalDelete: !toggleModalDelete,
+                                    }));
                                  }}
                                  className="btn btn-danger"
                               >
-                                 <i className="far fa-trash-alt"></i>
+                                 <FaTrashAlt />
                               </button>
                            </td>
                         </tr>
                      ))}
                </tbody>
             </table>
-            {newTowns.length === 0 && (
+            {formData.length === 0 && (
                <p className="heading-tertiary text-dark text-center mt-1">
                   {error.msg}
                </p>
@@ -125,22 +129,16 @@ const TownsTab = ({
             <EditButtons
                add={addTown}
                save={() =>
-                  setOtherValues({
-                     ...otherValues,
-                     toggleModalSave: true,
-                  })
+                  setAdminValues((prev) => ({
+                     ...prev,
+                     toggleModalSave: !toggleModalSave,
+                  }))
                }
                type="Localidad"
             />
          </div>
       </>
    );
-};
-
-TownsTab.propTypes = {
-   towns: PropTypes.object.isRequired,
-   updateTowns: PropTypes.func.isRequired,
-   deleteTown: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({

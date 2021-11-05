@@ -12,7 +12,6 @@ import {
    LIKES_UPDATED,
    POST_SEEN,
    UNSEENPOSTS_CHANGED,
-   ALLUNSEENPOSTS_CHANGED,
    POSTS_CLEARED,
    POST_ERROR,
 } from "./types";
@@ -27,44 +26,30 @@ export const loadPosts = (class_id) => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: POST_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
+      if (err.response.status !== 401)
+         dispatch(setPostsError(POST_ERROR, err.response));
    }
 };
 
-export const getUnseenPosts = (class_id = false) => async (dispatch) => {
+export const getUnseenPosts = (class_id) => async (dispatch) => {
    try {
-      let res = [];
-      if (!class_id) {
-         res = await api.get(`/post/unseen/teacher`);
-      } else {
-         res = await api.get(`/post/unseen/class/${class_id}`);
-      }
+      let res;
+      if (!class_id) res = await api.get(`/post/unseen/teacher`);
+      else res = await api.get(`/post/unseen/class/${class_id}`);
       dispatch({
-         type: !class_id ? ALLUNSEENPOSTS_CHANGED : UNSEENPOSTS_CHANGED,
+         type: UNSEENPOSTS_CHANGED,
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: POST_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
+      if (err.response.status !== 401)
+         dispatch(setPostsError(POST_ERROR, err.response));
    }
 };
 
 //Add a post
 export const addPost = (formData, class_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    let post = {};
    for (const prop in formData) {
@@ -83,37 +68,27 @@ export const addPost = (formData, class_id) => async (dispatch) => {
 
       dispatch(setAlert("Posteo Creado", "success", "2"));
    } catch (err) {
-      if (err.response.data.errors) {
-         const errors = err.response.data.errors;
-         errors.forEach((error) => {
-            dispatch(setAlert(error.msg, "danger", "2"));
-         });
-         dispatch({
-            type: POST_ERROR,
-            payload: errors,
-         });
-      } else {
-         const msg = err.response.data.msg;
-         const type = err.response.statusText;
-         dispatch({
-            type: POST_ERROR,
-            payload: {
-               type,
-               status: err.response.status,
-               msg,
-            },
-         });
-         dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      }
+      if (err.response.status !== 401) {
+         dispatch(setPostsError(POST_ERROR, err.response));
+
+         if (err.response.data.errors)
+            err.response.data.errors.forEach((error) => {
+               dispatch(setAlert(error.msg, "danger", "2"));
+            });
+         else dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 //Delete a post
 export const deletePost = (post_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       await api.delete(`/post/${post_id}`);
@@ -125,21 +100,16 @@ export const deletePost = (post_id) => async (dispatch) => {
 
       dispatch(setAlert("Posteo Eliminado", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: POST_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setPostsError(POST_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 // Add comment
@@ -148,6 +118,7 @@ export const addComment = (post_id, formData, screen) => async (dispatch) => {
    //post_id is to create a type of alert so it does not create as many alerts as comments
 
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    let comment = {};
    for (const prop in formData) {
@@ -166,68 +137,55 @@ export const addComment = (post_id, formData, screen) => async (dispatch) => {
 
       dispatch(setAlert("Comentario Agregado", "success", post_id));
    } catch (err) {
-      if (err.response.data.errors) {
-         const errors = err.response.data.errors;
-         errors.forEach((error) => {
-            dispatch(setAlert(error.msg, "danger", post_id));
-         });
-         dispatch({
-            type: POST_ERROR,
-            payload: errors,
-         });
-      } else {
-         const msg = err.response.data.msg;
-         const type = err.response.statusText;
-         dispatch({
-            type: POST_ERROR,
-            payload: {
-               type,
-               status: err.response.status,
-               msg,
-            },
-         });
-         dispatch(setAlert(msg ? msg : type, "danger", post_id));
-      }
+      if (err.response.status !== 401) {
+         dispatch(setPostsError(POST_ERROR, err.response));
+
+         if (err.response.data.errors)
+            err.response.data.errors.forEach((error) => {
+               dispatch(setAlert(error.msg, "danger", post_id));
+            });
+         else dispatch(setAlert(err.response.data.msg, "danger", post_id));
+      } else error = true;
    }
 
-   window.scrollBy(0, screen);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollBy(0, screen);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 //Delete a comment
-export const deleteComment = (post_id, comment_id, screen) => async (
-   dispatch
-) => {
-   dispatch(updateLoadingSpinner(true));
-   try {
-      const res = await api.delete(`/post/comment/${post_id}/${comment_id}`);
+export const deleteComment =
+   (post_id, comment_id, screen) => async (dispatch) => {
+      dispatch(updateLoadingSpinner(true));
+      let error = false;
 
-      dispatch({
-         type: COMMENT_DELETED,
-         payload: { post_id, comments: res.data },
-      });
+      try {
+         const res = await api.delete(`/post/comment/${post_id}/${comment_id}`);
 
-      dispatch(setAlert("Comentario Eliminado", "success", post_id));
-   } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: POST_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", post_id));
-   }
+         dispatch({
+            type: COMMENT_DELETED,
+            payload: { post_id, comments: res.data },
+         });
 
-   window.scrollBy(0, screen);
-   dispatch(updateLoadingSpinner(false));
-};
+         dispatch(setAlert("Comentario Eliminado", "success", post_id));
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setPostsError(POST_ERROR, err.response));
+            dispatch(setAlert(err.response.data.msg, "danger", post_id));
+         } else error = true;
+      }
+
+      if (!error) {
+         window.scrollBy(0, screen);
+         dispatch(updateLoadingSpinner(false));
+      }
+   };
 
 export const addRemoveLike = (post_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
+
    try {
       const res = await api.put(`/post/like/${post_id}`);
 
@@ -236,19 +194,12 @@ export const addRemoveLike = (post_id) => async (dispatch) => {
          payload: { post_id, likes: res.data },
       });
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: POST_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", post_id));
+      if (err.response.status !== 401) {
+         dispatch(setPostsError(POST_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", post_id));
+      } else error = true;
    }
-   dispatch(updateLoadingSpinner(false));
+   if (!error) dispatch(updateLoadingSpinner(false));
 };
 
 export const seenPost = (post_id, data) => async (dispatch) => {
@@ -260,27 +211,26 @@ export const seenPost = (post_id, data) => async (dispatch) => {
          payload: { post_id, seenArray: res.data },
       });
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: POST_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", post_id));
+      if (err.response.status !== 401) {
+         dispatch(setPostsError(POST_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", post_id));
+      }
    }
-};
-
-export const changeUnseenPosts = (count, all = false) => async (dispatch) => {
-   dispatch({
-      type: all ? ALLUNSEENPOSTS_CHANGED : UNSEENPOSTS_CHANGED,
-      payload: count,
-   });
 };
 
 export const clearPosts = () => (dispatch) => {
    dispatch({ type: POSTS_CLEARED });
+};
+
+const setPostsError = (type, response) => (dispatch) => {
+   dispatch({
+      type: type,
+      payload: response.data.errors
+         ? response.data.errors
+         : {
+              type: response.statusText,
+              status: response.status,
+              msg: response.data.msg,
+           },
+   });
 };

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import Moment from "react-moment";
-import PropTypes from "prop-types";
+import { FaTrashAlt } from "react-icons/fa";
+import { BiFilterAlt } from "react-icons/bi";
 
 import {
    loadTransactions,
@@ -18,7 +19,6 @@ import {
 
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
-import Loading from "../../../../../modal/Loading";
 import PopUp from "../../../../../modal/PopUp";
 
 import "./style.scss";
@@ -30,8 +30,8 @@ const TransactionList = ({
    deleteExpence,
    clearInvoice,
    transactionsPDF,
-   expences: { transactions, loadingTransactions },
-   registers: { register, loading },
+   expences: { transactions, loading },
+   registers: { register, loading: loadingRegister },
    mixvalues: { page },
 }) => {
    const expenceType = {
@@ -57,32 +57,22 @@ const TransactionList = ({
 
    const { startDate, endDate, transactionType } = filterData;
 
-   const [otherValues, setOtherValues] = useState({
+   const [adminValues, setAdminValues] = useState({
       toDelete: "",
       toggleModal: false,
    });
 
-   const { toDelete, toggleModal } = otherValues;
+   const { toDelete, toggleModal } = adminValues;
 
    useEffect(() => {
-      if (loadingTransactions) {
-         updatePageNumber(0);
-         loadTransactions({});
-         loadRegister();
-      }
-   }, [loadingTransactions, loadTransactions, updatePageNumber, loadRegister]);
+      if (loading) loadTransactions({});
+      if (loadingRegister) loadRegister();
+   }, [loading, loadTransactions, loadingRegister, loadRegister]);
 
    const onChange = (e) => {
       setFilterData({
          ...filterData,
          [e.target.name]: e.target.value,
-      });
-   };
-
-   const setToggle = (expence_id) => {
-      setOtherValues({
-         toDelete: expence_id ? expence_id : "",
-         toggleModal: !toggleModal,
       });
    };
 
@@ -102,17 +92,22 @@ const TransactionList = ({
                <td>${formatNumber(transaction.value)}</td>
                <td>{transaction.description}</td>
                <td>
-                  {transaction.register &&
+                  {!loadingRegister &&
+                     transaction.register &&
                      transaction.register === register._id &&
                      register.temporary && (
                         <button
                            onClick={(e) => {
                               e.preventDefault();
-                              setToggle(transaction._id);
+                              setAdminValues((prev) => ({
+                                 ...prev,
+                                 toDelete: transaction._id,
+                                 toggleModal: !toggleModal,
+                              }));
                            }}
                            className="btn btn-danger"
                         >
-                           <i className="far fa-trash-alt"></i>
+                           <FaTrashAlt />
                         </button>
                      )}
                </td>
@@ -163,109 +158,97 @@ const TransactionList = ({
 
    return (
       <>
-         {!loadingTransactions && !loading ? (
-            <div>
-               <h2>Listado Movimientos</h2>
-               <PopUp
-                  toggleModal={toggleModal}
-                  setToggleModal={setToggle}
-                  text="¿Está seguro que desea eliminar el movimiento?"
-                  confirm={() => deleteExpence(toDelete)}
-               />
-               <form
-                  className="form"
-                  onSubmit={(e) => {
-                     e.preventDefault();
-                     loadTransactions(filterData);
-                  }}
+         <h2>Listado Movimientos</h2>
+         <PopUp
+            toggleModal={toggleModal}
+            setToggleModal={() =>
+               setAdminValues((prev) => ({
+                  ...prev,
+                  toggleModal: !toggleModal,
+               }))
+            }
+            text="¿Está seguro que desea eliminar el movimiento?"
+            confirm={() => deleteExpence(toDelete)}
+         />
+         <form
+            className="form"
+            onSubmit={(e) => {
+               e.preventDefault();
+               loadTransactions(filterData);
+            }}
+         >
+            <DateFilter
+               endDate={endDate}
+               startDate={startDate}
+               onChange={onChange}
+            />
+            <div className="form-group">
+               <select
+                  className="form-input"
+                  id="transactionType"
+                  name="transactionType"
+                  onChange={onChange}
+                  value={transactionType}
                >
-                  <DateFilter
-                     endDate={endDate}
-                     startDate={startDate}
-                     onChange={onChange}
-                  />
-                  <div className="form-group">
-                     <select
-                        className="form-input"
-                        id="transactionType"
-                        name="transactionType"
-                        onChange={onChange}
-                        value={transactionType}
-                     >
-                        <option value="">
-                           Seleccione el tipo de movimiento
-                        </option>
-                        <option value="income">Ingreso</option>
-                        <option value="expence">Gasto</option>
-                        <option value="withdrawal">Retiro</option>
-                        <option value="special-income">Ingreso Especial</option>
-                     </select>
-                     <label
-                        htmlFor="transactionType"
-                        className={`form-label ${
-                           transactionType === "" ? "lbl" : ""
-                        }`}
-                     >
-                        Tipo de Movimiento
-                     </label>
-                  </div>
-                  <div className="btn-right mb-1">
-                     <button type="submit" className="btn btn-light">
-                        <i className="fas fa-filter"></i>&nbsp; Buscar
-                     </button>
-                  </div>
-               </form>
-               <div className="wrapper my-2">
-                  <table className="expences">
-                     <thead>
-                        <tr>
-                           <th>Fecha</th>
-                           <th>Tipo</th>
-                           <th>Importe</th>
-                           <th>Descripción</th>
-                           <th>&nbsp;</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        {!loadingTransactions &&
-                           transactions.length > 0 &&
-                           transactions.map(
-                              (transaction, i) =>
-                                 i >= page * 10 &&
-                                 i < (page + 1) * 10 && (
-                                    <React.Fragment key={i}>
-                                       {type(transaction)}
-                                    </React.Fragment>
-                                 )
-                           )}
-                     </tbody>
-                  </table>
-               </div>
-               <ListButtons
-                  page={page}
-                  type="transacciones"
-                  items={transactions}
-                  changePage={updatePageNumber}
-                  pdfGenerator={() => transactionsPDF(transactions)}
-               />
+                  <option value="">Seleccione el tipo de movimiento</option>
+                  <option value="income">Ingreso</option>
+                  <option value="expence">Gasto</option>
+                  <option value="withdrawal">Retiro</option>
+                  <option value="special-income">Ingreso Especial</option>
+               </select>
+               <label
+                  htmlFor="transactionType"
+                  className={`form-label ${
+                     transactionType === "" ? "lbl" : ""
+                  }`}
+               >
+                  Tipo de Movimiento
+               </label>
             </div>
-         ) : (
-            <Loading />
+            <div className="btn-right mb-1">
+               <button type="submit" className="btn btn-light">
+                  <BiFilterAlt />
+                  &nbsp; Buscar
+               </button>
+            </div>
+         </form>
+         <div className="wrapper my-2">
+            <table className="expences">
+               <thead>
+                  <tr>
+                     <th>Fecha</th>
+                     <th>Tipo</th>
+                     <th>Importe</th>
+                     <th>Descripción</th>
+                     <th>&nbsp;</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  {!loading &&
+                     transactions.length > 0 &&
+                     transactions.map(
+                        (transaction, i) =>
+                           i >= page * 10 &&
+                           i < (page + 1) * 10 && (
+                              <React.Fragment key={i}>
+                                 {type(transaction)}
+                              </React.Fragment>
+                           )
+                     )}
+               </tbody>
+            </table>
+         </div>
+         {!loading && (
+            <ListButtons
+               page={page}
+               type="transacciones"
+               items={transactions}
+               changePage={updatePageNumber}
+               pdfGenerator={() => transactionsPDF(transactions)}
+            />
          )}
       </>
    );
-};
-
-TransactionList.propTypes = {
-   mixvalues: PropTypes.object.isRequired,
-   expences: PropTypes.object.isRequired,
-   registers: PropTypes.object.isRequired,
-   loadTransactions: PropTypes.func.isRequired,
-   loadRegister: PropTypes.func.isRequired,
-   updatePageNumber: PropTypes.func.isRequired,
-   deleteExpence: PropTypes.func.isRequired,
-   transactionsPDF: PropTypes.func.isRequired,
-   clearInvoice: PropTypes.func.isRequired,
 };
 
 const mapStatetoProps = (state) => ({

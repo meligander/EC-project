@@ -24,7 +24,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
       res.json(neighbourhoods);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -46,7 +46,7 @@ router.get("/town/:id", auth, async (req, res) => {
       res.json(neighbourhoods);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -66,7 +66,7 @@ router.post("/", [auth, adminAuth], async (req, res) => {
             return res
                .status(400)
                .json({ msg: "El nombre debe estar definido" });
-         if (neighbourhoods[x].town === 0)
+         if (neighbourhoods[x].town === "")
             return res
                .status(400)
                .json({ msg: "La localidad debe estar definida" });
@@ -91,7 +91,7 @@ router.post("/", [auth, adminAuth], async (req, res) => {
       res.json(newNeighbourhoods);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -106,7 +106,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       res.json({ msg: "Neighbourhood Deleted" });
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 

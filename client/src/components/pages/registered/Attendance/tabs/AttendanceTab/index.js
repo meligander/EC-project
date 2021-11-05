@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { withRouter } from "react-router-dom";
-import PropTypes from "prop-types";
+import { FaPlus, FaTimes } from "react-icons/fa";
+import { FiSave } from "react-icons/fi";
+import { ImFilePdf } from "react-icons/im";
 
 import { setAlert } from "../../../../../../actions/alert";
 import {
@@ -15,7 +16,6 @@ import PopUp from "../../../../../modal/PopUp";
 import Alert from "../../../../sharedComp/Alert";
 
 const AttendanceTab = ({
-   history,
    classes: { classInfo },
    attendances: {
       attendances: { header, students, periods },
@@ -38,7 +38,7 @@ const AttendanceTab = ({
          classroom: classInfo,
       },
    });
-   const [otherValues, setOtherValues] = useState({
+   const [adminValues, setAdminValues] = useState({
       dayPlus: false,
       addBimester: false,
       toggleModalSave: false,
@@ -52,7 +52,7 @@ const AttendanceTab = ({
       toggleModalDelete,
       toggleModalSave,
       toDelete,
-   } = otherValues;
+   } = adminValues;
    const { newAttendances, newDay } = formData;
 
    useEffect(() => {
@@ -63,7 +63,7 @@ const AttendanceTab = ({
          }));
 
          if (!periods[period - 1]) {
-            setOtherValues((prev) => ({
+            setAdminValues((prev) => ({
                ...prev,
                addBimester: true,
             }));
@@ -75,30 +75,30 @@ const AttendanceTab = ({
 
    const onChange = (e, row) => {
       let number = Number(e.target.name.substring(5, e.target.name.length));
-      let changedRows = [...newAttendances];
+
       const daysNumber = newAttendances[0].length;
       const rowN = Math.ceil((number + 1) / daysNumber) - 1;
       const mult = daysNumber * rowN;
       number = number - mult;
-      changedRows[rowN][number] = {
+      newAttendances[rowN][number] = {
          ...row,
          inassistance: !row.inassistance,
       };
 
-      setFormData({
-         ...formData,
-         newAttendances: changedRows,
-      });
+      setFormData((prev) => ({
+         ...prev,
+         newAttendances,
+      }));
    };
 
    const onChangeDate = (e) => {
-      setFormData({
-         ...formData,
+      setFormData((prev) => ({
+         ...prev,
          newDay: {
             ...newDay,
             [e.target.name]: e.target.value,
          },
-      });
+      }));
    };
 
    const addDate = () => {
@@ -108,8 +108,8 @@ const AttendanceTab = ({
       );
 
       if (!periods[period - 1]) {
-         setOtherValues({
-            ...otherValues,
+         setAdminValues({
+            ...adminValues,
             addBimester: false,
             dayPlus: false,
          });
@@ -130,11 +130,11 @@ const AttendanceTab = ({
                ? toDelete.classroom._id
                : toDelete.classroom
          );
-         setOtherValues({ ...otherValues, dayPlus: false });
-         setFormData({
-            ...formData,
+         setAdminValues((prev) => ({ ...prev, dayPlus: false }));
+         setFormData((prev) => ({
+            ...prev,
             newAttendances: periods[period - 1] ? periods[period - 1] : [],
-         });
+         }));
       }
    };
 
@@ -142,15 +142,7 @@ const AttendanceTab = ({
       const AttendancePeriod = newAttendances.filter(
          (attendance) => attendance[0].student
       );
-      updateAttendances(AttendancePeriod, history, classInfo._id);
-   };
-
-   const setToggle = () => {
-      setOtherValues({
-         ...otherValues,
-         toggleModalDelete: false,
-         toggleModalSave: false,
-      });
+      updateAttendances(AttendancePeriod, classInfo._id);
    };
 
    const pdfGenerator = () => {
@@ -168,13 +160,23 @@ const AttendanceTab = ({
          <Alert type="4" />
          <PopUp
             toggleModal={toggleModalSave}
-            setToggleModal={setToggle}
+            setToggleModal={() =>
+               setAdminValues((prev) => ({
+                  ...prev,
+                  toggleModalSave: !toggleModalSave,
+               }))
+            }
             confirm={saveAttendances}
             text="¿Está seguro que desea guardar los cambios?"
          />
          <PopUp
             toggleModal={toggleModalDelete}
-            setToggleModal={setToggle}
+            setToggleModal={() =>
+               setAdminValues((prev) => ({
+                  ...prev,
+                  toggleModalDelete: !toggleModalDelete,
+               }))
+            }
             confirm={deleteDateAc}
             text="¿Está seguro que desea eliminar la fecha?"
          />
@@ -212,14 +214,14 @@ const AttendanceTab = ({
                                           className="btn btn-danger"
                                           onClick={(e) => {
                                              e.preventDefault();
-                                             setOtherValues({
-                                                ...otherValues,
+                                             setAdminValues({
+                                                ...adminValues,
                                                 toggleModalDelete: true,
                                                 toDelete: row,
                                              });
                                           }}
                                        >
-                                          <i className="fas fa-times"></i>
+                                          <FaTimes />
                                        </button>
                                     )}
                                  </td>
@@ -236,25 +238,25 @@ const AttendanceTab = ({
                type="button"
                onClick={(e) => {
                   e.preventDefault();
-                  setOtherValues({
-                     ...otherValues,
+                  setAdminValues({
+                     ...adminValues,
                      toggleModalSave: true,
                   });
                }}
             >
-               <i className="far fa-save"></i>
-               <span className="hide-md">&nbsp; Guardar</span>
+               <FiSave />
+               <span className="hide-md">&nbsp;Guardar</span>
             </button>
             <button
                className="btn btn-dark"
                type="button"
                onClick={(e) => {
                   e.preventDefault();
-                  setOtherValues({ ...otherValues, dayPlus: !dayPlus });
+                  setAdminValues({ ...adminValues, dayPlus: !dayPlus });
                }}
             >
-               <i className="fas fa-plus"></i>
-               <span className="hide-md">&nbsp; Día</span>
+               <FaPlus />
+               <span className="hide-md">&nbsp;Día</span>
             </button>
             <div className="tooltip">
                <button
@@ -265,7 +267,7 @@ const AttendanceTab = ({
                      pdfGenerator();
                   }}
                >
-                  <i className="fas fa-file-pdf"></i>
+                  <ImFilePdf />
                </button>
                <span className="tooltiptext">PDF asistencias del bimestre</span>
             </div>
@@ -328,10 +330,10 @@ const AttendanceTab = ({
                      </div>
                   )}
 
-                  <div className="btn-ctr">
+                  <div className="btn-center">
                      <button type="submit" className="btn btn-dark">
-                        <i className="fas fa-plus"></i>
-                        <span className="hide-sm">&nbsp; Agregar</span>
+                        <FaPlus />
+                        <span className="hide-sm">&nbsp;Agregar</span>
                      </button>
                   </div>
                </div>
@@ -339,17 +341,6 @@ const AttendanceTab = ({
          )}
       </>
    );
-};
-
-AttendanceTab.propTypes = {
-   classes: PropTypes.object.isRequired,
-   attendances: PropTypes.object.isRequired,
-   registerNewDate: PropTypes.func.isRequired,
-   updateAttendances: PropTypes.func.isRequired,
-   deleteDate: PropTypes.func.isRequired,
-   period: PropTypes.number.isRequired,
-   setAlert: PropTypes.func.isRequired,
-   attendancesPDF: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -363,4 +354,4 @@ export default connect(mapStateToProps, {
    deleteDate,
    updateAttendances,
    attendancesPDF,
-})(withRouter(AttendanceTab));
+})(AttendanceTab);

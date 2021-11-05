@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Moment from "react-moment";
-import PropTypes from "prop-types";
+import { FaTimes } from "react-icons/fa";
 
 import logo from "../../../img/logoSinLetras.png";
 import "./style.scss";
@@ -34,7 +34,7 @@ const PopUp = ({
    const onChangeObservations = (e, index) => {
       let newObservations = [...observations];
       newObservations[index] = e.target.value;
-      setFormData({ ...formData, observations: newObservations });
+      setFormData((prev) => ({ ...prev, observations: newObservations }));
    };
 
    const chooseType = (type) => {
@@ -163,13 +163,13 @@ const PopUp = ({
                   }}
                   className="btn-cancel"
                >
-                  <i className="fas fa-times"></i>
+                  <FaTimes />
                </button>
             </div>
             {chooseType(type)}
             {type !== "post-likes" && (
                <>
-                  <div className="btn-ctr">
+                  <div className="btn-center">
                      <button
                         type="button"
                         className="btn btn-success"
@@ -178,21 +178,24 @@ const PopUp = ({
                            switch (type) {
                               case "penalty":
                                  confirm(percentage);
-                                 setFormData({ ...formData, percentage: "" });
+                                 setFormData((prev) => ({
+                                    ...prev,
+                                    percentage: "",
+                                 }));
                                  break;
                               case "certificate-date":
                                  confirm(date);
-                                 setFormData({ ...formData, date: "" });
+                                 setFormData((prev) => ({ ...prev, date: "" }));
                                  break;
                               case "report-cards":
                                  confirm(observations);
-                                 setFormData({
-                                    ...formData,
+                                 setFormData((prev) => ({
+                                    ...prev,
                                     observations: Array.from(
                                        Array(users.length),
                                        () => ""
                                     ),
-                                 });
+                                 }));
                                  break;
                               default:
                                  confirm();
@@ -219,15 +222,6 @@ const PopUp = ({
          </div>
       </div>
    );
-};
-
-PopUp.propTypes = {
-   penalty: PropTypes.object,
-   type: PropTypes.string,
-   users: PropTypes.array,
-   toggleModal: PropTypes.bool,
-   setToggleModal: PropTypes.func,
-   confirm: PropTypes.func,
 };
 
 export default PopUp;

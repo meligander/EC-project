@@ -1,7 +1,5 @@
 import React, { useEffect } from "react";
-import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
 
 import { loadClass } from "../../../../actions/class";
 import { loadAttendances } from "../../../../actions/attendance";
@@ -9,61 +7,44 @@ import { loadAttendances } from "../../../../actions/attendance";
 import AttendanceTab from "./tabs/AttendanceTab";
 import ClassInfo from "../sharedComp/ClassInfo";
 import Tabs from "../sharedComp/Tabs";
-import Loading from "../../../modal/Loading";
 
 const Attendance = ({
    match,
-   classes: { loading, classInfo },
+   classes: { loadingClass, classInfo },
+   attendances: { loadingClass: loadingAttendances, attendances },
    loadAttendances,
    loadClass,
-   attendances,
 }) => {
    useEffect(() => {
-      if (loading) {
-         loadClass(match.params.class_id);
-      }
-      if (attendances.loading) {
-         loadAttendances(match.params.class_id);
-      }
-   }, [match.params, loadClass, loadAttendances, attendances.loading, loading]);
+      if (loadingClass) loadClass(match.params.class_id);
+      if (loadingAttendances) loadAttendances(match.params.class_id);
+   }, [match, loadClass, loadAttendances, loadingAttendances, loadingClass]);
 
    return (
       <>
-         {!attendances.loading ? (
-            <>
-               <h1 className="text-center light-font p-1 mt-2">
-                  Inasistencias
-               </h1>
-               <ClassInfo classInfo={classInfo} />
-               <div className="few-tabs">
-                  <Tabs
-                     tablist={[
-                        "1° Bimestre",
-                        "2° Bimestre",
-                        "3° Bimestre",
-                        "4° Bimestre",
-                     ]}
-                     panellist={[
-                        AttendanceTab,
-                        AttendanceTab,
-                        AttendanceTab,
-                        AttendanceTab,
-                     ]}
-                  />
-               </div>
-            </>
-         ) : (
-            <Loading />
-         )}
+         <h1 className="text-center light-font p-1 mt-2">Inasistencias</h1>
+         {!loadingClass && <ClassInfo classInfo={classInfo} />}
+
+         <div className="few-tabs">
+            {!loadingAttendances && (
+               <Tabs
+                  tablist={[
+                     "1° Bimestre",
+                     "2° Bimestre",
+                     "3° Bimestre",
+                     "4° Bimestre",
+                  ]}
+                  panellist={[
+                     AttendanceTab,
+                     AttendanceTab,
+                     AttendanceTab,
+                     AttendanceTab,
+                  ]}
+               />
+            )}
+         </div>
       </>
    );
-};
-
-Attendance.propTypes = {
-   classes: PropTypes.object.isRequired,
-   attendances: PropTypes.object.isRequired,
-   loadClass: PropTypes.func.isRequired,
-   loadAttendances: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -74,4 +55,4 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    loadClass,
    loadAttendances,
-})(withRouter(Attendance));
+})(Attendance);

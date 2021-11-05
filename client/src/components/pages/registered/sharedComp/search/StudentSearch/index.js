@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import PropTypes from "prop-types";
-import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import moment from "moment";
+import { BiFilterAlt } from "react-icons/bi";
+import { FaMoneyCheckAlt, FaPlus } from "react-icons/fa";
 
 import { loadUsers } from "../../../../../../actions/user";
 
@@ -12,7 +12,7 @@ import NameField from "../../NameField";
 import "./style.scss";
 
 const StudentSearch = ({
-   users: { users },
+   users: { users, loading },
    loadUsers,
    actionForSelected,
    selectStudent,
@@ -23,18 +23,29 @@ const StudentSearch = ({
    const [filterForm, setFilterForm] = useState({
       name: "",
       lastname: "",
-      active: true,
-      type: typeSearch === "guardian/student" ? "guardian/student" : "student",
    });
 
+   const { name, lastname } = filterForm;
+
    const onChangeFilter = (e) => {
-      setFilterForm({
-         ...filterForm,
+      setFilterForm((prev) => ({
+         ...prev,
          [e.target.name]: e.target.value,
-      });
+      }));
    };
    const searchStudents = () => {
-      loadUsers(filterForm, true, true);
+      loadUsers(
+         {
+            ...filterForm,
+            active: true,
+            type:
+               typeSearch === "guardian/student"
+                  ? "guardian/student"
+                  : "student",
+         },
+         true,
+         true
+      );
    };
 
    return (
@@ -45,8 +56,8 @@ const StudentSearch = ({
          <div className="border my-2">
             <Alert type="3" />
             <NameField
-               name={filterForm.name}
-               lastname={filterForm.lastname}
+               name={name}
+               lastname={lastname}
                onChange={onChangeFilter}
             />
 
@@ -64,7 +75,7 @@ const StudentSearch = ({
                      searchStudents();
                   }}
                >
-                  <i className="fas fa-filter"></i>
+                  <BiFilterAlt />
                   <span className="hide-sm">&nbsp; Buscar</span>
                </button>
             </div>
@@ -81,7 +92,7 @@ const StudentSearch = ({
                   </tr>
                </thead>
                <tbody>
-                  {users &&
+                  {!loading &&
                      users.length > 0 &&
                      users.map((user) => (
                         <tr
@@ -115,7 +126,7 @@ const StudentSearch = ({
                      ))}
                </tbody>
             </table>
-            <div className="btn-right">
+            <div className="btn-right mt-2">
                <button
                   type="button"
                   className={`btn ${
@@ -123,22 +134,22 @@ const StudentSearch = ({
                   }`}
                   onClick={(e) => {
                      e.preventDefault();
-                     setFilterForm({
-                        ...filterForm,
+                     setFilterForm((prev) => ({
+                        ...prev,
                         name: "",
                         lastname: "",
-                     });
+                     }));
                      actionForSelected();
                   }}
                >
                   {typeSearch !== "installment" ? (
                      <>
-                        <i className="fas fa-plus"></i>
+                        <FaPlus />
                         <span className="hide-md">&nbsp; Agregar</span>
                      </>
                   ) : (
                      <>
-                        <i className="fas fa-money-check-alt"></i>
+                        <FaMoneyCheckAlt />
                         <span className="hide-md">&nbsp; Ver Cuotas</span>
                      </>
                   )}
@@ -149,20 +160,8 @@ const StudentSearch = ({
    );
 };
 
-StudentSearch.propTypes = {
-   users: PropTypes.object.isRequired,
-   selectedStudent: PropTypes.object.isRequired,
-   loadUsers: PropTypes.func.isRequired,
-   actionForSelected: PropTypes.func.isRequired,
-   selectStudent: PropTypes.func.isRequired,
-   typeSearch: PropTypes.string.isRequired,
-   block: PropTypes.bool,
-};
-
 const mapStateToProps = (state) => ({
    users: state.users,
 });
 
-export default connect(mapStateToProps, { loadUsers })(
-   withRouter(StudentSearch)
-);
+export default connect(mapStateToProps, { loadUsers })(StudentSearch);

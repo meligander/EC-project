@@ -21,12 +21,14 @@ export default function (state = initialState, action) {
             ...state,
             loading: false,
             towns: payload,
+            error: {},
          };
       case TOWN_DELETED:
          return {
             ...state,
             towns: state.towns.filter((town) => town._id !== payload),
             loading: false,
+            error: {},
          };
       case TOWNS_ERROR:
          return {

@@ -9,13 +9,13 @@ module.exports = async function (req, res, next) {
          user.type !== "secretary" &&
          user.type !== "admin&teacher"
       ) {
-         return res.status(400).json({
+         return res.status(401).json({
             msg: "Usuario sin autorización",
          });
       }
       next();
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Auth Error");
+      return res.status(500).json({ msg: "Server Error" });
    }
 };

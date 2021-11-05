@@ -2,7 +2,6 @@ import { combineReducers } from "redux";
 import alert from "./alert";
 import user from "./user";
 import auth from "./auth";
-import navbar from "./navbar";
 import classes from "./class";
 import grades from "./grade";
 import attendances from "./attendance";
@@ -30,7 +29,6 @@ export default combineReducers({
    grades,
    invoices,
    mixvalues,
-   navbar,
    neighbourhoods,
    penalties,
    posts,

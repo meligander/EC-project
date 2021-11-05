@@ -32,7 +32,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
       res.json(categories);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      return res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -69,7 +69,7 @@ router.post(
          res.json(category);
       } catch (err) {
          console.error(err.message);
-         return res.status(500).send("Server Error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 );
@@ -120,15 +120,12 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
          pdfTemplate(css, img, "categorías", thead, tbody, true),
          options
       ).toFile(path.join(__dirname, "../../reports/categories.pdf"), (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
+         if (err) res.send(Promise.reject());
+         else res.send(Promise.resolve());
       });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("PDF Error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -242,7 +239,7 @@ router.put(
          res.json({ msg: "Categories Prices Updated" });
       } catch (err) {
          console.error(err.message);
-         return res.status(500).send("Server Error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 );

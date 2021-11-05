@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import PropTypes from "prop-types";
+import { FiSave } from "react-icons/fi";
+import { FaEdit } from "react-icons/fa";
 
 import {
    clearExpenceTypes,
@@ -26,7 +27,7 @@ const IncomeExpenceTab = ({
    registerExpence,
    setAlert,
 }) => {
-   const [otherValues, setOtherValues] = useState({
+   const [adminValues, setAdminValues] = useState({
       show: false,
       toggleModal: false,
       employeePaymentID: "",
@@ -46,13 +47,13 @@ const IncomeExpenceTab = ({
 
    const { expencetype, value, description, hours, teacher } = formData;
 
-   const { show, toggleModal, employeePaymentID } = otherValues;
+   const { show, toggleModal, employeePaymentID } = adminValues;
 
    useEffect(() => {
       if (!expences.loadingET) {
          for (let x = 0; x < expences.expencetypes.length; x++) {
             if (expences.expencetypes[x].name === "Pago a Empleados") {
-               setOtherValues((prev) => ({
+               setAdminValues((prev) => ({
                   ...prev,
                   employeePaymentID: expences.expencetypes[x]._id,
                }));
@@ -70,20 +71,20 @@ const IncomeExpenceTab = ({
          e.target.name === "expencetype" &&
          e.target.value === employeePaymentID
       ) {
-         setOtherValues({
-            ...otherValues,
+         setAdminValues((prev) => ({
+            ...prev,
             show: true,
-         });
+         }));
          loadUsers({ active: true, type: "team" });
       } else {
          if (
             e.target.value !== employeePaymentID &&
             e.target.name === "expencetype"
          )
-            setOtherValues({
-               ...otherValues,
+            setAdminValues((prev) => ({
+               ...prev,
                show: false,
-            });
+            }));
       }
    };
 
@@ -128,13 +129,6 @@ const IncomeExpenceTab = ({
          });
    };
 
-   const setToggle = () => {
-      setOtherValues({
-         ...otherValues,
-         toggleModal: !toggleModal,
-      });
-   };
-
    const setValueAfterHours = (e) => {
       if (teacher.salary && teacher.salary !== "") {
          setFormData({
@@ -157,7 +151,12 @@ const IncomeExpenceTab = ({
          <Alert type="3" />
          <PopUp
             toggleModal={toggleModal}
-            setToggleModal={setToggle}
+            setToggleModal={() =>
+               setAdminValues((prev) => ({
+                  ...prev,
+                  toggleModal: !toggleModal,
+               }))
+            }
             confirm={confirm}
             text="¿Está seguro que desea registrar un nuevo movimiento?"
          />
@@ -171,7 +170,11 @@ const IncomeExpenceTab = ({
             className="register income-tab"
             onSubmit={(e) => {
                e.preventDefault();
-               if (register) setToggle();
+               if (register)
+                  setAdminValues((prev) => ({
+                     ...prev,
+                     toggleModal: !toggleModal,
+                  }));
             }}
          >
             <table>
@@ -267,13 +270,13 @@ const IncomeExpenceTab = ({
                </tbody>
             </table>
 
-            <div className="btn-ctr mt-5">
+            <div className="btn-center mt-5">
                <button
                   type="submit"
                   className={`btn ${register ? "btn-primary" : "btn-black"}`}
                   disabled={!register}
                >
-                  <i className="far fa-save"></i>
+                  <FiSave />
                   <span className="hide-sm">&nbsp; Guardar</span>
                </button>
 
@@ -288,7 +291,7 @@ const IncomeExpenceTab = ({
                         }}
                         className="btn btn-mix-secondary"
                      >
-                        <i className="fas fa-edit"></i>
+                        <FaEdit />
                         <span className="hide-sm">&nbsp; Tipo Movimiento</span>
                      </Link>
                      <span className="tooltiptext">Editar</span>
@@ -298,17 +301,6 @@ const IncomeExpenceTab = ({
          </form>
       </>
    );
-};
-
-IncomeExpenceTab.propTypes = {
-   auth: PropTypes.object.isRequired,
-   registers: PropTypes.object.isRequired,
-   expences: PropTypes.object.isRequired,
-   users: PropTypes.object.isRequired,
-   loadUsers: PropTypes.func.isRequired,
-   registerExpence: PropTypes.func.isRequired,
-   setAlert: PropTypes.func.isRequired,
-   clearExpenceTypes: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({

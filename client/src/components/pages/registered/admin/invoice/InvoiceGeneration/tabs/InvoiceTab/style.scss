@@ -3,17 +3,29 @@
 .invoice-tab {
    .paying-user {
       display: flex;
+      align-items: center;
+      margin-bottom: 2rem;
+
+      .paragraph {
+         margin-bottom: 0;
+      }
 
       .search {
-         font-size: 1.6rem;
+         font-size: 2rem;
          background-color: inherit;
          margin-left: 1.5rem;
-         margin-bottom: 0.9rem;
 
          &:active,
          &:focus {
             box-shadow: none;
          }
+      }
+   }
+
+   table {
+      td:last-child {
+         display: flex;
+         justify-content: center;
       }
    }
 
@@ -56,8 +68,7 @@
          margin-right: -7.9rem;
       }
       .search {
-         font-size: 2rem;
-         padding: 0 0.7rem;
+         font-size: 2.5rem;
       }
    }
 

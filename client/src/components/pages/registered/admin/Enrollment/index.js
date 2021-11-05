@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Link, withRouter } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import moment from "moment";
-import PropTypes from "prop-types";
+import { FiSave } from "react-icons/fi";
+import { IoIosListBox } from "react-icons/io";
+import { FaTimes, FaUserEdit } from "react-icons/fa";
 
 import { loadCategories } from "../../../../../actions/category";
 import {
@@ -14,11 +16,9 @@ import { clearSearch, clearProfile } from "../../../../../actions/user";
 import { setAlert } from "../../../../../actions/alert";
 
 import StudentSearch from "../../sharedComp/search/StudentSearch";
-import Loading from "../../../../modal/Loading";
 import PopUp from "../../../../modal/PopUp";
 
 const Enrollment = ({
-   history,
    match,
    loadCategories,
    registerEnrollment,
@@ -28,7 +28,7 @@ const Enrollment = ({
    clearProfile,
    setAlert,
    auth: { userLogged },
-   categories,
+   categories: { categories, loading: loadingCategories },
    enrollments: { enrollment, loading },
 }) => {
    const day = moment();
@@ -43,13 +43,14 @@ const Enrollment = ({
    const currentMonthNumber = day.month() + 1;
 
    const [formData, setFormData] = useState({
+      _id: match.params.enrollment_id !== "0" ? match.params.enrollment_id : "",
       student: "",
       category: "",
       year: "",
       month: "",
    });
 
-   const [otherValues, setOtherValues] = useState({
+   const [adminValues, setAdminValues] = useState({
       selectedStudent: {
          _id: "",
          name: "",
@@ -59,56 +60,32 @@ const Enrollment = ({
       toggleModal: false,
    });
 
-   const {
-      toggleModal,
-      enrollmentValue,
-      selectedStudent,
-      hideSearch,
-   } = otherValues;
+   const { toggleModal, enrollmentValue, selectedStudent, hideSearch } =
+      adminValues;
 
-   const { year, category, month } = formData;
-
-   const enroll_id = match.params.enrollment_id;
+   const { year, category, month, _id } = formData;
 
    useEffect(() => {
-      const load = () => {
-         setFormData({
-            category: enrollment.category._id,
-            currentMonth: true,
-            year: Number(enrollment.year),
-         });
-      };
-
-      if (categories.loading) {
-         loadCategories();
-         if (enroll_id) {
-            loadEnrollment(enroll_id);
-         }
-      } else {
-         setOtherValues((prev) => ({
+      if (loadingCategories) loadCategories();
+      else
+         setAdminValues((prev) => ({
             ...prev,
             enrollmentValue: categories.categories[0].value,
          }));
-         if (!loading) load();
-      }
-   }, [
-      enrollment,
-      categories,
-      loading,
-      loadEnrollment,
-      loadCategories,
-      enroll_id,
-   ]);
+   }, [loadingCategories, loadCategories, categories]);
 
-   const selectStudent = (user) => {
-      setOtherValues({
-         ...otherValues,
-         selectedStudent: {
-            _id: user._id,
-            name: user.lastname + ", " + user.name,
-         },
-      });
-   };
+   useEffect(() => {
+      if (_id !== "0") {
+         if (loading) loadEnrollment();
+         else
+            setFormData((prev) => ({
+               ...prev,
+               category: enrollment.category._id,
+               currentMonth: true,
+               year: Number(enrollment.year),
+            }));
+      }
+   }, [_id, loading, loadEnrollment, enrollment]);
 
    const addStudent = () => {
       if (selectedStudent._id === "") {
@@ -119,9 +96,13 @@ const Enrollment = ({
             student: selectedStudent._id,
          });
          clearSearch();
-         setOtherValues({
-            ...otherValues,
+         setAdminValues({
+            ...adminValues,
             hideSearch: true,
+            selectedStudent: {
+               _id: "",
+               name: "",
+            },
          });
       }
    };
@@ -133,29 +114,13 @@ const Enrollment = ({
       });
    };
 
-   const confirm = () => {
-      registerEnrollment(
-         {
-            ...formData,
-            month:
-               thisYear === Number(year) && currentMonthNumber > 2 ? month : 0,
-         },
-         history,
-         userLogged._id,
-         enroll_id
-      );
-   };
-
    const setToggle = () => {
-      setOtherValues({
-         ...otherValues,
-         toggleModal: !toggleModal,
-      });
+      setAdminValues((prev) => ({ ...prev, toggleModal: !toggleModal }));
    };
 
    const restore = () => {
-      setOtherValues({
-         ...otherValues,
+      setAdminValues({
+         ...adminValues,
          hideSearch: false,
          selectedStudent: {
             _id: "",
@@ -166,198 +131,199 @@ const Enrollment = ({
 
    return (
       <>
-         {(!loading || !enroll_id) && !categories.loading ? (
-            <>
-               {!enroll_id ? <h1>Inscripción</h1> : <h2>Editar inscripción</h2>}
-               <PopUp
-                  toggleModal={toggleModal}
-                  setToggleModal={setToggle}
-                  confirm={confirm}
-                  text={`¿Está seguro que ${
-                     enroll_id
-                        ? "desea modificar la inscripción"
-                        : "los datos son correctos"
-                  }?`}
-               />
-               {!enroll_id && (
-                  <div className="btn-right">
-                     <Link
-                        to="/enrollment-list"
-                        onClick={() => {
-                           window.scroll(0, 0);
-                           clearEnrollments();
-                        }}
-                        className="btn btn-light"
-                     >
-                        <i className="fas fa-list-ul"></i>
-                        <span className="hide-sm">&nbsp; Listado</span>
-                     </Link>
-                  </div>
-               )}
-               <form
-                  className="form"
-                  onSubmit={(e) => {
-                     e.preventDefault();
-                     setToggle();
+         {_id === "" ? <h1>Inscripción</h1> : <h2>Editar inscripción</h2>}
+         <PopUp
+            toggleModal={toggleModal}
+            setToggleModal={setToggle}
+            confirm={() =>
+               registerEnrollment({
+                  ...formData,
+                  month:
+                     thisYear === Number(year) && currentMonthNumber > 2
+                        ? month
+                        : 0,
+               })
+            }
+            text={`¿Está seguro que ${
+               _id !== ""
+                  ? "desea modificar la inscripción"
+                  : "los datos son correctos"
+            }?`}
+         />
+         {!_id && (
+            <div className="btn-right">
+               <Link
+                  to="/enrollment-list"
+                  onClick={() => {
+                     window.scroll(0, 0);
+                     clearEnrollments();
                   }}
+                  className="btn btn-light"
                >
-                  {!enroll_id && !hideSearch && (
-                     <StudentSearch
-                        selectStudent={selectStudent}
-                        selectedStudent={selectedStudent}
-                        actionForSelected={addStudent}
-                        typeSearch="enrollment"
-                     />
-                  )}
-                  <p className={`heading-tertiary ${!enroll_id && "mt-3"}`}>
-                     <span className="text-dark">Alumno: </span> &nbsp;
-                     {hideSearch && (
-                        <>
-                           <Link
-                              to={`/dashboard/${selectedStudent._id}`}
-                              className="text-secondary"
-                              onClick={() => {
-                                 clearProfile();
-                                 window.scroll(0, 0);
-                              }}
-                           >
-                              {selectedStudent.name}
-                           </Link>
-                           &nbsp;
-                           <button
-                              className="btn-cancel"
-                              type="button"
-                              onClick={(e) => {
-                                 e.preventDefault();
-                                 restore();
-                              }}
-                           >
-                              <i className="fas fa-times"></i>
-                           </button>
-                        </>
-                     )}
-                  </p>
-                  <div className="form-group mt-3">
-                     <select
-                        className="form-input"
-                        id="category"
-                        name="category"
-                        onChange={onChange}
-                        value={category}
-                     >
-                        <option value="">* Seleccione Categoría</option>
-                        {categories.categories.length > 0 &&
-                           categories.categories.map(
-                              (category) =>
-                                 category.name !== "Inscripción" && (
-                                    <option
-                                       key={category._id}
-                                       value={category._id}
-                                    >
-                                       {category.name}
-                                    </option>
-                                 )
-                           )}
-                     </select>
-                     <label
-                        htmlFor="category"
-                        className={`form-label ${category === "" && "lbl"}`}
-                     >
-                        Categoría
-                     </label>
-                  </div>
-                  <div className="form-group">
-                     <select
-                        className="form-input"
-                        id="year"
-                        name="year"
-                        onChange={onChange}
-                        value={year}
-                        disabled={enroll_id}
-                     >
-                        <option value="">
-                           * Seleccione el año al que lo va a inscribir
-                        </option>
-                        <option value={thisYear}>{thisYear}</option>
-                        <option value={thisYear + 1}>{thisYear + 1}</option>
-                     </select>
-                     <label
-                        htmlFor="year"
-                        className={`form-label ${year === "" && "lbl"}`}
-                     >
-                        Año
-                     </label>
-                  </div>
-                  {Number(year) === thisYear && currentMonthNumber > 2 && (
-                     <div className="form-group">
-                        <select
-                           className="form-input"
-                           id="month"
-                           name="month"
-                           onChange={onChange}
-                           value={month}
-                        >
-                           <option value="">{`* Seleccione el mes a partir del cuál ${
-                              enroll_id
-                                 ? "cambiará la inscripción"
-                                 : "lo va a inscribir"
-                           }`}</option>
-                           <option value={currentMonthNumber}>
-                              {currentMonthName}
-                           </option>
-                           <option value={currentMonthNumber + 1}>
-                              {nextMonthName}
-                           </option>
-                        </select>
-                        <label
-                           htmlFor="month"
-                           className={`form-label ${month === "" && "lbl"}`}
-                        >
-                           Mes
-                        </label>
-                     </div>
-                  )}
-                  {!enroll_id && (
-                     <div className="form-group">
-                        <input
-                           className="form-input"
-                           type="text"
-                           id="value"
-                           value={`$${enrollmentValue}`}
-                           disabled
-                        />
-                        <label htmlFor="value" className="form-label show">
-                           Importe
-                        </label>
-                     </div>
-                  )}
-                  <div className="show-md mt-4"></div>
-                  <div className="btn-ctr">
-                     <button type="submit" className="btn btn-primary">
-                        <i className="fas fa-user-edit"></i>&nbsp;{" "}
-                        {enroll_id ? "Guardar Cambios" : "Inscribir"}
-                     </button>
-                  </div>
-               </form>
-            </>
-         ) : (
-            <Loading />
+                  <IoIosListBox />
+                  <span className="hide-sm">&nbsp; Listado</span>
+               </Link>
+            </div>
          )}
+         <form
+            className="form"
+            onSubmit={(e) => {
+               e.preventDefault();
+               setToggle();
+            }}
+         >
+            {_id === "" && !hideSearch && (
+               <StudentSearch
+                  selectStudent={(user) =>
+                     setAdminValues({
+                        ...adminValues,
+                        selectedStudent: {
+                           _id: user._id,
+                           name: `${user.lastname} ${user.name}`,
+                        },
+                     })
+                  }
+                  selectedStudent={selectedStudent}
+                  actionForSelected={addStudent}
+                  typeSearch="enrollment"
+               />
+            )}
+            <p className={`heading-tertiary ${_id === "" && "mt-3"}`}>
+               <span className="text-dark">Alumno: </span> &nbsp;
+               {hideSearch && (
+                  <>
+                     <Link
+                        to={`/dashboard/${selectedStudent._id}`}
+                        className="text-secondary"
+                        onClick={() => {
+                           clearProfile();
+                           window.scroll(0, 0);
+                        }}
+                     >
+                        {selectedStudent.name}
+                     </Link>
+                     &nbsp;
+                     <button
+                        className="btn-cancel"
+                        type="button"
+                        onClick={(e) => {
+                           e.preventDefault();
+                           restore();
+                        }}
+                     >
+                        <FaTimes />
+                     </button>
+                  </>
+               )}
+            </p>
+            <div className="form-group mt-3">
+               <select
+                  className="form-input"
+                  id="category"
+                  name="category"
+                  onChange={onChange}
+                  value={category}
+               >
+                  <option value="">* Seleccione Categoría</option>
+                  {categories.categories.length > 0 &&
+                     categories.categories.map(
+                        (category) =>
+                           category.name !== "Inscripción" && (
+                              <option key={category._id} value={category._id}>
+                                 {category.name}
+                              </option>
+                           )
+                     )}
+               </select>
+               <label
+                  htmlFor="category"
+                  className={`form-label ${category === "" && "lbl"}`}
+               >
+                  Categoría
+               </label>
+            </div>
+            <div className="form-group">
+               <select
+                  className="form-input"
+                  id="year"
+                  name="year"
+                  onChange={onChange}
+                  value={year}
+                  disabled={_id !== ""}
+               >
+                  <option value="">
+                     * Seleccione el año al que lo va a inscribir
+                  </option>
+                  <option value={thisYear}>{thisYear}</option>
+                  <option value={thisYear + 1}>{thisYear + 1}</option>
+               </select>
+               <label
+                  htmlFor="year"
+                  className={`form-label ${year === "" && "lbl"}`}
+               >
+                  Año
+               </label>
+            </div>
+            {Number(year) === thisYear && currentMonthNumber > 2 && (
+               <div className="form-group">
+                  <select
+                     className="form-input"
+                     id="month"
+                     name="month"
+                     onChange={onChange}
+                     value={month}
+                  >
+                     <option value="">{`* Seleccione el mes a partir del cuál ${
+                        _id ? "cambiará la inscripción" : "lo va a inscribir"
+                     }`}</option>
+                     <option value={currentMonthNumber}>
+                        {currentMonthName}
+                     </option>
+                     <option value={currentMonthNumber + 1}>
+                        {nextMonthName}
+                     </option>
+                  </select>
+                  <label
+                     htmlFor="month"
+                     className={`form-label ${month === "" && "lbl"}`}
+                  >
+                     Mes
+                  </label>
+               </div>
+            )}
+            {_id === "" && (
+               <div className="form-group">
+                  <input
+                     className="form-input"
+                     type="text"
+                     id="value"
+                     value={`$${enrollmentValue}`}
+                     disabled
+                  />
+                  <label htmlFor="value" className="form-label show">
+                     Importe
+                  </label>
+               </div>
+            )}
+            <div className="show-md mt-4"></div>
+            <div className="btn-center">
+               <button type="submit" className="btn btn-primary">
+                  {_id !== "" ? (
+                     <>
+                        <FiSave />
+                        &nbsp; Guardar Cambios
+                     </>
+                  ) : (
+                     <>
+                        <FaUserEdit />
+                        "Inscribir
+                     </>
+                  )}
+               </button>
+            </div>
+         </form>
       </>
    );
-};
-
-Enrollment.propTypes = {
-   loadCategories: PropTypes.func.isRequired,
-   registerEnrollment: PropTypes.func.isRequired,
-   loadEnrollment: PropTypes.func.isRequired,
-   clearEnrollments: PropTypes.func.isRequired,
-   clearSearch: PropTypes.func.isRequired,
-   clearProfile: PropTypes.func.isRequired,
-   setAlert: PropTypes.func.isRequired,
-   categories: PropTypes.object.isRequired,
-   enrollments: PropTypes.object.isRequired,
-   auth: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -374,4 +340,4 @@ export default connect(mapStateToProps, {
    clearSearch,
    clearProfile,
    setAlert,
-})(withRouter(Enrollment));
+})(Enrollment);

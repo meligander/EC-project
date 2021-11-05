@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Moment from "react-moment";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
+import { FaPaperPlane, FaTimes } from "react-icons/fa";
 
 import { addComment, deleteComment } from "../../../../../../actions/post";
 
@@ -109,7 +109,7 @@ const Comments = ({
                               }}
                               className="btn btn-danger"
                            >
-                              <i className="fas fa-times"></i>
+                              <FaTimes />
                            </button>
                            <span className="tooltiptext">Eliminar</span>
                         </div>
@@ -134,21 +134,13 @@ const Comments = ({
             ></textarea>
             <div className="tooltip">
                <button type="submit" className="btn-comment">
-                  <i className="far fa-paper-plane"></i>
+                  <FaPaperPlane />
                </button>
                <span className="tooltiptext">Enviar comentario</span>
             </div>
          </form>
       </div>
    );
-};
-
-Comments.propTypes = {
-   post_id: PropTypes.string.isRequired,
-   comments: PropTypes.array.isRequired,
-   userLogged: PropTypes.object.isRequired,
-   addComment: PropTypes.func.isRequired,
-   deleteComment: PropTypes.func.isRequired,
 };
 
 export default connect(null, { addComment, deleteComment })(Comments);

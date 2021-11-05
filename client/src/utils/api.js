@@ -1,7 +1,10 @@
 import axios from "axios";
-import store from "../store";
+import store from "./store";
 
-import { LOGOUT } from "../actions/types";
+import { logOut, setAuthError } from "../actions/auth";
+import { updateLoadingSpinner } from "../actions/mixvalues";
+import { setAlert } from "../actions/alert";
+import { AUTH_ERROR } from "../actions/types";
 
 const api = axios.create({
    baseURL: "/api",
@@ -21,8 +24,16 @@ api.interceptors.response.use(
    (res) => res,
    (err) => {
       if (err.response.status === 401) {
-         store.dispatch({ type: LOGOUT });
-         window.location.replace("https://vmenglishcentre.com.ar/login");
+         store.dispatch(logOut());
+         if (
+            !store
+               .getState()
+               .alert.some((item) => item.msg === err.response.data.msg)
+         )
+            store.dispatch(setAlert(err.response.data.msg, "danger", "1"));
+         store.dispatch(setAuthError(AUTH_ERROR, err.response));
+         store.dispatch(updateLoadingSpinner(false));
+         window.scrollTo(0, 0);
       }
       return Promise.reject(err);
    }

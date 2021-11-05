@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
+import { FaTrashAlt } from "react-icons/fa";
 
 import {
    deleteNeighbourhood,
@@ -16,56 +16,45 @@ const NeighbourhoodTab = ({
    updateNeighbourhoods,
    deleteNeighbourhood,
 }) => {
-   const [newNB, setNewNB] = useState([]);
-   const [otherValues, setOtherValues] = useState({
+   const [formData, setFormData] = useState([]);
+   const [adminValues, setAdminValues] = useState({
       toggleModalDelete: false,
       toggleModalSave: false,
       toDelete: "",
-      count: 0,
    });
 
-   const { toggleModalDelete, toggleModalSave, toDelete, count } = otherValues;
+   const { toggleModalDelete, toggleModalSave, toDelete } = adminValues;
 
    useEffect(() => {
-      if (!loading) setNewNB(neighbourhoods);
+      if (!loading) setFormData(neighbourhoods);
    }, [loading, neighbourhoods]);
 
    const onChange = (e, index) => {
-      let newValue = [...newNB];
-      newValue[index] = {
-         ...newValue[index],
+      let newArray = [...formData];
+
+      newArray[index] = {
+         ...formData[index],
          [e.target.name]: e.target.value,
       };
-      setNewNB(newValue);
+      setFormData(newArray);
    };
 
    const addNeighbourhood = () => {
-      let newValue = [...newNB];
-      newValue.push({
-         _id: count,
+      let newArray = [...formData];
+      newArray.push({
+         _id: "",
          name: "",
-         town: 0,
+         town: "",
       });
-      setNewNB(newValue);
-      setOtherValues({
-         ...otherValues,
-         count: count + 1,
-      });
+      setFormData(newArray);
    };
 
    const deleteNeighbourhoodConfirm = () => {
-      if (typeof toDelete._id === "number") {
-         const array = newNB.filter((nb) => nb._id !== toDelete._id);
-         setNewNB(array);
-      } else deleteNeighbourhood(toDelete._id);
-   };
-
-   const setToggle = () => {
-      setOtherValues({
-         ...otherValues,
-         toggleModalSave: false,
-         toggleModalDelete: false,
-      });
+      if (formData[toDelete]._id === "") {
+         let newArray = [...formData];
+         newArray.splice(toDelete, 1);
+         setFormData(newArray);
+      } else deleteNeighbourhood(formData[toDelete]._id);
    };
 
    return (
@@ -73,13 +62,23 @@ const NeighbourhoodTab = ({
          <PopUp
             toggleModal={toggleModalDelete}
             confirm={deleteNeighbourhoodConfirm}
-            setToggleModal={setToggle}
+            setToggleModal={() =>
+               setAdminValues((prev) => ({
+                  ...prev,
+                  toggleModalDelete: !toggleModalDelete,
+               }))
+            }
             text="¿Está seguro que desea eliminar el barrio?"
          />
          <PopUp
             toggleModal={toggleModalSave}
-            confirm={() => updateNeighbourhoods(newNB)}
-            setToggleModal={setToggle}
+            confirm={() => updateNeighbourhoods(formData)}
+            setToggleModal={() =>
+               setAdminValues((prev) => ({
+                  ...prev,
+                  toggleModalSave: !toggleModalSave,
+               }))
+            }
             text="¿Está seguro que desea guardar los cambios?"
          />
          <table className="smaller">
@@ -91,11 +90,11 @@ const NeighbourhoodTab = ({
                </tr>
             </thead>
             <tbody>
-               {newNB &&
-                  newNB.length > 0 &&
-                  newNB.map((item, i) => (
+               {formData &&
+                  formData.length > 0 &&
+                  formData.map((item, i) => (
                      <tr key={i}>
-                        <td>
+                        <td data-th="Nombre">
                            <input
                               type="text"
                               name="name"
@@ -104,13 +103,13 @@ const NeighbourhoodTab = ({
                               placeholder="Nombre"
                            />
                         </td>
-                        <td>
+                        <td data-th="Localidad">
                            <select
                               name="town"
                               onChange={(e) => onChange(e, i)}
-                              value={newNB[i].town}
+                              value={formData[i].town}
                            >
-                              <option value={0}>
+                              <option value="">
                                  *Seleccione la localidad a la que pertenece
                               </option>
                               {towns.towns.length > 0 &&
@@ -126,22 +125,22 @@ const NeighbourhoodTab = ({
                               type="button"
                               onClick={(e) => {
                                  e.preventDefault();
-                                 setOtherValues({
-                                    ...otherValues,
-                                    toggleModalDelete: true,
-                                    toDelete: item,
-                                 });
+                                 setAdminValues((prev) => ({
+                                    ...prev,
+                                    toggleModalDelete: !toggleModalDelete,
+                                    toDelete: i,
+                                 }));
                               }}
                               className="btn btn-danger"
                            >
-                              <i className="far fa-trash-alt"></i>
+                              <FaTrashAlt />
                            </button>
                         </td>
                      </tr>
                   ))}
             </tbody>
          </table>
-         {newNB.length === 0 && (
+         {formData.length === 0 && (
             <p className="heading-tertiary text-dark text-center mt-1">
                {error.msg}
             </p>
@@ -149,22 +148,15 @@ const NeighbourhoodTab = ({
          <EditButtons
             add={addNeighbourhood}
             save={() =>
-               setOtherValues({
-                  ...otherValues,
-                  toggleModalSave: true,
-               })
+               setAdminValues((prev) => ({
+                  ...prev,
+                  toggleModalSave: !toggleModalSave,
+               }))
             }
             type="Barrio"
          />
       </div>
    );
-};
-
-NeighbourhoodTab.propTypes = {
-   neighbourhoods: PropTypes.object.isRequired,
-   towns: PropTypes.object.isRequired,
-   updateNeighbourhoods: PropTypes.func.isRequired,
-   deleteNeighbourhood: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({

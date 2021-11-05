@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import { Link, withRouter } from "react-router-dom";
-import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
+import { FaDollarSign, FaPlus } from "react-icons/fa";
+import { IoIosListBox } from "react-icons/io";
 
 import {
    clearInstallments,
    clearInstallment,
-   loadStudentInstallments,
+   loadInstallments,
 } from "../../../../../actions/installment";
-import { updatePreviousPage } from "../../../../../actions/mixvalues";
 import { loadPenalty, updatePenalty } from "../../../../../actions/penalty";
 import { clearUser, loadUser } from "../../../../../actions/user";
 
@@ -24,15 +24,14 @@ const Installments = ({
    clearInstallments,
    clearInstallment,
    clearUser,
-   updatePreviousPage,
    updatePenalty,
    loadPenalty,
    loadUser,
-   loadStudentInstallments,
+   loadInstallments,
 }) => {
    const _id = match.params.user_id;
 
-   const [otherValues, setOtherValues] = useState({
+   const [adminValues, setAdminValues] = useState({
       toggleModal: false,
       student: {
          _id: "",
@@ -40,12 +39,12 @@ const Installments = ({
       },
    });
 
-   const { toggleModal, student } = otherValues;
+   const { toggleModal, student } = adminValues;
 
    useEffect(() => {
       if (loading) loadPenalty();
       if (_id !== "0" && loadingUsersInstallments) {
-         loadStudentInstallments(_id, true);
+         loadInstallments(null, _id);
          loadUser(_id);
       } else {
          if (!userLoading && userLogged._id !== user._id) {
@@ -54,13 +53,12 @@ const Installments = ({
                name: user.lastname + ", " + user.name,
             };
 
-            setOtherValues((prev) => ({
+            setAdminValues((prev) => ({
                ...prev,
                student,
             }));
          }
       }
-      updatePreviousPage("dashboard");
    }, [
       _id,
       loadingUsersInstallments,
@@ -70,16 +68,11 @@ const Installments = ({
       userLoading,
       loadUser,
       loading,
-      updatePreviousPage,
-      loadStudentInstallments,
+      loadInstallments,
    ]);
 
-   const setToggle = () => {
-      setOtherValues({ ...otherValues, toggleModal: !toggleModal });
-   };
-
    const changeStudent = (student) => {
-      setOtherValues((prev) => ({
+      setAdminValues((prev) => ({
          ...prev,
          student,
       }));
@@ -92,7 +85,12 @@ const Installments = ({
             {toggleModal && !loading && (
                <PopUp
                   toggleModal={toggleModal}
-                  setToggleModal={setToggle}
+                  setToggleModal={() =>
+                     setAdminValues((prev) => ({
+                        ...prev,
+                        toggleModal: !toggleModal,
+                     }))
+                  }
                   type="penalty"
                   confirm={(percentage) => updatePenalty({ percentage })}
                   penalty={penalty}
@@ -107,10 +105,14 @@ const Installments = ({
                      type="button"
                      onClick={(e) => {
                         e.preventDefault();
-                        setToggle();
+                        setAdminValues((prev) => ({
+                           ...prev,
+                           toggleModal: !toggleModal,
+                        }));
                      }}
                   >
-                     <i className="fas fa-dollar-sign"></i>&nbsp; Recargo
+                     <FaDollarSign />
+                     &nbsp;Recargo
                   </button>
                )}
                <Link
@@ -121,7 +123,8 @@ const Installments = ({
                   }}
                   className="btn btn-light"
                >
-                  <i className="fas fa-list-ul"></i>&nbsp;{" "}
+                  <IoIosListBox />
+                  &nbsp;
                   <span className="hide-sm">Listado</span> Deudas
                </Link>
             </div>
@@ -145,27 +148,13 @@ const Installments = ({
                      clearUser();
                   }}
                >
-                  <i className="fas fa-plus-circle"></i>&nbsp; Agregar cuota
+                  <FaPlus />
+                  &nbsp; Agregar cuota
                </Link>
             </div>
          </div>
       </>
    );
-};
-
-Installments.propTypes = {
-   installments: PropTypes.object.isRequired,
-   auth: PropTypes.object.isRequired,
-   penalties: PropTypes.object.isRequired,
-   users: PropTypes.object.isRequired,
-   clearInstallments: PropTypes.func.isRequired,
-   clearInstallment: PropTypes.func.isRequired,
-   loadPenalty: PropTypes.func.isRequired,
-   loadUser: PropTypes.func.isRequired,
-   clearUser: PropTypes.func.isRequired,
-   updatePenalty: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
-   loadStudentInstallments: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -182,6 +171,5 @@ export default connect(mapStateToProps, {
    loadUser,
    clearUser,
    updatePenalty,
-   updatePreviousPage,
-   loadStudentInstallments,
-})(withRouter(Installments));
+   loadInstallments,
+})(Installments);

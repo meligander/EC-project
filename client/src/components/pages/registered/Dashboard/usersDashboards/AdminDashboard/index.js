@@ -4,13 +4,27 @@ import moment from "moment";
 import "moment/locale/es";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import PropTypes from "prop-types";
+import {
+   FaUserEdit,
+   FaUserCog,
+   FaHandHoldingUsd,
+   FaRegCalendarAlt,
+   FaLayerGroup,
+   FaCashRegister,
+   FaCalendarDay,
+   FaChalkboardTeacher,
+   FaGraduationCap,
+} from "react-icons/fa";
+import { ImSearch } from "react-icons/im";
 
 import {
    loadRegister,
    clearRegisters,
 } from "../../../../../../actions/register";
-import { clearInvoiceNumber } from "../../../../../../actions/invoice";
+import {
+   getInvoiceNumber,
+   clearInvoice,
+} from "../../../../../../actions/invoice";
 import {
    clearInstallments,
    getTotalDebt,
@@ -24,12 +38,10 @@ import {
 import { clearCategories } from "../../../../../../actions/category";
 import { formatNumber } from "../../../../../../actions/mixvalues";
 
-import Loading from "../../../../../modal/Loading";
-
 import "./style.scss";
 
 const AdminDashboard = ({
-   registers: { register, loading },
+   registers: { register, loadingRegister },
    yearEnrollments,
    totalDebt,
    activeUsers,
@@ -39,270 +51,261 @@ const AdminDashboard = ({
    getYearEnrollments,
    getActiveUsers,
    getActiveClasses,
-   clearInvoiceNumber,
+   getInvoiceNumber,
    clearInstallments,
    clearRegisters,
    clearSearch,
    clearClasses,
    clearCategories,
+   clearInvoice,
 }) => {
    const date = new Date();
 
-   const [otherValues, setOtherValues] = useState({
+   const [adminValues, setAdminValues] = useState({
       dateR: moment(),
-      oneLoadDate: true,
-      oneLoadInfoAdmin: true,
    });
 
-   const { dateR, oneLoadDate, oneLoadInfoAdmin } = otherValues;
+   const { dateR } = adminValues;
 
    useEffect(() => {
-      const changeDate = () => {
-         if (register && register.temporary) {
-            setOtherValues((prev) => ({
-               ...prev,
-               dateR: register.date,
-               oneLoadDate: false,
-            }));
-         }
-      };
+      if (yearEnrollments.year === "") getYearEnrollments();
+   }, [yearEnrollments.year, getYearEnrollments]);
 
-      if (oneLoadDate && !loading) changeDate();
+   useEffect(() => {
+      if (activeUsers.activeTeachers === "") getActiveUsers("teacher");
+   }, [activeUsers.activeTeachers, getActiveUsers]);
 
-      if (oneLoadInfoAdmin) {
-         if (yearEnrollments.year === "") getYearEnrollments();
-         if (activeUsers.activeStudents === "") getActiveUsers("student");
-         if (activeUsers.activeTeachers === "") getActiveUsers("teacher");
-         if (totalDebt === "") getTotalDebt();
-         if (activeClasses === "") getActiveClasses();
-         if (loading || !register) loadRegister();
+   useEffect(() => {
+      if (activeUsers.activeStudents === "") getActiveUsers("student");
+   }, [activeUsers.activeStudents, getActiveUsers]);
 
-         setOtherValues((prev) => ({
+   useEffect(() => {
+      if (totalDebt === "") getTotalDebt();
+   }, [totalDebt, getTotalDebt]);
+
+   useEffect(() => {
+      if (activeClasses === "") getActiveClasses();
+   }, [activeClasses, getActiveClasses]);
+
+   useEffect(() => {
+      if (loadingRegister) loadRegister();
+      else if (register.temporary)
+         setAdminValues((prev) => ({
             ...prev,
-            oneLoadInfoAdmin: false,
+            dateR: register.date,
          }));
-      }
-   }, [
-      loading,
-      register,
-      oneLoadDate,
-      oneLoadInfoAdmin,
-      yearEnrollments,
-      activeUsers,
-      totalDebt,
-      activeClasses,
-      loadRegister,
-      getYearEnrollments,
-      getActiveUsers,
-      getTotalDebt,
-      getActiveClasses,
-   ]);
+   }, [loadingRegister, register, loadRegister]);
 
    return (
       <>
-         {!loading &&
-         yearEnrollments.year !== "" &&
-         totalDebt !== "" &&
-         activeUsers.activeTeachers !== "" &&
-         activeUsers.activeStudents !== "" &&
-         activeClasses !== "" ? (
-            <>
-               <section className="section-sidebar">
-                  <div className="sidebar">
-                     <ul className="side-nav">
-                        <li className="side-nav-item">
-                           <Link
-                              to="/invoice-generation"
-                              className="side-nav-link"
-                              onClick={() => {
-                                 clearInstallments();
-                                 clearInvoiceNumber();
-                                 clearSearch();
-                                 window.scroll(0, 0);
-                              }}
-                           >
-                              <i className="fas fa-hand-holding-usd side-nav-icon"></i>{" "}
-                              <span className="hide-sm">Facturación</span>
-                           </Link>
-                        </li>
-                        <li className="side-nav-item">
-                           <Link
-                              to="/installments/0"
-                              onClick={() => {
-                                 clearSearch();
-                                 clearInstallments();
-                                 window.scroll(0, 0);
-                              }}
-                              className="side-nav-link"
-                           >
-                              <i className="far fa-calendar-alt side-nav-icon"></i>
-                              <span className="hide-sm"> Cuotas</span>
-                           </Link>
-                        </li>
-                        <li className="side-nav-item">
-                           <Link
-                              to="/categories"
-                              onClick={() => {
-                                 clearCategories();
-                                 window.scroll(0, 0);
-                              }}
-                              className="side-nav-link"
-                           >
-                              <i className="fas fa-layer-group side-nav-icon"></i>
-                              <span className="hide-sm"> Categorías</span>
-                           </Link>
-                        </li>
-                        <li className="side-nav-item">
-                           <Link
-                              className="side-nav-link"
-                              to="/cashregister-info"
-                              onClick={() => {
-                                 clearRegisters();
-                                 clearSearch();
-                                 window.scroll(0, 0);
-                              }}
-                           >
-                              <i className="fas fa-cash-register side-nav-icon"></i>{" "}
-                              <span className="hide-sm">Caja</span>
-                           </Link>
-                        </li>
-                     </ul>
-                  </div>
-                  <div className="info p-3">
-                     <h3 className="heading-tertiary text-dark">
-                        <i className="fas fa-calendar-day"></i> &nbsp;
-                        <Moment format="LLLL" locale="es" date={dateR} />
-                     </h3>
-                     <div className="register-info-money my-5 pt-2 text-center">
-                        <p className=" heading-tertiary">
-                           <span className="text-dark">Ingresos: </span>$
-                           {register && register.income && register.temporary
-                              ? formatNumber(register.income)
-                              : 0}
-                        </p>
-                        <p className=" heading-tertiary">
-                           <span className="text-dark">Egresos: </span>$
-                           {register && register.expence && register.temporary
-                              ? formatNumber(register.expence)
-                              : 0}
-                        </p>
-                     </div>
-                  </div>
-               </section>
-               <section className="section-sidebar">
-                  <div className="sidebar">
-                     <ul className="side-nav">
-                        <li className="side-nav-item">
-                           <Link
-                              to="/search"
-                              onClick={() => {
-                                 clearSearch();
-                                 window.scroll(0, 0);
-                              }}
-                              className="side-nav-link"
-                           >
-                              <i className="fas fa-search side-nav-icon"></i>
-                              <span className="hide-sm"> Búsqueda</span>
-                           </Link>
-                        </li>
-                        <li className="side-nav-item">
-                           <Link
-                              to="/classes"
-                              onClick={() => {
-                                 clearClasses();
-                                 window.scroll(0, 0);
-                              }}
-                              className="side-nav-link"
-                           >
-                              <i className="fas fa-chalkboard-teacher side-nav-icon"></i>
-                              <span className="hide-sm"> Clases</span>
-                           </Link>
-                        </li>
-                        <li className="side-nav-item">
-                           <Link
-                              to="/enrollment"
-                              onClick={() => {
-                                 clearSearch();
-                                 window.scroll(0, 0);
-                              }}
-                              className="side-nav-link"
-                           >
-                              <i className="fas fa-user-edit side-nav-icon"></i>
-                              <span className="hide-sm"> Inscripción</span>
-                           </Link>
-                        </li>
+         <section className="section-sidebar">
+            <div className="sidebar">
+               <ul className="side-nav">
+                  <li className="side-nav-item">
+                     <Link
+                        to="/invoice-generation"
+                        className="side-nav-link"
+                        onClick={() => {
+                           clearInstallments();
+                           getInvoiceNumber();
+                           clearSearch();
+                           clearInvoice();
+                           window.scroll(0, 0);
+                        }}
+                     >
+                        <span className="side-nav-icon">
+                           <FaHandHoldingUsd />
+                        </span>
+                        <span className="hide-sm">Facturación</span>
+                     </Link>
+                  </li>
+                  <li className="side-nav-item">
+                     <Link
+                        to="/installments/0"
+                        onClick={() => {
+                           clearSearch();
+                           clearInstallments();
+                           window.scroll(0, 0);
+                        }}
+                        className="side-nav-link"
+                     >
+                        <span className="side-nav-icon">
+                           <FaRegCalendarAlt />
+                        </span>
+                        <span className="hide-sm">Cuotas</span>
+                     </Link>
+                  </li>
+                  <li className="side-nav-item">
+                     <Link
+                        to="/categories"
+                        onClick={() => {
+                           clearCategories();
+                           window.scroll(0, 0);
+                        }}
+                        className="side-nav-link"
+                     >
+                        <span className="side-nav-icon">
+                           <FaLayerGroup />
+                        </span>
+                        <span className="hide-sm">Categorías</span>
+                     </Link>
+                  </li>
+                  <li className="side-nav-item">
+                     <Link
+                        className="side-nav-link"
+                        to="/cashregister-info"
+                        onClick={() => {
+                           clearRegisters();
+                           clearSearch();
+                           window.scroll(0, 0);
+                        }}
+                     >
+                        <span className="side-nav-icon">
+                           <FaCashRegister />
+                        </span>
+                        <span className="hide-sm">Caja</span>
+                     </Link>
+                  </li>
+               </ul>
+            </div>
+            {!loadingRegister && (
+               <div className="info p-3">
+                  <h3 className="heading-tertiary text-dark">
+                     <FaCalendarDay />
+                     &nbsp;&nbsp;
+                     <Moment format="LLLL" locale="es" date={dateR} />
+                  </h3>
 
-                        <li className="side-nav-item">
-                           <Link
-                              to="/mention-list"
-                              onClick={() => {
-                                 clearSearch();
-                                 window.scroll(0, 0);
-                              }}
-                              className="side-nav-link"
-                           >
-                              <i className="fas fa-graduation-cap side-nav-icon"></i>
-                              <span className="hide-sm"> Menciones</span>
-                           </Link>
-                        </li>
-                     </ul>
+                  <div className="register-info-money my-5 pt-2 text-center">
+                     <p className=" heading-tertiary">
+                        <span className="text-dark">Ingresos: </span>$
+                        {register && register.income && register.temporary
+                           ? formatNumber(register.income)
+                           : 0}
+                     </p>
+                     <p className=" heading-tertiary">
+                        <span className="text-dark">Egresos: </span>$
+                        {register && register.expence && register.temporary
+                           ? formatNumber(register.expence)
+                           : 0}
+                     </p>
                   </div>
-                  <div className="info p-3">
-                     <h3 className="heading-tertiary text-dark">
-                        <i className="fas fa-user-cog"></i>&nbsp; Administración
-                        de Usuarios
-                     </h3>
-                     <div className="text-center mt-4">
-                        <p className="heading-tertiary">
-                           <span className="text-dark">Deuda: </span>$
-                           {formatNumber(totalDebt)}
-                        </p>
-                        <p className="heading-tertiary">
-                           <span className="text-dark">Alumnos Activos: </span>
-                           {activeUsers.activeStudents}
-                        </p>
-                        <p className="heading-tertiary">
-                           <span className="text-dark">
-                              Inscripciones{" "}
-                              {yearEnrollments.year !== 0
-                                 ? yearEnrollments.year
-                                 : date.getFullYear()}
-                              :{" "}
-                           </span>
-                           {yearEnrollments.length}
-                        </p>
-                        <p className="heading-tertiary">
-                           <span className="text-dark">Profesores: </span>
-                           {activeUsers.activeTeachers}
-                        </p>
-                        <p className="heading-tertiary">
-                           <span className="text-dark">Clases: </span>
-                           {activeClasses}
-                        </p>
-                     </div>
-                  </div>
-               </section>
-            </>
-         ) : (
-            <Loading />
-         )}
+               </div>
+            )}
+         </section>
+         <section className="section-sidebar">
+            <div className="sidebar">
+               <ul className="side-nav">
+                  <li className="side-nav-item">
+                     <Link
+                        to="/search"
+                        onClick={() => {
+                           clearSearch();
+                           window.scroll(0, 0);
+                        }}
+                        className="side-nav-link"
+                     >
+                        <span className="side-nav-icon">
+                           <ImSearch />
+                        </span>
+                        <span className="hide-sm">Búsqueda</span>
+                     </Link>
+                  </li>
+                  <li className="side-nav-item">
+                     <Link
+                        to="/classes"
+                        onClick={() => {
+                           clearClasses();
+                           window.scroll(0, 0);
+                        }}
+                        className="side-nav-link"
+                     >
+                        <span className="side-nav-icon">
+                           <FaChalkboardTeacher />
+                        </span>
+                        <span className="hide-sm">Clases</span>
+                     </Link>
+                  </li>
+                  <li className="side-nav-item">
+                     <Link
+                        to="/enrollment"
+                        onClick={() => {
+                           clearSearch();
+                           window.scroll(0, 0);
+                        }}
+                        className="side-nav-link"
+                     >
+                        <span className="side-nav-icon">
+                           <FaUserEdit />
+                        </span>
+                        <span className="hide-sm">Inscripción</span>
+                     </Link>
+                  </li>
+
+                  <li className="side-nav-item">
+                     <Link
+                        to="/mention-list"
+                        onClick={() => {
+                           clearSearch();
+                           window.scroll(0, 0);
+                        }}
+                        className="side-nav-link"
+                     >
+                        <span className="side-nav-icon">
+                           <FaGraduationCap />
+                        </span>
+                        <span className="hide-sm">Menciones</span>
+                     </Link>
+                  </li>
+               </ul>
+            </div>
+            <div className="info p-3">
+               <h3 className="heading-tertiary text-dark">
+                  <FaUserCog />
+                  &nbsp; Administración de Usuarios
+               </h3>
+               <div className="text-center mt-4">
+                  {totalDebt !== "" && (
+                     <p className="heading-tertiary">
+                        <span className="text-dark">Deuda: </span>$
+                        {formatNumber(totalDebt)}
+                     </p>
+                  )}
+                  {activeUsers.activeStudents !== "" && (
+                     <p className="heading-tertiary">
+                        <span className="text-dark">Alumnos Activos: </span>
+                        {activeUsers.activeStudents}
+                     </p>
+                  )}
+                  {yearEnrollments.year !== "" && (
+                     <p className="heading-tertiary">
+                        <span className="text-dark">
+                           Inscripciones{" "}
+                           {yearEnrollments.year !== 0
+                              ? yearEnrollments.year
+                              : date.getFullYear()}
+                           :{" "}
+                        </span>
+                        {yearEnrollments.length}
+                     </p>
+                  )}
+                  {activeUsers.activeTeachers !== "" && (
+                     <p className="heading-tertiary">
+                        <span className="text-dark">Profesores: </span>
+                        {activeUsers.activeTeachers}
+                     </p>
+                  )}
+                  {activeClasses !== "" && (
+                     <p className="heading-tertiary">
+                        <span className="text-dark">Clases: </span>
+                        {activeClasses}
+                     </p>
+                  )}
+               </div>
+            </div>
+         </section>
       </>
    );
-};
-
-AdminDashboard.propTypes = {
-   registers: PropTypes.object.isRequired,
-   loadRegister: PropTypes.func.isRequired,
-   getTotalDebt: PropTypes.func.isRequired,
-   getYearEnrollments: PropTypes.func.isRequired,
-   getActiveUsers: PropTypes.func.isRequired,
-   getActiveClasses: PropTypes.func.isRequired,
-   clearInvoiceNumber: PropTypes.func.isRequired,
-   clearInstallments: PropTypes.func.isRequired,
-   clearRegisters: PropTypes.func.isRequired,
-   clearSearch: PropTypes.func.isRequired,
-   clearClasses: PropTypes.func.isRequired,
-   clearCategories: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -320,9 +323,10 @@ export default connect(mapStateToProps, {
    getActiveUsers,
    getActiveClasses,
    clearInstallments,
-   clearInvoiceNumber,
+   getInvoiceNumber,
    clearRegisters,
    clearSearch,
    clearClasses,
    clearCategories,
+   clearInvoice,
 })(AdminDashboard);

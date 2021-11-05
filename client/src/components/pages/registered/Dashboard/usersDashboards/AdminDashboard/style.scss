@@ -101,12 +101,12 @@
 
       &-icon {
          margin-right: 2rem;
+         display: flex;
+         font-size: 2.5rem;
 
          @include respond(small-phone) {
             margin-right: 0;
-            width: 1.5rem;
-            height: 1.5rem;
-            margin-bottom: 0.7rem;
+            font-size: 2.2rem;
          }
       }
    }

@@ -7,11 +7,6 @@
       url(../../../../img/entrada.PNG);
    background-size: cover;
    background-position: top;
-   height: 93.5vh;
-
-   @include respond(phone) {
-      height: 90.5vh;
-   }
 
    .main-text {
       height: 100%;
@@ -21,8 +16,8 @@
       justify-content: center;
       text-align: center;
       width: 80%;
+      min-height: inherit;
       color: $secondary-color;
-      padding-top: 7rem;
 
       h1,
       p {
@@ -30,7 +25,7 @@
          margin-bottom: 0;
       }
 
-      .btn-ctr {
+      .btn-center {
          animation: moveInBottom 1s ease-out;
       }
    }

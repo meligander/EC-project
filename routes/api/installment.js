@@ -77,7 +77,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
       res.json(installments);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -97,14 +97,14 @@ router.get("/:id", [auth, adminAuth], async (req, res) => {
       res.json(installment);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
 //@route    GET /api/installment/student/:id
 //@desc     Get all student's installments
 //@access   Private
-router.get("/student/:id/:admin", auth, async (req, res) => {
+router.get("/student/:id", auth, async (req, res) => {
    try {
       const student = req.params.id;
 
@@ -124,12 +124,15 @@ router.get("/student/:id/:admin", auth, async (req, res) => {
          });
       }
 
-      installments = buildTable(installments, req.params.admin === "true");
+      installments = buildTable(
+         installments,
+         req.user.type === "admin" || req.user.type === "admin&teacher"
+      );
 
       res.json(installments);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -151,7 +154,7 @@ router.get("/month/debts", [auth, adminAuth], async (req, res) => {
       res.json(totalDebt);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -177,7 +180,7 @@ router.get("/month/:month_id", [auth, adminAuth], async (req, res) => {
       res.json(totalDebt);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -244,7 +247,7 @@ router.post(
          res.json({ msg: "Cuota Agregada" });
       } catch (err) {
          console.error(err.message);
-         return res.status(500).send("Server Error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 );
@@ -318,16 +321,13 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
       pdf.create(pdfTemplate(css, img, "deudas", thead, tbody), options).toFile(
          name,
          (err) => {
-            if (err) {
-               res.send(Promise.reject());
-            }
-
-            res.send(Promise.resolve());
+            if (err) res.send(Promise.reject());
+            else res.send(Promise.resolve());
          }
       );
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("PDF Error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -363,7 +363,7 @@ router.put(
          res.json({ msg: "Cuota Modificada" });
       } catch (err) {
          console.error(err.message);
-         return res.status(500).send("Server Error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 );
@@ -481,7 +481,7 @@ router.put("/", auth, async (req, res) => {
       res.json({ msg: "Installments updated" });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -496,7 +496,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       res.json({ msg: "Installment deleted" });
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FaTimes } from "react-icons/fa";
 
 import gallery1 from "../../../../../img/gallery-1.jpg";
 import gallery2 from "../../../../../img/gallery-2.jpg";
@@ -42,7 +43,7 @@ const Gallery = () => {
                changePicture();
             }}
          >
-            <i className="fas fa-times"></i>
+            <FaTimes />
          </button>
          <figure
             className={`gallery-item gallery-item--1 ${

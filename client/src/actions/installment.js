@@ -1,31 +1,37 @@
 import moment from "moment";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
+import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, updatePreviousPage } from "./mixvalues";
+import { updateLoadingSpinner, updatePageNumber } from "./mixvalues";
+import { clearSearch } from "./user";
 
 import {
    INSTALLMENT_LOADED,
    TOTALDEBT_LOADED,
    ESTIMATEDPROFIT_LOADED,
    INSTALLMENTS_LOADED,
-   STUDENTINSTALLMENTS_LOADED,
    INSTALLMENT_UPDATED,
    INSTALLMENT_REGISTERED,
    INSTALLMENT_DELETED,
-   INVOICEDETAIL_ADDED,
-   INVOICEDETAIL_REMOVED,
    EXPIREDINSTALLMENTS_UPDATED,
    INSTALLMENT_CLEARED,
-   TOTALDEBT_CLEARED,
    INSTALLMENTS_CLEARED,
-   STUDENTINSTALLMENTS_CLEARED,
    INSTALLMENTS_ERROR,
    MONTHLYDEBT_LOADED,
+   INSTALLMENT_ERROR,
 } from "./types";
 
-export const loadInstallment = (installment_id) => async (dispatch) => {
+export const loadInstallment = (installment_id, edit) => async (dispatch) => {
+   if (edit)
+      if (!installment_id) {
+         dispatch(
+            setAlert("Debe seleccionar una cuota primero", "danger", "4")
+         );
+         return false;
+      } else history.push(`/edit-installment/${installment_id}`);
+
    try {
       const res = await api.get(`/installment/${installment_id}`);
       dispatch({
@@ -33,14 +39,8 @@ export const loadInstallment = (installment_id) => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: INSTALLMENTS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
+      if (err.response.status !== 401)
+         dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));
    }
 };
 
@@ -53,15 +53,10 @@ export const getTotalDebt = () => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: INSTALLMENTS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-      window.scroll(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setInstallmentsError(INSTALLMENTS_ERROR, err.response));
+         window.scroll(0, 0);
+      }
    }
 };
 
@@ -74,91 +69,62 @@ export const getMonthlyDebt = (month) => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: INSTALLMENTS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-      window.scroll(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setInstallmentsError(INSTALLMENTS_ERROR, err.response));
+         window.scroll(0, 0);
+      }
    }
 };
 
-export const loadStudentInstallments = (user_id, admin = false) => async (
-   dispatch
-) => {
-   //admin: if is for the dashboard, dont do it... only when is the admin loading the installments
-   if (admin) dispatch(updateLoadingSpinner(true));
-   try {
-      const res = await api.get(`/installment/student/${user_id}/${admin}`);
-      dispatch({
-         type: STUDENTINSTALLMENTS_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      dispatch({
-         type: INSTALLMENTS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-   }
-   if (admin) dispatch(updateLoadingSpinner(false));
-};
-
-export const loadInstallments = (filterData) => async (dispatch) => {
+export const loadInstallments = (filterData, type) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
    try {
-      let filter = "";
-
-      const filternames = Object.keys(filterData);
-      for (let x = 0; x < filternames.length; x++) {
-         const name = filternames[x];
-         if (filterData[name] !== "") {
-            if (filter !== "") filter = filter + "&";
-            filter = filter + filternames[x] + "=" + filterData[name];
+      let res;
+      if (type === "student") {
+         if (!filterData._id) {
+            dispatch(
+               setAlert("Debe seleccionar un usuario primero", "danger", "3")
+            );
+            return false;
+         } else {
+            res = await api.get(`/installment/student/${filterData._id}`);
+            dispatch(clearSearch());
          }
+      } else {
+         let filter = "";
+
+         const filternames = Object.keys(filterData);
+         for (let x = 0; x < filternames.length; x++) {
+            const name = filternames[x];
+            if (filterData[name] !== "") {
+               if (filter !== "") filter = filter + "&";
+               filter = filter + filternames[x] + "=" + filterData[name];
+            }
+         }
+         res = await api.get(`/installment?${filter}`);
       }
-      const res = await api.get(`/installment?${filter}`);
+
       dispatch({
          type: INSTALLMENTS_LOADED,
          payload: res.data,
       });
+      dispatch(updateLoadingSpinner(false));
+      return true;
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: INSTALLMENTS_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-
-      window.scroll(0, 0);
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setInstallmentsError(INSTALLMENTS_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         window.scroll(0, 0);
+         dispatch(updateLoadingSpinner(false));
+      }
+      return false;
    }
-
-   dispatch(updateLoadingSpinner(false));
 };
 
-export const addInstallment = (installment) => (dispatch) => {
-   dispatch({
-      type: INVOICEDETAIL_ADDED,
-      payload: installment,
-   });
-};
-
-export const updateIntallment = (formData, history, user_id, inst_id) => async (
-   dispatch
-) => {
+export const updateIntallment = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    let installment = {};
    for (const prop in formData) {
@@ -169,48 +135,35 @@ export const updateIntallment = (formData, history, user_id, inst_id) => async (
 
    try {
       let res;
-      if (!inst_id) {
+      if (formData._id === "") {
          res = await api.post("/installment", installment);
       } else {
          //Update installment
-         res = await api.put(`/installment/${inst_id}`, installment);
+         res = await api.put(`/installment/${formData._id}`, installment);
       }
       dispatch({
-         type: inst_id ? INSTALLMENT_UPDATED : INSTALLMENT_REGISTERED,
+         type:
+            formData._id !== "" ? INSTALLMENT_UPDATED : INSTALLMENT_REGISTERED,
       });
-
-      dispatch(updatePreviousPage("dashboard"));
 
       dispatch(setAlert(res.data.msg, "success", "2"));
       dispatch(clearInstallments());
-      history.push(`/installments/${user_id}`);
+      history.push(`/installments/${formData.student._id}`);
    } catch (err) {
-      if (err.response.data.errors) {
-         const errors = err.response.data.errors;
-         errors.forEach((error) => {
-            dispatch(setAlert(error.msg, "danger", "2"));
-         });
-         dispatch({
-            type: INSTALLMENTS_ERROR,
-            payload: errors,
-         });
-      } else {
-         const msg = err.response.data.msg;
-         const type = err.response.statusText;
-         dispatch({
-            type: INSTALLMENTS_ERROR,
-            payload: {
-               type,
-               status: err.response.status,
-               msg,
-            },
-         });
-         dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      }
+      if (err.response.status !== 401) {
+         dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));
+         if (err.response.data.errors)
+            err.response.data.errors.forEach((error) => {
+               dispatch(setAlert(error.msg, "danger", "2"));
+            });
+         else dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const updateExpiredIntallments = () => async (dispatch) => {
@@ -221,81 +174,44 @@ export const updateExpiredIntallments = () => async (dispatch) => {
          type: EXPIREDINSTALLMENTS_UPDATED,
       });
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: INSTALLMENTS_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "1", 7000));
-      window.scroll(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setInstallmentsError(INSTALLMENTS_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "1", 7000));
+         window.scroll(0, 0);
+      }
    }
 };
 
-export const deleteInstallment = (inst_id, history, user_id) => async (
-   dispatch
-) => {
+export const deleteInstallment = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
-      await api.delete(`/installment/${inst_id}`);
+      await api.delete(`/installment/${formData._id}`);
 
       dispatch({
          type: INSTALLMENT_DELETED,
-         payload: inst_id,
+         payload: formData._id,
       });
 
       dispatch(setAlert("Cuota eliminada", "success", "2"));
-      dispatch(clearInstallments());
-      history.push(`/installments/${user_id}`);
+      history.push(`/installments/${formData.student._id}`);
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: INSTALLMENTS_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scroll(0, 0);
-   dispatch(updateLoadingSpinner(false));
-};
-
-export const removeInstallmentFromList = (inst_id) => async (dispatch) => {
-   try {
-      dispatch({
-         type: INVOICEDETAIL_REMOVED,
-         payload: inst_id,
-      });
-
-      dispatch(setAlert("Cuota eliminada", "success", "5"));
-   } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: INSTALLMENTS_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+   if (!error) {
       window.scroll(0, 0);
+      dispatch(updateLoadingSpinner(false));
    }
 };
 
 export const installmentsPDF = (installments) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       await api.post("/installment/create-list", installments);
@@ -312,21 +228,16 @@ export const installmentsPDF = (installments) => async (dispatch) => {
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: INSTALLMENTS_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setInstallmentsError(INSTALLMENTS_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scroll(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scroll(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const clearInstallment = () => (dispatch) => {
@@ -335,20 +246,22 @@ export const clearInstallment = () => (dispatch) => {
    });
 };
 
-export const clearTotalDebt = () => (dispatch) => {
-   dispatch({
-      type: TOTALDEBT_CLEARED,
-   });
-};
-
 export const clearInstallments = () => (dispatch) => {
    dispatch({
       type: INSTALLMENTS_CLEARED,
    });
+   dispatch(updatePageNumber(0));
 };
 
-export const clearUserInstallments = () => (dispatch) => {
+const setInstallmentsError = (type, response) => (dispatch) => {
    dispatch({
-      type: STUDENTINSTALLMENTS_CLEARED,
+      type: type,
+      payload: response.data.errors
+         ? response.data.errors
+         : {
+              type: response.statusText,
+              status: response.status,
+              msg: response.data.msg,
+           },
    });
 };

@@ -1,12 +1,13 @@
 import React from "react";
+import { BsExclamationTriangleFill } from "react-icons/bs";
 
 import "./style.scss";
 
 const NotFound = () => {
    return (
       <div className="bg-white not-found">
-         <h1 className="heading-primary text-primary">
-            <i className="fas fa-exclamation-triangle" />
+         <h1 className="heading-primary">
+            <BsExclamationTriangleFill />
             &nbsp; Página Inexistente
          </h1>
          <p className="heading-secondary fancy-heading">

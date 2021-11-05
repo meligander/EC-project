@@ -1,7 +1,7 @@
 import React from "react";
 import { withRouter } from "react-router-dom";
 import moment from "moment";
-import PropTypes from "prop-types";
+import { FaEdit, FaPlus } from "react-icons/fa";
 
 import { formatNumber } from "../../../../../../actions/mixvalues";
 
@@ -81,61 +81,48 @@ const InstallmentsTable = ({
                         {row.map((item, index) =>
                            !forAdmin ? (
                               item.year <= year && (
-                                 <React.Fragment key={index}>
-                                    {item.value === 0 ? (
-                                       <td className="paid">PGO</td>
-                                    ) : (month < item.number &&
-                                         year === item.year) ||
-                                      item._id === "" ? (
-                                       <td></td>
-                                    ) : (
-                                       <td
-                                          className={item.expired ? "debt" : ""}
-                                       >
-                                          {item.value}
-                                       </td>
-                                    )}
-                                 </React.Fragment>
+                                 <td
+                                    key={index}
+                                    className={`${
+                                       item.value === 0 ? "paid" : ""
+                                    }${item.expired ? "debt" : ""}`}
+                                 >
+                                    {item.value === 0
+                                       ? "PGO"
+                                       : (item._id === "" ||
+                                            (month >= item.number &&
+                                               item.year === year)) &&
+                                         item.value}
+                                 </td>
                               )
                            ) : (
-                              <React.Fragment key={index}>
-                                 {item.value === 0 ? (
-                                    <td
-                                       onDoubleClick={
-                                          !invoice
-                                             ? () => selectItem(item)
-                                             : null
-                                       }
-                                       className={`paid ${
-                                          selectedItem._id === item._id &&
-                                          !invoice
-                                             ? "selected"
-                                             : ""
-                                       }`}
-                                    >
-                                       PGO
-                                    </td>
-                                 ) : (
-                                    <td
-                                       onDoubleClick={
-                                          !invoice
-                                             ? () => selectItem(item)
-                                             : () => selectItem(item)
-                                       }
-                                       className={`${
-                                          item.expired ? "debt" : ""
-                                       } ${
-                                          selectedItem._id === item._id
-                                             ? "selected"
-                                             : ""
-                                       }`}
-                                    >
-                                       {item.value
-                                          ? "$" + formatNumber(item.value)
-                                          : ""}
-                                    </td>
-                                 )}
-                              </React.Fragment>
+                              <td
+                                 key={index}
+                                 onDoubleClick={() => {
+                                    if (invoice) {
+                                       if (item.value !== 0) selectItem(item);
+                                    } else selectItem(item);
+                                 }}
+                                 className={`${
+                                    item.value === 0
+                                       ? "paid "
+                                       : item.expired
+                                       ? "debt "
+                                       : ""
+                                 }
+                               ${
+                                  selectedItem._id === item._id &&
+                                  (!invoice || (invoice && item.value > 0))
+                                     ? "selected"
+                                     : ""
+                               }`}
+                              >
+                                 {item.value === 0
+                                    ? "PGO"
+                                    : item.value
+                                    ? "$" + formatNumber(item.value)
+                                    : ""}
+                              </td>
                            )
                         )}
                      </tr>
@@ -157,13 +144,14 @@ const InstallmentsTable = ({
                >
                   {!invoice ? (
                      <>
-                        <i className="far fa-edit"></i>
-                        <span className="hide-md">&nbsp; Editar</span>
+                        <FaEdit />
+
+                        <span className="hide-md">&nbsp;Editar</span>
                      </>
                   ) : (
                      <>
-                        <i className="fas fa-plus"></i>
-                        <span className="hide-md">&nbsp; Agregar</span>
+                        <FaPlus />
+                        <span className="hide-md">&nbsp;Agregar</span>
                      </>
                   )}
                </button>
@@ -171,14 +159,6 @@ const InstallmentsTable = ({
          )}
       </>
    );
-};
-
-InstallmentsTable.prototypes = {
-   forAdmin: PropTypes.bool.isRequired,
-   installments: PropTypes.array.isRequired,
-   selectedItem: PropTypes.object,
-   selectItem: PropTypes.func,
-   actionForSelected: PropTypes.func,
 };
 
 export default withRouter(InstallmentsTable);

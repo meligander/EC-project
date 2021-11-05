@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import Moment from "react-moment";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import PropTypes from "prop-types";
+import { FaTrashAlt } from "react-icons/fa";
+import { IoIosListBox } from "react-icons/io";
+import { BiFilterAlt } from "react-icons/bi";
 
 import {
    updatePageNumber,
-   updatePreviousPage,
    formatNumber,
 } from "../../../../../../actions/mixvalues";
 import {
@@ -18,16 +19,14 @@ import {
 
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
-import Loading from "../../../../../modal/Loading";
 import PopUp from "../../../../../modal/PopUp";
 
 const RegisterList = ({
    auth: { userLogged },
-   registers: { registers, loadingRegisters },
+   registers: { registers, loading },
    mixvalues: { page },
    loadRegisters,
    updatePageNumber,
-   updatePreviousPage,
    deleteRegister,
    clearRegisters,
    registerPDF,
@@ -40,16 +39,17 @@ const RegisterList = ({
       endDate: "",
    });
 
+   const [adminValues, setAdminValues] = useState({
+      toggleModal: false,
+   });
+
    const { startDate, endDate } = filterData;
 
-   const [toggleModal, setToggleModal] = useState(false);
+   const { toggleModal } = adminValues;
 
    useEffect(() => {
-      if (loadingRegisters) {
-         updatePageNumber(0);
-         loadRegisters({ startDate: "", endDate: "" });
-      }
-   }, [loadingRegisters, loadRegisters, updatePageNumber]);
+      if (loading) loadRegisters({});
+   }, [loading, loadRegisters]);
 
    const onChange = (e) => {
       setFilterData({
@@ -58,184 +58,155 @@ const RegisterList = ({
       });
    };
 
-   const setToggle = () => {
-      setToggleModal(!toggleModal);
-   };
-
    return (
       <>
-         {!loadingRegisters ? (
-            <>
-               <PopUp
-                  toggleModal={toggleModal}
-                  confirm={() => deleteRegister(registers[0]._id)}
-                  text="¿Está seguro que desea eliminar el cierre de caja?"
-                  setToggleModal={setToggle}
-               />
-               <h2>Caja Diaria</h2>
-               {isAdmin && (
-                  <div className="btn-right my-3">
-                     <Link
-                        to="/monthlyregister-list"
-                        onClick={() => {
-                           window.scroll(0, 0);
-                           clearRegisters();
-                           updatePreviousPage("register");
-                        }}
-                        className="btn btn-light"
-                     >
-                        <i className="fas fa-list-ul"></i>&nbsp;{" "}
-                        <span className="hide-sm">Listado</span> Mensual
-                     </Link>
-                  </div>
-               )}
-
-               <form
-                  className="form"
-                  onSubmit={(e) => {
-                     e.preventDefault();
-                     loadRegisters(filterData);
+         <PopUp
+            toggleModal={toggleModal}
+            confirm={() => deleteRegister(registers[0]._id)}
+            text="¿Está seguro que desea eliminar el cierre de caja?"
+            setToggleModal={() =>
+               setAdminValues((prev) => ({
+                  ...prev,
+                  toggleModal: !toggleModal,
+               }))
+            }
+         />
+         <h2>Caja Diaria</h2>
+         {isAdmin && (
+            <div className="btn-right my-3">
+               <Link
+                  to="/monthlyregister-list"
+                  onClick={() => {
+                     window.scroll(0, 0);
+                     clearRegisters();
                   }}
+                  className="btn btn-light"
                >
-                  <DateFilter
-                     endDate={endDate}
-                     startDate={startDate}
-                     onChange={onChange}
-                  />
-                  <div className="btn-right my-1">
-                     <button type="submit" className="btn btn-light">
-                        <i className="fas fa-filter"></i>&nbsp; Buscar
-                     </button>
-                  </div>
-               </form>
-               <div className="wrapper">
-                  <table className="my-2">
-                     <thead>
-                        <tr>
-                           <th>Fecha</th>
-                           <th>Ingresos</th>
-                           <th>Egresos</th>
-                           <th>Otros Ing.</th>
-                           <th>Retiro</th>
-                           <th>Plata Caja</th>
-                           <th>Diferencia</th>
-                           <th>Detalles</th>
-                           {isAdmin && !registers[0].temporary && (
-                              <th>&nbsp;</th>
-                           )}
-                        </tr>
-                     </thead>
-                     <tbody>
-                        {!loadingRegisters &&
-                           registers.length > 0 &&
-                           registers.map(
-                              (register, i) =>
-                                 i >= page * 10 &&
-                                 i < (page + 1) * 10 &&
-                                 !register.temporary && (
-                                    <tr key={i}>
-                                       <td>
-                                          <Moment
-                                             date={register.date}
-                                             format="DD/MM/YY"
-                                          />
-                                       </td>
-                                       <td>
-                                          {register.income &&
-                                             "$" +
-                                                formatNumber(register.income)}
-                                       </td>
-                                       <td>
-                                          {register.expence &&
-                                             "$" +
-                                                formatNumber(register.expence)}
-                                       </td>
-                                       <td>
-                                          {register.cheatincome &&
-                                             "$" +
-                                                formatNumber(
-                                                   register.cheatincome
-                                                )}
-                                       </td>
-                                       <td>
-                                          {register.withdrawal &&
-                                             "$" +
-                                                formatNumber(
-                                                   register.withdrawal
-                                                )}
-                                       </td>
-                                       <td>
-                                          $
-                                          {formatNumber(register.registermoney)}
-                                       </td>
-                                       <td
-                                          className={
-                                             register.negative ? "debt" : ""
-                                          }
-                                       >
-                                          {register.difference !== 0 &&
-                                             register.difference &&
-                                             (register.negative
-                                                ? "-$" +
-                                                  formatNumber(
-                                                     register.difference
-                                                  )
-                                                : "+$" +
-                                                  formatNumber(
-                                                     register.difference
-                                                  ))}
-                                       </td>
-                                       <td>
-                                          {register.description &&
-                                             register.description}
-                                       </td>
-                                       {!registers[0].temporary && (
-                                          <td>
-                                             {isAdmin && i === 0 && (
-                                                <button
-                                                   type="button"
-                                                   className="btn btn-danger"
-                                                   onClick={(e) => {
-                                                      e.preventDefault();
-                                                      setToggle();
-                                                   }}
-                                                >
-                                                   <i className="far fa-trash-alt"></i>
-                                                </button>
-                                             )}
-                                          </td>
+                  <IoIosListBox />
+                  <span className="hide-sm">&nbsp;Listado</span> Mensual
+               </Link>
+            </div>
+         )}
+
+         <form
+            className="form"
+            onSubmit={(e) => {
+               e.preventDefault();
+               loadRegisters(filterData);
+            }}
+         >
+            <DateFilter
+               endDate={endDate}
+               startDate={startDate}
+               onChange={onChange}
+            />
+            <div className="btn-right my-1">
+               <button type="submit" className="btn btn-light">
+                  <BiFilterAlt />
+                  &nbsp;Buscar
+               </button>
+            </div>
+         </form>
+         <div className="wrapper">
+            <table className="my-2">
+               <thead>
+                  <tr>
+                     <th>Fecha</th>
+                     <th>Ingresos</th>
+                     <th>Egresos</th>
+                     <th>Otros Ing.</th>
+                     <th>Retiro</th>
+                     <th>Plata Caja</th>
+                     <th>Diferencia</th>
+                     <th>Detalles</th>
+                     {isAdmin && !registers[0].temporary && <th>&nbsp;</th>}
+                  </tr>
+               </thead>
+               <tbody>
+                  {!loading &&
+                     registers.length > 0 &&
+                     registers.map(
+                        (register, i) =>
+                           i >= page * 10 &&
+                           i < (page + 1) * 10 &&
+                           !register.temporary && (
+                              <tr key={i}>
+                                 <td>
+                                    <Moment
+                                       date={register.date}
+                                       format="DD/MM/YY"
+                                    />
+                                 </td>
+                                 <td>
+                                    {register.income &&
+                                       "$" + formatNumber(register.income)}
+                                 </td>
+                                 <td>
+                                    {register.expence &&
+                                       "$" + formatNumber(register.expence)}
+                                 </td>
+                                 <td>
+                                    {register.cheatincome &&
+                                       "$" + formatNumber(register.cheatincome)}
+                                 </td>
+                                 <td>
+                                    {register.withdrawal &&
+                                       "$" + formatNumber(register.withdrawal)}
+                                 </td>
+                                 <td>
+                                    ${formatNumber(register.registermoney)}
+                                 </td>
+                                 <td
+                                    className={register.negative ? "debt" : ""}
+                                 >
+                                    {register.difference !== 0 &&
+                                       register.difference &&
+                                       (register.negative
+                                          ? "-$" +
+                                            formatNumber(register.difference)
+                                          : "+$" +
+                                            formatNumber(register.difference))}
+                                 </td>
+                                 <td>
+                                    {register.description &&
+                                       register.description}
+                                 </td>
+                                 {!registers[0].temporary && (
+                                    <td>
+                                       {isAdmin && i === 0 && (
+                                          <button
+                                             type="button"
+                                             className="btn btn-danger"
+                                             onClick={(e) => {
+                                                e.preventDefault();
+                                                setAdminValues((prev) => ({
+                                                   ...prev,
+                                                   toggleModal: !toggleModal,
+                                                }));
+                                             }}
+                                          >
+                                             <FaTrashAlt />
+                                          </button>
                                        )}
-                                    </tr>
-                                 )
-                           )}
-                     </tbody>
-                  </table>
-               </div>
-               <ListButtons
-                  items={registers}
-                  type="cajas diarias"
-                  page={page}
-                  changePage={updatePageNumber}
-                  pdfGenerator={() => registerPDF(registers)}
-               />
-            </>
-         ) : (
-            <Loading />
+                                    </td>
+                                 )}
+                              </tr>
+                           )
+                     )}
+               </tbody>
+            </table>
+         </div>
+         {!loading && (
+            <ListButtons
+               items={registers}
+               type="cajas diarias"
+               page={page}
+               changePage={updatePageNumber}
+               pdfGenerator={() => registerPDF(registers)}
+            />
          )}
       </>
    );
-};
-
-RegisterList.propTypes = {
-   auth: PropTypes.object.isRequired,
-   registers: PropTypes.object.isRequired,
-   mixvalues: PropTypes.object.isRequired,
-   loadRegisters: PropTypes.func.isRequired,
-   updatePageNumber: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
-   deleteRegister: PropTypes.func.isRequired,
-   clearRegisters: PropTypes.func.isRequired,
-   registerPDF: PropTypes.func.isRequired,
 };
 
 const mapStatetoProps = (state) => ({
@@ -247,7 +218,6 @@ const mapStatetoProps = (state) => ({
 export default connect(mapStatetoProps, {
    loadRegisters,
    updatePageNumber,
-   updatePreviousPage,
    deleteRegister,
    clearRegisters,
    registerPDF,

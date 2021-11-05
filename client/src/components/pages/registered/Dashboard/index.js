@@ -1,57 +1,54 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import Moment from "react-moment";
-import { withRouter, Link } from "react-router-dom";
-import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
+import { FaUserMinus, FaUserEdit } from "react-icons/fa";
 
 import {
    loadUser,
    deleteUser,
-   clearOtherValues,
+   clearUsers,
    clearSearch,
 } from "../../../../actions/user";
 import { clearTowns } from "../../../../actions/town";
 import { clearUser } from "../../../../actions/user";
 import { clearNeighbourhoods } from "../../../../actions/neighbourhood";
-import { updateExpiredIntallments } from "../../../../actions/installment";
 
 import PopUp from "../../../modal/PopUp";
-import Loading from "../../../modal/Loading";
 import GoBack from "../../sharedComp/GoBack";
 import Alert from "../../sharedComp/Alert";
+import Loading from "../../../modal/Loading";
 import StudentDashboard from "./usersDashboards/StudentDashboard";
 import RelativeDashboard from "./usersDashboards/RelativeDashboard";
 import AdminDashboard from "./usersDashboards/AdminDashboard";
 import TeacherDashboard from "./usersDashboards/TeacherDashboard";
 
 import "./style.scss";
-import ExpireAuthToken from "../../../../utils/ExpireAuthToken";
 
 const Dashboard = ({
    match,
-   history,
    auth: { userLogged },
-   users: { user, loading },
+   users: { user: otherUser, loadingUser },
    loadUser,
    clearTowns,
    clearSearch,
    clearNeighbourhoods,
    clearUser,
    deleteUser,
-   clearOtherValues,
-   updateExpiredIntallments,
+   clearUsers,
 }) => {
-   const [otherValues, setOtherValues] = useState({
+   const [adminValues, setAdminValues] = useState({
       toggleModal: false,
-      type: "",
+      user: null,
    });
 
-   const { toggleModal, type } = otherValues;
+   const { toggleModal, user } = adminValues;
 
    const isOwner =
-      userLogged.type === "admin" || userLogged.type === "admin&teacher";
+      userLogged &&
+      (userLogged.type === "admin" || userLogged.type === "admin&teacher");
 
-   const isAdmin = userLogged.type === "secretary" || isOwner;
+   const isAdmin = (userLogged && userLogged.type === "secretary") || isOwner;
 
    const userTypeName = {
       student: "Alumno",
@@ -62,26 +59,19 @@ const Dashboard = ({
       "admin&teacher": "Administrador y Profesor",
    };
 
+   const _id = match.params.user_id !== "0" ? match.params.user_id : null;
+
    useEffect(() => {
-      if (loading) {
-         loadUser(match.params.user_id);
-         updateExpiredIntallments();
-      } else {
-         if (type === "")
-            setOtherValues((prev) => ({
+      if (!user) {
+         if (_id && loadingUser) loadUser(_id);
+         else {
+            setAdminValues((prev) => ({
                ...prev,
-               type: userTypeName[user.type],
+               user: _id ? otherUser : userLogged,
             }));
+         }
       }
-   }, [
-      loadUser,
-      match.params.user_id,
-      loading,
-      user,
-      userTypeName,
-      type,
-      updateExpiredIntallments,
-   ]);
+   }, [loadUser, _id, loadingUser, otherUser, userTypeName, user, userLogged]);
 
    const dashboardType = () => {
       switch (user.type) {
@@ -106,18 +96,18 @@ const Dashboard = ({
    };
 
    const setToggle = () => {
-      setOtherValues({ ...otherValues, toggleModal: !toggleModal });
+      setAdminValues({ ...adminValues, toggleModal: !toggleModal });
    };
 
    return (
-      <>
-         {!loading ? (
+      <div className="dashboard">
+         <Loading />
+         {user !== null && (
             <>
-               <ExpireAuthToken />
                <PopUp
                   setToggleModal={setToggle}
                   toggleModal={toggleModal}
-                  confirm={() => deleteUser(user, history, userLogged._id)}
+                  confirm={() => deleteUser(user)}
                   text="¿Está seguro que desea eliminar el usuario?"
                />
                {user._id !== userLogged._id && <GoBack />}
@@ -150,7 +140,9 @@ const Dashboard = ({
 
                      <div className="about p-2">
                         <div className="about-info">
-                           <h4 className="heading-tertiary">Info {type}:</h4>
+                           <h4 className="heading-tertiary">
+                              Info {userTypeName[user.type]}:
+                           </h4>
                            {user.dni && (
                               <p>
                                  <span className="text-dark">DNI: </span>
@@ -278,12 +270,11 @@ const Dashboard = ({
                                        clearUser();
                                        clearNeighbourhoods();
                                        clearSearch();
-                                       clearOtherValues("studentNumber");
                                     }}
                                  >
-                                    <i className="far fa-edit"></i>
+                                    <FaUserEdit />
                                     <span className="hide-md">
-                                       &nbsp; Editar
+                                       &nbsp;Editar
                                     </span>
                                  </Link>
                                  {isAdmin && (
@@ -295,9 +286,9 @@ const Dashboard = ({
                                           setToggle();
                                        }}
                                     >
-                                       <i className="fas fa-user-minus"></i>
+                                       <FaUserMinus />
                                        <span className="hide-md">
-                                          &nbsp; Eliminar
+                                          &nbsp;Eliminar
                                        </span>
                                     </button>
                                  )}
@@ -306,27 +297,12 @@ const Dashboard = ({
                         </div>
                      </div>
                   </div>
-                  {!loading && dashboardType()}
                </div>
+               {dashboardType()}
             </>
-         ) : (
-            <Loading />
          )}
-      </>
+      </div>
    );
-};
-
-Dashboard.prototypes = {
-   users: PropTypes.object.isRequired,
-   auth: PropTypes.object.isRequired,
-   loadUser: PropTypes.func.isRequired,
-   deleteUser: PropTypes.func.isRequired,
-   clearTowns: PropTypes.func.isRequired,
-   clearSearch: PropTypes.func.isRequired,
-   clearOtherValues: PropTypes.func.isRequired,
-   clearUser: PropTypes.func.isRequired,
-   clearNeighbourhoods: PropTypes.func.isRequired,
-   updateExpiredIntallments: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -339,8 +315,7 @@ export default connect(mapStateToProps, {
    deleteUser,
    clearTowns,
    clearSearch,
-   clearOtherValues,
+   clearUsers,
    clearNeighbourhoods,
    clearUser,
-   updateExpiredIntallments,
-})(withRouter(Dashboard));
+})(Dashboard);

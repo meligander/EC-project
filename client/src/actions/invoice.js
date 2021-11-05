@@ -1,12 +1,12 @@
 import api from "../utils/api";
 import moment from "moment";
 import { saveAs } from "file-saver";
+import history from "../utils/history";
 
 import { setAlert } from "./alert";
 import { clearRegisters } from "./register";
-import { clearTotalDebt } from "./installment";
-import { updateLoadingSpinner } from "./mixvalues";
-import { clearProfile } from "./user";
+import { getTotalDebt } from "./installment";
+import { updateLoadingSpinner, updatePageNumber } from "./mixvalues";
 
 import {
    INVOICE_LOADED,
@@ -17,7 +17,9 @@ import {
    INVOICE_CLEARED,
    INVOICES_CLEARED,
    INVOICE_ERROR,
-   INVOICENUMBER_CLEARED,
+   INVOICES_ERROR,
+   INVOICEDETAIL_ADDED,
+   INVOICEDETAIL_REMOVED,
 } from "./types";
 
 export const loadInvoice = (invoice_id) => async (dispatch) => {
@@ -29,14 +31,8 @@ export const loadInvoice = (invoice_id) => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: INVOICE_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
+      if (err.response.status !== 401)
+         dispatch(setInvoicesError(INVOICE_ERROR, err.response));
    }
 };
 
@@ -49,20 +45,17 @@ export const getInvoiceNumber = () => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: INVOICE_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-      window.scroll(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setInvoicesError(INVOICES_ERROR, err.response));
+         window.scroll(0, 0);
+      }
    }
 };
 
 export const loadInvoices = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
+
    try {
       let filter = "";
 
@@ -80,29 +73,19 @@ export const loadInvoices = (filterData) => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: INVOICE_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      window.scroll(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setInvoicesError(INVOICES_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         window.scroll(0, 0);
+      } else error = true;
    }
-   dispatch(updateLoadingSpinner(false));
+
+   if (!error) dispatch(updateLoadingSpinner(false));
 };
 
-export const registerInvoice = (
-   formData,
-   remaining,
-   history,
-   user_id
-) => async (dispatch) => {
+export const registerInvoice = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    let invoice = {};
    for (const prop in formData) {
@@ -112,51 +95,40 @@ export const registerInvoice = (
    }
 
    try {
-      await api.post("/invoice", invoice);
+      const res = await api.post("/invoice", invoice);
 
       dispatch({
          type: INVOICE_REGISTERED,
       });
 
-      dispatch(invoicePDF(formData, remaining));
+      await dispatch(invoicePDF(res.data));
 
-      dispatch(clearTotalDebt());
+      dispatch(getTotalDebt());
       dispatch(clearRegisters());
 
       dispatch(setAlert("Factura Registrada", "success", "1", 7000));
-      dispatch(clearProfile());
-      history.push(`/dashboard/${user_id}`);
+      history.push("/dashboard/0");
    } catch (err) {
-      if (err.response.data.errors) {
-         const errors = err.response.data.errors;
-         errors.forEach((error) => {
-            dispatch(setAlert(error.msg, "danger", "2"));
-         });
-         dispatch({
-            type: INVOICE_ERROR,
-            payload: errors,
-         });
-      } else {
-         const msg = err.response.data.msg;
-         const type = err.response.statusText;
-         dispatch({
-            type: INVOICE_ERROR,
-            payload: {
-               type,
-               status: err.response.status,
-               msg,
-            },
-         });
-         dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setInvoicesError(INVOICE_ERROR, err.response));
+
+         if (err.response.data.errors)
+            err.response.data.errors.forEach((error) => {
+               dispatch(setAlert(error.msg, "danger", "2"));
+            });
+         else dispatch(setAlert(err.response.data.msg, "danger", "2"));
       }
    }
 
-   dispatch(updateLoadingSpinner(false));
-   window.scrollTo(0, 0);
+   if (!error) {
+      dispatch(updateLoadingSpinner(false));
+      window.scrollTo(0, 0);
+   }
 };
 
 export const deleteInvoice = (invoice_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       await api.delete(`/invoice/${invoice_id}`);
@@ -166,30 +138,26 @@ export const deleteInvoice = (invoice_id) => async (dispatch) => {
          payload: invoice_id,
       });
 
-      dispatch(clearTotalDebt());
+      dispatch(getTotalDebt());
       dispatch(clearRegisters());
 
       dispatch(setAlert("Factura Eliminada", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: INVOICE_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setInvoicesError(INVOICE_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scroll(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scroll(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const invoicesPDF = (invoices) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       await api.post("/invoice/create-list", invoices);
@@ -206,52 +174,35 @@ export const invoicesPDF = (invoices) => async (dispatch) => {
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: INVOICE_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setInvoicesError(INVOICES_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scroll(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scroll(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
-export const invoicePDF = (formData, remaining) => async (dispatch) => {
+export const invoicePDF = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
-   let invoice = {};
-   for (const prop in formData) {
-      if (formData[prop] !== "" && formData[prop] !== 0) {
-         invoice[prop] = formData[prop];
-      }
-   }
+   let fileName = "";
 
-   let name = "";
-   switch (invoice.user) {
-      case null:
-         name = "Usuario Eliminado";
-         break;
-      case undefined:
-         if (invoice.lastname) {
-            name = invoice.lastname + ", " + invoice.name;
-         } else {
-            name = "Usuario no definido";
-         }
-         break;
-      default:
-         name = invoice.user.lastname + ", " + invoice.user.name;
-         break;
+   const { name, lastname, _id } = formData.user;
+
+   if ((name && name !== "") || (lastname && lastname !== ""))
+      fileName = lastname + ", " + name;
+   else {
+      if (_id === null) fileName = "Usuario Eliminado";
+      else fileName = _id.lastname + ", " + _id.name;
    }
 
    try {
-      await api.post("/invoice/create-invoice", { invoice, remaining });
+      await api.post("/invoice/create-invoice", formData);
 
       const pdf = await api.get("/invoice/for-print/fetch-invoice", {
          responseType: "blob",
@@ -259,42 +210,62 @@ export const invoicePDF = (formData, remaining) => async (dispatch) => {
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-      let date;
-      if (invoice.date) {
-         date = moment(invoice.date).format("DD-MM-YY");
-      } else {
-         date = moment().format("DD-MM-YY");
-      }
+      const date = moment(formData.date).format("DD-MM-YY");
 
-      saveAs(pdfBlob, `Factura ${name}  ${date}.pdf`);
+      saveAs(pdfBlob, `Factura ${fileName}  ${date}.pdf`);
 
       dispatch(setAlert("PDF Generado", "success", "1"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: INVOICE_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setInvoicesError(INVOICES_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scroll(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scroll(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const clearInvoice = () => (dispatch) => {
    dispatch({ type: INVOICE_CLEARED });
 };
 
-export const clearInvoiceNumber = () => (dispatch) => {
-   dispatch({ type: INVOICENUMBER_CLEARED });
-};
-
 export const clearInvoices = () => (dispatch) => {
    dispatch({ type: INVOICES_CLEARED });
+   dispatch(updatePageNumber(0));
+};
+
+export const addDetail = (detail, details) => (dispatch) => {
+   if (detail._id === 0)
+      dispatch(setAlert("No se ha seleccionado ninguna cuota", "danger", "4"));
+   else {
+      if (
+         !details ||
+         (details && !details.some((item) => item._id === detail._id))
+      ) {
+         dispatch(setAlert("Cuota agregada correctamente", "success", "4"));
+         dispatch({ type: INVOICEDETAIL_ADDED, payload: detail });
+      } else {
+         dispatch(setAlert("Ya se ha agregado dicha cuota", "danger", "4"));
+      }
+   }
+};
+
+export const removeDetail = (installment) => (dispatch) => {
+   dispatch({ type: INVOICEDETAIL_REMOVED, payload: installment });
+};
+
+const setInvoicesError = (type, response) => (dispatch) => {
+   dispatch({
+      type: type,
+      payload: response.data.errors
+         ? response.data.errors
+         : {
+              type: response.statusText,
+              status: response.status,
+              msg: response.data.msg,
+           },
+   });
 };

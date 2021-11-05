@@ -25,7 +25,7 @@ router.get("/", auth, async (req, res) => {
       res.json(towns);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -38,8 +38,6 @@ router.post("/", [auth, adminAuth], async (req, res) => {
    let town = {};
    let newTowns = [];
 
-   let checkForValidMongoDbID = new RegExp("^[0-9a-fA-F]{24}$");
-
    try {
       for (let x = 0; x < towns.length; x++) {
          if (towns[x].name === "")
@@ -50,7 +48,7 @@ router.post("/", [auth, adminAuth], async (req, res) => {
          let name = towns[x].name;
          let id = towns[x]._id;
 
-         if (!checkForValidMongoDbID.test(id)) {
+         if (id === "") {
             town = new Town({ name });
             await town.save();
          } else {
@@ -66,7 +64,7 @@ router.post("/", [auth, adminAuth], async (req, res) => {
       res.json(newTowns);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -87,7 +85,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       res.json({ msg: "Town deleted" });
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 

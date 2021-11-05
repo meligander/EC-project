@@ -1,21 +1,17 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import PropTypes from "prop-types";
+import { FaUserPlus } from "react-icons/fa";
 
 import { clearTowns } from "../../../../actions/town";
-import {
-   clearUser,
-   clearSearch,
-   clearOtherValues,
-} from "../../../../actions/user";
+import { clearUser, clearSearch, clearUsers } from "../../../../actions/user";
 
 import Tabs from "../sharedComp/Tabs";
 import SearchTab from "./tabs/SearchTab";
 
 const Search = ({
    auth: { userLogged },
-   clearOtherValues,
+   clearUsers,
    clearUser,
    clearTowns,
    clearSearch,
@@ -32,13 +28,13 @@ const Search = ({
                   className="btn btn-dark"
                   onClick={() => {
                      window.scroll(0, 0);
-                     clearOtherValues("studentNumber");
+                     clearUsers();
                      clearTowns();
                      clearSearch();
                      clearUser();
                   }}
                >
-                  <i className="fas fa-user-plus"></i>
+                  <FaUserPlus />
                   <span className="hide-sm">&nbsp; Registrar Usuario</span>
                </Link>
             </div>
@@ -53,20 +49,12 @@ const Search = ({
    );
 };
 
-Search.propTypes = {
-   auth: PropTypes.object.isRequired,
-   clearUser: PropTypes.func.isRequired,
-   clearOtherValues: PropTypes.func.isRequired,
-   clearTowns: PropTypes.func.isRequired,
-   clearSearch: PropTypes.func.isRequired,
-};
-
 const mapStateToProps = (state) => ({
    auth: state.auth,
 });
 
 export default connect(mapStateToProps, {
-   clearOtherValues,
+   clearUsers,
    clearUser,
    clearTowns,
    clearSearch,

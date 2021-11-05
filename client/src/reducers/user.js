@@ -2,9 +2,6 @@ import {
    USER_LOADED,
    USERS_LOADED,
    USERSBK_LOADED,
-   STUDENTNUMBER_LOADED,
-   ACTIVEUSERS_LOADED,
-   USERSEARCHTYPE_CHANGED,
    REGISTER_SUCCESS,
    USER_UPDATED,
    USER_DELETED,
@@ -13,21 +10,21 @@ import {
    USERS_CLEARED,
    USER_CLEARED,
    SEARCH_CLEARED,
-   OTHERVALUES_CLEARED,
    USERS_ERROR,
    USER_ERROR,
    USERSBK_ERROR,
+   OTHERVALUES_LOADED,
 } from "../actions/types";
 
 const initialState = {
-   loading: true,
-   loadingUsers: true,
-   user: null,
    users: [],
-   userSearchType: "",
+   loading: true,
+   user: null,
+   loadingUser: true,
    usersBK: [],
-   loadingUsersBK: true,
+   loadingBK: true,
    otherValues: {
+      userSearchType: "",
       studentNumber: "",
       activeStudents: "",
       activeTeachers: "",
@@ -42,30 +39,25 @@ export default function (state = initialState, action) {
       case USER_LOADED:
          return {
             ...state,
-            loading: false,
+            loadingUser: false,
             user: payload,
+            error: {},
          };
       case USERS_LOADED:
          return {
             ...state,
-            loadingUsers: false,
+            loading: false,
             users: payload,
+            error: {},
          };
       case USERSBK_LOADED:
          return {
             ...state,
-            loadingUsersBK: false,
+            loadingBK: false,
             usersBK: payload,
+            error: {},
          };
-      case STUDENTNUMBER_LOADED:
-         return {
-            ...state,
-            otherValues: {
-               ...state.otherValues,
-               studentNumber: payload,
-            },
-         };
-      case ACTIVEUSERS_LOADED:
+      case OTHERVALUES_LOADED:
          return {
             ...state,
             otherValues: {
@@ -75,11 +67,11 @@ export default function (state = initialState, action) {
          };
       case REGISTER_SUCCESS:
       case USER_UPDATED:
-         return state;
-      case USERSEARCHTYPE_CHANGED:
          return {
             ...state,
-            userSearchType: payload,
+            user: payload,
+            loadingUser: false,
+            error: {},
          };
       case USER_DELETED:
          return {
@@ -101,56 +93,57 @@ export default function (state = initialState, action) {
       case USER_CLEARED:
          return {
             ...state,
-            loading: true,
+            loadingUser: true,
             user: null,
-            usersBK: [],
-            loadingUsersBK: true,
+            error: {},
          };
       case USERS_CLEARED:
-         return initialState;
+         return {
+            ...state,
+            loading: true,
+            users: [],
+            usersBK: [],
+            loadingBK: true,
+            otherValues: {
+               userSearchType: "",
+               studentNumber: "",
+               activeStudents: "",
+               activeTeachers: "",
+            },
+            error: {},
+         };
       case SEARCH_CLEARED:
          return {
             ...state,
             users: [],
-            loadingUsers: true,
+            loading: true,
             usersBK: [],
-            loadingUsersBK: true,
-            userSearchType: "",
-         };
-      case OTHERVALUES_CLEARED:
-         return {
-            ...state,
+            loadingBK: true,
             otherValues: {
                ...state.otherValues,
-               [payload]: "",
+               userSearchType: "",
             },
+            error: {},
          };
       case USER_ERROR:
          return {
             ...state,
-            loadingUsers: true,
-            users: [],
-            userSearchType: "",
-            usersBK: [],
-            loadingUsersBK: true,
+            loadingUser: true,
+            user: null,
             error: payload,
-            otherValues: {
-               ...state.otherValues,
-               [payload.userType]: 0,
-            },
          };
       case USERS_ERROR:
          return {
             ...state,
             users: [],
-            loadingUsers: false,
+            loading: false,
             error: payload,
          };
       case USERSBK_ERROR:
          return {
             ...state,
             usersBK: [],
-            loadingUsersBK: false,
+            loadingBK: false,
             error: payload,
          };
       default:

@@ -2,19 +2,18 @@ import {
    REGISTER_LOADED,
    REGISTERS_LOADED,
    REGISTER_CLOSED,
-   NEWREGISTER_ADDED,
-   NEWREGISTER_ALLOWED,
    REGISTER_DELETED,
    REGISTERS_CLEARED,
    REGISTER_ERROR,
+   REGISTER_CLEARED,
+   REGISTERS_ERROR,
 } from "../actions/types";
 
 const initialState = {
-   loading: true,
    register: null,
+   loadingRegister: true,
    registers: [],
-   loadingRegisters: true,
-   addNew: false,
+   loading: true,
    error: {},
 };
 
@@ -26,27 +25,23 @@ export default function (state = initialState, action) {
          return {
             ...state,
             register: payload,
-            loading: false,
+            loadingRegister: false,
             error: {},
          };
       case REGISTERS_LOADED:
          return {
             ...state,
             registers: payload,
-            loadingRegisters: false,
+            loading: false,
+            error: {},
          };
+      case REGISTER_CLEARED:
       case REGISTER_CLOSED:
-         return state;
-      case NEWREGISTER_ADDED:
          return {
             ...state,
-            loading: true,
-            addNew: false,
-         };
-      case NEWREGISTER_ALLOWED:
-         return {
-            ...state,
-            addNew: true,
+            register: null,
+            loadingRegister: true,
+            error: {},
          };
       case REGISTER_DELETED:
          return {
@@ -56,15 +51,24 @@ export default function (state = initialState, action) {
             ),
          };
       case REGISTERS_CLEARED:
-         return initialState;
+         return {
+            ...state,
+            registers: [],
+            loading: true,
+            error: {},
+         };
       case REGISTER_ERROR:
          return {
             ...state,
             register: null,
+            loadingRegister: false,
+            error: payload,
+         };
+      case REGISTERS_ERROR:
+         return {
+            ...state,
             registers: [],
             loading: false,
-            loadingRegisters: false,
-            addNew: false,
             error: payload,
          };
       default:

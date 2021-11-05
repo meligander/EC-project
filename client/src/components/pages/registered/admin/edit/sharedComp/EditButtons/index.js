@@ -1,9 +1,10 @@
 import React from "react";
-import PropTypes from "prop-types";
+import { FaPlus } from "react-icons/fa";
+import { FiSave } from "react-icons/fi";
 
 const EditButtons = ({ save, add, type }) => {
    return (
-      <div className="btn-right p-2">
+      <div className="btn-right mt-5">
          <button
             type="button"
             onClick={(e) => {
@@ -12,7 +13,7 @@ const EditButtons = ({ save, add, type }) => {
             }}
             className="btn btn-primary"
          >
-            <i className="far fa-save"></i>
+            <FiSave />
             <span className="hide-sm">&nbsp; Guardar </span>
          </button>
          <button
@@ -23,17 +24,11 @@ const EditButtons = ({ save, add, type }) => {
             }}
             className="btn btn-primary"
          >
-            <i className="fas fa-plus"></i>
+            <FaPlus />
             <span className="hide-sm">&nbsp; Agregar {type}</span>
          </button>
       </div>
    );
-};
-
-EditButtons.propTypes = {
-   save: PropTypes.func.isRequired,
-   add: PropTypes.func.isRequired,
-   type: PropTypes.string.isRequired,
 };
 
 export default EditButtons;

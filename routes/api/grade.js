@@ -55,7 +55,7 @@ router.get("/:class_id", auth, async (req, res) => {
       res.json(tableGrades);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -93,7 +93,7 @@ router.get("/student/:class_id/:user_id", [auth], async (req, res) => {
       res.json(studentTable);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -222,7 +222,7 @@ router.post("/period", auth, async (req, res) => {
       res.json({ msg: "Grades Updated" });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -281,7 +281,7 @@ router.post("/", auth, async (req, res) => {
       res.json(tableGrades);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -368,15 +368,12 @@ router.post("/create-list", auth, (req, res) => {
          pdfTemplateAssitanceGrades(css, img, title, thead, tbody, classInfo),
          options
       ).toFile(name, (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
+         if (err) res.send(Promise.reject());
+         else res.send(Promise.resolve());
       });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("PDF Error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -487,15 +484,12 @@ router.post("/all/create-list", auth, (req, res) => {
          ),
          options
       ).toFile(name, (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
+         if (err) res.send(Promise.reject());
+         else res.send(Promise.resolve());
       });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("PDF Error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -554,7 +548,7 @@ router.post("/certificate/create-list", auth, async (req, res) => {
          });
       } catch (err) {
          console.error(err.message);
-         res.status(500).send("Server error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 
@@ -681,15 +675,12 @@ router.post("/certificate/create-list", auth, async (req, res) => {
             format: "A4",
          }
       ).toFile(name, (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
+         if (err) res.send(Promise.reject());
+         else res.send(Promise.resolve());
       });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("PDF Error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -835,15 +826,12 @@ router.post("/certificate-cambridge/create-list", auth, (req, res) => {
             format: "A4",
          }
       ).toFile(name, (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
+         if (err) res.send(Promise.reject());
+         else res.send(Promise.resolve());
       });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("PDF Error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -889,7 +877,7 @@ router.post("/report-card", auth, async (req, res) => {
       });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 
    if (grades.length > 0) {
@@ -1030,15 +1018,12 @@ router.post("/report-card", auth, async (req, res) => {
             ),
             options
          ).toFile(name, (err) => {
-            if (err) {
-               res.send(Promise.reject());
-            }
-
-            res.send(Promise.resolve());
+            if (err) res.send(Promise.reject());
+            else res.send(Promise.resolve());
          });
       } catch (err) {
          console.error(err.message);
-         return res.status(500).send("PDF Error");
+         res.status(500).json({ msg: "PDF Error" });
       }
    } else {
       res.json({ msg: "Alumno sin notas" });
@@ -1084,7 +1069,7 @@ router.delete("/:type/:classroom/:period", auth, async (req, res) => {
       res.json(tableGrades);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -1129,7 +1114,7 @@ const buildClassTable = async (grades, class_id, res) => {
       });
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 
    users = enrollments.sort((a, b) => {

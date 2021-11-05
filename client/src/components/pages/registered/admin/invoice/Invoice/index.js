@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import { withRouter } from "react-router-dom";
 import Moment from "react-moment";
-import PropTypes from "prop-types";
+import { ImFilePdf } from "react-icons/im";
 
 import { loadInvoice, invoicePDF } from "../../../../../../actions/invoice";
 import { formatNumber } from "../../../../../../actions/mixvalues";
 
-import Loading from "../../../../../modal/Loading";
 import logo from "../../../../../../img/fondoBlanco.png";
 
 import "./style.scss";
@@ -18,16 +16,21 @@ const Invoice = ({
    match,
    invoices: { invoice, loading },
 }) => {
-   const [remaining, setRemaining] = useState(0);
-   const [name, setName] = useState("");
+   const [adminValues, setAdminValues] = useState({
+      remaining: 0,
+      name: "",
+   });
+
+   const { name, remaining } = adminValues;
 
    useEffect(() => {
       if (!loading) {
-         let rem = 0;
+         let remaining = 0;
+
          for (let x = 0; x < invoice.details.length; x++) {
-            rem += invoice.details[x].value - invoice.details[x].payment;
+            remaining += invoice.details[x].value - invoice.details[x].payment;
          }
-         setRemaining(rem);
+         setAdminValues((prev) => ({ ...prev, remaining }));
 
          let name = "";
          switch (invoice.user) {
@@ -45,9 +48,9 @@ const Invoice = ({
                name = invoice.user.lastname + ", " + invoice.user.name;
                break;
          }
-         setName(name);
+         setAdminValues((prev) => ({ ...prev, name }));
       } else loadInvoice(match.params.invoice_id);
-   }, [loadInvoice, match.params, invoice, loading]);
+   }, [loadInvoice, match, invoice, loading]);
 
    const installment = [
       "Insc",
@@ -67,8 +70,9 @@ const Invoice = ({
 
    return (
       <>
-         {!loading ? (
+         {!loading && (
             <>
+               {" "}
                <div className="invoice">
                   <div className="row">
                      <div>
@@ -129,12 +133,19 @@ const Invoice = ({
                               invoice.details.map((invoice, index) => (
                                  <tr key={index}>
                                     <td>
-                                       {invoice.installment ? invoice.installment.student.lastname +
-                                          ", " +
-                                          invoice.installment.student.name : 'Cuota eliminada'}
+                                       {invoice.installment
+                                          ? invoice.installment.student
+                                               .lastname +
+                                            ", " +
+                                            invoice.installment.student.name
+                                          : "Cuota eliminada"}
                                     </td>
                                     <td>
-                                       {invoice.installment ? installment[invoice.installment.number] : 'Indefinida'}
+                                       {invoice.installment
+                                          ? installment[
+                                               invoice.installment.number
+                                            ]
+                                          : "Indefinida"}
                                     </td>
                                     <td>${formatNumber(invoice.value)}</td>
                                     <td>${formatNumber(invoice.payment)}</td>
@@ -167,7 +178,7 @@ const Invoice = ({
                      </p>
                   </div>
                </div>
-               <div className="btn-ctr">
+               <div className="btn-center">
                   <button
                      type="button"
                      className="btn btn-secondary"
@@ -176,26 +187,17 @@ const Invoice = ({
                         invoicePDF(invoice, remaining);
                      }}
                   >
-                     <i className="fas fa-file-pdf"></i>
+                     <ImFilePdf />
                   </button>
                </div>
             </>
-         ) : (
-            <Loading />
          )}
       </>
    );
-};
-
-Invoice.propTypes = {
-   loadInvoice: PropTypes.func.isRequired,
-   invoicePDF: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
    invoices: state.invoices,
 });
 
-export default connect(mapStateToProps, { loadInvoice, invoicePDF })(
-   withRouter(Invoice)
-);
+export default connect(mapStateToProps, { loadInvoice, invoicePDF })(Invoice);

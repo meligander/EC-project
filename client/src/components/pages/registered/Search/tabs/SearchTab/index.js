@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
+import { BiFilterAlt } from "react-icons/bi";
+import { ImFilePdf } from "react-icons/im";
 
 import { loadCategories } from "../../../../../../actions/category";
 import {
@@ -141,7 +142,8 @@ const SearchTab = ({
             </div>
             <div className="btn-right mb-1">
                <button type="submit" className="btn btn-light">
-                  <i className="fas fa-filter"></i>&nbsp; Buscar
+                  <BiFilterAlt />
+                  &nbsp;Buscar
                </button>
             </div>
          </form>
@@ -175,23 +177,13 @@ const SearchTab = ({
                      userPDF(users, userSearchType);
                   }}
                >
-                  <i className="fas fa-file-pdf"></i>
+                  <ImFilePdf />
                </button>
                <span className="tooltiptext">PDF lista de alumnos</span>
             </div>
          </div>
       </>
    );
-};
-
-SearchTab.propTypes = {
-   users: PropTypes.object.isRequired,
-   categories: PropTypes.object.isRequired,
-   loadUsers: PropTypes.func.isRequired,
-   loadCategories: PropTypes.func.isRequired,
-   userPDF: PropTypes.func.isRequired,
-   clearProfile: PropTypes.func.isRequired,
-   clearClasses: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({

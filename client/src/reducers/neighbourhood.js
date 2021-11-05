@@ -4,6 +4,7 @@ import {
    NEIGHBOURHOOD_DELETED,
    NEIGHBOURHOODS_CLEARED,
    NEIGHBOURHOODS_ERROR,
+   NEIGHBOURHOOD_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -33,6 +34,13 @@ export default function (state = initialState, action) {
       case NEIGHBOURHOODS_CLEARED:
          return initialState;
       case NEIGHBOURHOODS_ERROR:
+         return {
+            ...state,
+            loading: false,
+            error: payload,
+            neighbourhoods: [],
+         };
+      case NEIGHBOURHOOD_ERROR:
          return {
             ...state,
             loading: false,

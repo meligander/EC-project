@@ -1,33 +1,24 @@
 import {
    INSTALLMENT_LOADED,
    INSTALLMENTS_LOADED,
-   STUDENTINSTALLMENTS_LOADED,
    TOTALDEBT_LOADED,
    INSTALLMENT_UPDATED,
    INSTALLMENT_REGISTERED,
    INSTALLMENT_DELETED,
-   INVOICEDETAIL_ADDED,
-   INVOICEDETAIL_REMOVED,
    EXPIREDINSTALLMENTS_UPDATED,
    INSTALLMENT_CLEARED,
    INSTALLMENTS_CLEARED,
-   STUDENTINSTALLMENTS_CLEARED,
-   TOTALDEBT_CLEARED,
    INSTALLMENTS_ERROR,
    ESTIMATEDPROFIT_LOADED,
    MONTHLYDEBT_LOADED,
+   INSTALLMENT_ERROR,
 } from "../actions/types";
 
 const initialState = {
    loading: true,
    installments: [],
-   usersInstallments: {
-      years: [],
-      rows: [],
-   },
-   loadingUsersInstallments: true,
+   loadingInstallment: true,
    installment: null,
-   loadingInstallments: true,
    otherValues: {
       totalDebt: "",
       estimatedProfit: "",
@@ -43,21 +34,15 @@ export default function (state = initialState, action) {
          return {
             ...state,
             installment: payload,
-            loading: false,
+            loadingInstallment: false,
             error: {},
          };
       case INSTALLMENTS_LOADED:
          return {
             ...state,
             installments: payload,
-            loadingInstallments: false,
+            loading: false,
             error: {},
-         };
-      case STUDENTINSTALLMENTS_LOADED:
-         return {
-            ...state,
-            usersInstallments: payload,
-            loadingUsersInstallments: false,
          };
       case TOTALDEBT_LOADED:
          return {
@@ -83,20 +68,6 @@ export default function (state = initialState, action) {
                monthlyDebt: payload,
             },
          };
-      case INVOICEDETAIL_ADDED:
-         return {
-            ...state,
-            installments: [...state.installments, payload],
-            loadingInstallments: false,
-         };
-      case INVOICEDETAIL_REMOVED:
-         return {
-            ...state,
-            installments: state.installments.filter(
-               (installment) => installment._id !== payload
-            ),
-            loadingInstallments: false,
-         };
       case INSTALLMENT_UPDATED:
       case INSTALLMENT_REGISTERED:
       case INSTALLMENT_DELETED:
@@ -106,39 +77,31 @@ export default function (state = initialState, action) {
          return {
             ...state,
             installment: null,
-            loading: true,
+            loadingInstallment: true,
          };
       case INSTALLMENTS_CLEARED:
-         return initialState;
-      case STUDENTINSTALLMENTS_CLEARED:
          return {
             ...state,
-            usersInstallments: {
-               years: [],
-               rows: [],
-            },
-            loadingUsersInstallments: true,
-         };
-      case TOTALDEBT_CLEARED:
-         return {
-            ...state,
+            installment: [],
+            loading: true,
             otherValues: {
-               ...state.otherValues,
                totalDebt: "",
+               estimatedProfit: "",
+               monthlyDebt: "",
             },
          };
       case INSTALLMENTS_ERROR:
          return {
             ...state,
-            installment: null,
             installments: [],
-            usersInstallments: {
-               years: [],
-               rows: [],
-            },
             loading: false,
-            loadingInstallments: false,
-            loadingUsersInstallments: false,
+            error: payload,
+         };
+      case INSTALLMENT_ERROR:
+         return {
+            ...state,
+            installment: null,
+            loadingInstallment: false,
             error: payload,
          };
       default:

@@ -31,7 +31,7 @@ router.get("/unseen/teacher", auth, async (req, res) => {
       return res.json(count);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -47,7 +47,7 @@ router.get("/unseen/class/:class_id", auth, async (req, res) => {
       return res.json(count);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -79,7 +79,7 @@ router.get("/class/:class_id", auth, async (req, res) => {
       return res.json(posts);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -130,7 +130,7 @@ router.post(
          return res.json(post);
       } catch (err) {
          console.error(err.message);
-         res.status(500).send("Server error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 );
@@ -178,7 +178,7 @@ router.post(
          return res.json(post.comments);
       } catch (err) {
          console.error(err.message);
-         res.status(500).send("Server error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 );
@@ -214,7 +214,7 @@ router.put("/like/:id", auth, async (req, res) => {
       res.json(post.likes);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -244,7 +244,7 @@ router.put("/seen/:id", auth, async (req, res) => {
       res.json(post.seenArray);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -266,7 +266,7 @@ router.delete("/:id", auth, async (req, res) => {
       console.error(err.message);
       if (error.includes("ObjectId"))
          return res.status(404).json({ msg: "Publicación no encontrada" });
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -302,7 +302,7 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
       res.json(post.comments);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 

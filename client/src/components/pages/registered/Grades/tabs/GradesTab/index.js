@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import moment from "moment";
-import { withRouter, Link } from "react-router-dom";
-import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
+import { FaEdit, FaGraduationCap, FaPlus, FaTimes } from "react-icons/fa";
+import { FiSave } from "react-icons/fi";
+import { ImFilePdf } from "react-icons/im";
 
 import { setAlert } from "../../../../../../actions/alert";
 import {
@@ -18,15 +20,10 @@ import PopUp from "../../../../../modal/PopUp";
 import Alert from "../../../../sharedComp/Alert";
 
 const GradesTab = ({
-   history,
    period,
    classes: { classInfo },
    auth: { userLogged },
-   grades: {
-      grades: { header, students, periods },
-      loading,
-      gradeTypes,
-   },
+   grades: { grades, loading, gradeTypes },
    setAlert,
    registerNewGrade,
    deleteGrades,
@@ -46,7 +43,7 @@ const GradesTab = ({
 
    const { newGrades, newGradeType } = formData;
 
-   const [otherValues, setOtherValues] = useState({
+   const [adminValues, setAdminValues] = useState({
       gradePlus: false,
       gradetypes: [],
       toggleModalSave: false,
@@ -62,55 +59,61 @@ const GradesTab = ({
       toggleModalDelete,
       toggleModalDate,
       toDelete,
-   } = otherValues;
+   } = adminValues;
 
    useEffect(() => {
       const loadGradeTypes = () => {
          let gradetypes = [];
-         if (header.length === 0) {
+         if (!grades.header || (grades.header && !grades.header[period - 1])) {
             gradetypes = gradeTypes;
          } else {
-            if (header[period - 1]) {
+            if (grades.header[period - 1]) {
                for (let x = 0; x < gradeTypes.length; x++) {
-                  let equal = false;
-                  for (let y = 0; y < header[period - 1].length; y++) {
-                     if (gradeTypes[x].name === header[period - 1][y])
+                  if (
+                     grades.header[period - 1].some(
+                        (item) => item === gradeTypes[x].name
+                     )
+                  )
+                     gradetypes.push(gradeTypes[x]);
+                  /* let equal = false;
+                  for (let y = 0; y < grades.header[period - 1].length; y++) {
+                     if (gradeTypes[x].name === grades.header[period - 1][y])
                         equal = true;
                   }
-                  if (!equal) gradetypes.push(gradeTypes[x]);
+                  if (!equal) gradetypes.push(gradeTypes[x]); */
                }
-            } else {
-               gradetypes = gradeTypes;
             }
          }
-         setOtherValues((prev) => ({ ...prev, gradetypes }));
+         setAdminValues((prev) => ({ ...prev, gradetypes }));
       };
 
       const setInput = () => {
          setFormData((prev) => ({
             ...prev,
-            newGrades: periods[period - 1] ? periods[period - 1] : [],
+            newGrades: grades.periods[period - 1]
+               ? grades.periods[period - 1]
+               : [],
          }));
       };
 
       setInput();
       loadGradeTypes();
-   }, [gradeTypes, period, header, periods]);
+   }, [gradeTypes, period, grades]);
 
    const onChange = (e, row) => {
       let number = Number(e.target.name.substring(5, e.target.name.length));
-      let changedRows = [...newGrades];
+
       const gradesNumber = newGrades[0].length;
       const rowN = Math.ceil((number + 1) / gradesNumber) - 1;
       const mult = gradesNumber * rowN;
       number = number - mult;
-      changedRows[rowN][number] = {
+      newGrades[rowN][number] = {
          ...row,
          value: e.target.value,
       };
       setFormData({
          ...formData,
-         newGrades: changedRows,
+         newGrades,
       });
    };
 
@@ -125,67 +128,64 @@ const GradesTab = ({
    };
 
    const addGradeType = () => {
-      registerNewGrade({ ...newGradeType, periods });
-      if (periods[period - 1]) {
-         setOtherValues({
-            ...otherValues,
+      registerNewGrade({ ...newGradeType, periods: grades.periods });
+
+      if (grades.periods[period - 1]) {
+         setAdminValues((prev) => ({
+            ...prev,
             gradetypes: gradetypes.filter(
                (gt) => gt._id !== newGradeType.gradetype
             ),
-         });
+         }));
       }
    };
 
    const deleteGradeType = () => {
-      if (periods[period] && gradeTypes.length === gradetypes.length + 1) {
+      if (
+         grades.periods[period] &&
+         gradeTypes.length === gradetypes.length + 1
+      ) {
          setAlert(
             "No puede eliminar la última nota del bimestre",
             "danger",
             "4"
          );
       } else {
-         setOtherValues({
-            ...otherValues,
+         setAdminValues((prev) => ({
+            ...prev,
             gradePlus: false,
             gradetypes: [
                ...gradetypes,
                ...gradeTypes.filter((gt) => gt._id === toDelete.gradetype._id),
             ],
-         });
+         }));
          deleteGrades(toDelete);
          setFormData({
             ...formData,
-            newGrades: periods[period - 1] ? periods[period - 1] : [],
+            newGrades: grades.periods[period - 1]
+               ? grades.periods[period - 1]
+               : [],
          });
       }
    };
 
    const saveGrades = () => {
       const gradesPeriod = newGrades.filter((grade) => grade[0].student);
-      updateGrades(gradesPeriod, history, classInfo._id);
-   };
-
-   const setToggle = () => {
-      setOtherValues({
-         ...otherValues,
-         toggleModalDate: false,
-         toggleModalSave: false,
-         toggleModalDelete: false,
-      });
+      updateGrades(gradesPeriod, classInfo._id);
    };
 
    const certificatePdfGenerator = (date) => {
-      if (!periods[4])
+      if (!grades.periods[4])
          setAlert("Las notas del final deben estar cargadas", "danger", "4");
       else {
-         const studentsPeriod = periods[period - 1].filter(
+         const studentsPeriod = grades.periods[period - 1].filter(
             (item) => item[0].student
          );
 
          const stringDate = moment(date).format("DD [de] MMMM [de] YYYY");
          certificatePDF(
-            students.filter((student) => student.name !== ""),
-            header[period - 1],
+            grades.students.filter((student) => student.name !== ""),
+            grades.header[period - 1],
             studentsPeriod,
             classInfo,
             date !== "" ? stringDate : null,
@@ -199,19 +199,34 @@ const GradesTab = ({
          <Alert type="4" />
          <PopUp
             toggleModal={toggleModalSave}
-            setToggleModal={setToggle}
+            setToggleModal={() =>
+               setAdminValues((prev) => ({
+                  ...prev,
+                  toggleModalSave: !toggleModalSave,
+               }))
+            }
             confirm={saveGrades}
             text="¿Está seguro que desea guardar los cambios?"
          />
          <PopUp
             toggleModal={toggleModalDelete}
-            setToggleModal={setToggle}
+            setToggleModal={() =>
+               setAdminValues((prev) => ({
+                  ...prev,
+                  toggleModalDelete: !toggleModalDelete,
+               }))
+            }
             confirm={deleteGradeType}
             text="¿Está seguro que desea eliminar el tipo de nota?"
          />
          <PopUp
             toggleModal={toggleModalDate}
-            setToggleModal={setToggle}
+            setToggleModal={() =>
+               setAdminValues((prev) => ({
+                  ...prev,
+                  toggleModalDate: !toggleModalDate,
+               }))
+            }
             type="certificate-date"
             confirm={certificatePdfGenerator}
          />
@@ -221,14 +236,14 @@ const GradesTab = ({
                   <thead>
                      <tr>
                         <th>&nbsp; Nombre &nbsp;</th>
-                        {header[period - 1] &&
-                           header[period - 1].map((type, index) => (
+                        {grades.header[period - 1] &&
+                           grades.header[period - 1].map((type, index) => (
                               <th key={index}>{type}</th>
                            ))}
                      </tr>
                   </thead>
                   <tbody>
-                     {students.map((student, i) => (
+                     {grades.students.map((student, i) => (
                         <tr key={i}>
                            <td>{student.name}</td>
                            {newGrades &&
@@ -249,14 +264,15 @@ const GradesTab = ({
                                           className="btn btn-danger"
                                           onClick={(e) => {
                                              e.preventDefault();
-                                             setOtherValues({
-                                                ...otherValues,
-                                                toggleModalDelete: true,
+                                             setAdminValues((prev) => ({
+                                                ...prev,
+                                                toggleModalDelete:
+                                                   !toggleModalDelete,
                                                 toDelete: row,
-                                             });
+                                             }));
                                           }}
                                        >
-                                          <i className="fas fa-times"></i>
+                                          <FaTimes />
                                        </button>
                                     )}
                                  </td>
@@ -273,24 +289,27 @@ const GradesTab = ({
                type="button"
                onClick={(e) => {
                   e.preventDefault();
-                  setOtherValues({ ...otherValues, toggleModalSave: true });
+                  setAdminValues((prev) => ({
+                     ...prev,
+                     toggleModalSave: !toggleModalSave,
+                  }));
                }}
             >
-               <i className="far fa-save"></i>
-               <span className="hide-md">&nbsp; Guardar Cambios</span>
+               <FiSave />
+               <span className="hide-md">&nbsp;Guardar Cambios</span>
             </button>
             <button
                className="btn btn-dark"
                type="button"
                onClick={(e) => {
                   e.preventDefault();
-                  setOtherValues({
-                     ...otherValues,
+                  setAdminValues((prev) => ({
+                     ...prev,
                      gradePlus: !gradePlus,
-                  });
+                  }));
                }}
             >
-               <i className="fas fa-plus"></i>
+               <FaPlus />
                <span className="hide-md">&nbsp; Nota</span>
             </button>
             <div className="tooltip">
@@ -301,8 +320,8 @@ const GradesTab = ({
                      e.preventDefault();
                      gradesPDF(
                         {
-                           header: header[period - 1],
-                           period: periods[period - 1],
+                           header: grades.header[period - 1],
+                           period: grades.periods[period - 1],
                            periodNumber: period - 1,
                         },
                         classInfo,
@@ -310,7 +329,7 @@ const GradesTab = ({
                      );
                   }}
                >
-                  <i className="fas fa-file-pdf"></i>
+                  <ImFilePdf />
                </button>
                <span className="tooltiptext">PDF notas del bimestre</span>
             </div>
@@ -323,13 +342,13 @@ const GradesTab = ({
                      type="button"
                      onClick={(e) => {
                         e.preventDefault();
-                        setOtherValues({
-                           ...setOtherValues,
-                           toggleModalDate: true,
-                        });
+                        setAdminValues((prev) => ({
+                           ...prev,
+                           toggleModalDate: !toggleModalDate,
+                        }));
                      }}
                   >
-                     <i className="fas fa-graduation-cap"></i>
+                     <FaGraduationCap />
                   </button>
                   <span className="tooltiptext">PDF certificados</span>
                </div>
@@ -370,10 +389,10 @@ const GradesTab = ({
                         Tipo de nota
                      </label>
                   </div>
-                  <div className="btn-ctr mt-1">
+                  <div className="btn-center mt-1">
                      <button type="submit" className="btn btn-dark">
-                        <i className="fas fa-plus"></i>
-                        <span className="hide-md">&nbsp; Agregar</span>
+                        <FaPlus />
+                        <span className="hide-md">&nbsp;Agregar</span>
                      </button>
                      {(userLogged.type === "admin" ||
                         userLogged.type === "admin&teacher") && (
@@ -386,7 +405,7 @@ const GradesTab = ({
                               }}
                               className="btn btn-mix-secondary"
                            >
-                              <i className="fas fa-edit"></i>
+                              <FaEdit />
                            </Link>
                            <span className="tooltiptext">
                               Editar tipo de nota
@@ -399,20 +418,6 @@ const GradesTab = ({
          )}
       </>
    );
-};
-
-GradesTab.propTypes = {
-   auth: PropTypes.object.isRequired,
-   grades: PropTypes.object.isRequired,
-   classes: PropTypes.object.isRequired,
-   period: PropTypes.number.isRequired,
-   registerNewGrade: PropTypes.func.isRequired,
-   deleteGrades: PropTypes.func.isRequired,
-   updateGrades: PropTypes.func.isRequired,
-   setAlert: PropTypes.func.isRequired,
-   gradesPDF: PropTypes.func.isRequired,
-   certificatePDF: PropTypes.func.isRequired,
-   clearGradeTypes: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -429,4 +434,4 @@ export default connect(mapStateToProps, {
    gradesPDF,
    certificatePDF,
    clearGradeTypes,
-})(withRouter(GradesTab));
+})(GradesTab);

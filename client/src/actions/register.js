@@ -1,23 +1,25 @@
 import moment from "moment";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
+import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
-import { clearProfile } from "./user";
+import { updateLoadingSpinner, updatePageNumber } from "./mixvalues";
 
 import {
    REGISTER_LOADED,
    REGISTERS_LOADED,
-   NEWREGISTER_ADDED,
    REGISTER_CLOSED,
-   NEWREGISTER_ALLOWED,
    REGISTER_DELETED,
    REGISTERS_CLEARED,
    REGISTER_ERROR,
+   REGISTERS_ERROR,
 } from "./types";
 
 export const loadRegister = () => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+   let error = false;
+
    try {
       const res = await api.get(`/register/last`);
       dispatch({
@@ -25,84 +27,52 @@ export const loadRegister = () => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: REGISTER_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
+      if (err.response.status !== 401)
+         dispatch(setRegistersError(REGISTER_ERROR, err.response));
+      else error = true;
    }
+
+   if (!error) dispatch(updateLoadingSpinner(false));
 };
 
-export const loadRegisters = (filterData) => async (dispatch) => {
+export const loadRegisters = (filterData, byMonth) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    let filter = "";
-   const filternames = Object.keys(filterData);
-   for (let x = 0; x < filternames.length; x++) {
-      const name = filternames[x];
-      if (filterData[name] !== "") {
-         if (filter !== "") filter = filter + "&";
-         filter = filter + filternames[x] + "=" + filterData[name];
+   if (!byMonth) {
+      const filternames = Object.keys(filterData);
+      for (let x = 0; x < filternames.length; x++) {
+         const name = filternames[x];
+         if (filterData[name] !== "") {
+            if (filter !== "") filter = filter + "&";
+            filter = filter + filternames[x] + "=" + filterData[name];
+         }
       }
    }
+
    try {
-      const res = await api.get(`/register?${filter}`);
+      const res = await api.get(
+         byMonth ? "/register/year/bymonth" : `/register?${filter}`
+      );
       dispatch({
          type: REGISTERS_LOADED,
          payload: res.data,
       });
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: REGISTER_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      window.scrollTo(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setRegistersError(REGISTERS_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         window.scrollTo(0, 0);
+      } else error = true;
    }
 
-   dispatch(updateLoadingSpinner(false));
+   if (!error) dispatch(updateLoadingSpinner(false));
 };
 
-export const loadRegistersByMonth = () => async (dispatch) => {
+export const createRegister = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
-
-   try {
-      const res = await api.get("/register/year/bymonth");
-      dispatch({
-         type: REGISTERS_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: REGISTER_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      window.scrollTo(0, 0);
-   }
-
-   dispatch(updateLoadingSpinner(false));
-};
-
-export const createRegister = (formData, user_id, history) => async (
-   dispatch
-) => {
-   dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    let register = {};
    for (const prop in formData) {
@@ -113,48 +83,34 @@ export const createRegister = (formData, user_id, history) => async (
    try {
       await api.post("/register", register);
 
-      dispatch({ type: NEWREGISTER_ADDED });
       dispatch(clearRegisters());
 
-      dispatch(clearProfile());
-      history.push(`/dashboard/${user_id}`);
+      history.push("/dashboard/0");
 
       dispatch(
          setAlert("Caja Abierta para Transacciones", "success", "1", 7000)
       );
    } catch (err) {
-      if (err.response.data.errors) {
-         const errors = err.response.data.errors;
-         errors.forEach((error) => {
-            dispatch(setAlert(error.msg, "danger", "2"));
-         });
-         dispatch({
-            type: REGISTER_ERROR,
-            payload: errors,
-         });
-      } else {
-         const msg = err.response.data.msg;
-         const type = err.response.statusText;
-         dispatch({
-            type: REGISTER_ERROR,
-            payload: {
-               type,
-               status: err.response.status,
-               msg,
-            },
-         });
-         dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      }
+      if (err.response.status !== 401) {
+         dispatch(setRegistersError(REGISTER_ERROR, err.response));
+
+         if (err.response.data.errors)
+            err.response.data.errors.forEach((error) => {
+               dispatch(setAlert(error.msg, "danger", "2"));
+            });
+         else dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scroll(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scroll(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
-export const closeRegister = (formData, user_id, history) => async (
-   dispatch
-) => {
+export const closeRegister = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       let register = {};
@@ -169,30 +125,24 @@ export const closeRegister = (formData, user_id, history) => async (
          type: REGISTER_CLOSED,
       });
 
-      dispatch(clearRegisters());
-
-      history.push(`/dashboard/${user_id}`);
+      history.push("/dashboard/0");
       dispatch(setAlert("Caja del día Cerrada", "success", "1", 7000));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: REGISTER_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setRegistersError(REGISTER_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const deleteRegister = (register_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       await api.delete(`/register/${register_id}`);
@@ -201,29 +151,24 @@ export const deleteRegister = (register_id) => async (dispatch) => {
          type: REGISTER_DELETED,
          payload: register_id,
       });
-      dispatch(setAlert("Cierre de Caja Eliminado", "success", "2"));
 
-      dispatch({ type: REGISTERS_CLEARED });
+      dispatch(setAlert("Cierre de Caja Eliminado", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: REGISTER_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setRegistersError(REGISTER_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const registerPDF = (registers) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       await api.post("/register/create-list", registers);
@@ -247,27 +192,32 @@ export const registerPDF = (registers) => async (dispatch) => {
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: REGISTER_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setRegistersError(REGISTER_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
-};
-
-export const allowNewRegister = () => (dispatch) => {
-   dispatch({ type: NEWREGISTER_ALLOWED });
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const clearRegisters = () => (dispatch) => {
    dispatch({ type: REGISTERS_CLEARED });
+   dispatch(updatePageNumber(0));
+};
+
+const setRegistersError = (type, response) => (dispatch) => {
+   dispatch({
+      type: type,
+      payload: response.data.errors
+         ? response.data.errors
+         : {
+              type: response.statusText,
+              status: response.status,
+              msg: response.data.msg,
+           },
+   });
 };

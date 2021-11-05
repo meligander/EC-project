@@ -1,12 +1,12 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { Link, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
+import { BsClock } from "react-icons/bs";
+import { GoHome } from "react-icons/go";
+import { RiLogoutCircleRLine } from "react-icons/ri";
 
-import { toggleMenu } from "../../../actions/navbar";
-import { clearProfile } from "../../../actions/user";
-import { loadStudentClass } from "../../../actions/class";
 import { getUnseenPosts } from "../../../actions/post";
+import { setNavbarHeight } from "../../../actions/mixvalues";
 
 import GuestNavbar from "./usersLinks/GuestNavbar";
 import AdminNavbar from "./usersLinks/AdminNavbar";
@@ -17,21 +17,117 @@ import GuardianNavbar from "./usersLinks/GuardianNavbar";
 import onlyLogo from "../../../img/logoSinLetras.png";
 import logo from "../../../img/logo.png";
 import "./style.scss";
+import { logOut } from "../../../actions/auth";
 
 const Navbar = ({
    auth: { userLogged, loading, isAuthenticated },
-   navbar: { showMenu },
+   location,
+   match,
+   logOut,
    getUnseenPosts,
-   loadStudentClass,
-   toggleMenu,
-   clearProfile,
+   setNavbarHeight,
 }) => {
+   const ref = useRef();
+   const string = location.pathname.substring(1, location.pathname.length);
+   const path =
+      string.indexOf("/") !== -1
+         ? string.substring(0, string.indexOf("/"))
+         : string;
+
+   const _id =
+      path === "dashboard" && match.params.user_id !== "0"
+         ? match.params.user_id
+         : "";
+
+   const isAdmin =
+      userLogged &&
+      (userLogged.type === "admin" || userLogged.type === "admin&teacher");
+
+   const [adminValues, setAdminValues] = useState({
+      toggleMenu: false,
+      currentNav: "index",
+   });
+
+   const { toggleMenu, currentNav } = adminValues;
+
    useEffect(() => {
       if (userLogged) {
-         if (userLogged.type === "student") {
-            loadStudentClass(userLogged._id);
+         let currentNav = "";
+
+         switch (path) {
+            case "about":
+               currentNav = "about";
+               break;
+            case "contact":
+               currentNav = "contact";
+               break;
+            case "login":
+               currentNav = "login";
+               break;
+            case "chat":
+            case "classes":
+            case "class":
+            case "attendance":
+            case "grades":
+            case "edit-class":
+            case "edit-gradetypes":
+            case "register-class":
+               currentNav =
+                  userLogged.type === "student" ? "classmates" : "classes";
+               break;
+            case "cashregister-info":
+            case "edit-expencetypes":
+            case "income-list":
+            case "expence-list":
+            case "register-list":
+               currentNav = "register";
+               break;
+            case "register":
+            case "edit-user":
+            case "edit-towns-neighbourhoods":
+            case "credentials":
+            case "search":
+               currentNav = "search";
+               break;
+            case "enrollment-list":
+            case "enrollment":
+            case "edit-enrollment":
+               currentNav = "enrollment";
+               break;
+            case "invoice-generation":
+            case "invoice":
+               currentNav = "invoice";
+               break;
+            case "dashboard":
+               if (_id === "") currentNav = "index";
+               else {
+                  if (userLogged.type === "guardian")
+                     currentNav =
+                        "child" +
+                        userLogged.children.findIndex(
+                           (item) => item._id === _id
+                        );
+                  else
+                     currentNav =
+                        userLogged.type === "student" ? "classmates" : "search";
+               }
+               break;
+            default:
+               currentNav = "index";
+               break;
+         }
+         setAdminValues((prev) => ({
+            ...prev,
+            currentNav,
+         }));
+      }
+   }, [_id, path, userLogged]);
+
+   useEffect(() => {
+      if (userLogged) {
+         if (userLogged.type === "student")
             getUnseenPosts(userLogged.classroom);
-         } else {
+         else {
             if (
                userLogged.type === "teacher" ||
                userLogged.type === "admin&teacher"
@@ -39,34 +135,85 @@ const Navbar = ({
                getUnseenPosts();
          }
       }
-   }, [userLogged, loadStudentClass, getUnseenPosts]);
+   }, [userLogged, getUnseenPosts]);
+
+   useEffect(() => {
+      setTimeout(() => {
+         setNavbarHeight(ref.current.offsetHeight);
+      }, 60);
+   }, [setNavbarHeight]);
 
    const type = () => {
       switch (userLogged.type) {
          case "student":
-            return <StudentNavbar />;
+            return (
+               <StudentNavbar
+                  toggleMenu={toggleMenu}
+                  currentNav={currentNav}
+                  setCurrentNav={(page) =>
+                     setAdminValues((prev) => ({
+                        ...prev,
+                        currentNav: page,
+                        toggleMenu: !toggleMenu,
+                     }))
+                  }
+               />
+            );
          case "teacher":
-            return <TeacherNavbar />;
+            return (
+               <TeacherNavbar
+                  toggleMenu={toggleMenu}
+                  currentNav={currentNav}
+                  setCurrentNav={(page) =>
+                     setAdminValues((prev) => ({
+                        ...prev,
+                        currentNav: page,
+                        toggleMenu: !toggleMenu,
+                     }))
+                  }
+               />
+            );
          case "guardian":
-            return <GuardianNavbar />;
+            return (
+               <GuardianNavbar
+                  toggleMenu={toggleMenu}
+                  currentNav={currentNav}
+                  setCurrentNav={(page) =>
+                     setAdminValues((prev) => ({
+                        ...prev,
+                        currentNav: page,
+                        toggleMenu: !toggleMenu,
+                     }))
+                  }
+               />
+            );
          case "admin":
          case "secretary":
          case "admin&teacher":
-            return <AdminNavbar />;
+            return (
+               <AdminNavbar
+                  toggleMenu={toggleMenu}
+                  currentNav={currentNav}
+                  setCurrentNav={(page) =>
+                     setAdminValues((prev) => ({
+                        ...prev,
+                        currentNav: page,
+                        toggleMenu: !toggleMenu,
+                     }))
+                  }
+               />
+            );
          default:
-            return <GuestNavbar />;
+            return <></>;
       }
    };
 
    return (
-      <nav className="navbar bg-primary">
+      <nav className="navbar bg-primary" ref={ref}>
          <Link
             className="navbar-home-btn"
-            to={isAuthenticated ? `/dashboard/${userLogged._id}` : "/"}
-            onClick={() => {
-               window.scroll(0, 0);
-               if (isAuthenticated) clearProfile(userLogged.type !== "student");
-            }}
+            to={userLogged ? "/dashboard/0" : "/"}
+            onClick={() => window.scroll(0, 0)}
          >
             <div className="navbar-logo">
                <img src={onlyLogo} alt="Logo English Centre" />
@@ -79,16 +226,20 @@ const Navbar = ({
             <h3 className="navbar-name">Welcome {userLogged.name}</h3>
          )}
          <div
-            className={!showMenu ? "menu-btn" : "menu-btn close"}
-            onClick={toggleMenu}
+            className={!toggleMenu ? "menu-btn" : "menu-btn close"}
+            onClick={() =>
+               setAdminValues((prev) => ({ ...prev, toggleMenu: !toggleMenu }))
+            }
          >
             <div className="btn-line"></div>
             <div className="btn-line"></div>
             <div className="btn-line"></div>
          </div>
 
-         <div className={!showMenu ? "menu" : "menu show"}>
-            <div className={!showMenu ? "menu-branding" : "menu-branding show"}>
+         <div className={!toggleMenu ? "menu" : "menu show"}>
+            <div
+               className={!toggleMenu ? "menu-branding" : "menu-branding show"}
+            >
                <div className="logo">
                   <img src={logo} alt="English Centre logo" />
                </div>
@@ -103,46 +254,95 @@ const Navbar = ({
             </div>
             {isAuthenticated ? (
                loading ? (
-                  <ul className={!showMenu ? "menu-nav" : "menu-nav show"}>
+                  <ul className={`menu-nav${toggleMenu ? " show" : ""}`}>
                      <li
                         className={
-                           !showMenu ? "nav-item" : "nav-item show current"
+                           !toggleMenu ? "nav-item" : "nav-item show current"
                         }
                      >
                         <p className="heading-tertiary">
-                           <i className="far fa-clock"></i>
-                           <span className="hide-md">&nbsp; Cargando...</span>
+                           <BsClock />
+                           <span className="hide-md">&nbsp;Cargando...</span>
                         </p>
                      </li>
                   </ul>
                ) : (
-                  type()
+                  <ul
+                     className={`${isAdmin ? "admin " : ""}menu-nav${
+                        toggleMenu ? " show" : ""
+                     }`}
+                  >
+                     <li
+                        className={`nav-item${isAdmin ? " smaller" : ""}${
+                           toggleMenu ? " show" : ""
+                        }${currentNav === "index" ? " current" : ""}`}
+                     >
+                        <Link
+                           className="nav-link"
+                           to="/dashboard/0"
+                           onClick={() => {
+                              window.scroll(0, 0);
+                              setAdminValues((prev) => ({
+                                 ...prev,
+                                 currentNav: "index",
+                              }));
+                           }}
+                        >
+                           <GoHome />
+                           <span className="hide-md">
+                              &nbsp; Página Principal
+                           </span>
+                        </Link>
+                     </li>
+                     {type()}
+                     <li
+                        className={`nav-item${isAdmin ? " smaller" : ""}${
+                           toggleMenu ? " show" : ""
+                        }`}
+                     >
+                        <Link
+                           className="nav-link"
+                           to="/login"
+                           onClick={() => {
+                              window.scroll(0, 0);
+                              setAdminValues((prev) => ({
+                                 ...prev,
+                                 toggleMenu: false,
+                                 currentNav: "login",
+                              }));
+                              logOut();
+                           }}
+                        >
+                           <RiLogoutCircleRLine />
+                           <span className="hide-md">&nbsp;Cerrar Sesión</span>
+                        </Link>
+                     </li>
+                  </ul>
                )
             ) : (
-               <GuestNavbar />
+               <GuestNavbar
+                  toggleMenu={toggleMenu}
+                  currentNav={currentNav}
+                  setCurrentNav={(page) =>
+                     setAdminValues((prev) => ({
+                        ...prev,
+                        currentNav: page,
+                        toggleMenu: !toggleMenu,
+                     }))
+                  }
+               />
             )}
          </div>
       </nav>
    );
 };
 
-Navbar.prototypes = {
-   auth: PropTypes.object.isRequired,
-   navbar: PropTypes.object.isRequired,
-   toggleMenu: PropTypes.func.isRequired,
-   clearProfile: PropTypes.func.isRequired,
-   getUnseenPosts: PropTypes.func.isRequired,
-   loadStudentClass: PropTypes.func.isRequired,
-};
-
 const mapStateToProps = (state) => ({
    auth: state.auth,
-   navbar: state.navbar,
 });
 
 export default connect(mapStateToProps, {
-   toggleMenu,
-   clearProfile,
    getUnseenPosts,
-   loadStudentClass,
-})(Navbar);
+   setNavbarHeight,
+   logOut,
+})(withRouter(Navbar));

@@ -23,40 +23,38 @@ router.get("/", auth, async (req, res) => {
    try {
       let user = {};
 
-      user = await User.findById(req.user.id)
-         .select("-password")
-         .populate({
-            path: "children",
-            model: "user",
-            select: ["name", "lastname", "studentnumber"],
-         });
-
-      if (user.type === "student") {
+      if (req.user.type === "student") {
          const date = new Date();
 
-         enrollment = await Enrollment.findOne({
+         const enrollment = await Enrollment.findOne({
             student: req.user.id,
             year: date.getFullYear(),
-         }).populate({
-            path: "student",
-            model: "user",
-            select: ["name", "lastname", "studentnumber"],
-         });
+         })
+            .populate({
+               path: "student",
+               model: "user",
+               select: ["name", "lastname", "studentnumber"],
+            })
+            .populate({
+               path: "classroom",
+               model: "class",
+            });
 
-         user = {
-            _id: req.user.id,
-            name: enrollment.student.name,
-            lastname: enrollment.student.lastname,
-            studentnumber: enrollment.student.studentnumber,
-            type: "student",
-            classroom: enrollment.classroom._id,
-         };
+         user = enrollment.student;
+      } else {
+         user = await User.findById(req.user.id)
+            .select("-password")
+            .populate({
+               path: "children",
+               model: "user",
+               select: ["name", "lastname", "studentnumber"],
+            });
       }
 
       res.json(user);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -99,15 +97,13 @@ router.post(
                .json({ msg: "Lo siento, ya no puede ingresar a la página." });
 
          const payload = {
-            user: {
-               id: user.id,
-            },
+            user: { id: user.id, type: user.type },
          };
 
          jwt.sign(
             payload,
             process.env.JWT_SECRET,
-            { expiresIn: 60 * 60 },
+            { expiresIn: 60 * 60 * 2 },
             (err, token) => {
                if (err) throw err;
                res.json({ token });
@@ -115,7 +111,7 @@ router.post(
          );
       } catch (err) {
          console.error(err.message);
-         return res.status(500).send("Server Error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 );

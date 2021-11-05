@@ -1,59 +1,70 @@
 @import "../../../../style/abstract.scss";
 
-.profile-top {
-   display: flex;
-   padding: 3rem;
+.dashboard {
+   width: 75%;
 
-   @include respond(small-phone) {
-      flex-direction: column;
-      align-items: center;
-      padding: 1.5rem;
+   @include respond(tab-port) {
+      width: 90%;
    }
 
-   & > * {
+   @include respond(phone) {
+      width: 95%;
+   }
+   .profile-top {
       display: flex;
-      flex-direction: column;
-      justify-content: center;
+      padding: 3rem;
 
       @include respond(small-phone) {
-         width: 100% !important;
-      }
-   }
-
-   .img-about {
-      width: 40%;
-      align-items: center;
-
-      @include respond(small-phone) {
-         padding-bottom: 1rem;
-         border-bottom: 1px solid $dark-color;
-      }
-   }
-
-   .about {
-      width: 60%;
-
-      @include respond(small-phone) {
-         margin-top: 2rem;
+         flex-direction: column;
+         align-items: center;
+         padding: 1.5rem;
       }
 
-      p {
-         font-size: 1.8rem;
-
-         span {
-            font-size: 2.5rem;
-         }
-      }
-
-      &-info {
-         height: 80%;
+      & > * {
          display: flex;
          flex-direction: column;
          justify-content: center;
+
+         @include respond(small-phone) {
+            width: 100% !important;
+         }
       }
 
-      .btn-right {
-         padding-top: 3rem;
+      .img-about {
+         width: 45%;
+         align-items: center;
+
+         @include respond(small-phone) {
+            padding-bottom: 1rem;
+            border-bottom: 1px solid $dark-color;
+         }
+      }
+
+      .about {
+         width: 55%;
+
+         @include respond(small-phone) {
+            margin-top: 2rem;
+         }
+
+         p {
+            font-size: 1.8rem;
+
+            span {
+               font-size: 2.5rem;
+            }
+         }
+
+         &-info {
+            height: 80%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+         }
+
+         .btn-right {
+            padding-top: 3rem;
+         }
       }
    }
 }

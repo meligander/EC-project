@@ -40,6 +40,16 @@ form {
             background-color: $success-color;
             color: $white-color;
          }
+
+         span {
+            display: flex;
+            align-items: center;
+
+            & > * {
+               margin-right: 0.5rem;
+               font-size: 2rem;
+            }
+         }
       }
    }
 

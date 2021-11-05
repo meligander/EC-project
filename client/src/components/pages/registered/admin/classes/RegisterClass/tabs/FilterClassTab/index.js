@@ -1,29 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
-import PropTypes from "prop-types";
+import { BiFilterAlt } from "react-icons/bi";
 
-import {
-   updateClassCategory,
-   addStudent,
-} from "../../../../../../../../actions/class";
+import { addStudent } from "../../../../../../../../actions/class";
 import { loadUsers, clearProfile } from "../../../../../../../../actions/user";
 import { setAlert } from "../../../../../../../../actions/alert";
 
 import StudentTable from "../../../../../sharedComp/tables/StudentTable";
 import Alert from "../../../../../../sharedComp/Alert";
-import Loading from "../../../../../../../modal/Loading";
 
 const FilterClassTab = ({
    location,
    setAlert,
    loadUsers,
-   updateClassCategory,
    addStudent,
    clearProfile,
-   categories,
-   classes: { classInfo, loading, loadingStudents },
-   users: { users, loadingUsers },
+   categories: { categories, loading: loadingCategories },
+   classes: { classInfo, loadingClass },
+   users: { users, loading },
 }) => {
    const registerClass = location.pathname === "/register-class";
 
@@ -33,13 +28,13 @@ const FilterClassTab = ({
    });
 
    useEffect(() => {
-      if (!registerClass && !loading && category._id === "") {
+      if (!registerClass && !loadingClass) {
          setCategory({
             _id: classInfo.category._id,
             name: classInfo.category.name,
          });
       }
-   }, [classInfo, registerClass, loading, category._id]);
+   }, [classInfo, registerClass, loadingClass]);
 
    const filterStudents = (e) => {
       e.preventDefault();
@@ -53,7 +48,6 @@ const FilterClassTab = ({
             category: category._id,
             classroom: "null",
          });
-         updateClassCategory({ ...(classInfo && { ...classInfo }), category });
       }
    };
 
@@ -65,10 +59,9 @@ const FilterClassTab = ({
    };
 
    const addChild = (studentInfo) => {
-      let exist = false;
-      for (let x = 0; x < classInfo.students.length; x++) {
-         if (classInfo.students[x]._id === studentInfo._id) exist = true;
-      }
+      let exist = classInfo.students.some(
+         (student) => student._id === studentInfo._id
+      );
 
       if (!exist) {
          addStudent(studentInfo);
@@ -80,78 +73,64 @@ const FilterClassTab = ({
 
    return (
       <>
-         {(registerClass || (!loading && !loadingStudents && !registerClass)) &&
-         !categories.loading ? (
-            <>
-               <form className="form" onSubmit={filterStudents}>
-                  <div className="form-group">
-                     <select
-                        className="form-input"
-                        name="new-category"
-                        disabled={!registerClass}
-                        id="new-category"
-                        onChange={onChange}
-                        value={category._id}
-                     >
-                        <option value="">* Seleccione Categoría</option>
-                        {categories.categories.map((category) => (
-                           <React.Fragment key={category._id}>
-                              {category.name !== "Inscripción" && (
-                                 <option value={category._id}>
-                                    {category.name}
-                                 </option>
-                              )}
-                           </React.Fragment>
-                        ))}
-                     </select>
-                     <label
-                        htmlFor="new-category"
-                        className={`form-label ${
-                           category._id === "" ? "lbl" : ""
-                        }`}
-                     >
-                        Categoría
-                     </label>
-                  </div>
-                  <div className="text-right">
-                     <button
-                        type="submit"
-                        className={`btn ${
-                           registerClass ? "btn-light" : "btn-black"
-                        } my-1`}
-                        disabled={!registerClass}
-                     >
-                        <i className="fas fa-filter"></i>&nbsp; Buscar
-                     </button>
-                  </div>
-               </form>
-               <div className="mt-2">
-                  <Alert type="3" />
-                  <StudentTable
-                     users={users}
-                     clearProfile={clearProfile}
-                     loadingUsers={loadingUsers}
-                     actionWChild={addChild}
-                     type="add-child"
-                  />
+         <form className="form" onSubmit={filterStudents}>
+            {!loadingCategories && (
+               <div className="form-group">
+                  <select
+                     className="form-input"
+                     disabled={!registerClass}
+                     id="new-category"
+                     onChange={onChange}
+                     value={category._id}
+                  >
+                     <option value="">* Seleccione Categoría</option>
+                     {categories.categories.map((category) => (
+                        <React.Fragment key={category._id}>
+                           {category.name !== "Inscripción" && (
+                              <option value={category._id}>
+                                 {category.name}
+                              </option>
+                           )}
+                        </React.Fragment>
+                     ))}
+                  </select>
+                  <label
+                     htmlFor="new-category"
+                     className={`form-label ${
+                        category._id === "" ? "lbl" : ""
+                     }`}
+                  >
+                     Categoría
+                  </label>
                </div>
-            </>
-         ) : (
-            <Loading />
-         )}
+            )}
+
+            <div className="text-right">
+               <button
+                  type="submit"
+                  className={`btn ${
+                     registerClass ? "btn-light" : "btn-black"
+                  } my-1`}
+                  disabled={!registerClass}
+               >
+                  <BiFilterAlt />
+                  &nbsp;Buscar
+               </button>
+            </div>
+         </form>
+         <div className="mt-2">
+            <Alert type="3" />
+            {!loading && (
+               <StudentTable
+                  users={users}
+                  clearProfile={clearProfile}
+                  actionWChild={addChild}
+                  type="add-child"
+               />
+            )}
+         </div>
       </>
    );
-};
-
-FilterClassTab.propTypes = {
-   categories: PropTypes.object.isRequired,
-   classes: PropTypes.object.isRequired,
-   users: PropTypes.object.isRequired,
-   setAlert: PropTypes.func.isRequired,
-   updateClassCategory: PropTypes.func.isRequired,
-   loadUsers: PropTypes.func.isRequired,
-   addStudent: PropTypes.func.isRequired,
-   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -163,7 +142,6 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    setAlert,
    loadUsers,
-   updateClassCategory,
    addStudent,
    clearProfile,
 })(withRouter(FilterClassTab));

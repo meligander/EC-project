@@ -1,10 +1,10 @@
 import moment from "moment";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
+import history from "../utils/history";
 
 import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
-import { updateExpiredIntallments } from "./installment";
 import { clearProfile } from "./user";
 
 import {
@@ -22,21 +22,16 @@ export const loadCategories = () => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: CATEGORY_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
+      if (err.response.status !== 401) {
+         dispatch(setCategoriesError(CATEGORY_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      }
    }
 };
 
-export const updateCategories = (formData, history, user_id) => async (
-   dispatch
-) => {
+export const updateCategories = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       await api.put("/category", formData);
@@ -49,40 +44,29 @@ export const updateCategories = (formData, history, user_id) => async (
          setAlert("Precios de Categorías Modificados", "success", "1", 7000)
       );
       dispatch(clearProfile());
-      dispatch(updateExpiredIntallments());
 
-      history.push(`/dashboard/${user_id}`);
+      history.push("/dashboard/0");
    } catch (err) {
-      if (err.response.data.errors) {
-         const errors = err.response.data.errors;
-         errors.forEach((error) => {
-            dispatch(setAlert(error.msg, "danger", "2"));
-         });
-         dispatch({
-            type: CATEGORY_ERROR,
-            payload: errors,
-         });
-      } else {
-         const msg = err.response.data.msg;
-         const type = err.response.statusText;
-         dispatch({
-            type: CATEGORY_ERROR,
-            payload: {
-               type,
-               status: err.response.status,
-               msg,
-            },
-         });
-         dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      }
+      if (err.response.status !== 401) {
+         dispatch(setCategoriesError(CATEGORY_ERROR, err.response));
+
+         if (err.response.data.errors)
+            err.response.data.errorsforEach((error) => {
+               dispatch(setAlert(error.msg, "danger", "2"));
+            });
+         else dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const categoriesPDF = (categories) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       await api.post("/category/create-list", categories);
@@ -99,23 +83,31 @@ export const categoriesPDF = (categories) => async (dispatch) => {
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: CATEGORY_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg !== "" ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setCategoriesError(CATEGORY_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const clearCategories = () => (dispatch) => {
    dispatch({ type: CATEGORIES_CLEARED });
+};
+
+const setCategoriesError = (type, response) => (dispatch) => {
+   dispatch({
+      type: type,
+      payload: response.data.errors
+         ? response.data.errors
+         : {
+              type: response.statusText,
+              status: response.status,
+              msg: response.data.msg,
+           },
+   });
 };

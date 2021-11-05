@@ -4,7 +4,7 @@
    display: flex;
    align-items: center;
    justify-content: space-between;
-   padding: 0rem 2.4rem;
+   padding: 0.5rem 2.4rem;
    position: fixed;
    z-index: 8999;
    width: 100%;
@@ -12,8 +12,8 @@
    opacity: 0.9;
 
    &-logo img {
-      margin: 0.64rem 0;
-      width: 4.3rem;
+      margin: 0.7rem 0 0;
+      //width: 4.3rem;
       height: 4rem;
       filter: none;
       -webkit-filter: invert(100%);
@@ -41,7 +41,7 @@
    }
 
    &-name {
-      margin-right: 30px;
+      margin-right: 5rem;
       font-size: 1.9rem;
    }
 }
@@ -51,14 +51,19 @@
       position: absolute;
       z-index: 3;
       right: 2rem;
-      top: 2rem;
+      top: 2.1rem;
       cursor: pointer;
       @include easeOut;
 
+      @include respond(phone) {
+         top: 2rem;
+      }
+
       .btn-line {
-         width: 20px;
-         height: 2px;
-         margin: 0 0 5px 0;
+         width: 25px;
+         height: 3px;
+         margin: 0 0 6px 0;
+         border-radius: 2px;
          background: set-text-color($primary-color);
          @include shortTrans;
       }
@@ -81,7 +86,7 @@
          .btn-line {
             //Line 1 Rotate
             &:nth-child(1) {
-               transform: rotate(45deg) translate(9px, 8px);
+               transform: rotate(45deg) translate(11.5px, 10.8px);
             }
 
             //Line 2 Hide
@@ -199,12 +204,13 @@
       }
 
       &.current > a {
-         color: $dark-color;
+         color: darken($light-color, 20%);
       }
    }
 
    .nav-link {
-      display: inline-block;
+      display: flex;
+      align-items: center;
       color: set-text-color($primary-color);
       font-size: 3.2rem;
       padding: 0.4rem 1.4rem;
@@ -215,6 +221,11 @@
          transparent 50%,
          $white-color 50%
       );
+
+      & > *:nth-child(2) {
+         margin-left: 1rem;
+      }
+
       background-size: 230%;
       @include shortTrans;
 

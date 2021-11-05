@@ -1,5 +1,9 @@
 import React from "react";
-import PropTypes from "prop-types";
+import { ImFilePdf } from "react-icons/im";
+import {
+   HiOutlineChevronDoubleLeft,
+   HiOutlineChevronDoubleRight,
+} from "react-icons/hi";
 
 import "./style.scss";
 
@@ -9,7 +13,7 @@ const ListButtons = ({ changePage, items, page, pdfGenerator, type }) => {
    return (
       <>
          {items.length > 10 && (
-            <div className="btn-list btn-ctr">
+            <div className="btn-list btn-center">
                {page !== 0 && (
                   <button
                      type="button"
@@ -19,7 +23,7 @@ const ListButtons = ({ changePage, items, page, pdfGenerator, type }) => {
                      }}
                      className="btn btn-primary"
                   >
-                     <i className="fas fa-angle-double-left"></i>
+                     <HiOutlineChevronDoubleLeft />
                   </button>
                )}
 
@@ -32,7 +36,7 @@ const ListButtons = ({ changePage, items, page, pdfGenerator, type }) => {
                      }}
                      className="btn btn-primary"
                   >
-                     <i className="fas fa-angle-double-right"></i>
+                     <HiOutlineChevronDoubleRight />
                   </button>
                )}
             </div>
@@ -48,21 +52,13 @@ const ListButtons = ({ changePage, items, page, pdfGenerator, type }) => {
                      pdfGenerator();
                   }}
                >
-                  <i className="fas fa-file-pdf"></i>
+                  <ImFilePdf />
                </button>
                <span className="tooltiptext">PDF lista de {type}</span>
             </div>
          </div>
       </>
    );
-};
-
-ListButtons.propTypes = {
-   page: PropTypes.number.isRequired,
-   items: PropTypes.array.isRequired,
-   changePage: PropTypes.func.isRequired,
-   pdfGenerator: PropTypes.func.isRequired,
-   type: PropTypes.string.isRequired,
 };
 
 export default ListButtons;

@@ -1,7 +1,8 @@
 import {
    LOADINGSPINNER_UPDATED,
    SEARCHPAGE_CHANGED,
-   PREVPAGE_UPDATED,
+   FOOTER_HEIGHT_SETTED,
+   NAVBAR_HEIGHT_SETTED,
 } from "./types";
 
 export const updateLoadingSpinner = (bool) => (dispatch) => {
@@ -18,10 +19,17 @@ export const updatePageNumber = (page) => (dispatch) => {
    });
 };
 
-export const updatePreviousPage = (page) => (dispatch) => {
+export const setFooterHeight = (height) => (dispatch) => {
    dispatch({
-      type: PREVPAGE_UPDATED,
-      payload: page,
+      type: FOOTER_HEIGHT_SETTED,
+      payload: height,
+   });
+};
+
+export const setNavbarHeight = (height) => (dispatch) => {
+   dispatch({
+      type: NAVBAR_HEIGHT_SETTED,
+      payload: height,
    });
 };
 

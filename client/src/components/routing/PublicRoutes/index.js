@@ -1,20 +1,15 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
 
 const PublicRoutes = ({
    component: Component,
-   auth: { isAuthenticated, userLogged },
+   auth: { isAuthenticated },
    path,
 }) => {
    if (isAuthenticated) {
-      return <Redirect to={`/dashboard/${userLogged._id}`} />;
+      return <Redirect to={"/dashboard/0"} />;
    } else return <Route exact path={path} component={Component} />;
-};
-
-PublicRoutes.propTypes = {
-   auth: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = (state) => ({

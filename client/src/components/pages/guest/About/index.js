@@ -3,6 +3,7 @@ import React from "react";
 import Canada from "./Canada";
 import BgVideo from "./Team";
 import Gallery from "./Gallery";
+import Loading from "../../../modal/Loading";
 
 import cambridge from "../../../../img/cambridge.png";
 import "./style.scss";
@@ -10,6 +11,7 @@ import "./style.scss";
 const About = () => {
    return (
       <>
+         <Loading />
          <header className="header">
             <div className="header-textbox">
                <h2 className="heading-secondary text-white">

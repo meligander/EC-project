@@ -6,15 +6,17 @@ import {
    INVOICE_DELETED,
    INVOICE_CLEARED,
    INVOICES_CLEARED,
-   INVOICENUMBER_CLEARED,
    INVOICE_ERROR,
+   INVOICES_ERROR,
+   INVOICEDETAIL_ADDED,
+   INVOICEDETAIL_REMOVED,
 } from "../actions/types";
 
 const initialState = {
-   loading: true,
-   invoices: [],
    invoice: null,
-   loadingInvoices: true,
+   loadingInvoice: true,
+   invoices: [],
+   loading: true,
    otherValues: {
       invoiceNumber: "",
    },
@@ -28,14 +30,14 @@ export default function (state = initialState, action) {
          return {
             ...state,
             invoice: payload,
-            loading: false,
+            loadingInvoice: false,
             error: {},
          };
       case INVOICES_LOADED:
          return {
             ...state,
             invoices: payload,
-            loadingInvoices: false,
+            loading: false,
             error: {},
          };
       case INVOICENUMBER_LOADED:
@@ -47,6 +49,30 @@ export default function (state = initialState, action) {
          };
       case INVOICE_REGISTERED:
          return state;
+      case INVOICEDETAIL_ADDED:
+         const detail = {
+            ...payload,
+            _id: "",
+            installment: payload._id,
+            payment: "",
+         };
+         return {
+            ...state,
+            invoice: {
+               details: state.invoice
+                  ? [...state.invoice.details, detail]
+                  : [detail],
+            },
+         };
+      case INVOICEDETAIL_REMOVED:
+         return {
+            ...state,
+            invoice: {
+               details: state.invoice.details.filter(
+                  (item) => item.installment !== payload
+               ),
+            },
+         };
       case INVOICE_DELETED:
          return {
             ...state,
@@ -54,28 +80,39 @@ export default function (state = initialState, action) {
                (invoice) => invoice._id !== payload
             ),
          };
-      case INVOICES_CLEARED:
-         return initialState;
+
       case INVOICE_CLEARED:
          return {
             ...state,
-            loading: true,
+            loadingInvoice: true,
             invoice: null,
+            error: {},
          };
-      case INVOICENUMBER_CLEARED:
+      case INVOICES_CLEARED:
          return {
             ...state,
+            invoices: [],
+            loading: true,
             otherValues: {
                invoiceNumber: "",
             },
+            error: {},
          };
       case INVOICE_ERROR:
          return {
             ...state,
-            invoices: [],
             invoice: null,
+            loadingInvoice: false,
+            error: payload,
+         };
+      case INVOICES_ERROR:
+         return {
+            ...state,
+            invoices: [],
             loading: false,
-            loadingInvoices: false,
+            otherValues: {
+               invoiceNumber: "",
+            },
             error: payload,
          };
       default:

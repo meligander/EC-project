@@ -24,7 +24,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
       res.json(expenceTypes);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -46,7 +46,7 @@ router.get("/withdrawal", [auth, adminAuth], async (req, res) => {
       res.json(expenceTypes);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -95,7 +95,7 @@ router.post("/", [auth, adminAuth], async (req, res) => {
       res.json(newExpeceTypes);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -110,7 +110,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       res.json({ msg: "Expence Type Deleted" });
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 

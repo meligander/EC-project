@@ -10,13 +10,14 @@ import {
    EXPENCETYPES_CLEARED,
    EXPENCE_ERROR,
    EXPENCETYPE_ERROR,
+   TRANSACTIONS_ERROR,
 } from "../actions/types";
 
 const initialState = {
-   loading: true,
+   loadingExpence: true,
    expence: null,
    transactions: [],
-   loadingTransactions: true,
+   loading: true,
    expencetypes: [],
    loadingET: true,
    error: {},
@@ -29,7 +30,7 @@ export default function (state = initialState, action) {
          return {
             ...state,
             transactions: payload,
-            loadingTransactions: false,
+            loading: false,
             error: {},
          };
       case EXPENCETYPES_LOADED:
@@ -61,17 +62,15 @@ export default function (state = initialState, action) {
       case EXPENCES_CLEARED:
          return {
             ...state,
-            loading: true,
+            loadingExpence: true,
             expence: null,
-            transactions: [],
-            loadingTransactions: true,
             error: {},
          };
       case TRANSACTIONS_CLEARED:
          return {
             ...state,
             transactions: [],
-            loadingTransactions: [],
+            loading: true,
          };
       case EXPENCETYPES_CLEARED:
          return {
@@ -83,15 +82,21 @@ export default function (state = initialState, action) {
          return {
             ...state,
             expence: null,
+            loadingExpence: false,
+            error: payload,
+         };
+      case TRANSACTIONS_ERROR:
+         return {
+            ...state,
             transactions: [],
             loading: false,
-            loadingTransactions: false,
             error: payload,
          };
       case EXPENCETYPE_ERROR:
          return {
             ...state,
             loadingET: false,
+            expencetypes: [],
             error: payload,
          };
       default:

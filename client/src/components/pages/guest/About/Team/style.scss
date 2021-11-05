@@ -3,6 +3,7 @@
 .section-team {
    padding: 10rem 1rem 15rem 1rem;
    position: relative;
+   background-color: lighten($light-color, 10%);
 
    @include respond(phone) {
       padding: 6rem 1rem 3rem 1rem;
@@ -20,7 +21,7 @@
       justify-content: space-evenly;
    }
 
-   .bg-video {
+   /* .bg-video {
       position: absolute;
       top: 0;
       left: 0;
@@ -37,7 +38,7 @@
          //como background-size: cover; pero con videos
          object-fit: cover;
       }
-   }
+   } */
 
    .person {
       width: 75%;

@@ -28,7 +28,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
       if (Object.entries(req.query).length === 0) {
          invoices = await Invoice.find()
             .populate({
-               path: "user",
+               path: "user._id",
                model: "user",
                select: ["name", "lastname"],
             })
@@ -69,7 +69,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
          if (filter.name || filter.lastname) {
             const invoicesNameDetails = await Invoice.find(filterDate)
                .populate({
-                  path: "user",
+                  path: "user._id",
                   model: "user",
                   select: ["name", "lastname"],
                })
@@ -131,14 +131,16 @@ router.get("/", [auth, adminAuth], async (req, res) => {
                   }
                }
             }
-            invoice = invoices.concat(invoicesName);
-            invoices = invoices.unique();
+            invoices = invoices
+               .concat(invoicesName)
+               .unique()
+               .sort((a, b) => {
+                  if (a.date > b.date) return -1;
+                  if (a.date < b.date) return 1;
+                  return 0;
+               });
 
-            invoices = invoices.sort((a, b) => {
-               if (a.date > b.date) return -1;
-               if (a.date < b.date) return 1;
-               return 0;
-            });
+            invoices = invoices;
          } else {
             invoices = invoicesName;
          }
@@ -153,7 +155,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
       res.json(invoices);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -164,7 +166,7 @@ router.get("/:id", [auth, adminAuth], async (req, res) => {
    try {
       let invoice = await Invoice.findOne({ _id: req.params.id })
          .populate({
-            path: "user",
+            path: "user._id",
             model: "user",
             select: ["name", "lastname", "cel", "email"],
          })
@@ -186,7 +188,7 @@ router.get("/:id", [auth, adminAuth], async (req, res) => {
       res.json(invoice);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -205,7 +207,7 @@ router.get("/last/invoiceid", [auth, adminAuth], async (req, res) => {
       res.json(number);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -236,16 +238,9 @@ router.post(
          .isEmpty(),
    ],
    async (req, res) => {
-      let {
-         invoiceid,
-         user,
-         name,
-         email,
-         total,
-         lastname,
-         details,
-         remaining,
-      } = req.body;
+      let { invoiceid, user, total, details, remaining } = req.body;
+
+      const { _id, name, lastname, email } = user;
 
       if (total) total = Number(total);
 
@@ -256,48 +251,30 @@ router.post(
          return res.status(400).json({ errors });
       }
 
-      let newDetails = [];
+      if (details.some((item) => item.payment === ""))
+         return res.status(400).json({
+            msg: "Debe ingresar el pago de todas las cuotas agregadas",
+         });
+
+      if (_id === "" && name === "" && lastname === "")
+         return res.status(400).json({
+            msg: "Debe ingresar al usuario que paga la factura",
+         });
+
       try {
-         let installment;
-         for (let x = 0; x < details.length; x++) {
-            if (details[x].payment === "")
-               return res.status(400).json({
-                  msg: "Debe ingresar el pago de todas las cuotas agregadas",
-               });
-            installment = await Installment.findOne({
-               _id: details[x].item._id,
-            });
-
-            if (installment.value < parseFloat(details[x].payment))
-               return res.status(400).json({
-                  msg: "El importe a pagar debe ser menor al valor de la cuota",
-               });
-         }
-
          let last = await Register.find().sort({ $natural: -1 }).limit(1);
          last = last[0];
 
          if (!last)
             return res.status(400).json({
-               msg:
-                  "Antes de realizar cualquier transacción debe ingresar dinero en la caja",
+               msg: "Antes de realizar cualquier transacción debe ingresar dinero en la caja",
             });
 
          for (let x = 0; x < details.length; x++) {
-            newDetails.push({
-               payment: details[x].payment,
-               installment: details[x].item._id,
-               value: details[x].value,
-            });
-
-            installment = await Installment.findOne({
-               _id: details[x].item._id,
-            });
-
-            const newValue = installment.value - details[x].payment;
+            const newValue = details[x].value - details[x].payment;
 
             await Installment.findOneAndUpdate(
-               { _id: installment._id },
+               { _id: details[x].installment },
                { value: newValue, ...(newValue !== 0 && { halfPayed: true }) }
             );
          }
@@ -306,7 +283,7 @@ router.post(
 
          if (last.temporary) {
             await Register.findOneAndUpdate(
-               { _id: last.id },
+               { _id: last._id },
                {
                   income: last.income ? last.income + total : total,
                   registermoney: plusvalue,
@@ -330,12 +307,24 @@ router.post(
 
          let data = {
             invoiceid,
-            ...(user && { user: user._id }),
-            ...(name && { name }),
-            ...(lastname && { lastname }),
-            ...(email && { email }),
+            user: {
+               ...(_id !== ""
+                  ? { _id }
+                  : {
+                       _id: null,
+                       name,
+                       lastname,
+                       email,
+                    }),
+            },
             total,
-            details: newDetails,
+            details: details.map((item) => {
+               return {
+                  installment: item.installment,
+                  payment: item.payment,
+                  value: item.value,
+               };
+            }),
             remaining,
             register: last._id,
          };
@@ -344,10 +333,29 @@ router.post(
 
          await invoice.save();
 
-         res.json({ msg: "Invoice Registered" });
+         invoice = await Invoice.find()
+            .sort({ $natural: -1 })
+            .populate({
+               path: "user._id",
+               model: "user",
+               select: ["name", "lastname", "email"],
+            })
+            .populate({
+               path: "details.installment",
+               model: "installment",
+               populate: {
+                  path: "student",
+                  model: "user",
+                  select: ["name", "lastname"],
+               },
+            })
+            .limit(1);
+         invoice = invoice[0];
+
+         res.json(invoice);
       } catch (err) {
          console.error(err.message);
-         return res.status(500).send("Server Error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 );
@@ -424,15 +432,12 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
          pdfTemplate(css, img, "ingresos", thead, tbody),
          options
       ).toFile(name, (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
+         if (err) res.send(Promise.reject());
+         else res.send(Promise.resolve());
       });
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("PDF error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -440,9 +445,10 @@ router.post("/create-list", [auth, adminAuth], (req, res) => {
 //@desc     Create a pdf of an invoice
 //@access   Private && Admin
 router.post("/create-invoice", [auth, adminAuth], (req, res) => {
-   const name = path.join(__dirname, "../../reports/invoice.pdf");
+   const pathName = path.join(__dirname, "../../reports/invoice.pdf");
 
-   const { invoice, remaining } = req.body;
+   const { remaining, details, user, invoiceid, date, total } = req.body;
+   const { _id, email, name, lastname } = user;
 
    let tbody = "";
 
@@ -462,54 +468,40 @@ router.post("/create-invoice", [auth, adminAuth], (req, res) => {
       "Dic",
    ];
 
-   for (let x = 0; x < invoice.details.length; x++) {
-      let userName = "";
-      let instName = "";
-      let year = "";
-      if (invoice.details[x].installment) {
-         userName = `<td> ${invoice.details[x].installment.student.lastname}, ${invoice.details[x].installment.student.name} </td>`;
-         instName = `<td> ${
-            installment[invoice.details[x].installment.number]
-         }</td>`;
-         year = `<td>${invoice.details[x].installment.year}</td>`;
-      } else {
-         userName = `<td> ${invoice.details[x].item.student.lastname}, ${invoice.details[x].item.student.name} </td>`;
-         instName = `<td> ${installment[invoice.details[x].item.number]}</td>`;
-         year = `<td>${invoice.details[x].item.year}</td>`;
-      }
+   for (let x = 0; x < details.length; x++) {
+      const userName = `<td> ${details[x].installment.student.lastname}, 
+      ${details[x].installment.student.name} </td>`;
+      const instName = `<td> ${
+         installment[details[x].installment.number]
+      }</td>`;
+      const year = `<td>${details[x].installment.year}</td>`;
 
-      const value = `<td> $${formatNumber(invoice.details[x].value)} </td>`;
-      const payment = `<td> $${formatNumber(invoice.details[x].payment)} </td>`;
+      const value = `<td> $${formatNumber(details[x].value)} </td>`;
+      const payment = `<td> $${formatNumber(details[x].payment)} </td>`;
       tbody += "<tr>" + userName + instName + year + value + payment + "</tr>";
    }
 
    let userName = "";
-   let email = "";
-   switch (invoice.user) {
-      case null:
-         userName = "Usuario Eliminado";
-         break;
-      case undefined:
-         if (invoice.lastname) {
-            userName = invoice.lastname + ", " + invoice.name;
-            email = invoice.email ? invoice.email : "";
-         } else {
-            userName = "Usuario no definido";
-         }
-         break;
-      default:
-         userName = invoice.user.lastname + ", " + invoice.user.name;
-         email = invoice.user.email ? invoice.user.email : "";
-         break;
+   let userEmail = "";
+
+   if ((name && name !== "") || (lastname && lastname !== "")) {
+      userName = lastname + ", " + name;
+      userEmail = email;
+   } else {
+      if (_id === null) userName = "Usuario Eliminado";
+      else {
+         userName = _id.lastname + ", " + _id.name;
+         userEmail = _id.email ? _id.email : "";
+      }
    }
 
-   let invoiceDetails = {
+   const invoiceDetails = {
       user: userName,
-      email,
-      cel: invoice.user ? (invoice.user.cel ? invoice.user.cel : "") : "",
-      invoiceid: invoice.invoiceid,
-      date: moment(invoice.date).format("DD/MM/YY"),
-      total: formatNumber(invoice.total),
+      email: userEmail,
+      cel: user._id ? (user._id.cel ? user._id.cel : "") : "",
+      invoiceid: invoiceid,
+      date: moment(date).format("DD/MM/YY"),
+      total: formatNumber(total),
       remaining: formatNumber(remaining),
    };
 
@@ -530,18 +522,15 @@ router.post("/create-invoice", [auth, adminAuth], (req, res) => {
 
    try {
       pdf.create(pdfTemplate2(css, img, tbody, invoiceDetails), options).toFile(
-         name,
+         pathName,
          (err) => {
-            if (err) {
-               res.send(Promise.reject());
-            }
-
-            res.send(Promise.resolve());
+            if (err) res.send(Promise.reject());
+            else res.send(Promise.resolve());
          }
       );
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("PDF error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -579,7 +568,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       res.json({ msg: "Invoice deleted" });
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 

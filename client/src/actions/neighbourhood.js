@@ -9,53 +9,34 @@ import {
    NEIGHBOURHOOD_DELETED,
    NEIGHBOURHOODS_CLEARED,
    NEIGHBOURHOODS_ERROR,
+   NEIGHBOURHOOD_ERROR,
 } from "./types";
 
-export const loadNeighbourhoods = () => async (dispatch) => {
-   try {
-      const res = await api.get("/neighbourhood");
-      dispatch({
-         type: NEIGHBOURHOODS_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      dispatch({
-         type: NEIGHBOURHOODS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-      window.scroll(0, 0);
-   }
-};
-
-export const loadTownNeighbourhoods = (town_id) => async (dispatch) => {
+export const loadNeighbourhoods = (town_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
+
    try {
-      const res = await api.get(`/neighbourhood/town/${town_id}`);
+      const res = await api.get(
+         `/neighbourhood${town_id ? `/town/${town_id}` : ""}`
+      );
       dispatch({
          type: NEIGHBOURHOODS_LOADED,
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: NEIGHBOURHOODS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-      window.scroll(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setNeightbourhoodError(NEIGHBOURHOODS_ERROR, err.response));
+         if (!town_id) window.scroll(0, 0);
+      } else error = true;
    }
 
-   dispatch(updateLoadingSpinner(false));
+   if (!error) dispatch(updateLoadingSpinner(false));
 };
 
 export const updateNeighbourhoods = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       const res = await api.post("/neighbourhood", formData);
@@ -67,25 +48,21 @@ export const updateNeighbourhoods = (formData) => async (dispatch) => {
 
       dispatch(setAlert("Barrios Modificados", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: NEIGHBOURHOODS_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setNeightbourhoodError(NEIGHBOURHOOD_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scroll(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scroll(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const deleteNeighbourhood = (toDelete) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       await api.delete(`/neighbourhood/${toDelete}`);
@@ -97,25 +74,31 @@ export const deleteNeighbourhood = (toDelete) => async (dispatch) => {
 
       dispatch(setAlert("Barrio Eliminado", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: NEIGHBOURHOODS_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setNeightbourhoodError(NEIGHBOURHOOD_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const clearNeighbourhoods = () => (dispatch) => {
    dispatch({
       type: NEIGHBOURHOODS_CLEARED,
+   });
+};
+
+const setNeightbourhoodError = (type, response) => (dispatch) => {
+   dispatch({
+      type: type,
+      payload: {
+         type: response.statusText,
+         status: response.status,
+         msg: response.data.msg,
+      },
    });
 };

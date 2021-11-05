@@ -6,6 +6,7 @@ import {
    LOGOUT,
    STARTLOGOUT,
    FINISHLOGOUT,
+   USERAUTH_UPDATED,
 } from "../actions/types";
 
 const initialState = {
@@ -19,6 +20,7 @@ export default function (state = initialState, action) {
    const { type, payload } = action;
 
    switch (type) {
+      case USERAUTH_UPDATED:
       case USERAUTH_LOADED:
          return {
             ...state,

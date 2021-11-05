@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import { withRouter } from "react-router-dom";
-import PropTypes from "prop-types";
 
 import {
    loadPosts,
    deletePost,
-   changeUnseenPosts,
    getUnseenPosts,
 } from "../../../../actions/post";
 import { loadClass } from "../../../../actions/class";
 
-import Loading from "../../../modal/Loading";
 import PopUp from "../../../modal/PopUp";
 import PostForm from "./sharedComp/PostForm";
 import Post from "./sharedComp/Post";
@@ -21,23 +17,20 @@ const Chat = ({
    loadClass,
    loadPosts,
    deletePost,
-   changeUnseenPosts,
    getUnseenPosts,
    auth: { userLogged },
    posts: { posts, loading },
-   classes: { classInfo, loading: loadingClass },
+   classes: { classInfo, loadingClass },
 }) => {
+   const isAdmin =
+      userLogged.type === "teacher" || userLogged.type === "admin&teacher";
+
    useEffect(() => {
       if (loading) {
          loadPosts(match.params.class_id);
          if (loadingClass) loadClass(match.params.class_id);
       } else {
-         changeUnseenPosts(0);
-         if (
-            userLogged.type === "teacher" ||
-            userLogged.type === "admin&teacher"
-         )
-            getUnseenPosts();
+         if (isAdmin) getUnseenPosts();
       }
    }, [
       loadPosts,
@@ -45,34 +38,31 @@ const Chat = ({
       match.params.class_id,
       loading,
       loadingClass,
-      changeUnseenPosts,
-      userLogged,
+      isAdmin,
       getUnseenPosts,
    ]);
 
-   const [otherValues, setOtherValues] = useState({
+   const [adminValues, setAdminValues] = useState({
       toggleModal: false,
       toDelete: "",
    });
 
-   const { toggleModal, toDelete } = otherValues;
-
-   const setToggle = (post_id) => {
-      setOtherValues({
-         toDelete: post_id ? post_id : "",
-         toggleModal: true,
-      });
-   };
+   const { toggleModal, toDelete } = adminValues;
 
    return (
       <>
          <h1 className="py-4">Posteos Grupales</h1>
 
-         {!loadingClass && !loading ? (
+         {!loadingClass && (
             <>
                <PopUp
                   toggleModal={toggleModal}
-                  setToggleModal={setToggle}
+                  setToggleModal={() =>
+                     setAdminValues((prev) => ({
+                        ...prev,
+                        toggleModal: !toggleModal,
+                     }))
+                  }
                   confirm={() => deletePost(toDelete)}
                   text="¿Está seguro que desea eliminar la publicación?"
                />
@@ -81,33 +71,30 @@ const Chat = ({
                   {classInfo.teacher.lastname}, {classInfo.teacher.name}
                </p>
                <PostForm class_id={classInfo._id} />
-
-               {posts.length > 0 ? (
-                  posts.map((post) => (
-                     <Post post={post} key={post._id} setToggle={setToggle} />
-                  ))
-               ) : (
-                  <p className="heading-tertiary text-center my-4">
-                     No hay ninguna publicación hasta el momento
-                  </p>
-               )}
             </>
+         )}
+
+         {!loading && posts.length > 0 ? (
+            posts.map((post) => (
+               <Post
+                  post={post}
+                  key={post._id}
+                  setToggle={(toDelete) =>
+                     setAdminValues((prev) => ({
+                        ...prev,
+                        toggleModal: !toggleModal,
+                        toDelete,
+                     }))
+                  }
+               />
+            ))
          ) : (
-            <Loading />
+            <p className="heading-tertiary text-center my-4">
+               No hay ninguna publicación hasta el momento
+            </p>
          )}
       </>
    );
-};
-
-Chat.propTypes = {
-   posts: PropTypes.object.isRequired,
-   classes: PropTypes.object.isRequired,
-   auth: PropTypes.object.isRequired,
-   loadClass: PropTypes.func.isRequired,
-   loadPosts: PropTypes.func.isRequired,
-   deletePost: PropTypes.func.isRequired,
-   getUnseenPosts: PropTypes.func.isRequired,
-   changeUnseenPosts: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -121,5 +108,4 @@ export default connect(mapStateToProps, {
    loadClass,
    deletePost,
    getUnseenPosts,
-   changeUnseenPosts,
-})(withRouter(Chat));
+})(Chat);

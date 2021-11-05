@@ -1,6 +1,5 @@
 import {
    GRADES_LOADED,
-   STUDENTGRADES_LOADED,
    GRADETYPES_LOADED,
    GRADES_UPDATED,
    NEWGRADE_REGISTERED,
@@ -15,16 +14,7 @@ import {
 
 const initialState = {
    loading: true,
-   grades: {
-      header: [],
-      students: [],
-      period: [],
-   },
-   studentGrades: {
-      headers: [],
-      rows: [],
-   },
-   loadingStudentGrades: true,
+   grades: null,
    gradeTypes: [],
    loadingGT: true,
    error: {},
@@ -41,12 +31,6 @@ export default function (state = initialState, action) {
             grades: payload,
             loading: false,
             error: {},
-         };
-      case STUDENTGRADES_LOADED:
-         return {
-            ...state,
-            studentGrades: payload,
-            loadingStudentGrades: false,
          };
       case GRADETYPES_LOADED:
       case GRADETYPES_UPDATED:
@@ -67,18 +51,17 @@ export default function (state = initialState, action) {
             loadingGT: false,
          };
       case GRADES_CLEARED:
-         return initialState;
+         return {
+            ...state,
+            grades: null,
+            loading: true,
+         };
       case GRADETYPES_CLEARED:
          return { ...state, gradeTypes: [], loadingGT: true };
       case GRADES_ERROR:
          return {
             ...state,
             loading: false,
-            studentGrades: {
-               headers: [],
-               rows: [],
-            },
-            loadingStudentGrades: false,
             error: payload,
          };
       case GRADETYPE_ERROR:

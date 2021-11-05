@@ -7,7 +7,6 @@ import {
    LIKES_UPDATED,
    POST_SEEN,
    UNSEENPOSTS_CHANGED,
-   ALLUNSEENPOSTS_CHANGED,
    POSTS_CLEARED,
    POST_ERROR,
 } from "../actions/types";
@@ -15,8 +14,7 @@ import {
 const initialState = {
    posts: [],
    loading: true,
-   unseenPosts: 0,
-   allUnseenPosts: 0,
+   unseenPosts: "",
    error: {},
 };
 
@@ -77,11 +75,6 @@ export default function (state = initialState, action) {
             ...state,
             unseenPosts: payload,
          };
-      case ALLUNSEENPOSTS_CHANGED:
-         return {
-            ...state,
-            allUnseenPosts: payload,
-         };
       case POSTS_CLEARED:
          return initialState;
       case POST_ERROR:
@@ -89,6 +82,7 @@ export default function (state = initialState, action) {
             ...state,
             error: payload,
             loading: false,
+            unseenPosts: 0,
          };
       default:
          return state;

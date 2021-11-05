@@ -1,18 +1,23 @@
 @import "../../../../../style/abstract.scss";
 
 .section-canada {
-   padding: 8rem 3rem;
+   padding: 12rem 3rem 15rem;
 
    @include respond(phone) {
-      margin-bottom: 6rem;
+      margin-bottom: 2rem;
    }
 
    h2 {
-      padding-bottom: 7rem;
+      margin-bottom: 15rem;
+
+      @include respond(phone) {
+         margin-bottom: 5rem;
+      }
    }
 
    & > .row {
-      justify-content: space-around;
+      justify-content: space-between;
+      max-width: 130rem;
    }
 
    &-text {

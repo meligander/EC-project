@@ -1,0 +1,17 @@
+@import "../../../../style/abstract.scss";
+
+.login {
+   align-self: center;
+   margin-top: -2rem;
+   width: 70%;
+
+   @include respond(tab-port) {
+      width: 80%;
+   }
+   @include respond(phone) {
+      width: 85%;
+   }
+   @include respond(small-phone) {
+      width: 95%;
+   }
+}

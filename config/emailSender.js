@@ -41,10 +41,16 @@ const sendEmail = (user_email, subject, text) => {
       ],
    };
 
-   transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-         console.error(error.message);
-      } else console.log(info.response);
+   return new Promise((resolve, reject) => {
+      transporter.sendMail(mailOptions, (error, info) => {
+         if (error) {
+            console.error(error.message);
+            reject("Something went wrong...");
+         } else {
+            console.log("Email sent: " + info.response);
+            resolve(true);
+         }
+      });
    });
 };
 

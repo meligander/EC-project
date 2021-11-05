@@ -1,13 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
-import PropTypes from "prop-types";
+import { FaTrashAlt, FaPlus } from "react-icons/fa";
 
 const StudentTable = ({
    userSearchType = "student",
-   clearAll = true,
    actionWChild,
-   loadingUsers,
    users,
    type,
    clearProfile,
@@ -31,8 +29,7 @@ const StudentTable = ({
             </tr>
          </thead>
          <tbody>
-            {(!loadingUsers || users.length > 0) &&
-               userSearchType === "student" &&
+            {userSearchType === "student" &&
                users.map((user) => {
                   let years = "";
                   if (type !== "class-students")
@@ -46,7 +43,7 @@ const StudentTable = ({
                               to={`/dashboard/${user._id}`}
                               onClick={() => {
                                  window.scroll(0, 0);
-                                 clearProfile(clearAll);
+                                 clearProfile();
                               }}
                            >
                               {user.lastname}, {user.name}
@@ -75,13 +72,11 @@ const StudentTable = ({
                                     actionWChild(user);
                                  }}
                               >
-                                 <i
-                                    className={
-                                       type === "add-child"
-                                          ? "fas fa-plus"
-                                          : "far fa-trash-alt"
-                                    }
-                                 ></i>
+                                 {type === "add-child" ? (
+                                    <FaPlus />
+                                 ) : (
+                                    <FaTrashAlt />
+                                 )}
                                  &nbsp;{" "}
                                  {type === "add-child" ? "Agregar" : "Eliminar"}
                               </button>
@@ -93,16 +88,6 @@ const StudentTable = ({
          </tbody>
       </table>
    );
-};
-
-StudentTable.propTypes = {
-   users: PropTypes.array,
-   loadingUsers: PropTypes.bool.isRequired,
-   type: PropTypes.string.isRequired,
-   clearProfile: PropTypes.func.isRequired,
-   userSearchType: PropTypes.string,
-   clearAll: PropTypes.bool,
-   actionWChild: PropTypes.func,
 };
 
 export default StudentTable;

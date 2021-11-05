@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import PropTypes from "prop-types";
+import { ImFilePdf } from "react-icons/im";
+import { FaPlus } from "react-icons/fa";
+import { BiFilterAlt } from "react-icons/bi";
 
 import {
    loadClasses,
@@ -17,13 +19,12 @@ import {
 } from "../../../../../../actions/user";
 
 import ClassesTable from "../../../sharedComp/tables/ClassesTable";
-import Loading from "../../../../../modal/Loading";
 
 const Classes = ({
    classes: { classes, loadingClasses },
-   users,
+   users: { users, loading: loadingUsers },
    auth: { userLogged },
-   categories,
+   categories: { categories, loading: loadingCategories },
    loadClasses,
    loadUsers,
    loadCategories,
@@ -33,15 +34,6 @@ const Classes = ({
    clearProfile,
    clearSearch,
 }) => {
-   const isTeacher = userLogged.type === "teacher";
-
-   const [otherValues, setOtherValues] = useState({
-      condition: true,
-      oneLoad: true,
-   });
-
-   const { condition, oneLoad } = otherValues;
-
    const [filterForm, setfilterForm] = useState({
       teacher: "",
       category: "",
@@ -50,39 +42,19 @@ const Classes = ({
    const { teacher, category } = filterForm;
 
    useEffect(() => {
-      if (isTeacher) {
-         setOtherValues((prev) => ({
-            ...prev,
-            condition: !loadingClasses,
-         }));
-      } else {
-         if (oneLoad) {
-            if (loadingClasses) loadClasses({});
-            loadUsers({ type: "teacher", active: true });
-            loadCategories();
-
-            setOtherValues((prev) => ({
-               ...prev,
-               oneLoad: false,
-            }));
-         } else {
-            setOtherValues((prev) => ({
-               ...prev,
-               condition:
-                  !loadingClasses && !categories.loading && !users.loadingUsers,
-            }));
-         }
+      if (userLogged.type !== "teacher") {
+         if (loadingUsers) loadUsers({ type: "teacher", active: true });
+         if (loadingCategories) loadCategories();
       }
+      if (loadingClasses) loadClasses({});
    }, [
       loadUsers,
       loadCategories,
       loadClasses,
       userLogged,
-      isTeacher,
-      oneLoad,
       loadingClasses,
-      categories.loading,
-      users.loadingUsers,
+      loadingCategories,
+      loadingUsers,
    ]);
 
    const onChange = (e) => {
@@ -94,141 +66,121 @@ const Classes = ({
 
    return (
       <>
-         {condition ? (
-            <>
-               <h1>Clases</h1>
-               {!isTeacher && (
-                  <form
-                     className="form"
-                     onSubmit={(e) => {
-                        e.preventDefault();
-                        loadClasses(filterForm);
-                     }}
-                  >
-                     <div className="form-group">
-                        <select
-                           id="teacher"
-                           className="form-input"
-                           name="teacher"
-                           onChange={onChange}
-                           value={teacher}
-                        >
-                           <option value="">* Seleccione Profesor</option>
-                           {users.users.length > 0 &&
-                              users.users.map((user) => (
-                                 <option key={user._id} value={user._id}>
-                                    {user.lastname + " " + user.name}
-                                 </option>
-                              ))}
-                        </select>
-                        <label
-                           htmlFor="teacher"
-                           className={`form-label ${
-                              teacher === "" ? "lbl" : ""
-                           }`}
-                        >
-                           Profesor
-                        </label>
-                     </div>
-                     <div className="form-group">
-                        <select
-                           id="category"
-                           className="form-input"
-                           name="category"
-                           onChange={onChange}
-                           value={category}
-                        >
-                           <option value="">* Seleccione Categoría</option>
-                           {categories.categories.map((category) => (
-                              <React.Fragment key={category._id}>
-                                 {category.name !== "Inscripción" && (
-                                    <option value={category._id}>
-                                       {category.name}
-                                    </option>
-                                 )}
-                              </React.Fragment>
+         <h1>Clases</h1>
+         {userLogged.type !== "teacher" && (
+            <form
+               className="form"
+               onSubmit={(e) => {
+                  e.preventDefault();
+                  loadClasses(filterForm);
+               }}
+            >
+               {!loadingUsers && (
+                  <div className="form-group">
+                     <select
+                        id="teacher"
+                        className="form-input"
+                        name="teacher"
+                        onChange={onChange}
+                        value={teacher}
+                     >
+                        <option value="">* Seleccione Profesor</option>
+                        {users.users.length > 0 &&
+                           users.users.map((user) => (
+                              <option key={user._id} value={user._id}>
+                                 {user.lastname + " " + user.name}
+                              </option>
                            ))}
-                        </select>
-                        <label
-                           htmlFor="category"
-                           className={`form-label ${
-                              category === "" ? "lbl" : ""
-                           }`}
-                        >
-                           Categoría
-                        </label>
-                     </div>
-                     <div className="btn-right">
-                        <button type="submit" className="btn btn-light">
-                           <i className="fas fa-filter"></i>&nbsp; Buscar
-                        </button>
-                     </div>
-                  </form>
+                     </select>
+                     <label
+                        htmlFor="teacher"
+                        className={`form-label ${teacher === "" ? "lbl" : ""}`}
+                     >
+                        Profesor
+                     </label>
+                  </div>
+               )}
+               {!loadingCategories && (
+                  <div className="form-group">
+                     <select
+                        id="category"
+                        className="form-input"
+                        name="category"
+                        onChange={onChange}
+                        value={category}
+                     >
+                        <option value="">* Seleccione Categoría</option>
+                        {categories.categories.map((category) => (
+                           <React.Fragment key={category._id}>
+                              {category.name !== "Inscripción" && (
+                                 <option value={category._id}>
+                                    {category.name}
+                                 </option>
+                              )}
+                           </React.Fragment>
+                        ))}
+                     </select>
+                     <label
+                        htmlFor="category"
+                        className={`form-label ${category === "" ? "lbl" : ""}`}
+                     >
+                        Categoría
+                     </label>
+                  </div>
                )}
 
-               <div className="pt-4">
-                  <ClassesTable
-                     classes={classes ? classes : []}
-                     all={!isTeacher}
-                     clearClass={clearClass}
-                     clearClasses={clearClasses}
-                     clearProfile={clearProfile}
-                  />
-               </div>
-
                <div className="btn-right">
-                  {!isTeacher && (
-                     <Link
-                        to={users.users.length !== 0 ? "/register-class" : "#"}
-                        onClick={() => {
-                           window.scroll(0, 0);
-                           clearClass();
-                           clearSearch();
-                        }}
-                        className={`btn ${
-                           users.users.length !== 0 ? "btn-dark" : "btn-black"
-                        }`}
-                     >
-                        <i className="fas fa-plus"></i>&nbsp; Nueva Clase
-                     </Link>
-                  )}
-                  <div className="tooltip">
-                     <button
-                        type="button"
-                        className="btn btn-secondary tooltip"
-                        onClick={(e) => {
-                           e.preventDefault();
-                           classPDF(classes, "classes");
-                        }}
-                     >
-                        <i className="fas fa-file-pdf"></i>
-                     </button>
-                     <span className="tooltiptext">
-                        PDF con clases y su info
-                     </span>
-                  </div>
+                  <button type="submit" className="btn btn-light">
+                     <BiFilterAlt />
+                     &nbsp;Buscar
+                  </button>
                </div>
-            </>
-         ) : (
-            <Loading />
+            </form>
          )}
+
+         <div className="pt-4">
+            <ClassesTable
+               classes={classes ? classes : []}
+               all={userLogged.type !== "teacher"}
+               clearClass={clearClass}
+               clearClasses={clearClasses}
+               clearProfile={clearProfile}
+            />
+         </div>
+
+         <div className="btn-right">
+            {userLogged.type !== "teacher" && (
+               <Link
+                  to={users.length !== 0 ? "/register-class" : "#"}
+                  onClick={() => {
+                     window.scroll(0, 0);
+                     clearClass();
+                     clearSearch();
+                  }}
+                  className={`btn ${
+                     users.length !== 0 ? "btn-dark" : "btn-black"
+                  }`}
+               >
+                  <FaPlus />
+                  &nbsp;Nueva Clase
+               </Link>
+            )}
+            <div className="tooltip">
+               <button
+                  type="button"
+                  className="btn btn-secondary tooltip"
+                  onClick={(e) => {
+                     e.preventDefault();
+                     classPDF(classes, "classes");
+                  }}
+               >
+                  <ImFilePdf />
+               </button>
+               <span className="tooltiptext">PDF con clases y su info</span>
+            </div>
+         </div>
       </>
    );
-};
-
-Classes.propTypes = {
-   classes: PropTypes.object.isRequired,
-   users: PropTypes.object.isRequired,
-   auth: PropTypes.object.isRequired,
-   categories: PropTypes.object.isRequired,
-   loadClasses: PropTypes.func.isRequired,
-   loadUsers: PropTypes.func.isRequired,
-   loadCategories: PropTypes.func.isRequired,
-   classPDF: PropTypes.func.isRequired,
-   clearProfile: PropTypes.func.isRequired,
-   clearClass: PropTypes.func.isRequired,
-   clearClasses: PropTypes.func.isRequired,
-   clearSearch: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({

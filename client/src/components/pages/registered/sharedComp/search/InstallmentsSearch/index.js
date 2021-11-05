@@ -1,20 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState /* useEffect */ } from "react";
 import { connect } from "react-redux";
 import { withRouter, Link } from "react-router-dom";
-import PropTypes from "prop-types";
+import { FaTimes } from "react-icons/fa";
 
 import { setAlert } from "../../../../../../actions/alert";
 import {
-   loadStudentInstallments,
-   clearUserInstallments,
-   clearInstallment,
-   addInstallment,
+   loadInstallments,
+   clearInstallments,
+   loadInstallment,
 } from "../../../../../../actions/installment";
-import {
-   clearSearch,
-   clearProfile,
-   clearUser,
-} from "../../../../../../actions/user";
+import { addDetail } from "../../../../../../actions/invoice";
+import { clearProfile, clearUser } from "../../../../../../actions/user";
 
 import StudentSearch from "../StudentSearch";
 import InstallmentsTable from "../../tables/InstallmentsTable";
@@ -24,32 +20,27 @@ import "./style.scss";
 const InstallmentsSearch = ({
    history,
    location,
-   installments: { usersInstallments, loadingUsersInstallments, installments },
-   loadStudentInstallments,
-   changeStudent,
-   clearUserInstallments,
-   clearInstallment,
-   clearSearch,
+   installments: { loading, installments },
+   invoices: { invoice },
+   loadInstallments,
+   /* changeStudent, */
+   clearInstallments,
+   loadInstallment,
    clearProfile,
-   clearUser,
-   addInstallment,
-   student,
-   setAlert,
+   addDetail,
+   /* student, */
 }) => {
-   const [otherValues, setOtherValues] = useState({
-      selectedStudent: {
-         _id: "",
-         name: "",
-      },
-      selectedItem: { _id: 0 },
+   const [adminValues, setAdminValues] = useState({
+      selectedStudent: {},
+      selectedItem: {},
       block: false,
    });
 
-   const { selectedStudent, selectedItem, block } = otherValues;
+   const { selectedStudent, selectedItem, block } = adminValues;
 
-   useEffect(() => {
+   /* useEffect(() => {
       if (student) {
-         setOtherValues((prev) => ({
+         setAdminValues((prev) => ({
             ...prev,
             selectedStudent: {
                _id: student._id,
@@ -58,91 +49,18 @@ const InstallmentsSearch = ({
             block: true,
          }));
       }
-   }, [student]);
+   }, [student]); */
 
-   const invoice = location.pathname === "/invoice-generation";
-
-   const selectStudent = (user) => {
-      const student = {
-         _id: user._id,
-         name: user.lastname + ", " + user.name,
-      };
-      setOtherValues({
-         ...otherValues,
-         selectedStudent: student,
-      });
-      if (changeStudent) changeStudent(student);
-   };
-
-   const selectItem = (item) => {
-      if (item._id !== "")
-         setOtherValues({
-            ...otherValues,
-            selectedItem: item,
-         });
-      else
-         setOtherValues({
-            ...otherValues,
-            selectedItem: { _id: 0 },
-            year: "",
-            month: "",
-         });
-   };
-
-   const searchInstallments = () => {
-      if (!selectedStudent._id)
-         setAlert("Debe seleccionar un usuario primero", "danger", "3");
-      else {
-         loadStudentInstallments(selectedStudent._id, true);
-         clearSearch();
-         setOtherValues({
-            ...otherValues,
-            block: true,
-         });
-      }
-   };
+   const newInvoice = location.pathname === "/invoice-generation";
 
    const restore = () => {
-      setOtherValues({
-         ...otherValues,
+      setAdminValues((prev) => ({
+         ...prev,
          block: false,
-         selectedStudent: {
-            _id: "",
-            name: "",
-         },
-      });
-      clearUser();
-      clearUserInstallments();
-      if (!invoice) history.push("/installments/0");
-   };
-
-   //Inside Installment for edit
-   const seeInstallmentInfo = () => {
-      if (selectedItem._id === 0) {
-         setAlert("Debe seleccionar una cuota primero", "danger", "4");
-      } else {
-         history.push(`/edit-installment/1/${selectedItem._id}`);
-         clearInstallment();
-      }
-   };
-
-   //Inside Invoice to add them
-   const addToList = () => {
-      if (selectedItem._id === 0) {
-         setAlert("No se ha seleccionado ninguna cuota", "danger", "4");
-      } else {
-         const pass = installments.every(
-            (item) => item._id !== selectedItem._id
-         );
-
-         if (pass) {
-            setAlert("Cuota agregada correctamente", "success", "4");
-            addInstallment(selectedItem);
-            setOtherValues({ ...otherValues, selectedItem: { _id: 0 } });
-         } else {
-            setAlert("Ya se ha agregado dicha cuota", "danger", "4");
-         }
-      }
+         selectedStudent: {},
+      }));
+      clearInstallments();
+      if (!newInvoice) history.push("/installments/0");
    };
 
    return (
@@ -150,8 +68,27 @@ const InstallmentsSearch = ({
          <div className="form">
             <StudentSearch
                selectedStudent={selectedStudent}
-               actionForSelected={searchInstallments}
-               selectStudent={selectStudent}
+               actionForSelected={async () => {
+                  const answer = await loadInstallments(
+                     selectedStudent,
+                     "student"
+                  );
+                  if (answer)
+                     setAdminValues((prev) => ({
+                        ...prev,
+                        block: true,
+                     }));
+               }}
+               selectStudent={(user) => {
+                  setAdminValues((prev) => ({
+                     ...prev,
+                     selectedStudent: {
+                        _id: user._id,
+                        name: user.lastname + ", " + user.name,
+                     },
+                  }));
+                  /* if (changeStudent) changeStudent(student); */
+               }}
                typeSearch={"installment"}
                block={block}
             />
@@ -170,7 +107,7 @@ const InstallmentsSearch = ({
                   {selectedStudent.name}
                </Link>
             </p>
-            {selectedStudent._id !== "" && (
+            {selectedStudent._id && (
                <button
                   className="btn-cancel"
                   type="button"
@@ -179,56 +116,57 @@ const InstallmentsSearch = ({
                      restore();
                   }}
                >
-                  <i className="fas fa-times"></i>
+                  <FaTimes />
                </button>
             )}
          </div>
-         {!loadingUsersInstallments && usersInstallments.rows.length > 0 ? (
-            <InstallmentsTable
-               installments={usersInstallments}
-               forAdmin={true}
-               selectedItem={selectedItem}
-               student={selectedStudent._id}
-               selectItem={selectItem}
-               actionForSelected={invoice ? addToList : seeInstallmentInfo}
-            />
-         ) : (
-            !loadingUsersInstallments &&
-            usersInstallments.rows.length === 0 && (
-               <p className="heading-tertiary text-center my-4">
-                  El alumno no tiene deudas hasta el momento
-               </p>
-            )
+         {!loading && (
+            <>
+               {installments.rows.length > 0 ? (
+                  <InstallmentsTable
+                     installments={installments}
+                     forAdmin={true}
+                     selectedItem={selectedItem}
+                     student={selectedStudent._id}
+                     selectItem={(item) =>
+                        setAdminValues((prev) => ({
+                           ...prev,
+                           selectedItem: item._id !== "" ? item : {},
+                        }))
+                     }
+                     actionForSelected={() => {
+                        if (newInvoice) {
+                           addDetail(selectedItem, invoice && invoice.details);
+
+                           setAdminValues((prev) => ({
+                              ...prev,
+                              selectedItem: {},
+                           }));
+                        } else loadInstallment(selectedItem._id, true);
+                     }}
+                  />
+               ) : (
+                  <p className="heading-tertiary text-center my-4">
+                     El alumno no tiene deudas hasta el momento
+                  </p>
+               )}
+            </>
          )}
       </div>
    );
 };
 
-InstallmentsSearch.propTypes = {
-   installments: PropTypes.object.isRequired,
-   student: PropTypes.object,
-   loadStudentInstallments: PropTypes.func.isRequired,
-   setAlert: PropTypes.func.isRequired,
-   addInstallment: PropTypes.func.isRequired,
-   clearUserInstallments: PropTypes.func.isRequired,
-   clearInstallment: PropTypes.func.isRequired,
-   clearSearch: PropTypes.func.isRequired,
-   clearProfile: PropTypes.func.isRequired,
-   clearUser: PropTypes.func.isRequired,
-   changeStudent: PropTypes.func,
-};
-
 const mapStateToProps = (state) => ({
    installments: state.installments,
+   invoices: state.invoices,
 });
 
 export default connect(mapStateToProps, {
-   loadStudentInstallments,
+   loadInstallments,
    setAlert,
-   clearUserInstallments,
-   clearInstallment,
-   clearSearch,
+   clearInstallments,
+   loadInstallment,
    clearProfile,
    clearUser,
-   addInstallment,
+   addDetail,
 })(withRouter(InstallmentsSearch));

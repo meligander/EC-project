@@ -27,7 +27,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
       res.json(tableGrades);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -49,7 +49,7 @@ router.get("/category/:id", auth, async (req, res) => {
       res.json(gradetypes);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -117,7 +117,7 @@ router.post("/", [auth, adminAuth], async (req, res) => {
       res.json(newGradeTypes);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -132,7 +132,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       res.json({ msg: "Grade Type Deleted" });
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -143,7 +143,7 @@ const buildTable = async (gradetypes) => {
       categories = await Category.find();
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 
    let rows = [];

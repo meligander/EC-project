@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import moment from "moment";
 import { withRouter } from "react-router-dom";
-import PropTypes from "prop-types";
+import { FaEdit } from "react-icons/fa";
+import { FiSave } from "react-icons/fi";
 
 import {
    registerUpdateClass,
@@ -14,7 +15,6 @@ import PopUp from "../../../../../../../modal/PopUp";
 import StudentTable from "../../../../../sharedComp/tables/StudentTable";
 
 const NewClassTab = ({
-   history,
    location,
    registerUpdateClass,
    removeStudent,
@@ -26,7 +26,7 @@ const NewClassTab = ({
 
    const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 
-   const [otherValues, setOtherValues] = useState({
+   const [adminValues, setAdminValues] = useState({
       toggleModal: false,
       sameSchedule: true,
    });
@@ -42,7 +42,7 @@ const NewClassTab = ({
       hourout2: "",
    });
 
-   const { toggleModal, sameSchedule } = otherValues;
+   const { toggleModal, sameSchedule } = adminValues;
 
    const {
       teacher,
@@ -63,8 +63,8 @@ const NewClassTab = ({
          const timeout2 = moment(classInfo.hourout2).utc().format("HH:mm");
 
          if (timein1 === timein2 && timeout1 === timeout2)
-            setOtherValues((prev) => ({ ...prev, sameSchedule: true }));
-         else setOtherValues((prev) => ({ ...prev, sameSchedule: false }));
+            setAdminValues((prev) => ({ ...prev, sameSchedule: true }));
+         else setAdminValues((prev) => ({ ...prev, sameSchedule: false }));
 
          setFormData((prev) => ({
             ...prev,
@@ -100,14 +100,10 @@ const NewClassTab = ({
    };
 
    const onChangeCheckbox = () => {
-      setOtherValues((prev) => ({
+      setAdminValues((prev) => ({
          ...prev,
          sameSchedule: !sameSchedule,
       }));
-   };
-
-   const setToggle = () => {
-      setOtherValues({ ...otherValues, toggleModal: !toggleModal });
    };
 
    const confirm = () => {
@@ -117,7 +113,6 @@ const NewClassTab = ({
             category: classInfo.category._id,
             students: classInfo.students,
          },
-         history,
          !registerClass && classInfo._id
       );
    };
@@ -126,7 +121,12 @@ const NewClassTab = ({
       <>
          <PopUp
             toggleModal={toggleModal}
-            setToggleModal={setToggle}
+            setToggleModal={() =>
+               setAdminValues((prev) => ({
+                  ...prev,
+                  toggleModal: !toggleModal,
+               }))
+            }
             confirm={confirm}
             text="¿Está seguro que los datos son correctos?"
          />
@@ -134,7 +134,10 @@ const NewClassTab = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               setToggle();
+               setAdminValues((prev) => ({
+                  ...prev,
+                  toggleModal: !toggleModal,
+               }));
             }}
          >
             <div className="form-group my-3 heading-tertiary">
@@ -317,27 +320,15 @@ const NewClassTab = ({
                </p>
             )}
 
-            <div className="btn-ctr">
+            <div className="btn-center">
                <button className="btn btn-primary" type="submit">
-                  {!registerClass ? (
-                     <i className="fas fa-edit"></i>
-                  ) : (
-                     <i className="far fa-save"></i>
-                  )}
+                  {!registerClass ? <FaEdit /> : <FiSave />}
                   &nbsp; {!registerClass ? "Guardar Cambios" : "Registrar"}
                </button>
             </div>
          </form>
       </>
    );
-};
-
-NewClassTab.propTypes = {
-   users: PropTypes.object.isRequired,
-   classes: PropTypes.object.isRequired,
-   registerUpdateClass: PropTypes.func.isRequired,
-   removeStudent: PropTypes.func.isRequired,
-   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({

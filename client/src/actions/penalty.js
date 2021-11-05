@@ -18,20 +18,16 @@ export const loadPenalty = () => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: PENALTY_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-      window.scrollTo(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setPenaltiesError(PENALTY_ERROR, err.response));
+         window.scrollTo(0, 0);
+      }
    }
 };
 
 export const updatePenalty = (penalty) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       await api.post("/penalty", penalty);
@@ -41,36 +37,36 @@ export const updatePenalty = (penalty) => async (dispatch) => {
       dispatch(clearPenalty());
       dispatch(setAlert("Recargo Modificado", "success", "2"));
    } catch (err) {
-      if (err.response.data.errors) {
-         const errors = err.response.data.errors;
-         errors.forEach((error) => {
-            dispatch(setAlert(error.msg, "danger", "2"));
-         });
-         dispatch({
-            type: PENALTY_ERROR,
-            payload: errors,
-         });
-      } else {
-         const msg = err.response.data.msg;
-         const type = err.response.statusText;
-         dispatch({
-            type: PENALTY_ERROR,
-            payload: {
-               type,
-               status: err.response.status,
-               msg,
-            },
-         });
-         dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      }
+      if (err.response.status !== 401) {
+         dispatch(setPenaltiesError(PENALTY_ERROR, err.response));
+
+         if (err.response.data.errors)
+            err.response.data.errors.forEach((error) => {
+               dispatch(setAlert(error.msg, "danger", "2"));
+            });
+         else dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const clearPenalty = () => (dispatch) => {
    dispatch({
       type: PENALTY_CLEARED,
+   });
+};
+
+const setPenaltiesError = (type, response) => (dispatch) => {
+   dispatch({
+      type: type,
+      payload: {
+         type: response.statusText,
+         status: response.status,
+         msg: response.data.msg,
+      },
    });
 };

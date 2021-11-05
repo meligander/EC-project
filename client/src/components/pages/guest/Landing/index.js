@@ -1,11 +1,15 @@
 import React from "react";
+import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
 import "./style.scss";
 
-const Landing = () => {
+const Landing = ({ mixvalues: { footer, navbar } }) => {
    return (
-      <section className="landing">
+      <section
+         className="landing"
+         style={{ minHeight: `calc(100vh - ${footer}px - ${navbar}px)` }}
+      >
          <div className="main-text">
             <h1 className="heading-primary fancy-heading">
                Villa de Merlo English Centre
@@ -14,7 +18,7 @@ const Landing = () => {
             <p className="heading-tertiary">
                Instituto de inglés para todas las edades
             </p>
-            <div className="btn-ctr mt-5">
+            <div className="btn-center mt-5">
                <Link to="/login" className="btn btn-primary">
                   Iniciar Sesión
                </Link>
@@ -27,4 +31,8 @@ const Landing = () => {
    );
 };
 
-export default Landing;
+const mapStateToProps = (state) => ({
+   mixvalues: state.mixvalues,
+});
+
+export default connect(mapStateToProps)(Landing);

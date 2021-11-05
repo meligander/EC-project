@@ -1,18 +1,25 @@
-import React, { Fragment } from "react";
+import React, { useRef, useEffect } from "react";
+import { connect } from "react-redux";
+
+import { setFooterHeight } from "../../../actions/mixvalues";
 
 import "./style.scss";
 
-const Footer = () => {
+const Footer = ({ setFooterHeight }) => {
+   const ref = useRef();
+
+   useEffect(() => {
+      setFooterHeight(ref.current.offsetHeight);
+   }, [setFooterHeight]);
+
    return (
-      <Fragment>
-         <footer className="footer bg-primary">
-            <p>
-               <span className="hide-sm">Villa de Merlo</span> English Centre
-               Copyright &copy;{new Date().getFullYear()}
-            </p>
-         </footer>
-      </Fragment>
+      <footer className="footer bg-primary" ref={ref}>
+         <p>
+            <span className="hide-sm">Villa de Merlo</span> English Centre
+            Copyright &copy;{new Date().getFullYear()}
+         </p>
+      </footer>
    );
 };
 
-export default Footer;
+export default connect(null, { setFooterHeight })(Footer);

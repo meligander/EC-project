@@ -55,13 +55,11 @@ router.get("/", async (req, res) => {
                case "student":
                   search = false;
                   const classroom = req.query.classroom;
+
                   if (req.query.category) {
                      const date = new Date();
                      const enrollments = await Enrollment.find({
-                        ...(classroom && {
-                           "classroom._id":
-                              classroom === "null" ? null : classroom,
-                        }),
+                        "classroom._id": null,
                         category: req.query.category,
                         year: date.getFullYear(),
                      })
@@ -76,37 +74,22 @@ router.get("/", async (req, res) => {
                            select: "name",
                         });
 
-                     for (let x = 0; x < enrollments.length; x++) {
-                        let user = {};
-                        if (enrollments[x].student) {
-                           user = {
-                              _id: enrollments[x].student._id,
-                              type: req.query.type,
-                              dni: enrollments[x].student.dni,
-                              name: enrollments[x].student.name,
-                              lastname: enrollments[x].student.lastname,
-                              studentnumber:
-                                 enrollments[x].student.studentnumber,
-                              category: enrollments[x].category.name,
-                              ...(enrollments[x].student.cel && {
-                                 cel: enrollments[x].student.cel,
-                              }),
-                              ...(enrollments[x].student.dob && {
-                                 dob: enrollments[x].student.dob,
-                              }),
-                           };
-                           users.push(user);
-                        }
-                     }
+                     users = enrollments
+                        .filter((item) => !item.student)
+                        .map((item) => item.student)
+                        .sort((a, b) => {
+                           if (a.lastname > b.lastname) return 1;
+                           if (a.lastname < b.lastname) return -1;
 
-                     users = sortArray(users);
+                           if (a.name > b.name) return 1;
+                           if (a.name < b.name) return -1;
+                        });
                   } else {
                      const students = await User.find(filter)
                         .select("-password")
                         .sort({ lastname: 1, name: 1 });
 
                      for (let x = 0; x < students.length; x++) {
-                        let user = {};
                         const date = new Date();
 
                         const enrollment = await Enrollment.findOne({
@@ -115,27 +98,12 @@ router.get("/", async (req, res) => {
                            ...(classroom && { "classroom._id": classroom }),
                         }).populate({ path: "category", select: "name" });
 
-                        user = {
-                           _id: students[x]._id,
-                           type: req.query.type,
-                           dni: students[x].dni,
-                           name: students[x].name,
-                           lastname: students[x].lastname,
-                           studentnumber: students[x].studentnumber,
+                        users.push({
+                           ...students[x].toJSON(),
                            ...(enrollment && {
                               category: enrollment.category.name,
                            }),
-                           ...(students[x].cel && { cel: students[x].cel }),
-                           ...(students[x].dob && { dob: students[x].dob }),
-                        };
-
-                        if (!classroom) {
-                           users.push(user);
-                        } else {
-                           if (enrollment) {
-                              users.push(user);
-                           }
-                        }
+                        });
                      }
                   }
                   break;
@@ -168,12 +136,9 @@ router.get("/", async (req, res) => {
                         .select("-password")
                         .sort({ lastname: 1, name: 1 });
 
-                     for (let x = 0; x < allusers.length; x++) {
-                        for (let y = 0; y < allusers[x].children.length; y++) {
-                           if (allusers[x].children[y].user !== null)
-                              users.push(allusers[x]);
-                        }
-                     }
+                     users = allusers.filter((user) =>
+                        user.children.some((child) => child !== null)
+                     );
                   }
                   break;
                case "admin":
@@ -216,7 +181,7 @@ router.get("/", async (req, res) => {
       res.json(users);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -240,7 +205,7 @@ router.get("/:id", auth, async (req, res) => {
       res.json(user);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -261,7 +226,7 @@ router.get("/tutor/:id", auth, async (req, res) => {
       res.json(users);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -281,7 +246,7 @@ router.get("/register/number", [auth, adminAuth], async (req, res) => {
       res.json(studentnumber);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -306,6 +271,8 @@ router.post(
    ],
    async (req, res) => {
       let studentnumber = 1;
+      let user = {};
+
       const {
          name,
          lastname,
@@ -387,24 +354,11 @@ router.post(
             school,
             salary,
             description,
+            studentnumber,
+            ...(type === "guardian" && {
+               children: children.map((item) => item._id),
+            }),
          };
-
-         if (type === "student") {
-            data = {
-               ...data,
-               studentnumber,
-            };
-         }
-         if (type === "guardian") {
-            let childrenList = [];
-            for (let x = 0; x < children.length; x++) {
-               childrenList.push(children[x]._id);
-            }
-            data = {
-               ...data,
-               children: childrenList,
-            };
-         }
 
          user = new User(data);
 
@@ -426,10 +380,10 @@ router.post(
             .limit(1);
          user = user[0];
 
-         res.json(user._id);
+         res.json(user);
       } catch (err) {
          console.error(err.message);
-         return res.status(500).send("Server Error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 );
@@ -569,16 +523,13 @@ router.post("/create-list", auth, (req, res) => {
       pdf.create(pdfTemplate(css, img, nameList, thead, tbody), options).toFile(
          nameReport,
          (err) => {
-            if (err) {
-               res.send(Promise.reject());
-            }
-
-            res.send(Promise.resolve());
+            if (err) res.send(Promise.reject());
+            else res.send(Promise.resolve());
          }
       );
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("PDF Error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -654,90 +605,79 @@ router.put(
             lastname,
             active,
             sex,
-            ...(tel ? { tel } : !tel && user.tel && { tel: "" }),
-            ...(cel ? { cel } : !cel && user.cel && { cel: "" }),
-            ...(type && { type }),
-            ...(dni ? { dni } : !dni && user.dni && { dni: "" }),
-            ...(town ? { town } : !town && user.town && { town: "" }),
-            ...(neighbourhood
-               ? { neighbourhood }
-               : !neighbourhood && user.neighbourhood && { neighbourhood: "" }),
-            ...(address
-               ? { address }
-               : !address && user.address && { address: "" }),
-            ...(dob ? { dob } : !dob && user.dob && { dob: "" }),
-            ...(discount
-               ? { discount }
-               : !discount && user.discount && { discount: "" }),
-            ...(chargeday
-               ? { chargeday }
-               : !chargeday && user.chargeday && { chargeday: "" }),
-            ...(birthprov
-               ? { birthprov }
-               : !birthprov && user.birthprov && { birthprov: "" }),
-            ...(birthtown
-               ? { birthtown }
-               : !birthtown && user.birthtown && { birthtown: "" }),
-            ...(degree ? { degree } : !tel && user.tel && { tel: "" }),
-            ...(school ? { school } : !school && user.school && { school: "" }),
-            ...(salary ? { salary } : !salary && user.tel && { tel: "" }),
-            ...(children
+            tel,
+            cel,
+            type,
+            dni,
+            town,
+            neighbourhood,
+            address,
+            discount,
+            chargeday,
+            birthprov,
+            birthtown,
+            degree,
+            school,
+            salary,
+            description,
+            dob,
+            /* ...(children
                ? { children }
-               : !children && user.children.length > 0 && { children: [] }),
-            ...(description
-               ? { description }
-               : !description && user.description && { description: "" }),
+               : !children && user.children.length > 0 && { children: [] }), */
             ...(imgObject.public_id !== "" && { img: imgObject }),
          };
 
          if (discount && discount !== user.discount) {
             const date = new Date();
             const month = date.getMonth() + 1;
-            const yearl = date.getFullYear();
+            const year = date.getFullYear();
 
             let enrollments = await Enrollment.find({
                student: req.params.id,
-               year: { $in: [yearl, yearl + 1] },
+               year: { $in: [year, year + 1] },
             }).populate({ path: "category", model: "category" });
 
             for (let x = 0; x < enrollments.length; x++) {
-               let installments = await Installment.find({
+               const installments = await Installment.find({
                   enrollment: enrollments[x]._id,
                   value: { $ne: 0 },
-                  ...(enrollments[x].year === yearl && {
-                     number: { $gte: month },
-                  }),
+                  number: { $gte: enrollments[x].year === year ? month : 3 },
                });
                let value = enrollments[x].category.value;
-               let half = value / 2;
 
-               if (discount && discount !== 0) {
-                  const disc = (value * discount) / 100;
-                  value = Math.round((value - disc) / 10) * 10;
-                  half = value / 2;
-               }
+               if (discount !== 0)
+                  value =
+                     Math.round((value - (value * discount) / 100) / 10) * 10;
 
-               for (let y = 0; y < installments.length; y++) {
-                  if (installments[y].number === 0 || installments[y].halfPayed)
-                     continue;
-
-                  await Installment.findOneAndUpdate(
-                     { _id: installments[y]._id },
-                     {
-                        value: installments[y].number === 3 ? half : value,
-                        expired: false,
-                     }
-                  );
-               }
+               for (let y = 0; y < installments.length; y++)
+                  if (!installments[y].halfPayed)
+                     await Installment.findOneAndUpdate(
+                        { _id: installments[y]._id },
+                        {
+                           $set: {
+                              value:
+                                 installments[y].number === 3
+                                    ? value / 2
+                                    : value,
+                              expired: false,
+                           },
+                        }
+                     );
             }
          }
 
-         await User.findOneAndUpdate({ _id: user._id }, { $set: data });
+         user = await User.findOneAndUpdate(
+            { _id: user._id },
+            { $set: data },
+            { new: true }
+         )
+            .populate({ path: "town", select: "name" })
+            .populate({ path: "neighbourhood", select: "name" });
 
-         res.json({ msg: "User Updated" });
+         res.json(user);
       } catch (err) {
          console.error(err.message);
-         return res.status(500).send("Server Error");
+         res.status(500).json({ msg: "Server Error" });
       }
    }
 );
@@ -840,7 +780,7 @@ router.put("/credentials/:id", auth, async (req, res) => {
       res.json(user);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -857,7 +797,7 @@ router.delete("/:id/:type", [auth, adminAuth], async (req, res) => {
       res.json({ msg: "User deleted" });
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -1039,18 +979,6 @@ const newUserEmail = (type, email) => {
       utilizando este mail y la contraseña '12345678'. Le recomendamos que cambie la contraseña
        para que sea más seguro. <br/>En la página podrá ${text}`
    );
-};
-
-const sortArray = (array) => {
-   const sortedArray = array.sort((a, b) => {
-      if (a.lastname > b.lastname) return 1;
-      if (a.lastname < b.lastname) return -1;
-
-      if (a.name > b.name) return 1;
-      if (a.name < b.name) return -1;
-   });
-
-   return sortedArray;
 };
 
 module.exports = router;

@@ -1,11 +1,11 @@
 import moment from "moment";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
+import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
-import { clearTotalDebt, updateExpiredIntallments } from "./installment";
-import { clearProfile } from "./user";
+import { updateLoadingSpinner, updatePageNumber } from "./mixvalues";
+import { getTotalDebt } from "./installment";
 
 import {
    ENROLLMENT_LOADED,
@@ -15,9 +15,9 @@ import {
    ENROLLMENT_UPDATED,
    ENROLLMENT_DELETED,
    ENROLLMENT_CLEARED,
-   YEARENROLLMENTS_CLEARED,
    ENROLLMENTS_CLEARED,
    ENROLLMENT_ERROR,
+   ENROLLMENTS_ERROR,
 } from "./types";
 
 export const loadEnrollment = (enrollment_id) => async (dispatch) => {
@@ -28,14 +28,8 @@ export const loadEnrollment = (enrollment_id) => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: ENROLLMENT_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
+      if (err.response.status !== 401)
+         dispatch(setEnrollmentsError(ENROLLMENT_ERROR, err.response));
    }
 };
 
@@ -48,20 +42,16 @@ export const getYearEnrollments = () => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: ENROLLMENT_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-      window.scroll(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setEnrollmentsError(ENROLLMENTS_ERROR, err.response));
+         window.scroll(0, 0);
+      }
    }
 };
 
 export const loadEnrollments = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       let filter = "";
@@ -74,30 +64,25 @@ export const loadEnrollments = (filterData) => async (dispatch) => {
          }
       }
       const res = await api.get(`/enrollment?${filter}`);
+
       dispatch({
          type: ENROLLMENTS_LOADED,
          payload: { enrollments: res.data, type: "enrollments" },
       });
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: ENROLLMENT_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      window.scroll(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setEnrollmentsError(ENROLLMENTS_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         window.scroll(0, 0);
+      } else error = true;
    }
 
-   dispatch(updateLoadingSpinner(false));
+   if (!error) dispatch(updateLoadingSpinner(false));
 };
 
-export const loadStudentAttendance = (filterData) => async (dispatch) => {
+export const loadStudentsAvAtt = (filterData, type) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       let filter = "";
@@ -111,74 +96,25 @@ export const loadStudentAttendance = (filterData) => async (dispatch) => {
          }
       }
 
-      const res = await api.get(`/enrollment/absences?${filter}`);
+      const res = await api.get(`/enrollment/${type}?${filter}`);
 
       dispatch({
          type: ENROLLMENTS_LOADED,
-         payload: { enrollments: res.data, type: "attendance" },
+         payload: { enrollments: res.data, type },
       });
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: ENROLLMENT_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      window.scroll(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setEnrollmentsError(ENROLLMENTS_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         window.scroll(0, 0);
+      } else error = true;
    }
 
-   dispatch(updateLoadingSpinner(false));
+   if (!error) dispatch(updateLoadingSpinner(false));
 };
-
-export const loadStudentAverage = (filterData) => async (dispatch) => {
+export const registerEnrollment = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
-   try {
-      let filter = "";
-
-      const filternames = Object.keys(filterData);
-      for (let x = 0; x < filternames.length; x++) {
-         const name = filternames[x];
-         if (filterData[name] !== "") {
-            if (filter !== "") filter = filter + "&";
-            filter = filter + filternames[x] + "=" + filterData[name];
-         }
-      }
-
-      const res = await api.get(`/enrollment/average?${filter}`);
-      dispatch({
-         type: ENROLLMENTS_LOADED,
-         payload: { enrollments: res.data, type: "average" },
-      });
-   } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: ENROLLMENT_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      window.scroll(0, 0);
-   }
-
-   dispatch(updateLoadingSpinner(false));
-};
-
-export const registerEnrollment = (
-   formData,
-   history,
-   user_id,
-   enroll_id
-) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    let enrollment = {};
    for (const prop in formData) {
@@ -189,68 +125,49 @@ export const registerEnrollment = (
 
    try {
       let res;
-      if (!enroll_id) {
-         res = await api.post("/enrollment", enrollment);
-      } else {
-         res = await api.put(`/enrollment/${enroll_id}`, enrollment);
-      }
+      if (formData._id !== "0") res = await api.post("/enrollment", enrollment);
+      else res = await api.put(`/enrollment/${formData._id}`, enrollment);
 
       dispatch({
-         type: !enroll_id ? ENROLLMENT_REGISTERED : ENROLLMENT_UPDATED,
-         ...(enroll_id && { payload: res.data }),
+         type:
+            formData._id === "0" ? ENROLLMENT_REGISTERED : ENROLLMENT_UPDATED,
+         payload: res.data,
       });
 
       dispatch(
          setAlert(
-            `Inscripción ${!enroll_id ? "Registrada" : "Modificada"}`,
+            `Inscripción ${formData._id === "0" ? "Registrada" : "Modificada"}`,
             "success",
-            !enroll_id ? "1" : "2",
+            formData._id === "0" ? "1" : "2",
             7000
          )
       );
+      dispatch(getYearEnrollments());
+      dispatch(getTotalDebt());
 
-      dispatch(updateExpiredIntallments());
-      dispatch(clearYearEnrollments());
-      dispatch(clearTotalDebt());
-
-      if (!enroll_id) {
-         dispatch(clearProfile());
-         history.push(`/dashboard/${user_id}`);
-      } else {
-         history.push("/enrollment-list");
-         dispatch(clearEnrollment());
-      }
+      history.push("/enrollment-list");
+      dispatch(clearEnrollment());
    } catch (err) {
-      if (err.response.data.errors) {
-         const errors = err.response.data.errors;
-         errors.forEach((error) => {
-            dispatch(setAlert(error.msg, "danger", "2"));
-         });
-         dispatch({
-            type: ENROLLMENT_ERROR,
-            payload: errors,
-         });
-      } else {
-         const msg = err.response.data.msg;
-         const type = err.response.statusText;
-         dispatch({
-            type: ENROLLMENT_ERROR,
-            payload: {
-               type,
-               status: err.response.status,
-               msg,
-            },
-         });
-         dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      }
+      if (err.response.status !== 401) {
+         dispatch(setEnrollmentsError(ENROLLMENT_ERROR, err.response));
+
+         if (err.response.data.errors)
+            err.response.data.errors.forEach((error) => {
+               dispatch(setAlert(error.msg, "danger", "2"));
+            });
+         else dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   dispatch(updateLoadingSpinner(false));
-   window.scrollTo(0, 0);
+   if (!error) {
+      dispatch(updateLoadingSpinner(false));
+      window.scrollTo(0, 0);
+   }
 };
 
 export const deleteEnrollment = (enroll_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       await api.delete(`/enrollment/${enroll_id}`);
@@ -259,28 +176,25 @@ export const deleteEnrollment = (enroll_id) => async (dispatch) => {
          type: ENROLLMENT_DELETED,
          payload: enroll_id,
       });
-      dispatch(clearYearEnrollments());
+      dispatch(getYearEnrollments());
       dispatch(setAlert("Inscripción Eliminada", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: ENROLLMENT_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setEnrollmentsError(ENROLLMENT_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      }
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const enrollmentsPDF = (enrollments, average) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
+
    try {
       let pdf;
       let name;
@@ -322,31 +236,36 @@ export const enrollmentsPDF = (enrollments, average) => async (dispatch) => {
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: ENROLLMENT_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setEnrollmentsError(ENROLLMENT_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const clearEnrollment = () => (dispatch) => {
    dispatch({ type: ENROLLMENT_CLEARED });
 };
 
-export const clearYearEnrollments = () => (dispatch) => {
-   dispatch({ type: YEARENROLLMENTS_CLEARED });
-};
-
 export const clearEnrollments = () => (dispatch) => {
    dispatch({ type: ENROLLMENTS_CLEARED });
+   dispatch(updatePageNumber(0));
+};
+
+const setEnrollmentsError = (type, response) => (dispatch) => {
+   dispatch({
+      type: type,
+      payload: response.data.errors
+         ? response.data.errors
+         : {
+              type: response.statusText,
+              status: response.status,
+              msg: response.data.msg,
+           },
+   });
 };

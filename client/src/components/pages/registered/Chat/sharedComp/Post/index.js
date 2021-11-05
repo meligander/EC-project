@@ -2,7 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import Moment from "react-moment";
-import PropTypes from "prop-types";
+import {
+   FaUsers,
+   FaHeart,
+   FaRegHeart,
+   FaComments,
+   FaTimes,
+} from "react-icons/fa";
 
 import { clearProfile } from "../../../../../../actions/user";
 import { addRemoveLike, seenPost } from "../../../../../../actions/post";
@@ -21,7 +27,7 @@ const Post = ({
    clearProfile,
    setToggle,
 }) => {
-   const [otherValues, setOtherValues] = useState({
+   const [adminValues, setAdminValues] = useState({
       toggleComments: false,
       toggleModalLikes: false,
       isLiked: false,
@@ -29,13 +35,8 @@ const Post = ({
       hasNotSeen: false,
    });
 
-   const {
-      toggleComments,
-      isLiked,
-      oneLoad,
-      toggleModalLikes,
-      hasNotSeen,
-   } = otherValues;
+   const { toggleComments, isLiked, oneLoad, toggleModalLikes, hasNotSeen } =
+      adminValues;
 
    const isAdmin =
       userLogged.type !== "student" && userLogged.type !== "guardian";
@@ -49,7 +50,7 @@ const Post = ({
       if (oneLoad) {
          for (let x = 0; x < post.likes.length; x++) {
             if (post.likes[x].user._id === userLogged._id) {
-               setOtherValues((prev) => ({
+               setAdminValues((prev) => ({
                   ...prev,
                   isLiked: true,
                }));
@@ -76,14 +77,14 @@ const Post = ({
 
                seenPost(post._id, { newSeen, newOne });
 
-               setOtherValues((prev) => ({
+               setAdminValues((prev) => ({
                   ...prev,
                   hasNotSeen: true,
                }));
             }
          }
 
-         setOtherValues((prev) => ({
+         setAdminValues((prev) => ({
             ...prev,
             oneLoad: false,
          }));
@@ -91,8 +92,8 @@ const Post = ({
    }, [post, userLogged, oneLoad, canMarkSeenUser, seenPost]);
 
    const setToggleModalLikes = () => {
-      setOtherValues({
-         ...otherValues,
+      setAdminValues({
+         ...adminValues,
          toggleModalLikes: !toggleModalLikes,
       });
    };
@@ -115,16 +116,16 @@ const Post = ({
                   }}
                   className="btn btn-danger"
                >
-                  <i className="fas fa-times"></i>
+                  <FaTimes />
                </button>
             )}
          </div>
          <Alert type={post._id} />
          <Link
-            to={`/dashboards/${post.user}`}
+            to={`/dashboard/${post.user}`}
             onClick={() => {
                window.scroll(0, 0);
-               clearProfile(userLogged.type !== "student");
+               clearProfile();
             }}
          >
             <figure className="post-shape">
@@ -158,7 +159,7 @@ const Post = ({
                            }}
                            className="btn btn-danger"
                         >
-                           <i className="fas fa-times"></i>
+                           <FaTimes />
                         </button>
                         <span className="tooltiptext close">Eliminar</span>
                      </div>
@@ -177,13 +178,13 @@ const Post = ({
                      onClick={(e) => {
                         e.preventDefault();
                         addRemoveLike(post._id);
-                        setOtherValues({ ...otherValues, isLiked: !isLiked });
+                        setAdminValues({ ...adminValues, isLiked: !isLiked });
                      }}
                      className={`btn btn-mix-secondary ${
                         isLiked ? "liked" : ""
                      }`}
                   >
-                     <i className="fas fa-heart"></i>
+                     {isLiked ? <FaHeart /> : <FaRegHeart />}
                   </button>
                   <span className="tooltiptext">Me Gusta</span>
                </div>
@@ -194,9 +195,11 @@ const Post = ({
                      onClick={setToggleModalLikes}
                   >
                      <span className="heart">
-                        <i className="fas fa-heart"></i>
+                        <FaHeart />
                      </span>
-                     <i className="fas fa-users"></i>
+                     <span className="users">
+                        <FaUsers />
+                     </span>
                      {post.likes.length > 0 && (
                         <span className="post-notification secondary">
                            {post.likes.length}
@@ -211,13 +214,13 @@ const Post = ({
                      className="btn btn-light"
                      onClick={(e) => {
                         e.preventDefault();
-                        setOtherValues({
-                           ...otherValues,
+                        setAdminValues({
+                           ...adminValues,
                            toggleComments: !toggleComments,
                         });
                      }}
                   >
-                     <i className="far fa-comments"></i>
+                     <FaComments />
                      {post.comments.length > 0 && (
                         <span className="post-notification primary">
                            {post.comments.length}
@@ -237,15 +240,6 @@ const Post = ({
          )}
       </div>
    );
-};
-
-Post.propTypes = {
-   addRemoveLike: PropTypes.func.isRequired,
-   seenPost: PropTypes.func.isRequired,
-   clearProfile: PropTypes.func.isRequired,
-   setToggle: PropTypes.func,
-   post: PropTypes.object.isRequired,
-   auth: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = (state) => ({

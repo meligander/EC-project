@@ -1,10 +1,10 @@
-import React, { Fragment, useEffect } from "react";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import React, { useEffect } from "react";
+import { connect } from "react-redux";
+import { Router, Route, Switch } from "react-router-dom";
 
-//Redux
-import store from "./store";
-import { Provider } from "react-redux";
 import setAuthToken from "./utils/setAuthToken";
+import history from "./utils/history";
+
 //actions
 import { loadUser } from "./actions/auth";
 
@@ -22,29 +22,36 @@ import Routes from "./components/routing/Routes";
 
 import "./style/main.scss";
 
-const App = () => {
+const App = ({ loadUser, mixvalues: { navbar } }) => {
    useEffect(() => {
       if (localStorage.token) {
          setAuthToken(localStorage.token);
-         store.dispatch(loadUser());
+         loadUser();
       }
-   }, []);
+   }, [loadUser]);
    return (
-      <Provider store={store}>
-         <Router>
-            <Fragment>
-               <Navbar />
-               <Switch>
-                  <PublicRoutes exact path="/" component={Landing} />
-                  <PublicRoutes exact path="/about" component={About} />
-                  <PublicRoutes exact path="/contact" component={Contact} />
-                  <Route component={Routes} />
-               </Switch>
-               <Footer />
-            </Fragment>
-         </Router>
-      </Provider>
+      <Router history={history}>
+         <Navbar />
+         <div
+            style={{
+               /* minHeight: `calc(100vh - ${footer}px)`, */
+               paddingTop: `${navbar}px`,
+            }}
+         >
+            <Switch>
+               <PublicRoutes exact path="/" component={Landing} />
+               <PublicRoutes exact path="/about" component={About} />
+               <PublicRoutes exact path="/contact" component={Contact} />
+               <Route component={Routes} />
+            </Switch>
+         </div>
+         <Footer />
+      </Router>
    );
 };
 
-export default App;
+const mapStateToProps = (state) => ({
+   mixvalues: state.mixvalues,
+});
+
+export default connect(mapStateToProps, { loadUser })(App);

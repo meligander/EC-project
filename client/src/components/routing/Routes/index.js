@@ -1,4 +1,5 @@
 import React from "react";
+import { connect } from "react-redux";
 import { Switch, Route } from "react-router-dom";
 
 //Unregister Pages
@@ -40,9 +41,12 @@ import PrivateRoutes from "../PrivateRoutes";
 import PublicRoutes from "../PublicRoutes";
 import NotFound from "../../layouts/NotFound";
 
-const Routes = () => {
+const Routes = ({ mixvalues: { navbar, footer } }) => {
    return (
-      <section className="container">
+      <section
+         style={{ minHeight: `calc(100vh - ${footer}px - ${navbar}px)` }}
+         className="container"
+      >
          <Switch>
             <PublicRoutes exact path="/login" component={Login} />
             <PrivateRoutes
@@ -50,12 +54,6 @@ const Routes = () => {
                types={[]}
                path="/dashboard/:user_id"
                component={Dashboard}
-            />
-            <PrivateRoutes
-               exact
-               path="/register"
-               types={["admin", "secretary", "admin&teacher"]}
-               component={RegisterUser}
             />
             <PrivateRoutes
                exact
@@ -237,4 +235,8 @@ const Routes = () => {
    );
 };
 
-export default Routes;
+const mapStateToProps = (state) => ({
+   mixvalues: state.mixvalues,
+});
+
+export default connect(mapStateToProps)(Routes);

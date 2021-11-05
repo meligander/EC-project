@@ -1,27 +1,40 @@
-import React, { useState, useRef } from "react";
-import PropTypes from "prop-types";
+import React, { useEffect, useState, useMemo } from "react";
 
 import "./style.scss";
 
 const Tabs = ({ tablist, panellist }) => {
-   let refs = [
-      useRef(),
-      useRef(),
-      useRef(),
-      useRef(),
-      useRef(),
-      useRef(),
-      useRef(),
-   ];
+   const [adminValues, setAdminValues] = useState({
+      isActive: 0,
+      width: 0,
+      position: 0,
+      refs: useMemo(
+         () =>
+            Array(tablist.length)
+               .fill(0)
+               .map((i) => React.createRef()),
+         [tablist.length]
+      ),
+   });
 
-   const [isActive, setIsActive] = useState(0);
-   const [width, setWidth] = useState(0);
-   const [position, setPosition] = useState(0);
+   const { isActive, width, position, refs } = adminValues;
+
+   useEffect(() => {
+      setTimeout(() => {
+         setAdminValues((prev) => ({
+            ...prev,
+            width: refs[0].current.offsetWidth,
+            position: refs[0].current.offsetLeft,
+         }));
+      }, 50);
+   }, [refs]);
 
    const changeActive = (nb) => {
-      setIsActive(nb);
-      setWidth(refs[nb].current.offsetWidth);
-      setPosition(refs[nb].current.offsetLeft);
+      setAdminValues((prev) => ({
+         ...prev,
+         isActive: nb,
+         width: refs[nb].current.offsetWidth,
+         position: refs[nb].current.offsetLeft,
+      }));
    };
 
    return (
@@ -34,9 +47,6 @@ const Tabs = ({ tablist, panellist }) => {
                   key={index}
                   onClick={() => changeActive(index)}
                   ref={refs[index]}
-                  style={{
-                     height: refs[0].current && refs[0].current.offsetHeight,
-                  }}
                >
                   {tablist.length > 3 ? (
                      <>
@@ -66,11 +76,6 @@ const Tabs = ({ tablist, panellist }) => {
          </div>
       </section>
    );
-};
-
-Tabs.prototypes = {
-   tablist: PropTypes.array.isRequired,
-   panellist: PropTypes.array.isRequired,
 };
 
 export default Tabs;

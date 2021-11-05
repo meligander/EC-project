@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
+import { FaPaperPlane } from "react-icons/fa";
 
 import { addPost } from "../../../../../../actions/post";
 
@@ -46,17 +46,13 @@ const PostForm = ({ addPost, class_id }) => {
             ></textarea>
             <div className="btn-right my-2 p-1">
                <button type="submit" className="btn btn-primary">
-                  <i className="far fa-paper-plane"></i>&nbsp; Enviar
+                  <FaPaperPlane />
+                  &nbsp;Enviar
                </button>
             </div>
          </form>
       </div>
    );
-};
-
-PostForm.propTypes = {
-   addPost: PropTypes.func.isRequired,
-   class_id: PropTypes.string,
 };
 
 export default connect(null, { addPost })(PostForm);

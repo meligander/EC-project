@@ -7,56 +7,36 @@ import { updateLoadingSpinner } from "./mixvalues";
 
 import {
    ATTENDANCES_LOADED,
-   STUDENTATTENDANCES_LOADED,
    NEWDATE_REGISTERED,
    ATTENDANCES_UPDATED,
-   DATES_DELETED,
+   DATE_DELETED,
    ATTENDANCES_CLEARED,
    ATTENDANCES_ERROR,
 } from "./types";
 
-export const loadStudentAttendance = (user_id, class_id) => async (
-   dispatch
-) => {
+export const loadAttendances = (class_id, user_id) => async (dispatch) => {
    try {
-      const res = await api.get(`/attendance/student/${class_id}/${user_id}`);
-      dispatch({
-         type: STUDENTATTENDANCES_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      dispatch({
-         type: ATTENDANCES_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-   }
-};
+      let res;
+      if (user_id)
+         res = await api.get(`/attendance/student/${class_id}/${user_id}`);
+      else res = await api.get(`/attendance/${class_id}`);
 
-export const loadAttendances = (class_id) => async (dispatch) => {
-   try {
-      const res = await api.get(`/attendance/${class_id}`);
       dispatch({
          type: ATTENDANCES_LOADED,
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: ATTENDANCES_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
+      if (err.response.status !== 401) {
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         dispatch(setAttendanceError(ATTENDANCES_ERROR, err.response));
+      }
    }
 };
 
 export const registerNewDate = (formData, addBimester) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
+
    try {
       let newDate = {};
       for (const prop in formData) {
@@ -82,135 +62,122 @@ export const registerNewDate = (formData, addBimester) => async (dispatch) => {
          )
       );
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: ATTENDANCES_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "3"));
+      if (err.response.status !== 401) {
+         dispatch(setAttendanceError(ATTENDANCES_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "3"));
+      } else error = true;
    }
 
-   dispatch(updateLoadingSpinner(false));
+   if (!error) dispatch(updateLoadingSpinner(false));
 };
 
-export const updateAttendances = (formData, history, class_id) => async (
-   dispatch
-) => {
-   dispatch(updateLoadingSpinner(true));
-   try {
-      await api.post("/attendance/period", formData);
-      dispatch({
-         type: ATTENDANCES_UPDATED,
-      });
+export const updateAttendances =
+   (formData, history, class_id) => async (dispatch) => {
+      dispatch(updateLoadingSpinner(true));
+      let error = false;
 
-      history.push(`/class/${class_id}`);
-      dispatch(setAlert("Inasistencias Modificadas", "success", "2"));
-   } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: ATTENDANCES_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-   }
+      try {
+         await api.post("/attendance/period", formData);
+         dispatch({
+            type: ATTENDANCES_UPDATED,
+         });
 
-   window.scroll(0, 0);
-   dispatch(updateLoadingSpinner(false));
-};
+         history.push(`/class/${class_id}`);
+         dispatch(setAlert("Inasistencias Modificadas", "success", "2"));
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setAttendanceError(ATTENDANCES_ERROR, err.response));
+            dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         } else error = true;
+      }
+
+      if (!error) {
+         window.scroll(0, 0);
+         dispatch(updateLoadingSpinner(false));
+      }
+   };
 
 export const deleteDate = (date, classroom) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
+
    try {
       const res = await api.delete(`/attendance/date/${date}/${classroom}`);
 
       dispatch({
-         type: DATES_DELETED,
+         type: DATE_DELETED,
          payload: res.data,
       });
 
       dispatch(setAlert("Fecha eliminada", "success", "4"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: ATTENDANCES_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "4"));
+      if (err.response.status !== 401) {
+         dispatch(setAttendanceError(ATTENDANCES_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "4"));
+      } else error = true;
    }
 
-   dispatch(updateLoadingSpinner(false));
+   if (!error) dispatch(updateLoadingSpinner(false));
 };
 
-export const attendancesPDF = (
-   header,
-   students,
-   attendances,
-   period,
-   classInfo
-) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-   let tableInfo = {
-      header,
-      students,
-      attendances,
-      period,
-      classInfo,
+export const attendancesPDF =
+   (header, students, attendances, period, classInfo) => async (dispatch) => {
+      dispatch(updateLoadingSpinner(true));
+      let error = false;
+
+      let tableInfo = {
+         header,
+         students,
+         attendances,
+         period,
+         classInfo,
+      };
+
+      try {
+         await api.post("/attendance/create-list", tableInfo);
+
+         const pdf = await api.get("/attendance/list/fetch-list", {
+            responseType: "blob",
+         });
+
+         const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
+
+         const date = moment().format("DD-MM-YY");
+
+         saveAs(
+            pdfBlob,
+            `Asistencia de ${classInfo.category.name} de ${
+               classInfo.teacher.lastname + " " + classInfo.teacher.name
+            }  ${date}.pdf`
+         );
+
+         dispatch(setAlert("PDF Generado", "success", "2"));
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setAttendanceError(ATTENDANCES_ERROR, err.response));
+            dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         } else error = true;
+      }
+
+      if (!error) {
+         window.scroll(0, 0);
+         dispatch(updateLoadingSpinner(false));
+      }
    };
-
-   try {
-      await api.post("/attendance/create-list", tableInfo);
-
-      const pdf = await api.get("/attendance/list/fetch-list", {
-         responseType: "blob",
-      });
-
-      const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
-
-      const date = moment().format("DD-MM-YY");
-
-      saveAs(
-         pdfBlob,
-         `Asistencia de ${classInfo.category.name} de ${
-            classInfo.teacher.lastname + " " + classInfo.teacher.name
-         }  ${date}.pdf`
-      );
-
-      dispatch(setAlert("PDF Generado", "success", "2"));
-   } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: ATTENDANCES_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-   }
-
-   window.scroll(0, 0);
-   dispatch(updateLoadingSpinner(false));
-};
 
 export const clearAttendances = () => (dispatch) => {
    dispatch({
       type: ATTENDANCES_CLEARED,
+   });
+};
+
+const setAttendanceError = (type, response) => (dispatch) => {
+   dispatch({
+      type: type,
+      payload: {
+         type: response.statusText,
+         status: response.status,
+         msg: response.data.msg,
+      },
    });
 };

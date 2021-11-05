@@ -27,6 +27,9 @@
          cursor: pointer;
          @include easeOut;
 
+         @include respond(phone) {
+            padding: 1.8rem 3rem;
+         }
          @include respond(small-phone) {
             font-size: 2rem;
          }

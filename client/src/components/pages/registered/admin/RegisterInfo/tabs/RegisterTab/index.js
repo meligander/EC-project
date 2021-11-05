@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
-import { Link, withRouter } from "react-router-dom";
-import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
+import { IoIosListBox } from "react-icons/io";
+import { FiSave } from "react-icons/fi";
 
 import {
    clearRegisters,
@@ -13,19 +14,16 @@ import { clearExpences } from "../../../../../../../actions/expence";
 import { formatNumber } from "../../../../../../../actions/mixvalues";
 
 import PopUp from "../../../../../../modal/PopUp";
-import Loading from "../../../../../../modal/Loading";
 
 import "./style.scss";
 
 const RegisterTab = ({
-   history,
-   registers: { register, addNew, loading },
+   registers: { register, addNew, loadingRegister },
    closeRegister,
    createRegister,
    clearInvoices,
    clearExpences,
    clearRegisters,
-   auth: { userLogged },
 }) => {
    const [formData, setFormData] = useState({
       difference: "",
@@ -33,260 +31,233 @@ const RegisterTab = ({
       description: "",
    });
 
-   const [toggleModal, setToggleModal] = useState(false);
+   const [adminValues, setAdminValues] = useState({
+      toggleModal: false,
+   });
 
    const { difference, negative, description } = formData;
+
+   const { toggleModal } = adminValues;
 
    const onChange = (e) => {
       setFormData({
          ...formData,
-         [e.target.name]: e.target.value,
+         [e.target.name]:
+            e.target.type !== "checkbox" ? e.target.value : e.target.checked,
       });
-   };
-
-   const onChangeCheckBox = (e) => {
-      setFormData({
-         ...formData,
-         negative: e.target.checked,
-      });
-   };
-
-   const setToggle = () => {
-      setToggleModal(!toggleModal);
    };
 
    const confirm = () => {
-      if (addNew)
-         createRegister({ difference, description }, userLogged._id, history);
-      else closeRegister(formData, userLogged._id, history);
+      if (addNew) createRegister({ difference, description });
+      else closeRegister(formData);
    };
 
    return (
-      <>
-         {!loading ? (
-            <div className="register register-tab">
-               <PopUp
-                  toggleModal={toggleModal}
-                  setToggleModal={setToggle}
-                  confirm={confirm}
-                  text="¿Está seguro que desea cerrar la caja?"
-               />
-               <form
-                  className="form"
-                  onSubmit={(e) => {
-                     e.preventDefault();
-                     if (addNew || (register && register.temporary))
-                        setToggle();
-                  }}
-               >
-                  <table>
-                     <tbody>
+      <div className="register register-tab">
+         <PopUp
+            toggleModal={toggleModal}
+            setToggleModal={() =>
+               setAdminValues((prev) => ({
+                  ...prev,
+                  toggleModal: !toggleModal,
+               }))
+            }
+            confirm={confirm}
+            text="¿Está seguro que desea cerrar la caja?"
+         />
+         <form
+            className="form"
+            onSubmit={(e) => {
+               e.preventDefault();
+               if (addNew || (register && register.temporary))
+                  setAdminValues((prev) => ({
+                     ...prev,
+                     toggleModal: !toggleModal,
+                  }));
+            }}
+         >
+            <table>
+               <tbody>
+                  {!loadingRegister && !addNew && (
+                     <>
+                        <tr>
+                           <td>Ingresos</td>
+                           <td>
+                              $
+                              {register && register.temporary && register.income
+                                 ? formatNumber(register.income)
+                                 : 0}
+                           </td>
+                           <td>
+                              <Link
+                                 className="btn btn-light"
+                                 onClick={() => {
+                                    window.scroll(0, 0);
+                                    clearInvoices();
+                                 }}
+                                 to="/income-list"
+                              >
+                                 <IoIosListBox />
+                                 <span className="hide-sm">&nbsp;Listado</span>
+                              </Link>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td>Egresos</td>
+                           <td>
+                              $
+                              {register &&
+                              register.temporary &&
+                              register.expence
+                                 ? formatNumber(register.expence)
+                                 : 0}
+                           </td>
+                           <td>
+                              <Link
+                                 className="btn btn-light"
+                                 onClick={() => {
+                                    window.scroll(0, 0);
+                                    clearExpences();
+                                 }}
+                                 to="/transaction-list"
+                              >
+                                 <IoIosListBox />
+                                 <span className="hide-sm">&nbsp;Listado</span>
+                              </Link>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td>Ingreso Especial</td>
+                           <td>
+                              $
+                              {register &&
+                              register.temporary &&
+                              register.cheatincome
+                                 ? formatNumber(register.cheatincome)
+                                 : 0}
+                           </td>
+                           <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                           <td>Retiro de Dinero</td>
+                           <td>
+                              $
+                              {register &&
+                              register.temporary &&
+                              register.withdrawal
+                                 ? formatNumber(register.withdrawal)
+                                 : 0}
+                           </td>
+                           <td>
+                              <Link
+                                 to="/withdrawal-list"
+                                 onClick={() => {
+                                    window.scroll(0, 0);
+                                    clearRegisters();
+                                    clearExpences();
+                                 }}
+                                 className="btn btn-light"
+                              >
+                                 <IoIosListBox />
+                                 <span className="hide-sm">&nbsp;Listado</span>
+                              </Link>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td>Plata Caja</td>
+                           <td>
+                              $
+                              {register && formatNumber(register.registermoney)}
+                           </td>
+                           <td>
+                              <Link
+                                 to="/register-list"
+                                 onClick={() => {
+                                    window.scroll(0, 0);
+                                    clearRegisters();
+                                 }}
+                                 className="btn btn-light"
+                              >
+                                 <IoIosListBox />
+                                 <span className="hide-sm">&nbsp;Cierres</span>
+                              </Link>
+                           </td>
+                        </tr>
+                     </>
+                  )}
+
+                  <tr>
+                     <td>{addNew ? "Dinero Inicial" : "Diferencia"}</td>
+                     <td>
+                        <input
+                           type="number"
+                           name="difference"
+                           disabled={register && !register.temporary}
+                           value={difference}
+                           onChange={onChange}
+                           placeholder={
+                              addNew ? "Dinero Inicial" : "Diferencia"
+                           }
+                        />
+                     </td>
+                     <td>
                         {!addNew && (
                            <>
-                              <tr>
-                                 <td>Ingresos</td>
-                                 <td>
-                                    $
-                                    {register &&
-                                    register.temporary &&
-                                    register.income
-                                       ? formatNumber(register.income)
-                                       : 0}
-                                 </td>
-                                 <td>
-                                    <Link
-                                       className="btn btn-light"
-                                       onClick={() => {
-                                          window.scroll(0, 0);
-                                          clearInvoices();
-                                       }}
-                                       to="/income-list"
-                                    >
-                                       <i className="fas fa-list-ul"></i>
-                                       <span className="hide-sm">
-                                          &nbsp; Listado
-                                       </span>
-                                    </Link>
-                                 </td>
-                              </tr>
-                              <tr>
-                                 <td>Egresos</td>
-                                 <td>
-                                    $
-                                    {register &&
-                                    register.temporary &&
-                                    register.expence
-                                       ? formatNumber(register.expence)
-                                       : 0}
-                                 </td>
-                                 <td>
-                                    <Link
-                                       className="btn btn-light"
-                                       onClick={() => {
-                                          window.scroll(0, 0);
-                                          clearExpences();
-                                       }}
-                                       to="/transaction-list"
-                                    >
-                                       <i className="fas fa-list-ul"></i>
-                                       <span className="hide-sm">
-                                          &nbsp; Listado
-                                       </span>
-                                    </Link>
-                                 </td>
-                              </tr>
-                              <tr>
-                                 <td>Ingreso Especial</td>
-                                 <td>
-                                    $
-                                    {register &&
-                                    register.temporary &&
-                                    register.cheatincome
-                                       ? formatNumber(register.cheatincome)
-                                       : 0}
-                                 </td>
-                                 <td>&nbsp;</td>
-                              </tr>
-                              <tr>
-                                 <td>Retiro de Dinero</td>
-                                 <td>
-                                    $
-                                    {register &&
-                                    register.temporary &&
-                                    register.withdrawal
-                                       ? formatNumber(register.withdrawal)
-                                       : 0}
-                                 </td>
-                                 <td>
-                                    <Link
-                                       to="/withdrawal-list"
-                                       onClick={() => {
-                                          window.scroll(0, 0);
-                                          clearRegisters();
-                                          clearExpences();
-                                       }}
-                                       className="btn btn-light"
-                                    >
-                                       <i className="fas fa-list-ul"></i>
-                                       <span className="hide-sm">
-                                          &nbsp; Listado
-                                       </span>
-                                    </Link>
-                                 </td>
-                              </tr>
-                              <tr>
-                                 <td>Plata Caja</td>
-                                 <td>
-                                    $
-                                    {register &&
-                                       formatNumber(register.registermoney)}
-                                 </td>
-                                 <td>
-                                    <Link
-                                       to="/register-list"
-                                       onClick={() => {
-                                          window.scroll(0, 0);
-                                          clearRegisters();
-                                       }}
-                                       className="btn btn-light"
-                                    >
-                                       <i className="fas fa-list-ul"></i>
-                                       <span className="hide-sm">
-                                          &nbsp; Cierres
-                                       </span>
-                                    </Link>
-                                 </td>
-                              </tr>
+                              <input
+                                 className="form-checkbox"
+                                 type="checkbox"
+                                 checked={negative}
+                                 disabled={register && !register.temporary}
+                                 onChange={onChange}
+                                 name="negative"
+                                 id="cb1"
+                              />
+                              <label
+                                 className="checkbox-lbl"
+                                 id="check"
+                                 htmlFor="cb1"
+                              >
+                                 {negative ? "Negativa" : "Positiva"}
+                              </label>
                            </>
                         )}
-
-                        <tr>
-                           <td>{addNew ? "Dinero Inicial" : "Diferencia"}</td>
-                           <td>
-                              <input
-                                 type="number"
-                                 name="difference"
-                                 disabled={register && !register.temporary}
-                                 value={difference}
-                                 onChange={onChange}
-                                 placeholder={
-                                    addNew ? "Dinero Inicial" : "Diferencia"
-                                 }
-                              />
-                           </td>
-                           <td>
-                              {!addNew && (
-                                 <>
-                                    <input
-                                       className="form-checkbox"
-                                       type="checkbox"
-                                       checked={negative}
-                                       disabled={
-                                          register && !register.temporary
-                                       }
-                                       onChange={onChangeCheckBox}
-                                       name="negative"
-                                       id="cb1"
-                                    />
-                                    <label
-                                       className="checkbox-lbl"
-                                       id="check"
-                                       htmlFor="cb1"
-                                    >
-                                       {negative ? "Negativa" : "Positiva"}
-                                    </label>
-                                 </>
-                              )}
-                           </td>
-                        </tr>
-                        <tr>
-                           <td>Detalles</td>
-                           <td colSpan="2">
-                              <textarea
-                                 cols="30"
-                                 value={description}
-                                 onChange={onChange}
-                                 disabled={register && !register.temporary}
-                                 name="description"
-                                 rows="4"
-                              ></textarea>
-                           </td>
-                        </tr>
-                     </tbody>
-                  </table>
-                  <div className="btn-ctr pt-3">
-                     <button
-                        type="submit"
-                        disabled={!register && !addNew}
-                        className={`btn ${
-                           register && !register.temporary && !addNew
-                              ? "btn-black"
-                              : "btn-primary"
-                        }`}
-                     >
-                        <i className="far fa-save"></i>
-                        <span className="hide-sm">&nbsp; Cerrar Caja</span>
-                     </button>
-                  </div>
-               </form>
-            </div>
-         ) : (
-            <Loading />
-         )}
-      </>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>Detalles</td>
+                     <td colSpan="2">
+                        <textarea
+                           cols="30"
+                           value={description}
+                           onChange={onChange}
+                           disabled={register && !register.temporary}
+                           name="description"
+                           rows="4"
+                        ></textarea>
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+            {!loadingRegister && (
+               <div className="btn-center pt-3">
+                  <button
+                     type="submit"
+                     disabled={!register && !addNew}
+                     className={`btn ${
+                        register && !register.temporary && !addNew
+                           ? "btn-black"
+                           : "btn-primary"
+                     }`}
+                  >
+                     <FiSave />
+                     <span className="hide-sm">&nbsp; Cerrar Caja</span>
+                  </button>
+               </div>
+            )}
+         </form>
+      </div>
    );
 };
-
-RegisterTab.propTypes = {
-   registers: PropTypes.object.isRequired,
-   auth: PropTypes.object.isRequired,
-   closeRegister: PropTypes.func.isRequired,
-   createRegister: PropTypes.func.isRequired,
-   clearInvoices: PropTypes.func.isRequired,
-   clearExpences: PropTypes.func.isRequired,
-   clearRegisters: PropTypes.func.isRequired,
-};
-
 const mapStateToProps = (state) => ({
    registers: state.registers,
    auth: state.auth,
@@ -298,4 +269,4 @@ export default connect(mapStateToProps, {
    clearInvoices,
    clearExpences,
    clearRegisters,
-})(withRouter(RegisterTab));
+})(RegisterTab);

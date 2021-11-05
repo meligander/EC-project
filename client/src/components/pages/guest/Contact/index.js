@@ -1,30 +1,43 @@
 import React from "react";
+import { connect } from "react-redux";
+import { ImPhone } from "react-icons/im";
+import { MdEmail } from "react-icons/md";
+import { FaMapMarkedAlt } from "react-icons/fa";
 
 import "./style.scss";
 
-const Contact = () => {
+const Contact = ({ mixvalues: { footer, navbar } }) => {
    return (
-      <section className="contact">
+      <section
+         className="contact"
+         style={{ minHeight: `calc(100vh - ${footer}px - ${navbar}px)` }}
+      >
          <h1 className="text-primary heading-primary text-center">
             Contáctanos
          </h1>
          <div className="row">
             <div className="contact-box heading-tertiary">
-               <i className="fas fa-phone contact-box-icon"></i>
+               <span className="contact-box-icon">
+                  <ImPhone />
+               </span>
                <h3 className=" mb-3">Teléfono</h3>
                <p className="heading-tertiary contact-box-text ">
                   (02656) 476-661
                </p>
             </div>
             <div className="contact-box heading-tertiary">
-               <i className="far fa-envelope contact-box-icon"></i>
+               <span className="contact-box-icon">
+                  <MdEmail />
+               </span>
                <h3 className=" mb-3">Email</h3>
                <p className="heading-tertiary contact-box-text">
                   vdmenglishcenter@gmail.com
                </p>
             </div>
             <div className="contact-box heading-tertiary">
-               <i className="fas fa-map-marked-alt contact-box-icon"></i>
+               <span className="contact-box-icon">
+                  <FaMapMarkedAlt />
+               </span>
                <h3 className=" mb-3">Dirección</h3>
                <p className="heading-tertiary contact-box-text">
                   Coronel Mercau 783
@@ -45,4 +58,8 @@ const Contact = () => {
    );
 };
 
-export default Contact;
+const mapStateToProps = (state) => ({
+   mixvalues: state.mixvalues,
+});
+
+export default connect(mapStateToProps)(Contact);

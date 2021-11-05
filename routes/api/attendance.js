@@ -45,7 +45,7 @@ router.get("/:class_id", auth, async (req, res) => {
       res.json(attendancesTable);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -74,7 +74,7 @@ router.get("/student/:class_id/:user_id", auth, async (req, res) => {
       res.json(attendances);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -154,7 +154,7 @@ router.post("/period", auth, async (req, res) => {
       res.json({ msg: "Attendances Updated" });
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -206,7 +206,7 @@ router.post("/", auth, async (req, res) => {
       res.json(attendancesTable);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -230,8 +230,7 @@ router.post("/bimester", auth, async (req, res) => {
 
    if (!classroom.day1 || !classroom.day2)
       return res.status(400).json({
-         msg:
-            "Deben estar cargadas los días en la que los alumno asisten a clases",
+         msg: "Deben estar cargadas los días en la que los alumno asisten a clases",
       });
 
    dates = getDaysBetweenDates(fromDate, toDate, classroom.day1);
@@ -274,7 +273,7 @@ router.post("/bimester", auth, async (req, res) => {
       res.json(attendancesTable);
    } catch (err) {
       console.error(err.message);
-      return res.status(500).send("Server Error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -355,15 +354,12 @@ router.post("/create-list", auth, (req, res) => {
          pdfTemplate(css, img, title, thead, tbody, classInfo, true),
          options
       ).toFile(name, (err) => {
-         if (err) {
-            res.send(Promise.reject());
-         }
-
-         res.send(Promise.resolve());
+         if (err) res.send(Promise.reject());
+         else res.send(Promise.resolve());
       });
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("PDF error");
+      res.status(500).json({ msg: "PDF Error" });
    }
 });
 
@@ -406,7 +402,7 @@ router.delete("/date/:date/:classroom", auth, async (req, res) => {
       res.json(attendancesTable);
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 });
 
@@ -423,7 +419,7 @@ const buildTable = async (attendances, class_id, res) => {
       });
    } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server Error" });
    }
 
    users = enrollments.sort((a, b) => {

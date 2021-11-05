@@ -2,7 +2,7 @@ import moment from "moment";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
 
-import { updateLoadingSpinner } from "./mixvalues";
+import { updateLoadingSpinner, updatePageNumber } from "./mixvalues";
 import { clearRegisters } from "./register";
 import { setAlert } from "./alert";
 
@@ -18,10 +18,12 @@ import {
    EXPENCETYPES_CLEARED,
    EXPENCE_ERROR,
    EXPENCETYPE_ERROR,
+   TRANSACTIONS_ERROR,
 } from "./types";
 
 export const loadTransactions = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       let filter = "";
@@ -41,25 +43,19 @@ export const loadTransactions = (filterData) => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-
-      dispatch({
-         type: EXPENCE_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      window.scroll(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setExpencesError(TRANSACTIONS_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         window.scroll(0, 0);
+      } else error = true;
    }
-   dispatch(updateLoadingSpinner(false));
+
+   if (!error) dispatch(updateLoadingSpinner(false));
 };
 
 export const loadWithdrawals = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       let filter = "";
@@ -79,64 +75,35 @@ export const loadWithdrawals = (filterData) => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-
-      dispatch({
-         type: EXPENCE_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      window.scroll(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setExpencesError(TRANSACTIONS_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         window.scroll(0, 0);
+      } else error = true;
    }
-   dispatch(updateLoadingSpinner(false));
+
+   if (!error) dispatch(updateLoadingSpinner(false));
 };
 
-export const loadExpenceTypes = () => async (dispatch) => {
+export const loadExpenceTypes = (expenceType) => async (dispatch) => {
    try {
-      const res = await api.get("/expence-type");
+      const res = await api.get(
+         `/expence-type${!expenceType ? "/withdrawal" : ""}`
+      );
       dispatch({
          type: EXPENCETYPES_LOADED,
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: EXPENCETYPE_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-   }
-};
-
-export const loadWithdrawalTypes = () => async (dispatch) => {
-   try {
-      const res = await api.get("/expence-type/withdrawal");
-      dispatch({
-         type: EXPENCETYPES_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      dispatch({
-         type: EXPENCETYPE_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
+      if (err.response.status !== 401)
+         dispatch(setExpencesError(EXPENCETYPE_ERROR, err.response));
    }
 };
 
 //Update or register a user
 export const registerExpence = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    let expence = {};
    for (const prop in formData) {
@@ -157,36 +124,26 @@ export const registerExpence = (formData) => async (dispatch) => {
 
       dispatch(setAlert("Gasto/Ingreso Registrado", "success", "2", 7000));
    } catch (err) {
-      if (err.response.data.errors) {
-         const errors = err.response.data.errors;
-         errors.forEach((error) => {
-            dispatch(setAlert(error.msg, "danger", "2"));
-         });
-         dispatch({
-            type: EXPENCE_ERROR,
-            payload: errors,
-         });
-      } else {
-         const msg = err.response.data.msg;
-         const type = err.response.statusText;
-         dispatch({
-            type: EXPENCE_ERROR,
-            payload: {
-               type,
-               status: err.response.status,
-               msg,
-            },
-         });
-         dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      }
+      if (err.response.status !== 401) {
+         dispatch(setExpencesError(EXPENCE_ERROR, err.response));
+
+         if (err.response.data.errors)
+            err.response.data.errors.forEach((error) => {
+               dispatch(setAlert(error.msg, "danger", "2"));
+            });
+         else dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const deleteExpence = (expence_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       await api.delete(`/expence/${expence_id}`);
@@ -200,25 +157,21 @@ export const deleteExpence = (expence_id) => async (dispatch) => {
 
       dispatch(clearTransactions());
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: EXPENCE_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setExpencesError(EXPENCE_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const updateExpenceTypes = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       const res = await api.post("/expence-type", formData);
@@ -230,25 +183,21 @@ export const updateExpenceTypes = (formData) => async (dispatch) => {
 
       dispatch(setAlert("Tipos de Movimientos Modificados", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: EXPENCE_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setExpencesError(EXPENCE_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const deleteExpenceType = (toDelete) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       await api.delete(`/expence-type/${toDelete}`);
@@ -260,25 +209,22 @@ export const deleteExpenceType = (toDelete) => async (dispatch) => {
 
       dispatch(setAlert("Tipo de Gasto Eliminado", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: EXPENCE_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setExpencesError(EXPENCE_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const transactionsPDF = (transactions, total) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
+
    try {
       if (total)
          await api.post("/expence/withdrawal/create-list", {
@@ -299,21 +245,16 @@ export const transactionsPDF = (transactions, total) => async (dispatch) => {
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: EXPENCE_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setExpencesError(EXPENCE_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const clearExpenceTypes = () => (dispatch) => {
@@ -326,4 +267,18 @@ export const clearExpences = () => (dispatch) => {
 
 export const clearTransactions = () => (dispatch) => {
    dispatch({ type: TRANSACTIONS_CLEARED });
+   dispatch(updatePageNumber(0));
+};
+
+const setExpencesError = (type, response) => (dispatch) => {
+   dispatch({
+      type: type,
+      payload: response.data.errors
+         ? response.data.errors
+         : {
+              type: response.statusText,
+              status: response.status,
+              msg: response.data.msg,
+           },
+   });
 };

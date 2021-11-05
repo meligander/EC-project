@@ -6,20 +6,20 @@ const InvoiceSchema = new mongoose.Schema({
       required: true,
    },
    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
+      _id: {
+         type: mongoose.Schema.Types.ObjectId,
+         ref: "user",
+      },
+      name: {
+         type: String,
+      },
+      lastname: {
+         type: String,
+      },
+      email: {
+         type: String,
+      },
    },
-   //SI ES ALGUIEN NO REGISTRADO
-   name: {
-      type: String,
-   },
-   lastname: {
-      type: String,
-   },
-   email: {
-      type: String,
-   },
-   //
    date: {
       type: Date,
       default: Date.now,

@@ -20,20 +20,16 @@ export const loadTowns = () => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      dispatch({
-         type: TOWNS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-      window.scrollTo(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setTownsError(TOWNS_ERROR, err.response));
+         window.scrollTo(0, 0);
+      }
    }
 };
 
 export const updateTowns = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       const res = await api.post("/town", formData);
@@ -47,59 +43,61 @@ export const updateTowns = (formData) => async (dispatch) => {
 
       dispatch(setAlert("Localidades Modificadas", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: TOWNS_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setTownsError(TOWNS_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
-export const deleteTown = (toDelete) => async (dispatch) => {
+export const deleteTown = (town_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
-      await api.delete(`/town/${toDelete}`);
+      await api.delete(`/town/${town_id}`);
 
       dispatch(clearNeighbourhoods());
 
       dispatch({
          type: TOWN_DELETED,
-         payload: toDelete,
+         payload: town_id,
       });
 
       dispatch(
          setAlert("Localidad y Barrios Relacionados Eliminados", "success", "2")
       );
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: TOWNS_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setTownsError(TOWNS_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const clearTowns = () => (dispatch) => {
    dispatch({
       type: TOWNS_CLEARED,
+   });
+};
+
+const setTownsError = (type, response) => (dispatch) => {
+   dispatch({
+      type: type,
+      payload: {
+         type: response.statusText,
+         status: response.status,
+         msg: response.data.msg,
+      },
    });
 };

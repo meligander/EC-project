@@ -1,118 +1,89 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
+import { ImFilePdf } from "react-icons/im";
 
-import {
-   loadRegistersByMonth,
-   registerPDF,
-} from "../../../../../../actions/register";
-import {
-   updatePreviousPage,
-   formatNumber,
-} from "../../../../../../actions/mixvalues";
-
-import Loading from "../../../../../modal/Loading";
+import { loadRegisters, registerPDF } from "../../../../../../actions/register";
+import { formatNumber } from "../../../../../../actions/mixvalues";
 
 const RegisterByMonth = ({
-   registers: { registers, loadingRegisters },
-   loadRegistersByMonth,
+   registers: { registers, loading },
+   loadRegisters,
    registerPDF,
-   updatePreviousPage,
 }) => {
    useEffect(() => {
-      if (loadingRegisters) {
-         loadRegistersByMonth();
-         updatePreviousPage("register");
-      }
-   }, [loadingRegisters, loadRegistersByMonth, updatePreviousPage]);
+      if (loading) loadRegisters(null, true);
+   }, [loading, loadRegisters]);
 
    return (
       <>
-         {!loadingRegisters ? (
-            <>
-               <h2>Cajas por Mes</h2>
+         <h2>Cajas por Mes</h2>
 
-               <div className="wrapper">
-                  <table className="my-2">
-                     <thead>
-                        <tr>
-                           <th className="blank"></th>
-                           <th>Ingresos</th>
-                           <th>Egresos</th>
-                           <th>Otros Ing.</th>
-                           <th>Retiro</th>
-                           <th>Diferencia</th>
+         <div className="wrapper">
+            <table className="my-2">
+               <thead>
+                  <tr>
+                     <th className="blank"></th>
+                     <th>Ingresos</th>
+                     <th>Egresos</th>
+                     <th>Otros Ing.</th>
+                     <th>Retiro</th>
+                     <th>Diferencia</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  {!loading &&
+                     registers.map((register, i) => (
+                        <tr key={i}>
+                           <th>{register.month}</th>
+                           <td>
+                              {register.income !== 0 &&
+                                 "$" + formatNumber(register.income)}
+                           </td>
+                           <td>
+                              {register.expence !== 0 &&
+                                 "$" + formatNumber(register.expence)}
+                           </td>
+                           <td>
+                              {register.cheatincome !== 0 &&
+                                 "$" + formatNumber(register.cheatincome)}
+                           </td>
+                           <td>
+                              {register.withdrawal !== 0 &&
+                                 "$" + formatNumber(register.withdrawal)}
+                           </td>
+                           <td
+                              className={register.difference < 0 ? "debt" : ""}
+                           >
+                              {register.difference !== 0
+                                 ? register.difference < 0
+                                    ? "-$" + formatNumber(register.difference)
+                                    : "+$" + formatNumber(register.difference)
+                                 : ""}
+                           </td>
                         </tr>
-                     </thead>
-                     <tbody>
-                        {!loadingRegisters &&
-                           registers.map((register, i) => (
-                              <tr key={i}>
-                                 <th>{register.month}</th>
-                                 <td>
-                                    {register.income !== 0 &&
-                                       "$" + formatNumber(register.income)}
-                                 </td>
-                                 <td>
-                                    {register.expence !== 0 &&
-                                       "$" + formatNumber(register.expence)}
-                                 </td>
-                                 <td>
-                                    {register.cheatincome !== 0 &&
-                                       "$" + formatNumber(register.cheatincome)}
-                                 </td>
-                                 <td>
-                                    {register.withdrawal !== 0 &&
-                                       "$" + formatNumber(register.withdrawal)}
-                                 </td>
-                                 <td
-                                    className={
-                                       register.difference < 0 ? "debt" : ""
-                                    }
-                                 >
-                                    {register.difference !== 0
-                                       ? register.difference < 0
-                                          ? "-$" +
-                                            formatNumber(register.difference)
-                                          : "+$" +
-                                            formatNumber(register.difference)
-                                       : ""}
-                                 </td>
-                              </tr>
-                           ))}
-                     </tbody>
-                  </table>
+                     ))}
+               </tbody>
+            </table>
+         </div>
+         {!loading && (
+            <div className="btn-right">
+               <div className="tooltip">
+                  <button
+                     type="button"
+                     className="btn btn-secondary tooltip"
+                     onClick={(e) => {
+                        e.preventDefault();
+                        registerPDF(registers);
+                     }}
+                  >
+                     <ImFilePdf />
+                  </button>
+                  <span className="tooltiptext">PDF con cajas mensuales</span>
                </div>
-               <div className="btn-right">
-                  <div className="tooltip">
-                     <button
-                        type="button"
-                        className="btn btn-secondary tooltip"
-                        onClick={(e) => {
-                           e.preventDefault();
-                           registerPDF(registers);
-                        }}
-                     >
-                        <i className="fas fa-file-pdf"></i>
-                     </button>
-                     <span className="tooltiptext">
-                        PDF con cajas mensuales
-                     </span>
-                  </div>
-               </div>
-            </>
-         ) : (
-            <Loading />
+            </div>
          )}
       </>
    );
-};
-
-RegisterByMonth.propTypes = {
-   registers: PropTypes.object.isRequired,
-   loadRegistersByMonth: PropTypes.func.isRequired,
-   registerPDF: PropTypes.func.isRequired,
-   updatePreviousPage: PropTypes.func.isRequired,
 };
 
 const mapStatetoProps = (state) => ({
@@ -120,7 +91,6 @@ const mapStatetoProps = (state) => ({
 });
 
 export default connect(mapStatetoProps, {
-   loadRegistersByMonth,
+   loadRegisters,
    registerPDF,
-   updatePreviousPage,
 })(RegisterByMonth);

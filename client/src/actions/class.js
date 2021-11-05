@@ -1,6 +1,7 @@
 import moment from "moment";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
+import history from "../utils/history";
 
 import { updateLoadingSpinner } from "./mixvalues";
 import { addUserToList, removeUserFromList } from "./user";
@@ -9,45 +10,31 @@ import { setAlert } from "./alert";
 import {
    CLASS_LOADED,
    CLASSES_LOADED,
-   CLASSSTUDENTS_LOADED,
    ACTIVECLASSES_LOADED,
    CLASS_REGISTERED,
    CLASSSTUDENT_ADDED,
    CLASS_UPDATED,
    CLASSSTUDENT_REMOVED,
    CLASS_DELETED,
-   CLASSCATEGORY_UPDATED,
    CLASS_CLEARED,
    CLASSES_CLEARED,
-   ACTIVECLASSES_CLEARED,
    CLASS_ERROR,
-   CLASSSTUDENTS_ERROR,
+   CLASSES_ERROR,
 } from "./types";
 
 export const loadClass = (class_id) => async (dispatch) => {
    try {
-      if (class_id === "0") {
-         dispatch({
-            type: CLASS_LOADED,
-            payload: null,
-         });
-      } else {
-         const res = await api.get(`/class/${class_id}`);
-         dispatch({
-            type: CLASS_LOADED,
-            payload: res.data,
-         });
-         dispatch(loadClassStudents(class_id));
-      }
-   } catch (err) {
+      let res;
+
+      if (class_id !== "0") res = await api.get(`/class/${class_id}`);
+
       dispatch({
-         type: CLASS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
+         type: CLASS_LOADED,
+         payload: class_id === "0" ? null : res.data,
       });
+   } catch (err) {
+      if (err.response.status !== 401)
+         dispatch(setClassesError(CLASS_ERROR, err.response));
    }
 };
 
@@ -60,59 +47,30 @@ export const getActiveClasses = () => async (dispatch) => {
          payload: res.data.length,
       });
    } catch (err) {
-      dispatch({
-         type: CLASS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-      window.scroll(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setClassesError(CLASSES_ERROR, err.response));
+         window.scroll(0, 0);
+      }
    }
 };
 
 export const loadStudentClass = (user_id) => async (dispatch) => {
    try {
       const res = await api.get(`/class/student/${user_id}`);
+
       dispatch({
          type: CLASS_LOADED,
          payload: res.data,
       });
-      dispatch(loadClassStudents(res.data._id));
    } catch (err) {
-      dispatch({
-         type: CLASS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
-   }
-};
-
-export const loadClassStudents = (class_id) => async (dispatch) => {
-   try {
-      const res = await api.get(`/user?type=student&classroom=${class_id}`);
-      dispatch({
-         type: CLASSSTUDENTS_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      dispatch({
-         type: CLASSSTUDENTS_ERROR,
-         payload: {
-            type: err.response.statusText,
-            status: err.response.status,
-            msg: err.response.data.msg,
-         },
-      });
+      if (err.response.status !== 401)
+         dispatch(setClassesError(CLASS_ERROR, err.response));
    }
 };
 
 export const loadClasses = (filterData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    let filter = "";
    const filternames = Object.keys(filterData);
@@ -132,27 +90,19 @@ export const loadClasses = (filterData) => async (dispatch) => {
          payload: res.data,
       });
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: CLASS_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      window.scrollTo(0, 0);
+      if (err.response.status !== 401) {
+         dispatch(setClassesError(CLASSES_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         window.scrollTo(0, 0);
+      } else error = true;
    }
 
-   dispatch(updateLoadingSpinner(false));
+   if (!error) dispatch(updateLoadingSpinner(false));
 };
 
-export const registerUpdateClass = (formData, history, class_id) => async (
-   dispatch
-) => {
+export const registerUpdateClass = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    let newClass = {};
    for (const prop in formData) {
@@ -162,59 +112,42 @@ export const registerUpdateClass = (formData, history, class_id) => async (
    }
 
    try {
-      let res = {};
-      if (!class_id) {
-         res = await api.post("/class", newClass);
-      } else {
-         res = await api.put(`/class/${class_id}`, formData);
-      }
+      let res;
+
+      if (formData._id === "0") res = await api.post("/class", newClass);
+      else res = await api.put(`/class/${formData._id}`, formData);
 
       dispatch({
-         type: !class_id ? CLASS_REGISTERED : CLASS_UPDATED,
+         type: formData._id === "0" ? CLASS_REGISTERED : CLASS_UPDATED,
          payload: res.data,
       });
 
       dispatch(
          setAlert(
-            !class_id ? "Nueva Clase Creada" : "Clase Modificada",
+            formData._id === "0" ? "Nueva Clase Creada" : "Clase Modificada",
             "success",
             "2"
          )
       );
 
+      dispatch(getActiveClasses());
       history.push("/classes");
-      dispatch(clearActiveClasses());
    } catch (err) {
-      if (err.response.data.errors) {
-         const errors = err.response.data.errors;
-         errors.forEach((error) => {
-            dispatch(setAlert(error.msg, "danger", "2"));
-         });
-         dispatch({
-            type: CLASS_ERROR,
-            payload: errors,
-         });
-      } else {
-         const msg = err.response.data.msg;
-         const type = err.response.statusText;
-         dispatch({
-            type: CLASS_ERROR,
-            payload: {
-               type,
-               status: err.response.status,
-               msg,
-            },
-         });
-         dispatch(setAlert(msg ? msg : type, "danger", "2"));
-      }
+      if (err.response.status !== 401) {
+         dispatch(setClassesError(CLASS_ERROR, err.response));
+
+         if (err.response.data.errors)
+            err.response.data.errors.forEach((error) => {
+               dispatch(setAlert(error.msg, "danger", "2"));
+            });
+         else dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
-};
-
-export const updateClassCategory = (classInfo) => (dispatch) => {
-   dispatch({ type: CLASSCATEGORY_UPDATED, payload: classInfo });
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const addStudent = (student) => (dispatch) => {
@@ -233,8 +166,9 @@ export const removeStudent = (student) => (dispatch) => {
    dispatch(addUserToList(student));
 };
 
-export const deleteClass = (class_id, history) => async (dispatch) => {
+export const deleteClass = (class_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       await api.delete(`/class/${class_id}`);
@@ -244,30 +178,26 @@ export const deleteClass = (class_id, history) => async (dispatch) => {
          payload: class_id,
       });
 
-      dispatch(clearActiveClasses());
+      dispatch(getActiveClasses());
 
       history.push("/classes");
       dispatch(setAlert("Clase Eliminada", "success", "2"));
    } catch (err) {
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: CLASS_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setClassesError(CLASS_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const classPDF = (classInfo, type) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
+   let error = false;
 
    try {
       let pdf;
@@ -314,22 +244,16 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
-      console.log(err);
-      const msg = err.response.data.msg;
-      const type = err.response.statusText;
-      dispatch({
-         type: CLASS_ERROR,
-         payload: {
-            type,
-            status: err.response.status,
-            msg,
-         },
-      });
-      dispatch(setAlert(msg ? msg : type, "danger", "2"));
+      if (err.response.status !== 401) {
+         dispatch(setClassesError(CLASS_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      }
    }
 
-   window.scrollTo(0, 0);
-   dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const clearClass = () => (dispatch) => {
@@ -338,14 +262,21 @@ export const clearClass = () => (dispatch) => {
    });
 };
 
-export const clearActiveClasses = () => (dispatch) => {
-   dispatch({
-      type: ACTIVECLASSES_CLEARED,
-   });
-};
-
 export const clearClasses = () => (dispatch) => {
    dispatch({
       type: CLASSES_CLEARED,
+   });
+};
+
+const setClassesError = (type, response) => (dispatch) => {
+   dispatch({
+      type: type,
+      payload: response.data.errors
+         ? response.data.errors
+         : {
+              type: response.statusText,
+              status: response.status,
+              msg: response.data.msg,
+           },
    });
 };

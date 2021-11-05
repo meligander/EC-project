@@ -7,8 +7,8 @@ import {
    ENROLLMENT_DELETED,
    ENROLLMENT_CLEARED,
    ENROLLMENTS_CLEARED,
-   YEARENROLLMENTS_CLEARED,
    ENROLLMENT_ERROR,
+   ENROLLMENTS_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -16,7 +16,7 @@ const initialState = {
    enrollments: [],
    type: "",
    enrollment: null,
-   loadingEnrollments: true,
+   loadingEnrollment: true,
    otherValues: {
       yearEnrollments: {
          year: "",
@@ -33,7 +33,7 @@ export default function (state = initialState, action) {
          return {
             ...state,
             enrollment: payload,
-            loading: false,
+            loadingEnrollment: false,
             error: {},
          };
       case ENROLLMENTS_LOADED:
@@ -41,7 +41,7 @@ export default function (state = initialState, action) {
             ...state,
             enrollments: payload.enrollments,
             type: payload.type,
-            loadingEnrollments: false,
+            loading: false,
             error: {},
          };
       case YEARENROLLMENTS_LOADED:
@@ -52,14 +52,22 @@ export default function (state = initialState, action) {
             },
          };
       case ENROLLMENT_REGISTERED:
-         return state;
+         return {
+            ...state,
+            enrollments:
+               state.enrollments.length > 0
+                  ? [payload]
+                  : [...state.enrollments, payload],
+            loading: false,
+            error: {},
+         };
       case ENROLLMENT_UPDATED:
          return {
             ...state,
             enrollments: state.enrollments.map((enrollment) =>
                enrollment._id === payload._id ? payload : enrollment
             ),
-            loadingEnrollments: false,
+            loading: false,
          };
       case ENROLLMENT_DELETED:
          return {
@@ -67,19 +75,19 @@ export default function (state = initialState, action) {
             enrollments: state.enrollments.filter(
                (enrollment) => enrollment._id !== payload
             ),
-            loadingEnrollments: false,
+            loading: false,
          };
       case ENROLLMENT_CLEARED:
          return {
             ...state,
             enrollment: null,
-            loading: true,
+            loadingEnrollment: true,
          };
       case ENROLLMENTS_CLEARED:
-         return initialState;
-      case YEARENROLLMENTS_CLEARED:
          return {
             ...state,
+            enrollments: [],
+            loading: true,
             otherValues: {
                yearEnrollments: {
                   year: "",
@@ -90,9 +98,22 @@ export default function (state = initialState, action) {
       case ENROLLMENT_ERROR:
          return {
             ...state,
-            enrollments: [],
-            loadingEnrollments: false,
+            enrollment: null,
+            loadingEnrollment: false,
             error: payload,
+         };
+      case ENROLLMENTS_ERROR:
+         return {
+            ...state,
+            enrollments: [],
+            loading: false,
+            error: payload,
+            otherValues: {
+               yearEnrollments: {
+                  year: "",
+                  length: "",
+               },
+            },
          };
       default:
          return state;
