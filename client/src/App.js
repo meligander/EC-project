@@ -34,7 +34,6 @@ const App = ({ loadUser, mixvalues: { navbar } }) => {
          <Navbar />
          <div
             style={{
-               /* minHeight: `calc(100vh - ${footer}px)`, */
                paddingTop: `${navbar}px`,
             }}
          >

@@ -4,12 +4,12 @@ import { Link } from "react-router-dom";
 import { FaUserCircle, FaRegUserCircle } from "react-icons/fa";
 
 import { clearProfile } from "../../../../../actions/user";
+import { updateCurrentNav } from "../../../../../actions/mixvalues";
 
 const GuardianNavbar = ({
    auth: { userLogged },
-   toggleMenu,
-   currentNav,
-   setCurrentNav,
+   mixvalues: { currentNav, menuToggle },
+   updateCurrentNav,
    clearProfile,
 }) => {
    return (
@@ -18,17 +18,17 @@ const GuardianNavbar = ({
             userLogged.children.map((child, index) => (
                <li
                   key={child._id}
-                  className={`nav-item ${toggleMenu ? "show" : ""} ${
+                  className={`nav-item ${menuToggle ? "show" : ""} ${
                      currentNav === "child" + index ? "current" : ""
                   }`}
                >
                   <Link
                      className="nav-link"
-                     to={`/dashboard/${child._id}`}
+                     to={`/index/dashboard/${child._id}`}
                      onClick={() => {
                         window.scroll(0, 0);
                         clearProfile();
-                        setCurrentNav(`child${index}`);
+                        updateCurrentNav(`child${index}`, true);
                      }}
                   >
                      {index % 2 === 0 ? <FaRegUserCircle /> : <FaUserCircle />}
@@ -44,6 +44,9 @@ const GuardianNavbar = ({
 
 const mapStateToProps = (state) => ({
    auth: state.auth,
+   mixvalues: state.mixvalues,
 });
 
-export default connect(mapStateToProps, { clearProfile })(GuardianNavbar);
+export default connect(mapStateToProps, { clearProfile, updateCurrentNav })(
+   GuardianNavbar
+);

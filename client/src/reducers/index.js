@@ -11,7 +11,6 @@ import neighbourhoods from "./neighbourhood";
 import registers from "./register";
 import categories from "./category";
 import expences from "./expence";
-import posts from "./post";
 import mixvalues from "./mixvalues";
 import invoices from "./invoice";
 import enrollments from "./enrollment";
@@ -31,7 +30,6 @@ export default combineReducers({
    mixvalues,
    neighbourhoods,
    penalties,
-   posts,
    registers,
    towns,
    users: user,

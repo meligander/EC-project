@@ -29,6 +29,7 @@ function AverageTab({
    const { amount, category } = filterData;
 
    const onChange = (e) => {
+      e.persist();
       setFilterData({
          ...filterData,
          [e.target.name]: e.target.value,
@@ -76,7 +77,7 @@ function AverageTab({
                   className="form-input"
                   type="number"
                   value={amount}
-                  onChange={(e) => onChange(e)}
+                  onChange={onChange}
                   name="amount"
                   id="amount"
                   placeholder="Cantidad"
@@ -115,7 +116,7 @@ function AverageTab({
                                  <td>
                                     <Link
                                        className="btn-text"
-                                       to={`/dashboard/${enroll.student._id}`}
+                                       to={`/index/dashboard/${enroll.student._id}`}
                                        onClick={() => {
                                           window.scroll(0, 0);
                                           clearProfile();

@@ -1,16 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import {
-   FaAddressCard,
-   FaComments,
-   FaEdit,
-   FaPenFancy,
-   FaScroll,
-   FaTrashAlt,
-} from "react-icons/fa";
+import { FaEdit, FaPenFancy, FaScroll, FaTrashAlt } from "react-icons/fa";
 import { IoCheckmarkCircleSharp } from "react-icons/io5";
 import { ImFilePdf } from "react-icons/im";
+import { CgNotes } from "react-icons/cg";
 
 import {
    loadClass,
@@ -18,7 +12,7 @@ import {
    classPDF,
 } from "../../../../../../actions/class";
 import { clearAttendances } from "../../../../../../actions/attendance";
-import { clearPosts, getUnseenPosts } from "../../../../../../actions/post";
+import { togglePopup } from "../../../../../../actions/mixvalues";
 import {
    clearGrades,
    clearGradeTypes,
@@ -32,82 +26,53 @@ import StudentTable from "../../../sharedComp/tables/StudentTable";
 
 import "./style.scss";
 
-const OneClass = ({
+const SingleClass = ({
    match,
    classes: { classInfo, loadingClass },
-   posts: { unseenPosts },
    auth: { userLogged },
    loadClass,
-   clearPosts,
    deleteClass,
-   getUnseenPosts,
    clearAttendances,
    clearGrades,
    clearGradeTypes,
    clearSearch,
    clearProfile,
+   togglePopup,
    classPDF,
    gradesPDF,
 }) => {
+   const _id = match.params.class_id;
+
    const userCanSeeButtons =
       userLogged.type !== "student" && userLogged.type !== "guardian";
-   const userCanMarkSeen =
-      userLogged.type === "student" ||
-      userLogged.type === "admin&teacher" ||
-      userLogged.type === "teacher";
 
    const [adminValues, setAdminValues] = useState({
-      toggleModalDelete: false,
-      toggleModalReportCards: false,
+      popupType: "",
    });
 
-   const { toggleModalDelete, toggleModalReportCards } = adminValues;
+   const { popupType } = adminValues;
 
    useEffect(() => {
-      if (userLogged.type !== "student" && loadingClass) {
-         loadClass(match.params.class_id);
-         if (userCanMarkSeen) getUnseenPosts(match.params.class_id);
-      }
-   }, [
-      loadClass,
-      match.params.class_id,
-      getUnseenPosts,
-      userLogged,
-      loadingClass,
-      userCanMarkSeen,
-   ]);
+      if (loadingClass) loadClass(_id);
+   }, [loadClass, _id, loadingClass]);
 
    return (
       <div className="classInfo">
-         <PopUp
-            toggleModal={toggleModalDelete}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModalDelete: !toggleModalDelete,
-               }))
-            }
-            text="¿Está seguro que desea eliminar el curso?"
-            confirm={() => deleteClass(classInfo._id)}
-         />
-         <PopUp
-            toggleModal={toggleModalReportCards}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModalReportCards: !toggleModalReportCards,
-               }))
-            }
-            users={classInfo.students}
-            type="report-cards"
-            confirm={(observations) =>
-               gradesPDF(observations, classInfo, "report-cards")
-            }
-         />
          <h1 className="pt-3 text-center light-font">Clase</h1>
 
          {!loadingClass && (
             <>
+               <PopUp
+                  text={
+                     popupType === "delete"
+                        ? "¿Está seguro que desea eliminar el curso?"
+                        : null
+                  }
+                  confirm={(observations) => {
+                     if (popupType === "delete") deleteClass(classInfo._id);
+                     else gradesPDF(observations, classInfo, "report-cards");
+                  }}
+               />
                <ClassInfo classInfo={classInfo} />
                {classInfo.students && (
                   <>
@@ -128,7 +93,7 @@ const OneClass = ({
                               <Link
                                  to={
                                     classInfo.students.length > 0
-                                       ? `/grades/${classInfo._id}`
+                                       ? `/class/grades/${classInfo._id}`
                                        : "!#"
                                  }
                                  className={
@@ -148,7 +113,7 @@ const OneClass = ({
                               <Link
                                  to={
                                     classInfo.students.length > 0
-                                       ? `/attendances/${classInfo._id}`
+                                       ? `/class/attendances/${classInfo._id}`
                                        : "!#"
                                  }
                                  className={
@@ -166,40 +131,28 @@ const OneClass = ({
                                     &nbsp;Inasistencias
                                  </span>
                               </Link>
+                              <Link
+                                 to={
+                                    classInfo.students.length > 0
+                                       ? `/class/notes/${classInfo._id}`
+                                       : "!#"
+                                 }
+                                 className={
+                                    classInfo.students.length > 0
+                                       ? "btn btn-primary"
+                                       : "btn btn-black"
+                                 }
+                                 onClick={() => {
+                                    window.scroll(0, 0);
+                                 }}
+                              >
+                                 <CgNotes />
+                                 <span className="hide-sm">
+                                    &nbsp;Observaciones
+                                 </span>
+                              </Link>
                            </>
                         )}
-                        <Link
-                           to={
-                              classInfo.students.length > 0
-                                 ? `/chat/${classInfo._id}`
-                                 : "!#"
-                           }
-                           className={
-                              classInfo.students.length > 0
-                                 ? "btn btn-primary"
-                                 : "btn btn-black"
-                           }
-                           onClick={() => {
-                              clearPosts();
-                              window.scroll(0, 0);
-                           }}
-                        >
-                           <div className="notification">
-                              <FaComments />
-                              {unseenPosts > 0 && (
-                                 <span className="post-notification light">
-                                    {unseenPosts}
-                                 </span>
-                              )}
-                           </div>
-                           <span
-                              className={`hide-sm ${
-                                 unseenPosts > 0 ? "text" : ""
-                              }`}
-                           >
-                              &nbsp; Chat
-                           </span>
-                        </Link>
                      </div>
                      <br />
                      {userCanSeeButtons && (
@@ -234,28 +187,28 @@ const OneClass = ({
                                  PDF en blanco para notas y asistencias
                               </span>
                            </div>
-                           <div className="tooltip">
+                           {/* <div className="tooltip">
                               <button
                                  type="button"
                                  className="btn btn-secondary"
                                  onClick={(e) => {
                                     e.preventDefault();
+                                    togglePopup("report-cards");
                                     setAdminValues((prev) => ({
                                        ...prev,
-                                       toggleModalReportCards:
-                                          !toggleModalReportCards,
+                                       popupType: "report-cards",
                                     }));
                                  }}
                               >
                                  <FaAddressCard />
                               </button>
                               <span className="tooltiptext">PDF libretas</span>
-                           </div>
+                           </div> */}
                            {userLogged.type !== "teacher" && (
                               <>
                                  <div className="tooltip">
                                     <Link
-                                       to={`/edit-class/${classInfo._id}/${classInfo.category._id}`}
+                                       to={`/class/edit/${classInfo._id}`}
                                        className="btn btn-mix-secondary"
                                        onClick={() => {
                                           window.scroll(0, 0);
@@ -272,10 +225,10 @@ const OneClass = ({
                                        className="btn btn-danger"
                                        onClick={(e) => {
                                           e.preventDefault();
+                                          togglePopup();
                                           setAdminValues((prev) => ({
                                              ...prev,
-                                             toggleModalDelete:
-                                                !toggleModalDelete,
+                                             popupType: "delete",
                                           }));
                                        }}
                                     >
@@ -300,14 +253,12 @@ const OneClass = ({
 const mapStateToProps = (state) => ({
    classes: state.classes,
    auth: state.auth,
-   posts: state.posts,
 });
 
 export default connect(mapStateToProps, {
    loadClass,
-   clearPosts,
    deleteClass,
-   getUnseenPosts,
+   togglePopup,
    classPDF,
    gradesPDF,
    clearGrades,
@@ -315,4 +266,4 @@ export default connect(mapStateToProps, {
    clearProfile,
    clearSearch,
    clearGradeTypes,
-})(OneClass);
+})(SingleClass);

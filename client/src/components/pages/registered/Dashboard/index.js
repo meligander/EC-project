@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import Moment from "react-moment";
 import { Link } from "react-router-dom";
 import { FaUserMinus, FaUserEdit } from "react-icons/fa";
+import format from "date-fns/format";
 
 import {
    loadUser,
@@ -13,6 +13,7 @@ import {
 import { clearTowns } from "../../../../actions/town";
 import { clearUser } from "../../../../actions/user";
 import { clearNeighbourhoods } from "../../../../actions/neighbourhood";
+import { togglePopup } from "../../../../actions/mixvalues";
 
 import PopUp from "../../../modal/PopUp";
 import GoBack from "../../sharedComp/GoBack";
@@ -36,13 +37,13 @@ const Dashboard = ({
    clearUser,
    deleteUser,
    clearUsers,
+   togglePopup,
 }) => {
    const [adminValues, setAdminValues] = useState({
-      toggleModal: false,
       user: null,
    });
 
-   const { toggleModal, user } = adminValues;
+   const { user } = adminValues;
 
    const isOwner =
       userLogged &&
@@ -58,12 +59,11 @@ const Dashboard = ({
       admin: "Administrador",
       "admin&teacher": "Administrador y Profesor",
    };
-
    const _id = match.params.user_id !== "0" ? match.params.user_id : null;
 
    useEffect(() => {
       if (!user) {
-         if (_id && loadingUser) loadUser(_id);
+         if (_id && loadingUser) loadUser(_id, true);
          else {
             setAdminValues((prev) => ({
                ...prev,
@@ -71,7 +71,7 @@ const Dashboard = ({
             }));
          }
       }
-   }, [loadUser, _id, loadingUser, otherUser, userTypeName, user, userLogged]);
+   }, [loadUser, _id, loadingUser, otherUser, user, userLogged]);
 
    const dashboardType = () => {
       switch (user.type) {
@@ -95,18 +95,12 @@ const Dashboard = ({
       }
    };
 
-   const setToggle = () => {
-      setAdminValues({ ...adminValues, toggleModal: !toggleModal });
-   };
-
    return (
       <div className="dashboard">
          <Loading />
          {user !== null && (
             <>
                <PopUp
-                  setToggleModal={setToggle}
-                  toggleModal={toggleModal}
                   confirm={() => deleteUser(user)}
                   text="¿Está seguro que desea eliminar el usuario?"
                />
@@ -184,18 +178,12 @@ const Dashboard = ({
                                  <span className="text-dark">
                                     Fecha de Nacimiento:{" "}
                                  </span>
-                                 <Moment
-                                    format={
-                                       isOwner ||
-                                       userLogged._id === user._id ||
-                                       user.type !== "admin" ||
-                                       user.type !== "admin&teacher"
-                                          ? "DD/MM/YYYY"
-                                          : "DD/MM"
-                                    }
-                                    utc
-                                    date={user.dob}
-                                 />
+                                 {format(
+                                    new Date(user.dob.slice(0, -1)),
+                                    isOwner || userLogged._id === user._id
+                                       ? "d/MM/yyyy"
+                                       : "dd/MM"
+                                 )}
                               </p>
                            )}
 
@@ -262,7 +250,7 @@ const Dashboard = ({
                            {(isAdmin || userLogged._id === user._id) && (
                               <>
                                  <Link
-                                    to={`/edit-user/${user._id}`}
+                                    to={`/user/edit/${user._id}`}
                                     className="btn btn-mix-secondary"
                                     onClick={() => {
                                        window.scroll(0, 0);
@@ -283,7 +271,7 @@ const Dashboard = ({
                                        className="btn btn-danger"
                                        onClick={(e) => {
                                           e.preventDefault();
-                                          setToggle();
+                                          togglePopup();
                                        }}
                                     >
                                        <FaUserMinus />
@@ -318,4 +306,5 @@ export default connect(mapStateToProps, {
    clearUsers,
    clearNeighbourhoods,
    clearUser,
+   togglePopup,
 })(Dashboard);

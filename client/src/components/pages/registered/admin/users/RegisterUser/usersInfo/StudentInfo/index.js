@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 
 const StudentInfo = ({
    isAdmin,
@@ -19,7 +18,7 @@ const StudentInfo = ({
                      name="discount"
                      id="discount"
                      value={discount}
-                     onChange={(e) => onChange(e)}
+                     onChange={onChange}
                   >
                      <option value="">* Seleccione el tipo de descuento</option>
                      <option value={0}>Ninguno</option>
@@ -39,7 +38,7 @@ const StudentInfo = ({
                      name="chargeday"
                      id="chargeday"
                      value={chargeday}
-                     onChange={(e) => onChange(e)}
+                     onChange={onChange}
                   >
                      <option value="">
                         * Seleccione el día en que se aplicará el recargo
@@ -64,7 +63,7 @@ const StudentInfo = ({
                name="birthprov"
                id="birthprov"
                disabled={!isAdmin}
-               onChange={(e) => onChange(e)}
+               onChange={onChange}
             >
                <option value="0">* Seleccione Provincia de Nacimiento</option>
                <option value="Buenos Aires">Buenos Aires</option>
@@ -109,7 +108,7 @@ const StudentInfo = ({
                id="birthtown"
                disabled={!isAdmin}
                value={birthtown}
-               onChange={(e) => onChange(e)}
+               onChange={onChange}
                placeholder="Localidad de Nacimiento"
             />
             <label htmlFor="birthtown" className="form-label">
@@ -118,15 +117,6 @@ const StudentInfo = ({
          </div>
       </>
    );
-};
-
-StudentInfo.propTypes = {
-   isAdmin: PropTypes.bool.isRequired,
-   chargeday: PropTypes.string.isRequired,
-   discount: PropTypes.string.isRequired,
-   birthprov: PropTypes.string.isRequired,
-   birthtown: PropTypes.string.isRequired,
-   onChange: PropTypes.func.isRequired,
 };
 
 export default StudentInfo;

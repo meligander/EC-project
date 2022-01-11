@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import Moment from "react-moment";
+import format from "date-fns/format";
 import { BiFilterAlt } from "react-icons/bi";
 
 import {
@@ -41,7 +41,7 @@ const WithdrawalList = ({
    useEffect(() => {
       if (loading) {
          loadWithdrawals({});
-         loadExpenceTypes(false);
+         loadExpenceTypes(false, false);
       } else
          setAdminValues((prev) => ({
             ...prev,
@@ -50,6 +50,7 @@ const WithdrawalList = ({
    }, [loading, loadWithdrawals, transactions, loadExpenceTypes]);
 
    const onChange = (e) => {
+      e.persist();
       setFilterData({
          ...filterData,
          [e.target.name]: e.target.value,
@@ -120,10 +121,10 @@ const WithdrawalList = ({
                            i < (page + 1) * 10 && (
                               <tr key={transaction._id}>
                                  <td>
-                                    <Moment
-                                       date={transaction.date}
-                                       format="DD/MM/YY"
-                                    />
+                                    {format(
+                                       new Date(transaction.date),
+                                       "dd/MM/yy"
+                                    )}
                                  </td>
                                  <td>{transaction.expencetype.name}</td>
                                  <td>${formatNumber(transaction.value)}</td>

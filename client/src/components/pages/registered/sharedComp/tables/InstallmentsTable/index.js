@@ -1,6 +1,6 @@
 import React from "react";
 import { withRouter } from "react-router-dom";
-import moment from "moment";
+import { getMonth, getYear } from "date-fns";
 import { FaEdit, FaPlus } from "react-icons/fa";
 
 import { formatNumber } from "../../../../../../actions/mixvalues";
@@ -17,10 +17,10 @@ const InstallmentsTable = ({
    selectItem,
    actionForSelected,
 }) => {
-   const invoice = location.pathname === "/invoice-generation";
-   const day = moment();
-   const month = day.month() + 1;
-   const year = day.year();
+   const invoice = location.pathname === "/invoice/register";
+   const day = new Date();
+   const month = getMonth(day) + 1;
+   const year = getYear(day);
 
    return (
       <>
@@ -131,7 +131,7 @@ const InstallmentsTable = ({
             </table>
          </div>
          {forAdmin && (
-            <div className={`btn-right ${!invoice ? "next-btn" : ""}`}>
+            <div className={`btn-center ${!invoice ? "move-down" : ""}`}>
                <button
                   type="button"
                   className={`btn ${
@@ -145,7 +145,6 @@ const InstallmentsTable = ({
                   {!invoice ? (
                      <>
                         <FaEdit />
-
                         <span className="hide-md">&nbsp;Editar</span>
                      </>
                   ) : (

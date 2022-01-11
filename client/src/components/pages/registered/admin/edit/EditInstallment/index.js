@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import moment from "moment";
+import getYear from "date-fns/getYear";
 import { FaTrashAlt } from "react-icons/fa";
 import { FiSave } from "react-icons/fi";
 
@@ -10,6 +10,7 @@ import {
    deleteInstallment,
 } from "../../../../../../actions/installment";
 import { loadUser } from "../../../../../../actions/user";
+import { togglePopup } from "../../../../../../actions/mixvalues";
 
 import PopUp from "../../../../../modal/PopUp";
 
@@ -19,10 +20,12 @@ const EditInstallment = ({
    loadInstallment,
    loadUser,
    updateIntallment,
+   togglePopup,
    deleteInstallment,
-   installments: { installment, loading },
+   installments: { installment, loadingInstallment },
 }) => {
    const [formData, setformData] = useState({
+      _id: "",
       year: 0,
       number: "",
       value: "",
@@ -32,53 +35,52 @@ const EditInstallment = ({
    });
 
    const [adminValues, setAdminValues] = useState({
-      toggleModalDelete: false,
-      toggleModalSave: false,
+      popupType: "",
    });
 
-   const { toggleModalDelete, toggleModalSave } = adminValues;
+   const { popupType } = adminValues;
 
    const { year, number, value, expired, student, halfPayed } = formData;
 
-   const _id = match.params.installment_id;
+   const _id = match.params.item_id;
+   const type = match.params.type;
 
-   const day = moment();
-   const thisYear = day.year();
+   const day = new Date();
+   const thisYear = getYear(day);
 
    useEffect(() => {
-      if (_id === "0")
-         if (loadingUser) loadUser(_id);
-         else if (loading) loadInstallment(_id);
-
-      if (!loading || !loadingUser)
-         setformData((prev) => ({
-            ...prev,
-            ...(_id === "0"
-               ? {
-                    student: user,
-                 }
-               : {
-                    year: installment.year,
-                    number: installment.number,
-                    value: installment.value,
-                    expired: installment.expired,
-                    student: installment.student,
-                    halfPayed: installment.halfPayed
-                       ? installment.halfPayed
-                       : false,
-                 }),
-         }));
+      if (type === "new") {
+         if (loadingUser) loadUser(_id, false);
+         else setformData((prev) => ({ ...prev, student: user }));
+      } else {
+         if (loadingInstallment) loadInstallment(_id);
+         else {
+            setformData((prev) => {
+               let oldInstallment = {};
+               for (const x in prev) {
+                  oldInstallment[x] = !installment[x]
+                     ? prev[x]
+                     : installment[x];
+               }
+               return {
+                  ...oldInstallment,
+               };
+            });
+         }
+      }
    }, [
       loadInstallment,
       loadUser,
-      loading,
+      loadingInstallment,
       loadingUser,
       installment,
       user,
       _id,
+      type,
    ]);
 
    const onChange = (e) => {
+      e.persist();
       setformData({
          ...formData,
          [e.target.name]:
@@ -89,35 +91,27 @@ const EditInstallment = ({
    return (
       <>
          <PopUp
-            text="¿Está seguro que desea eliminar la cuota?"
-            confirm={() => deleteInstallment(_id, student._id)}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModalDelete: !toggleModalDelete,
-               }))
-            }
-            toggleModal={toggleModalDelete}
+            text={`¿Está seguro que desea ${
+               popupType === "save"
+                  ? "guardar los cambios"
+                  : "eliminar la cuota"
+            }?`}
+            confirm={() => {
+               if (popupType === "save")
+                  updateIntallment({
+                     ...formData,
+                     ...(_id === "" && { student: student._id }),
+                  });
+               else deleteInstallment(_id, student._id);
+            }}
          />
-         <PopUp
-            text="¿Está seguro que desea guardar los cambios?"
-            confirm={() =>
-               updateIntallment(formData, student._id, _id !== "0" && _id)
-            }
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModalSave: !toggleModalSave,
-               }))
-            }
-            toggleModal={toggleModalSave}
-         />
-         <h2>{_id === "0" ? "Editar Cuota" : "Crear Cuota"}</h2>
+         <h2>{type === "edit" ? "Editar Cuota" : "Crear Cuota"}</h2>
          <form
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               setAdminValues({ ...adminValues, toggleModalSave: true });
+               togglePopup();
+               setAdminValues({ ...adminValues, popupType: "save" });
             }}
          >
             <p className="heading-tertiary">
@@ -228,9 +222,10 @@ const EditInstallment = ({
                      type="button"
                      onClick={(e) => {
                         e.preventDefault();
+                        togglePopup();
                         setAdminValues({
                            ...adminValues,
-                           toggleModalDelete: !toggleModalDelete,
+                           popupType: "delete",
                         });
                      }}
                      className="btn btn-danger"
@@ -255,4 +250,5 @@ export default connect(mapStateToProps, {
    loadUser,
    deleteInstallment,
    updateIntallment,
+   togglePopup,
 })(EditInstallment);

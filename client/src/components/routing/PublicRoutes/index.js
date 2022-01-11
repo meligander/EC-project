@@ -8,7 +8,7 @@ const PublicRoutes = ({
    path,
 }) => {
    if (isAuthenticated) {
-      return <Redirect to={"/dashboard/0"} />;
+      return <Redirect to={"/index/dashboard/0"} />;
    } else return <Route exact path={path} component={Component} />;
 };
 

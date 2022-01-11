@@ -57,6 +57,7 @@ const SearchTab = ({
    }, [loadCategories, type]);
 
    const onChange = (e) => {
+      e.persist();
       setFilterForm({
          ...filterForm,
          [e.target.name]: e.target.value,
@@ -64,6 +65,7 @@ const SearchTab = ({
    };
 
    const onChangeCheckbox = (e) => {
+      e.persist();
       setFilterForm({
          ...filterForm,
          active: e.target.checked,
@@ -76,7 +78,7 @@ const SearchTab = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               loadUsers(filterForm, true, false, true);
+               loadUsers(filterForm, true, true, false);
             }}
          >
             <NameField
@@ -94,7 +96,7 @@ const SearchTab = ({
                      className="form-input"
                      value={category}
                      name="category"
-                     onChange={(e) => onChange(e)}
+                     onChange={onChange}
                   >
                      <option value="">* Seleccione Categoría</option>
                      {!categories.loading &&
@@ -130,7 +132,7 @@ const SearchTab = ({
             <div className="form-group mt-1">
                <input
                   className="form-checkbox"
-                  onChange={(e) => onChangeCheckbox(e)}
+                  onChange={onChangeCheckbox}
                   type="checkbox"
                   checked={active}
                   name="active"

@@ -1,4 +1,4 @@
-import moment from "moment";
+import format from "date-fns/format";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
 
@@ -85,7 +85,9 @@ export const loadWithdrawals = (filterData) => async (dispatch) => {
    if (!error) dispatch(updateLoadingSpinner(false));
 };
 
-export const loadExpenceTypes = (expenceType) => async (dispatch) => {
+export const loadExpenceTypes = (spinner, expenceType) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
+   let error = false;
    try {
       const res = await api.get(
          `/expence-type${!expenceType ? "/withdrawal" : ""}`
@@ -97,6 +99,12 @@ export const loadExpenceTypes = (expenceType) => async (dispatch) => {
    } catch (err) {
       if (err.response.status !== 401)
          dispatch(setExpencesError(EXPENCETYPE_ERROR, err.response));
+      else error = true;
+   }
+
+   if (!error && spinner) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
    }
 };
 
@@ -227,21 +235,19 @@ export const transactionsPDF = (transactions, total) => async (dispatch) => {
 
    try {
       if (total)
-         await api.post("/expence/withdrawal/create-list", {
+         await api.post("/pdf/expence/withdrawal-list", {
             transactions,
             total,
          });
-      else await api.post("/expence/create-list", transactions);
+      else await api.post("/pdf/expence/list", transactions);
 
-      const pdf = await api.get("/expence/fetch-list", {
+      const pdf = await api.get("/pdf/expence/fetch", {
          responseType: "blob",
       });
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-      const date = moment().format("DD-MM-YY");
-
-      saveAs(pdfBlob, `Movimientos ${date}.pdf`);
+      saveAs(pdfBlob, `Movimientos ${format(new Date(), "dd-MM-yy")}.pdf`);
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {

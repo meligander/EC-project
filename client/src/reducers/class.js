@@ -62,8 +62,8 @@ export default function (state = initialState, action) {
       case CLASS_UPDATED:
          return {
             ...state,
-            classes: state.classes.map((oneclass) =>
-               oneclass._id === payload._id ? payload : oneclass
+            classes: state.classes.map((SingleClass) =>
+               SingleClass._id === payload._id ? payload : SingleClass
             ),
             loading: false,
             error: {},

@@ -6,6 +6,7 @@ import {
    deleteNeighbourhood,
    updateNeighbourhoods,
 } from "../../../../../../../../actions/neighbourhood";
+import { togglePopup } from "../../../../../../../../actions/mixvalues";
 
 import PopUp from "../../../../../../../modal/PopUp";
 import EditButtons from "../../../sharedComp/EditButtons";
@@ -13,23 +14,24 @@ import EditButtons from "../../../sharedComp/EditButtons";
 const NeighbourhoodTab = ({
    towns,
    neighbourhoods: { neighbourhoods, loading, error },
+   togglePopup,
    updateNeighbourhoods,
    deleteNeighbourhood,
 }) => {
    const [formData, setFormData] = useState([]);
    const [adminValues, setAdminValues] = useState({
-      toggleModalDelete: false,
-      toggleModalSave: false,
+      popupType: "",
       toDelete: "",
    });
 
-   const { toggleModalDelete, toggleModalSave, toDelete } = adminValues;
+   const { popupType, toDelete } = adminValues;
 
    useEffect(() => {
       if (!loading) setFormData(neighbourhoods);
    }, [loading, neighbourhoods]);
 
    const onChange = (e, index) => {
+      e.persist();
       let newArray = [...formData];
 
       newArray[index] = {
@@ -49,37 +51,24 @@ const NeighbourhoodTab = ({
       setFormData(newArray);
    };
 
-   const deleteNeighbourhoodConfirm = () => {
-      if (formData[toDelete]._id === "") {
-         let newArray = [...formData];
-         newArray.splice(toDelete, 1);
-         setFormData(newArray);
-      } else deleteNeighbourhood(formData[toDelete]._id);
-   };
-
    return (
       <div className="mt-3">
          <PopUp
-            toggleModal={toggleModalDelete}
-            confirm={deleteNeighbourhoodConfirm}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModalDelete: !toggleModalDelete,
-               }))
-            }
-            text="¿Está seguro que desea eliminar el barrio?"
-         />
-         <PopUp
-            toggleModal={toggleModalSave}
-            confirm={() => updateNeighbourhoods(formData)}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModalSave: !toggleModalSave,
-               }))
-            }
-            text="¿Está seguro que desea guardar los cambios?"
+            confirm={() => {
+               if (popupType === "save") updateNeighbourhoods(formData);
+               else {
+                  if (formData[toDelete]._id === "") {
+                     let newArray = [...formData];
+                     newArray.splice(toDelete, 1);
+                     setFormData(newArray);
+                  } else deleteNeighbourhood(formData[toDelete]._id);
+               }
+            }}
+            text={`¿Está seguro que desea ${
+               popupType === "save"
+                  ? "guardar los cambios"
+                  : "eliminar el barrio"
+            }?`}
          />
          <table className="smaller">
             <thead>
@@ -125,9 +114,10 @@ const NeighbourhoodTab = ({
                               type="button"
                               onClick={(e) => {
                                  e.preventDefault();
+                                 togglePopup();
                                  setAdminValues((prev) => ({
                                     ...prev,
-                                    toggleModalDelete: !toggleModalDelete,
+                                    popupType: "delete",
                                     toDelete: i,
                                  }));
                               }}
@@ -147,12 +137,13 @@ const NeighbourhoodTab = ({
          )}
          <EditButtons
             add={addNeighbourhood}
-            save={() =>
+            save={() => {
+               togglePopup();
                setAdminValues((prev) => ({
                   ...prev,
-                  toggleModalSave: !toggleModalSave,
-               }))
-            }
+                  popupType: "save",
+               }));
+            }}
             type="Barrio"
          />
       </div>
@@ -167,4 +158,5 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    updateNeighbourhoods,
    deleteNeighbourhood,
+   togglePopup,
 })(NeighbourhoodTab);

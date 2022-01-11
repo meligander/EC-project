@@ -16,11 +16,7 @@ import Tabs from "../sharedComp/Tabs";
 const Grades = ({
    match,
    classes: { loadingClass, classInfo },
-   grades: {
-      loadingGT,
-      loading,
-      grades: { header, periods },
-   },
+   grades: { loadingGT, loading, grades },
    loadGrades,
    loadGradeTypes,
    loadClass,
@@ -116,7 +112,7 @@ const Grades = ({
                         onClick={(e) => {
                            e.preventDefault();
                            gradesPDF(
-                              { header, period: periods },
+                              { header: grades.header, period: grades.periods },
                               classInfo,
                               "all"
                            );

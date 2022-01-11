@@ -1,11 +1,5 @@
-const express = require("express");
+const router = require("express").Router();
 const { check, validationResult } = require("express-validator");
-const path = require("path");
-const pdf = require("html-pdf");
-const router = express.Router();
-
-//PDF Templates
-const pdfTemplate = require("../../templates/list");
 
 //Middlewares
 const adminAuth = require("../../middleware/adminAuth");
@@ -34,13 +28,6 @@ router.get("/", [auth, adminAuth], async (req, res) => {
       console.error(err.message);
       return res.status(500).json({ msg: "Server Error" });
    }
-});
-
-//@route    GET /api/category/fetch-list
-//@desc     Get the pdf of categories
-//@access   Private && Admin
-router.get("/fetch-list", [auth, adminAuth], (req, res) => {
-   res.sendFile(path.join(__dirname, "../../reports/categories.pdf"));
 });
 
 //@route    POST /api/category
@@ -73,61 +60,6 @@ router.post(
       }
    }
 );
-
-//@route    POST api/category/create-list
-//@desc     Create a pdf of categories
-//@access   Private && Admin
-router.post("/create-list", [auth, adminAuth], (req, res) => {
-   const category = req.body;
-
-   let tbody = "";
-
-   for (let x = 0; x < category.length; x++) {
-      const name = "<td>" + category[x].name + "</td>";
-      const value = "<td>$" + formatNumber(category[x].value) + "</td>";
-
-      tbody += "<tr>" + name + value + "</tr>";
-   }
-
-   const thead = "<th>Nombre</th> <th>Valor</th>";
-
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/list/style.css"
-   );
-
-   const options = {
-      format: "A4",
-      header: {
-         height: "15mm",
-         contents: `<div></div>`,
-      },
-      footer: {
-         height: "17mm",
-         contents:
-            '<footer class="footer">Villa de Merlo English Center</footer>',
-      },
-   };
-
-   try {
-      pdf.create(
-         pdfTemplate(css, img, "categorías", thead, tbody, true),
-         options
-      ).toFile(path.join(__dirname, "../../reports/categories.pdf"), (err) => {
-         if (err) res.send(Promise.reject());
-         else res.send(Promise.resolve());
-      });
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ msg: "PDF Error" });
-   }
-});
 
 //@route    PUT /api/category
 //@desc     Update all categories

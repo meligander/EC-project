@@ -1,6 +1,6 @@
 import React from "react";
 import { FaChevronLeft } from "react-icons/fa";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import "./style.scss";
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import moment from "moment";
+import { differenceInYears, format } from "date-fns";
 import { FaTrashAlt, FaPlus } from "react-icons/fa";
 
 const StudentTable = ({
@@ -33,14 +33,17 @@ const StudentTable = ({
                users.map((user) => {
                   let years = "";
                   if (type !== "class-students")
-                     years = moment().utc().diff(user.dob, "years", false);
+                     years = differenceInYears(
+                        new Date(),
+                        new Date(user.dob.slice(0, -1))
+                     );
                   return (
                      <tr key={user._id}>
                         <td>{user.studentnumber}</td>
                         <td>
                            <Link
                               className="btn-text"
-                              to={`/dashboard/${user._id}`}
+                              to={`/index/dashboard/${user._id}`}
                               onClick={() => {
                                  window.scroll(0, 0);
                                  clearProfile();
@@ -52,7 +55,10 @@ const StudentTable = ({
                         <td className="hide-sm">
                            {user.dob && type !== "class-students"
                               ? years
-                              : moment(user.dob).utc().format("DD/MM/YY")}
+                              : format(
+                                   new Date(user.dob.slice(0, -1)),
+                                   "dd/MM/yy"
+                                )}
                         </td>
                         {type !== "add-child" && type !== "chosen-child" && (
                            <td className="hide-sm">{user.cel}</td>

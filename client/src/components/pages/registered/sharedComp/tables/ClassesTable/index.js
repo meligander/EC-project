@@ -1,7 +1,6 @@
 import React from "react";
-import Moment from "react-moment";
+import format from "date-fns/format";
 import { Link } from "react-router-dom";
-import PropTypes from "prop-types";
 
 const ClassesTable = ({
    classes,
@@ -34,7 +33,7 @@ const ClassesTable = ({
                            {all && (
                               <td>
                                  <Link
-                                    to={`/dashboard/${classItem.teacher._id}`}
+                                    to={`/index/dashboard/${classItem.teacher._id}`}
                                     className="btn-text"
                                     onClick={() => {
                                        clearProfile();
@@ -51,41 +50,33 @@ const ClassesTable = ({
                            <td>{classItem.category.name}</td>
                            <td>{classItem.day1}</td>
                            <td>
-                              {classItem.hourin1 && (
-                                 <Moment
-                                    format="HH:mm"
-                                    utc
-                                    date={classItem.hourin1}
-                                 />
-                              )}
+                              {classItem.hourin1 &&
+                                 format(
+                                    new Date(classItem.hourin1.slice(0, -1)),
+                                    "HH:mm"
+                                 )}
                            </td>
                            <td>
-                              {classItem.hourout1 && (
-                                 <Moment
-                                    format="HH:mm"
-                                    utc
-                                    date={classItem.hourout1}
-                                 />
-                              )}
+                              {classItem.hourout1 &&
+                                 format(
+                                    new Date(classItem.hourout1.slice(0, -1)),
+                                    "HH:mm"
+                                 )}
                            </td>
                            <td>{classItem.day2}</td>
                            <td>
-                              {classItem.hourin2 && (
-                                 <Moment
-                                    format="HH:mm"
-                                    utc
-                                    date={classItem.hourin2}
-                                 />
-                              )}
+                              {classItem.hourin2 &&
+                                 format(
+                                    new Date(classItem.hourin2.slice(0, -1)),
+                                    "HH:mm"
+                                 )}
                            </td>
                            <td>
-                              {classItem.hourout2 && (
-                                 <Moment
-                                    format="HH:mm"
-                                    utc
-                                    date={classItem.hourout2}
-                                 />
-                              )}
+                              {classItem.hourout2 &&
+                                 format(
+                                    new Date(classItem.hourout2.slice(0, -1)),
+                                    "HH:mm"
+                                 )}
                            </td>
                            <td>
                               <Link
@@ -93,7 +84,7 @@ const ClassesTable = ({
                                     clearClass();
                                     window.scroll(0, 0);
                                  }}
-                                 to={`/class/${classItem._id}`}
+                                 to={`/class/single/${classItem._id}`}
                                  className="btn-text"
                               >
                                  Ver &rarr;
@@ -111,14 +102,6 @@ const ClassesTable = ({
          )}
       </div>
    );
-};
-
-ClassesTable.propTypes = {
-   classes: PropTypes.array.isRequired,
-   all: PropTypes.bool,
-   clearClass: PropTypes.func.isRequired,
-   clearClasses: PropTypes.func,
-   clearProfile: PropTypes.func,
 };
 
 export default ClassesTable;

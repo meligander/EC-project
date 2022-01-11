@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import moment from "moment";
+import { getYear, getMonth } from "date-fns";
 import { BiFilterAlt } from "react-icons/bi";
 
 import {
@@ -32,8 +32,8 @@ const InstallmentList = ({
    clearProfile,
    installmentsPDF,
 }) => {
-   const date = moment();
-   const thisYear = date.year();
+   const date = new Date();
+   const thisYear = getYear(date);
 
    const installmentName = [
       "Inscripción",
@@ -68,7 +68,7 @@ const InstallmentList = ({
 
    useEffect(() => {
       if (loading) {
-         loadInstallments({});
+         loadInstallments({}, true, "list");
          getMonthlyDebt(12);
       } else
          setAdminValues((prev) => ({
@@ -81,6 +81,7 @@ const InstallmentList = ({
    }, [installments, loading, loadInstallments, getMonthlyDebt]);
 
    const onChange = (e) => {
+      e.persist();
       setFilterData((prev) => ({
          ...prev,
          [e.target.name]: e.target.value,
@@ -94,7 +95,7 @@ const InstallmentList = ({
          <p className="heading-tertiary text-moved-right">
             Total: ${total !== 0 ? formatNumber(total) : 0}
          </p>
-         {date.month !== 11 &&
+         {getMonth(date) !== 11 &&
             (userLogged.type === "admin" ||
                userLogged.type === "admin&teacher") && (
                <p className="heading-tertiary text-moved-right">
@@ -107,7 +108,7 @@ const InstallmentList = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               loadInstallments(filterData);
+               loadInstallments(filterData, true, "list");
             }}
          >
             <div className="form-group">
@@ -184,7 +185,7 @@ const InstallmentList = ({
                               <tr key={installment._id}>
                                  <td>
                                     <Link
-                                       to={`/dashboard/${installment.student._id}`}
+                                       to={`/index/dashboard/${installment.student._id}`}
                                        className="btn-text"
                                        onClick={() => {
                                           window.scroll(0, 0);

@@ -1,4 +1,4 @@
-import moment from "moment";
+import format from "date-fns/format";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
 import history from "../utils/history";
@@ -131,7 +131,7 @@ export const registerUpdateClass = (formData) => async (dispatch) => {
       );
 
       dispatch(getActiveClasses());
-      history.push("/classes");
+      history.push("/class/all");
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setClassesError(CLASS_ERROR, err.response));
@@ -150,12 +150,20 @@ export const registerUpdateClass = (formData) => async (dispatch) => {
    }
 };
 
-export const addStudent = (student) => (dispatch) => {
-   dispatch({
-      type: CLASSSTUDENT_ADDED,
-      payload: student,
-   });
-   dispatch(removeUserFromList(student._id));
+export const addStudent = (student, classInfo) => (dispatch) => {
+   let exist = classInfo.students.some((item) => item._id === student._id);
+   if (!exist) {
+      dispatch({
+         type: CLASSSTUDENT_ADDED,
+         payload: student,
+      });
+      dispatch(removeUserFromList(student._id));
+      dispatch(
+         setAlert("El alumno se ha agregado correctamente", "success", "3")
+      );
+   } else {
+      dispatch(setAlert("El alumno ya ha sido agregado", "danger", "3"));
+   }
 };
 
 export const removeStudent = (student) => (dispatch) => {
@@ -180,7 +188,7 @@ export const deleteClass = (class_id) => async (dispatch) => {
 
       dispatch(getActiveClasses());
 
-      history.push("/classes");
+      history.push("/class/all");
       dispatch(setAlert("Clase Eliminada", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
@@ -205,29 +213,20 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
 
       switch (type) {
          case "classes":
-            await api.post("/class/create-list", classInfo);
+            await api.post("/pdf/class/list", classInfo);
 
-            pdf = await api.get("/class/list/fetch-list", {
-               responseType: "blob",
-            });
             name = "Clases";
             break;
          case "class":
-            await api.post("/class/oneclass/create-list", classInfo);
+            await api.post("/pdf/class/one", classInfo);
 
-            pdf = await api.get("/class/oneclass/fetch-list", {
-               responseType: "blob",
-            });
             name = `Clase ${
                classInfo.teacher.lastname + ", " + classInfo.teacher.name
             } ${classInfo.category.name} `;
             break;
          case "blank":
-            await api.post("/class/blank/create-list", classInfo);
+            await api.post("/pdf/class/blank", classInfo);
 
-            pdf = await api.get("/class/blank/fetch-list", {
-               responseType: "blob",
-            });
             name = `${classInfo.category.name} de ${
                classInfo.teacher.lastname + ", " + classInfo.teacher.name
             } blanco`;
@@ -236,11 +235,13 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
             break;
       }
 
+      pdf = await api.get("/pdf/class/fetch", {
+         responseType: "blob",
+      });
+
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-      const date = moment().format("DD-MM-YY");
-
-      saveAs(pdfBlob, `${name} ${date}.pdf`);
+      saveAs(pdfBlob, `${name} ${format(new Date(), "dd-MM-yy")}.pdf`);
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {

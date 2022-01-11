@@ -1,5 +1,5 @@
 import api from "../utils/api";
-import moment from "moment";
+import format from "date-fns/format";
 import { saveAs } from "file-saver";
 import history from "../utils/history";
 
@@ -101,13 +101,13 @@ export const registerInvoice = (formData) => async (dispatch) => {
          type: INVOICE_REGISTERED,
       });
 
-      await dispatch(invoicePDF(res.data));
+      await dispatch(invoicesPDF(res.data, "invoice"));
 
       dispatch(getTotalDebt());
       dispatch(clearRegisters());
 
       dispatch(setAlert("Factura Registrada", "success", "1", 7000));
-      history.push("/dashboard/0");
+      history.push("/index/dashboard/0");
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setInvoicesError(INVOICE_ERROR, err.response));
@@ -155,66 +155,46 @@ export const deleteInvoice = (invoice_id) => async (dispatch) => {
    }
 };
 
-export const invoicesPDF = (invoices) => async (dispatch) => {
+export const invoicesPDF = (formData, type) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
-      await api.post("/invoice/create-list", invoices);
+      let fileName = "";
 
-      const pdf = await api.get("/invoice/list/fetch-list", {
+      if (type === "list") await api.post("/pdf/invoice/list", formData);
+      else {
+         const { name, lastname, _id } = formData.user;
+
+         if ((name && name !== "") || (lastname && lastname !== ""))
+            fileName = lastname + ", " + name;
+         else {
+            if (_id === null) fileName = "Usuario Eliminado";
+            else fileName = _id.lastname + ", " + _id.name;
+         }
+
+         await api.post("/invoice/create-invoice", formData);
+      }
+
+      const pdf = await api.get("/pdf/invoice/fetch", {
          responseType: "blob",
       });
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-      const date = moment().format("DD-MM-YY");
+      const date = format(
+         new Date(type === "list" ? null : formData.date),
+         "dd-MM-yy"
+      );
 
-      saveAs(pdfBlob, `Ingresos ${date}.pdf`);
+      saveAs(
+         pdfBlob,
+         type === "list"
+            ? `Ingresos ${date}.pdf`
+            : `Factura ${fileName} ${date}.pdf`
+      );
 
       dispatch(setAlert("PDF Generado", "success", "2"));
-   } catch (err) {
-      if (err.response.status !== 401) {
-         dispatch(setInvoicesError(INVOICES_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      } else error = true;
-   }
-
-   if (!error) {
-      window.scroll(0, 0);
-      dispatch(updateLoadingSpinner(false));
-   }
-};
-
-export const invoicePDF = (formData) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-   let error = false;
-
-   let fileName = "";
-
-   const { name, lastname, _id } = formData.user;
-
-   if ((name && name !== "") || (lastname && lastname !== ""))
-      fileName = lastname + ", " + name;
-   else {
-      if (_id === null) fileName = "Usuario Eliminado";
-      else fileName = _id.lastname + ", " + _id.name;
-   }
-
-   try {
-      await api.post("/invoice/create-invoice", formData);
-
-      const pdf = await api.get("/invoice/for-print/fetch-invoice", {
-         responseType: "blob",
-      });
-
-      const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
-
-      const date = moment(formData.date).format("DD-MM-YY");
-
-      saveAs(pdfBlob, `Factura ${fileName}  ${date}.pdf`);
-
-      dispatch(setAlert("PDF Generado", "success", "1"));
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setInvoicesError(INVOICES_ERROR, err.response));

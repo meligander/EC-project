@@ -45,16 +45,20 @@
       box-shadow: 0 3rem 6rem rgba($black-color, 0.1);
       background-color: rgba($white-color, 0.7);
       border-radius: 3px;
-      padding: 6rem 6rem 6rem 9rem;
-      font-size: $default-font-size;
+      padding: 5rem;
+      padding-left: 8rem;
       transform: skewX(-12deg);
 
       @include respond(phone) {
          width: 88%;
       }
-
       @include respond(small-phone) {
          transform: skewX(0);
+         padding: 5rem 3rem 3rem;
+         display: flex;
+         flex-direction: column;
+         justify-content: center;
+         align-items: center;
       }
 
       &-shape {
@@ -65,59 +69,83 @@
          border-radius: 50%;
 
          //elementos que usa float no utilizar margin para moverlo sino transform
-         transform: translate(-4rem, -1rem) skewX(12deg);
+         transform: translate(-3rem, -1rem) skewX(12deg);
          position: relative;
 
          @include respond(small-phone) {
-            transform: translateX(-3rem) skewX(0);
+            transform: skewX(0);
+            overflow: inherit;
          }
       }
 
       &-img {
          object-fit: cover;
          border-radius: 50%;
-         width: 15rem;
-         height: 15rem;
+         width: 37rem;
+         height: 37rem;
          transform: /* translateX(-4rem) */ scale(1.1);
          background-color: #fff;
          @include easeOut;
          backface-visibility: hidden;
 
+         @include respond(tab-port) {
+            width: 30rem;
+            height: 30rem;
+         }
+
          @include respond(small-phone) {
-            width: 13rem;
-            height: 13rem;
+            width: 25rem;
+            height: 25rem;
          }
       }
 
       &-text {
          transform: skewX(12deg);
+         margin-top: 3rem;
 
+         .heading-tertiary {
+            margin-top: 3rem;
+         }
+
+         @include respond(tab-port) {
+            margin-top: 1.5rem;
+            .heading {
+               &-secondary {
+                  font-size: 3.8rem;
+               }
+               &-tertiary {
+                  margin-top: 2rem;
+                  font-size: 2rem;
+               }
+            }
+         }
          @include respond(small-phone) {
-            transform: translateY(1rem) skewX(0);
+            transform: skewX(0);
+            text-align: center;
          }
       }
 
-      &-caption {
-         position: absolute;
-         top: 50%;
-         left: 50%;
-         transform: translate(-50%, 20%);
-         color: $white-color;
-         text-align: center;
-         opacity: 0;
-         @include easeOut;
-         //para anular cambio extrano que hace transform con las animaciones
-         backface-visibility: hidden;
-      }
+      // &-caption {
+      //    position: absolute;
+      //    top: 50%;
+      //    left: 50%;
+      //    transform: translate(-50%, 20%);
+      //    color: $white-color;
+      //    text-align: center;
+      //    opacity: 0;
+      //    @include easeOut;
+      //    //para anular cambio extrano que hace transform con las animaciones
+      //    backface-visibility: hidden;
+      // }
 
-      &:hover .person-caption {
-         opacity: 1;
-         transform: translate(-50%, -50%);
-      }
+      // &:hover .person-caption {
+      //    opacity: 1;
+      //    transform: translate(-50%, -50%);
+      // }
 
-      &:hover .person-img {
-         transform: /* translateX(-4rem) */ scale(1);
-         filter: blur(3px) brightness(80%);
-      }
+      // &:hover .person-img {
+      //    transform: /* translateX(-4rem) */ scale(1);
+      //    filter: blur(3px) brightness(80%);
+      // }
    }
 }

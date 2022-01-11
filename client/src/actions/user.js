@@ -1,4 +1,4 @@
-import moment from "moment";
+import format from "date-fns/format";
 import history from "../utils/history";
 import { saveAs } from "file-saver";
 import api from "../utils/api";
@@ -31,8 +31,8 @@ import {
 } from "./types";
 
 //Load User
-export const loadUser = (user_id) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
+export const loadUser = (user_id, spinner) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
@@ -47,7 +47,7 @@ export const loadUser = (user_id) => async (dispatch) => {
       else error = true;
    }
 
-   if (!error) dispatch(updateLoadingSpinner(false));
+   if (!error && spinner) dispatch(updateLoadingSpinner(false));
 };
 
 export const getStudentNumber = () => async (dispatch) => {
@@ -90,8 +90,8 @@ export const getActiveUsers = (type) => async (dispatch) => {
 
 //LoadUsers
 export const loadUsers =
-   (filterData, primary, studentSearch) => async (dispatch) => {
-      dispatch(updateLoadingSpinner(true));
+   (filterData, spinner, primary, studentSearch) => async (dispatch) => {
+      if (spinner) dispatch(updateLoadingSpinner(true));
       let error = false;
 
       try {
@@ -136,7 +136,7 @@ export const loadUsers =
          } else error = true;
       }
 
-      if (!error) dispatch(updateLoadingSpinner(false));
+      if (!error && spinner) dispatch(updateLoadingSpinner(false));
    };
 
 //Load Relatives
@@ -185,7 +185,7 @@ export const registerUpdateUser = (formData) => async (dispatch) => {
          )
       );
 
-      history.push("/dashboard/0");
+      history.push("/index/dashboard/0");
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setUsersError(USER_ERROR, err.response));
@@ -224,7 +224,7 @@ export const updateCredentials = (formData) => async (dispatch) => {
 
       dispatch(setAlert("Credenciales modificadas", "success", "1", 7000));
 
-      history.push("/dashboard/0");
+      history.push("/index/dashboard/0");
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setUsersError(USER_ERROR, err.response));
@@ -265,7 +265,7 @@ export const deleteUser = (user, self) => async (dispatch) => {
       dispatch(setAlert("Usuario Eliminado", "success", "1", 7000));
 
       if (self) dispatch(logOut());
-      else history.push("/dashboard/0");
+      else history.push("/index/dashboard/0");
 
       dispatch(clearUsers());
    } catch (err) {
@@ -286,15 +286,13 @@ export const userPDF = (users, userSearchType) => async (dispatch) => {
    let error = false;
 
    try {
-      await api.post("/user/create-list", { users, usersType: userSearchType });
+      await api.post("/pdf/user/list", { users, usersType: userSearchType });
 
-      const pdf = await api.get("/user/lista/fetch-list", {
+      const pdf = await api.get("/pdf/user/fetch", {
          responseType: "blob",
       });
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
-
-      const date = moment().format("DD-MM-YY");
 
       let type = "";
 
@@ -315,7 +313,7 @@ export const userPDF = (users, userSearchType) => async (dispatch) => {
             break;
       }
 
-      saveAs(pdfBlob, `${type} ${date}.pdf`);
+      saveAs(pdfBlob, `${type} ${format(new Date(), "dd-MM-yy")}.pdf`);
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {

@@ -5,6 +5,7 @@ import { FiSave } from "react-icons/fi";
 
 //Actions
 import { updateCredentials, loadUser } from "../../../../../../actions/user";
+import { togglePopup } from "../../../../../../actions/mixvalues";
 
 import PopUp from "../../../../../modal/PopUp";
 
@@ -12,6 +13,7 @@ const Credentials = ({
    match,
    updateCredentials,
    loadUser,
+   togglePopup,
    auth: { userLogged },
    users: { user, loadingUser },
 }) => {
@@ -20,12 +22,6 @@ const Credentials = ({
       password: "",
       password2: "",
    });
-
-   const [adminValues, setAdminValues] = useState({
-      toggleModal: false,
-   });
-
-   const { toggleModal } = adminValues;
 
    const { email, password, password2 } = formData;
 
@@ -40,10 +36,11 @@ const Credentials = ({
             ...prev,
             email: !user.email ? "" : user.email,
          }));
-      else loadUser(match.params.user_id);
+      else loadUser(match.params.user_id, true);
    }, [loadingUser, match.params, loadUser, user]);
 
    const onChange = (e) => {
+      e.persist();
       setFormData({
          ...formData,
          [e.target.name]: e.target.value,
@@ -53,13 +50,6 @@ const Credentials = ({
    return (
       <div className="p-4">
          <PopUp
-            toggleModal={toggleModal}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModal: !toggleModal,
-               }))
-            }
             confirm={() => updateCredentials(formData)}
             text="¿Está seguro que desea aplicar los cambios?"
          />
@@ -76,10 +66,7 @@ const Credentials = ({
                className="form"
                onSubmit={(e) => {
                   e.preventDefault();
-                  setAdminValues((prev) => ({
-                     ...prev,
-                     toggleModal: !toggleModal,
-                  }));
+                  togglePopup();
                }}
             >
                {isAdmin && (
@@ -90,7 +77,7 @@ const Credentials = ({
                         type="text"
                         value={email}
                         name="email"
-                        onChange={(e) => onChange(e)}
+                        onChange={onChange}
                         placeholder="Dirección de correo electrónico"
                      />
                      <label htmlFor="email" className="form-label">
@@ -106,7 +93,7 @@ const Credentials = ({
                      type="password"
                      value={password}
                      placeholder="Nueva contraseña"
-                     onChange={(e) => onChange(e)}
+                     onChange={onChange}
                      name="password"
                   />
                   <label htmlFor="email" className="form-label">
@@ -120,7 +107,7 @@ const Credentials = ({
                      type="password"
                      value={password2}
                      placeholder="Confirmación de contraseña"
-                     onChange={(e) => onChange(e)}
+                     onChange={onChange}
                      name="password2"
                   />
                   <label htmlFor="email" className="form-label">
@@ -147,4 +134,5 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    updateCredentials,
    loadUser,
+   togglePopup,
 })(Credentials);

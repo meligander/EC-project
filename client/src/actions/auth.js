@@ -55,9 +55,9 @@ export const loginUser = (formData) => async (dispatch) => {
 
          if (err.response.data.errors)
             err.response.data.errors.forEach((error) => {
-               dispatch(setAlert(error.msg, "danger", "2"));
+               dispatch(setAlert(error.msg, "danger", "1"));
             });
-         else dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         else dispatch(setAlert(err.response.data.msg, "danger", "1"));
 
          window.scrollTo(0, 0);
          dispatch(updateLoadingSpinner(false));

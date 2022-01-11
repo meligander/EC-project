@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import Moment from "react-moment";
+import format from "date-fns/format";
 import { FaTrashAlt } from "react-icons/fa";
 import { BiFilterAlt } from "react-icons/bi";
 
@@ -15,6 +15,7 @@ import { loadRegister } from "../../../../../../actions/register";
 import {
    updatePageNumber,
    formatNumber,
+   togglePopup,
 } from "../../../../../../actions/mixvalues";
 
 import ListButtons from "../sharedComp/ListButtons";
@@ -24,15 +25,16 @@ import PopUp from "../../../../../modal/PopUp";
 import "./style.scss";
 
 const TransactionList = ({
+   expences: { transactions, loading },
+   registers: { register, loading: loadingRegister },
+   mixvalues: { page },
    loadTransactions,
+   togglePopup,
    loadRegister,
    updatePageNumber,
    deleteExpence,
    clearInvoice,
    transactionsPDF,
-   expences: { transactions, loading },
-   registers: { register, loading: loadingRegister },
-   mixvalues: { page },
 }) => {
    const expenceType = {
       "special-income": {
@@ -59,10 +61,9 @@ const TransactionList = ({
 
    const [adminValues, setAdminValues] = useState({
       toDelete: "",
-      toggleModal: false,
    });
 
-   const { toDelete, toggleModal } = adminValues;
+   const { toDelete } = adminValues;
 
    useEffect(() => {
       if (loading) loadTransactions({});
@@ -70,6 +71,7 @@ const TransactionList = ({
    }, [loading, loadTransactions, loadingRegister, loadRegister]);
 
    const onChange = (e) => {
+      e.persist();
       setFilterData({
          ...filterData,
          [e.target.name]: e.target.value,
@@ -83,9 +85,7 @@ const TransactionList = ({
                key={transaction._id}
                className={expenceType[transaction.expencetype.type].trClass}
             >
-               <td>
-                  <Moment date={transaction.date} format="DD/MM/YY" />
-               </td>
+               <td>{format(new Date(transaction.date), "dd/MM/yy")}</td>
                <td>{`${expenceType[transaction.expencetype.type].nameType} - ${
                   transaction.expencetype.name
                }`}</td>
@@ -99,10 +99,10 @@ const TransactionList = ({
                         <button
                            onClick={(e) => {
                               e.preventDefault();
+                              togglePopup();
                               setAdminValues((prev) => ({
                                  ...prev,
                                  toDelete: transaction._id,
-                                 toggleModal: !toggleModal,
                               }));
                            }}
                            className="btn btn-danger"
@@ -133,15 +133,13 @@ const TransactionList = ({
          }
          return (
             <tr key={transaction._id} className="bg-income">
-               <td>
-                  <Moment date={transaction.date} format="DD/MM/YY" />
-               </td>
+               <td>{format(new Date(transaction.date), "dd/MM/yy")}</td>
                <td>Ingreso</td>
                <td>${formatNumber(transaction.total)}</td>
                <td>Factura {name}</td>
                <td>
                   <Link
-                     to={`/invoice/${transaction._id}`}
+                     to={`/invoice/single/${transaction._id}`}
                      onClick={() => {
                         window.scroll(0, 0);
                         clearInvoice();
@@ -160,13 +158,6 @@ const TransactionList = ({
       <>
          <h2>Listado Movimientos</h2>
          <PopUp
-            toggleModal={toggleModal}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModal: !toggleModal,
-               }))
-            }
             text="¿Está seguro que desea eliminar el movimiento?"
             confirm={() => deleteExpence(toDelete)}
          />
@@ -263,5 +254,6 @@ export default connect(mapStatetoProps, {
    updatePageNumber,
    deleteExpence,
    clearInvoice,
+   togglePopup,
    transactionsPDF,
 })(TransactionList);

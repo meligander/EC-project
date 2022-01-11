@@ -1,4 +1,4 @@
-const moment = require("moment");
+const format = require("date-fns/format");
 
 module.exports = (css, img, tbody, classInfo, table) => {
    return `
@@ -33,10 +33,14 @@ module.exports = (css, img, tbody, classInfo, table) => {
                             <td>
                                 <p>Día 1: ${classInfo.day1}</p>
                                 <p>
-                                    <span class="space">Entrada: ${moment(
-                                       classInfo.hourin1
-                                    ).format("HH:mm")}</span>
-                                    Salida: ${moment(classInfo.hourout1).format(
+                                    <span class="space">Entrada: ${format(
+                                       new Date(classInfo.hourin1.slice(0, -1)),
+                                       "HH:mm"
+                                    )}</span>
+                                    Salida: ${format(
+                                       new Date(
+                                          classInfo.hourout1.slice(0, -1)
+                                       ),
                                        "HH:mm"
                                     )}
                                 </p>
@@ -44,10 +48,14 @@ module.exports = (css, img, tbody, classInfo, table) => {
                             <td>
                                 <p>Día 1: ${classInfo.day2}</p>
                                 <p>
-                                    <span class="space">Entrada: ${moment(
-                                       classInfo.hourin2
-                                    ).format("HH:mm")}</span>
-                                    Salida: ${moment(classInfo.hourout2).format(
+                                    <span class="space">Entrada: ${format(
+                                       new Date(classInfo.hourin2.slice(0, -1)),
+                                       "HH:mm"
+                                    )}</span>
+                                    Salida: ${format(
+                                       new Date(
+                                          classInfo.hourout2.slice(0, -1)
+                                       ),
                                        "HH:mm"
                                     )}
                                 </p>

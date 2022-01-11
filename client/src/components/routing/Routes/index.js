@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Switch, Route } from "react-router-dom";
+import { Switch, Route, withRouter } from "react-router-dom";
 
 //Unregister Pages
 import Login from "../../pages/guest/Login";
@@ -8,8 +8,7 @@ import Login from "../../pages/guest/Login";
 //Register Pages
 import Dashboard from "../../pages/registered/Dashboard";
 import Credentials from "../../pages/registered/admin/users/Credentials";
-import Chat from "../../pages/registered/Chat";
-import OneClass from "../../pages/registered/admin/classes/OneClass";
+import SingleClass from "../../pages/registered/admin/classes/SingleClass";
 import Attendance from "../../pages/registered/Attendance";
 import Grades from "../../pages/registered/Grades";
 
@@ -41,10 +40,15 @@ import PrivateRoutes from "../PrivateRoutes";
 import PublicRoutes from "../PublicRoutes";
 import NotFound from "../../layouts/NotFound";
 
-const Routes = ({ mixvalues: { navbar, footer } }) => {
+const Routes = ({ location, mixvalues: { navbar, footer } }) => {
    return (
       <section
-         style={{ minHeight: `calc(100vh - ${footer}px - ${navbar}px)` }}
+         style={{
+            minHeight: `calc(100vh - ${footer}px - ${navbar}px)`,
+            justifyContent: `${
+               location.pathname === "/login" ? "center" : "stretch"
+            }`,
+         }}
          className="container"
       >
          <Switch>
@@ -52,181 +56,175 @@ const Routes = ({ mixvalues: { navbar, footer } }) => {
             <PrivateRoutes
                exact
                types={[]}
-               path="/dashboard/:user_id"
+               path="/index/dashboard/:user_id"
                component={Dashboard}
             />
             <PrivateRoutes
                exact
-               path="/edit-user/:user_id"
+               path="/user/edit/:user_id"
                types={[]}
                component={RegisterUser}
             />
             <PrivateRoutes
                exact
                types={[]}
-               path="/credentials/:user_id"
+               path="/user/credentials/:user_id"
                component={Credentials}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "teacher", "admin&teacher"]}
-               path="/search"
+               path="/user/search"
                component={Search}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/cashregister-info"
+               path="/register/info"
                component={RegisterInfo}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/categories"
+               path="/index/categories"
                component={Categories}
             />
             <PrivateRoutes
                exact
                types={[]}
-               path="/chat/:class_id"
-               component={Chat}
-            />
-            <PrivateRoutes
-               exact
-               types={[]}
-               path="/class/:class_id"
-               component={OneClass}
+               path="/class/single/:class_id"
+               component={SingleClass}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/register-class"
+               path="/class/register"
                component={RegisterClass}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/edit-class/:class_id/:category_id"
+               path="/class/edit/:class_id"
                component={RegisterClass}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/installments/:user_id"
+               path="/index/installments/:user_id"
                component={Installments}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/edit-installment/:type/:installment_id"
+               path="/index/installment/:type/:item_id"
                component={EditInstallment}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "teacher", "admin&teacher"]}
-               path="/classes"
+               path="/class/all"
                component={Classes}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/invoice-generation"
+               path="/invoice/register"
                component={InvoiceGeneration}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/invoice/:invoice_id"
+               path="/invoice/single/:invoice_id"
                component={Invoice}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "teacher", "admin&teacher"]}
-               path="/attendances/:class_id"
+               path="/class/attendances/:class_id"
                component={Attendance}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "teacher", "admin&teacher"]}
-               path="/grades/:class_id"
+               path="/class/grades/:class_id"
                component={Grades}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/enrollment"
+               path="/enrollment/register"
                component={Enrollment}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/edit-enrollment/:enrollment_id"
+               path="/enrollment/edit/:enrollment_id"
                component={Enrollment}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/edit-towns-neighbourhoods"
+               path="/user/towns-neighbourhoods/edit"
                component={EditNeigTowns}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/edit-expencetypes"
+               path="/register/expencetypes/edit"
                component={EditExpenceType}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/edit-gradetypes"
+               path="/class/gradetypes/edit"
                component={EditGradeType}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/enrollment-list"
+               path="/enrollment/list"
                component={EnrollmentList}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/income-list"
+               path="/register/income/list"
                component={IncomeList}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/transaction-list"
+               path="/register/transaction/list"
                component={TransactionList}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/installment-list"
+               path="/index/installment/list"
                component={InstallmentList}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/register-list"
+               path="/register/list"
                component={RegisterList}
             />
             <PrivateRoutes
                exact
                types={["admin", "admin&teacher"]}
-               path="/monthlyregister-list"
+               path="/register/monthly-list"
                component={RegisterByMonth}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/mention-list"
+               path="/index/mentions-list"
                component={MentionList}
             />
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/withdrawal-list"
+               path="/register/withdrawal/list"
                component={WithdrawalList}
             />
             <Route component={NotFound} />
@@ -239,4 +237,4 @@ const mapStateToProps = (state) => ({
    mixvalues: state.mixvalues,
 });
 
-export default connect(mapStateToProps)(Routes);
+export default connect(mapStateToProps)(withRouter(Routes));

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import moment from "moment";
+import format from "date-fns/format";
 import {
    FaCloudUploadAlt,
    FaEdit,
@@ -21,6 +21,7 @@ import {
    loadNeighbourhoods,
    clearNeighbourhoods,
 } from "../../../../../../actions/neighbourhood";
+import { togglePopup } from "../../../../../../actions/mixvalues";
 
 import PopUp from "../../../../../modal/PopUp";
 import TutorInfo from "./usersInfo/TutorInfo";
@@ -31,7 +32,6 @@ import "./style.scss";
 
 const RegisterUser = ({
    match,
-   registerUpdateUser,
    auth: { userLogged },
    users: {
       user: otherUser,
@@ -40,6 +40,8 @@ const RegisterUser = ({
    },
    towns: { loading: loadingTowns, towns },
    neighbourhoods: { neighbourhoods, loading },
+   registerUpdateUser,
+   togglePopup,
    loadUser,
    loadTowns,
    loadNeighbourhoods,
@@ -53,20 +55,14 @@ const RegisterUser = ({
    const isAdmin = userLogged.type === "secretary" || isOwner;
 
    const [adminValues, setAdminValues] = useState({
-      toggleModal: false,
-      toggleActive: false,
+      popupType: "",
       previewSource: "",
       fileInputState: "",
       selectedFile: "",
    });
 
-   const {
-      toggleModal,
-      toggleActive,
-      previewSource,
-      fileInputState,
-      selectedFile,
-   } = adminValues;
+   const { popupType, previewSource, fileInputState, selectedFile } =
+      adminValues;
 
    const [formData, setFormData] = useState({
       _id: match.params.user_id,
@@ -139,7 +135,7 @@ const RegisterUser = ({
 
    useEffect(() => {
       if (_id !== "0" && name === "") {
-         if (loadingUser && userLogged._id !== _id) loadUser(_id);
+         if (loadingUser && userLogged._id !== _id) loadUser(_id, true);
          else {
             const user = userLogged._id !== _id ? otherUser : userLogged;
 
@@ -151,7 +147,7 @@ const RegisterUser = ({
                   oldUser[x] = !user[x]
                      ? prev[x]
                      : x === "dob"
-                     ? moment(user.dob).utc().format("YYYY-MM-DD")
+                     ? format(new Date(user.dob.slice(0, -1)), "yyyy-MM-dd")
                      : user[x];
                }
                return {
@@ -171,6 +167,7 @@ const RegisterUser = ({
    ]);
 
    const onChange = (e) => {
+      e.persist();
       setFormData({
          ...formData,
          [e.target.name]:
@@ -180,6 +177,7 @@ const RegisterUser = ({
    };
 
    const onChangeImg = (e) => {
+      e.persist();
       if (e.target.value) {
          const file = e.target.files[0];
          previewFile(file, e.target.value);
@@ -254,45 +252,34 @@ const RegisterUser = ({
    return (
       <>
          <PopUp
-            toggleModal={toggleModal}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModal: !toggleModal,
-               }))
-            }
-            confirm={() =>
-               registerUpdateUser({
-                  ...formData,
-                  ...(selectedFile && { img: previewSource }),
-               })
-            }
-            text={`¿Está seguro que desea ${
-               _id !== "" ? "aplicar los cambios" : "registrar al nuevo usuario"
-            }?`}
-         />
-         <PopUp
-            toggleModal={toggleActive}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleActive: !toggleActive,
-               }))
-            }
-            confirm={() =>
-               setFormData((prev) => ({ ...prev, active: !active }))
-            }
-            type="active"
-            text={{
-               question: "¿Está seguro que desea inactivar al usuario?",
-               info: `No se le permitirá el ingreso a la página${
-                  type === "student"
-                     ? ", se borrarán notas, asistencias, cuotas, inscripción y se lo quitará de la clase."
-                     : type === "teacher"
-                     ? " y se borrarán todas las clases en las que está asignado como profesor."
-                     : "."
-               }`,
+            confirm={() => {
+               if (popupType === "save")
+                  registerUpdateUser({
+                     ...formData,
+                     ...(selectedFile && { img: previewSource }),
+                  });
+               else setFormData((prev) => ({ ...prev, active: !active }));
             }}
+            text={
+               popupType === "save"
+                  ? `¿Está seguro que desea ${
+                       _id !== ""
+                          ? "aplicar los cambios"
+                          : "registrar al nuevo usuario"
+                    }?`
+                  : popupType === "active"
+                  ? {
+                       question: "¿Está seguro que desea inactivar al usuario?",
+                       info: `No se le permitirá el ingreso a la página${
+                          type === "student"
+                             ? ", se borrarán notas, asistencias, cuotas, inscripción y se lo quitará de la clase."
+                             : type === "teacher"
+                             ? " y se borrarán todas las clases en las que está asignado como profesor."
+                             : "."
+                       }`,
+                    }
+                  : ""
+            }
          />
          <div>
             <h2 className="mb-2">
@@ -308,7 +295,7 @@ const RegisterUser = ({
             {_id !== "" && !loadingUser && (
                <div className="btn-right mb-3">
                   <Link
-                     to={`/credentials/${_id}`}
+                     to={`/user/credentials/${_id}`}
                      className="btn btn-primary"
                      onClick={() => {
                         window.scroll(0, 0);
@@ -322,9 +309,10 @@ const RegisterUser = ({
             <form
                onSubmit={(e) => {
                   e.preventDefault();
+                  togglePopup();
                   setAdminValues((prev) => ({
                      ...prev,
-                     toggleModal: true,
+                     popupType: "save",
                   }));
                }}
                className="form"
@@ -627,7 +615,7 @@ const RegisterUser = ({
                            <div className="btn-right townNeigh">
                               <div className="tooltip">
                                  <Link
-                                    to="/edit-towns-neighbourhoods"
+                                    to="/user/towns-neighbourhoods/edit"
                                     className="btn btn-mix-secondary"
                                     onClick={() => {
                                        window.scroll(0, 0);
@@ -676,11 +664,7 @@ const RegisterUser = ({
                      <input
                         className="form-checkbox"
                         onChange={(e) => {
-                           if (!e.target.checked)
-                              setAdminValues((prev) => ({
-                                 ...prev,
-                                 toggleActive: true,
-                              }));
+                           if (!e.target.checked) togglePopup("active");
                            else
                               setFormData((prev) => ({
                                  ...prev,
@@ -763,4 +747,5 @@ export default connect(mapStateToProps, {
    getStudentNumber,
    clearNeighbourhoods,
    clearTowns,
+   togglePopup,
 })(RegisterUser);

@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 
 const EmployeeInfo = ({
    isAdmin,
@@ -21,7 +20,7 @@ const EmployeeInfo = ({
                name="birthprov"
                id="birthprov"
                disabled={!isAdmin}
-               onChange={(e) => onChange(e)}
+               onChange={onChange}
             >
                <option value="0">* Seleccione Provincia de Nacimiento</option>
                <option value="Buenos Aires">Buenos Aires</option>
@@ -66,7 +65,7 @@ const EmployeeInfo = ({
                id="birthtown"
                disabled={!isAdmin}
                value={birthtown}
-               onChange={(e) => onChange(e)}
+               onChange={onChange}
                placeholder="Localidad de Nacimiento"
             />
             <label htmlFor="birthtown" className="form-label">
@@ -83,7 +82,7 @@ const EmployeeInfo = ({
                      id="degree"
                      disabled={!isAdmin}
                      value={degree}
-                     onChange={(e) => onChange(e)}
+                     onChange={onChange}
                      placeholder="Titulo"
                   />
                   <label htmlFor="degree" className="form-label">
@@ -98,7 +97,7 @@ const EmployeeInfo = ({
                      id="school"
                      disabled={!isAdmin}
                      value={school}
-                     onChange={(e) => onChange(e)}
+                     onChange={onChange}
                      placeholder="Institución donde se graduó"
                   />
                   <label htmlFor="degree" className="form-label">
@@ -112,7 +111,7 @@ const EmployeeInfo = ({
                <input
                   className="form-input"
                   type="number"
-                  onChange={(e) => onChange(e)}
+                  onChange={onChange}
                   value={salary}
                   name="salary"
                   id="salary"
@@ -125,18 +124,6 @@ const EmployeeInfo = ({
          )}
       </>
    );
-};
-
-EmployeeInfo.propTypes = {
-   isAdmin: PropTypes.bool.isRequired,
-   isOwner: PropTypes.bool.isRequired,
-   type: PropTypes.string.isRequired,
-   birthprov: PropTypes.string.isRequired,
-   birthtown: PropTypes.string.isRequired,
-   salary: PropTypes.string.isRequired,
-   degree: PropTypes.string.isRequired,
-   school: PropTypes.string.isRequired,
-   onChange: PropTypes.func.isRequired,
 };
 
 export default EmployeeInfo;

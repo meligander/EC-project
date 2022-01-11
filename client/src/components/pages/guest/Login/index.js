@@ -19,6 +19,7 @@ const Login = ({ loginUser }) => {
    const { email, password } = formData;
 
    const onChange = (e) => {
+      e.persist();
       setFormData({
          ...formData,
          [e.target.name]: e.target.value,
@@ -45,7 +46,7 @@ const Login = ({ loginUser }) => {
                   type="email"
                   name="email"
                   value={email}
-                  onChange={(e) => onChange(e)}
+                  onChange={onChange}
                   placeholder="Dirección de correo electrónico"
                />
                <label htmlFor="email" className="form-label">
@@ -58,7 +59,7 @@ const Login = ({ loginUser }) => {
                   type="password"
                   value={password}
                   name="password"
-                  onChange={(e) => onChange(e)}
+                  onChange={onChange}
                   placeholder="Contraseña"
                />
                <label htmlFor="name" className="form-label">

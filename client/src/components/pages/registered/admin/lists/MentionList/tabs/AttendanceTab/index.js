@@ -29,6 +29,7 @@ function AttendanceTab({
    const { absence, category } = filterData;
 
    const onChange = (e) => {
+      e.persist();
       setFilterData({
          ...filterData,
          [e.target.name]: e.target.value,
@@ -76,7 +77,7 @@ function AttendanceTab({
                   className="form-input"
                   type="number"
                   value={absence}
-                  onChange={(e) => onChange(e)}
+                  onChange={onChange}
                   name="absence"
                   id="absence"
                   placeholder="N° Faltas"
@@ -115,7 +116,7 @@ function AttendanceTab({
                                  <td>
                                     <Link
                                        className="btn-text"
-                                       to={`/dashboard/${enroll.student._id}`}
+                                       to={`/index/dashboard/${enroll.student._id}`}
                                        onClick={() => {
                                           window.scroll(0, 0);
                                           clearProfile();

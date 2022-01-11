@@ -1,77 +1,88 @@
 import React, { useState } from "react";
-import Moment from "react-moment";
+import format from "date-fns/format";
+import { connect } from "react-redux";
 import { FaTimes } from "react-icons/fa";
+
+import { togglePopup } from "../../../actions/mixvalues";
 
 import logo from "../../../img/logoSinLetras.png";
 import "./style.scss";
 
 const PopUp = ({
-   toggleModal,
-   setToggleModal,
+   mixvalues: { popupType, popupToggle },
+   penalties: { loading, penalty },
+   classes: { classInfo, loadingClass },
+   togglePopup,
    confirm,
    text,
-   users,
-   penalty,
-   type,
 }) => {
    const [formData, setFormData] = useState({
       percentage: "",
       date: "",
-      ...(users &&
-         type === "report-cards" && {
-            observations: Array.from(Array(users.length), () => ""),
+      ...(!loadingClass &&
+         popupType === "report-cards" && {
+            observations: Array.from(Array(classInfo.student.length), () => ""),
          }),
    });
 
    const { percentage, date, observations } = formData;
 
    const onChange = (e) => {
+      e.persist();
       setFormData({
          [e.target.name]: e.target.value,
       });
    };
 
    const onChangeObservations = (e, index) => {
+      e.persist();
       let newObservations = [...observations];
       newObservations[index] = e.target.value;
       setFormData((prev) => ({ ...prev, observations: newObservations }));
    };
 
-   const chooseType = (type) => {
-      switch (type) {
+   const chooseType = () => {
+      switch (popupType) {
          case "penalty":
             return (
                <div className="popup-penalty">
-                  {penalty && (
-                     <p className="posted-date">
-                        Última Actualización:{" "}
-                        <Moment format="DD/MM/YY" date={penalty.date} />
-                     </p>
+                  {!loading && (
+                     <>
+                        {penalty && (
+                           <p className="posted-date">
+                              Última Actualización:{" "}
+                              {format(new Date(penalty.date), "dd/MM/yy")}
+                           </p>
+                        )}
+
+                        <h3>Actualización de Recargo</h3>
+
+                        <div className="pt-2">
+                           <h4>
+                              {" "}
+                              Recargo Actual: {penalty && penalty.percentage}%
+                           </h4>
+
+                           {!penalty && (
+                              <h5 className="paragraph text-danger text-center">
+                                 No hay ningún recargo registrado
+                              </h5>
+                           )}
+                        </div>
+
+                        <h4>
+                           <input
+                              id="percentage"
+                              type="number"
+                              name="percentage"
+                              placeholder="Nuevo Recargo"
+                              value={percentage}
+                              onChange={onChange}
+                           />
+                           %
+                        </h4>
+                     </>
                   )}
-
-                  <h3>Actualización de Recargo</h3>
-
-                  <div className="pt-2">
-                     <h4> Recargo Actual: {penalty && penalty.percentage}%</h4>
-
-                     {!penalty && (
-                        <h5 className="paragraph text-danger text-center">
-                           No hay ningún recargo registrado
-                        </h5>
-                     )}
-                  </div>
-
-                  <h4>
-                     <input
-                        id="percentage"
-                        type="number"
-                        name="percentage"
-                        placeholder="Nuevo Recargo"
-                        value={percentage}
-                        onChange={onChange}
-                     />
-                     %
-                  </h4>
                </div>
             );
          case "certificate-date":
@@ -97,33 +108,13 @@ const PopUp = ({
                   <p>{text.info}</p>
                </div>
             );
-         case "post-likes":
-            return (
-               <div className="popup-text wrapper both">
-                  {users.length > 0 &&
-                     users.map((user, i) => (
-                        <div className="user" key={i}>
-                           <img
-                              className="round-img"
-                              src={
-                                 user.user.img.public_id === ""
-                                    ? "https://pngimage.net/wp-content/uploads/2018/06/no-user-image-png-3-300x200.png"
-                                    : user.user.img.url
-                              }
-                              alt="English Centre User"
-                           />
-                           <h4 className="text-dark">
-                              {user.user.name + " " + user.user.lastname}
-                           </h4>
-                        </div>
-                     ))}
-               </div>
-            );
+         //Cambiar forma de hacer los report cards... que se puedan ver todas las observaciones
          case "report-cards":
             return (
                <div className="popup-text wrapper both smaller">
-                  {users.length > 0 &&
-                     users.map((student, i) => (
+                  {classInfo.student &&
+                     classInfo.student.length > 0 &&
+                     classInfo.student.map((student, i) => (
                         <div className="student" key={i}>
                            <label htmlFor="observation" className="name">
                               {student.lastname + ", " + student.name}
@@ -151,7 +142,7 @@ const PopUp = ({
    };
 
    return (
-      <div className={`popup ${!toggleModal ? "hide" : ""}`}>
+      <div className={`popup ${!popupToggle ? "hide" : ""}`}>
          <div className="popup-content text-center">
             <div className="popup-img">
                <img src={logo} alt="logo" />
@@ -159,69 +150,71 @@ const PopUp = ({
                   type="button"
                   onClick={(e) => {
                      e.preventDefault();
-                     setToggleModal();
+                     togglePopup();
                   }}
                   className="btn-cancel"
                >
                   <FaTimes />
                </button>
             </div>
-            {chooseType(type)}
-            {type !== "post-likes" && (
-               <>
-                  <div className="btn-center">
-                     <button
-                        type="button"
-                        className="btn btn-success"
-                        onClick={(e) => {
-                           e.preventDefault();
-                           switch (type) {
-                              case "penalty":
-                                 confirm(percentage);
-                                 setFormData((prev) => ({
-                                    ...prev,
-                                    percentage: "",
-                                 }));
-                                 break;
-                              case "certificate-date":
-                                 confirm(date);
-                                 setFormData((prev) => ({ ...prev, date: "" }));
-                                 break;
-                              case "report-cards":
-                                 confirm(observations);
-                                 setFormData((prev) => ({
-                                    ...prev,
-                                    observations: Array.from(
-                                       Array(users.length),
-                                       () => ""
-                                    ),
-                                 }));
-                                 break;
-                              default:
-                                 confirm();
-                                 break;
-                           }
-                           setToggleModal();
-                        }}
-                     >
-                        Aceptar
-                     </button>
-                     <button
-                        type="button"
-                        className="btn btn-danger"
-                        onClick={(e) => {
-                           e.preventDefault();
-                           setToggleModal();
-                        }}
-                     >
-                        Cancelar
-                     </button>
-                  </div>
-               </>
-            )}
+            {chooseType(popupType)}
+            <div className="btn-center">
+               <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={(e) => {
+                     e.preventDefault();
+                     switch (popupType) {
+                        case "penalty":
+                           confirm(percentage);
+                           setFormData((prev) => ({
+                              ...prev,
+                              percentage: "",
+                           }));
+                           break;
+                        case "certificate-date":
+                           confirm(date);
+                           setFormData((prev) => ({ ...prev, date: "" }));
+                           break;
+                        case "report-cards":
+                           confirm(observations);
+                           setFormData((prev) => ({
+                              ...prev,
+                              observations: Array.from(
+                                 Array(classInfo.student.length),
+                                 () => ""
+                              ),
+                           }));
+                           break;
+                        default:
+                           confirm();
+                           break;
+                     }
+                     togglePopup();
+                  }}
+               >
+                  Aceptar
+               </button>
+               <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={(e) => {
+                     e.preventDefault();
+                     togglePopup();
+                  }}
+               >
+                  Cancelar
+               </button>
+            </div>
          </div>
       </div>
    );
 };
 
-export default PopUp;
+const mapStateToProps = (state) => ({
+   mixvalues: state.mixvalues,
+   penalties: state.penalties,
+   classes: state.classes,
+});
+
+export default connect(mapStateToProps, { togglePopup })(PopUp);

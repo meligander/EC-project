@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import Moment from "react-moment";
+import format from "date-fns/format";
 import { FaCalendarDay } from "react-icons/fa";
+import es from "date-fns/locale/es";
 
 import {
    loadRegister,
@@ -34,7 +35,7 @@ const RegisterInfo = ({
          } */
       } else {
          loadRegister();
-         loadExpenceTypes();
+         loadExpenceTypes(false, true);
       }
    }, [loadRegister, loadExpenceTypes, loadingRegister, register]);
 
@@ -44,7 +45,7 @@ const RegisterInfo = ({
          <h3 className="heading-tertiary my-4 text-dark">
             <FaCalendarDay />
             &nbsp;
-            <Moment format="LLLL" locale="es" date={date} />
+            {format(new Date(date), "Lo 'de' LLLL 'de' yyyy", { locale: es })}
          </h3>
          <Tabs
             tablist={["Caja Diaria", "Ingreso/Egreso"]}

@@ -1,4 +1,4 @@
-import moment from "moment";
+import format from "date-fns/format";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
 import history from "../utils/history";
@@ -145,7 +145,7 @@ export const registerEnrollment = (formData) => async (dispatch) => {
       dispatch(getYearEnrollments());
       dispatch(getTotalDebt());
 
-      history.push("/enrollment-list");
+      history.push("/enrollment/list");
       dispatch(clearEnrollment());
    } catch (err) {
       if (err.response.status !== 401) {
@@ -201,38 +201,31 @@ export const enrollmentsPDF = (enrollments, average) => async (dispatch) => {
 
       switch (average) {
          case "enrollments":
-            await api.post("/enrollment/create-list", enrollments);
+            await api.post("/pdf/enrollment/list", enrollments);
 
-            pdf = await api.get("/enrollment/fetch-list", {
-               responseType: "blob",
-            });
             name = "Inscripciones";
             break;
          case "averages":
-            await api.post("/enrollment/averages/create-list", enrollments);
+            await api.post("/pdf/enrollment/averages-list", enrollments);
 
-            pdf = await api.get("/enrollment/averages/fetch-list", {
-               responseType: "blob",
-            });
             name = "Mejores Promedios";
             break;
          case "attendances":
-            await api.post("/enrollment/absences/create-list", enrollments);
+            await api.post("/pdf/enrollment/absences-list", enrollments);
 
-            pdf = await api.get("/enrollment/absences/fetch-list", {
-               responseType: "blob",
-            });
             name = "Mejores Asistencias";
             break;
          default:
             break;
       }
 
+      pdf = await api.get("/pdf/enrollment/fetch", {
+         responseType: "blob",
+      });
+
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-      const date = moment().format("DD-MM-YY");
-
-      saveAs(pdfBlob, `${name} ${date}.pdf`);
+      saveAs(pdfBlob, `${name} ${format(new Date(), "dd-MM-yy")}.pdf`);
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {

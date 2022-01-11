@@ -11,7 +11,10 @@ import {
 } from "../../../../../../../actions/register";
 import { clearInvoices } from "../../../../../../../actions/invoice";
 import { clearExpences } from "../../../../../../../actions/expence";
-import { formatNumber } from "../../../../../../../actions/mixvalues";
+import {
+   formatNumber,
+   togglePopup,
+} from "../../../../../../../actions/mixvalues";
 
 import PopUp from "../../../../../../modal/PopUp";
 
@@ -24,6 +27,7 @@ const RegisterTab = ({
    clearInvoices,
    clearExpences,
    clearRegisters,
+   togglePopup,
 }) => {
    const [formData, setFormData] = useState({
       difference: "",
@@ -31,15 +35,10 @@ const RegisterTab = ({
       description: "",
    });
 
-   const [adminValues, setAdminValues] = useState({
-      toggleModal: false,
-   });
-
    const { difference, negative, description } = formData;
 
-   const { toggleModal } = adminValues;
-
    const onChange = (e) => {
+      e.persist();
       setFormData({
          ...formData,
          [e.target.name]:
@@ -55,13 +54,6 @@ const RegisterTab = ({
    return (
       <div className="register register-tab">
          <PopUp
-            toggleModal={toggleModal}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModal: !toggleModal,
-               }))
-            }
             confirm={confirm}
             text="¿Está seguro que desea cerrar la caja?"
          />
@@ -69,11 +61,7 @@ const RegisterTab = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               if (addNew || (register && register.temporary))
-                  setAdminValues((prev) => ({
-                     ...prev,
-                     toggleModal: !toggleModal,
-                  }));
+               if (addNew || (register && register.temporary)) togglePopup();
             }}
          >
             <table>
@@ -95,7 +83,7 @@ const RegisterTab = ({
                                     window.scroll(0, 0);
                                     clearInvoices();
                                  }}
-                                 to="/income-list"
+                                 to="/register/income/list"
                               >
                                  <IoIosListBox />
                                  <span className="hide-sm">&nbsp;Listado</span>
@@ -119,7 +107,7 @@ const RegisterTab = ({
                                     window.scroll(0, 0);
                                     clearExpences();
                                  }}
-                                 to="/transaction-list"
+                                 to="/register/transaction/list"
                               >
                                  <IoIosListBox />
                                  <span className="hide-sm">&nbsp;Listado</span>
@@ -150,7 +138,7 @@ const RegisterTab = ({
                            </td>
                            <td>
                               <Link
-                                 to="/withdrawal-list"
+                                 to="/register/withdrawal/list"
                                  onClick={() => {
                                     window.scroll(0, 0);
                                     clearRegisters();
@@ -171,7 +159,7 @@ const RegisterTab = ({
                            </td>
                            <td>
                               <Link
-                                 to="/register-list"
+                                 to="/register/list"
                                  onClick={() => {
                                     window.scroll(0, 0);
                                     clearRegisters();
@@ -269,4 +257,5 @@ export default connect(mapStateToProps, {
    clearInvoices,
    clearExpences,
    clearRegisters,
+   togglePopup,
 })(RegisterTab);

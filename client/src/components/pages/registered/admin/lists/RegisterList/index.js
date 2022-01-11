@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Moment from "react-moment";
+import format from "date-fns/format";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { FaTrashAlt } from "react-icons/fa";
@@ -9,6 +9,7 @@ import { BiFilterAlt } from "react-icons/bi";
 import {
    updatePageNumber,
    formatNumber,
+   togglePopup,
 } from "../../../../../../actions/mixvalues";
 import {
    loadRegisters,
@@ -29,6 +30,7 @@ const RegisterList = ({
    updatePageNumber,
    deleteRegister,
    clearRegisters,
+   togglePopup,
    registerPDF,
 }) => {
    const isAdmin =
@@ -39,19 +41,14 @@ const RegisterList = ({
       endDate: "",
    });
 
-   const [adminValues, setAdminValues] = useState({
-      toggleModal: false,
-   });
-
    const { startDate, endDate } = filterData;
-
-   const { toggleModal } = adminValues;
 
    useEffect(() => {
       if (loading) loadRegisters({});
    }, [loading, loadRegisters]);
 
    const onChange = (e) => {
+      e.persist();
       setFilterData({
          ...filterData,
          [e.target.name]: e.target.value,
@@ -61,21 +58,14 @@ const RegisterList = ({
    return (
       <>
          <PopUp
-            toggleModal={toggleModal}
             confirm={() => deleteRegister(registers[0]._id)}
             text="¿Está seguro que desea eliminar el cierre de caja?"
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModal: !toggleModal,
-               }))
-            }
          />
          <h2>Caja Diaria</h2>
          {isAdmin && (
             <div className="btn-right my-3">
                <Link
-                  to="/monthlyregister-list"
+                  to="/register/monthly-list"
                   onClick={() => {
                      window.scroll(0, 0);
                      clearRegisters();
@@ -132,10 +122,10 @@ const RegisterList = ({
                            !register.temporary && (
                               <tr key={i}>
                                  <td>
-                                    <Moment
-                                       date={register.date}
-                                       format="DD/MM/YY"
-                                    />
+                                    {format(
+                                       new Date(register.date),
+                                       "dd/MM/yy"
+                                    )}
                                  </td>
                                  <td>
                                     {register.income &&
@@ -179,10 +169,7 @@ const RegisterList = ({
                                              className="btn btn-danger"
                                              onClick={(e) => {
                                                 e.preventDefault();
-                                                setAdminValues((prev) => ({
-                                                   ...prev,
-                                                   toggleModal: !toggleModal,
-                                                }));
+                                                togglePopup();
                                              }}
                                           >
                                              <FaTrashAlt />
@@ -220,5 +207,6 @@ export default connect(mapStatetoProps, {
    updatePageNumber,
    deleteRegister,
    clearRegisters,
+   togglePopup,
    registerPDF,
 })(RegisterList);

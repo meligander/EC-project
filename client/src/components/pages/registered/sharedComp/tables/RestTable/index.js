@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Moment from "react-moment";
-import PropTypes from "prop-types";
+import format from "date-fns/format";
 
 import "./style.scss";
 
@@ -47,7 +46,7 @@ const RestTable = ({
                         <td>
                            <Link
                               className="btn-text"
-                              to={`/dashboard/${user._id}`}
+                              to={`/index/dashboard/${user._id}`}
                               onClick={() => {
                                  window.scroll(0, 0);
                                  clearProfile();
@@ -63,9 +62,10 @@ const RestTable = ({
                         <td>{user.cel}</td>
                         {userSearchType !== "guardian" && (
                            <td className="hide-sm">
-                              {user.dob && (
-                                 <Moment date={user.dob} utc format={"DD/MM"} />
-                              )}
+                              {user.dob &&
+                                 format(
+                                    new Date(user.dob.slice(0, -1), "dd/MM")
+                                 )}
                            </td>
                         )}
                         {type === "admin" && <td>{userType[user.type]}</td>}
@@ -76,14 +76,6 @@ const RestTable = ({
          </tbody>
       </table>
    );
-};
-
-RestTable.propTypes = {
-   users: PropTypes.array,
-   loadingUsers: PropTypes.bool,
-   type: PropTypes.string.isRequired,
-   clearProfile: PropTypes.func.isRequired,
-   clearClasses: PropTypes.func.isRequired,
 };
 
 export default RestTable;

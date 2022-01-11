@@ -1,12 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { Link, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { BsClock } from "react-icons/bs";
 import { GoHome } from "react-icons/go";
 import { RiLogoutCircleRLine } from "react-icons/ri";
 
-import { getUnseenPosts } from "../../../actions/post";
-import { setNavbarHeight } from "../../../actions/mixvalues";
+import {
+   setNavbarHeight,
+   updateCurrentNav,
+   toggleMenu,
+} from "../../../actions/mixvalues";
+import { logOut } from "../../../actions/auth";
 
 import GuestNavbar from "./usersLinks/GuestNavbar";
 import AdminNavbar from "./usersLinks/AdminNavbar";
@@ -17,125 +21,49 @@ import GuardianNavbar from "./usersLinks/GuardianNavbar";
 import onlyLogo from "../../../img/logoSinLetras.png";
 import logo from "../../../img/logo.png";
 import "./style.scss";
-import { logOut } from "../../../actions/auth";
 
 const Navbar = ({
-   auth: { userLogged, loading, isAuthenticated },
    location,
-   match,
+   auth: { userLogged, loading, isAuthenticated },
+   mixvalues: { currentNav, menuToggle },
    logOut,
-   getUnseenPosts,
    setNavbarHeight,
+   updateCurrentNav,
+   toggleMenu,
 }) => {
    const ref = useRef();
-   const string = location.pathname.substring(1, location.pathname.length);
-   const path =
-      string.indexOf("/") !== -1
-         ? string.substring(0, string.indexOf("/"))
-         : string;
-
-   const _id =
-      path === "dashboard" && match.params.user_id !== "0"
-         ? match.params.user_id
-         : "";
-
    const isAdmin =
       userLogged &&
       (userLogged.type === "admin" || userLogged.type === "admin&teacher");
 
-   const [adminValues, setAdminValues] = useState({
-      toggleMenu: false,
-      currentNav: "index",
-   });
-
-   const { toggleMenu, currentNav } = adminValues;
-
    useEffect(() => {
       if (userLogged) {
-         let currentNav = "";
+         const path = location.pathname.split("/");
 
-         switch (path) {
-            case "about":
-               currentNav = "about";
-               break;
-            case "contact":
-               currentNav = "contact";
-               break;
-            case "login":
-               currentNav = "login";
-               break;
-            case "chat":
-            case "classes":
-            case "class":
-            case "attendance":
-            case "grades":
-            case "edit-class":
-            case "edit-gradetypes":
-            case "register-class":
-               currentNav =
-                  userLogged.type === "student" ? "classmates" : "classes";
-               break;
-            case "cashregister-info":
-            case "edit-expencetypes":
-            case "income-list":
-            case "expence-list":
-            case "register-list":
-               currentNav = "register";
-               break;
-            case "register":
-            case "edit-user":
-            case "edit-towns-neighbourhoods":
-            case "credentials":
-            case "search":
-               currentNav = "search";
-               break;
-            case "enrollment-list":
-            case "enrollment":
-            case "edit-enrollment":
-               currentNav = "enrollment";
-               break;
-            case "invoice-generation":
-            case "invoice":
-               currentNav = "invoice";
-               break;
-            case "dashboard":
-               if (_id === "") currentNav = "index";
-               else {
-                  if (userLogged.type === "guardian")
+         let currentNav = path[1];
+
+         if (path[2] === "dashboard") {
+            if (path[3] !== "0")
+               switch (userLogged.type) {
+                  case "guardian":
                      currentNav =
                         "child" +
                         userLogged.children.findIndex(
-                           (item) => item._id === _id
+                           (item) => item._id === path[3]
                         );
-                  else
-                     currentNav =
-                        userLogged.type === "student" ? "classmates" : "search";
+                     break;
+                  case "student":
+                     currentNav = "class";
+                     break;
+                  default:
+                     currentNav = "user";
+                     break;
                }
-               break;
-            default:
-               currentNav = "index";
-               break;
          }
-         setAdminValues((prev) => ({
-            ...prev,
-            currentNav,
-         }));
-      }
-   }, [_id, path, userLogged]);
 
-   useEffect(() => {
-      if (userLogged) {
-         if (userLogged.type === "student")
-            getUnseenPosts(userLogged.classroom);
-         else {
-            if (
-               userLogged.type === "teacher" ||
-               userLogged.type === "admin&teacher"
-            )
-               getUnseenPosts();
-         }
+         updateCurrentNav(currentNav, false);
       }
-   }, [userLogged, getUnseenPosts]);
+   }, [userLogged, updateCurrentNav, location.pathname]);
 
    useEffect(() => {
       setTimeout(() => {
@@ -146,63 +74,15 @@ const Navbar = ({
    const type = () => {
       switch (userLogged.type) {
          case "student":
-            return (
-               <StudentNavbar
-                  toggleMenu={toggleMenu}
-                  currentNav={currentNav}
-                  setCurrentNav={(page) =>
-                     setAdminValues((prev) => ({
-                        ...prev,
-                        currentNav: page,
-                        toggleMenu: !toggleMenu,
-                     }))
-                  }
-               />
-            );
+            return <StudentNavbar />;
          case "teacher":
-            return (
-               <TeacherNavbar
-                  toggleMenu={toggleMenu}
-                  currentNav={currentNav}
-                  setCurrentNav={(page) =>
-                     setAdminValues((prev) => ({
-                        ...prev,
-                        currentNav: page,
-                        toggleMenu: !toggleMenu,
-                     }))
-                  }
-               />
-            );
+            return <TeacherNavbar />;
          case "guardian":
-            return (
-               <GuardianNavbar
-                  toggleMenu={toggleMenu}
-                  currentNav={currentNav}
-                  setCurrentNav={(page) =>
-                     setAdminValues((prev) => ({
-                        ...prev,
-                        currentNav: page,
-                        toggleMenu: !toggleMenu,
-                     }))
-                  }
-               />
-            );
+            return <GuardianNavbar />;
          case "admin":
          case "secretary":
          case "admin&teacher":
-            return (
-               <AdminNavbar
-                  toggleMenu={toggleMenu}
-                  currentNav={currentNav}
-                  setCurrentNav={(page) =>
-                     setAdminValues((prev) => ({
-                        ...prev,
-                        currentNav: page,
-                        toggleMenu: !toggleMenu,
-                     }))
-                  }
-               />
-            );
+            return <AdminNavbar />;
          default:
             return <></>;
       }
@@ -212,8 +92,11 @@ const Navbar = ({
       <nav className="navbar bg-primary" ref={ref}>
          <Link
             className="navbar-home-btn"
-            to={userLogged ? "/dashboard/0" : "/"}
-            onClick={() => window.scroll(0, 0)}
+            to={userLogged ? "/index/dashboard/0" : "/"}
+            onClick={() => {
+               updateCurrentNav("index", false);
+               window.scroll(0, 0);
+            }}
          >
             <div className="navbar-logo">
                <img src={onlyLogo} alt="Logo English Centre" />
@@ -226,19 +109,17 @@ const Navbar = ({
             <h3 className="navbar-name">Welcome {userLogged.name}</h3>
          )}
          <div
-            className={!toggleMenu ? "menu-btn" : "menu-btn close"}
-            onClick={() =>
-               setAdminValues((prev) => ({ ...prev, toggleMenu: !toggleMenu }))
-            }
+            className={!menuToggle ? "menu-btn" : "menu-btn close"}
+            onClick={toggleMenu}
          >
             <div className="btn-line"></div>
             <div className="btn-line"></div>
             <div className="btn-line"></div>
          </div>
 
-         <div className={!toggleMenu ? "menu" : "menu show"}>
+         <div className={!menuToggle ? "menu" : "menu show"}>
             <div
-               className={!toggleMenu ? "menu-branding" : "menu-branding show"}
+               className={!menuToggle ? "menu-branding" : "menu-branding show"}
             >
                <div className="logo">
                   <img src={logo} alt="English Centre logo" />
@@ -254,10 +135,10 @@ const Navbar = ({
             </div>
             {isAuthenticated ? (
                loading ? (
-                  <ul className={`menu-nav${toggleMenu ? " show" : ""}`}>
+                  <ul className={`menu-nav${menuToggle ? " show" : ""}`}>
                      <li
                         className={
-                           !toggleMenu ? "nav-item" : "nav-item show current"
+                           !menuToggle ? "nav-item" : "nav-item show current"
                         }
                      >
                         <p className="heading-tertiary">
@@ -269,23 +150,20 @@ const Navbar = ({
                ) : (
                   <ul
                      className={`${isAdmin ? "admin " : ""}menu-nav${
-                        toggleMenu ? " show" : ""
+                        menuToggle ? " show" : ""
                      }`}
                   >
                      <li
                         className={`nav-item${isAdmin ? " smaller" : ""}${
-                           toggleMenu ? " show" : ""
+                           menuToggle ? " show" : ""
                         }${currentNav === "index" ? " current" : ""}`}
                      >
                         <Link
                            className="nav-link"
-                           to="/dashboard/0"
+                           to="/index/dashboard/0"
                            onClick={() => {
                               window.scroll(0, 0);
-                              setAdminValues((prev) => ({
-                                 ...prev,
-                                 currentNav: "index",
-                              }));
+                              updateCurrentNav("index", true);
                            }}
                         >
                            <GoHome />
@@ -297,7 +175,7 @@ const Navbar = ({
                      {type()}
                      <li
                         className={`nav-item${isAdmin ? " smaller" : ""}${
-                           toggleMenu ? " show" : ""
+                           menuToggle ? " show" : ""
                         }`}
                      >
                         <Link
@@ -305,11 +183,7 @@ const Navbar = ({
                            to="/login"
                            onClick={() => {
                               window.scroll(0, 0);
-                              setAdminValues((prev) => ({
-                                 ...prev,
-                                 toggleMenu: false,
-                                 currentNav: "login",
-                              }));
+                              updateCurrentNav("login", true);
                               logOut();
                            }}
                         >
@@ -320,17 +194,7 @@ const Navbar = ({
                   </ul>
                )
             ) : (
-               <GuestNavbar
-                  toggleMenu={toggleMenu}
-                  currentNav={currentNav}
-                  setCurrentNav={(page) =>
-                     setAdminValues((prev) => ({
-                        ...prev,
-                        currentNav: page,
-                        toggleMenu: !toggleMenu,
-                     }))
-                  }
-               />
+               <GuestNavbar />
             )}
          </div>
       </nav>
@@ -339,10 +203,12 @@ const Navbar = ({
 
 const mapStateToProps = (state) => ({
    auth: state.auth,
+   mixvalues: state.mixvalues,
 });
 
 export default connect(mapStateToProps, {
-   getUnseenPosts,
    setNavbarHeight,
    logOut,
+   updateCurrentNav,
+   toggleMenu,
 })(withRouter(Navbar));

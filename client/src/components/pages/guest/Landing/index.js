@@ -18,7 +18,7 @@ const Landing = ({ mixvalues: { footer, navbar } }) => {
             <p className="heading-tertiary">
                Instituto de inglés para todas las edades
             </p>
-            <div className="btn-center mt-5">
+            <div className="btn-center pt-3">
                <Link to="/login" className="btn btn-primary">
                   Iniciar Sesión
                </Link>

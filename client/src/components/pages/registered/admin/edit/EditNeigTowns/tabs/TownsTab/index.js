@@ -3,29 +3,31 @@ import { connect } from "react-redux";
 import { FaTrashAlt } from "react-icons/fa";
 
 import { deleteTown, updateTowns } from "../../../../../../../../actions/town";
+import { togglePopup } from "../../../../../../../../actions/mixvalues";
 
 import PopUp from "../../../../../../../modal/PopUp";
 import EditButtons from "../../../sharedComp/EditButtons";
 
 const TownsTab = ({
    towns: { towns, loading, error },
+   togglePopup,
    updateTowns,
    deleteTown,
 }) => {
    const [formData, setFormData] = useState([]);
    const [adminValues, setAdminValues] = useState({
-      toggleModalDelete: false,
-      toggleModalSave: false,
+      popupType: "",
       toDelete: "",
    });
 
-   const { toggleModalDelete, toggleModalSave, toDelete } = adminValues;
+   const { popupType, toDelete } = adminValues;
 
    useEffect(() => {
       if (!loading) setFormData(towns);
    }, [loading, towns]);
 
    const onChange = (e) => {
+      e.persist();
       const number = Number(e.target.name.substring(5, e.target.name.length));
 
       let newArray = [...formData];
@@ -47,38 +49,25 @@ const TownsTab = ({
       setFormData(newArray);
    };
 
-   const deleteTownConfirm = () => {
-      if (formData[toDelete]._id === "") {
-         let newArray = [...formData];
-         newArray.splice(toDelete, 1);
-         setFormData(newArray);
-      } else deleteTown(formData[toDelete]._id);
-   };
-
    return (
       <>
          <div className="mt-3">
             <PopUp
-               toggleModal={toggleModalDelete}
-               confirm={deleteTownConfirm}
-               setToggleModal={() =>
-                  setAdminValues((prev) => ({
-                     ...prev,
-                     toggleModalDelete: !toggleModalDelete,
-                  }))
-               }
-               text="¿Está seguro que desea eliminar la localidad?"
-            />
-            <PopUp
-               toggleModal={toggleModalSave}
-               confirm={() => updateTowns(formData)}
-               setToggleModal={() =>
-                  setAdminValues((prev) => ({
-                     ...prev,
-                     toggleModalSave: !toggleModalSave,
-                  }))
-               }
-               text="¿Está seguro que desea guardar los cambios?"
+               confirm={() => {
+                  if (popupType === "save") updateTowns(formData);
+                  else {
+                     if (formData[toDelete]._id === "") {
+                        let newArray = [...formData];
+                        newArray.splice(toDelete, 1);
+                        setFormData(newArray);
+                     } else deleteTown(formData[toDelete]._id);
+                  }
+               }}
+               text={`¿Está seguro que desea ${
+                  popupType === "save"
+                     ? "guardar los cambios"
+                     : "eliminar la localidad"
+               }?`}
             />
             <table className="smaller">
                <thead>
@@ -106,10 +95,11 @@ const TownsTab = ({
                                  type="button"
                                  onClick={(e) => {
                                     e.preventDefault();
+                                    togglePopup();
                                     setAdminValues((prev) => ({
                                        ...prev,
                                        toDelete: i,
-                                       toggleModalDelete: !toggleModalDelete,
+                                       popupType: "delete",
                                     }));
                                  }}
                                  className="btn btn-danger"
@@ -128,12 +118,13 @@ const TownsTab = ({
             )}
             <EditButtons
                add={addTown}
-               save={() =>
+               save={() => {
+                  togglePopup();
                   setAdminValues((prev) => ({
                      ...prev,
-                     toggleModalSave: !toggleModalSave,
-                  }))
-               }
+                     popupType: "save",
+                  }));
+               }}
                type="Localidad"
             />
          </div>
@@ -145,4 +136,8 @@ const mapStateToProps = (state) => ({
    towns: state.towns,
 });
 
-export default connect(mapStateToProps, { updateTowns, deleteTown })(TownsTab);
+export default connect(mapStateToProps, {
+   updateTowns,
+   deleteTown,
+   togglePopup,
+})(TownsTab);

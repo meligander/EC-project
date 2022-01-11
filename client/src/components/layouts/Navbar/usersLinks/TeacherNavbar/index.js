@@ -5,28 +5,27 @@ import { ImSearch } from "react-icons/im";
 import { FaChalkboardTeacher } from "react-icons/fa";
 
 import { clearSearch } from "../../../../../actions/user";
+import { updateCurrentNav } from "../../../../../actions/mixvalues";
 
 const TeacherNavbar = ({
-   posts: { allUnseenPosts },
+   mixvalues: { currentNav, menuToggle },
    clearSearch,
-   toggleMenu,
-   setCurrentNav,
-   currentNav,
+   updateCurrentNav,
 }) => {
    return (
       <>
          <li
-            className={`nav-item${toggleMenu ? " show" : ""}${
+            className={`nav-item${menuToggle ? " show" : ""}${
                currentNav === "search" ? " current" : ""
             }`}
          >
             <Link
                className="nav-link"
-               to="/search"
+               to="/user/search"
                onClick={() => {
                   window.scroll(0, 0);
                   clearSearch();
-                  setCurrentNav("search");
+                  updateCurrentNav("user", true);
                }}
             >
                <ImSearch />
@@ -34,30 +33,19 @@ const TeacherNavbar = ({
             </Link>
          </li>
          <li
-            className={`nav-item${toggleMenu ? " show" : ""}${
+            className={`nav-item${menuToggle ? " show" : ""}${
                currentNav === "classes" ? " current" : ""
             }`}
          >
             <Link
                className="nav-link"
-               to="/classes"
+               to="/class/all"
                onClick={() => {
                   window.scroll(0, 0);
-                  setCurrentNav("classes");
+                  updateCurrentNav("class", true);
                }}
             >
-               <div className="notification">
-                  <FaChalkboardTeacher />
-                  {allUnseenPosts > 0 && (
-                     <span
-                        className={`post-notification teacher ${
-                           currentNav === "classes" ? "white" : "light"
-                        }`}
-                     >
-                        {allUnseenPosts}
-                     </span>
-                  )}
-               </div>
+               <FaChalkboardTeacher />
                <span className="hide-md">&nbsp; Clases</span>
             </Link>
          </li>
@@ -66,9 +54,10 @@ const TeacherNavbar = ({
 };
 
 const mapStateToProps = (state) => ({
-   posts: state.posts,
+   mixvalues: state.mixvalues,
 });
 
 export default connect(mapStateToProps, {
    clearSearch,
+   updateCurrentNav,
 })(TeacherNavbar);

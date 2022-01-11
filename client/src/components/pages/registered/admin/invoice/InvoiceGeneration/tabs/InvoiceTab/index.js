@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import moment from "moment";
+import format from "date-fns/format";
 import {
    FaFileInvoiceDollar,
    FaTimes,
@@ -18,7 +18,10 @@ import {
    registerInvoice,
    removeDetail,
 } from "../../../../../../../../actions/invoice";
-import { formatNumber } from "../../../../../../../../actions/mixvalues";
+import {
+   formatNumber,
+   togglePopup,
+} from "../../../../../../../../actions/mixvalues";
 
 import Alert from "../../../../../../sharedComp/Alert";
 import StudentSearch from "../../../../../sharedComp/search/StudentSearch";
@@ -31,16 +34,16 @@ const InvoiceTab = ({
       invoice,
       otherValues: { invoiceNumber },
    },
+   togglePopup,
    clearSearch,
    registerInvoice,
    clearProfile,
    removeDetail,
 }) => {
    const [adminValues, setAdminValues] = useState({
-      day: moment().format("DD/MM/YYYY"),
+      day: format(new Date(), "dd/MM/yyyy"),
       selectedUser: {},
       registeredUser: false,
-      toggleModal: false,
       toggleSearch: false,
       toDelete: "",
    });
@@ -78,14 +81,8 @@ const InvoiceTab = ({
 
    const { _id, email, name, lastname } = user;
 
-   const {
-      day,
-      selectedUser,
-      registeredUser,
-      toggleModal,
-      toggleSearch,
-      toDelete,
-   } = adminValues;
+   const { day, selectedUser, registeredUser, toggleSearch, toDelete } =
+      adminValues;
 
    useEffect(() => {
       if (invoice) {
@@ -124,6 +121,7 @@ const InvoiceTab = ({
    };
 
    const onChange = (e) => {
+      e.persist();
       setFormData((prev) => ({
          ...prev,
          ...(e.target.id === "user"
@@ -138,6 +136,7 @@ const InvoiceTab = ({
    };
 
    const onChangeValue = (e) => {
+      e.persist();
       let newDetails = [...details];
 
       if (newDetails[e.target.id].value >= e.target.value) {
@@ -162,10 +161,6 @@ const InvoiceTab = ({
       setAdminValues((prev) => ({ ...prev, toDelete: item }));
    };
 
-   const setToggle = () => {
-      setAdminValues((prev) => ({ ...prev, toggleModal: !toggleModal }));
-   };
-
    const confirm = () => {
       registerInvoice({
          ...formData,
@@ -178,8 +173,6 @@ const InvoiceTab = ({
    return (
       <div className="invoice-tab">
          <PopUp
-            toggleModal={toggleModal}
-            setToggleModal={setToggle}
             confirm={confirm}
             text="¿Está seguro que la factura es correcta?"
          />
@@ -187,7 +180,7 @@ const InvoiceTab = ({
             className="form bigger"
             onSubmit={(e) => {
                e.preventDefault();
-               setToggle();
+               togglePopup();
             }}
          >
             <div className="form-group mb-2">
@@ -289,7 +282,7 @@ const InvoiceTab = ({
                                     clearProfile();
                                  }}
                                  className="btn-cancel search"
-                                 to={`/dashboard/${_id}`}
+                                 to={`/index/dashboard/${_id}`}
                               >
                                  <FaUserCircle />
                               </Link>
@@ -453,4 +446,5 @@ export default connect(mapStateToProps, {
    registerInvoice,
    clearProfile,
    removeDetail,
+   togglePopup,
 })(InvoiceTab);

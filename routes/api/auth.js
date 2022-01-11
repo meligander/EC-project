@@ -1,13 +1,6 @@
-const express = require("express");
-const bcrypt = require("bcryptjs");
+const router = require("express").Router();
 const jwt = require("jsonwebtoken");
-const path = require("path");
-const router = express.Router();
 const { check, validationResult } = require("express-validator");
-
-require("dotenv").config({
-   path: path.resolve(__dirname, "../../config/.env"),
-});
 
 //Middleware
 const auth = require("../../middleware/auth");
@@ -29,21 +22,18 @@ router.get("/", auth, async (req, res) => {
          const enrollment = await Enrollment.findOne({
             student: req.user.id,
             year: date.getFullYear(),
-         })
-            .populate({
-               path: "student",
-               model: "user",
-               select: ["name", "lastname", "studentnumber"],
-            })
-            .populate({
-               path: "classroom",
-               model: "class",
-            });
+         }).populate({
+            path: "student",
+            model: "user",
+            select: ["name", "lastname", "studentnumber"],
+         });
 
          user = enrollment.student;
       } else {
          user = await User.findById(req.user.id)
             .select("-password")
+            .populate({ path: "town", select: "name" })
+            .populate({ path: "neighbourhood", select: "name" })
             .populate({
                path: "children",
                model: "user",
@@ -79,17 +69,18 @@ router.post(
 
       try {
          //See if users exists
-         let user = await User.findOne({ email });
+         const user = await User.findOne({ email });
 
-         if (!user) {
-            return res.status(400).json({ msg: "Credenciales Inválidas" });
-         }
+         if (!user) return res.status(400).json({ msg: "Email Inválido" });
 
-         const isMatch = await bcrypt.compare(password, user.password);
+         // const salt = await bcrypt.genSalt(10);
 
-         if (!isMatch) {
-            return res.status(400).json({ msg: "Credenciales Inválidas" });
-         }
+         // console.log(await bcrypt.hash(password, salt));
+
+         const OKPassword = await user.comparePassword(password);
+
+         if (!OKPassword)
+            return res.status(400).json({ msg: "Contraseña Inválida" });
 
          if (!user.active)
             return res

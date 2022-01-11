@@ -1,5 +1,5 @@
-import moment from "moment";
 import api from "../utils/api";
+import format from "date-fns/format";
 import { saveAs } from "file-saver";
 
 import { setAlert } from "./alert";
@@ -82,7 +82,7 @@ export const updateAttendances =
             type: ATTENDANCES_UPDATED,
          });
 
-         history.push(`/class/${class_id}`);
+         history.push(`/class/single/${class_id}`);
          dispatch(setAlert("Inasistencias Modificadas", "success", "2"));
       } catch (err) {
          if (err.response.status !== 401) {
@@ -134,21 +134,19 @@ export const attendancesPDF =
       };
 
       try {
-         await api.post("/attendance/create-list", tableInfo);
+         await api.post("/pdf/attendance/list", tableInfo);
 
-         const pdf = await api.get("/attendance/list/fetch-list", {
+         const pdf = await api.get("/pdf/attendance/fetch", {
             responseType: "blob",
          });
 
          const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-         const date = moment().format("DD-MM-YY");
-
          saveAs(
             pdfBlob,
             `Asistencia de ${classInfo.category.name} de ${
                classInfo.teacher.lastname + " " + classInfo.teacher.name
-            }  ${date}.pdf`
+            }  ${format(new Date(), "dd-MM-yy")}.pdf`
          );
 
          dispatch(setAlert("PDF Generado", "success", "2"));

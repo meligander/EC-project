@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import Moment from "react-moment";
+import format from "date-fns/format";
 import { ImFilePdf } from "react-icons/im";
 
-import { loadInvoice, invoicePDF } from "../../../../../../actions/invoice";
+import { loadInvoice, invoicesPDF } from "../../../../../../actions/invoice";
 import { formatNumber } from "../../../../../../actions/mixvalues";
 
 import logo from "../../../../../../img/fondoBlanco.png";
@@ -12,7 +12,7 @@ import "./style.scss";
 
 const Invoice = ({
    loadInvoice,
-   invoicePDF,
+   invoicesPDF,
    match,
    invoices: { invoice, loading },
 }) => {
@@ -114,7 +114,10 @@ const Invoice = ({
                         </p>
                         <p className="paragraph">
                            Fecha:{" "}
-                           <Moment date={invoice.date} format="DD/MM/YY" />
+                           {format(
+                              new Date(invoice.date.slice(0, -1)),
+                              "dd/MM/yy"
+                           )}
                         </p>
                      </div>
                   </div>
@@ -184,7 +187,7 @@ const Invoice = ({
                      className="btn btn-secondary"
                      onClick={(e) => {
                         e.preventDefault();
-                        invoicePDF(invoice, remaining);
+                        invoicesPDF({ invoice, remaining }, "invoice");
                      }}
                   >
                      <ImFilePdf />
@@ -200,4 +203,4 @@ const mapStateToProps = (state) => ({
    invoices: state.invoices,
 });
 
-export default connect(mapStateToProps, { loadInvoice, invoicePDF })(Invoice);
+export default connect(mapStateToProps, { loadInvoice, invoicesPDF })(Invoice);

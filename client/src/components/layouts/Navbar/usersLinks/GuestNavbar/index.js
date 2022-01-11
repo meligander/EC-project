@@ -7,17 +7,18 @@ import { FaAddressBook } from "react-icons/fa";
 import { RiLoginCircleLine } from "react-icons/ri";
 
 import { clearSearch } from "../../../../../actions/user";
+import { updateCurrentNav, toggleMenu } from "../../../../../actions/mixvalues";
 
 const GuestNavbar = ({
+   mixvalues: { currentNav, menuToggle },
    clearSearch,
    toggleMenu,
-   currentNav,
-   setCurrentNav,
+   updateCurrentNav,
 }) => {
    return (
-      <ul className={`menu-nav${toggleMenu ? " show" : ""}`}>
+      <ul className={`menu-nav${menuToggle ? " show" : ""}`}>
          <li
-            className={`nav-item${toggleMenu ? " show" : ""}${
+            className={`nav-item${menuToggle ? " show" : ""}${
                currentNav === "index" ? " current" : ""
             }`}
          >
@@ -26,7 +27,7 @@ const GuestNavbar = ({
                to="/"
                onClick={() => {
                   window.scroll(0, 0);
-                  setCurrentNav("index");
+                  updateCurrentNav("index", true);
                }}
             >
                <GoHome />
@@ -34,7 +35,7 @@ const GuestNavbar = ({
             </Link>
          </li>
          <li
-            className={`nav-item${toggleMenu ? " show" : ""}${
+            className={`nav-item${menuToggle ? " show" : ""}${
                currentNav === "about" ? " current" : ""
             }`}
          >
@@ -43,7 +44,7 @@ const GuestNavbar = ({
                to="/about"
                onClick={() => {
                   window.scroll(0, 0);
-                  setCurrentNav("about");
+                  updateCurrentNav("about", true);
                   clearSearch();
                }}
             >
@@ -52,7 +53,7 @@ const GuestNavbar = ({
             </Link>
          </li>
          <li
-            className={`nav-item${toggleMenu ? " show" : ""}${
+            className={`nav-item${menuToggle ? " show" : ""}${
                currentNav === "contact" ? " current" : ""
             }`}
          >
@@ -61,7 +62,7 @@ const GuestNavbar = ({
                to="/contact"
                onClick={() => {
                   window.scroll(0, 0);
-                  setCurrentNav("contact");
+                  updateCurrentNav("contact", true);
                }}
             >
                <FaAddressBook />
@@ -69,7 +70,7 @@ const GuestNavbar = ({
             </Link>
          </li>
          <li
-            className={`nav-item${toggleMenu ? " show" : ""}${
+            className={`nav-item${menuToggle ? " show" : ""}${
                currentNav === "login" ? " current" : ""
             }`}
          >
@@ -78,7 +79,7 @@ const GuestNavbar = ({
                to="/login"
                onClick={() => {
                   window.scroll(0, 0);
-                  setCurrentNav("login");
+                  toggleMenu();
                }}
             >
                <RiLoginCircleLine />
@@ -89,6 +90,12 @@ const GuestNavbar = ({
    );
 };
 
-export default connect(null, {
+const mapStateToProps = (state) => ({
+   mixvalues: state.mixvalues,
+});
+
+export default connect(mapStateToProps, {
    clearSearch,
+   updateCurrentNav,
+   toggleMenu,
 })(GuestNavbar);

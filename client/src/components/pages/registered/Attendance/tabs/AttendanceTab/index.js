@@ -11,6 +11,7 @@ import {
    updateAttendances,
    attendancesPDF,
 } from "../../../../../../actions/attendance";
+import { togglePopup } from "../../../../../../actions/mixvalues";
 
 import PopUp from "../../../../../modal/PopUp";
 import Alert from "../../../../sharedComp/Alert";
@@ -27,6 +28,7 @@ const AttendanceTab = ({
    deleteDate,
    updateAttendances,
    attendancesPDF,
+   togglePopup,
 }) => {
    const [formData, setFormData] = useState({
       newAttendances: [],
@@ -41,18 +43,11 @@ const AttendanceTab = ({
    const [adminValues, setAdminValues] = useState({
       dayPlus: false,
       addBimester: false,
-      toggleModalSave: false,
-      toggleModalDelete: false,
+      popupType: "",
       toDelete: null,
    });
 
-   const {
-      dayPlus,
-      addBimester,
-      toggleModalDelete,
-      toggleModalSave,
-      toDelete,
-   } = adminValues;
+   const { dayPlus, addBimester, popupType, toDelete } = adminValues;
    const { newAttendances, newDay } = formData;
 
    useEffect(() => {
@@ -74,6 +69,7 @@ const AttendanceTab = ({
    }, [period, periods]);
 
    const onChange = (e, row) => {
+      e.persist();
       let number = Number(e.target.name.substring(5, e.target.name.length));
 
       const daysNumber = newAttendances[0].length;
@@ -92,6 +88,7 @@ const AttendanceTab = ({
    };
 
    const onChangeDate = (e) => {
+      e.persist();
       setFormData((prev) => ({
          ...prev,
          newDay: {
@@ -159,26 +156,15 @@ const AttendanceTab = ({
       <>
          <Alert type="4" />
          <PopUp
-            toggleModal={toggleModalSave}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModalSave: !toggleModalSave,
-               }))
-            }
-            confirm={saveAttendances}
-            text="¿Está seguro que desea guardar los cambios?"
-         />
-         <PopUp
-            toggleModal={toggleModalDelete}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModalDelete: !toggleModalDelete,
-               }))
-            }
-            confirm={deleteDateAc}
-            text="¿Está seguro que desea eliminar la fecha?"
+            confirm={() => {
+               if (popupType === "save") saveAttendances();
+               else deleteDateAc();
+            }}
+            text={`¿Está seguro que desea ${
+               popupType === "save"
+                  ? "guardar los cambios"
+                  : "eliminar la fecha"
+            }?`}
          />
          {!loading && (
             <div className="wrapper both mt-2">
@@ -214,9 +200,10 @@ const AttendanceTab = ({
                                           className="btn btn-danger"
                                           onClick={(e) => {
                                              e.preventDefault();
+                                             togglePopup();
                                              setAdminValues({
                                                 ...adminValues,
-                                                toggleModalDelete: true,
+                                                popupType: "delete",
                                                 toDelete: row,
                                              });
                                           }}
@@ -238,9 +225,10 @@ const AttendanceTab = ({
                type="button"
                onClick={(e) => {
                   e.preventDefault();
+                  togglePopup();
                   setAdminValues({
                      ...adminValues,
-                     toggleModalSave: true,
+                     popupType: "save",
                   });
                }}
             >
@@ -354,4 +342,5 @@ export default connect(mapStateToProps, {
    deleteDate,
    updateAttendances,
    attendancesPDF,
+   togglePopup,
 })(AttendanceTab);

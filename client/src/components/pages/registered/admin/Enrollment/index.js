@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import moment from "moment";
+import { format, getYear, addYears, getMonth } from "date-fns";
 import { FiSave } from "react-icons/fi";
 import { IoIosListBox } from "react-icons/io";
 import { FaTimes, FaUserEdit } from "react-icons/fa";
@@ -14,11 +14,14 @@ import {
 } from "../../../../../actions/enrollment";
 import { clearSearch, clearProfile } from "../../../../../actions/user";
 import { setAlert } from "../../../../../actions/alert";
+import { togglePopup } from "../../../../../actions/mixvalues";
 
 import StudentSearch from "../../sharedComp/search/StudentSearch";
 import PopUp from "../../../../modal/PopUp";
 
 const Enrollment = ({
+   categories: { categories, loading: loadingCategories },
+   enrollments: { enrollment, loading },
    match,
    loadCategories,
    registerEnrollment,
@@ -27,20 +30,17 @@ const Enrollment = ({
    clearSearch,
    clearProfile,
    setAlert,
-   auth: { userLogged },
-   categories: { categories, loading: loadingCategories },
-   enrollments: { enrollment, loading },
+   togglePopup,
 }) => {
-   const day = moment();
-   const thisYear = day.year();
-   const currentMonthName = day
-      .format("MMMM")
-      .replace(/\b\w/, (c) => c.toUpperCase());
-   const nextMonthName = moment()
-      .add(1, "M")
-      .format("MMMM")
-      .replace(/\b\w/, (c) => c.toUpperCase());
-   const currentMonthNumber = day.month() + 1;
+   const day = new Date();
+   const thisYear = getYear(day);
+   const currentMonthName = format(day, "MMMM").replace(/\b\w/, (c) =>
+      c.toUpperCase()
+   );
+   const nextMonthName = format(addYears(day, 1), "MMMM").replace(/\b\w/, (c) =>
+      c.toUpperCase()
+   );
+   const currentMonthNumber = getMonth(day) + 1;
 
    const [formData, setFormData] = useState({
       _id: match.params.enrollment_id !== "0" ? match.params.enrollment_id : "",
@@ -57,11 +57,9 @@ const Enrollment = ({
       },
       enrollmentValue: 0,
       hideSearch: false,
-      toggleModal: false,
    });
 
-   const { toggleModal, enrollmentValue, selectedStudent, hideSearch } =
-      adminValues;
+   const { enrollmentValue, selectedStudent, hideSearch } = adminValues;
 
    const { year, category, month, _id } = formData;
 
@@ -108,14 +106,11 @@ const Enrollment = ({
    };
 
    const onChange = (e) => {
+      e.persist();
       setFormData({
          ...formData,
          [e.target.name]: e.target.value,
       });
-   };
-
-   const setToggle = () => {
-      setAdminValues((prev) => ({ ...prev, toggleModal: !toggleModal }));
    };
 
    const restore = () => {
@@ -133,8 +128,6 @@ const Enrollment = ({
       <>
          {_id === "" ? <h1>Inscripción</h1> : <h2>Editar inscripción</h2>}
          <PopUp
-            toggleModal={toggleModal}
-            setToggleModal={setToggle}
             confirm={() =>
                registerEnrollment({
                   ...formData,
@@ -153,7 +146,7 @@ const Enrollment = ({
          {!_id && (
             <div className="btn-right">
                <Link
-                  to="/enrollment-list"
+                  to="/enrollment/list"
                   onClick={() => {
                      window.scroll(0, 0);
                      clearEnrollments();
@@ -169,7 +162,7 @@ const Enrollment = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               setToggle();
+               togglePopup();
             }}
          >
             {_id === "" && !hideSearch && (
@@ -193,7 +186,7 @@ const Enrollment = ({
                {hideSearch && (
                   <>
                      <Link
-                        to={`/dashboard/${selectedStudent._id}`}
+                        to={`/index/dashboard/${selectedStudent._id}`}
                         className="text-secondary"
                         onClick={() => {
                            clearProfile();
@@ -329,7 +322,6 @@ const Enrollment = ({
 const mapStateToProps = (state) => ({
    categories: state.categories,
    enrollments: state.enrollments,
-   auth: state.auth,
 });
 
 export default connect(mapStateToProps, {
@@ -340,4 +332,5 @@ export default connect(mapStateToProps, {
    clearSearch,
    clearProfile,
    setAlert,
+   togglePopup,
 })(Enrollment);

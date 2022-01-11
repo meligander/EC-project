@@ -2,72 +2,43 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { FiSave } from "react-icons/fi";
 import { ImFilePdf } from "react-icons/im";
+import { addMonths, format } from "date-fns";
 
 import {
    loadCategories,
    updateCategories,
    categoriesPDF,
 } from "../../../../../actions/category";
+import { togglePopup } from "../../../../../actions/mixvalues";
+
 import PopUp from "../../../../modal/PopUp";
 
 import "./style.scss";
 
 const Categories = ({
+   categories: { categories, loading },
+   togglePopup,
    loadCategories,
    updateCategories,
    categoriesPDF,
-   categories: { categories, loading },
-   auth: { userLogged },
 }) => {
+   const min = format(addMonths(new Date(), 1), "yyyy-MM");
+   const max = format(addMonths(new Date(), 4), "yyyy-MM");
+
    const [formData, setFormData] = useState([]);
-   const [otherValues, setOtherValues] = useState({
-      min: "",
-      max: "",
+   const [adminValues, setAdminValues] = useState({
       date: "",
-      toggleModal: false,
    });
 
-   const { min, max, date, toggleModal } = otherValues;
+   const { date } = adminValues;
 
    useEffect(() => {
-      const initInput = () => {
-         setFormData(categories);
-      };
-      const monthMinMax = (date, num) => {
-         if (date.getMonth() + num < 11) {
-            let value = date.getMonth() + num;
-            if (value < 9) value = "0" + value;
-            return `${date.getFullYear()}-${value}`;
-         } else {
-            let value = num - (11 - date.getMonth());
-            if (value < 9) value = "0" + value;
-            return `${date.getFullYear() + 1}-${value}`;
-         }
-      };
-      const setMinMax = () => {
-         const date = new Date();
-         setOtherValues((prev) => ({
-            ...prev,
-            min: monthMinMax(date, 1),
-            max: monthMinMax(date, 4),
-         }));
-      };
-
-      if (loading) loadCategories();
-      else {
-         initInput();
-         setMinMax();
-      }
+      if (loading) loadCategories(true);
+      else setFormData(categories);
    }, [loadCategories, loading, categories]);
 
-   const setToggle = () => {
-      setOtherValues({
-         ...otherValues,
-         toggleModal: !toggleModal,
-      });
-   };
-
    const onChange = (e, index) => {
+      e.persist();
       let newValue = [...formData];
       newValue[index] = {
          ...newValue[index],
@@ -77,8 +48,9 @@ const Categories = ({
    };
 
    const onChangeMonth = (e) => {
-      setOtherValues({
-         ...otherValues,
+      e.persist();
+      setAdminValues({
+         ...adminValues,
          date: e.target.value,
       });
    };
@@ -89,8 +61,6 @@ const Categories = ({
          <PopUp
             text="¿Está seguro que los datos son correctos?"
             confirm={() => updateCategories({ categories: formData, date })}
-            setToggleModal={setToggle}
-            toggleModal={toggleModal}
          />
          <div className="form ">
             <div className="form-group">
@@ -122,8 +92,8 @@ const Categories = ({
                   {formData.length > 0 &&
                      formData.map((category, index) => (
                         <tr key={index}>
-                           <td>{category.name}</td>
-                           <td>
+                           <td data-th="Nombre">{category.name}</td>
+                           <td data-th="Valor">
                               <input
                                  type="number"
                                  name={`value${index}`}
@@ -143,7 +113,7 @@ const Categories = ({
                type="button"
                onClick={(e) => {
                   e.preventDefault();
-                  setToggle();
+                  togglePopup();
                }}
                className="btn btn-primary"
             >
@@ -170,11 +140,11 @@ const Categories = ({
 
 const mapStatetoProps = (state) => ({
    categories: state.categories,
-   auth: state.auth,
 });
 
 export default connect(mapStatetoProps, {
    loadCategories,
    updateCategories,
+   togglePopup,
    categoriesPDF,
 })(Categories);

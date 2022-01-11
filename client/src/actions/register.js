@@ -1,4 +1,4 @@
-import moment from "moment";
+import format from "date-fns/format";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
 import history from "../utils/history";
@@ -85,7 +85,7 @@ export const createRegister = (formData) => async (dispatch) => {
 
       dispatch(clearRegisters());
 
-      history.push("/dashboard/0");
+      history.push("/index/dashboard/0");
 
       dispatch(
          setAlert("Caja Abierta para Transacciones", "success", "1", 7000)
@@ -125,7 +125,7 @@ export const closeRegister = (formData) => async (dispatch) => {
          type: REGISTER_CLOSED,
       });
 
-      history.push("/dashboard/0");
+      history.push("/index/dashboard/0");
       dispatch(setAlert("Caja del día Cerrada", "success", "1", 7000));
    } catch (err) {
       if (err.response.status !== 401) {
@@ -171,15 +171,13 @@ export const registerPDF = (registers) => async (dispatch) => {
    let error = false;
 
    try {
-      await api.post("/register/create-list", registers);
+      await api.post("/pdf/register/list", registers);
 
-      const pdf = await api.get("/register/fetch-list", {
+      const pdf = await api.get("/pdf/register/fetch", {
          responseType: "blob",
       });
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
-
-      const date = moment().format("DD-MM-YY");
 
       saveAs(
          pdfBlob,
@@ -187,7 +185,7 @@ export const registerPDF = (registers) => async (dispatch) => {
             registers[0].temporary !== undefined
                ? "Caja Diaria"
                : "Cajas Mensuales"
-         } ${date}.pdf`
+         } ${format(new Date(), "dd-MM-yy")}.pdf`
       );
 
       dispatch(setAlert("PDF Generado", "success", "2"));

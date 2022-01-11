@@ -1,12 +1,5 @@
-const express = require("express");
-const path = require("path");
-const pdf = require("html-pdf");
-const moment = require("moment");
+const router = require("express").Router();
 const { check, validationResult } = require("express-validator");
-const router = express.Router();
-
-//PDF Templates
-const pdfTemplate = require("../../templates/list");
 
 //Middlewares
 const adminAuth = require("../../middleware/adminAuth");
@@ -67,6 +60,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
          if (filter.transactionType && filter.transactionType !== "income") {
             let filteredExpences = [];
             for (let x = 0; x < expences.length; x++) {
+               console.log(expences[x]);
                if (expences[x].expencetype.type === filter.transactionType)
                   filteredExpences.push(expences[x]);
             }
@@ -149,13 +143,6 @@ router.get("/withdrawal", [auth, adminAuth], async (req, res) => {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });
    }
-});
-
-//@route    GET /api/expence/fetch-list
-//@desc     Get the pdf of transactions
-//@access   Private && Admin
-router.get("/fetch-list", [auth, adminAuth], (req, res) => {
-   res.sendFile(path.join(__dirname, "../../reports/transactions.pdf"));
 });
 
 //@route    POST /api/expence
@@ -293,197 +280,6 @@ router.post(
    }
 );
 
-//@route    POST /api/expence/create-list
-//@desc     Create a pdf of transactions
-//@access   Private && Admin
-router.post("/create-list", [auth, adminAuth], (req, res) => {
-   const name = path.join(__dirname, "../../reports/transactions.pdf");
-
-   const transactions = req.body;
-
-   let tbody = "";
-
-   for (let x = 0; x < transactions.length; x++) {
-      let userName = "";
-      if (!transactions[x].expencetype) {
-         switch (transactions[x].user) {
-            case null:
-               userName += "Usuario Eliminado </td>";
-               break;
-            case undefined:
-               if (transactions[x].lastname) {
-                  userName +=
-                     transactions[x].lastname +
-                     ", " +
-                     transactions[x].name +
-                     "</td>";
-               } else {
-                  userName += "Usuario no definido </td>";
-               }
-               break;
-            default:
-               userName +=
-                  transactions[x].user.lastname +
-                  ", " +
-                  transactions[x].user.name +
-                  "</td>";
-               break;
-         }
-      }
-
-      let typeName = "";
-      if (transactions[x].expencetype) {
-         switch (transactions[x].expencetype.type) {
-            case "special-income":
-               typeName = "Ingreso Especial";
-               break;
-            case "expence":
-               typeName = "Gasto";
-               break;
-            case "withdrawal":
-               typeName = "Retiro";
-               break;
-            default:
-               break;
-         }
-      } else typeName = "Ingreso";
-
-      const date =
-         "<td>" + moment(transactions[x].date).format("DD/MM/YY") + "</td>";
-
-      const type = "<td>" + typeName + "</td>";
-      const value =
-         "<td> $" +
-         (transactions[x].expencetype
-            ? formatNumber(transactions[x].value)
-            : formatNumber(transactions[x].total)) +
-         "</td>";
-      const description =
-         "<td>" +
-         (!transactions[x].expencetype
-            ? "Factura " + userName
-            : `${transactions[x].expencetype.name} ${
-                 transactions[x].description
-                    ? "- " + transactions[x].description
-                    : ""
-              }`) +
-         "</td>";
-
-      tbody += "<tr>" + date + type + value + description + "</tr>";
-   }
-
-   const thead =
-      "<th>Fecha</th> <th>Tipo</th> <th>Importe</th> <th>Descripción</th>";
-
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/list/style.css"
-   );
-
-   const options = {
-      format: "A4",
-      header: {
-         height: "15mm",
-         contents: `<div></div>`,
-      },
-      footer: {
-         height: "17mm",
-         contents:
-            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
-      },
-   };
-
-   try {
-      pdf.create(
-         pdfTemplate(css, img, "movimientos", thead, tbody),
-         options
-      ).toFile(name, (err) => {
-         if (err) res.send(Promise.reject());
-         else res.send(Promise.resolve());
-      });
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ msg: "PDF Error" });
-   }
-});
-
-//@route    POST /api/expence/create-list
-//@desc     Create a pdf of transactions
-//@access   Private && Admin
-router.post("/withdrawal/create-list", [auth, adminAuth], (req, res) => {
-   const name = path.join(__dirname, "../../reports/transactions.pdf");
-
-   const { transactions, total } = req.body;
-
-   let tbody = "";
-
-   for (let x = 0; x < transactions.length; x++) {
-      const date =
-         "<td>" + moment(transactions[x].date).format("DD/MM/YY") + "</td>";
-
-      const type = "<td>" + transactions[x].expencetype.name + "</td>";
-      const value = "<td> $" + formatNumber(transactions[x].value) + "</td>";
-      const description =
-         "<td>" +
-         (transactions[x].description ? transactions[x].description : "") +
-         "</td>";
-
-      tbody += "<tr>" + date + type + value + description + "</tr>";
-   }
-
-   const thead =
-      "<th>Fecha</th> <th>Tipo</th> <th>Importe</th> <th>Descripción</th>";
-
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/list/style.css"
-   );
-
-   const options = {
-      format: "A4",
-      header: {
-         height: "15mm",
-         contents: `<div></div>`,
-      },
-      footer: {
-         height: "17mm",
-         contents:
-            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
-      },
-   };
-
-   try {
-      pdf.create(
-         pdfTemplate(
-            css,
-            img,
-            "Retiros - $" + formatNumber(total),
-            thead,
-            tbody
-         ),
-         options
-      ).toFile(name, (err) => {
-         if (err) res.send(Promise.reject());
-         else res.send(Promise.resolve());
-      });
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ msg: "PDF Error" });
-   }
-});
-
 //@route    DELETE /api/expence/:id
 //@desc     Delete an expence
 //@access   Private && Admin
@@ -532,8 +328,8 @@ const sortArray = (array) => {
    return sortedArray;
 };
 
-const formatNumber = (number) => {
-   return new Intl.NumberFormat("de-DE").format(number);
-};
+// const formatNumber = (number) => {
+//    return new Intl.NumberFormat("de-DE").format(number);
+// };
 
 module.exports = router;

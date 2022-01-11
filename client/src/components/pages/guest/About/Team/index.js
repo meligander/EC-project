@@ -14,7 +14,7 @@ const Team = ({ users: { loading, users }, loadUsers }) => {
    const [teamNumber, setTeamNumber] = useState(0);
 
    useEffect(() => {
-      if (loading) loadUsers({ active: true, type: "team" }, true);
+      if (loading) loadUsers({ active: true, type: "team" }, true, true, false);
    }, [loading, loadUsers]);
 
    const moveUp = () => {
@@ -90,23 +90,28 @@ const Team = ({ users: { loading, users }, loadUsers }) => {
                         }
                         className="person-img"
                      />
-                     <figcaption className="person-caption">
+                  </figure>
+                  <div className="person-text">
+                     <h2 className="heading-secondary text-dark">
                         {users[teamNumber].name +
                            " " +
                            users[teamNumber].lastname}
-                     </figcaption>
-                  </figure>
-                  <div className="person-text">
-                     <h3 className="heading-tertiary text-dark">
+                     </h2>
+                     <h3 className="heading-tertiary">
                         {users[teamNumber].type === "admin&teacher"
-                           ? "Directora y Profesora"
+                           ? `Director${
+                                users[teamNumber].sex === "Femenino" ? "a" : ""
+                             } y Profesor${
+                                users[teamNumber].sex === "Femenino" ? "a" : ""
+                             }`
                            : users[teamNumber].type === "teacher"
-                           ? "Profesor"
-                           : "Secretaria"}
+                           ? `Profesor${
+                                users[teamNumber].sex === "Femenino" ? "a" : ""
+                             }`
+                           : `Secretari${
+                                users[teamNumber].sex === "Femenino" ? "a" : "o"
+                             }`}
                      </h3>
-                     <p className="paragraph">
-                        {users[teamNumber].description}
-                     </p>
                   </div>
                </div>
                <div className="hide-md">

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import moment from "moment";
-import Moment from "react-moment";
+import { format, getYear } from "date-fns";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import { BiFilterAlt } from "react-icons/bi";
 
@@ -17,7 +16,10 @@ import {
    clearCategories,
 } from "../../../../../../actions/category";
 import { clearProfile } from "../../../../../../actions/user";
-import { updatePageNumber } from "../../../../../../actions/mixvalues";
+import {
+   togglePopup,
+   updatePageNumber,
+} from "../../../../../../actions/mixvalues";
 
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
@@ -33,12 +35,13 @@ const EnrollmentList = ({
    clearCategories,
    clearProfile,
    deleteEnrollment,
+   togglePopup,
    loadCategories,
    enrollmentsPDF,
    updatePageNumber,
 }) => {
-   const day = moment();
-   const thisYear = day.year();
+   const day = new Date();
+   const thisYear = getYear(day);
 
    const [filterData, setFilterData] = useState({
       startDate: "",
@@ -50,11 +53,10 @@ const EnrollmentList = ({
    });
 
    const [adminValues, setAdminValues] = useState({
-      toggleModal: false,
       toDelete: "",
    });
 
-   const { toggleModal, toDelete } = adminValues;
+   const { toDelete } = adminValues;
    const { startDate, endDate, category, year, name, lastname } = filterData;
 
    useEffect(() => {
@@ -63,6 +65,7 @@ const EnrollmentList = ({
    }, [loading, loadEnrollments, loadCategories, loadingCategories]);
 
    const onChange = (e) => {
+      e.persist();
       setFilterData({
          ...filterData,
          [e.target.name]: e.target.value,
@@ -73,13 +76,6 @@ const EnrollmentList = ({
       <>
          <h2>Listado Inscripciones</h2>
          <PopUp
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModal: !toggleModal,
-               }))
-            }
-            toggleModal={toggleModal}
             confirm={() => deleteEnrollment(toDelete)}
             text="¿Está seguro que desea eliminar la inscripción?"
          />
@@ -177,16 +173,13 @@ const EnrollmentList = ({
                            i < (page + 1) * 10 && (
                               <tr key={enroll._id}>
                                  <td>
-                                    <Moment
-                                       date={enroll.date}
-                                       format="DD/MM/YY"
-                                    />
+                                    {format(new Date(enroll.date), "dd/MM/yy")}
                                  </td>
                                  <td>{enroll.student.studentnumber}</td>
                                  <td>
                                     <Link
                                        className="btn-text"
-                                       to={`/dashboard/${enroll.student._id}`}
+                                       to={`/index/dashboard/${enroll.student._id}`}
                                        onClick={() => {
                                           window.scroll(0, 0);
                                           clearProfile();
@@ -203,7 +196,7 @@ const EnrollmentList = ({
                                     <>
                                        <td>
                                           <Link
-                                             to={`/edit-enrollment/${enroll._id}`}
+                                             to={`/enrollment/edit/${enroll._id}`}
                                              className="btn-text"
                                              onClick={() => {
                                                 window.scroll(0, 0);
@@ -219,10 +212,10 @@ const EnrollmentList = ({
                                              className="btn btn-danger"
                                              onClick={(e) => {
                                                 e.preventDefault();
+                                                togglePopup();
                                                 setAdminValues((prev) => ({
                                                    ...prev,
                                                    toDelete: enroll._id,
-                                                   toggleModal: !toggleModal,
                                                 }));
                                              }}
                                           >
@@ -270,4 +263,5 @@ export default connect(mapStatetoProps, {
    clearProfile,
    enrollmentsPDF,
    updatePageNumber,
+   togglePopup,
 })(EnrollmentList);

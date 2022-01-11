@@ -1,4 +1,4 @@
-import moment from "moment";
+import format from "date-fns/format";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
 import history from "../utils/history";
@@ -14,7 +14,8 @@ import {
    CATEGORY_ERROR,
 } from "./types";
 
-export const loadCategories = () => async (dispatch) => {
+export const loadCategories = (spinner) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
    try {
       const res = await api.get("/category");
       dispatch({
@@ -27,6 +28,7 @@ export const loadCategories = () => async (dispatch) => {
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       }
    }
+   if (spinner) dispatch(updateLoadingSpinner(false));
 };
 
 export const updateCategories = (formData) => async (dispatch) => {
@@ -45,7 +47,7 @@ export const updateCategories = (formData) => async (dispatch) => {
       );
       dispatch(clearProfile());
 
-      history.push("/dashboard/0");
+      history.push("/index/dashboard/0");
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setCategoriesError(CATEGORY_ERROR, err.response));
@@ -69,17 +71,15 @@ export const categoriesPDF = (categories) => async (dispatch) => {
    let error = false;
 
    try {
-      await api.post("/category/create-list", categories);
+      await api.post("/pdf/category/list", categories);
 
-      const pdf = await api.get("/category/fetch-list", {
+      const pdf = await api.get("/pdf/category/fetch", {
          responseType: "blob",
       });
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-      const date = moment().format("DD-MM-YY");
-
-      saveAs(pdfBlob, `Categorías ${date}.pdf`);
+      saveAs(pdfBlob, `Categorías ${format(new Date(), "dd-MM-yy")}.pdf`);
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {

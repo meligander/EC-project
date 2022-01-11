@@ -1,4 +1,4 @@
-import React, { useState /* useEffect */ } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { withRouter, Link } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
@@ -23,12 +23,12 @@ const InstallmentsSearch = ({
    installments: { loading, installments },
    invoices: { invoice },
    loadInstallments,
-   /* changeStudent, */
    clearInstallments,
    loadInstallment,
    clearProfile,
    addDetail,
-   /* student, */
+   changeStudent,
+   student,
 }) => {
    const [adminValues, setAdminValues] = useState({
       selectedStudent: {},
@@ -38,7 +38,7 @@ const InstallmentsSearch = ({
 
    const { selectedStudent, selectedItem, block } = adminValues;
 
-   /* useEffect(() => {
+   useEffect(() => {
       if (student) {
          setAdminValues((prev) => ({
             ...prev,
@@ -49,9 +49,9 @@ const InstallmentsSearch = ({
             block: true,
          }));
       }
-   }, [student]); */
+   }, [student]);
 
-   const newInvoice = location.pathname === "/invoice-generation";
+   const newInvoice = location.pathname === "/invoice/register";
 
    const restore = () => {
       setAdminValues((prev) => ({
@@ -60,7 +60,7 @@ const InstallmentsSearch = ({
          selectedStudent: {},
       }));
       clearInstallments();
-      if (!newInvoice) history.push("/installments/0");
+      if (!newInvoice) history.push("/index/installments/0");
    };
 
    return (
@@ -70,7 +70,8 @@ const InstallmentsSearch = ({
                selectedStudent={selectedStudent}
                actionForSelected={async () => {
                   const answer = await loadInstallments(
-                     selectedStudent,
+                     { student: selectedStudent },
+                     true,
                      "student"
                   );
                   if (answer)
@@ -87,7 +88,7 @@ const InstallmentsSearch = ({
                         name: user.lastname + ", " + user.name,
                      },
                   }));
-                  /* if (changeStudent) changeStudent(student); */
+                  if (changeStudent) changeStudent(student);
                }}
                typeSearch={"installment"}
                block={block}
@@ -97,7 +98,7 @@ const InstallmentsSearch = ({
             <p className="heading-tertiary">
                <span className="text-dark">Alumno: </span> &nbsp;
                <Link
-                  to={`/dashboard/${selectedStudent._id}`}
+                  to={`/index/dashboard/${selectedStudent._id}`}
                   className="btn-text"
                   onClick={() => {
                      clearProfile();

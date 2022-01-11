@@ -7,6 +7,7 @@ import {
    loadExpenceTypes,
    updateExpenceTypes,
 } from "../../../../../../actions/expence";
+import { togglePopup } from "../../../../../../actions/mixvalues";
 
 import EditButtons from "../sharedComp/EditButtons";
 import PopUp from "../../../../../modal/PopUp";
@@ -16,62 +17,53 @@ const EditExpenceType = ({
    loadExpenceTypes,
    updateExpenceTypes,
    deleteExpenceType,
+   togglePopup,
 }) => {
    const [formData, setFormData] = useState([]);
 
    const [adminValues, setAdminValues] = useState({
-      toggleModalSave: false,
-      toggleModalDelete: false,
+      popupType: "",
       toDelete: "",
    });
 
-   const { toggleModalSave, toggleModalDelete, toDelete } = adminValues;
+   const { popupType, toDelete } = adminValues;
 
    useEffect(() => {
-      if (loadingET) loadExpenceTypes();
+      if (loadingET) loadExpenceTypes(true, true);
       else setFormData(expencetypes);
    }, [loadingET, loadExpenceTypes, expencetypes]);
 
    const onChange = (e, index) => {
-      formData[index] = {
+      e.persist();
+      const newFormData = [...formData];
+      newFormData[index] = {
          ...formData[index],
          [e.target.name]: e.target.value,
       };
 
-      setFormData(formData);
+      setFormData(newFormData);
    };
 
    return (
       <>
-         <h2>Tipo de Movimiento</h2>
+         <h2>Editar Tipo de Movimientos</h2>
          <PopUp
-            toggleModal={toggleModalSave}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModalSave: !toggleModalSave,
-               }))
-            }
-            confirm={() => updateExpenceTypes(formData)}
-            text="¿Está seguro que desea guardar los cambios?"
-         />
-         <PopUp
-            toggleModal={toggleModalDelete}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModalDelete: !toggleModalDelete,
-               }))
-            }
             confirm={() => {
-               if (formData[toDelete]._id !== 0)
-                  deleteExpenceType(formData[toDelete]._id);
+               if (popupType === "save") updateExpenceTypes(formData);
                else {
-                  formData.splice(toDelete, 1);
-                  setFormData(formData);
+                  if (formData[toDelete]._id !== 0)
+                     deleteExpenceType(formData[toDelete]._id);
+                  else {
+                     formData.splice(toDelete, 1);
+                     setFormData(formData);
+                  }
                }
             }}
-            text="¿Está seguro que desea eliminar el tipo de movimiento?"
+            text={`¿Está seguro que desea ${
+               popupType === "save"
+                  ? "guardar los cambios"
+                  : "eliminar el tipo de movimiento"
+            }?`}
          />
          <table className="smaller">
             <thead>
@@ -83,10 +75,9 @@ const EditExpenceType = ({
             </thead>
             <tbody>
                {!loadingET &&
-                  formData.length > 0 &&
                   formData.map((exptyp, index) => (
                      <tr key={index}>
-                        <td>
+                        <td data-th="Nombre">
                            <input
                               type="text"
                               name="name"
@@ -95,7 +86,7 @@ const EditExpenceType = ({
                               value={exptyp.name}
                            />
                         </td>
-                        <td>
+                        <td data-th="Tipo">
                            <select
                               name="type"
                               onChange={(e) => onChange(e, index)}
@@ -116,10 +107,11 @@ const EditExpenceType = ({
                               type="button"
                               onClick={(e) => {
                                  e.preventDefault();
+                                 togglePopup();
                                  setAdminValues({
                                     ...adminValues,
                                     toDelete: index,
-                                    toggleModalDelete: true,
+                                    popupType: "delete",
                                  });
                               }}
                               className="btn btn-danger"
@@ -132,19 +124,21 @@ const EditExpenceType = ({
             </tbody>
          </table>
          <EditButtons
-            save={() =>
+            save={() => {
+               togglePopup();
                setAdminValues({
                   ...adminValues,
-                  toggleModalSave: true,
-               })
-            }
+                  popupType: "save",
+               });
+            }}
             add={() => {
-               formData.push({
+               const newFormData = [...formData];
+               newFormData.push({
                   _id: 0,
                   name: "",
                   type: "",
                });
-               setFormData(formData);
+               setFormData(newFormData);
             }}
             type="Tipo de Gasto"
          />
@@ -160,4 +154,5 @@ export default connect(mapStateToProps, {
    loadExpenceTypes,
    updateExpenceTypes,
    deleteExpenceType,
+   togglePopup,
 })(EditExpenceType);

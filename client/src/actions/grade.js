@@ -1,4 +1,4 @@
-import moment from "moment";
+import format from "date-fns/format";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
 import history from "../utils/history";
@@ -98,7 +98,7 @@ export const updateGrades = (formData, class_id) => async (dispatch) => {
          type: GRADES_CLEARED,
       });
 
-      history.push(`/class/${class_id}`);
+      history.push(`/class/single/${class_id}`);
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setGradesError(GRADES_ERROR, err.response));
@@ -204,14 +204,14 @@ export const gradesPDF = (info, classInfo, type) => async (dispatch) => {
    try {
       let pdf;
       let name = "";
-      const date = moment().format("DD-MM-YY");
+      const date = format(new Date(), "dd-MM-yy");
 
       switch (type) {
          case "bimester":
-            await api.post("/grade/create-list", tableInfo);
+            await api.post("/pdf/grade/period-list", tableInfo);
             break;
          case "all":
-            await api.post("/grade/all/create-list", tableInfo);
+            await api.post("/pdf/grade/list", tableInfo);
             break;
          case "report-cards":
             for (let x = 0; x < classInfo.students.length; x++) {
@@ -234,10 +234,10 @@ export const gradesPDF = (info, classInfo, type) => async (dispatch) => {
                   },
                };
 
-               const res = await api.post("/grade/report-card", reportInfo);
+               const res = await api.post("/pdf/grade/report-card", reportInfo);
 
                if (res.data.msg !== "Alumno sin notas") {
-                  pdf = await api.get("/grade/pdf/report-card", {
+                  pdf = await api.get("/pdf/grade/fetch", {
                      responseType: "blob",
                   });
 
@@ -260,7 +260,7 @@ export const gradesPDF = (info, classInfo, type) => async (dispatch) => {
             classInfo.teacher.lastname + ", " + classInfo.teacher.name
          }  ${date}.pdf`;
 
-         pdf = await api.get("/grade/list/fetch-list", {
+         pdf = await api.get("/pdf/grade/fetch", {
             responseType: "blob",
          });
 
@@ -303,12 +303,15 @@ export const certificatePDF =
             };
 
             if (periodNumber === 6) {
-               await api.post("/grade/certificate-cambridge/create-list", info);
+               await api.post(
+                  "/pdf/grade/certificate-cambridge/create-list",
+                  info
+               );
             } else {
-               await api.post("/grade/certificate/create-list", info);
+               await api.post("/pdf/grade/certificate", info);
             }
 
-            const pdf = await api.get("/grade/certificate/fetch-list", {
+            const pdf = await api.get("/pdf/grade/fetch", {
                responseType: "blob",
             });
 

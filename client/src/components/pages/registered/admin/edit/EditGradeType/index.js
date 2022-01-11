@@ -8,45 +8,29 @@ import {
    deleteGradeType,
 } from "../../../../../../actions/grade";
 import { loadCategories } from "../../../../../../actions/category";
+import { togglePopup } from "../../../../../../actions/mixvalues";
 
 import PopUp from "../../../../../modal/PopUp";
 import EditButtons from "../sharedComp/EditButtons";
 
 const EditGradeType = ({
+   categories: { categories, loading },
+   grades: { gradeTypes, loadingGT },
    loadGradeTypes,
    loadCategories,
    updateGradeTypes,
    deleteGradeType,
-   grades: { gradeTypes, loadingGT },
-   categories: { categories, loading },
+   togglePopup,
 }) => {
-   const header = [
-      "K",
-      "IC",
-      "IB",
-      "IA",
-      "P",
-      "J",
-      "1°",
-      "2°",
-      "3°",
-      "4°",
-      "5°",
-      "6°",
-      "C",
-      "Pf",
-   ];
-
    const [adminValues, setAdminValues] = useState({
-      toggleModalDelete: false,
-      toggleModalSave: false,
+      popupType: "",
       toDelete: "",
       newRow: [],
    });
 
    const [formData, setFormData] = useState([]);
 
-   const { toggleModalDelete, toggleModalSave, toDelete, newRow } = adminValues;
+   const { popupType, toDelete, newRow } = adminValues;
 
    useEffect(() => {
       if (loadingGT) loadGradeTypes();
@@ -68,66 +52,59 @@ const EditGradeType = ({
    }, [categories, loading, loadCategories]);
 
    const onChange = (e, index, i) => {
+      e.persist();
+      let newFormData = [...formData];
       if (e.target.type === "checkbox") {
-         formData[index][i] = {
-            ...formData[index][i],
+         newFormData[index][i] = {
+            ...newFormData[index][i],
             checks: e.target.checked,
          };
       } else {
-         formData[index][0].name = e.target.value;
+         newFormData[index][0].name = e.target.value;
       }
-      setFormData(formData);
+      setFormData(newFormData);
+   };
+
+   const header = () => {
+      const items = "K,IC,IB,IA,P,J,1°,2°,3°,4°,5°,6°,C,PF";
+
+      return items
+         .split(",")
+         .map((header, index) => <th key={index}>{header}</th>);
    };
 
    return (
       <>
          <PopUp
-            toggleModal={toggleModalSave}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModalSave: !toggleModalSave,
-               }))
-            }
             confirm={() => {
-               updateGradeTypes(formData);
-            }}
-            text="¿Está seguro que desea guardar los cambios?"
-         />
-         <PopUp
-            toggleModal={toggleModalDelete}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModalDelete: !toggleModalDelete,
-               }))
-            }
-            confirm={() => {
-               if (formData[toDelete]._id !== 0)
-                  deleteGradeType(formData[toDelete]._id);
+               if (popupType === "save") updateGradeTypes(formData);
                else {
-                  formData.splice(toDelete, 1);
-                  setFormData(formData);
+                  if (formData[toDelete][0]._id !== 0)
+                     deleteGradeType(formData[toDelete][0]._id);
+                  else {
+                     formData.splice(toDelete, 1);
+                     setFormData(formData);
+                  }
                }
             }}
-            text="¿Está seguro que desea eliminar el tipo de nota?"
+            text={`¿Está seguro que desea ${
+               popupType === "save"
+                  ? "guardar los cambios"
+                  : "eliminar el tipo de nota"
+            }?`}
          />
-         <h2>Editar tipo de notas</h2>
+         <h2>Editar Tipo de Notas</h2>
          <div className="wrapper both mt-3">
             <table className="stick">
                <thead>
                   <tr>
                      <th>Nombre</th>
-                     {header.length > 0 &&
-                        header.map((header, index) => (
-                           <th key={index}>{header}</th>
-                        ))}
+                     {header()}
                      <th colSpan="2">&nbsp;</th>
                   </tr>
                </thead>
                <tbody>
                   {!loading &&
-                     formData.length > 0 &&
                      formData.map((row, index) => (
                         <tr key={index}>
                            {row.map((item, i) =>
@@ -157,10 +134,11 @@ const EditGradeType = ({
                                  type="button"
                                  onClick={(e) => {
                                     e.preventDefault();
+                                    togglePopup();
                                     setAdminValues({
                                        ...adminValues,
-                                       toDelete: row,
-                                       toggleModalDelete: true,
+                                       toDelete: index,
+                                       popupType: "delete",
                                     });
                                  }}
                                  className="btn btn-danger"
@@ -174,15 +152,17 @@ const EditGradeType = ({
             </table>
          </div>
          <EditButtons
-            save={() =>
+            save={() => {
+               togglePopup();
                setAdminValues({
                   ...adminValues,
-                  toggleModalSave: true,
-               })
-            }
+                  popupType: "save",
+               });
+            }}
             add={() => {
-               formData.push([...newRow]);
-               setFormData(formData);
+               let newFormData = [...formData];
+               newFormData.push(JSON.parse(JSON.stringify(newRow)));
+               setFormData(newFormData);
             }}
             type="Tipo de Nota"
          />
@@ -200,4 +180,5 @@ export default connect(mapStateToProps, {
    loadCategories,
    updateGradeTypes,
    deleteGradeType,
+   togglePopup,
 })(EditGradeType);

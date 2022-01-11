@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from "react";
+import getYear from "date-fns/getYear";
 import { connect } from "react-redux";
 
 import { setFooterHeight } from "../../../actions/mixvalues";
@@ -16,7 +17,7 @@ const Footer = ({ setFooterHeight }) => {
       <footer className="footer bg-primary" ref={ref}>
          <p>
             <span className="hide-sm">Villa de Merlo</span> English Centre
-            Copyright &copy;{new Date().getFullYear()}
+            Copyright &copy;{getYear(new Date())}
          </p>
       </footer>
    );

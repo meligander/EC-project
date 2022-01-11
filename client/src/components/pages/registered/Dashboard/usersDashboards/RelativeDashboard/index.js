@@ -22,7 +22,7 @@ const RelativeDashboard = ({
             </p>
             <Link
                className="btn-text"
-               to={`/dashboard/${user._id}`}
+               to={`/index/dashboard/${user._id}`}
                onClick={() => {
                   window.scroll(0, 0);
                   clearProfile(userLogged.type !== "student");

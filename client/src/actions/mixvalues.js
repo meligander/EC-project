@@ -3,6 +3,9 @@ import {
    SEARCHPAGE_CHANGED,
    FOOTER_HEIGHT_SETTED,
    NAVBAR_HEIGHT_SETTED,
+   CURRENTNAV_CHANGED,
+   MENU_TOGGLED,
+   POPUP_TOGGLED,
 } from "./types";
 
 export const updateLoadingSpinner = (bool) => (dispatch) => {
@@ -16,6 +19,31 @@ export const updatePageNumber = (page) => (dispatch) => {
    dispatch({
       type: SEARCHPAGE_CHANGED,
       payload: page,
+   });
+};
+
+export const toggleMenu = () => (dispatch) => {
+   dispatch({
+      type: MENU_TOGGLED,
+   });
+};
+
+export const togglePopup = (type) => (dispatch) => {
+   dispatch({
+      type: POPUP_TOGGLED,
+      payload: {
+         type,
+      },
+   });
+};
+
+export const updateCurrentNav = (currentNav, toggle) => (dispatch) => {
+   dispatch({
+      type: CURRENTNAV_CHANGED,
+      payload: {
+         nav: currentNav,
+         toggle,
+      },
    });
 };
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import moment from "moment";
 import { withRouter } from "react-router-dom";
+import format from "date-fns/format";
 import { FaEdit } from "react-icons/fa";
 import { FiSave } from "react-icons/fi";
 
@@ -10,25 +10,24 @@ import {
    removeStudent,
 } from "../../../../../../../../actions/class";
 import { clearProfile } from "../../../../../../../../actions/user";
+import { togglePopup } from "../../../../../../../../actions/mixvalues";
 
 import PopUp from "../../../../../../../modal/PopUp";
 import StudentTable from "../../../../../sharedComp/tables/StudentTable";
 
 const NewClassTab = ({
-   location,
+   match,
+   users: { usersBK, loadingBK },
+   classes: { classInfo, loadingClass },
    registerUpdateClass,
    removeStudent,
+   togglePopup,
    clearProfile,
-   users: { usersBK, loadingUsersBK },
-   classes: { classInfo, loading },
 }) => {
-   const registerClass = location.pathname === "/register-class";
-
-   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+   const _id = match.params.class_id;
 
    const [adminValues, setAdminValues] = useState({
-      toggleModal: false,
-      sameSchedule: true,
+      sameSchedule: false,
    });
 
    const [formData, setFormData] = useState({
@@ -42,7 +41,7 @@ const NewClassTab = ({
       hourout2: "",
    });
 
-   const { toggleModal, sameSchedule } = adminValues;
+   const { sameSchedule } = adminValues;
 
    const {
       teacher,
@@ -56,46 +55,43 @@ const NewClassTab = ({
    } = formData;
 
    useEffect(() => {
-      if (!registerClass && !loading) {
-         const timein1 = moment(classInfo.hourin1).utc().format("HH:mm");
-         const timein2 = moment(classInfo.hourin2).utc().format("HH:mm");
-         const timeout1 = moment(classInfo.hourout1).utc().format("HH:mm");
-         const timeout2 = moment(classInfo.hourout2).utc().format("HH:mm");
-
-         if (timein1 === timein2 && timeout1 === timeout2)
+      if (!loadingClass) {
+         if (
+            format(new Date(classInfo.hourin1), "HH:mm") ===
+               format(new Date(classInfo.hourin2), "HH:mm") &&
+            format(new Date(classInfo.hourout1), "HH:mm") ===
+               format(new Date(classInfo.hourout2), "HH:mm")
+         )
             setAdminValues((prev) => ({ ...prev, sameSchedule: true }));
-         else setAdminValues((prev) => ({ ...prev, sameSchedule: false }));
 
-         setFormData((prev) => ({
-            ...prev,
-            teacher: classInfo.teacher._id,
-            ...(classInfo.classroom && { classroom: classInfo.classroom }),
-            ...(classInfo.day1 && { day1: classInfo.day1 }),
-            ...(classInfo.day2 && { day2: classInfo.day2 }),
-            ...(classInfo.hourin1 && {
-               hourin1: timein1,
-            }),
-            ...(classInfo.hourin2 && {
-               hourin2: timein2,
-            }),
-            ...(classInfo.hourout1 && {
-               hourout1: timeout1,
-            }),
-            ...(classInfo.hourout2 && {
-               hourout2: timeout2,
-            }),
-         }));
+         setFormData((prev) => {
+            let oldClass = {};
+            for (const x in prev) {
+               oldClass[x] = !classInfo[x]
+                  ? prev[x]
+                  : x.substring(0, 4) === "hour"
+                  ? format(new Date(classInfo[x].slice(0, -1)), "HH:mm")
+                  : x === "teacher"
+                  ? classInfo[x]._id
+                  : classInfo[x];
+            }
+            return {
+               ...oldClass,
+            };
+         });
       }
-   }, [usersBK, loadingUsersBK, classInfo, loading, registerClass]);
+   }, [classInfo, loadingClass]);
 
    const onChange = (e) => {
+      e.persist();
       setFormData({
          ...formData,
          [e.target.name]: e.target.value,
-         ...(e.target.name === "hourin1" &&
-            sameSchedule && { hourin2: e.target.value }),
-         ...(e.target.name === "hourout1" &&
-            sameSchedule && { hourout2: e.target.value }),
+         ...(e.target.name.substring(0, 4) === "hour" &&
+            sameSchedule && {
+               [e.target.name.substring(0, e.target.name.length - 1) + "2"]:
+                  e.target.value,
+            }),
       });
    };
 
@@ -106,42 +102,42 @@ const NewClassTab = ({
       }));
    };
 
-   const confirm = () => {
-      registerUpdateClass(
-         {
-            ...formData,
-            category: classInfo.category._id,
-            students: classInfo.students,
-         },
-         !registerClass && classInfo._id
-      );
+   const days = () => {
+      const weekDays = "Lunes,Martes,Miércoles,Jueves,Viernes";
+
+      return weekDays.split(",").map((item) => (
+         <option key={item} value={item}>
+            {item}
+         </option>
+      ));
    };
 
    return (
       <>
          <PopUp
-            toggleModal={toggleModal}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModal: !toggleModal,
-               }))
+            confirm={() =>
+               registerUpdateClass(
+                  {
+                     ...formData,
+                     category: classInfo.category._id,
+                     students: classInfo.students,
+                  },
+                  _id
+               )
             }
-            confirm={confirm}
             text="¿Está seguro que los datos son correctos?"
          />
          <form
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModal: !toggleModal,
-               }));
+               togglePopup();
             }}
          >
             <div className="form-group my-3 heading-tertiary">
-               <p>Categoría: &nbsp; {!loading && classInfo.category.name}</p>
+               <p>
+                  Categoría: &nbsp; {!loadingClass && classInfo.category.name}
+               </p>
             </div>
             <div className="form-group">
                <select
@@ -152,8 +148,7 @@ const NewClassTab = ({
                   value={teacher}
                >
                   <option value="">* Seleccione Profesor</option>
-                  {!loadingUsersBK &&
-                     usersBK.length > 0 &&
+                  {!loadingBK &&
                      usersBK.map((teacher) => (
                         <option key={teacher._id} value={teacher._id}>
                            {teacher.lastname + ", " + teacher.name}
@@ -190,11 +185,7 @@ const NewClassTab = ({
                   value={day1}
                >
                   <option value="">* Seleccione Día 1</option>
-                  {days.map((day, index) => (
-                     <option key={index} value={day}>
-                        {day}
-                     </option>
-                  ))}
+                  {days()}
                </select>
                <label
                   htmlFor="day1"
@@ -238,11 +229,7 @@ const NewClassTab = ({
                   value={day2}
                >
                   <option value="0">* Seleccione Día 2</option>
-                  {days.map((day, index) => (
-                     <option key={index} value={day}>
-                        {day}
-                     </option>
-                  ))}
+                  {days()}
                </select>
                <label
                   htmlFor="day2"
@@ -293,27 +280,19 @@ const NewClassTab = ({
                </div>
             )}
 
-            <h3 className="text-primary heading-tertiary my-3">
+            <h3 className="text-primary heading-tertiary my-2 pt-2">
                Lista de Alumnos
             </h3>
-            {!loading && classInfo.students ? (
-               <>
-                  {classInfo.students.length > 0 ? (
-                     <StudentTable
-                        users={classInfo.students}
-                        clearProfile={clearProfile}
-                        loadingUsers={true}
-                        actionWChild={(studentToDelete) =>
-                           removeStudent(studentToDelete)
-                        }
-                        type="chosen-child"
-                     />
-                  ) : (
-                     <p className="text-secondary paragraph">
-                        Todavía no hay alumnos añadidos
-                     </p>
-                  )}
-               </>
+            {!loadingClass && classInfo.students.length > 0 ? (
+               <StudentTable
+                  users={classInfo.students}
+                  clearProfile={clearProfile}
+                  loadingUsers={true}
+                  actionWChild={(studentToDelete) =>
+                     removeStudent(studentToDelete)
+                  }
+                  type="chosen-child"
+               />
             ) : (
                <p className="text-secondary paragraph">
                   Todavía no hay alumnos añadidos
@@ -322,8 +301,8 @@ const NewClassTab = ({
 
             <div className="btn-center">
                <button className="btn btn-primary" type="submit">
-                  {!registerClass ? <FaEdit /> : <FiSave />}
-                  &nbsp; {!registerClass ? "Guardar Cambios" : "Registrar"}
+                  {_id ? <FaEdit /> : <FiSave />}
+                  &nbsp; {!_id ? "Guardar Cambios" : "Registrar"}
                </button>
             </div>
          </form>
@@ -339,5 +318,6 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    registerUpdateClass,
    removeStudent,
+   togglePopup,
    clearProfile,
 })(withRouter(NewClassTab));

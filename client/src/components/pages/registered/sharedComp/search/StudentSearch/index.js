@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
-import moment from "moment";
+import differenceInYears from "date-fns/differenceInYears";
 import { BiFilterAlt } from "react-icons/bi";
 import { FaMoneyCheckAlt, FaPlus } from "react-icons/fa";
 
@@ -28,6 +28,7 @@ const StudentSearch = ({
    const { name, lastname } = filterForm;
 
    const onChangeFilter = (e) => {
+      e.persist();
       setFilterForm((prev) => ({
          ...prev,
          [e.target.name]: e.target.value,
@@ -43,6 +44,7 @@ const StudentSearch = ({
                   ? "guardian/student"
                   : "student",
          },
+         true,
          true,
          true
       );
@@ -120,7 +122,12 @@ const StudentSearch = ({
                               <td>{user.category && user.category}</td>
                            )}
                            {typeSearch === "enrollment" && (
-                              <td>{moment().diff(user.dob, "years", false)}</td>
+                              <td>
+                                 {differenceInYears(
+                                    new Date(),
+                                    new Date(user.dob.slice(0, -1))
+                                 )}
+                              </td>
                            )}
                         </tr>
                      ))}

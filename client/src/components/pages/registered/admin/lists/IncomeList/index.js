@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import Moment from "react-moment";
+import format from "date-fns/format";
 import { FaTrashAlt } from "react-icons/fa";
 import { BiFilterAlt } from "react-icons/bi";
 
@@ -15,6 +15,7 @@ import { loadRegister } from "../../../../../../actions/register";
 import {
    updatePageNumber,
    formatNumber,
+   togglePopup,
 } from "../../../../../../actions/mixvalues";
 
 import ListButtons from "../sharedComp/ListButtons";
@@ -35,6 +36,7 @@ const IncomeList = ({
    updatePageNumber,
    invoicesPDF,
    deleteInvoice,
+   togglePopup,
 }) => {
    const isAdmin =
       userLogged.type === "admin" || userLogged.type === "admin&teacher";
@@ -47,12 +49,11 @@ const IncomeList = ({
    });
 
    const [adminValues, setAdminValues] = useState({
-      toggleModal: false,
       toDelete: "",
    });
 
    const { startDate, endDate, name, lastname } = filterData;
-   const { toggleModal, toDelete } = adminValues;
+   const { toDelete } = adminValues;
 
    useEffect(() => {
       if (loading) loadInvoices({});
@@ -60,6 +61,7 @@ const IncomeList = ({
    }, [loading, loadInvoices, loadRegister, loadingRegister]);
 
    const onChange = (e) => {
+      e.persist();
       setFilterData({
          ...filterData,
          [e.target.name]: e.target.value,
@@ -89,13 +91,6 @@ const IncomeList = ({
    return (
       <>
          <PopUp
-            toggleModal={toggleModal}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModal: !toggleModal,
-               }))
-            }
             text="¿Está seguro que desea eliminar la factura?"
             confirm={() => deleteInvoice(toDelete)}
          />
@@ -151,17 +146,14 @@ const IncomeList = ({
                            index < (page + 1) * 10 && (
                               <tr key={index}>
                                  <td>
-                                    <Moment
-                                       date={invoice.date}
-                                       format="DD/MM/YY"
-                                    />
+                                    {format(new Date(invoice.date), "dd/MM/yy")}
                                  </td>
                                  <td>{invoice.invoiceid}</td>
                                  <td>{setName(invoice)}</td>
                                  <td>${formatNumber(invoice.total)}</td>
                                  <td>
                                     <Link
-                                       to={`/invoice/${invoice._id}`}
+                                       to={`/invoice/single/${invoice._id}`}
                                        onClick={() => {
                                           window.scroll(0, 0);
                                           clearInvoice();
@@ -184,13 +176,12 @@ const IncomeList = ({
                                                    type="button"
                                                    onClick={(e) => {
                                                       e.preventDefault();
+                                                      togglePopup();
                                                       setAdminValues(
                                                          (prev) => ({
                                                             ...prev,
                                                             toDelete:
                                                                invoice._id,
-                                                            toggleModal:
-                                                               !toggleModal,
                                                          })
                                                       );
                                                    }}
@@ -214,7 +205,7 @@ const IncomeList = ({
                type="ingresos"
                items={invoices}
                changePage={updatePageNumber}
-               pdfGenerator={() => invoicesPDF(invoices)}
+               pdfGenerator={() => invoicesPDF(invoices, "list")}
             />
          )}
       </>
@@ -235,4 +226,5 @@ export default connect(mapStatetoProps, {
    invoicesPDF,
    clearInvoice,
    loadRegister,
+   togglePopup,
 })(IncomeList);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
+import format from "date-fns/format";
 import { Link } from "react-router-dom";
-import Moment from "react-moment";
 
 import { loadGrades } from "../../../../../../actions/grade";
 import { loadAttendances } from "../../../../../../actions/attendance";
@@ -59,7 +59,7 @@ const StudentDashboard = ({
       if (user.active) {
          if (allowedUsers || pass) {
             loadStudentClass(user._id);
-            loadInstallments(null, user._id);
+            loadInstallments({ student: user._id }, true, "student");
          }
          if (!loadingClass) {
             loadGrades(classInfo._id, user._id);
@@ -122,7 +122,7 @@ const StudentDashboard = ({
                               </p>
                               <Link
                                  className="btn-text"
-                                 to={`/dashboard/${classInfo.teacher._id}`}
+                                 to={`/index/dashboard/${classInfo.teacher._id}`}
                                  onClick={() => {
                                     window.scroll(0, 0);
                                     clearProfile(userLogged.type !== "student");
@@ -146,17 +146,17 @@ const StudentDashboard = ({
                                  </p>
                                  <p>
                                     <span className="text-dark">Horario: </span>{" "}
-                                    <Moment
-                                       format="HH:mm"
-                                       utc
-                                       date={classInfo.hourin1}
-                                    />{" "}
+                                    {format(
+                                       new Date(classInfo.hourin1.slice(0, -1)),
+                                       "HH:mm"
+                                    )}{" "}
                                     -{" "}
-                                    <Moment
-                                       format="HH:mm"
-                                       utc
-                                       date={classInfo.hourout1}
-                                    />
+                                    {format(
+                                       new Date(
+                                          classInfo.hourout1.slice(0, -1)
+                                       ),
+                                       "HH:mm"
+                                    )}
                                  </p>
                               </>
                            ) : (
@@ -165,33 +165,33 @@ const StudentDashboard = ({
                                     <span className="text-dark">
                                        {classInfo.day1}:{" "}
                                     </span>
-                                    <Moment
-                                       format="HH:mm"
-                                       utc
-                                       date={classInfo.hourin1}
-                                    />{" "}
+                                    {format(
+                                       new Date(classInfo.hourin1.slice(0, -1)),
+                                       "HH:mm"
+                                    )}{" "}
                                     -{" "}
-                                    <Moment
-                                       format="HH:mm"
-                                       utc
-                                       date={classInfo.hourout1}
-                                    />
+                                    {format(
+                                       new Date(
+                                          classInfo.hourout1.slice(0, -1)
+                                       ),
+                                       "HH:mm"
+                                    )}
                                  </p>
                                  <p>
                                     <span className="text-dark">
                                        {classInfo.day2}:{" "}
                                     </span>
-                                    <Moment
-                                       format="HH:mm"
-                                       utc
-                                       date={classInfo.hourin2}
-                                    />{" "}
+                                    {format(
+                                       new Date(classInfo.hourin2.slice(0, -1)),
+                                       "HH:mm"
+                                    )}{" "}
                                     -{" "}
-                                    <Moment
-                                       format="HH:mm"
-                                       utc
-                                       date={classInfo.hourout2}
-                                    />
+                                    {format(
+                                       new Date(
+                                          classInfo.hourout2.slice(0, -1)
+                                       ),
+                                       "HH:mm"
+                                    )}
                                  </p>
                               </>
                            )}
@@ -248,11 +248,10 @@ const StudentDashboard = ({
                            {studentAttendances.map((attendance, index) => (
                               <div key={index} className="paragraph p-1">
                                  <FaTimesCircle />
-                                 <Moment
-                                    format="DD/MM"
-                                    utc
-                                    date={attendance.date}
-                                 />
+                                 {format(
+                                    new Date(attendance.date.slice(0, -1)),
+                                    "DD/MM"
+                                 )}
                               </div>
                            ))}
                         </div>

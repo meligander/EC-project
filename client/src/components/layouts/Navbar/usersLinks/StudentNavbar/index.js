@@ -1,66 +1,34 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { FaChalkboardTeacher, FaComments } from "react-icons/fa";
+import { FaChalkboardTeacher } from "react-icons/fa";
 
-import { clearPosts } from "../../../../../actions/post";
+import { updateCurrentNav } from "../../../../../actions/mixvalues";
 
 const StudentNavbar = ({
    auth: {
       userLogged: { classInfo },
    },
-   posts: { unseenPosts },
-   clearPosts,
-   toggleMenu,
-   currentNav,
-   setCurrentNav,
+   mixvalues: { menuToggle, currentNav },
+   updateCurrentNav,
 }) => {
    return (
       <>
          <li
-            className={`nav-item${toggleMenu ? " show" : ""}${
-               currentNav === "classmates" ? " current" : ""
+            className={`nav-item${menuToggle ? " show" : ""}${
+               currentNav === "class" ? " current" : ""
             }`}
          >
             <Link
                className="nav-link"
-               to={`/class/${classInfo._id}`}
+               to={`/class/single/${classInfo._id}`}
                onClick={() => {
                   window.scroll(0, 0);
-                  setCurrentNav("classmates");
+                  updateCurrentNav("class", true);
                }}
             >
                <FaChalkboardTeacher />
                <span className="hide-md">&nbsp; Clase</span>
-            </Link>
-         </li>
-         <li
-            className={`nav-item${toggleMenu ? " show" : ""}${
-               currentNav === "chat" ? " current" : ""
-            }`}
-         >
-            <Link
-               className="nav-link"
-               to={`/chat/${classInfo._id}`}
-               onClick={() => {
-                  window.scroll(0, 0);
-                  clearPosts();
-                  setCurrentNav("chat");
-               }}
-            >
-               <div className="notification">
-                  <FaComments />
-                  {unseenPosts > 0 && (
-                     <span
-                        className={`post-notification ${
-                           currentNav === "chat" ? "white" : "light"
-                        }`}
-                     >
-                        {unseenPosts}
-                     </span>
-                  )}
-               </div>
-               <span className="hide-md">&nbsp; Posteo Grupal</span>
             </Link>
          </li>
       </>
@@ -68,8 +36,8 @@ const StudentNavbar = ({
 };
 
 const mapStateToProps = (state) => ({
-   posts: state.posts,
    auth: state.auth,
+   mixvalues: state.mixvalues,
 });
 
-export default connect(mapStateToProps, { clearPosts })(StudentNavbar);
+export default connect(mapStateToProps, { updateCurrentNav })(StudentNavbar);

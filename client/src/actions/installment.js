@@ -1,4 +1,4 @@
-import moment from "moment";
+import format from "date-fns/format";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
 import history from "../utils/history";
@@ -30,9 +30,10 @@ export const loadInstallment = (installment_id, edit) => async (dispatch) => {
             setAlert("Debe seleccionar una cuota primero", "danger", "4")
          );
          return false;
-      } else history.push(`/edit-installment/${installment_id}`);
+      } else history.push(`/index/installment/edit/${installment_id}`);
 
    try {
+      dispatch(updateLoadingSpinner(true));
       const res = await api.get(`/installment/${installment_id}`);
       dispatch({
          type: INSTALLMENT_LOADED,
@@ -42,6 +43,7 @@ export const loadInstallment = (installment_id, edit) => async (dispatch) => {
       if (err.response.status !== 401)
          dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));
    }
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const getTotalDebt = () => async (dispatch) => {
@@ -76,51 +78,54 @@ export const getMonthlyDebt = (month) => async (dispatch) => {
    }
 };
 
-export const loadInstallments = (filterData, type) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-
-   try {
-      let res;
-      if (type === "student") {
-         if (!filterData._id) {
-            dispatch(
-               setAlert("Debe seleccionar un usuario primero", "danger", "3")
-            );
-            return false;
-         } else {
-            res = await api.get(`/installment/student/${filterData._id}`);
-            dispatch(clearSearch());
-         }
-      } else {
-         let filter = "";
-
-         const filternames = Object.keys(filterData);
-         for (let x = 0; x < filternames.length; x++) {
-            const name = filternames[x];
-            if (filterData[name] !== "") {
-               if (filter !== "") filter = filter + "&";
-               filter = filter + filternames[x] + "=" + filterData[name];
+export const loadInstallments =
+   (filterData, spinner, type) => async (dispatch) => {
+      console.log(filterData);
+      if (spinner) dispatch(updateLoadingSpinner(true));
+      try {
+         let res;
+         if (type === "student") {
+            if (!filterData.student._id) {
+               dispatch(
+                  setAlert("Debe seleccionar un usuario primero", "danger", "3")
+               );
+               return false;
+            } else {
+               res = await api.get(
+                  `/installment/student/${filterData.student._id}`
+               );
+               dispatch(clearSearch());
             }
-         }
-         res = await api.get(`/installment?${filter}`);
-      }
+         } else {
+            let filter = "";
 
-      dispatch({
-         type: INSTALLMENTS_LOADED,
-         payload: res.data,
-      });
-      dispatch(updateLoadingSpinner(false));
-      return true;
-   } catch (err) {
-      if (err.response.status !== 401) {
-         dispatch(setInstallmentsError(INSTALLMENTS_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         window.scroll(0, 0);
-         dispatch(updateLoadingSpinner(false));
+            const filternames = Object.keys(filterData);
+            for (let x = 0; x < filternames.length; x++) {
+               const name = filternames[x];
+               if (filterData[name] !== "") {
+                  if (filter !== "") filter = filter + "&";
+                  filter = filter + filternames[x] + "=" + filterData[name];
+               }
+            }
+            res = await api.get(`/installment?${filter}`);
+         }
+
+         dispatch({
+            type: INSTALLMENTS_LOADED,
+            payload: res.data,
+         });
+         if (spinner) dispatch(updateLoadingSpinner(false));
+         return true;
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setInstallmentsError(INSTALLMENTS_ERROR, err.response));
+            dispatch(setAlert(err.response.data.msg, "danger", "2"));
+            window.scroll(0, 0);
+            if (spinner) dispatch(updateLoadingSpinner(false));
+         }
+         return false;
       }
-      return false;
-   }
-};
+   };
 
 export const updateIntallment = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
@@ -148,7 +153,7 @@ export const updateIntallment = (formData) => async (dispatch) => {
 
       dispatch(setAlert(res.data.msg, "success", "2"));
       dispatch(clearInstallments());
-      history.push(`/installments/${formData.student._id}`);
+      history.push(`/index/installments/${formData.student._id}`);
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));
@@ -195,7 +200,7 @@ export const deleteInstallment = (formData) => async (dispatch) => {
       });
 
       dispatch(setAlert("Cuota eliminada", "success", "2"));
-      history.push(`/installments/${formData.student._id}`);
+      history.push(`/index/installments/${formData.student._id}`);
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));
@@ -214,17 +219,15 @@ export const installmentsPDF = (installments) => async (dispatch) => {
    let error = false;
 
    try {
-      await api.post("/installment/create-list", installments);
+      await api.post("/pdf/installment/list", installments);
 
-      const pdf = await api.get("/installment/list/fetch-list", {
+      const pdf = await api.get("/pdf/installment/fetch", {
          responseType: "blob",
       });
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-      const date = moment().format("DD-MM-YY");
-
-      saveAs(pdfBlob, `Deudas ${date}.pdf`);
+      saveAs(pdfBlob, `Deudas ${format(new Date(), "dd-MM-yy")}.pdf`);
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {

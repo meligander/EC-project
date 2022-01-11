@@ -21,7 +21,7 @@ import {
 import ClassesTable from "../../../sharedComp/tables/ClassesTable";
 
 const Classes = ({
-   classes: { classes, loadingClasses },
+   classes: { classes, loading },
    users: { users, loading: loadingUsers },
    auth: { userLogged },
    categories: { categories, loading: loadingCategories },
@@ -37,27 +37,26 @@ const Classes = ({
    const [filterForm, setfilterForm] = useState({
       teacher: "",
       category: "",
+      year: new Date().getFullYear(),
    });
 
-   const { teacher, category } = filterForm;
+   const { teacher, category, year } = filterForm;
 
    useEffect(() => {
-      if (userLogged.type !== "teacher") {
-         if (loadingUsers) loadUsers({ type: "teacher", active: true });
-         if (loadingCategories) loadCategories();
-      }
-      if (loadingClasses) loadClasses({});
-   }, [
-      loadUsers,
-      loadCategories,
-      loadClasses,
-      userLogged,
-      loadingClasses,
-      loadingCategories,
-      loadingUsers,
-   ]);
+      if (userLogged.type !== "teacher" && loadingUsers)
+         loadUsers({ type: "teacher", active: true }, false, true, false);
+   }, [loadUsers, userLogged, loadingUsers]);
+
+   useEffect(() => {
+      if (userLogged.type !== "teacher" && loadingCategories) loadCategories();
+   }, [userLogged, loadingCategories, loadCategories]);
+
+   useEffect(() => {
+      if (loading) loadClasses({ year });
+   }, [loading, loadClasses, year]);
 
    const onChange = (e) => {
+      e.persist();
       setfilterForm({
          ...filterForm,
          [e.target.name]: e.target.value,
@@ -75,42 +74,40 @@ const Classes = ({
                   loadClasses(filterForm);
                }}
             >
-               {!loadingUsers && (
-                  <div className="form-group">
-                     <select
-                        id="teacher"
-                        className="form-input"
-                        name="teacher"
-                        onChange={onChange}
-                        value={teacher}
-                     >
-                        <option value="">* Seleccione Profesor</option>
-                        {users.users.length > 0 &&
-                           users.users.map((user) => (
-                              <option key={user._id} value={user._id}>
-                                 {user.lastname + " " + user.name}
-                              </option>
-                           ))}
-                     </select>
-                     <label
-                        htmlFor="teacher"
-                        className={`form-label ${teacher === "" ? "lbl" : ""}`}
-                     >
-                        Profesor
-                     </label>
-                  </div>
-               )}
-               {!loadingCategories && (
-                  <div className="form-group">
-                     <select
-                        id="category"
-                        className="form-input"
-                        name="category"
-                        onChange={onChange}
-                        value={category}
-                     >
-                        <option value="">* Seleccione Categoría</option>
-                        {categories.categories.map((category) => (
+               <div className="form-group">
+                  <select
+                     id="teacher"
+                     className="form-input"
+                     name="teacher"
+                     onChange={onChange}
+                     value={teacher}
+                  >
+                     <option value="">* Seleccione Profesor</option>
+                     {!loadingUsers &&
+                        users.map((user) => (
+                           <option key={user._id} value={user._id}>
+                              {user.lastname + " " + user.name}
+                           </option>
+                        ))}
+                  </select>
+                  <label
+                     htmlFor="teacher"
+                     className={`form-label ${teacher === "" ? "lbl" : ""}`}
+                  >
+                     Profesor
+                  </label>
+               </div>
+               <div className="form-group">
+                  <select
+                     id="category"
+                     className="form-input"
+                     name="category"
+                     onChange={onChange}
+                     value={category}
+                  >
+                     <option value="">* Seleccione Categoría</option>
+                     {!loadingCategories &&
+                        categories.map((category) => (
                            <React.Fragment key={category._id}>
                               {category.name !== "Inscripción" && (
                                  <option value={category._id}>
@@ -119,15 +116,33 @@ const Classes = ({
                               )}
                            </React.Fragment>
                         ))}
-                     </select>
-                     <label
-                        htmlFor="category"
-                        className={`form-label ${category === "" ? "lbl" : ""}`}
-                     >
-                        Categoría
-                     </label>
-                  </div>
-               )}
+                  </select>
+                  <label
+                     htmlFor="category"
+                     className={`form-label ${category === "" ? "lbl" : ""}`}
+                  >
+                     Categoría
+                  </label>
+               </div>
+               <div className="form-group">
+                  <select
+                     id="year"
+                     className="form-input"
+                     name="year"
+                     onChange={onChange}
+                     value={year}
+                  >
+                     <option value="">* Seleccione el Año</option>
+                     <option value="2022">2022</option>
+                     <option value="2021">2021</option>
+                  </select>
+                  <label
+                     htmlFor="year"
+                     className={`form-label ${year === "" ? "lbl" : ""}`}
+                  >
+                     Año
+                  </label>
+               </div>
 
                <div className="btn-right">
                   <button type="submit" className="btn btn-light">
@@ -151,7 +166,7 @@ const Classes = ({
          <div className="btn-right">
             {userLogged.type !== "teacher" && (
                <Link
-                  to={users.length !== 0 ? "/register-class" : "#"}
+                  to={users.length !== 0 ? "/class/register" : "#"}
                   onClick={() => {
                      window.scroll(0, 0);
                      clearClass();

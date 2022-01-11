@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import Moment from "react-moment";
-import moment from "moment";
-import "moment/locale/es";
 import { connect } from "react-redux";
+import es from "date-fns/locale/es";
+import format from "date-fns/format";
 import { Link } from "react-router-dom";
 import {
    FaUserEdit,
@@ -62,7 +61,7 @@ const AdminDashboard = ({
    const date = new Date();
 
    const [adminValues, setAdminValues] = useState({
-      dateR: moment(),
+      dateR: new Date(),
    });
 
    const { dateR } = adminValues;
@@ -92,9 +91,13 @@ const AdminDashboard = ({
       else if (register.temporary)
          setAdminValues((prev) => ({
             ...prev,
-            dateR: register.date,
+            dateR: new Date(register.date),
          }));
    }, [loadingRegister, register, loadRegister]);
+
+   const capitalize = (string) => {
+      return string && string[0].toUpperCase() + string.slice(1);
+   };
 
    return (
       <>
@@ -103,7 +106,7 @@ const AdminDashboard = ({
                <ul className="side-nav">
                   <li className="side-nav-item">
                      <Link
-                        to="/invoice-generation"
+                        to="/invoice/register"
                         className="side-nav-link"
                         onClick={() => {
                            clearInstallments();
@@ -121,7 +124,7 @@ const AdminDashboard = ({
                   </li>
                   <li className="side-nav-item">
                      <Link
-                        to="/installments/0"
+                        to="/index/installments/0"
                         onClick={() => {
                            clearSearch();
                            clearInstallments();
@@ -137,7 +140,7 @@ const AdminDashboard = ({
                   </li>
                   <li className="side-nav-item">
                      <Link
-                        to="/categories"
+                        to="/index/categories"
                         onClick={() => {
                            clearCategories();
                            window.scroll(0, 0);
@@ -153,7 +156,7 @@ const AdminDashboard = ({
                   <li className="side-nav-item">
                      <Link
                         className="side-nav-link"
-                        to="/cashregister-info"
+                        to="/register/info"
                         onClick={() => {
                            clearRegisters();
                            clearSearch();
@@ -173,7 +176,11 @@ const AdminDashboard = ({
                   <h3 className="heading-tertiary text-dark">
                      <FaCalendarDay />
                      &nbsp;&nbsp;
-                     <Moment format="LLLL" locale="es" date={dateR} />
+                     {capitalize(
+                        format(dateR, "EEEE, do 'de' LLLL 'de' yyyy", {
+                           locale: es,
+                        })
+                     )}
                   </h3>
 
                   <div className="register-info-money my-5 pt-2 text-center">
@@ -198,7 +205,7 @@ const AdminDashboard = ({
                <ul className="side-nav">
                   <li className="side-nav-item">
                      <Link
-                        to="/search"
+                        to="/user/search"
                         onClick={() => {
                            clearSearch();
                            window.scroll(0, 0);
@@ -213,7 +220,7 @@ const AdminDashboard = ({
                   </li>
                   <li className="side-nav-item">
                      <Link
-                        to="/classes"
+                        to="/class/all"
                         onClick={() => {
                            clearClasses();
                            window.scroll(0, 0);
@@ -228,7 +235,7 @@ const AdminDashboard = ({
                   </li>
                   <li className="side-nav-item">
                      <Link
-                        to="/enrollment"
+                        to="/enrollment/register"
                         onClick={() => {
                            clearSearch();
                            window.scroll(0, 0);
@@ -244,7 +251,7 @@ const AdminDashboard = ({
 
                   <li className="side-nav-item">
                      <Link
-                        to="/mention-list"
+                        to="/index/mentions-list"
                         onClick={() => {
                            clearSearch();
                            window.scroll(0, 0);

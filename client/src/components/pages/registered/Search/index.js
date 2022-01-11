@@ -24,7 +24,7 @@ const Search = ({
             userLogged.type === "admin&teacher") && (
             <div className="btn-right">
                <Link
-                  to="/register"
+                  to="/user/edit/0"
                   className="btn btn-dark"
                   onClick={() => {
                      window.scroll(0, 0);

@@ -1,5 +1,5 @@
 import React from "react";
-import Moment from "react-moment";
+import format from "date-fns/format";
 import PropTypes from "prop-types";
 
 import "./style.scss";
@@ -27,15 +27,19 @@ const ClassInfo = ({ classInfo }) => {
                <div className="schedule">
                   <p>
                      <span className="text-dark">Entrada: </span>
-                     {classInfo.hourin1 && (
-                        <Moment format="HH:mm" utc date={classInfo.hourin1} />
-                     )}
+                     {classInfo.hourin1 &&
+                        format(
+                           new Date(classInfo.hourin1.slice(0, -1)),
+                           "HH:mm"
+                        )}
                   </p>
                   <p>
                      <span className="text-dark">Salida: </span>
-                     {classInfo.hourout1 && (
-                        <Moment format="HH:mm" utc date={classInfo.hourout1} />
-                     )}
+                     {classInfo.hourout1 &&
+                        format(
+                           new Date(classInfo.hourout1.slice(0, -1)),
+                           "HH:mm"
+                        )}
                   </p>
                </div>
             </div>
@@ -47,15 +51,19 @@ const ClassInfo = ({ classInfo }) => {
                <div className="schedule">
                   <p>
                      <span className="text-dark">Entrada: </span>
-                     {classInfo.hourin2 && (
-                        <Moment format="HH:mm" utc date={classInfo.hourin2} />
-                     )}
+                     {classInfo.hourin2 &&
+                        format(
+                           new Date(classInfo.hourin2.slice(0, -1)),
+                           "HH:mm"
+                        )}
                   </p>
                   <p>
                      <span className="text-dark">Salida: </span>
-                     {classInfo.hourout2 && (
-                        <Moment format="HH:mm" utc date={classInfo.hourout2} />
-                     )}
+                     {classInfo.hourout2 &&
+                        format(
+                           new Date(classInfo.hourout2.slice(0, -1)),
+                           "HH:mm"
+                        )}
                   </p>
                </div>
             </div>

@@ -10,7 +10,10 @@ import {
 } from "../../../../../../../actions/expence";
 import { loadUsers } from "../../../../../../../actions/user";
 import { setAlert } from "../../../../../../../actions/alert";
-import { formatNumber } from "../../../../../../../actions/mixvalues";
+import {
+   formatNumber,
+   togglePopup,
+} from "../../../../../../../actions/mixvalues";
 
 import PopUp from "../../../../../../modal/PopUp";
 import Alert from "../../../../../sharedComp/Alert";
@@ -25,11 +28,11 @@ const IncomeExpenceTab = ({
    clearExpenceTypes,
    loadUsers,
    registerExpence,
+   togglePopup,
    setAlert,
 }) => {
    const [adminValues, setAdminValues] = useState({
       show: false,
-      toggleModal: false,
       employeePaymentID: "",
    });
 
@@ -47,7 +50,7 @@ const IncomeExpenceTab = ({
 
    const { expencetype, value, description, hours, teacher } = formData;
 
-   const { show, toggleModal, employeePaymentID } = adminValues;
+   const { show, employeePaymentID } = adminValues;
 
    useEffect(() => {
       if (!expences.loadingET) {
@@ -63,6 +66,7 @@ const IncomeExpenceTab = ({
    }, [expences.loadingET, expences.expencetypes]);
 
    const onChange = (e) => {
+      e.persist();
       setFormData({
          ...formData,
          [e.target.name]: e.target.value,
@@ -75,7 +79,7 @@ const IncomeExpenceTab = ({
             ...prev,
             show: true,
          }));
-         loadUsers({ active: true, type: "team" });
+         loadUsers({ active: true, type: "team" }, true, true, false);
       } else {
          if (
             e.target.value !== employeePaymentID &&
@@ -89,6 +93,7 @@ const IncomeExpenceTab = ({
    };
 
    const onChangeTeacher = (e) => {
+      e.persist();
       let sal = 0;
 
       for (let x = 0; x < users.users.length; x++) {
@@ -130,6 +135,7 @@ const IncomeExpenceTab = ({
    };
 
    const setValueAfterHours = (e) => {
+      e.persist();
       if (teacher.salary && teacher.salary !== "") {
          setFormData({
             ...formData,
@@ -150,13 +156,6 @@ const IncomeExpenceTab = ({
       <>
          <Alert type="3" />
          <PopUp
-            toggleModal={toggleModal}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModal: !toggleModal,
-               }))
-            }
             confirm={confirm}
             text="¿Está seguro que desea registrar un nuevo movimiento?"
          />
@@ -170,11 +169,7 @@ const IncomeExpenceTab = ({
             className="register income-tab"
             onSubmit={(e) => {
                e.preventDefault();
-               if (register)
-                  setAdminValues((prev) => ({
-                     ...prev,
-                     toggleModal: !toggleModal,
-                  }));
+               if (register) togglePopup();
             }}
          >
             <table>
@@ -284,7 +279,7 @@ const IncomeExpenceTab = ({
                   userLogged.type === "admin&teacher") && (
                   <div className="tooltip">
                      <Link
-                        to="/edit-expencetypes"
+                        to="/register/expencetypes/edit"
                         onClick={() => {
                            window.scroll(0, 0);
                            clearExpenceTypes();
@@ -315,4 +310,5 @@ export default connect(mapStateToProps, {
    loadUsers,
    clearExpenceTypes,
    setAlert,
+   togglePopup,
 })(IncomeExpenceTab);

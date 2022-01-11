@@ -12,11 +12,10 @@ table.installments {
    }
 }
 
-.next-btn {
-   margin-right: 19rem;
-   margin-bottom: -6.75rem;
+.move-down {
+   margin-bottom: -7.2rem !important;
 
    @include respond(phone) {
-      margin-bottom: -5.8rem;
+      margin-bottom: -5.3rem !important;
    }
 }

@@ -16,7 +16,11 @@ const PrivateRoutes = ({
    if (userLogged) {
       if (Component === Dashboard)
          return (
-            <Route exact path="/dashboard/:user_id" component={Dashboard} />
+            <Route
+               exact
+               path="/index/dashboard/:user_id"
+               component={Dashboard}
+            />
          );
 
       let pass =
@@ -34,7 +38,7 @@ const PrivateRoutes = ({
             </>
          );
       } else {
-         return <Redirect to="/dashboard/0" />;
+         return <Redirect to="/index/dashboard/0" />;
       }
    } else {
       if (token === null) {

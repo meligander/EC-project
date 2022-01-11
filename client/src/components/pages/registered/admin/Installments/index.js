@@ -11,16 +11,17 @@ import {
 } from "../../../../../actions/installment";
 import { loadPenalty, updatePenalty } from "../../../../../actions/penalty";
 import { clearUser, loadUser } from "../../../../../actions/user";
+import { togglePopup } from "../../../../../actions/mixvalues";
 
 import InstallmentsSearch from "../../sharedComp/search/InstallmentsSearch";
 import PopUp from "../../../../modal/PopUp";
 
 const Installments = ({
    match,
-   penalties: { loading, penalty },
-   installments: { loadingUsersInstallments },
+   penalties: { loading: loadingPenalty },
+   installments: { loading },
    auth: { userLogged },
-   users: { user, loading: userLoading },
+   users: { user, loadingUser },
    clearInstallments,
    clearInstallment,
    clearUser,
@@ -28,48 +29,40 @@ const Installments = ({
    loadPenalty,
    loadUser,
    loadInstallments,
+   togglePopup,
 }) => {
    const _id = match.params.user_id;
 
    const [adminValues, setAdminValues] = useState({
-      toggleModal: false,
       student: {
          _id: "",
          name: "",
       },
    });
-
-   const { toggleModal, student } = adminValues;
+   const { student } = adminValues;
 
    useEffect(() => {
-      if (loading) loadPenalty();
-      if (_id !== "0" && loadingUsersInstallments) {
-         loadInstallments(null, _id);
-         loadUser(_id);
-      } else {
-         if (!userLoading && userLogged._id !== user._id) {
-            const student = {
-               _id: user._id,
-               name: user.lastname + ", " + user.name,
-            };
+      if (loadingPenalty) loadPenalty();
+   }, [loadingPenalty, loadPenalty]);
 
+   useEffect(() => {
+      if (_id !== "0" && loading)
+         loadInstallments({ student: { _id } }, true, "student");
+   }, [_id, loading, loadInstallments]);
+
+   useEffect(() => {
+      if (_id !== "0") {
+         if (loadingUser) loadUser(_id, loading ? false : true);
+         else
             setAdminValues((prev) => ({
                ...prev,
-               student,
+               student: {
+                  _id: user._id,
+                  name: user.lastname + ", " + user.name,
+               },
             }));
-         }
       }
-   }, [
-      _id,
-      loadingUsersInstallments,
-      loadPenalty,
-      user,
-      userLogged,
-      userLoading,
-      loadUser,
-      loading,
-      loadInstallments,
-   ]);
+   }, [_id, loadingUser, loadUser, user, loading]);
 
    const changeStudent = (student) => {
       setAdminValues((prev) => ({
@@ -82,20 +75,7 @@ const Installments = ({
       <>
          <div>
             <h1>Cuotas</h1>
-            {toggleModal && !loading && (
-               <PopUp
-                  toggleModal={toggleModal}
-                  setToggleModal={() =>
-                     setAdminValues((prev) => ({
-                        ...prev,
-                        toggleModal: !toggleModal,
-                     }))
-                  }
-                  type="penalty"
-                  confirm={(percentage) => updatePenalty({ percentage })}
-                  penalty={penalty}
-               />
-            )}
+            <PopUp confirm={(percentage) => updatePenalty({ percentage })} />
 
             <div className="btn-right my-3">
                {(userLogged.type === "admin" ||
@@ -105,10 +85,7 @@ const Installments = ({
                      type="button"
                      onClick={(e) => {
                         e.preventDefault();
-                        setAdminValues((prev) => ({
-                           ...prev,
-                           toggleModal: !toggleModal,
-                        }));
+                        togglePopup("penalty");
                      }}
                   >
                      <FaDollarSign />
@@ -116,7 +93,7 @@ const Installments = ({
                   </button>
                )}
                <Link
-                  to="/installment-list"
+                  to="/index/installment/list"
                   onClick={() => {
                      window.scroll(0, 0);
                      clearInstallments();
@@ -124,8 +101,7 @@ const Installments = ({
                   className="btn btn-light"
                >
                   <IoIosListBox />
-                  &nbsp;
-                  <span className="hide-sm">Listado</span> Deudas
+                  &nbsp; <span className="hide-sm">Listado</span>&nbsp;Deudas
                </Link>
             </div>
             <InstallmentsSearch
@@ -134,12 +110,10 @@ const Installments = ({
             />
             <div className="btn-right">
                <Link
-                  className={`btn ${
-                     !loadingUsersInstallments ? "btn-primary" : "btn-black"
-                  }`}
+                  className={`btn ${!loading ? "btn-primary" : "btn-black"}`}
                   to={
-                     !loadingUsersInstallments
-                        ? `/edit-installment/2/${student._id}`
+                     !loading && !loadingUser
+                        ? `/index/installment/new/${student._id}`
                         : "#"
                   }
                   onClick={() => {
@@ -149,7 +123,7 @@ const Installments = ({
                   }}
                >
                   <FaPlus />
-                  &nbsp; Agregar cuota
+                  <span className="hide-md">&nbsp;Agregar cuota</span>
                </Link>
             </div>
          </div>
@@ -172,4 +146,5 @@ export default connect(mapStateToProps, {
    clearUser,
    updatePenalty,
    loadInstallments,
+   togglePopup,
 })(Installments);

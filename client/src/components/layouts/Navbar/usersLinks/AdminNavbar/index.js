@@ -14,34 +14,33 @@ import { clearInstallments } from "../../../../../actions/installment";
 import { clearRegisters } from "../../../../../actions/register";
 import { clearSearch } from "../../../../../actions/user";
 import { clearClasses } from "../../../../../actions/class";
+import { updateCurrentNav } from "../../../../../actions/mixvalues";
 
 import "./style.scss";
 
 const AdminNavbar = ({
-   posts: { allUnseenPosts },
+   mixvalues: { currentNav, menuToggle },
    clearInstallments,
    getInvoiceNumber,
    clearRegisters,
    clearSearch,
    clearClasses,
-   toggleMenu,
-   setCurrentNav,
-   currentNav,
+   updateCurrentNav,
 }) => {
    return (
       <>
          <li
-            className={`nav-item smaller${toggleMenu ? " show" : ""}${
-               currentNav === "search" ? " current" : ""
+            className={`nav-item smaller${menuToggle ? " show" : ""}${
+               currentNav === "user" ? " current" : ""
             }`}
          >
             <Link
                className="nav-link"
-               to="/search"
+               to="/user/search"
                onClick={() => {
                   window.scroll(0, 0);
                   clearSearch();
-                  setCurrentNav("search");
+                  updateCurrentNav("user", true);
                }}
             >
                <ImSearch />
@@ -49,46 +48,35 @@ const AdminNavbar = ({
             </Link>
          </li>
          <li
-            className={`nav-item smaller${toggleMenu ? " show" : ""}${
-               currentNav === "classes" ? " current" : ""
+            className={`nav-item smaller${menuToggle ? " show" : ""}${
+               currentNav === "class" ? " current" : ""
             }`}
          >
             <Link
                className="nav-link"
-               to="/classes"
+               to="/class/all"
                onClick={() => {
                   clearClasses();
-                  setCurrentNav("classes");
+                  updateCurrentNav("class", true);
                   window.scroll(0, 0);
                }}
             >
-               <div className="notification">
-                  <FaChalkboardTeacher />
-                  {allUnseenPosts > 0 && (
-                     <span
-                        className={`post-notification teacher ${
-                           currentNav === "classes" ? "white" : "light"
-                        }`}
-                     >
-                        {allUnseenPosts}
-                     </span>
-                  )}
-               </div>
+               <FaChalkboardTeacher />
                <span className="hide-md">&nbsp;Clases</span>
             </Link>
          </li>
          <li
-            className={`nav-item smaller${toggleMenu ? " show" : ""}${
+            className={`nav-item smaller${menuToggle ? " show" : ""}${
                currentNav === "enrollment" ? " current" : ""
             }`}
          >
             <Link
                className="nav-link"
-               to="/enrollment"
+               to="/enrollment/register"
                onClick={() => {
                   window.scroll(0, 0);
                   clearSearch();
-                  setCurrentNav("enrollment");
+                  updateCurrentNav("enrollment", true);
                }}
             >
                <FaUserEdit />
@@ -96,15 +84,15 @@ const AdminNavbar = ({
             </Link>
          </li>
          <li
-            className={`nav-item smaller${toggleMenu ? " show" : ""}${
+            className={`nav-item smaller${menuToggle ? " show" : ""}${
                currentNav === "invoice" ? " current" : ""
             }`}
          >
             <Link
                className="nav-link"
-               to="/invoice-generation"
+               to="/invoice/register"
                onClick={() => {
-                  setCurrentNav("invoice");
+                  updateCurrentNav("invoice", true);
                   clearInstallments();
                   getInvoiceNumber();
                   clearSearch();
@@ -116,15 +104,15 @@ const AdminNavbar = ({
             </Link>
          </li>
          <li
-            className={`nav-item smaller${toggleMenu ? " show" : ""}${
+            className={`nav-item smaller${menuToggle ? " show" : ""}${
                currentNav === "register" ? " current" : ""
             }`}
          >
             <Link
                className="nav-link"
-               to="/cashregister-info"
+               to="/register/info"
                onClick={() => {
-                  setCurrentNav("register");
+                  updateCurrentNav("register", true);
                   clearRegisters();
                   clearSearch();
                   window.scroll(0, 0);
@@ -139,8 +127,7 @@ const AdminNavbar = ({
 };
 
 const mapStateToProps = (state) => ({
-   auth: state.auth,
-   posts: state.posts,
+   mixvalues: state.mixvalues,
 });
 
 export default connect(mapStateToProps, {
@@ -149,4 +136,5 @@ export default connect(mapStateToProps, {
    clearRegisters,
    clearSearch,
    clearClasses,
+   updateCurrentNav,
 })(AdminNavbar);

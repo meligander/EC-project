@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import moment from "moment";
+import format from "date-fns/format";
 import { Link } from "react-router-dom";
 import { FaEdit, FaGraduationCap, FaPlus, FaTimes } from "react-icons/fa";
 import { FiSave } from "react-icons/fi";
 import { ImFilePdf } from "react-icons/im";
+import es from "date-fns/locale/es";
 
 import { setAlert } from "../../../../../../actions/alert";
 import {
@@ -15,6 +16,7 @@ import {
    certificatePDF,
    clearGradeTypes,
 } from "../../../../../../actions/grade";
+import { togglePopup } from "../../../../../../actions/mixvalues";
 
 import PopUp from "../../../../../modal/PopUp";
 import Alert from "../../../../sharedComp/Alert";
@@ -31,6 +33,7 @@ const GradesTab = ({
    clearGradeTypes,
    gradesPDF,
    certificatePDF,
+   togglePopup,
 }) => {
    const [formData, setFormData] = useState({
       newGrades: [],
@@ -46,20 +49,11 @@ const GradesTab = ({
    const [adminValues, setAdminValues] = useState({
       gradePlus: false,
       gradetypes: [],
-      toggleModalSave: false,
-      toggleModalDelete: false,
-      toggleModalDate: false,
+      popupType: "",
       toDelete: null,
    });
 
-   const {
-      gradePlus,
-      gradetypes,
-      toggleModalSave,
-      toggleModalDelete,
-      toggleModalDate,
-      toDelete,
-   } = adminValues;
+   const { popupType, gradePlus, gradetypes, toDelete } = adminValues;
 
    useEffect(() => {
       const loadGradeTypes = () => {
@@ -96,11 +90,14 @@ const GradesTab = ({
          }));
       };
 
-      setInput();
-      loadGradeTypes();
+      if (grades) {
+         setInput();
+         loadGradeTypes();
+      }
    }, [gradeTypes, period, grades]);
 
    const onChange = (e, row) => {
+      e.persist();
       let number = Number(e.target.name.substring(5, e.target.name.length));
 
       const gradesNumber = newGrades[0].length;
@@ -118,6 +115,7 @@ const GradesTab = ({
    };
 
    const onChangeGradeTypes = (e) => {
+      e.persist();
       setFormData({
          ...formData,
          newGradeType: {
@@ -182,7 +180,9 @@ const GradesTab = ({
             (item) => item[0].student
          );
 
-         const stringDate = moment(date).format("DD [de] MMMM [de] YYYY");
+         const stringDate = format(new Date(date), "Lo 'de' LLLL 'de' yyyy", {
+            locale: es,
+         });
          certificatePDF(
             grades.students.filter((student) => student.name !== ""),
             grades.header[period - 1],
@@ -198,37 +198,30 @@ const GradesTab = ({
       <>
          <Alert type="4" />
          <PopUp
-            toggleModal={toggleModalSave}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModalSave: !toggleModalSave,
-               }))
+            confirm={() => {
+               switch (popupType) {
+                  case "save":
+                     saveGrades();
+                     break;
+                  case "delete":
+                     deleteGradeType();
+                     break;
+                  case "certificate-date":
+                     certificatePdfGenerator();
+                     break;
+                  default:
+                     break;
+               }
+            }}
+            text={
+               popupType !== "certificate-date"
+                  ? `¿Está seguro que desea ${
+                       popupType === "save"
+                          ? "guardar los cambios"
+                          : "eliminar el tipo de nota"
+                    }?`
+                  : null
             }
-            confirm={saveGrades}
-            text="¿Está seguro que desea guardar los cambios?"
-         />
-         <PopUp
-            toggleModal={toggleModalDelete}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModalDelete: !toggleModalDelete,
-               }))
-            }
-            confirm={deleteGradeType}
-            text="¿Está seguro que desea eliminar el tipo de nota?"
-         />
-         <PopUp
-            toggleModal={toggleModalDate}
-            setToggleModal={() =>
-               setAdminValues((prev) => ({
-                  ...prev,
-                  toggleModalDate: !toggleModalDate,
-               }))
-            }
-            type="certificate-date"
-            confirm={certificatePdfGenerator}
          />
          {!loading && (
             <div className="wrapper both mt-2">
@@ -264,10 +257,10 @@ const GradesTab = ({
                                           className="btn btn-danger"
                                           onClick={(e) => {
                                              e.preventDefault();
+                                             togglePopup();
                                              setAdminValues((prev) => ({
                                                 ...prev,
-                                                toggleModalDelete:
-                                                   !toggleModalDelete,
+                                                popupType: "delete",
                                                 toDelete: row,
                                              }));
                                           }}
@@ -289,9 +282,10 @@ const GradesTab = ({
                type="button"
                onClick={(e) => {
                   e.preventDefault();
+                  togglePopup();
                   setAdminValues((prev) => ({
                      ...prev,
-                     toggleModalSave: !toggleModalSave,
+                     popupType: "save",
                   }));
                }}
             >
@@ -342,9 +336,10 @@ const GradesTab = ({
                      type="button"
                      onClick={(e) => {
                         e.preventDefault();
+                        togglePopup();
                         setAdminValues((prev) => ({
                            ...prev,
-                           toggleModalDate: !toggleModalDate,
+                           popupType: "certificate-date",
                         }));
                      }}
                   >
@@ -398,7 +393,7 @@ const GradesTab = ({
                         userLogged.type === "admin&teacher") && (
                         <div className="tooltip">
                            <Link
-                              to="/edit-gradetypes"
+                              to="/class/gradetypes/edit"
                               onClick={() => {
                                  window.scroll(0, 0);
                                  clearGradeTypes();
@@ -434,4 +429,5 @@ export default connect(mapStateToProps, {
    gradesPDF,
    certificatePDF,
    clearGradeTypes,
+   togglePopup,
 })(GradesTab);

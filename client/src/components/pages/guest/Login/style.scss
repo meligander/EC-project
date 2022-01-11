@@ -1,17 +1,36 @@
 @import "../../../../style/abstract.scss";
 
 .login {
-   align-self: center;
+   padding: 8rem 10rem 5rem !important;
+   width: 70% !important;
    margin-top: -2rem;
-   width: 70%;
+
+   .btn-right {
+      margin-right: -10rem;
+   }
 
    @include respond(tab-port) {
-      width: 80%;
+      padding: 6rem 8rem 3rem !important;
+      width: 80% !important;
+
+      .btn-right {
+         margin-right: -6rem;
+      }
    }
    @include respond(phone) {
-      width: 85%;
+      padding: 4rem 6rem 2rem !important;
+      width: 85% !important;
+
+      .btn-right {
+         margin-right: -4rem;
+      }
    }
    @include respond(small-phone) {
-      width: 95%;
+      padding: 3rem !important;
+      width: 95% !important;
+
+      .btn-right {
+         margin-right: -1rem;
+      }
    }
 }
