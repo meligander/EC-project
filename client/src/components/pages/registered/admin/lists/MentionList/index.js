@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
 
 import { loadCategories } from "../../../../../../actions/category";
 
@@ -10,7 +9,7 @@ import Attendance from "./tabs/AttendanceTab";
 
 const MentionList = ({ loadCategories }) => {
    useEffect(() => {
-      loadCategories();
+      loadCategories(false);
    }, [loadCategories]);
 
    return (
@@ -22,10 +21,6 @@ const MentionList = ({ loadCategories }) => {
          />
       </>
    );
-};
-
-MentionList.propTypes = {
-   loadCategories: PropTypes.func.isRequired,
 };
 
 export default connect(null, { loadCategories })(MentionList);

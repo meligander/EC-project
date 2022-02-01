@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import es from "date-fns/locale/es";
 import format from "date-fns/format";
@@ -60,12 +60,6 @@ const AdminDashboard = ({
 }) => {
    const date = new Date();
 
-   const [adminValues, setAdminValues] = useState({
-      dateR: new Date(),
-   });
-
-   const { dateR } = adminValues;
-
    useEffect(() => {
       if (yearEnrollments.year === "") getYearEnrollments();
    }, [yearEnrollments.year, getYearEnrollments]);
@@ -87,13 +81,8 @@ const AdminDashboard = ({
    }, [activeClasses, getActiveClasses]);
 
    useEffect(() => {
-      if (loadingRegister) loadRegister();
-      else if (register.temporary)
-         setAdminValues((prev) => ({
-            ...prev,
-            dateR: new Date(register.date),
-         }));
-   }, [loadingRegister, register, loadRegister]);
+      if (loadingRegister) loadRegister(true);
+   }, [loadingRegister, loadRegister]);
 
    const capitalize = (string) => {
       return string && string[0].toUpperCase() + string.slice(1);
@@ -177,26 +166,33 @@ const AdminDashboard = ({
                      <FaCalendarDay />
                      &nbsp;&nbsp;
                      {capitalize(
-                        format(dateR, "EEEE, do 'de' LLLL 'de' yyyy", {
-                           locale: es,
-                        })
+                        format(
+                           register && register.temporary
+                              ? register.date
+                              : new Date(),
+                           "EEEE, d 'de' LLLL 'de' yyyy",
+                           {
+                              locale: es,
+                           }
+                        )
                      )}
                   </h3>
-
-                  <div className="register-info-money my-5 pt-2 text-center">
-                     <p className=" heading-tertiary">
-                        <span className="text-dark">Ingresos: </span>$
-                        {register && register.income && register.temporary
-                           ? formatNumber(register.income)
-                           : 0}
-                     </p>
-                     <p className=" heading-tertiary">
-                        <span className="text-dark">Egresos: </span>$
-                        {register && register.expence && register.temporary
-                           ? formatNumber(register.expence)
-                           : 0}
-                     </p>
-                  </div>
+                  {register && (
+                     <div className="register-info-money my-5 pt-2 text-center">
+                        <p className=" heading-tertiary">
+                           <span className="text-dark">Ingresos: </span>$
+                           {register.income && register.temporary
+                              ? formatNumber(register.income)
+                              : 0}
+                        </p>
+                        <p className=" heading-tertiary">
+                           <span className="text-dark">Egresos: </span>$
+                           {register.expence && register.temporary
+                              ? formatNumber(register.expence)
+                              : 0}
+                        </p>
+                     </div>
+                  )}
                </div>
             )}
          </section>

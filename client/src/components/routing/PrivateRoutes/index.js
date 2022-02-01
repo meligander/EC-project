@@ -4,7 +4,6 @@ import { connect } from "react-redux";
 
 import Loading from "../../modal/Loading";
 import Dashboard from "../../pages/registered/Dashboard";
-import GoBack from "../../pages/sharedComp/GoBack";
 import Alert from "../../pages/sharedComp/Alert";
 
 const PrivateRoutes = ({
@@ -29,7 +28,6 @@ const PrivateRoutes = ({
       if (pass) {
          return (
             <>
-               <GoBack />
                <Loading />
                <div className="inner-container">
                   <Alert type="2" />

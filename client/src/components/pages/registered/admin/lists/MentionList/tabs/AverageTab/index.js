@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { BiFilterAlt } from "react-icons/bi";
 
-import { updatePageNumber } from "../../../../../../../../actions/mixvalues";
 import { clearProfile } from "../../../../../../../../actions/user";
 import {
    loadStudentsAvAtt,
@@ -13,11 +12,9 @@ import {
 import ListButtons from "../../../sharedComp/ListButtons";
 
 function AverageTab({
-   mixvalues: { page },
    enrollments: { enrollments, loading, type },
    categories: { categories, loading: loadingCategories },
    loadStudentsAvAtt,
-   updatePageNumber,
    enrollmentsPDF,
    clearProfile,
 }) {
@@ -26,7 +23,13 @@ function AverageTab({
       category: "",
    });
 
+   const [adminValues, setAdminValues] = useState({
+      page: 0,
+   });
+
    const { amount, category } = filterData;
+
+   const { page } = adminValues;
 
    const onChange = (e) => {
       e.persist();
@@ -55,7 +58,6 @@ function AverageTab({
                >
                   <option value="">* Seleccione Categoría</option>
                   {!loadingCategories &&
-                     categories.length > 0 &&
                      categories.map(
                         (category) =>
                            category.name !== "Inscripción" && (
@@ -105,7 +107,6 @@ function AverageTab({
                </thead>
                <tbody>
                   {!loading &&
-                     enrollments.length > 0 &&
                      type === "average" &&
                      enrollments.map(
                         (enroll, i) =>
@@ -141,7 +142,9 @@ function AverageTab({
                page={page}
                items={enrollments}
                pdfGenerator={() => enrollmentsPDF(enrollments, "averages")}
-               changePage={updatePageNumber}
+               changePage={(page) =>
+                  setAdminValues((prev) => ({ ...prev, page }))
+               }
             />
          )}
       </>
@@ -150,13 +153,11 @@ function AverageTab({
 
 const mapStateToProps = (state) => ({
    enrollments: state.enrollments,
-   mixvalues: state.mixvalues,
    categories: state.categories,
 });
 
 export default connect(mapStateToProps, {
    loadStudentsAvAtt,
-   updatePageNumber,
    enrollmentsPDF,
    clearProfile,
 })(AverageTab);

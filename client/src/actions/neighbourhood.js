@@ -12,8 +12,8 @@ import {
    NEIGHBOURHOOD_ERROR,
 } from "./types";
 
-export const loadNeighbourhoods = (town_id) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
+export const loadNeighbourhoods = (town_id, spinner) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
@@ -31,7 +31,7 @@ export const loadNeighbourhoods = (town_id) => async (dispatch) => {
       } else error = true;
    }
 
-   if (!error) dispatch(updateLoadingSpinner(false));
+   if (!error && spinner) dispatch(updateLoadingSpinner(false));
 };
 
 export const updateNeighbourhoods = (formData) => async (dispatch) => {

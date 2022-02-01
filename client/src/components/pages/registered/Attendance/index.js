@@ -11,22 +11,26 @@ import Tabs from "../sharedComp/Tabs";
 const Attendance = ({
    match,
    classes: { loadingClass, classInfo },
-   attendances: { loadingClass: loadingAttendances, attendances },
+   attendances: { loading },
    loadAttendances,
    loadClass,
 }) => {
+   const _id = match.params.class_id;
+
    useEffect(() => {
-      if (loadingClass) loadClass(match.params.class_id);
-      if (loadingAttendances) loadAttendances(match.params.class_id);
-   }, [match, loadClass, loadAttendances, loadingAttendances, loadingClass]);
+      if (loadingClass) loadClass(_id, false);
+   }, [_id, loadClass, loadingClass]);
+
+   useEffect(() => {
+      if (loading) loadAttendances(_id);
+   }, [_id, loadAttendances, loading]);
 
    return (
       <>
          <h1 className="text-center light-font p-1 mt-2">Inasistencias</h1>
          {!loadingClass && <ClassInfo classInfo={classInfo} />}
-
          <div className="few-tabs">
-            {!loadingAttendances && (
+            {!loading && !loadingClass && (
                <Tabs
                   tablist={[
                      "1° Bimestre",

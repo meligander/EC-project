@@ -1,6 +1,7 @@
 import api from "../utils/api";
 import format from "date-fns/format";
 import { saveAs } from "file-saver";
+import history from "../utils/history";
 
 import { setAlert } from "./alert";
 import { updateLoadingSpinner } from "./mixvalues";
@@ -12,9 +13,11 @@ import {
    DATE_DELETED,
    ATTENDANCES_CLEARED,
    ATTENDANCES_ERROR,
+   DATE_ERROR,
 } from "./types";
 
 export const loadAttendances = (class_id, user_id) => async (dispatch) => {
+   if (!user_id) dispatch(updateLoadingSpinner(true));
    try {
       let res;
       if (user_id)
@@ -31,9 +34,10 @@ export const loadAttendances = (class_id, user_id) => async (dispatch) => {
          dispatch(setAttendanceError(ATTENDANCES_ERROR, err.response));
       }
    }
+   if (!user_id) dispatch(updateLoadingSpinner(false));
 };
 
-export const registerNewDate = (formData, addBimester) => async (dispatch) => {
+export const registerNewDate = (formData, bimestre) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
@@ -46,7 +50,7 @@ export const registerNewDate = (formData, addBimester) => async (dispatch) => {
       }
 
       let res;
-      if (addBimester) res = await api.post("/attendance/bimester", newDate);
+      if (bimestre) res = await api.post("/attendance/bimester", newDate);
       else res = await api.post("/attendance", newDate);
 
       dispatch({
@@ -56,14 +60,14 @@ export const registerNewDate = (formData, addBimester) => async (dispatch) => {
 
       dispatch(
          setAlert(
-            addBimester ? "Días del Bimestre Agregados" : "Día Agregado",
+            bimestre ? "Días del Bimestre Agregados" : "Día Agregado",
             "success",
-            addBimester ? "4" : "3"
+            "3"
          )
       );
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setAttendanceError(ATTENDANCES_ERROR, err.response));
+         dispatch(setAttendanceError(DATE_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "3"));
       } else error = true;
    }
@@ -71,53 +75,61 @@ export const registerNewDate = (formData, addBimester) => async (dispatch) => {
    if (!error) dispatch(updateLoadingSpinner(false));
 };
 
-export const updateAttendances =
-   (formData, history, class_id) => async (dispatch) => {
-      dispatch(updateLoadingSpinner(true));
-      let error = false;
-
-      try {
-         await api.post("/attendance/period", formData);
-         dispatch({
-            type: ATTENDANCES_UPDATED,
-         });
-
-         history.push(`/class/single/${class_id}`);
-         dispatch(setAlert("Inasistencias Modificadas", "success", "2"));
-      } catch (err) {
-         if (err.response.status !== 401) {
-            dispatch(setAttendanceError(ATTENDANCES_ERROR, err.response));
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else error = true;
-      }
-
-      if (!error) {
-         window.scroll(0, 0);
-         dispatch(updateLoadingSpinner(false));
-      }
-   };
-
-export const deleteDate = (date, classroom) => async (dispatch) => {
+export const updateAttendances = (formData, class_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
-      const res = await api.delete(`/attendance/date/${date}/${classroom}`);
-
+      await api.post("/attendance/period", formData);
       dispatch({
-         type: DATE_DELETED,
-         payload: res.data,
+         type: ATTENDANCES_UPDATED,
       });
 
-      dispatch(setAlert("Fecha eliminada", "success", "4"));
+      history.push(`/class/single/${class_id}`);
+      dispatch(setAlert("Inasistencias Modificadas", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setAttendanceError(ATTENDANCES_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "4"));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
 
-   if (!error) dispatch(updateLoadingSpinner(false));
+   if (!error) {
+      window.scroll(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
+};
+
+export const deleteDate = (date, classroom, last) => async (dispatch) => {
+   if (last) {
+      dispatch(
+         setAlert(
+            "No puede eliminar la última fecha del bimestre",
+            "danger",
+            "3"
+         )
+      );
+   } else {
+      dispatch(updateLoadingSpinner(true));
+      let error = false;
+      try {
+         const res = await api.delete(`/attendance/date/${date}/${classroom}`);
+
+         dispatch({
+            type: DATE_DELETED,
+            payload: res.data,
+         });
+
+         dispatch(setAlert("Fecha eliminada", "success", "3"));
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setAttendanceError(DATE_ERROR, err.response));
+            dispatch(setAlert(err.response.data.msg, "danger", "3"));
+         } else error = true;
+      }
+
+      if (!error) dispatch(updateLoadingSpinner(false));
+   }
 };
 
 export const attendancesPDF =

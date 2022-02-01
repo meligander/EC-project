@@ -67,7 +67,7 @@ router.get("/", async (req, res) => {
                         });
 
                      users = enrollments
-                        .filter((item) => !item.student)
+                        .filter((item) => item.student)
                         .map((item) => item.student)
                         .sort((a, b) => {
                            if (a.lastname > b.lastname) return 1;
@@ -277,7 +277,6 @@ router.post(
          school,
          salary,
          children,
-         description,
       } = req.body;
 
       let errors = [];
@@ -336,11 +335,8 @@ router.post(
             degree,
             school,
             salary,
-            description,
             studentnumber,
-            ...(type === "guardian" && {
-               children: children.map((item) => item._id),
-            }),
+            children,
          };
 
          user = new User(data);
@@ -402,7 +398,6 @@ router.put(
          school,
          salary,
          children,
-         description,
          active,
          img,
       } = req.body;
@@ -457,11 +452,10 @@ router.put(
             degree,
             school,
             salary,
-            description,
             dob,
-            /* ...(children
+            ...(children
                ? { children }
-               : !children && user.children.length > 0 && { children: [] }), */
+               : user.children.length > 0 && { children: [] }),
             ...(imgObject.public_id !== "" && { img: imgObject }),
          };
 

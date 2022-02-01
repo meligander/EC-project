@@ -6,7 +6,7 @@ import history from "../utils/history";
 import { setAlert } from "./alert";
 import { clearRegisters } from "./register";
 import { getTotalDebt } from "./installment";
-import { updateLoadingSpinner, updatePageNumber } from "./mixvalues";
+import { updateLoadingSpinner } from "./mixvalues";
 
 import {
    INVOICE_LOADED,
@@ -22,7 +22,8 @@ import {
    INVOICEDETAIL_REMOVED,
 } from "./types";
 
-export const loadInvoice = (invoice_id) => async (dispatch) => {
+export const loadInvoice = (invoice_id, spinner) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
    try {
       const res = await api.get(`/invoice/${invoice_id}`);
 
@@ -34,9 +35,11 @@ export const loadInvoice = (invoice_id) => async (dispatch) => {
       if (err.response.status !== 401)
          dispatch(setInvoicesError(INVOICE_ERROR, err.response));
    }
+   if (spinner) dispatch(updateLoadingSpinner(false));
 };
 
 export const getInvoiceNumber = () => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
    try {
       let res = await api.get("/invoice/last/invoiceid");
 
@@ -50,10 +53,11 @@ export const getInvoiceNumber = () => async (dispatch) => {
          window.scroll(0, 0);
       }
    }
+   dispatch(updateLoadingSpinner(false));
 };
 
-export const loadInvoices = (filterData) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
+export const loadInvoices = (filterData, spinner) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
@@ -80,7 +84,7 @@ export const loadInvoices = (filterData) => async (dispatch) => {
       } else error = true;
    }
 
-   if (!error) dispatch(updateLoadingSpinner(false));
+   if (!error && spinner) dispatch(updateLoadingSpinner(false));
 };
 
 export const registerInvoice = (formData) => async (dispatch) => {
@@ -214,16 +218,15 @@ export const clearInvoice = () => (dispatch) => {
 
 export const clearInvoices = () => (dispatch) => {
    dispatch({ type: INVOICES_CLEARED });
-   dispatch(updatePageNumber(0));
 };
 
 export const addDetail = (detail, details) => (dispatch) => {
-   if (detail._id === 0)
+   if (!detail._id)
       dispatch(setAlert("No se ha seleccionado ninguna cuota", "danger", "4"));
    else {
       if (
          !details ||
-         (details && !details.some((item) => item._id === detail._id))
+         (details && !details.some((item) => item.installment === detail._id))
       ) {
          dispatch(setAlert("Cuota agregada correctamente", "success", "4"));
          dispatch({ type: INVOICEDETAIL_ADDED, payload: detail });

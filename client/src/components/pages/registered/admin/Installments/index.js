@@ -10,7 +10,7 @@ import {
    loadInstallments,
 } from "../../../../../actions/installment";
 import { loadPenalty, updatePenalty } from "../../../../../actions/penalty";
-import { clearUser, loadUser } from "../../../../../actions/user";
+import { clearUser } from "../../../../../actions/user";
 import { togglePopup } from "../../../../../actions/mixvalues";
 
 import InstallmentsSearch from "../../sharedComp/search/InstallmentsSearch";
@@ -19,25 +19,22 @@ import PopUp from "../../../../modal/PopUp";
 const Installments = ({
    match,
    penalties: { loading: loadingPenalty },
-   installments: { loading },
+   installments: { loading, installments },
    auth: { userLogged },
-   users: { user, loadingUser },
    clearInstallments,
    clearInstallment,
    clearUser,
    updatePenalty,
    loadPenalty,
-   loadUser,
    loadInstallments,
    togglePopup,
 }) => {
    const _id = match.params.user_id;
+   const isAdmin =
+      userLogged.type === "admin" || userLogged.type === "admin&teacher";
 
    const [adminValues, setAdminValues] = useState({
-      student: {
-         _id: "",
-         name: "",
-      },
+      student: {},
    });
    const { student } = adminValues;
 
@@ -46,23 +43,21 @@ const Installments = ({
    }, [loadingPenalty, loadPenalty]);
 
    useEffect(() => {
-      if (_id !== "0" && loading)
-         loadInstallments({ student: { _id } }, true, "student");
-   }, [_id, loading, loadInstallments]);
-
-   useEffect(() => {
       if (_id !== "0") {
-         if (loadingUser) loadUser(_id, loading ? false : true);
+         if (loading) loadInstallments({ student: { _id } }, true, "student");
          else
             setAdminValues((prev) => ({
                ...prev,
                student: {
-                  _id: user._id,
-                  name: user.lastname + ", " + user.name,
+                  _id: installments.student._id,
+                  name:
+                     installments.student.lastname +
+                     ", " +
+                     installments.student.name,
                },
             }));
       }
-   }, [_id, loadingUser, loadUser, user, loading]);
+   }, [_id, loading, loadInstallments, installments]);
 
    const changeStudent = (student) => {
       setAdminValues((prev) => ({
@@ -78,8 +73,7 @@ const Installments = ({
             <PopUp confirm={(percentage) => updatePenalty({ percentage })} />
 
             <div className="btn-right my-3">
-               {(userLogged.type === "admin" ||
-                  userLogged.type === "admin&teacher") && (
+               {isAdmin && (
                   <button
                      className="btn btn-secondary"
                      type="button"
@@ -105,14 +99,14 @@ const Installments = ({
                </Link>
             </div>
             <InstallmentsSearch
-               student={_id !== "0" ? student : null}
+               student={student}
                changeStudent={changeStudent}
             />
             <div className="btn-right">
                <Link
                   className={`btn ${!loading ? "btn-primary" : "btn-black"}`}
                   to={
-                     !loading && !loadingUser
+                     !loading && student._id
                         ? `/index/installment/new/${student._id}`
                         : "#"
                   }
@@ -134,7 +128,6 @@ const Installments = ({
 const mapStateToProps = (state) => ({
    installments: state.installments,
    penalties: state.penalties,
-   users: state.users,
    auth: state.auth,
 });
 
@@ -142,7 +135,6 @@ export default connect(mapStateToProps, {
    clearInstallments,
    clearInstallment,
    loadPenalty,
-   loadUser,
    clearUser,
    updatePenalty,
    loadInstallments,

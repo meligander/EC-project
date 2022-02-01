@@ -1,6 +1,5 @@
 import {
    LOADINGSPINNER_UPDATED,
-   SEARCHPAGE_CHANGED,
    NAVBAR_HEIGHT_SETTED,
    FOOTER_HEIGHT_SETTED,
    CURRENTNAV_CHANGED,
@@ -10,7 +9,6 @@ import {
 
 const initialState = {
    loadingSpinner: false,
-   page: 0,
    currentNav: "",
    menuToggle: false,
    popupToggle: false,
@@ -22,11 +20,6 @@ const initialState = {
 export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
-      case SEARCHPAGE_CHANGED:
-         return {
-            ...state,
-            page: payload,
-         };
       case CURRENTNAV_CHANGED:
          return {
             ...state,

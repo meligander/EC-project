@@ -9,7 +9,7 @@ import PopUp from "../../../../../../../modal/PopUp";
 import EditButtons from "../../../sharedComp/EditButtons";
 
 const TownsTab = ({
-   towns: { towns, loading, error },
+   towns: { towns, error },
    togglePopup,
    updateTowns,
    deleteTown,
@@ -23,30 +23,30 @@ const TownsTab = ({
    const { popupType, toDelete } = adminValues;
 
    useEffect(() => {
-      if (!loading) setFormData(towns);
-   }, [loading, towns]);
+      setFormData(towns);
+   }, [towns]);
 
    const onChange = (e) => {
       e.persist();
       const number = Number(e.target.name.substring(5, e.target.name.length));
 
-      let newArray = [...formData];
+      let newFormData = [...formData];
 
-      newArray[number] = {
+      newFormData[number] = {
          ...formData[number],
          name: e.target.value,
       };
-      setFormData(newArray);
+      setFormData(newFormData);
    };
 
    const addTown = () => {
-      let newArray = [...formData];
+      let newFormData = [...formData];
 
-      newArray.push({
+      newFormData.push({
          _id: "",
          name: "",
       });
-      setFormData(newArray);
+      setFormData(newFormData);
    };
 
    return (
@@ -57,9 +57,9 @@ const TownsTab = ({
                   if (popupType === "save") updateTowns(formData);
                   else {
                      if (formData[toDelete]._id === "") {
-                        let newArray = [...formData];
-                        newArray.splice(toDelete, 1);
-                        setFormData(newArray);
+                        let newFormData = [...formData];
+                        newFormData.splice(toDelete, 1);
+                        setFormData(newFormData);
                      } else deleteTown(formData[toDelete]._id);
                   }
                }}
@@ -77,38 +77,36 @@ const TownsTab = ({
                   </tr>
                </thead>
                <tbody>
-                  {formData &&
-                     formData.length > 0 &&
-                     formData.map((town, i) => (
-                        <tr key={i}>
-                           <td data-th="Nombre">
-                              <input
-                                 type="text"
-                                 name={`input${i}`}
-                                 onChange={onChange}
-                                 value={town.name}
-                                 placeholder="Nombre"
-                              />
-                           </td>
-                           <td>
-                              <button
-                                 type="button"
-                                 onClick={(e) => {
-                                    e.preventDefault();
-                                    togglePopup();
-                                    setAdminValues((prev) => ({
-                                       ...prev,
-                                       toDelete: i,
-                                       popupType: "delete",
-                                    }));
-                                 }}
-                                 className="btn btn-danger"
-                              >
-                                 <FaTrashAlt />
-                              </button>
-                           </td>
-                        </tr>
-                     ))}
+                  {formData.map((town, i) => (
+                     <tr key={i}>
+                        <td data-th="Nombre">
+                           <input
+                              type="text"
+                              name={`input${i}`}
+                              onChange={onChange}
+                              value={town.name}
+                              placeholder="Nombre"
+                           />
+                        </td>
+                        <td>
+                           <button
+                              type="button"
+                              onClick={(e) => {
+                                 e.preventDefault();
+                                 setAdminValues((prev) => ({
+                                    ...prev,
+                                    toDelete: i,
+                                    popupType: "delete",
+                                 }));
+                                 togglePopup("default");
+                              }}
+                              className="btn btn-danger"
+                           >
+                              <FaTrashAlt />
+                           </button>
+                        </td>
+                     </tr>
+                  ))}
                </tbody>
             </table>
             {formData.length === 0 && (
@@ -119,11 +117,11 @@ const TownsTab = ({
             <EditButtons
                add={addTown}
                save={() => {
-                  togglePopup();
                   setAdminValues((prev) => ({
                      ...prev,
                      popupType: "save",
                   }));
+                  togglePopup("default");
                }}
                type="Localidad"
             />

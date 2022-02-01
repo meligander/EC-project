@@ -8,16 +8,13 @@ import {
    enrollmentsPDF,
 } from "../../../../../../../../actions/enrollment";
 import { clearProfile } from "../../../../../../../../actions/user";
-import { updatePageNumber } from "../../../../../../../../actions/mixvalues";
 
 import ListButtons from "../../../sharedComp/ListButtons";
 
 function AttendanceTab({
-   mixvalues: { page },
    enrollments: { enrollments, loading, type },
    categories: { categories, loading: loadingCategories },
    loadStudentsAvAtt,
-   updatePageNumber,
    clearProfile,
    enrollmentsPDF,
 }) {
@@ -26,7 +23,13 @@ function AttendanceTab({
       category: "",
    });
 
+   const [adminValues, setAdminValues] = useState({
+      page: 0,
+   });
+
    const { absence, category } = filterData;
+
+   const { page } = adminValues;
 
    const onChange = (e) => {
       e.persist();
@@ -55,7 +58,6 @@ function AttendanceTab({
                >
                   <option value="">* Seleccione Categoría</option>
                   {!loadingCategories &&
-                     categories.length > 0 &&
                      categories.map(
                         (category) =>
                            category.name !== "Inscripción" && (
@@ -105,7 +107,6 @@ function AttendanceTab({
                </thead>
                <tbody>
                   {!loading &&
-                     enrollments.length > 0 &&
                      type === "attendance" &&
                      enrollments.map(
                         (enroll, i) =>
@@ -141,7 +142,9 @@ function AttendanceTab({
                page={page}
                items={enrollments}
                pdfGenerator={() => enrollmentsPDF(enrollments, "attendances")}
-               changePage={updatePageNumber}
+               changePage={(page) =>
+                  setAdminValues((prev) => ({ ...prev, page }))
+               }
             />
          )}
       </>
@@ -150,13 +153,11 @@ function AttendanceTab({
 
 const mapStateToProps = (state) => ({
    enrollments: state.enrollments,
-   mixvalues: state.mixvalues,
    categories: state.categories,
 });
 
 export default connect(mapStateToProps, {
    loadStudentsAvAtt,
-   updatePageNumber,
    enrollmentsPDF,
    clearProfile,
 })(AttendanceTab);

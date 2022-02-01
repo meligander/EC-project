@@ -2,7 +2,7 @@ import format from "date-fns/format";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
 
-import { updateLoadingSpinner, updatePageNumber } from "./mixvalues";
+import { updateLoadingSpinner } from "./mixvalues";
 import { clearRegisters } from "./register";
 import { setAlert } from "./alert";
 
@@ -14,15 +14,15 @@ import {
    EXPENCETYPES_UPDATED,
    EXPENCETYPE_DELETED,
    TRANSACTIONS_CLEARED,
-   EXPENCES_CLEARED,
+   EXPENCE_CLEARED,
    EXPENCETYPES_CLEARED,
    EXPENCE_ERROR,
    EXPENCETYPE_ERROR,
    TRANSACTIONS_ERROR,
 } from "./types";
 
-export const loadTransactions = (filterData) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
+export const loadTransactions = (filterData, spinner) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
@@ -50,11 +50,11 @@ export const loadTransactions = (filterData) => async (dispatch) => {
       } else error = true;
    }
 
-   if (!error) dispatch(updateLoadingSpinner(false));
+   if (!error && spinner) dispatch(updateLoadingSpinner(false));
 };
 
-export const loadWithdrawals = (filterData) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
+export const loadWithdrawals = (filterData, spinner) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
@@ -82,7 +82,7 @@ export const loadWithdrawals = (filterData) => async (dispatch) => {
       } else error = true;
    }
 
-   if (!error) dispatch(updateLoadingSpinner(false));
+   if (!error && spinner) dispatch(updateLoadingSpinner(false));
 };
 
 export const loadExpenceTypes = (spinner, expenceType) => async (dispatch) => {
@@ -112,6 +112,7 @@ export const loadExpenceTypes = (spinner, expenceType) => async (dispatch) => {
 export const registerExpence = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
+   let answer = false;
 
    let expence = {};
    for (const prop in formData) {
@@ -131,6 +132,7 @@ export const registerExpence = (formData) => async (dispatch) => {
       dispatch(clearRegisters());
 
       dispatch(setAlert("Gasto/Ingreso Registrado", "success", "2", 7000));
+      answer = true;
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setExpencesError(EXPENCE_ERROR, err.response));
@@ -147,6 +149,7 @@ export const registerExpence = (formData) => async (dispatch) => {
       window.scrollTo(0, 0);
       dispatch(updateLoadingSpinner(false));
    }
+   return answer;
 };
 
 export const deleteExpence = (expence_id) => async (dispatch) => {
@@ -267,13 +270,12 @@ export const clearExpenceTypes = () => (dispatch) => {
    dispatch({ type: EXPENCETYPES_CLEARED });
 };
 
-export const clearExpences = () => (dispatch) => {
-   dispatch({ type: EXPENCES_CLEARED });
+export const clearExpence = () => (dispatch) => {
+   dispatch({ type: EXPENCE_CLEARED });
 };
 
 export const clearTransactions = () => (dispatch) => {
    dispatch({ type: TRANSACTIONS_CLEARED });
-   dispatch(updatePageNumber(0));
 };
 
 const setExpencesError = (type, response) => (dispatch) => {

@@ -7,16 +7,14 @@ import format from "date-fns/format";
 import {
    loadUser,
    deleteUser,
-   clearUsers,
+   clearUser,
    clearSearch,
 } from "../../../../actions/user";
 import { clearTowns } from "../../../../actions/town";
-import { clearUser } from "../../../../actions/user";
 import { clearNeighbourhoods } from "../../../../actions/neighbourhood";
 import { togglePopup } from "../../../../actions/mixvalues";
 
 import PopUp from "../../../modal/PopUp";
-import GoBack from "../../sharedComp/GoBack";
 import Alert from "../../sharedComp/Alert";
 import Loading from "../../../modal/Loading";
 import StudentDashboard from "./usersDashboards/StudentDashboard";
@@ -36,7 +34,6 @@ const Dashboard = ({
    clearNeighbourhoods,
    clearUser,
    deleteUser,
-   clearUsers,
    togglePopup,
 }) => {
    const [adminValues, setAdminValues] = useState({
@@ -70,6 +67,9 @@ const Dashboard = ({
                user: _id ? otherUser : userLogged,
             }));
          }
+      } else {
+         if ((_id && user._id !== _id) || (!_id && user._id !== userLogged._id))
+            setAdminValues((prev) => ({ ...prev, user: null }));
       }
    }, [loadUser, _id, loadingUser, otherUser, user, userLogged]);
 
@@ -80,8 +80,7 @@ const Dashboard = ({
          case "teacher":
             return (
                <>
-                  {userLogged.type !== "student" &&
-                     userLogged.type !== "guardian" && <TeacherDashboard />}
+                  {(isAdmin || userLogged._id === _id) && <TeacherDashboard />}
                </>
             );
          case "guardian":
@@ -91,7 +90,7 @@ const Dashboard = ({
          case "admin&teacher":
             return <>{userLogged._id === user._id && <AdminDashboard />}</>;
          default:
-            return <h1>Dashboard</h1>;
+            return <></>;
       }
    };
 
@@ -104,7 +103,6 @@ const Dashboard = ({
                   confirm={() => deleteUser(user)}
                   text="¿Está seguro que desea eliminar el usuario?"
                />
-               {user._id !== userLogged._id && <GoBack />}
                <Alert type="1" />
                <div className="mt-1">
                   <div className="profile-top bg-primary">
@@ -127,9 +125,11 @@ const Dashboard = ({
                               {user.studentnumber}
                            </p>
                         )}
-                        <p className="heading-tertiary text-dark">
-                           Usuario {user.active ? "Activo" : "Inactivo"}
-                        </p>
+                        {isAdmin && (
+                           <p className="heading-tertiary text-dark">
+                              Usuario {user.active ? "Activo" : "Inactivo"}
+                           </p>
+                        )}
                      </div>
 
                      <div className="about p-2">
@@ -181,12 +181,11 @@ const Dashboard = ({
                                  {format(
                                     new Date(user.dob.slice(0, -1)),
                                     isOwner || userLogged._id === user._id
-                                       ? "d/MM/yyyy"
+                                       ? "dd/MM/yyyy"
                                        : "dd/MM"
                                  )}
                               </p>
                            )}
-
                            {(user.birthtown || user.birthprov) && (
                               <p>
                                  <span className="text-dark">
@@ -217,15 +216,6 @@ const Dashboard = ({
                               <p>
                                  <span className="text-dark">Salario: </span>
                                  {user.salary}
-                              </p>
-                           )}
-
-                           {user.description && (
-                              <p>
-                                 <span className="text-dark">
-                                    Descripción:{" "}
-                                 </span>
-                                 {user.description}
                               </p>
                            )}
 
@@ -271,7 +261,7 @@ const Dashboard = ({
                                        className="btn btn-danger"
                                        onClick={(e) => {
                                           e.preventDefault();
-                                          togglePopup();
+                                          togglePopup("default");
                                        }}
                                     >
                                        <FaUserMinus />
@@ -303,8 +293,7 @@ export default connect(mapStateToProps, {
    deleteUser,
    clearTowns,
    clearSearch,
-   clearUsers,
-   clearNeighbourhoods,
    clearUser,
+   clearNeighbourhoods,
    togglePopup,
 })(Dashboard);

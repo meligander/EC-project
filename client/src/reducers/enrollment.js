@@ -2,6 +2,7 @@ import {
    ENROLLMENT_LOADED,
    ENROLLMENTS_LOADED,
    YEARENROLLMENTS_LOADED,
+   ESTIMATEDPROFIT_LOADED,
    ENROLLMENT_REGISTERED,
    ENROLLMENT_UPDATED,
    ENROLLMENT_DELETED,
@@ -22,6 +23,7 @@ const initialState = {
          year: "",
          length: "",
       },
+      estimatedProfit: "",
    },
    error: {},
 };
@@ -48,7 +50,16 @@ export default function (state = initialState, action) {
          return {
             ...state,
             otherValues: {
+               ...state.otherValues,
                yearEnrollments: payload,
+            },
+         };
+      case ESTIMATEDPROFIT_LOADED:
+         return {
+            ...state,
+            otherValues: {
+               ...state.otherValues,
+               estimatedProfit: payload,
             },
          };
       case ENROLLMENT_REGISTERED:

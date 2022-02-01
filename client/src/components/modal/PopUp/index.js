@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import format from "date-fns/format";
 import { connect } from "react-redux";
 import { FaTimes } from "react-icons/fa";
 
 import { togglePopup } from "../../../actions/mixvalues";
+
+import NewDate from "./NewDate";
+import PenaltyPercentage from "./PenaltyPercentage";
+import CertificateDate from "./CertificateDate";
 
 import logo from "../../../img/logoSinLetras.png";
 import "./style.scss";
@@ -11,34 +14,39 @@ import "./style.scss";
 const PopUp = ({
    mixvalues: { popupType, popupToggle },
    penalties: { loading, penalty },
-   classes: { classInfo, loadingClass },
    togglePopup,
    confirm,
    text,
 }) => {
-   const [formData, setFormData] = useState({
-      percentage: "",
+   const [newDate, setNewDate] = useState({
+      fromDate: "",
+      toDate: "",
       date: "",
-      ...(!loadingClass &&
-         popupType === "report-cards" && {
-            observations: Array.from(Array(classInfo.student.length), () => ""),
-         }),
    });
 
-   const { percentage, date, observations } = formData;
+   const [certificateDate, setCertificateDate] = useState("");
 
-   const onChange = (e) => {
+   const [penaltyPercentage, setPenaltyPercentage] = useState("");
+
+   const onChangeCertificateDate = (e) => {
       e.persist();
-      setFormData({
-         [e.target.name]: e.target.value,
-      });
+      setCertificateDate(e.target.value);
    };
 
-   const onChangeObservations = (e, index) => {
+   const onChangeNewDate = (e) => {
       e.persist();
-      let newObservations = [...observations];
-      newObservations[index] = e.target.value;
-      setFormData((prev) => ({ ...prev, observations: newObservations }));
+      setNewDate((prev) => ({
+         ...prev,
+         [e.target.id]: e.target.value,
+         ...(e.target.name === "both"
+            ? { date: "" }
+            : { fromDate: "", toDate: "" }),
+      }));
+   };
+
+   const onChangePenaltyPercentage = (e) => {
+      e.persist();
+      setPenaltyPercentage(e.target.value);
    };
 
    const chooseType = () => {
@@ -47,59 +55,20 @@ const PopUp = ({
             return (
                <div className="popup-penalty">
                   {!loading && (
-                     <>
-                        {penalty && (
-                           <p className="posted-date">
-                              Última Actualización:{" "}
-                              {format(new Date(penalty.date), "dd/MM/yy")}
-                           </p>
-                        )}
-
-                        <h3>Actualización de Recargo</h3>
-
-                        <div className="pt-2">
-                           <h4>
-                              {" "}
-                              Recargo Actual: {penalty && penalty.percentage}%
-                           </h4>
-
-                           {!penalty && (
-                              <h5 className="paragraph text-danger text-center">
-                                 No hay ningún recargo registrado
-                              </h5>
-                           )}
-                        </div>
-
-                        <h4>
-                           <input
-                              id="percentage"
-                              type="number"
-                              name="percentage"
-                              placeholder="Nuevo Recargo"
-                              value={percentage}
-                              onChange={onChange}
-                           />
-                           %
-                        </h4>
-                     </>
+                     <PenaltyPercentage
+                        onChange={onChangePenaltyPercentage}
+                        penalty={penalty}
+                        percentage={penaltyPercentage}
+                     />
                   )}
                </div>
             );
          case "certificate-date":
             return (
-               <div className="popup-date">
-                  <h3>¿Para cuando desea fechar los certificados?</h3>
-                  <div className="form">
-                     <input
-                        className="form-input"
-                        id="date"
-                        type="date"
-                        name="date"
-                        value={date}
-                        onChange={onChange}
-                     />
-                  </div>
-               </div>
+               <CertificateDate
+                  date={certificateDate}
+                  onChange={onChangeCertificateDate}
+               />
             );
          case "active":
             return (
@@ -108,29 +77,15 @@ const PopUp = ({
                   <p>{text.info}</p>
                </div>
             );
-         //Cambiar forma de hacer los report cards... que se puedan ver todas las observaciones
-         case "report-cards":
+         case "new-date":
             return (
-               <div className="popup-text wrapper both smaller">
-                  {classInfo.student &&
-                     classInfo.student.length > 0 &&
-                     classInfo.student.map((student, i) => (
-                        <div className="student" key={i}>
-                           <label htmlFor="observation" className="name">
-                              {student.lastname + ", " + student.name}
-                           </label>
-                           <textarea
-                              className="form-input"
-                              name={student._id}
-                              id="observation"
-                              rows="4"
-                              onChange={(e) => onChangeObservations(e, i)}
-                              value={observations[i]}
-                              placeholder="Observaciones"
-                           ></textarea>
-                        </div>
-                     ))}
-               </div>
+               <NewDate
+                  fromDate={newDate.fromDate}
+                  toDate={newDate.toDate}
+                  date={newDate.date}
+                  onChange={onChangeNewDate}
+                  bimestre={text}
+               />
             );
          default:
             return (
@@ -150,7 +105,7 @@ const PopUp = ({
                   type="button"
                   onClick={(e) => {
                      e.preventDefault();
-                     togglePopup();
+                     togglePopup("default");
                   }}
                   className="btn-cancel"
                >
@@ -166,25 +121,16 @@ const PopUp = ({
                      e.preventDefault();
                      switch (popupType) {
                         case "penalty":
-                           confirm(percentage);
-                           setFormData((prev) => ({
-                              ...prev,
-                              percentage: "",
-                           }));
+                           confirm(penaltyPercentage);
+                           setPenaltyPercentage("");
                            break;
                         case "certificate-date":
-                           confirm(date);
-                           setFormData((prev) => ({ ...prev, date: "" }));
+                           confirm(certificateDate);
+                           setCertificateDate("");
                            break;
-                        case "report-cards":
-                           confirm(observations);
-                           setFormData((prev) => ({
-                              ...prev,
-                              observations: Array.from(
-                                 Array(classInfo.student.length),
-                                 () => ""
-                              ),
-                           }));
+                        case "new-date":
+                           confirm(newDate);
+                           setNewDate({ fromDate: "", toDate: "", date: "" });
                            break;
                         default:
                            confirm();
@@ -214,7 +160,6 @@ const PopUp = ({
 const mapStateToProps = (state) => ({
    mixvalues: state.mixvalues,
    penalties: state.penalties,
-   classes: state.classes,
 });
 
 export default connect(mapStateToProps, { togglePopup })(PopUp);

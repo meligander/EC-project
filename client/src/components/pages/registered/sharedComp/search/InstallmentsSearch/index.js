@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import { withRouter, Link } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
@@ -18,8 +18,8 @@ import InstallmentsTable from "../../tables/InstallmentsTable";
 import "./style.scss";
 
 const InstallmentsSearch = ({
+   match,
    history,
-   location,
    installments: { loading, installments },
    invoices: { invoice },
    loadInstallments,
@@ -30,35 +30,16 @@ const InstallmentsSearch = ({
    changeStudent,
    student,
 }) => {
+   const newInvoice = match.params.user_id === undefined;
+
    const [adminValues, setAdminValues] = useState({
-      selectedStudent: {},
       selectedItem: {},
-      block: false,
    });
 
-   const { selectedStudent, selectedItem, block } = adminValues;
-
-   useEffect(() => {
-      if (student) {
-         setAdminValues((prev) => ({
-            ...prev,
-            selectedStudent: {
-               _id: student._id,
-               name: student.name,
-            },
-            block: true,
-         }));
-      }
-   }, [student]);
-
-   const newInvoice = location.pathname === "/invoice/register";
+   const { selectedItem } = adminValues;
 
    const restore = () => {
-      setAdminValues((prev) => ({
-         ...prev,
-         block: false,
-         selectedStudent: {},
-      }));
+      changeStudent({});
       clearInstallments();
       if (!newInvoice) history.push("/index/installments/0");
    };
@@ -67,68 +48,57 @@ const InstallmentsSearch = ({
       <div className="installment-search">
          <div className="form">
             <StudentSearch
-               selectedStudent={selectedStudent}
-               actionForSelected={async () => {
-                  const answer = await loadInstallments(
-                     { student: selectedStudent },
-                     true,
-                     "student"
-                  );
-                  if (answer)
-                     setAdminValues((prev) => ({
-                        ...prev,
-                        block: true,
-                     }));
-               }}
+               selectedStudent={student}
+               actionForSelected={async () =>
+                  await loadInstallments({ student }, true, "student")
+               }
                selectStudent={(user) => {
-                  setAdminValues((prev) => ({
-                     ...prev,
-                     selectedStudent: {
-                        _id: user._id,
-                        name: user.lastname + ", " + user.name,
-                     },
-                  }));
-                  if (changeStudent) changeStudent(student);
+                  changeStudent({
+                     _id: user._id,
+                     name: user.lastname + ", " + user.name,
+                  });
                }}
                typeSearch={"installment"}
-               block={block}
+               block={!loading && installments.student}
             />
          </div>
          <div className="btn-end">
-            <p className="heading-tertiary">
-               <span className="text-dark">Alumno: </span> &nbsp;
-               <Link
-                  to={`/index/dashboard/${selectedStudent._id}`}
-                  className="btn-text"
-                  onClick={() => {
-                     clearProfile();
-                     window.scroll(0, 0);
-                  }}
-               >
-                  {selectedStudent.name}
-               </Link>
-            </p>
-            {selectedStudent._id && (
-               <button
-                  className="btn-cancel"
-                  type="button"
-                  onClick={(e) => {
-                     e.preventDefault();
-                     restore();
-                  }}
-               >
-                  <FaTimes />
-               </button>
+            {student._id && !loading && (
+               <>
+                  <p className="heading-tertiary">
+                     <span className="text-dark">Alumno: </span> &nbsp;
+                     <Link
+                        to={`/index/dashboard/${student._id}`}
+                        className="btn-text"
+                        onClick={() => {
+                           clearProfile();
+                           window.scroll(0, 0);
+                        }}
+                     >
+                        {student.name}
+                     </Link>
+                  </p>
+                  <button
+                     className="btn-cancel"
+                     type="button"
+                     onClick={(e) => {
+                        e.preventDefault();
+                        restore();
+                     }}
+                  >
+                     <FaTimes />
+                  </button>
+               </>
             )}
          </div>
-         {!loading && (
+         {!loading && student._id === installments.student._id && (
             <>
                {installments.rows.length > 0 ? (
                   <InstallmentsTable
                      installments={installments}
                      forAdmin={true}
                      selectedItem={selectedItem}
-                     student={selectedStudent._id}
+                     student={student._id}
                      selectItem={(item) =>
                         setAdminValues((prev) => ({
                            ...prev,

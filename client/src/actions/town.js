@@ -12,7 +12,8 @@ import {
    TOWNS_ERROR,
 } from "./types";
 
-export const loadTowns = () => async (dispatch) => {
+export const loadTowns = (spinner) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
    try {
       const res = await api.get("/town");
       dispatch({
@@ -25,6 +26,7 @@ export const loadTowns = () => async (dispatch) => {
          window.scrollTo(0, 0);
       }
    }
+   if (spinner) dispatch(updateLoadingSpinner(false));
 };
 
 export const updateTowns = (formData) => async (dispatch) => {

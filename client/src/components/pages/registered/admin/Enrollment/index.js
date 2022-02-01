@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { format, getYear, addYears, getMonth } from "date-fns";
+import { format, getYear, getMonth, addMonths } from "date-fns";
+import { es } from "date-fns/locale";
 import { FiSave } from "react-icons/fi";
 import { IoIosListBox } from "react-icons/io";
 import { FaTimes, FaUserEdit } from "react-icons/fa";
 
 import { loadCategories } from "../../../../../actions/category";
 import {
-   registerEnrollment,
+   registerUpdateEnrollment,
    loadEnrollment,
    clearEnrollments,
 } from "../../../../../actions/enrollment";
@@ -20,11 +21,11 @@ import StudentSearch from "../../sharedComp/search/StudentSearch";
 import PopUp from "../../../../modal/PopUp";
 
 const Enrollment = ({
-   categories: { categories, loading: loadingCategories },
-   enrollments: { enrollment, loading },
+   categories: { categories, loading },
+   enrollments: { enrollment, loadingEnrollment },
    match,
    loadCategories,
-   registerEnrollment,
+   registerUpdateEnrollment,
    loadEnrollment,
    clearEnrollments,
    clearSearch,
@@ -32,18 +33,12 @@ const Enrollment = ({
    setAlert,
    togglePopup,
 }) => {
-   const day = new Date();
-   const thisYear = getYear(day);
-   const currentMonthName = format(day, "MMMM").replace(/\b\w/, (c) =>
-      c.toUpperCase()
-   );
-   const nextMonthName = format(addYears(day, 1), "MMMM").replace(/\b\w/, (c) =>
-      c.toUpperCase()
-   );
-   const currentMonthNumber = getMonth(day) + 1;
+   const date = new Date();
+   const thisYear = getYear(date);
+   const currentMonth = getMonth(date) + 1;
 
    const [formData, setFormData] = useState({
-      _id: match.params.enrollment_id !== "0" ? match.params.enrollment_id : "",
+      _id: match.params.enrollment_id ? match.params.enrollment_id : "",
       student: "",
       category: "",
       year: "",
@@ -64,26 +59,40 @@ const Enrollment = ({
    const { year, category, month, _id } = formData;
 
    useEffect(() => {
-      if (loadingCategories) loadCategories();
+      if (loading) loadCategories(_id === "" ? true : false);
       else
          setAdminValues((prev) => ({
             ...prev,
-            enrollmentValue: categories.categories[0].value,
+            enrollmentValue: categories[0].value,
          }));
-   }, [loadingCategories, loadCategories, categories]);
+   }, [loading, loadCategories, categories, _id]);
 
    useEffect(() => {
-      if (_id !== "0") {
-         if (loading) loadEnrollment();
+      if (_id !== "") {
+         if (loadingEnrollment) loadEnrollment(_id, true);
          else
             setFormData((prev) => ({
                ...prev,
                category: enrollment.category._id,
-               currentMonth: true,
-               year: Number(enrollment.year),
+               year: enrollment.year,
             }));
       }
-   }, [_id, loading, loadEnrollment, enrollment]);
+   }, [_id, loadingEnrollment, loadEnrollment, enrollment]);
+
+   const restore = () => {
+      setFormData({
+         ...formData,
+         student: "",
+      });
+      setAdminValues({
+         ...adminValues,
+         hideSearch: false,
+         selectedStudent: {
+            _id: "",
+            name: "",
+         },
+      });
+   };
 
    const addStudent = () => {
       if (selectedStudent._id === "") {
@@ -93,15 +102,11 @@ const Enrollment = ({
             ...formData,
             student: selectedStudent._id,
          });
-         clearSearch();
          setAdminValues({
             ...adminValues,
             hideSearch: true,
-            selectedStudent: {
-               _id: "",
-               name: "",
-            },
          });
+         clearSearch();
       }
    };
 
@@ -113,28 +118,15 @@ const Enrollment = ({
       });
    };
 
-   const restore = () => {
-      setAdminValues({
-         ...adminValues,
-         hideSearch: false,
-         selectedStudent: {
-            _id: "",
-            name: "",
-         },
-      });
-   };
-
    return (
       <>
          {_id === "" ? <h1>Inscripción</h1> : <h2>Editar inscripción</h2>}
          <PopUp
             confirm={() =>
-               registerEnrollment({
+               registerUpdateEnrollment({
                   ...formData,
                   month:
-                     thisYear === Number(year) && currentMonthNumber > 2
-                        ? month
-                        : 0,
+                     thisYear === Number(year) && currentMonth > 2 ? month : 0,
                })
             }
             text={`¿Está seguro que ${
@@ -162,7 +154,7 @@ const Enrollment = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               togglePopup();
+               togglePopup("default");
             }}
          >
             {_id === "" && !hideSearch && (
@@ -218,15 +210,14 @@ const Enrollment = ({
                   value={category}
                >
                   <option value="">* Seleccione Categoría</option>
-                  {categories.categories.length > 0 &&
-                     categories.categories.map(
-                        (category) =>
-                           category.name !== "Inscripción" && (
-                              <option key={category._id} value={category._id}>
-                                 {category.name}
-                              </option>
-                           )
-                     )}
+                  {categories.map(
+                     (category) =>
+                        category.name !== "Inscripción" && (
+                           <option key={category._id} value={category._id}>
+                              {category.name}
+                           </option>
+                        )
+                  )}
                </select>
                <label
                   htmlFor="category"
@@ -257,7 +248,7 @@ const Enrollment = ({
                   Año
                </label>
             </div>
-            {Number(year) === thisYear && currentMonthNumber > 2 && (
+            {Number(year) === thisYear && currentMonth > 2 && (
                <div className="form-group">
                   <select
                      className="form-input"
@@ -269,11 +260,16 @@ const Enrollment = ({
                      <option value="">{`* Seleccione el mes a partir del cuál ${
                         _id ? "cambiará la inscripción" : "lo va a inscribir"
                      }`}</option>
-                     <option value={currentMonthNumber}>
-                        {currentMonthName}
+                     <option value={currentMonth}>
+                        {format(date, "MMMM", { locale: es }).replace(
+                           /\b\w/,
+                           (c) => c.toUpperCase()
+                        )}
                      </option>
-                     <option value={currentMonthNumber + 1}>
-                        {nextMonthName}
+                     <option value={currentMonth + 1}>
+                        {format(addMonths(date, 1), "MMMM", {
+                           locale: es,
+                        }).replace(/\b\w/, (c) => c.toUpperCase())}
                      </option>
                   </select>
                   <label
@@ -309,7 +305,7 @@ const Enrollment = ({
                   ) : (
                      <>
                         <FaUserEdit />
-                        "Inscribir
+                        &nbsp; Inscribir
                      </>
                   )}
                </button>
@@ -326,7 +322,7 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    loadCategories,
-   registerEnrollment,
+   registerUpdateEnrollment,
    loadEnrollment,
    clearEnrollments,
    clearSearch,

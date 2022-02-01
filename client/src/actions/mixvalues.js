@@ -1,6 +1,5 @@
 import {
    LOADINGSPINNER_UPDATED,
-   SEARCHPAGE_CHANGED,
    FOOTER_HEIGHT_SETTED,
    NAVBAR_HEIGHT_SETTED,
    CURRENTNAV_CHANGED,
@@ -12,13 +11,6 @@ export const updateLoadingSpinner = (bool) => (dispatch) => {
    dispatch({
       type: LOADINGSPINNER_UPDATED,
       payload: bool,
-   });
-};
-
-export const updatePageNumber = (page) => (dispatch) => {
-   dispatch({
-      type: SEARCHPAGE_CHANGED,
-      payload: page,
    });
 };
 

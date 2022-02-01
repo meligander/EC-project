@@ -4,13 +4,12 @@ import { saveAs } from "file-saver";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, updatePageNumber } from "./mixvalues";
+import { updateLoadingSpinner } from "./mixvalues";
 import { clearSearch } from "./user";
 
 import {
    INSTALLMENT_LOADED,
    TOTALDEBT_LOADED,
-   ESTIMATEDPROFIT_LOADED,
    INSTALLMENTS_LOADED,
    INSTALLMENT_UPDATED,
    INSTALLMENT_REGISTERED,
@@ -19,32 +18,32 @@ import {
    INSTALLMENT_CLEARED,
    INSTALLMENTS_CLEARED,
    INSTALLMENTS_ERROR,
-   MONTHLYDEBT_LOADED,
    INSTALLMENT_ERROR,
 } from "./types";
 
-export const loadInstallment = (installment_id, edit) => async (dispatch) => {
-   if (edit)
-      if (!installment_id) {
-         dispatch(
-            setAlert("Debe seleccionar una cuota primero", "danger", "4")
-         );
-         return false;
-      } else history.push(`/index/installment/edit/${installment_id}`);
+export const loadInstallment =
+   (installment_id, edit, spinner) => async (dispatch) => {
+      if (edit)
+         if (!installment_id) {
+            dispatch(
+               setAlert("Debe seleccionar una cuota primero", "danger", "4")
+            );
+            return false;
+         } else history.push(`/index/installment/edit/${installment_id}`);
 
-   try {
-      dispatch(updateLoadingSpinner(true));
-      const res = await api.get(`/installment/${installment_id}`);
-      dispatch({
-         type: INSTALLMENT_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      if (err.response.status !== 401)
-         dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));
-   }
-   dispatch(updateLoadingSpinner(false));
-};
+      try {
+         if (spinner) dispatch(updateLoadingSpinner(true));
+         const res = await api.get(`/installment/${installment_id}`);
+         dispatch({
+            type: INSTALLMENT_LOADED,
+            payload: res.data,
+         });
+      } catch (err) {
+         if (err.response.status !== 401)
+            dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));
+      }
+      if (spinner) dispatch(updateLoadingSpinner(false));
+   };
 
 export const getTotalDebt = () => async (dispatch) => {
    try {
@@ -62,29 +61,13 @@ export const getTotalDebt = () => async (dispatch) => {
    }
 };
 
-export const getMonthlyDebt = (month) => async (dispatch) => {
-   try {
-      let res = await api.get(`/installment/month/${month}`);
-
-      dispatch({
-         type: month === 12 ? ESTIMATEDPROFIT_LOADED : MONTHLYDEBT_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      if (err.response.status !== 401) {
-         dispatch(setInstallmentsError(INSTALLMENTS_ERROR, err.response));
-         window.scroll(0, 0);
-      }
-   }
-};
-
 export const loadInstallments =
-   (filterData, spinner, type) => async (dispatch) => {
-      console.log(filterData);
+   (filterData, spinner, student) => async (dispatch) => {
       if (spinner) dispatch(updateLoadingSpinner(true));
+      let error = false;
       try {
          let res;
-         if (type === "student") {
+         if (student) {
             if (!filterData.student._id) {
                dispatch(
                   setAlert("Debe seleccionar un usuario primero", "danger", "3")
@@ -114,17 +97,15 @@ export const loadInstallments =
             type: INSTALLMENTS_LOADED,
             payload: res.data,
          });
-         if (spinner) dispatch(updateLoadingSpinner(false));
-         return true;
       } catch (err) {
          if (err.response.status !== 401) {
             dispatch(setInstallmentsError(INSTALLMENTS_ERROR, err.response));
             dispatch(setAlert(err.response.data.msg, "danger", "2"));
             window.scroll(0, 0);
-            if (spinner) dispatch(updateLoadingSpinner(false));
-         }
-         return false;
+         } else error = true;
       }
+
+      if (spinner && !error) dispatch(updateLoadingSpinner(false));
    };
 
 export const updateIntallment = (formData) => async (dispatch) => {
@@ -187,20 +168,20 @@ export const updateExpiredIntallments = () => async (dispatch) => {
    }
 };
 
-export const deleteInstallment = (formData) => async (dispatch) => {
+export const deleteInstallment = (_id, student) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
-      await api.delete(`/installment/${formData._id}`);
+      await api.delete(`/installment/${_id}`);
 
       dispatch({
          type: INSTALLMENT_DELETED,
-         payload: formData._id,
+         payload: _id,
       });
 
       dispatch(setAlert("Cuota eliminada", "success", "2"));
-      history.push(`/index/installments/${formData.student._id}`);
+      history.push(`/index/installments/${student}`);
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));
@@ -253,7 +234,6 @@ export const clearInstallments = () => (dispatch) => {
    dispatch({
       type: INSTALLMENTS_CLEARED,
    });
-   dispatch(updatePageNumber(0));
 };
 
 const setInstallmentsError = (type, response) => (dispatch) => {

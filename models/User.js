@@ -77,9 +77,6 @@ const UserSchema = new mongoose.Schema({
          ref: "user",
       },
    ],
-   description: {
-      type: String,
-   },
    active: {
       type: Boolean,
       default: true,

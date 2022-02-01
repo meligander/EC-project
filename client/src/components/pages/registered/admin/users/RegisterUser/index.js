@@ -15,12 +15,15 @@ import {
    registerUpdateUser,
    loadUser,
    getStudentNumber,
+   clearSearch,
+   clearProfile,
 } from "../../../../../../actions/user";
 import { loadTowns, clearTowns } from "../../../../../../actions/town";
 import {
    loadNeighbourhoods,
    clearNeighbourhoods,
 } from "../../../../../../actions/neighbourhood";
+import { setAlert } from "../../../../../../actions/alert";
 import { togglePopup } from "../../../../../../actions/mixvalues";
 
 import PopUp from "../../../../../modal/PopUp";
@@ -29,6 +32,7 @@ import EmployeeInfo from "./usersInfo/EmployeeInfo";
 import StudentInfo from "./usersInfo/StudentInfo";
 
 import "./style.scss";
+import StateInfo from "./usersInfo/StateInfo";
 
 const RegisterUser = ({
    match,
@@ -46,8 +50,11 @@ const RegisterUser = ({
    loadTowns,
    loadNeighbourhoods,
    getStudentNumber,
+   setAlert,
    clearNeighbourhoods,
    clearTowns,
+   clearSearch,
+   clearProfile,
 }) => {
    const isOwner =
       userLogged.type === "admin" || userLogged.type === "admin&teacher";
@@ -85,7 +92,6 @@ const RegisterUser = ({
       degree: "",
       school: "",
       children: [],
-      description: "",
       discount: "",
       chargeday: "",
       img: {
@@ -117,29 +123,36 @@ const RegisterUser = ({
       salary,
       children,
       img,
-      description,
       discount,
       chargeday,
       active,
    } = formData;
 
    useEffect(() => {
-      if (loadingTowns) loadTowns();
-   }, [loadTowns, loadingTowns, studentNumber]);
+      if (loadingTowns) loadTowns(false);
+   }, [loadTowns, loadingTowns]);
 
    useEffect(() => {
-      if (studentNumber !== "")
-         setFormData((prev) => ({ ...prev, studentnumber: studentNumber }));
-      else if (_id === "0") getStudentNumber();
+      if (_id !== "0") {
+         const user = userLogged._id !== _id ? otherUser : userLogged;
+
+         if (user.town && loading) loadNeighbourhoods(user.town._id, false);
+      }
+   }, [userLogged, otherUser, loading, loadNeighbourhoods, _id]);
+
+   useEffect(() => {
+      if (_id === "0") {
+         if (studentNumber === "") getStudentNumber();
+         else
+            setFormData((prev) => ({ ...prev, studentnumber: studentNumber }));
+      }
    }, [_id, getStudentNumber, studentNumber]);
 
    useEffect(() => {
-      if (_id !== "0" && name === "") {
+      if (_id !== "0") {
          if (loadingUser && userLogged._id !== _id) loadUser(_id, true);
          else {
             const user = userLogged._id !== _id ? otherUser : userLogged;
-
-            if (user.town) loadNeighbourhoods(user.town._id);
 
             setFormData((prev) => {
                let oldUser = {};
@@ -148,6 +161,8 @@ const RegisterUser = ({
                      ? prev[x]
                      : x === "dob"
                      ? format(new Date(user.dob.slice(0, -1)), "yyyy-MM-dd")
+                     : x === "town" || x === "neighbourhood"
+                     ? user[x]._id
                      : user[x];
                }
                return {
@@ -156,15 +171,7 @@ const RegisterUser = ({
             });
          }
       }
-   }, [
-      _id,
-      loadUser,
-      loadingUser,
-      otherUser,
-      loadNeighbourhoods,
-      userLogged,
-      name,
-   ]);
+   }, [_id, loadUser, loadingUser, otherUser, userLogged]);
 
    const onChange = (e) => {
       e.persist();
@@ -172,8 +179,9 @@ const RegisterUser = ({
          ...formData,
          [e.target.name]:
             e.target.type === "checkbox" ? e.target.checked : e.target.value,
+         ...(e.target.name === "town" && { neighbourhood: "" }),
       });
-      if (e.target.name === "town") loadNeighbourhoods(e.target.value);
+      if (e.target.name === "town") loadNeighbourhoods(e.target.value, true);
    };
 
    const onChangeImg = (e) => {
@@ -199,7 +207,10 @@ const RegisterUser = ({
 
    const setChildren = (student, add = true) => {
       if (add) {
-         children.push(student);
+         if (!children.some((item) => item._id === student._id)) {
+            children.push(student);
+            clearSearch();
+         } else setAlert("El alumno ya ha sido agregado", "danger", "3");
       } else {
          setFormData({
             ...formData,
@@ -212,36 +223,50 @@ const RegisterUser = ({
       switch (type) {
          case "student":
             return (
-               <StudentInfo
-                  isAdmin={isAdmin}
-                  discount={discount}
-                  chargeday={chargeday}
-                  birthprov={birthprov}
-                  birthtown={birthtown}
-                  onChange={onChange}
-               />
+               <>
+                  <StateInfo
+                     isAdmin={isAdmin}
+                     birthprov={birthprov}
+                     birthtown={birthtown}
+                     onChange={onChange}
+                  />
+                  <StudentInfo
+                     isAdmin={isAdmin}
+                     discount={discount}
+                     chargeday={chargeday}
+                     onChange={onChange}
+                  />
+               </>
             );
          case "teacher":
          case "secretary":
             return (
-               <EmployeeInfo
-                  isAdmin={isAdmin}
-                  isOwner={isOwner}
-                  type={type}
-                  birthprov={birthprov}
-                  birthtown={birthtown}
-                  degree={degree}
-                  salary={salary}
-                  school={school}
-                  onChange={onChange}
-               />
+               <>
+                  <StateInfo
+                     isAdmin={isAdmin}
+                     birthprov={birthprov}
+                     birthtown={birthtown}
+                     onChange={onChange}
+                  />
+                  <EmployeeInfo
+                     type={type}
+                     userType={userLogged.type}
+                     degree={degree}
+                     salary={salary}
+                     school={school}
+                     onChange={onChange}
+                  />
+               </>
             );
          case "guardian":
             return (
                <TutorInfo
+                  isAdmin={isAdmin}
                   setChildren={setChildren}
                   children={children}
-                  isAdmin={isAdmin}
+                  clearProfile={clearProfile}
+                  clearSearch={clearSearch}
+                  setAlert={setAlert}
                />
             );
          default:
@@ -256,6 +281,10 @@ const RegisterUser = ({
                if (popupType === "save")
                   registerUpdateUser({
                      ...formData,
+                     children:
+                        type === "guardian"
+                           ? children.map((child) => child._id)
+                           : "",
                      ...(selectedFile && { img: previewSource }),
                   });
                else setFormData((prev) => ({ ...prev, active: !active }));
@@ -263,7 +292,7 @@ const RegisterUser = ({
             text={
                popupType === "save"
                   ? `¿Está seguro que desea ${
-                       _id !== ""
+                       _id !== "0"
                           ? "aplicar los cambios"
                           : "registrar al nuevo usuario"
                     }?`
@@ -283,16 +312,15 @@ const RegisterUser = ({
          />
          <div>
             <h2 className="mb-2">
-               {_id === "" ? <FaUserPlus /> : <FaUserEdit />}
+               {_id === "0" ? <FaUserPlus /> : <FaUserEdit />}
                &nbsp;
                {isAdmin
-                  ? _id !== ""
+                  ? _id !== "0"
                      ? "Editar Usuario"
                      : "Registrar Usuario Nuevo"
                   : "Editar Imágen"}
             </h2>
-
-            {_id !== "" && !loadingUser && (
+            {_id !== "0" && (
                <div className="btn-right mb-3">
                   <Link
                      to={`/user/credentials/${_id}`}
@@ -309,11 +337,11 @@ const RegisterUser = ({
             <form
                onSubmit={(e) => {
                   e.preventDefault();
-                  togglePopup();
                   setAdminValues((prev) => ({
                      ...prev,
                      popupType: "save",
                   }));
+                  togglePopup("default");
                }}
                className="form"
             >
@@ -425,7 +453,7 @@ const RegisterUser = ({
                      Apellido
                   </label>
                </div>
-               {_id === "" && (
+               {_id === "0" && (
                   <div className="form-group">
                      <input
                         className="form-input"
@@ -546,11 +574,12 @@ const RegisterUser = ({
                               <option value="">
                                  * Seleccione localidad donde vive
                               </option>
-                              {towns.map((town) => (
-                                 <option key={town._id} value={town._id}>
-                                    {town.name}
-                                 </option>
-                              ))}
+                              {!loadingTowns &&
+                                 towns.map((town) => (
+                                    <option key={town._id} value={town._id}>
+                                       {town.name}
+                                    </option>
+                                 ))}
                            </select>
                            <label
                               htmlFor="town"
@@ -636,36 +665,18 @@ const RegisterUser = ({
                   </>
                )}
 
-               {type !== "student" && type !== "guardian" && (
-                  <div className="tooltip form">
-                     <div className="form-group">
-                        <textarea
-                           className="form-input"
-                           name="description"
-                           id="description"
-                           rows="4"
-                           onChange={onChange}
-                           value={description}
-                           placeholder="Descripción"
-                        ></textarea>
-                        <label htmlFor="description" className="form-label">
-                           Descripción
-                        </label>
-                     </div>
-                     <span className="tooltiptext">
-                        Descripción que aparecerá en la página "Acerca de
-                        Nosotros"
-                     </span>
-                  </div>
-               )}
-
-               {_id !== "" && isAdmin && (
+               {_id !== "0" && isAdmin && (
                   <div className="form-group my-3">
                      <input
                         className="form-checkbox"
                         onChange={(e) => {
-                           if (!e.target.checked) togglePopup("active");
-                           else
+                           if (!e.target.checked) {
+                              setAdminValues((prev) => ({
+                                 ...prev,
+                                 popupType: "active",
+                              }));
+                              togglePopup("active");
+                           } else
                               setFormData((prev) => ({
                                  ...prev,
                                  active: !active,
@@ -682,7 +693,7 @@ const RegisterUser = ({
                   </div>
                )}
 
-               {_id !== "" && (
+               {_id !== "0" && (
                   <>
                      <div className="text-center mt-3">
                         <img
@@ -721,8 +732,8 @@ const RegisterUser = ({
 
                <div className="btn-center">
                   <button className="btn btn-primary" type="submit">
-                     {_id !== "" ? <FaUserEdit /> : <FaUserPlus />}
-                     &nbsp;{_id !== "" ? "Guardar Cambios" : "Registrar"}
+                     {_id !== "0" ? <FaUserEdit /> : <FaUserPlus />}
+                     &nbsp;{_id !== "0" ? "Guardar Cambios" : "Registrar"}
                   </button>
                </div>
             </form>
@@ -745,7 +756,10 @@ export default connect(mapStateToProps, {
    loadTowns,
    loadNeighbourhoods,
    getStudentNumber,
+   setAlert,
    clearNeighbourhoods,
    clearTowns,
+   clearProfile,
+   clearSearch,
    togglePopup,
 })(RegisterUser);

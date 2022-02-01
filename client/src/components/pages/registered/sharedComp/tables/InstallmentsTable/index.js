@@ -80,18 +80,22 @@ const InstallmentsTable = ({
 
                         {row.map((item, index) =>
                            !forAdmin ? (
-                              item.year <= year && (
+                              year >= item.year && (
                                  <td
                                     key={index}
-                                    className={`${
-                                       item.value === 0 ? "paid" : ""
-                                    }${item.expired ? "debt" : ""}`}
+                                    className={
+                                       item.value === 0
+                                          ? "paid"
+                                          : item.expired
+                                          ? "debt"
+                                          : ""
+                                    }
                                  >
                                     {item.value === 0
                                        ? "PGO"
-                                       : (item._id === "" ||
-                                            (month >= item.number &&
-                                               item.year === year)) &&
+                                       : ((year === item.year &&
+                                            month >= item.number) ||
+                                            year > item.year) &&
                                          item.value}
                                  </td>
                               )

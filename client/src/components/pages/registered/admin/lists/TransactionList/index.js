@@ -12,11 +12,7 @@ import {
 } from "../../../../../../actions/expence";
 import { clearInvoice } from "../../../../../../actions/invoice";
 import { loadRegister } from "../../../../../../actions/register";
-import {
-   updatePageNumber,
-   formatNumber,
-   togglePopup,
-} from "../../../../../../actions/mixvalues";
+import { formatNumber, togglePopup } from "../../../../../../actions/mixvalues";
 
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
@@ -26,12 +22,10 @@ import "./style.scss";
 
 const TransactionList = ({
    expences: { transactions, loading },
-   registers: { register, loading: loadingRegister },
-   mixvalues: { page },
+   registers: { register, loadingRegister },
    loadTransactions,
    togglePopup,
    loadRegister,
-   updatePageNumber,
    deleteExpence,
    clearInvoice,
    transactionsPDF,
@@ -61,14 +55,18 @@ const TransactionList = ({
 
    const [adminValues, setAdminValues] = useState({
       toDelete: "",
+      page: 0,
    });
 
-   const { toDelete } = adminValues;
+   const { toDelete, page } = adminValues;
 
    useEffect(() => {
-      if (loading) loadTransactions({});
-      if (loadingRegister) loadRegister();
-   }, [loading, loadTransactions, loadingRegister, loadRegister]);
+      if (loadingRegister) loadRegister(false);
+   }, [loadingRegister, loadRegister]);
+
+   useEffect(() => {
+      if (loading) loadTransactions({}, true);
+   }, [loading, loadTransactions]);
 
    const onChange = (e) => {
       e.persist();
@@ -78,80 +76,15 @@ const TransactionList = ({
       });
    };
 
-   const type = (transaction) => {
-      if (transaction.expencetype) {
-         return (
-            <tr
-               key={transaction._id}
-               className={expenceType[transaction.expencetype.type].trClass}
-            >
-               <td>{format(new Date(transaction.date), "dd/MM/yy")}</td>
-               <td>{`${expenceType[transaction.expencetype.type].nameType} - ${
-                  transaction.expencetype.name
-               }`}</td>
-               <td>${formatNumber(transaction.value)}</td>
-               <td>{transaction.description}</td>
-               <td>
-                  {!loadingRegister &&
-                     transaction.register &&
-                     transaction.register === register._id &&
-                     register.temporary && (
-                        <button
-                           onClick={(e) => {
-                              e.preventDefault();
-                              togglePopup();
-                              setAdminValues((prev) => ({
-                                 ...prev,
-                                 toDelete: transaction._id,
-                              }));
-                           }}
-                           className="btn btn-danger"
-                        >
-                           <FaTrashAlt />
-                        </button>
-                     )}
-               </td>
-            </tr>
-         );
-      } else {
-         let name = "";
+   const setName = (user) => {
+      if (user.user_id === null) return "Usuario Eliminado";
 
-         switch (transaction.user) {
-            case null:
-               name = "Usuario Eliminado";
-               break;
-            case undefined:
-               if (transaction.lastname) {
-                  name = transaction.lastname + ", " + transaction.name;
-               } else {
-                  name = "Usuario no definido";
-               }
-               break;
-            default:
-               name = transaction.user.lastname + ", " + transaction.user.name;
-               break;
-         }
-         return (
-            <tr key={transaction._id} className="bg-income">
-               <td>{format(new Date(transaction.date), "dd/MM/yy")}</td>
-               <td>Ingreso</td>
-               <td>${formatNumber(transaction.total)}</td>
-               <td>Factura {name}</td>
-               <td>
-                  <Link
-                     to={`/invoice/single/${transaction._id}`}
-                     onClick={() => {
-                        window.scroll(0, 0);
-                        clearInvoice();
-                     }}
-                     className="btn-text"
-                  >
-                     Ver más &rarr;
-                  </Link>
-               </td>
-            </tr>
-         );
-      }
+      const lastname = user.user_id ? user.user_id.lastname : user.lastname;
+      const name = user.user_id ? user.user_id.name : user.name;
+
+      return `${lastname ? `${lastname}${name ? ", " : ""}` : ""}${
+         name ? name : ""
+      }`;
    };
 
    return (
@@ -216,13 +149,93 @@ const TransactionList = ({
                </thead>
                <tbody>
                   {!loading &&
-                     transactions.length > 0 &&
+                     !loadingRegister &&
                      transactions.map(
                         (transaction, i) =>
                            i >= page * 10 &&
                            i < (page + 1) * 10 && (
                               <React.Fragment key={i}>
-                                 {type(transaction)}
+                                 {transaction.expencetype ? (
+                                    <tr
+                                       key={transaction._id}
+                                       className={
+                                          expenceType[
+                                             transaction.expencetype.type
+                                          ].trClass
+                                       }
+                                    >
+                                       <td>
+                                          {format(
+                                             new Date(transaction.date),
+                                             "dd/MM/yy"
+                                          )}
+                                       </td>
+                                       <td>{`${
+                                          expenceType[
+                                             transaction.expencetype.type
+                                          ].nameType
+                                       } - ${
+                                          transaction.expencetype.name
+                                       }`}</td>
+                                       <td>
+                                          ${formatNumber(transaction.value)}
+                                       </td>
+                                       <td>{transaction.description}</td>
+                                       <td>
+                                          {transaction.register ===
+                                             register._id &&
+                                             register.temporary && (
+                                                <button
+                                                   onClick={(e) => {
+                                                      e.preventDefault();
+                                                      setAdminValues(
+                                                         (prev) => ({
+                                                            ...prev,
+                                                            toDelete:
+                                                               transaction._id,
+                                                         })
+                                                      );
+                                                      togglePopup("default");
+                                                   }}
+                                                   className="btn btn-danger"
+                                                >
+                                                   <FaTrashAlt />
+                                                </button>
+                                             )}
+                                       </td>
+                                    </tr>
+                                 ) : (
+                                    <tr
+                                       key={transaction._id}
+                                       className="bg-income"
+                                    >
+                                       <td>
+                                          {format(
+                                             new Date(transaction.date),
+                                             "dd/MM/yy"
+                                          )}
+                                       </td>
+                                       <td>Ingreso</td>
+                                       <td>
+                                          ${formatNumber(transaction.total)}
+                                       </td>
+                                       <td>
+                                          Factura {setName(transaction.user)}
+                                       </td>
+                                       <td>
+                                          <Link
+                                             to={`/invoice/single/${transaction._id}`}
+                                             onClick={() => {
+                                                window.scroll(0, 0);
+                                                clearInvoice();
+                                             }}
+                                             className="btn-text"
+                                          >
+                                             Ver más &rarr;
+                                          </Link>
+                                       </td>
+                                    </tr>
+                                 )}
                               </React.Fragment>
                            )
                      )}
@@ -234,7 +247,9 @@ const TransactionList = ({
                page={page}
                type="transacciones"
                items={transactions}
-               changePage={updatePageNumber}
+               changePage={(page) =>
+                  setAdminValues((prev) => ({ ...prev, page }))
+               }
                pdfGenerator={() => transactionsPDF(transactions)}
             />
          )}
@@ -245,13 +260,11 @@ const TransactionList = ({
 const mapStatetoProps = (state) => ({
    expences: state.expences,
    registers: state.registers,
-   mixvalues: state.mixvalues,
 });
 
 export default connect(mapStatetoProps, {
    loadTransactions,
    loadRegister,
-   updatePageNumber,
    deleteExpence,
    clearInvoice,
    togglePopup,

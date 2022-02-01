@@ -13,16 +13,8 @@ const Enrollment = require("../../models/Enrollment");
 //@access   Private
 router.get("/:class_id", auth, async (req, res) => {
    try {
-      const date = new Date();
-      const start = new Date(date.getFullYear(), 01, 01);
-      const end = new Date(date.getFullYear(), 12, 31);
-
       const attendances = await Attendance.find({
          classroom: req.params.class_id,
-         date: {
-            $gte: start,
-            $lt: end,
-         },
       })
          .populate({
             path: "student",
@@ -367,7 +359,7 @@ const buildTable = async (attendances, class_id, res) => {
 
       //Change the format of the date
       daysHeader = daysHeader.map((day) => {
-         const date = new Date(day);
+         const date = new Date(day).toISOString();
          return format(new Date(date.slice(0, -1)), "dd/MM");
       });
 

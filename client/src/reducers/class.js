@@ -11,6 +11,7 @@ import {
    CLASSES_CLEARED,
    CLASS_ERROR,
    CLASSES_ERROR,
+   CLASSCATEGORY_UPDATED,
 } from "../actions/types";
 
 const initialState = {
@@ -75,20 +76,24 @@ export default function (state = initialState, action) {
             loading: false,
             error: {},
          };
-      /*  case CLASSCATEGORY_UPDATED:
+      case CLASSCATEGORY_UPDATED:
          return {
             ...state,
-            classInfo: { ...payload, students: [] },
+            classInfo: { category: payload, students: [] },
             loadingClass: false,
             error: {},
-         }; */
+         };
       case CLASSSTUDENT_ADDED:
          return {
             ...state,
-            classInfo: {
-               ...state.classInfo,
-               students: [...state.classInfo.students, payload],
-            },
+            classInfo: state.classInfo
+               ? {
+                    ...state.classInfo,
+                    students: [...state.classInfo.students, payload],
+                 }
+               : {
+                    students: [payload],
+                 },
             loadingClass: false,
             error: {},
          };

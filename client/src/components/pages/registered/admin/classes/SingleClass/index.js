@@ -53,7 +53,7 @@ const SingleClass = ({
    const { popupType } = adminValues;
 
    useEffect(() => {
-      if (loadingClass) loadClass(_id);
+      if (loadingClass) loadClass(_id, true);
    }, [loadClass, _id, loadingClass]);
 
    return (
@@ -193,11 +193,11 @@ const SingleClass = ({
                                  className="btn btn-secondary"
                                  onClick={(e) => {
                                     e.preventDefault();
-                                    togglePopup("report-cards");
                                     setAdminValues((prev) => ({
                                        ...prev,
                                        popupType: "report-cards",
                                     }));
+                                    togglePopup("report-cards");
                                  }}
                               >
                                  <FaAddressCard />
@@ -206,30 +206,36 @@ const SingleClass = ({
                            </div> */}
                            {userLogged.type !== "teacher" && (
                               <>
-                                 <div className="tooltip">
-                                    <Link
-                                       to={`/class/edit/${classInfo._id}`}
-                                       className="btn btn-mix-secondary"
-                                       onClick={() => {
-                                          window.scroll(0, 0);
-                                          clearSearch();
-                                       }}
-                                    >
-                                       <FaEdit />
-                                    </Link>
-                                    <span className="tooltiptext">Editar</span>
-                                 </div>
+                                 {classInfo.year ===
+                                    new Date().getFullYear() && (
+                                    <div className="tooltip">
+                                       <Link
+                                          to={`/class/edit/${classInfo._id}`}
+                                          className="btn btn-mix-secondary"
+                                          onClick={() => {
+                                             window.scroll(0, 0);
+                                             clearSearch();
+                                          }}
+                                       >
+                                          <FaEdit />
+                                       </Link>
+                                       <span className="tooltiptext">
+                                          Editar
+                                       </span>
+                                    </div>
+                                 )}
+
                                  <div className="tooltip">
                                     <button
                                        type="button"
                                        className="btn btn-danger"
                                        onClick={(e) => {
                                           e.preventDefault();
-                                          togglePopup();
                                           setAdminValues((prev) => ({
                                              ...prev,
                                              popupType: "delete",
                                           }));
+                                          togglePopup("default");
                                        }}
                                     >
                                        <FaTrashAlt />

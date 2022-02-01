@@ -8,21 +8,16 @@ import {
    loadExpenceTypes,
    transactionsPDF,
 } from "../../../../../../actions/expence";
-import {
-   updatePageNumber,
-   formatNumber,
-} from "../../../../../../actions/mixvalues";
+import { formatNumber } from "../../../../../../actions/mixvalues";
 
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
 
 const WithdrawalList = ({
+   expences: { transactions, loading, expencetypes, loadingET },
    loadWithdrawals,
    loadExpenceTypes,
-   updatePageNumber,
    transactionsPDF,
-   expences: { transactions, loading, expencetypes, loadingET },
-   mixvalues: { page },
 }) => {
    const [filterData, setFilterData] = useState({
       startDate: "",
@@ -34,20 +29,23 @@ const WithdrawalList = ({
 
    const [adminValues, setAdminValues] = useState({
       total: 0,
+      page: 0,
    });
 
-   const { total } = adminValues;
+   const { total, page } = adminValues;
 
    useEffect(() => {
-      if (loading) {
-         loadWithdrawals({});
-         loadExpenceTypes(false, false);
-      } else
+      if (loadingET) loadExpenceTypes(false, false);
+   }, [loadingET, loadExpenceTypes]);
+
+   useEffect(() => {
+      if (loading) loadWithdrawals({}, true);
+      else
          setAdminValues((prev) => ({
             ...prev,
-            total: transactions.reduce((item, sum) => sum + item.value, 0),
+            total: transactions.reduce((sum, item) => sum + item.value, 0),
          }));
-   }, [loading, loadWithdrawals, transactions, loadExpenceTypes]);
+   }, [loading, loadWithdrawals, transactions]);
 
    const onChange = (e) => {
       e.persist();
@@ -114,7 +112,6 @@ const WithdrawalList = ({
                </thead>
                <tbody>
                   {!loading &&
-                     transactions.length > 0 &&
                      transactions.map(
                         (transaction, i) =>
                            i >= page * 10 &&
@@ -144,7 +141,9 @@ const WithdrawalList = ({
                page={page}
                type="transacciones"
                items={transactions}
-               changePage={updatePageNumber}
+               changePage={(page) =>
+                  setAdminValues((prev) => ({ ...prev, page }))
+               }
                pdfGenerator={() => transactionsPDF(transactions, total)}
             />
          )}
@@ -154,12 +153,10 @@ const WithdrawalList = ({
 
 const mapStatetoProps = (state) => ({
    expences: state.expences,
-   mixvalues: state.mixvalues,
 });
 
 export default connect(mapStatetoProps, {
    loadExpenceTypes,
    loadWithdrawals,
-   updatePageNumber,
    transactionsPDF,
 })(WithdrawalList);

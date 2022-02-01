@@ -1,77 +1,11 @@
 import React from "react";
 
-const EmployeeInfo = ({
-   isAdmin,
-   isOwner,
-   type,
-   birthprov,
-   birthtown,
-   salary,
-   degree,
-   school,
-   onChange,
-}) => {
+const EmployeeInfo = ({ type, userType, salary, degree, school, onChange }) => {
+   const isOwner = userType === "admin" || userType === "admin&teacher";
+   const isAdmin = userType === "secretary" || isOwner;
+
    return (
       <>
-         <div className="form-group">
-            <select
-               className="form-input"
-               value={birthprov}
-               name="birthprov"
-               id="birthprov"
-               disabled={!isAdmin}
-               onChange={onChange}
-            >
-               <option value="0">* Seleccione Provincia de Nacimiento</option>
-               <option value="Buenos Aires">Buenos Aires</option>
-               <option value="Catamarca">Catamarca</option>
-               <option value="Córdoba">Córdoba</option>
-               <option value="Corrientes">Corrientes</option>
-               <option value="Chaco">Chaco</option>
-               <option value="Chubut">Chubut</option>
-               <option value="Entre Ríos">Entre Ríos</option>
-               <option value="Formosa">Formosa</option>
-               <option value="Jujuy">Jujuy</option>
-               <option value="La Pampa">La Pampa</option>
-               <option value="La Rioja">La Rioja</option>
-               <option value="Mendoza">Mendoza</option>
-               <option value="Misiones">Misiones</option>
-               <option value="Neuquén">Neuquén</option>
-               <option value="Río Negro">Río Negro</option>
-               <option value="Salta">Salta</option>
-               <option value="San Juan">San Juan</option>
-               <option value="San Luis">San Luis</option>
-               <option value="Santa Cruz">Santa Cruz</option>
-               <option value="Santa Fe">Santa Fe</option>
-               <option value="Santiago del Estero">Santiago del Estero</option>
-               <option value="Tierra del Fuego">Tierra del Fuego</option>
-               <option value="Tucumán">Tucumán</option>
-               <option value=".">Otro</option>
-            </select>
-            <label
-               htmlFor="birthprov"
-               className={`form-label ${
-                  birthprov === "" || birthprov === "0" ? "lbl" : ""
-               }`}
-            >
-               Provincia de nacimiento
-            </label>
-         </div>
-         <div className="form-group">
-            <input
-               className="form-input"
-               type="text"
-               name="birthtown"
-               id="birthtown"
-               disabled={!isAdmin}
-               value={birthtown}
-               onChange={onChange}
-               placeholder="Localidad de Nacimiento"
-            />
-            <label htmlFor="birthtown" className="form-label">
-               Localidad de Nacimiento
-            </label>
-         </div>
          {type === "teacher" && (
             <>
                <div className="form-group">
@@ -115,10 +49,10 @@ const EmployeeInfo = ({
                   value={salary}
                   name="salary"
                   id="salary"
-                  placeholder="Salario"
+                  placeholder="Salario por hora"
                />
                <label htmlFor="salary" className="form-label">
-                  Salario
+                  Salario por hora
                </label>
             </div>
          )}

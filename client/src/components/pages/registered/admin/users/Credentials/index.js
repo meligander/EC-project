@@ -11,11 +11,11 @@ import PopUp from "../../../../../modal/PopUp";
 
 const Credentials = ({
    match,
+   auth: { userLogged },
+   users: { user, loadingUser },
    updateCredentials,
    loadUser,
    togglePopup,
-   auth: { userLogged },
-   users: { user, loadingUser },
 }) => {
    const [formData, setFormData] = useState({
       email: "",
@@ -37,7 +37,7 @@ const Credentials = ({
             email: !user.email ? "" : user.email,
          }));
       else loadUser(match.params.user_id, true);
-   }, [loadingUser, match.params, loadUser, user]);
+   }, [loadingUser, match.params.user_id, loadUser, user]);
 
    const onChange = (e) => {
       e.persist();
@@ -66,7 +66,7 @@ const Credentials = ({
                className="form"
                onSubmit={(e) => {
                   e.preventDefault();
-                  togglePopup();
+                  togglePopup("default");
                }}
             >
                {isAdmin && (
@@ -76,6 +76,7 @@ const Credentials = ({
                         id="email"
                         type="text"
                         value={email}
+                        autocomplete="off"
                         name="email"
                         onChange={onChange}
                         placeholder="Dirección de correo electrónico"
@@ -92,6 +93,7 @@ const Credentials = ({
                      id="password"
                      type="password"
                      value={password}
+                     autocomplete="new-password"
                      placeholder="Nueva contraseña"
                      onChange={onChange}
                      name="password"

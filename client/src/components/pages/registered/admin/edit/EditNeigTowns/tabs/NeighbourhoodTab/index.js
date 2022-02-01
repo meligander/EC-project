@@ -12,8 +12,8 @@ import PopUp from "../../../../../../../modal/PopUp";
 import EditButtons from "../../../sharedComp/EditButtons";
 
 const NeighbourhoodTab = ({
-   towns,
-   neighbourhoods: { neighbourhoods, loading, error },
+   towns: { towns },
+   neighbourhoods: { neighbourhoods, error },
    togglePopup,
    updateNeighbourhoods,
    deleteNeighbourhood,
@@ -27,28 +27,28 @@ const NeighbourhoodTab = ({
    const { popupType, toDelete } = adminValues;
 
    useEffect(() => {
-      if (!loading) setFormData(neighbourhoods);
-   }, [loading, neighbourhoods]);
+      setFormData(neighbourhoods);
+   }, [neighbourhoods]);
 
    const onChange = (e, index) => {
       e.persist();
-      let newArray = [...formData];
+      let newFormData = [...formData];
 
-      newArray[index] = {
+      newFormData[index] = {
          ...formData[index],
          [e.target.name]: e.target.value,
       };
-      setFormData(newArray);
+      setFormData(newFormData);
    };
 
    const addNeighbourhood = () => {
-      let newArray = [...formData];
-      newArray.push({
+      let newFormData = [...formData];
+      newFormData.push({
          _id: "",
          name: "",
          town: "",
       });
-      setFormData(newArray);
+      setFormData(newFormData);
    };
 
    return (
@@ -58,9 +58,9 @@ const NeighbourhoodTab = ({
                if (popupType === "save") updateNeighbourhoods(formData);
                else {
                   if (formData[toDelete]._id === "") {
-                     let newArray = [...formData];
-                     newArray.splice(toDelete, 1);
-                     setFormData(newArray);
+                     let newFormData = [...formData];
+                     newFormData.splice(toDelete, 1);
+                     setFormData(newFormData);
                   } else deleteNeighbourhood(formData[toDelete]._id);
                }
             }}
@@ -79,55 +79,52 @@ const NeighbourhoodTab = ({
                </tr>
             </thead>
             <tbody>
-               {formData &&
-                  formData.length > 0 &&
-                  formData.map((item, i) => (
-                     <tr key={i}>
-                        <td data-th="Nombre">
-                           <input
-                              type="text"
-                              name="name"
-                              onChange={(e) => onChange(e, i)}
-                              value={item.name}
-                              placeholder="Nombre"
-                           />
-                        </td>
-                        <td data-th="Localidad">
-                           <select
-                              name="town"
-                              onChange={(e) => onChange(e, i)}
-                              value={formData[i].town}
-                           >
-                              <option value="">
-                                 *Seleccione la localidad a la que pertenece
+               {formData.map((item, i) => (
+                  <tr key={i}>
+                     <td data-th="Nombre">
+                        <input
+                           type="text"
+                           name="name"
+                           onChange={(e) => onChange(e, i)}
+                           value={item.name}
+                           placeholder="Nombre"
+                        />
+                     </td>
+                     <td data-th="Localidad">
+                        <select
+                           name="town"
+                           onChange={(e) => onChange(e, i)}
+                           value={formData[i].town}
+                        >
+                           <option value="">
+                              *Seleccione la localidad a la que pertenece
+                           </option>
+                           {towns.map((town, index) => (
+                              <option key={index} value={town._id}>
+                                 {town.name}
                               </option>
-                              {towns.towns.length > 0 &&
-                                 towns.towns.map((town, index) => (
-                                    <option key={index} value={town._id}>
-                                       {town.name}
-                                    </option>
-                                 ))}
-                           </select>
-                        </td>
-                        <td>
-                           <button
-                              type="button"
-                              onClick={(e) => {
-                                 e.preventDefault();
-                                 togglePopup();
-                                 setAdminValues((prev) => ({
-                                    ...prev,
-                                    popupType: "delete",
-                                    toDelete: i,
-                                 }));
-                              }}
-                              className="btn btn-danger"
-                           >
-                              <FaTrashAlt />
-                           </button>
-                        </td>
-                     </tr>
-                  ))}
+                           ))}
+                        </select>
+                     </td>
+                     <td>
+                        <button
+                           type="button"
+                           onClick={(e) => {
+                              e.preventDefault();
+                              setAdminValues((prev) => ({
+                                 ...prev,
+                                 popupType: "delete",
+                                 toDelete: i,
+                              }));
+                              togglePopup("default");
+                           }}
+                           className="btn btn-danger"
+                        >
+                           <FaTrashAlt />
+                        </button>
+                     </td>
+                  </tr>
+               ))}
             </tbody>
          </table>
          {formData.length === 0 && (
@@ -138,11 +135,11 @@ const NeighbourhoodTab = ({
          <EditButtons
             add={addNeighbourhood}
             save={() => {
-               togglePopup();
                setAdminValues((prev) => ({
                   ...prev,
                   popupType: "save",
                }));
+               togglePopup("default");
             }}
             type="Barrio"
          />

@@ -33,7 +33,7 @@ const EditGradeType = ({
    const { popupType, toDelete, newRow } = adminValues;
 
    useEffect(() => {
-      if (loadingGT) loadGradeTypes();
+      if (loadingGT) loadGradeTypes(null, true);
       else setFormData(gradeTypes);
    }, [loadingGT, loadGradeTypes, gradeTypes]);
 
@@ -66,9 +66,7 @@ const EditGradeType = ({
    };
 
    const header = () => {
-      const items = "K,IC,IB,IA,P,J,1°,2°,3°,4°,5°,6°,C,PF";
-
-      return items
+      return "K,IC,IB,IA,P,J,1°,2°,3°,4°,5°,6°,C,PF"
          .split(",")
          .map((header, index) => <th key={index}>{header}</th>);
    };
@@ -134,12 +132,12 @@ const EditGradeType = ({
                                  type="button"
                                  onClick={(e) => {
                                     e.preventDefault();
-                                    togglePopup();
                                     setAdminValues({
                                        ...adminValues,
                                        toDelete: index,
                                        popupType: "delete",
                                     });
+                                    togglePopup("default");
                                  }}
                                  className="btn btn-danger"
                               >
@@ -153,11 +151,11 @@ const EditGradeType = ({
          </div>
          <EditButtons
             save={() => {
-               togglePopup();
                setAdminValues({
                   ...adminValues,
                   popupType: "save",
                });
+               togglePopup("default");
             }}
             add={() => {
                let newFormData = [...formData];

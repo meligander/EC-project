@@ -22,7 +22,11 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 
       if (Object.entries(req.query).length === 0) {
          expences = await Expence.find().populate("expencetype");
-         invoices = await Invoice.find().populate("user");
+         invoices = await Invoice.find().populate({
+            path: "user.user_id",
+            model: "user",
+            select: ["name", "lastname"],
+         });
       } else {
          const filter = req.query;
 

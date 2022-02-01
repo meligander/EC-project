@@ -180,9 +180,13 @@ const GradesTab = ({
             (item) => item[0].student
          );
 
-         const stringDate = format(new Date(date), "Lo 'de' LLLL 'de' yyyy", {
-            locale: es,
-         });
+         const stringDate = format(
+            new Date(date),
+            "EEEE, do 'de' LLLL 'de' yyyy",
+            {
+               locale: es,
+            }
+         );
          certificatePDF(
             grades.students.filter((student) => student.name !== ""),
             grades.header[period - 1],
@@ -257,12 +261,12 @@ const GradesTab = ({
                                           className="btn btn-danger"
                                           onClick={(e) => {
                                              e.preventDefault();
-                                             togglePopup();
                                              setAdminValues((prev) => ({
                                                 ...prev,
                                                 popupType: "delete",
                                                 toDelete: row,
                                              }));
+                                             togglePopup("default");
                                           }}
                                        >
                                           <FaTimes />
@@ -282,11 +286,11 @@ const GradesTab = ({
                type="button"
                onClick={(e) => {
                   e.preventDefault();
-                  togglePopup();
                   setAdminValues((prev) => ({
                      ...prev,
                      popupType: "save",
                   }));
+                  togglePopup("default");
                }}
             >
                <FiSave />
@@ -336,11 +340,11 @@ const GradesTab = ({
                      type="button"
                      onClick={(e) => {
                         e.preventDefault();
-                        togglePopup();
                         setAdminValues((prev) => ({
                            ...prev,
                            popupType: "certificate-date",
                         }));
+                        togglePopup("certificate-date");
                      }}
                   >
                      <FaGraduationCap />

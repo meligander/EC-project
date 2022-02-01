@@ -11,7 +11,7 @@ const RegisterByMonth = ({
    registerPDF,
 }) => {
    useEffect(() => {
-      if (loading) loadRegisters(null, true);
+      if (loading) loadRegisters({}, true, true);
    }, [loading, loadRegisters]);
 
    return (

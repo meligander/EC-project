@@ -33,6 +33,14 @@ const EditInstallment = ({
       student: "",
       halfPayed: false,
    });
+   const _id = match.params.item_id;
+   const type = match.params.type;
+
+   const day = new Date();
+   const thisYear = getYear(day);
+   const yearArray = new Array(6)
+      .fill()
+      .map((item, index) => thisYear + 1 - index);
 
    const [adminValues, setAdminValues] = useState({
       popupType: "",
@@ -42,18 +50,12 @@ const EditInstallment = ({
 
    const { year, number, value, expired, student, halfPayed } = formData;
 
-   const _id = match.params.item_id;
-   const type = match.params.type;
-
-   const day = new Date();
-   const thisYear = getYear(day);
-
    useEffect(() => {
       if (type === "new") {
          if (loadingUser) loadUser(_id, false);
          else setformData((prev) => ({ ...prev, student: user }));
       } else {
-         if (loadingInstallment) loadInstallment(_id);
+         if (loadingInstallment) loadInstallment(_id, false, true);
          else {
             setformData((prev) => {
                let oldInstallment = {};
@@ -88,6 +90,16 @@ const EditInstallment = ({
       });
    };
 
+   const installmentNames = () => {
+      return "Inscripción,,,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre"
+         .split(",")
+         .map((item, index) => (
+            <React.Fragment key={index}>
+               {item !== "" && <option value={index}>{item}</option>}
+            </React.Fragment>
+         ));
+   };
+
    return (
       <>
          <PopUp
@@ -100,7 +112,7 @@ const EditInstallment = ({
                if (popupType === "save")
                   updateIntallment({
                      ...formData,
-                     ...(_id === "" && { student: student._id }),
+                     ...(type === "new" && { student: student._id }),
                   });
                else deleteInstallment(_id, student._id);
             }}
@@ -110,8 +122,8 @@ const EditInstallment = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               togglePopup();
                setAdminValues({ ...adminValues, popupType: "save" });
+               togglePopup("default");
             }}
          >
             <p className="heading-tertiary">
@@ -124,17 +136,16 @@ const EditInstallment = ({
                   className="form-input"
                   name="year"
                   id="year"
-                  disabled={_id !== "0"}
+                  disabled={type === "edit"}
                   onChange={onChange}
                   value={year}
                >
                   <option value={0}>* Seleccione el Año</option>
-                  <option value={thisYear + 1}>{thisYear + 1}</option>
-                  <option value={thisYear}>{thisYear}</option>
-                  <option value={thisYear - 1}>{thisYear - 1}</option>
-                  <option value={thisYear - 2}>{thisYear - 2}</option>
-                  <option value={thisYear - 3}>{thisYear - 3}</option>
-                  <option value={thisYear - 4}>{thisYear - 4}</option>
+                  {yearArray.map((item) => (
+                     <option key={item} value={item}>
+                        {item}
+                     </option>
+                  ))}
                </select>
                <label
                   htmlFor="year"
@@ -149,21 +160,12 @@ const EditInstallment = ({
                   value={number}
                   name="number"
                   id="number"
-                  disabled={_id !== "0"}
+                  disabled={type === "edit"}
                   onChange={onChange}
                >
                   <option value="">* Seleccione la cuota</option>
                   <option value={0}>Inscripción</option>
-                  <option value={3}>Marzo</option>
-                  <option value={4}>Abril</option>
-                  <option value={5}>Mayo</option>
-                  <option value={6}>Junio</option>
-                  <option value={7}>Julio</option>
-                  <option value={8}>Agosto</option>
-                  <option value={9}>Septiembre</option>
-                  <option value={10}>Octubre</option>
-                  <option value={11}>Noviembre</option>
-                  <option value={12}>Diciembre</option>
+                  {installmentNames()}
                </select>
                <label
                   htmlFor="number"
@@ -222,11 +224,11 @@ const EditInstallment = ({
                      type="button"
                      onClick={(e) => {
                         e.preventDefault();
-                        togglePopup();
                         setAdminValues({
                            ...adminValues,
                            popupType: "delete",
                         });
+                        togglePopup("default");
                      }}
                      className="btn btn-danger"
                   >

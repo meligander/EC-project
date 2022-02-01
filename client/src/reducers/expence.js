@@ -6,7 +6,7 @@ import {
    EXPENCETYPES_UPDATED,
    EXPENCETYPE_DELETED,
    TRANSACTIONS_CLEARED,
-   EXPENCES_CLEARED,
+   EXPENCE_CLEARED,
    EXPENCETYPES_CLEARED,
    EXPENCE_ERROR,
    EXPENCETYPE_ERROR,
@@ -59,7 +59,7 @@ export default function (state = initialState, action) {
             ),
             loadingET: false,
          };
-      case EXPENCES_CLEARED:
+      case EXPENCE_CLEARED:
          return {
             ...state,
             loadingExpence: true,

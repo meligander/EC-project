@@ -468,7 +468,7 @@ const buildTable = (installments, admin) => {
       }
    }
    if (newYears.length > 0) years = newYears;
-   return { years, rows };
+   return { years, rows, student: installments[0].student };
 };
 
 const sortArray = (array) => {

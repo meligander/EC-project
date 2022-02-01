@@ -6,11 +6,7 @@ import { FaTrashAlt } from "react-icons/fa";
 import { IoIosListBox } from "react-icons/io";
 import { BiFilterAlt } from "react-icons/bi";
 
-import {
-   updatePageNumber,
-   formatNumber,
-   togglePopup,
-} from "../../../../../../actions/mixvalues";
+import { formatNumber, togglePopup } from "../../../../../../actions/mixvalues";
 import {
    loadRegisters,
    deleteRegister,
@@ -25,9 +21,7 @@ import PopUp from "../../../../../modal/PopUp";
 const RegisterList = ({
    auth: { userLogged },
    registers: { registers, loading },
-   mixvalues: { page },
    loadRegisters,
-   updatePageNumber,
    deleteRegister,
    clearRegisters,
    togglePopup,
@@ -41,11 +35,18 @@ const RegisterList = ({
       endDate: "",
    });
 
+   const [adminValues, setAdminValues] = useState({
+      page: 0,
+   });
+
+   const { page } = adminValues;
+
    const { startDate, endDate } = filterData;
 
    useEffect(() => {
-      if (loading) loadRegisters({});
-   }, [loading, loadRegisters]);
+      if (loading || (registers && registers[0].temporary === undefined))
+         loadRegisters({}, true, false);
+   }, [loading, loadRegisters, registers]);
 
    const onChange = (e) => {
       e.persist();
@@ -73,7 +74,7 @@ const RegisterList = ({
                   className="btn btn-light"
                >
                   <IoIosListBox />
-                  <span className="hide-sm">&nbsp;Listado</span> Mensual
+                  <span className="hide-sm">&nbsp;Listado</span>&nbsp;Mensual
                </Link>
             </div>
          )}
@@ -109,12 +110,14 @@ const RegisterList = ({
                      <th>Plata Caja</th>
                      <th>Diferencia</th>
                      <th>Detalles</th>
-                     {isAdmin && !registers[0].temporary && <th>&nbsp;</th>}
+                     {isAdmin && registers[0] && !registers[0].temporary && (
+                        <th>&nbsp;</th>
+                     )}
                   </tr>
                </thead>
                <tbody>
                   {!loading &&
-                     registers.length > 0 &&
+                     registers[0].temporary !== undefined &&
                      registers.map(
                         (register, i) =>
                            i >= page * 10 &&
@@ -169,7 +172,7 @@ const RegisterList = ({
                                              className="btn btn-danger"
                                              onClick={(e) => {
                                                 e.preventDefault();
-                                                togglePopup();
+                                                togglePopup("default");
                                              }}
                                           >
                                              <FaTrashAlt />
@@ -188,7 +191,9 @@ const RegisterList = ({
                items={registers}
                type="cajas diarias"
                page={page}
-               changePage={updatePageNumber}
+               changePage={(page) =>
+                  setAdminValues((prev) => ({ ...prev, page }))
+               }
                pdfGenerator={() => registerPDF(registers)}
             />
          )}
@@ -199,12 +204,10 @@ const RegisterList = ({
 const mapStatetoProps = (state) => ({
    auth: state.auth,
    registers: state.registers,
-   mixvalues: state.mixvalues,
 });
 
 export default connect(mapStatetoProps, {
    loadRegisters,
-   updatePageNumber,
    deleteRegister,
    clearRegisters,
    togglePopup,

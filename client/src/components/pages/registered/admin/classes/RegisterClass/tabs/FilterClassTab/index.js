@@ -3,7 +3,10 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { BiFilterAlt } from "react-icons/bi";
 
-import { addStudent } from "../../../../../../../../actions/class";
+import {
+   addStudent,
+   updateClassCategory,
+} from "../../../../../../../../actions/class";
 import { loadUsers, clearProfile } from "../../../../../../../../actions/user";
 import { setAlert } from "../../../../../../../../actions/alert";
 
@@ -12,12 +15,13 @@ import Alert from "../../../../../../sharedComp/Alert";
 
 const FilterClassTab = ({
    match,
-   categories: { categories, loading: loadingCategories },
-   classes: { classInfo, loadingClass },
+   categories: { categories },
+   classes: { classInfo },
    users: { users, loading },
    setAlert,
    loadUsers,
    addStudent,
+   updateClassCategory,
    clearProfile,
 }) => {
    const _id = match.params.class_id;
@@ -25,8 +29,8 @@ const FilterClassTab = ({
    const [category, setCategory] = useState("");
 
    useEffect(() => {
-      if (_id && !loadingClass) setCategory(classInfo.category._id);
-   }, [classInfo, _id, loadingClass]);
+      if (_id) setCategory(classInfo.category._id);
+   }, [classInfo, _id]);
 
    const filterStudents = (e) => {
       e.preventDefault();
@@ -45,6 +49,7 @@ const FilterClassTab = ({
             true,
             false
          );
+         updateClassCategory(categories.find((item) => item._id === category));
       }
    };
 
@@ -63,16 +68,13 @@ const FilterClassTab = ({
                   value={category}
                >
                   <option value="">* Seleccione Categoría</option>
-                  {!loadingCategories &&
-                     categories.map((category) => (
-                        <React.Fragment key={category._id}>
-                           {category.name !== "Inscripción" && (
-                              <option value={category._id}>
-                                 {category.name}
-                              </option>
-                           )}
-                        </React.Fragment>
-                     ))}
+                  {categories.map((category) => (
+                     <React.Fragment key={category._id}>
+                        {category.name !== "Inscripción" && (
+                           <option value={category._id}>{category.name}</option>
+                        )}
+                     </React.Fragment>
+                  ))}
                </select>
                <label
                   htmlFor="new-category"
@@ -120,5 +122,6 @@ export default connect(mapStateToProps, {
    setAlert,
    loadUsers,
    addStudent,
+   updateClassCategory,
    clearProfile,
 })(withRouter(FilterClassTab));

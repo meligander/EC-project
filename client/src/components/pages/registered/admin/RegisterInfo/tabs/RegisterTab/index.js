@@ -10,7 +10,7 @@ import {
    createRegister,
 } from "../../../../../../../actions/register";
 import { clearInvoices } from "../../../../../../../actions/invoice";
-import { clearExpences } from "../../../../../../../actions/expence";
+import { clearTransactions } from "../../../../../../../actions/expence";
 import {
    formatNumber,
    togglePopup,
@@ -21,11 +21,11 @@ import PopUp from "../../../../../../modal/PopUp";
 import "./style.scss";
 
 const RegisterTab = ({
-   registers: { register, addNew, loadingRegister },
+   registers: { register },
    closeRegister,
    createRegister,
    clearInvoices,
-   clearExpences,
+   clearTransactions,
    clearRegisters,
    togglePopup,
 }) => {
@@ -47,7 +47,7 @@ const RegisterTab = ({
    };
 
    const confirm = () => {
-      if (addNew) createRegister({ difference, description });
+      if (!register) createRegister({ difference, description });
       else closeRegister(formData);
    };
 
@@ -61,121 +61,110 @@ const RegisterTab = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               if (addNew || (register && register.temporary)) togglePopup();
+               if (!register || (register && register.temporary))
+                  togglePopup("default");
             }}
          >
             <table>
                <tbody>
-                  {!loadingRegister && !addNew && (
-                     <>
-                        <tr>
-                           <td>Ingresos</td>
-                           <td>
-                              $
-                              {register && register.temporary && register.income
-                                 ? formatNumber(register.income)
-                                 : 0}
-                           </td>
-                           <td>
-                              <Link
-                                 className="btn btn-light"
-                                 onClick={() => {
-                                    window.scroll(0, 0);
-                                    clearInvoices();
-                                 }}
-                                 to="/register/income/list"
-                              >
-                                 <IoIosListBox />
-                                 <span className="hide-sm">&nbsp;Listado</span>
-                              </Link>
-                           </td>
-                        </tr>
-                        <tr>
-                           <td>Egresos</td>
-                           <td>
-                              $
-                              {register &&
-                              register.temporary &&
-                              register.expence
-                                 ? formatNumber(register.expence)
-                                 : 0}
-                           </td>
-                           <td>
-                              <Link
-                                 className="btn btn-light"
-                                 onClick={() => {
-                                    window.scroll(0, 0);
-                                    clearExpences();
-                                 }}
-                                 to="/register/transaction/list"
-                              >
-                                 <IoIosListBox />
-                                 <span className="hide-sm">&nbsp;Listado</span>
-                              </Link>
-                           </td>
-                        </tr>
-                        <tr>
-                           <td>Ingreso Especial</td>
-                           <td>
-                              $
-                              {register &&
-                              register.temporary &&
-                              register.cheatincome
-                                 ? formatNumber(register.cheatincome)
-                                 : 0}
-                           </td>
-                           <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                           <td>Retiro de Dinero</td>
-                           <td>
-                              $
-                              {register &&
-                              register.temporary &&
-                              register.withdrawal
-                                 ? formatNumber(register.withdrawal)
-                                 : 0}
-                           </td>
-                           <td>
-                              <Link
-                                 to="/register/withdrawal/list"
-                                 onClick={() => {
-                                    window.scroll(0, 0);
-                                    clearRegisters();
-                                    clearExpences();
-                                 }}
-                                 className="btn btn-light"
-                              >
-                                 <IoIosListBox />
-                                 <span className="hide-sm">&nbsp;Listado</span>
-                              </Link>
-                           </td>
-                        </tr>
-                        <tr>
-                           <td>Plata Caja</td>
-                           <td>
-                              $
-                              {register && formatNumber(register.registermoney)}
-                           </td>
-                           <td>
-                              <Link
-                                 to="/register/list"
-                                 onClick={() => {
-                                    window.scroll(0, 0);
-                                    clearRegisters();
-                                 }}
-                                 className="btn btn-light"
-                              >
-                                 <IoIosListBox />
-                                 <span className="hide-sm">&nbsp;Cierres</span>
-                              </Link>
-                           </td>
-                        </tr>
-                     </>
-                  )}
+                  <tr>
+                     <td>Ingresos</td>
+                     <td>
+                        $
+                        {register && register.temporary && register.income
+                           ? formatNumber(register.income)
+                           : 0}
+                     </td>
+                     <td>
+                        <Link
+                           className="btn btn-light"
+                           onClick={() => {
+                              window.scroll(0, 0);
+                              clearInvoices();
+                           }}
+                           to="/register/income/list"
+                        >
+                           <IoIosListBox />
+                           <span className="hide-sm">&nbsp;Listado</span>
+                        </Link>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>Egresos</td>
+                     <td>
+                        $
+                        {register && register.temporary && register.expence
+                           ? formatNumber(register.expence)
+                           : 0}
+                     </td>
+                     <td>
+                        <Link
+                           className="btn btn-light"
+                           onClick={() => {
+                              window.scroll(0, 0);
+                              clearTransactions();
+                           }}
+                           to="/register/transaction/list"
+                        >
+                           <IoIosListBox />
+                           <span className="hide-sm">&nbsp;Listado</span>
+                        </Link>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>Ingreso Especial</td>
+                     <td>
+                        $
+                        {register && register.temporary && register.cheatincome
+                           ? formatNumber(register.cheatincome)
+                           : 0}
+                     </td>
+                     <td>&nbsp;</td>
+                  </tr>
+                  <tr>
+                     <td>Retiro de Dinero</td>
+                     <td>
+                        $
+                        {register && register.temporary && register.withdrawal
+                           ? formatNumber(register.withdrawal)
+                           : 0}
+                     </td>
+                     <td>
+                        <Link
+                           to="/register/withdrawal/list"
+                           onClick={() => {
+                              window.scroll(0, 0);
+                              clearTransactions();
+                           }}
+                           className="btn btn-light"
+                        >
+                           <IoIosListBox />
+                           <span className="hide-sm">&nbsp;Listado</span>
+                        </Link>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>Plata Caja</td>
+                     <td>
+                        ${register && formatNumber(register.registermoney)}
+                     </td>
+                     <td>
+                        <Link
+                           to="/register/list"
+                           onClick={() => {
+                              window.scroll(0, 0);
+                              clearRegisters();
+                           }}
+                           className="btn btn-light"
+                        >
+                           <IoIosListBox />
+                           <span className="hide-sm">&nbsp;Cierres</span>
+                        </Link>
+                     </td>
+                  </tr>
 
                   <tr>
-                     <td>{addNew ? "Dinero Inicial" : "Diferencia"}</td>
+                     <td>{!register ? "Dinero Inicial" : "Diferencia"}</td>
                      <td>
                         <input
                            type="number"
@@ -184,18 +173,18 @@ const RegisterTab = ({
                            value={difference}
                            onChange={onChange}
                            placeholder={
-                              addNew ? "Dinero Inicial" : "Diferencia"
+                              !register ? "Dinero Inicial" : "Diferencia"
                            }
                         />
                      </td>
                      <td>
-                        {!addNew && (
+                        {register && (
                            <>
                               <input
                                  className="form-checkbox"
                                  type="checkbox"
                                  checked={negative}
-                                 disabled={register && !register.temporary}
+                                 disabled={!register.temporary}
                                  onChange={onChange}
                                  name="negative"
                                  id="cb1"
@@ -226,22 +215,20 @@ const RegisterTab = ({
                   </tr>
                </tbody>
             </table>
-            {!loadingRegister && (
-               <div className="btn-center pt-3">
-                  <button
-                     type="submit"
-                     disabled={!register && !addNew}
-                     className={`btn ${
-                        register && !register.temporary && !addNew
-                           ? "btn-black"
-                           : "btn-primary"
-                     }`}
-                  >
-                     <FiSave />
-                     <span className="hide-sm">&nbsp; Cerrar Caja</span>
-                  </button>
-               </div>
-            )}
+            <div className="btn-center pt-3">
+               <button
+                  type="submit"
+                  disabled={!register || (register && !register.temporary)}
+                  className={`btn ${
+                     (register && !register.temporary) || !register
+                        ? "btn-black"
+                        : "btn-primary"
+                  }`}
+               >
+                  <FiSave />
+                  <span className="hide-sm">&nbsp; Cerrar Caja</span>
+               </button>
+            </div>
          </form>
       </div>
    );
@@ -255,7 +242,7 @@ export default connect(mapStateToProps, {
    closeRegister,
    createRegister,
    clearInvoices,
-   clearExpences,
+   clearTransactions,
    clearRegisters,
    togglePopup,
 })(RegisterTab);

@@ -21,7 +21,7 @@ const RegisterClass = ({
    const _id = match.params.class_id;
 
    useEffect(() => {
-      if (_id && loadingClass) loadClass(_id);
+      if (_id && loadingClass) loadClass(_id, true);
    }, [_id, loadingClass, loadClass]);
 
    useEffect(() => {
@@ -52,17 +52,23 @@ const RegisterClass = ({
    return (
       <>
          <h2>{_id ? "Editar Clase" : "Nueva Clase"}</h2>
-         {_id ? (
-            <Tabs
-               tablist={["Clase", "Alumnos"]}
-               panellist={[NewClass, FilterClassTab]}
-            />
-         ) : (
-            <Tabs
-               tablist={["Alumnos", "Clase"]}
-               panellist={[FilterClassTab, NewClass]}
-            />
-         )}
+         {!loadingCategories &&
+            !loadingBK &&
+            ((_id && !loadingClass) || !_id) && (
+               <>
+                  {_id ? (
+                     <Tabs
+                        tablist={["Clase", "Alumnos"]}
+                        panellist={[NewClass, FilterClassTab]}
+                     />
+                  ) : (
+                     <Tabs
+                        tablist={["Alumnos", "Clase"]}
+                        panellist={[FilterClassTab, NewClass]}
+                     />
+                  )}
+               </>
+            )}
       </>
    );
 };

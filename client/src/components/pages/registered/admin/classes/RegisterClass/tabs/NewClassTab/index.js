@@ -17,7 +17,7 @@ import StudentTable from "../../../../../sharedComp/tables/StudentTable";
 
 const NewClassTab = ({
    match,
-   users: { usersBK, loadingBK },
+   users: { usersBK },
    classes: { classInfo, loadingClass },
    registerUpdateClass,
    removeStudent,
@@ -31,6 +31,7 @@ const NewClassTab = ({
    });
 
    const [formData, setFormData] = useState({
+      _id: "",
       teacher: "",
       classroom: "",
       day1: "",
@@ -55,7 +56,7 @@ const NewClassTab = ({
    } = formData;
 
    useEffect(() => {
-      if (!loadingClass) {
+      if (!loadingClass && _id) {
          if (
             format(new Date(classInfo.hourin1), "HH:mm") ===
                format(new Date(classInfo.hourin2), "HH:mm") &&
@@ -80,7 +81,7 @@ const NewClassTab = ({
             };
          });
       }
-   }, [classInfo, loadingClass]);
+   }, [classInfo, loadingClass, _id]);
 
    const onChange = (e) => {
       e.persist();
@@ -103,9 +104,7 @@ const NewClassTab = ({
    };
 
    const days = () => {
-      const weekDays = "Lunes,Martes,Miércoles,Jueves,Viernes";
-
-      return weekDays.split(",").map((item) => (
+      return "Lunes,Martes,Miércoles,Jueves,Viernes".split(",").map((item) => (
          <option key={item} value={item}>
             {item}
          </option>
@@ -116,14 +115,11 @@ const NewClassTab = ({
       <>
          <PopUp
             confirm={() =>
-               registerUpdateClass(
-                  {
-                     ...formData,
-                     category: classInfo.category._id,
-                     students: classInfo.students,
-                  },
-                  _id
-               )
+               registerUpdateClass({
+                  ...formData,
+                  category: classInfo.category._id,
+                  students: classInfo.students,
+               })
             }
             text="¿Está seguro que los datos son correctos?"
          />
@@ -131,7 +127,7 @@ const NewClassTab = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               togglePopup();
+               togglePopup("default");
             }}
          >
             <div className="form-group my-3 heading-tertiary">
@@ -148,12 +144,11 @@ const NewClassTab = ({
                   value={teacher}
                >
                   <option value="">* Seleccione Profesor</option>
-                  {!loadingBK &&
-                     usersBK.map((teacher) => (
-                        <option key={teacher._id} value={teacher._id}>
-                           {teacher.lastname + ", " + teacher.name}
-                        </option>
-                     ))}
+                  {usersBK.map((teacher) => (
+                     <option key={teacher._id} value={teacher._id}>
+                        {teacher.lastname + ", " + teacher.name}
+                     </option>
+                  ))}
                </select>
                <label
                   htmlFor="teacher"

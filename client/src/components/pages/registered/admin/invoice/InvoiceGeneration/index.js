@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { getInvoiceNumber } from "../../../../../../actions/invoice";
 
 import Tabs from "../../../sharedComp/Tabs";
-import InstallmentsSearch from "../../../sharedComp/search/InstallmentsSearch";
+import InstallmentsSearchTab from "./tabs/InstallmentsSearchTab";
 import InvoiceTab from "./tabs/InvoiceTab";
 
 const InvoiceGeneration = ({
@@ -16,13 +16,16 @@ const InvoiceGeneration = ({
    useEffect(() => {
       if (invoiceNumber === "") getInvoiceNumber();
    }, [getInvoiceNumber, invoiceNumber]);
+
    return (
       <>
          <h1>Facturación</h1>
-         <Tabs
-            tablist={["Cuotas", "Factura"]}
-            panellist={[InstallmentsSearch, InvoiceTab]}
-         />
+         {invoiceNumber !== "" && (
+            <Tabs
+               tablist={["Cuotas", "Factura"]}
+               panellist={[InstallmentsSearchTab, InvoiceTab]}
+            />
+         )}
       </>
    );
 };

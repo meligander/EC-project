@@ -107,12 +107,12 @@ const EditExpenceType = ({
                               type="button"
                               onClick={(e) => {
                                  e.preventDefault();
-                                 togglePopup();
                                  setAdminValues({
                                     ...adminValues,
                                     toDelete: index,
                                     popupType: "delete",
                                  });
+                                 togglePopup("default");
                               }}
                               className="btn btn-danger"
                            >
@@ -125,11 +125,11 @@ const EditExpenceType = ({
          </table>
          <EditButtons
             save={() => {
-               togglePopup();
                setAdminValues({
                   ...adminValues,
                   popupType: "save",
                });
+               togglePopup("default");
             }}
             add={() => {
                const newFormData = [...formData];

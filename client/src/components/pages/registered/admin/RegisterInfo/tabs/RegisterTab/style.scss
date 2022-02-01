@@ -20,6 +20,10 @@
          width: 25%;
          font-size: $default-font-size;
 
+         .btn {
+            max-width: fit-content;
+         }
+
          @include respond(small-phone) {
             width: 31%;
 

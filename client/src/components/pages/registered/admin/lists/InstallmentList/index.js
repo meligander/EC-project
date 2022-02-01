@@ -1,55 +1,42 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { getYear, getMonth } from "date-fns";
+import { getYear } from "date-fns";
 import { BiFilterAlt } from "react-icons/bi";
 
 import {
    loadInstallments,
    installmentsPDF,
-   getMonthlyDebt,
 } from "../../../../../../actions/installment";
-import {
-   updatePageNumber,
-   formatNumber,
-} from "../../../../../../actions/mixvalues";
+import { getEstimatedProfit } from "../../../../../../actions/enrollment";
+import { formatNumber } from "../../../../../../actions/mixvalues";
 import { clearProfile } from "../../../../../../actions/user";
 
 import ListButtons from "../sharedComp/ListButtons";
 import NameField from "../../../sharedComp/NameField";
 
 const InstallmentList = ({
-   installments: {
-      installments,
-      loading,
+   enrollments: {
       otherValues: { estimatedProfit },
    },
+   installments: { installments, loading },
    auth: { userLogged },
-   mixvalues: { page },
    loadInstallments,
-   getMonthlyDebt,
-   updatePageNumber,
+   getEstimatedProfit,
    clearProfile,
    installmentsPDF,
 }) => {
    const date = new Date();
    const thisYear = getYear(date);
-
-   const installmentName = [
-      "Inscripción",
-      "",
-      "",
-      "Marzo",
-      "Abril",
-      "Mayo",
-      "Junio",
-      "Julio",
-      "Agosto",
-      "Septiembre",
-      "Octubre",
-      "Noviembre",
-      "Diciembre",
-   ];
+   const installmentName =
+      "Inscripción,,,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre".split(
+         ","
+      );
+   const isAdmin =
+      userLogged.type === "admin" || userLogged.type === "admin&teacher";
+   const yearArray = new Array(6)
+      .fill()
+      .map((item, index) => thisYear + 1 - index);
 
    const [filterData, setFilterData] = useState({
       number: "",
@@ -60,25 +47,28 @@ const InstallmentList = ({
 
    const [adminValues, setAdminValues] = useState({
       total: 0,
+      page: 0,
    });
 
-   const { total } = adminValues;
+   const { total, page } = adminValues;
 
    const { number, year, name, lastname } = filterData;
 
    useEffect(() => {
-      if (loading) {
-         loadInstallments({}, true, "list");
-         getMonthlyDebt(12);
-      } else
+      if (loading) loadInstallments({}, true, "list");
+      else
          setAdminValues((prev) => ({
             ...prev,
             total: installments.reduce(
-               (installment, sum) => sum + installment.value,
+               (sum, installment) => sum + installment.value,
                0
             ),
          }));
-   }, [installments, loading, loadInstallments, getMonthlyDebt]);
+   }, [installments, loading, loadInstallments]);
+
+   useEffect(() => {
+      if (estimatedProfit === "") getEstimatedProfit();
+   }, [estimatedProfit, getEstimatedProfit]);
 
    const onChange = (e) => {
       e.persist();
@@ -88,6 +78,14 @@ const InstallmentList = ({
       }));
    };
 
+   const installmentNames = () => {
+      return installmentName.map((item, index) => (
+         <React.Fragment key={index}>
+            {item !== "" && <option value={index}>{item}</option>}
+         </React.Fragment>
+      ));
+   };
+
    return (
       <>
          <h2 className="p-1">Lista de Deudas</h2>
@@ -95,14 +93,12 @@ const InstallmentList = ({
          <p className="heading-tertiary text-moved-right">
             Total: ${total !== 0 ? formatNumber(total) : 0}
          </p>
-         {getMonth(date) !== 11 &&
-            (userLogged.type === "admin" ||
-               userLogged.type === "admin&teacher") && (
-               <p className="heading-tertiary text-moved-right">
-                  Ganancia Estimada por Mes: $
-                  {estimatedProfit !== 0 ? formatNumber(estimatedProfit) : 0}
-               </p>
-            )}
+         {isAdmin && (
+            <p className="heading-tertiary text-moved-right">
+               Ganancia Estimada por Mes: $
+               {estimatedProfit !== 0 ? formatNumber(estimatedProfit) : 0}
+            </p>
+         )}
 
          <form
             className="form"
@@ -120,14 +116,7 @@ const InstallmentList = ({
                   value={number}
                >
                   <option value="">* Seleccione la cuota</option>
-                  {installmentName.map(
-                     (name, i) =>
-                        name !== "" && (
-                           <option key={i} value={i}>
-                              {name}
-                           </option>
-                        )
-                  )}
+                  {installmentNames()}
                </select>
                <label
                   htmlFor="number"
@@ -145,9 +134,11 @@ const InstallmentList = ({
                   value={year}
                >
                   <option value="">* Seleccione el Año</option>
-                  <option value={thisYear - 1}>{thisYear - 1}</option>
-                  <option value={thisYear}>{thisYear}</option>
-                  <option value={thisYear + 1}>{thisYear + 1}</option>
+                  {yearArray.map((item) => (
+                     <option key={item} value={item}>
+                        {item}
+                     </option>
+                  ))}
                </select>
                <label
                   htmlFor="year"
@@ -177,7 +168,6 @@ const InstallmentList = ({
                </thead>
                <tbody>
                   {!loading &&
-                     installments.length > 0 &&
                      installments.map(
                         (installment, i) =>
                            i >= page * 10 &&
@@ -216,7 +206,9 @@ const InstallmentList = ({
             <ListButtons
                page={page}
                type="deudas"
-               changePage={updatePageNumber}
+               changePage={(page) =>
+                  setAdminValues((prev) => ({ ...prev, page }))
+               }
                items={installments}
                pdfGenerator={() => installmentsPDF(installments)}
             />
@@ -227,14 +219,13 @@ const InstallmentList = ({
 
 const mapStatetoProps = (state) => ({
    installments: state.installments,
-   mixvalues: state.mixvalues,
+   enrollments: state.enrollments,
    auth: state.auth,
 });
 
 export default connect(mapStatetoProps, {
    loadInstallments,
-   getMonthlyDebt,
-   updatePageNumber,
+   getEstimatedProfit,
    installmentsPDF,
    clearProfile,
 })(InstallmentList);

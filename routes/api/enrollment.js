@@ -34,35 +34,37 @@ router.get("/", [auth, adminAuth], async (req, res) => {
             })
             .sort({ date: -1 });
       } else {
-         const filter = req.query;
+         const { startDate, endDate, category, year, student, name, lastname } =
+            req.query;
+
          enrollments = await Enrollment.find({
-            ...((filter.startDate || filter.endDate) && {
+            ...((startDate || endDate) && {
                date: {
-                  ...(filter.startDate && {
-                     $gte: new Date(filter.startDate).setHours(00, 00, 00),
+                  ...(startDate && {
+                     $gte: new Date(startDate).setHours(00, 00, 00),
                   }),
-                  ...(filter.endDate && {
-                     $lte: new Date(filter.endDate).setHours(23, 59, 59),
+                  ...(endDate && {
+                     $lte: new Date(endDate).setHours(23, 59, 59),
                   }),
                },
             }),
-            ...(filter.category && { category: filter.category }),
-            year: filter.year
-               ? filter.year
+            ...(category && { category: category }),
+            year: year
+               ? year
                : { $in: [date.getFullYear(), date.getFullYear() + 1] },
-            ...(filter.student && { student: filter.student }),
+            ...(student && { student: student }),
          })
             .populate({
                path: "student",
                model: "user",
                select: ["name", "lastname", "studentnumber"],
                match: {
-                  ...(filter.name && {
-                     name: { $regex: `.*${filter.name}.*`, $options: "i" },
+                  ...(name && {
+                     name: { $regex: `.*${name}.*`, $options: "i" },
                   }),
-                  ...(filter.lastname && {
+                  ...(lastname && {
                      lastname: {
-                        $regex: `.*${filter.lastname}.*`,
+                        $regex: `.*${lastname}.*`,
                         $options: "i",
                      },
                   }),
@@ -95,7 +97,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 //@access   Private && Admin
 router.get("/average", [auth, adminAuth], async (req, res) => {
    try {
-      let date = new Date();
+      let year = new Date().getFullYear();
 
       let enrollments;
       const filter = req.query;
@@ -105,7 +107,7 @@ router.get("/average", [auth, adminAuth], async (req, res) => {
             ? filter.category
             : { $ne: "5ebb3498397c2d2610a4eab8" },
          "classroom.average": { $exists: true },
-         year: date.getFullYear(),
+         year,
       })
          .populate({
             path: "student",
@@ -137,7 +139,7 @@ router.get("/average", [auth, adminAuth], async (req, res) => {
 //@access   Private && Admin
 router.get("/attendance", [auth, adminAuth], async (req, res) => {
    try {
-      let date = new Date();
+      let year = new Date().getFullYear();
 
       const filter = req.query;
 
@@ -146,7 +148,7 @@ router.get("/attendance", [auth, adminAuth], async (req, res) => {
          ...(filter.absence && {
             "classroom.absence": { $lte: filter.absence },
          }),
-         year: date.getFullYear(),
+         year,
       })
          .populate({
             path: "student",
@@ -166,6 +168,30 @@ router.get("/attendance", [auth, adminAuth], async (req, res) => {
       }
 
       res.json(enrollments);
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: "Server Error" });
+   }
+});
+
+//@route    GET /api/enrollment/money
+//@desc     get the money to earn per month
+//@access   Private && Admin
+router.get("/money", [auth, adminAuth], async (req, res) => {
+   try {
+      const enrollments = await Enrollment.find({
+         year: new Date().getFullYear(),
+      }).populate({
+         path: "category",
+         model: "category",
+      });
+
+      const money = enrollments.reduce(
+         (sum, item) => sum + item.category.value,
+         0
+      );
+
+      res.json(money);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });
@@ -206,11 +232,11 @@ router.get("/one/:id", [auth, adminAuth], async (req, res) => {
 router.get("/year", [auth, adminAuth], async (req, res) => {
    try {
       const date = new Date();
-      const year = date.getFullYear() + 1;
+      const year = date.getFullYear();
 
-      let enrollments = await Enrollment.find({ year });
+      let enrollments = await Enrollment.find({ year: year + 1 });
       if (enrollments.length === 0)
-         enrollments = await Enrollment.find({ year: date.getFullYear() });
+         enrollments = await Enrollment.find({ year });
 
       let yearEnrollments = {
          length: 0,

@@ -16,10 +16,7 @@ import {
    clearCategories,
 } from "../../../../../../actions/category";
 import { clearProfile } from "../../../../../../actions/user";
-import {
-   togglePopup,
-   updatePageNumber,
-} from "../../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../../actions/mixvalues";
 
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
@@ -27,7 +24,6 @@ import NameFilter from "../../../sharedComp/NameField";
 import PopUp from "../../../../../modal/PopUp";
 
 const EnrollmentList = ({
-   mixvalues: { page },
    enrollments: { enrollments, loading },
    categories: { categories, loading: loadingCategories },
    loadEnrollments,
@@ -38,10 +34,12 @@ const EnrollmentList = ({
    togglePopup,
    loadCategories,
    enrollmentsPDF,
-   updatePageNumber,
 }) => {
    const day = new Date();
    const thisYear = getYear(day);
+   const yearArray = new Array(3)
+      .fill()
+      .map((item, index) => thisYear - 1 + index);
 
    const [filterData, setFilterData] = useState({
       startDate: "",
@@ -49,20 +47,24 @@ const EnrollmentList = ({
       name: "",
       lastname: "",
       category: "",
-      year: 0,
+      year: "",
    });
 
    const [adminValues, setAdminValues] = useState({
       toDelete: "",
+      page: 0,
    });
 
-   const { toDelete } = adminValues;
+   const { toDelete, page } = adminValues;
    const { startDate, endDate, category, year, name, lastname } = filterData;
 
    useEffect(() => {
-      if (loading) loadEnrollments({});
-      if (loadingCategories) loadCategories();
-   }, [loading, loadEnrollments, loadCategories, loadingCategories]);
+      if (loading) loadEnrollments({}, true);
+   }, [loading, loadEnrollments]);
+
+   useEffect(() => {
+      if (loadingCategories) loadCategories(false);
+   }, [loadCategories, loadingCategories]);
 
    const onChange = (e) => {
       e.persist();
@@ -83,7 +85,7 @@ const EnrollmentList = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               loadEnrollments(filterData);
+               loadEnrollments(filterData, true);
             }}
          >
             <DateFilter
@@ -92,37 +94,32 @@ const EnrollmentList = ({
                onChange={onChange}
             />
             <NameFilter name={name} lastname={lastname} onChange={onChange} />
-            {!loadingCategories && (
-               <div className="form-group">
-                  <select
-                     className="form-input"
-                     id="category"
-                     name="category"
-                     onChange={onChange}
-                     value={category}
-                  >
-                     <option value="">* Seleccione Categoría</option>
-                     {categories.length > 0 &&
-                        categories.map(
-                           (category) =>
-                              category.name !== "Inscripción" && (
-                                 <option
-                                    key={category._id}
-                                    value={category._id}
-                                 >
-                                    {category.name}
-                                 </option>
-                              )
-                        )}
-                  </select>
-                  <label
-                     htmlFor="category"
-                     className={`form-label ${category === "" ? "lbl" : ""}`}
-                  >
-                     Categoría
-                  </label>
-               </div>
-            )}
+            <div className="form-group">
+               <select
+                  className="form-input"
+                  id="category"
+                  name="category"
+                  onChange={onChange}
+                  value={category}
+               >
+                  <option value="">* Seleccione Categoría</option>
+                  {!loadingCategories &&
+                     categories.map(
+                        (category) =>
+                           category.name !== "Inscripción" && (
+                              <option key={category._id} value={category._id}>
+                                 {category.name}
+                              </option>
+                           )
+                     )}
+               </select>
+               <label
+                  htmlFor="category"
+                  className={`form-label ${category === "" ? "lbl" : ""}`}
+               >
+                  Categoría
+               </label>
+            </div>
 
             <div className="form-group">
                <select
@@ -132,14 +129,16 @@ const EnrollmentList = ({
                   onChange={onChange}
                   value={year}
                >
-                  <option value={0}>* Seleccione el Año</option>
-                  <option value={thisYear - 1}>{thisYear - 1}</option>
-                  <option value={thisYear}>{thisYear}</option>
-                  <option value={thisYear + 1}>{thisYear + 1}</option>
+                  <option value="">* Seleccione el Año</option>
+                  {yearArray.map((item) => (
+                     <option key={item} value={item}>
+                        {item}
+                     </option>
+                  ))}
                </select>
                <label
                   htmlFor="year"
-                  className={`form-label ${year === 0 ? "lbl" : ""}`}
+                  className={`form-label ${year === "" ? "lbl" : ""}`}
                >
                   Año
                </label>
@@ -166,7 +165,6 @@ const EnrollmentList = ({
                </thead>
                <tbody>
                   {!loading &&
-                     enrollments.length > 0 &&
                      enrollments.map(
                         (enroll, i) =>
                            i >= page * 10 &&
@@ -212,11 +210,11 @@ const EnrollmentList = ({
                                              className="btn btn-danger"
                                              onClick={(e) => {
                                                 e.preventDefault();
-                                                togglePopup();
                                                 setAdminValues((prev) => ({
                                                    ...prev,
                                                    toDelete: enroll._id,
                                                 }));
+                                                togglePopup("default");
                                              }}
                                           >
                                              <FaTrashAlt />
@@ -241,7 +239,9 @@ const EnrollmentList = ({
                items={enrollments}
                type="inscripciones"
                pdfGenerator={() => enrollmentsPDF(enrollments, "enrollments")}
-               changePage={updatePageNumber}
+               changePage={(page) =>
+                  setAdminValues((prev) => ({ ...prev, page }))
+               }
             />
          )}
       </>
@@ -249,7 +249,6 @@ const EnrollmentList = ({
 };
 
 const mapStatetoProps = (state) => ({
-   mixvalues: state.mixvalues,
    enrollments: state.enrollments,
    categories: state.categories,
 });
@@ -262,6 +261,5 @@ export default connect(mapStatetoProps, {
    clearCategories,
    clearProfile,
    enrollmentsPDF,
-   updatePageNumber,
    togglePopup,
 })(EnrollmentList);

@@ -132,7 +132,7 @@ export const loadUsers =
                   err.response
                )
             );
-            window.scrollTo(0, 0);
+            if (!studentSearch) window.scrollTo(0, 0);
          } else error = true;
       }
 

@@ -20,22 +20,26 @@ import {
    CLASSES_CLEARED,
    CLASS_ERROR,
    CLASSES_ERROR,
+   CLASSCATEGORY_UPDATED,
 } from "./types";
 
-export const loadClass = (class_id) => async (dispatch) => {
+export const loadClass = (_id, spinner, user) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
    try {
       let res;
 
-      if (class_id !== "0") res = await api.get(`/class/${class_id}`);
+      if (_id !== "0")
+         res = await api.get(`/class/${user ? "student/" : ""}${_id}`);
 
       dispatch({
          type: CLASS_LOADED,
-         payload: class_id === "0" ? null : res.data,
+         payload: _id === "0" ? null : res.data,
       });
    } catch (err) {
       if (err.response.status !== 401)
          dispatch(setClassesError(CLASS_ERROR, err.response));
    }
+   if (spinner) dispatch(updateLoadingSpinner(false));
 };
 
 export const getActiveClasses = () => async (dispatch) => {
@@ -54,22 +58,8 @@ export const getActiveClasses = () => async (dispatch) => {
    }
 };
 
-export const loadStudentClass = (user_id) => async (dispatch) => {
-   try {
-      const res = await api.get(`/class/student/${user_id}`);
-
-      dispatch({
-         type: CLASS_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      if (err.response.status !== 401)
-         dispatch(setClassesError(CLASS_ERROR, err.response));
-   }
-};
-
-export const loadClasses = (filterData) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
+export const loadClasses = (filterData, spinner) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
    let error = false;
 
    let filter = "";
@@ -97,7 +87,7 @@ export const loadClasses = (filterData) => async (dispatch) => {
       } else error = true;
    }
 
-   if (!error) dispatch(updateLoadingSpinner(false));
+   if (!error && spinner) dispatch(updateLoadingSpinner(false));
 };
 
 export const registerUpdateClass = (formData) => async (dispatch) => {
@@ -114,17 +104,17 @@ export const registerUpdateClass = (formData) => async (dispatch) => {
    try {
       let res;
 
-      if (formData._id === "0") res = await api.post("/class", newClass);
-      else res = await api.put(`/class/${formData._id}`, formData);
+      if (!newClass._id) res = await api.post("/class", newClass);
+      else res = await api.put(`/class/${newClass._id}`, newClass);
 
       dispatch({
-         type: formData._id === "0" ? CLASS_REGISTERED : CLASS_UPDATED,
+         type: !newClass._id ? CLASS_REGISTERED : CLASS_UPDATED,
          payload: res.data,
       });
 
       dispatch(
          setAlert(
-            formData._id === "0" ? "Nueva Clase Creada" : "Clase Modificada",
+            !newClass._id ? "Nueva Clase Creada" : "Clase Modificada",
             "success",
             "2"
          )
@@ -151,7 +141,10 @@ export const registerUpdateClass = (formData) => async (dispatch) => {
 };
 
 export const addStudent = (student, classInfo) => (dispatch) => {
-   let exist = classInfo.students.some((item) => item._id === student._id);
+   let exist = classInfo
+      ? classInfo.students.some((item) => item._id === student._id)
+      : false;
+
    if (!exist) {
       dispatch({
          type: CLASSSTUDENT_ADDED,
@@ -172,6 +165,13 @@ export const removeStudent = (student) => (dispatch) => {
       payload: student._id,
    });
    dispatch(addUserToList(student));
+};
+
+export const updateClassCategory = (category) => (dispatch) => {
+   dispatch({
+      type: CLASSCATEGORY_UPDATED,
+      payload: category,
+   });
 };
 
 export const deleteClass = (class_id) => async (dispatch) => {

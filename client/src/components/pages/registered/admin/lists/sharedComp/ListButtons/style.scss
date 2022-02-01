@@ -1,10 +1,9 @@
 @import "../../../../../../../style/abstract.scss";
 
 .btn-list {
-   margin-bottom: -6.8rem;
-   justify-content: center !important;
+   margin-bottom: -6.8rem !important;
 
    @include respond(phone) {
-      margin-bottom: -5.95rem;
+      margin-bottom: -5.2rem !important;
    }
 }

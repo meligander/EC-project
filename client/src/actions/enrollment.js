@@ -4,13 +4,14 @@ import { saveAs } from "file-saver";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, updatePageNumber } from "./mixvalues";
+import { updateLoadingSpinner } from "./mixvalues";
 import { getTotalDebt } from "./installment";
 
 import {
    ENROLLMENT_LOADED,
    ENROLLMENTS_LOADED,
    YEARENROLLMENTS_LOADED,
+   ESTIMATEDPROFIT_LOADED,
    ENROLLMENT_REGISTERED,
    ENROLLMENT_UPDATED,
    ENROLLMENT_DELETED,
@@ -20,7 +21,8 @@ import {
    ENROLLMENTS_ERROR,
 } from "./types";
 
-export const loadEnrollment = (enrollment_id) => async (dispatch) => {
+export const loadEnrollment = (enrollment_id, spinner) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
    try {
       const res = await api.get(`/enrollment/one/${enrollment_id}`);
       dispatch({
@@ -31,6 +33,7 @@ export const loadEnrollment = (enrollment_id) => async (dispatch) => {
       if (err.response.status !== 401)
          dispatch(setEnrollmentsError(ENROLLMENT_ERROR, err.response));
    }
+   if (spinner) dispatch(updateLoadingSpinner(false));
 };
 
 export const getYearEnrollments = () => async (dispatch) => {
@@ -49,8 +52,24 @@ export const getYearEnrollments = () => async (dispatch) => {
    }
 };
 
-export const loadEnrollments = (filterData) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
+export const getEstimatedProfit = () => async (dispatch) => {
+   try {
+      let res = await api.get("/enrollment/money");
+
+      dispatch({
+         type: ESTIMATEDPROFIT_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      if (err.response.status !== 401) {
+         dispatch(setEnrollmentsError(ENROLLMENTS_ERROR, err.response));
+         window.scroll(0, 0);
+      }
+   }
+};
+
+export const loadEnrollments = (filterData, spinner) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
@@ -77,7 +96,7 @@ export const loadEnrollments = (filterData) => async (dispatch) => {
       } else error = true;
    }
 
-   if (!error) dispatch(updateLoadingSpinner(false));
+   if (!error && spinner) dispatch(updateLoadingSpinner(false));
 };
 
 export const loadStudentsAvAtt = (filterData, type) => async (dispatch) => {
@@ -112,7 +131,7 @@ export const loadStudentsAvAtt = (filterData, type) => async (dispatch) => {
 
    if (!error) dispatch(updateLoadingSpinner(false));
 };
-export const registerEnrollment = (formData) => async (dispatch) => {
+export const registerUpdateEnrollment = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
@@ -125,12 +144,11 @@ export const registerEnrollment = (formData) => async (dispatch) => {
 
    try {
       let res;
-      if (formData._id !== "0") res = await api.post("/enrollment", enrollment);
+      if (formData._id === "") res = await api.post("/enrollment", enrollment);
       else res = await api.put(`/enrollment/${formData._id}`, enrollment);
 
       dispatch({
-         type:
-            formData._id === "0" ? ENROLLMENT_REGISTERED : ENROLLMENT_UPDATED,
+         type: formData._id === "" ? ENROLLMENT_REGISTERED : ENROLLMENT_UPDATED,
          payload: res.data,
       });
 
@@ -138,7 +156,7 @@ export const registerEnrollment = (formData) => async (dispatch) => {
          setAlert(
             `Inscripción ${formData._id === "0" ? "Registrada" : "Modificada"}`,
             "success",
-            formData._id === "0" ? "1" : "2",
+            formData._id === "" ? "1" : "2",
             7000
          )
       );
@@ -247,7 +265,6 @@ export const clearEnrollment = () => (dispatch) => {
 
 export const clearEnrollments = () => (dispatch) => {
    dispatch({ type: ENROLLMENTS_CLEARED });
-   dispatch(updatePageNumber(0));
 };
 
 const setEnrollmentsError = (type, response) => (dispatch) => {

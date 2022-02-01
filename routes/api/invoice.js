@@ -17,125 +17,63 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    try {
       let invoices = [];
 
+      const { startDate, endDate, name, lastname } = req.query;
+
       if (Object.entries(req.query).length === 0) {
          invoices = await Invoice.find()
             .populate({
-               path: "user._id",
+               path: "user.user_id",
                model: "user",
                select: ["name", "lastname"],
             })
             .sort({ date: -1 });
       } else {
-         const filter = req.query;
-
-         const filterDate = (filter.startDate || filter.endDate) && {
-            date: {
-               ...(filter.startDate && {
-                  $gte: new Date(filter.startDate).setHours(00, 00, 00),
-               }),
-               ...(filter.endDate && {
-                  $lte: new Date(filter.endDate).setHours(23, 59, 59),
-               }),
-            },
-         };
-
-         const invoicesName = await Invoice.find({
-            ...filterDate,
-            ...(filter.name && {
-               name: { $regex: `.*${filter.name}.*`, $options: "i" },
-            }),
-            ...(filter.lastname && {
-               lastname: {
-                  $regex: `.*${filter.lastname}.*`,
-                  $options: "i",
+         invoices = await Invoice.find({
+            ...((startDate || endDate) && {
+               date: {
+                  ...(startDate && {
+                     $gte: new Date(startDate).setHours(00, 00, 00),
+                  }),
+                  ...(endDate && {
+                     $lte: new Date(endDate).setHours(23, 59, 59),
+                  }),
                },
             }),
          })
             .populate({
-               path: "user",
+               path: "user.user_id",
                model: "user",
                select: ["name", "lastname"],
             })
-            .sort({ date: -1 });
-
-         if (filter.name || filter.lastname) {
-            const invoicesNameDetails = await Invoice.find(filterDate)
-               .populate({
-                  path: "user._id",
+            .populate({
+               path: "details.installment",
+               model: "installment",
+               populate: {
+                  path: "student",
                   model: "user",
                   select: ["name", "lastname"],
-               })
-               .populate({
-                  path: "details.installment",
-                  model: "installment",
-                  populate: {
-                     path: "student",
-                     model: "user",
-                     select: ["name", "lastname"],
+                  ...((name || lastname) && {
                      match: {
-                        ...(filter.name && {
-                           name: {
-                              $regex: `.*${filter.name}.*`,
-                              $options: "i",
-                           },
+                        ...(name && {
+                           name: { $regex: `.*${name}.*`, $options: "i" },
                         }),
-                        ...(filter.lastname && {
+                        ...(lastname && {
                            lastname: {
-                              $regex: `.*${filter.lastname}.*`,
+                              $regex: `.*${lastname}.*`,
                               $options: "i",
                            },
                         }),
-                     },
-                  },
-               });
-
-            const invoicesUserNames = await Invoice.find(filterDate).populate({
-               path: "user",
-               model: "user",
-               select: ["name", "lastname"],
-               match: {
-                  ...(filter.name && {
-                     name: { $regex: `.*${filter.name}.*`, $options: "i" },
-                  }),
-                  ...(filter.lastname && {
-                     lastname: {
-                        $regex: `.*${filter.lastname}.*`,
-                        $options: "i",
                      },
                   }),
                },
-            });
+            })
+            .sort({ date: -1 });
 
-            for (let x = 0; x < invoicesUserNames.length; x++) {
-               if (invoicesUserNames[x].user) {
-                  invoices.push(invoicesUserNames[x]);
-               }
-            }
-            for (let x = 0; x < invoicesNameDetails.length; x++) {
-               for (let y = 0; y < invoicesNameDetails[x].details.length; y++) {
-                  if (invoicesNameDetails[x].details[y].installment) {
-                     if (
-                        invoicesNameDetails[x].details[y].installment.student
-                     ) {
-                        invoices.push(invoicesNameDetails[x]);
-                        break;
-                     }
-                  }
-               }
-            }
-            invoices = invoices
-               .concat(invoicesName)
-               .unique()
-               .sort((a, b) => {
-                  if (a.date > b.date) return -1;
-                  if (a.date < b.date) return 1;
-                  return 0;
-               });
-
-            invoices = invoices;
-         } else {
-            invoices = invoicesName;
-         }
+         invoices = invoices.filter((item) =>
+            item.details.some(
+               (detail) => detail.installment && detail.installment.student
+            )
+         );
       }
 
       if (invoices.length === 0) {
@@ -156,12 +94,60 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 //@access   Private && Admin
 router.get("/:id", [auth, adminAuth], async (req, res) => {
    try {
-      let invoice = await Invoice.findOne({ _id: req.params.id })
-         .populate({
-            path: "user._id",
-            model: "user",
-            select: ["name", "lastname", "cel", "email"],
-         })
+      // const invoices = await Invoice.find();
+
+      // for (let x = 0; x < invoices.length; x++) {
+      //    if (invoices[x].lastname || invoices[x].name) {
+      //       console.log("error lastname");
+      //       await Invoice.findOneAndUpdate(
+      //          { _id: invoices[x]._id },
+      //          {
+      //             $set: {
+      //                user: {
+      //                   ...(invoices[x].lastname && {
+      //                      lastname: invoices[x].lastname,
+      //                   }),
+      //                   ...(invoices[x].name && { name: invoices[x].name }),
+      //                   ...(invoices[x].email && { email: invoices[x].email }),
+      //                },
+      //                ...(invoices[x].lastname && { lastname: undefined }),
+      //                ...(invoices[x].name && { name: undefined }),
+      //                ...(invoices[x].email && { email: undefined }),
+      //             },
+      //          }
+      //       );
+      //    } else {
+      //       if (
+      //          invoices[x].user.user_id === undefined &&
+      //          invoices[x].user.toString() !== "{}"
+      //       ) {
+      //          await Invoice.findOneAndUpdate(
+      //             { _id: invoices[x]._id },
+      //             {
+      //                $set: {
+      //                   user: {
+      //                      user_id: invoices[x].user.toString(),
+      //                   },
+      //                },
+      //             }
+      //          );
+      //       }
+      //       if (invoices[x].user.toString() === "{}")
+      //          await Invoice.findOneAndUpdate(
+      //             { _id: invoices[x]._id },
+      //             {
+      //                $set: {
+      //                   user: {
+      //                      name: "varios",
+      //                      lastname: "varios",
+      //                   },
+      //                },
+      //             }
+      //          );
+      //    }
+      // }
+
+      const invoice = await Invoice.findOne({ _id: req.params.id })
          .populate({
             path: "details.installment",
             model: "installment",
@@ -170,6 +156,11 @@ router.get("/:id", [auth, adminAuth], async (req, res) => {
                model: "user",
                select: ["name", "lastname"],
             },
+         })
+         .populate({
+            path: "user.user_id",
+            model: "user",
+            select: ["name", "lastname", "email", "cel"],
          });
 
       if (!invoice)
@@ -236,7 +227,7 @@ router.post(
 
       if (_id === "" && name === "" && lastname === "")
          return res.status(400).json({
-            msg: "Debe ingresar al usuario que paga la factura",
+            msg: "Debe ingresar el usuario que paga la factura",
          });
 
       try {
@@ -287,12 +278,11 @@ router.post(
             invoiceid,
             user: {
                ...(_id !== ""
-                  ? { _id }
+                  ? { user_id: _id }
                   : {
-                       _id: null,
-                       name,
-                       lastname,
-                       email,
+                       ...(name !== "" && { name }),
+                       ...(lastname !== "" && { lastname }),
+                       ...(email !== "" && { email }),
                     }),
             },
             total,
@@ -314,7 +304,7 @@ router.post(
          invoice = await Invoice.find()
             .sort({ $natural: -1 })
             .populate({
-               path: "user._id",
+               path: "user.user_id",
                model: "user",
                select: ["name", "lastname", "email"],
             })

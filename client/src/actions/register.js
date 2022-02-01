@@ -4,7 +4,7 @@ import { saveAs } from "file-saver";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, updatePageNumber } from "./mixvalues";
+import { updateLoadingSpinner } from "./mixvalues";
 
 import {
    REGISTER_LOADED,
@@ -14,10 +14,11 @@ import {
    REGISTERS_CLEARED,
    REGISTER_ERROR,
    REGISTERS_ERROR,
+   REGISTER_CLEARED,
 } from "./types";
 
-export const loadRegister = () => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
+export const loadRegister = (spinner) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
@@ -32,43 +33,44 @@ export const loadRegister = () => async (dispatch) => {
       else error = true;
    }
 
-   if (!error) dispatch(updateLoadingSpinner(false));
+   if (!error && spinner) dispatch(updateLoadingSpinner(false));
 };
 
-export const loadRegisters = (filterData, byMonth) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-   let error = false;
+export const loadRegisters =
+   (filterData, spinner, byMonth) => async (dispatch) => {
+      if (spinner) dispatch(updateLoadingSpinner(true));
+      let error = false;
 
-   let filter = "";
-   if (!byMonth) {
-      const filternames = Object.keys(filterData);
-      for (let x = 0; x < filternames.length; x++) {
-         const name = filternames[x];
-         if (filterData[name] !== "") {
-            if (filter !== "") filter = filter + "&";
-            filter = filter + filternames[x] + "=" + filterData[name];
+      let filter = "";
+      if (!byMonth) {
+         const filternames = Object.keys(filterData);
+         for (let x = 0; x < filternames.length; x++) {
+            const name = filternames[x];
+            if (filterData[name] !== "") {
+               if (filter !== "") filter = filter + "&";
+               filter = filter + filternames[x] + "=" + filterData[name];
+            }
          }
       }
-   }
 
-   try {
-      const res = await api.get(
-         byMonth ? "/register/year/bymonth" : `/register?${filter}`
-      );
-      dispatch({
-         type: REGISTERS_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      if (err.response.status !== 401) {
-         dispatch(setRegistersError(REGISTERS_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         window.scrollTo(0, 0);
-      } else error = true;
-   }
+      try {
+         const res = await api.get(
+            byMonth ? "/register/year/bymonth" : `/register?${filter}`
+         );
+         dispatch({
+            type: REGISTERS_LOADED,
+            payload: res.data,
+         });
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setRegistersError(REGISTERS_ERROR, err.response));
+            dispatch(setAlert(err.response.data.msg, "danger", "2"));
+            window.scrollTo(0, 0);
+         } else error = true;
+      }
 
-   if (!error) dispatch(updateLoadingSpinner(false));
-};
+      if (!error && spinner) dispatch(updateLoadingSpinner(false));
+   };
 
 export const createRegister = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
@@ -202,9 +204,12 @@ export const registerPDF = (registers) => async (dispatch) => {
    }
 };
 
+export const clearRegister = () => (dispatch) => {
+   dispatch({ type: REGISTER_CLEARED });
+};
+
 export const clearRegisters = () => (dispatch) => {
    dispatch({ type: REGISTERS_CLEARED });
-   dispatch(updatePageNumber(0));
 };
 
 const setRegistersError = (type, response) => (dispatch) => {

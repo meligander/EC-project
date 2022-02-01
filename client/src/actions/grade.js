@@ -21,6 +21,7 @@ import {
 } from "./types";
 
 export const loadGrades = (class_id, user_id) => async (dispatch) => {
+   if (!user_id) dispatch(updateLoadingSpinner(true));
    try {
       const res = await api.get(
          `/grade/${user_id ? "student/" : ""}${class_id}${
@@ -37,9 +38,11 @@ export const loadGrades = (class_id, user_id) => async (dispatch) => {
          dispatch(setGradesError(GRADES_ERROR, err.response));
       }
    }
+   if (!user_id) dispatch(updateLoadingSpinner(false));
 };
 
-export const loadGradeTypes = (category_id) => async (dispatch) => {
+export const loadGradeTypes = (category_id, spinner) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
    try {
       const res = await api.get(
          `/grade-type${category_id ? `/category/${category_id}` : ""}`
@@ -52,6 +55,7 @@ export const loadGradeTypes = (category_id) => async (dispatch) => {
       if (err.response.status !== 401)
          dispatch(setGradesError(GRADETYPE_ERROR, err.response));
    }
+   if (spinner) dispatch(updateLoadingSpinner(false));
 };
 
 export const registerNewGrade = (formData) => async (dispatch) => {

@@ -6,7 +6,7 @@ const InvoiceSchema = new mongoose.Schema({
       required: true,
    },
    user: {
-      _id: {
+      user_id: {
          type: mongoose.Schema.Types.ObjectId,
          ref: "user",
       },
@@ -19,6 +19,16 @@ const InvoiceSchema = new mongoose.Schema({
       email: {
          type: String,
       },
+   },
+   //Borrar despues de modificar la base de datos
+   name: {
+      type: String,
+   },
+   lastname: {
+      type: String,
+   },
+   email: {
+      type: String,
    },
    date: {
       type: Date,

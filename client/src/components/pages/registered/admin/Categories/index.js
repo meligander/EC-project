@@ -113,7 +113,7 @@ const Categories = ({
                type="button"
                onClick={(e) => {
                   e.preventDefault();
-                  togglePopup();
+                  togglePopup("default");
                }}
                className="btn btn-primary"
             >

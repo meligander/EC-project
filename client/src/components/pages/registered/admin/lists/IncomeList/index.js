@@ -12,11 +12,7 @@ import {
    invoicesPDF,
 } from "../../../../../../actions/invoice";
 import { loadRegister } from "../../../../../../actions/register";
-import {
-   updatePageNumber,
-   formatNumber,
-   togglePopup,
-} from "../../../../../../actions/mixvalues";
+import { formatNumber, togglePopup } from "../../../../../../actions/mixvalues";
 
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
@@ -28,12 +24,10 @@ import "./style.scss";
 const IncomeList = ({
    auth: { userLogged },
    invoices: { loading, invoices },
-   registers: { register, loading: loadingRegister },
-   mixvalues: { page },
+   registers: { register, loadingRegister },
    loadInvoices,
    loadRegister,
    clearInvoice,
-   updatePageNumber,
    invoicesPDF,
    deleteInvoice,
    togglePopup,
@@ -50,15 +44,19 @@ const IncomeList = ({
 
    const [adminValues, setAdminValues] = useState({
       toDelete: "",
+      page: 0,
    });
 
    const { startDate, endDate, name, lastname } = filterData;
-   const { toDelete } = adminValues;
+   const { toDelete, page } = adminValues;
 
    useEffect(() => {
-      if (loading) loadInvoices({});
-      if (loadingRegister) loadRegister();
-   }, [loading, loadInvoices, loadRegister, loadingRegister]);
+      if (loading) loadInvoices({}, true);
+   }, [loading, loadInvoices]);
+
+   useEffect(() => {
+      if (loadingRegister) loadRegister(false);
+   }, [loadRegister, loadingRegister]);
 
    const onChange = (e) => {
       e.persist();
@@ -68,24 +66,15 @@ const IncomeList = ({
       });
    };
 
-   const setName = (invoice) => {
-      let name = "";
-      switch (invoice.user) {
-         case null:
-            name = "Usuario Eliminado";
-            break;
-         case undefined:
-            if (invoice.lastname) {
-               name = invoice.lastname + ", " + invoice.name;
-            } else {
-               name = "Usuario no definido";
-            }
-            break;
-         default:
-            name = invoice.user.lastname + ", " + invoice.user.name;
-            break;
-      }
-      return name;
+   const setName = (user) => {
+      if (user.user_id === null) return "Usuario Eliminado";
+
+      const lastname = user.user_id ? user.user_id.lastname : user.lastname;
+      const name = user.user_id ? user.user_id.name : user.name;
+
+      return `${lastname ? `${lastname}${name ? ", " : ""}` : ""}${
+         name ? name : ""
+      }`;
    };
 
    return (
@@ -99,7 +88,8 @@ const IncomeList = ({
             className="form bigger"
             onSubmit={(e) => {
                e.preventDefault();
-               loadInvoices(filterData);
+               console.log(filterData);
+               loadInvoices(filterData, true);
             }}
          >
             <DateFilter
@@ -111,8 +101,8 @@ const IncomeList = ({
                name={name}
                lastname={lastname}
                onChange={onChange}
-               lastnamePlaceholder="Apellido alumno o tutor"
-               namePlaceholder="Nombre alumno o tutor"
+               lastnamePlaceholder="Apellido alumno"
+               namePlaceholder="Nombre alumno"
             />
 
             <div className="btn-right mb-3">
@@ -123,7 +113,7 @@ const IncomeList = ({
             </div>
          </form>
 
-         {!loading && !loadingRegister && invoices.length > 0 && (
+         {!loadingRegister && !loading && invoices[0] && (
             <div className="wrapper">
                <table className="end-btn">
                   <thead>
@@ -149,7 +139,7 @@ const IncomeList = ({
                                     {format(new Date(invoice.date), "dd/MM/yy")}
                                  </td>
                                  <td>{invoice.invoiceid}</td>
-                                 <td>{setName(invoice)}</td>
+                                 <td>{setName(invoice.user)}</td>
                                  <td>${formatNumber(invoice.total)}</td>
                                  <td>
                                     <Link
@@ -170,13 +160,11 @@ const IncomeList = ({
                                        <td>
                                           {invoice.register &&
                                              invoice.register ===
-                                                register._id &&
-                                             register.temporary && (
+                                                register._id && (
                                                 <button
                                                    type="button"
                                                    onClick={(e) => {
                                                       e.preventDefault();
-                                                      togglePopup();
                                                       setAdminValues(
                                                          (prev) => ({
                                                             ...prev,
@@ -184,6 +172,7 @@ const IncomeList = ({
                                                                invoice._id,
                                                          })
                                                       );
+                                                      togglePopup("default");
                                                    }}
                                                    className="btn btn-danger"
                                                 >
@@ -204,7 +193,9 @@ const IncomeList = ({
                page={page}
                type="ingresos"
                items={invoices}
-               changePage={updatePageNumber}
+               changePage={(page) =>
+                  setAdminValues((prev) => ({ ...prev, page }))
+               }
                pdfGenerator={() => invoicesPDF(invoices, "list")}
             />
          )}
@@ -215,13 +206,11 @@ const IncomeList = ({
 const mapStatetoProps = (state) => ({
    auth: state.auth,
    invoices: state.invoices,
-   mixvalues: state.mixvalues,
    registers: state.registers,
 });
 
 export default connect(mapStatetoProps, {
    loadInvoices,
-   updatePageNumber,
    deleteInvoice,
    invoicesPDF,
    clearInvoice,

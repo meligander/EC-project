@@ -48,11 +48,12 @@ const Classes = ({
    }, [loadUsers, userLogged, loadingUsers]);
 
    useEffect(() => {
-      if (userLogged.type !== "teacher" && loadingCategories) loadCategories();
+      if (userLogged.type !== "teacher" && loadingCategories)
+         loadCategories(false);
    }, [userLogged, loadingCategories, loadCategories]);
 
    useEffect(() => {
-      if (loading) loadClasses({ year });
+      if (loading) loadClasses({ year }, true);
    }, [loading, loadClasses, year]);
 
    const onChange = (e) => {

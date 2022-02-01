@@ -46,6 +46,7 @@ const InvoiceTab = ({
       registeredUser: false,
       toggleSearch: false,
       toDelete: "",
+      installmentTotal: 0,
    });
 
    const [formData, setFormData] = useState({
@@ -55,34 +56,27 @@ const InvoiceTab = ({
          name: "",
          email: "",
       },
-      invoiceid: "",
+      invoiceid: invoiceNumber,
       total: 0,
       details: [],
-      paid: 0,
    });
 
-   const installment = [
-      "Insc",
-      "",
-      "",
-      "Mar",
-      "Abr",
-      "May",
-      "Jun",
-      "Jul",
-      "Agto",
-      "Sept",
-      "Oct",
-      "Nov",
-      "Dic",
-   ];
+   const installment = "Insc,,,Mar,Abr,May,Jun,Jul,Agto,Sept,Oct,Nov,Dic".split(
+      ","
+   );
 
-   const { invoiceid, details, total, paid, user } = formData;
+   const { invoiceid, details, total, user } = formData;
 
    const { _id, email, name, lastname } = user;
 
-   const { day, selectedUser, registeredUser, toggleSearch, toDelete } =
-      adminValues;
+   const {
+      day,
+      selectedUser,
+      installmentTotal,
+      registeredUser,
+      toggleSearch,
+      toDelete,
+   } = adminValues;
 
    useEffect(() => {
       if (invoice) {
@@ -91,18 +85,24 @@ const InvoiceTab = ({
             setFormData((prev) => ({
                ...prev,
                details: [...prev.details, newItem],
-               total: prev.total + newItem.value,
+            }));
+            setAdminValues((prev) => ({
+               ...prev,
+               installmentTotal: prev.installmentTotal + newItem.value,
             }));
          } else if (invoice.details.length < details.length) {
             setFormData((prev) => ({
                ...prev,
-               paid: prev.paid - toDelete.payment,
-               total: prev.total - toDelete.value,
+               total: prev.total - toDelete.payment,
                details: prev.details.filter(
                   (detail) => detail.installment !== toDelete.installment
                ),
             }));
-            setAdminValues((prev) => ({ ...prev, toDelete: "" }));
+            setAdminValues((prev) => ({
+               ...prev,
+               toDelete: "",
+               installmentTotal: prev.installmentTotal - toDelete.value,
+            }));
          }
       }
    }, [invoice, invoiceid, details.length, toDelete]);
@@ -148,7 +148,7 @@ const InvoiceTab = ({
          setFormData((prev) => ({
             ...prev,
             details: newDetails,
-            paid: newDetails.reduce(
+            total: newDetails.reduce(
                (accum, item) => accum + Number(item.payment),
                0
             ),
@@ -164,9 +164,7 @@ const InvoiceTab = ({
    const confirm = () => {
       registerInvoice({
          ...formData,
-         invoiceid: invoiceNumber,
-         remaining: total - paid,
-         total: paid,
+         remaining: installmentTotal - total,
       });
    };
 
@@ -180,7 +178,7 @@ const InvoiceTab = ({
             className="form bigger"
             onSubmit={(e) => {
                e.preventDefault();
-               togglePopup();
+               togglePopup("default");
             }}
          >
             <div className="form-group mb-2">
@@ -415,14 +413,14 @@ const InvoiceTab = ({
                   <label htmlFor="remaining">Saldo</label>
                   <input
                      type="number"
-                     value={total - paid}
+                     value={installmentTotal - total}
                      disabled
                      name="remaining"
                   />
                </div>
                <div className="invoice-detail">
                   <label htmlFor="total">Total a Pagar</label>
-                  <input type="number" name="total" value={paid} disabled />
+                  <input type="number" name="total" value={total} disabled />
                </div>
                <div className="btn-center">
                   <button type="submit" className="btn btn-primary">

@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
 
 import { clearProfile } from "../../../../../../actions/user";
 
@@ -60,12 +59,6 @@ const RelativeDashboard = ({
          )}
       </div>
    );
-};
-
-RelativeDashboard.propTypes = {
-   users: PropTypes.object.isRequired,
-   auth: PropTypes.object.isRequired,
-   clearProfile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({

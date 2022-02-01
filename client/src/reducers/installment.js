@@ -9,8 +9,6 @@ import {
    INSTALLMENT_CLEARED,
    INSTALLMENTS_CLEARED,
    INSTALLMENTS_ERROR,
-   ESTIMATEDPROFIT_LOADED,
-   MONTHLYDEBT_LOADED,
    INSTALLMENT_ERROR,
 } from "../actions/types";
 
@@ -21,8 +19,6 @@ const initialState = {
    installment: null,
    otherValues: {
       totalDebt: "",
-      estimatedProfit: "",
-      monthlyDebt: "",
    },
    error: {},
 };
@@ -50,22 +46,6 @@ export default function (state = initialState, action) {
             otherValues: {
                ...state.otherValues,
                totalDebt: payload,
-            },
-         };
-      case ESTIMATEDPROFIT_LOADED:
-         return {
-            ...state,
-            otherValues: {
-               ...state.otherValues,
-               estimatedProfit: payload,
-            },
-         };
-      case MONTHLYDEBT_LOADED:
-         return {
-            ...state,
-            otherValues: {
-               ...state.otherValues,
-               monthlyDebt: payload,
             },
          };
       case INSTALLMENT_UPDATED:

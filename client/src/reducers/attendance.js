@@ -5,6 +5,7 @@ import {
    DATE_DELETED,
    ATTENDANCES_CLEARED,
    ATTENDANCES_ERROR,
+   DATE_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -34,6 +35,11 @@ export default function (state = initialState, action) {
             ...state,
             loading: false,
             attendances: null,
+            error: payload,
+         };
+      case DATE_ERROR:
+         return {
+            ...state,
             error: payload,
          };
       default:

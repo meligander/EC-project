@@ -15,9 +15,12 @@ const EditNeigTowns = ({
    loadTowns,
 }) => {
    useEffect(() => {
-      if (loadingTowns) loadTowns();
-      if (loading) loadNeighbourhoods();
-   }, [loadNeighbourhoods, loadTowns, loadingTowns, loading]);
+      if (loading) loadNeighbourhoods(null, false);
+   }, [loadNeighbourhoods, loading]);
+
+   useEffect(() => {
+      if (loadingTowns) loadTowns(true);
+   }, [loadingTowns, loadTowns]);
 
    return (
       <>
