@@ -17,7 +17,7 @@ import { clearSearch, clearProfile } from "../../../../../actions/user";
 import { setAlert } from "../../../../../actions/alert";
 import { togglePopup } from "../../../../../actions/mixvalues";
 
-import StudentSearch from "../../sharedComp/search/StudentSearch";
+import UserSearch from "../../sharedComp/search/UserSearch";
 import PopUp from "../../../../modal/PopUp";
 
 const Enrollment = ({
@@ -129,7 +129,7 @@ const Enrollment = ({
                      thisYear === Number(year) && currentMonth > 2 ? month : 0,
                })
             }
-            text={`¿Está seguro que ${
+            info={`¿Está seguro que ${
                _id !== ""
                   ? "desea modificar la inscripción"
                   : "los datos son correctos"
@@ -158,7 +158,7 @@ const Enrollment = ({
             }}
          >
             {_id === "" && !hideSearch && (
-               <StudentSearch
+               <UserSearch
                   selectStudent={(user) =>
                      setAdminValues({
                         ...adminValues,

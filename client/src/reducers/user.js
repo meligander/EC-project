@@ -47,7 +47,11 @@ export default function (state = initialState, action) {
          return {
             ...state,
             loading: false,
-            users: payload,
+            users: payload.users,
+            otherValues: {
+               ...state.otherValues,
+               userSearchType: payload.type,
+            },
             error: {},
          };
       case USERSBK_LOADED:

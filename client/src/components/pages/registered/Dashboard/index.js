@@ -101,7 +101,7 @@ const Dashboard = ({
             <>
                <PopUp
                   confirm={() => deleteUser(user)}
-                  text="¿Está seguro que desea eliminar el usuario?"
+                  info="¿Está seguro que desea eliminar el usuario?"
                />
                <Alert type="1" />
                <div className="mt-1">

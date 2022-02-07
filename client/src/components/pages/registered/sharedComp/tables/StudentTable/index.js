@@ -20,7 +20,7 @@ const StudentTable = ({
                   {type !== "class-students" ? "Edad" : "Fecha Nac."}
                </th>
                {type !== "add-child" && type !== "chosen-child" && (
-                  <th className="hide-sm">Celular</th>
+                  <th className="hide-sm">DNI</th>
                )}
                {type === "search" && <th>Categoría</th>}
                {(type === "add-child" || type === "chosen-child") && (
@@ -60,9 +60,9 @@ const StudentTable = ({
                                    "dd/MM/yy"
                                 )}
                         </td>
-                        {type !== "add-child" && type !== "chosen-child" && (
-                           <td className="hide-sm">{user.cel}</td>
-                        )}
+                        {type !== "add-child" &&
+                           type !== "chosen-child" &&
+                           user.dni && <td className="hide-sm">{user.dni}</td>}
                         {type === "search" && <td>{user.category}</td>}
                         {(type === "add-child" || type === "chosen-child") && (
                            <td>

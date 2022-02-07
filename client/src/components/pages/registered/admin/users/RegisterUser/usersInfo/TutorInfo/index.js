@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import StudentSearch from "../../../../../sharedComp/search/StudentSearch";
+import UserSearch from "../../../../../sharedComp/search/UserSearch";
 import StudentTable from "../../../../../sharedComp/tables/StudentTable";
 
 const TutorInfo = ({ setChildren, children, clearProfile, isAdmin }) => {
@@ -9,7 +9,7 @@ const TutorInfo = ({ setChildren, children, clearProfile, isAdmin }) => {
    return (
       <div className="my-4">
          {isAdmin && (
-            <StudentSearch
+            <UserSearch
                actionForSelected={() => {
                   setSelectedStudent({});
                   setChildren(selectedStudent, true);

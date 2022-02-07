@@ -11,7 +11,7 @@ import NameField from "../../NameField";
 
 import "./style.scss";
 
-const StudentSearch = ({
+const UserSearch = ({
    users: { users, loading },
    loadUsers,
    actionForSelected,
@@ -20,6 +20,8 @@ const StudentSearch = ({
    typeSearch,
    block,
 }) => {
+   const instStudent = typeSearch === "installment" || typeSearch === "student";
+
    const [filterForm, setFilterForm] = useState({
       name: "",
       lastname: "",
@@ -33,21 +35,6 @@ const StudentSearch = ({
          ...prev,
          [e.target.name]: e.target.value,
       }));
-   };
-   const searchStudents = () => {
-      loadUsers(
-         {
-            ...filterForm,
-            active: true,
-            type:
-               typeSearch === "guardian/student"
-                  ? "guardian/student"
-                  : "student",
-         },
-         true,
-         true,
-         true
-      );
    };
 
    return (
@@ -74,7 +61,19 @@ const StudentSearch = ({
                   disabled={typeSearch === "installment" && block}
                   onClick={(e) => {
                      e.preventDefault();
-                     searchStudents();
+                     loadUsers(
+                        {
+                           ...filterForm,
+                           active: true,
+                           type:
+                              typeSearch === "guardian/student"
+                                 ? "guardian/student"
+                                 : "student",
+                        },
+                        true,
+                        true,
+                        true
+                     );
                   }}
                >
                   <BiFilterAlt />
@@ -84,18 +83,15 @@ const StudentSearch = ({
             <table className="search">
                <thead>
                   <tr>
-                     {(typeSearch === "installment" ||
-                        typeSearch === "student") && <th>Legajo</th>}
+                     {instStudent && <th>Legajo</th>}
                      <th>Nombre</th>
                      {typeSearch === "guardian/student" && <th>Tipo</th>}
-                     {(typeSearch === "installment" ||
-                        typeSearch === "student") && <th>Categoría</th>}
+                     {instStudent && <th>Categoría</th>}
                      {typeSearch === "enrollment" && <th>Edad</th>}
                   </tr>
                </thead>
                <tbody>
                   {!loading &&
-                     users.length > 0 &&
                      users.map((user) => (
                         <tr
                            key={user._id}
@@ -107,18 +103,14 @@ const StudentSearch = ({
                                  : ""
                            }
                         >
-                           {(typeSearch === "installment" ||
-                              typeSearch === "student") && (
-                              <td>{user.studentnumber}</td>
-                           )}
+                           {instStudent && <td>{user.studentnumber}</td>}
                            <td>{user.lastname + ", " + user.name}</td>
                            {typeSearch === "guardian/student" && (
                               <td>
                                  {user.type === "student" ? "Alumno" : "Tutor"}
                               </td>
                            )}
-                           {(typeSearch === "installment" ||
-                              typeSearch === "student") && (
+                           {instStudent && (
                               <td>{user.category && user.category}</td>
                            )}
                            {typeSearch === "enrollment" && (
@@ -171,4 +163,4 @@ const mapStateToProps = (state) => ({
    users: state.users,
 });
 
-export default connect(mapStateToProps, { loadUsers })(StudentSearch);
+export default connect(mapStateToProps, { loadUsers })(UserSearch);

@@ -60,7 +60,7 @@ const RegisterList = ({
       <>
          <PopUp
             confirm={() => deleteRegister(registers[0]._id)}
-            text="¿Está seguro que desea eliminar el cierre de caja?"
+            info="¿Está seguro que desea eliminar el cierre de caja?"
          />
          <h2>Caja Diaria</h2>
          {isAdmin && (

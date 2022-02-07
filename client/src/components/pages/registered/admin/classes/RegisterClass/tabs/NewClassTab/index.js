@@ -121,7 +121,7 @@ const NewClassTab = ({
                   students: classInfo.students,
                })
             }
-            text="¿Está seguro que los datos son correctos?"
+            info="¿Está seguro que los datos son correctos?"
          />
          <form
             className="form"

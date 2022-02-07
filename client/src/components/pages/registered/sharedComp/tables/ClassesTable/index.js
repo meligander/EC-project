@@ -26,73 +26,72 @@ const ClassesTable = ({
                </tr>
             </thead>
             <tbody>
-               {classes.length > 0 &&
-                  classes.map((classItem) => {
-                     return (
-                        <tr key={classItem._id}>
-                           {all && (
-                              <td>
-                                 <Link
-                                    to={`/index/dashboard/${classItem.teacher._id}`}
-                                    className="btn-text"
-                                    onClick={() => {
-                                       clearProfile();
-                                       clearClasses();
-                                       window.scroll(0, 0);
-                                    }}
-                                 >
-                                    {classItem.teacher.lastname +
-                                       ", " +
-                                       classItem.teacher.name}
-                                 </Link>
-                              </td>
-                           )}
-                           <td>{classItem.category.name}</td>
-                           <td>{classItem.day1}</td>
-                           <td>
-                              {classItem.hourin1 &&
-                                 format(
-                                    new Date(classItem.hourin1.slice(0, -1)),
-                                    "HH:mm"
-                                 )}
-                           </td>
-                           <td>
-                              {classItem.hourout1 &&
-                                 format(
-                                    new Date(classItem.hourout1.slice(0, -1)),
-                                    "HH:mm"
-                                 )}
-                           </td>
-                           <td>{classItem.day2}</td>
-                           <td>
-                              {classItem.hourin2 &&
-                                 format(
-                                    new Date(classItem.hourin2.slice(0, -1)),
-                                    "HH:mm"
-                                 )}
-                           </td>
-                           <td>
-                              {classItem.hourout2 &&
-                                 format(
-                                    new Date(classItem.hourout2.slice(0, -1)),
-                                    "HH:mm"
-                                 )}
-                           </td>
+               {classes.map((classItem) => {
+                  return (
+                     <tr key={classItem._id}>
+                        {all && (
                            <td>
                               <Link
+                                 to={`/index/dashboard/${classItem.teacher._id}`}
+                                 className="btn-text"
                                  onClick={() => {
-                                    clearClass();
+                                    clearProfile();
+                                    clearClasses();
                                     window.scroll(0, 0);
                                  }}
-                                 to={`/class/single/${classItem._id}`}
-                                 className="btn-text"
                               >
-                                 Ver &rarr;
+                                 {classItem.teacher.lastname +
+                                    ", " +
+                                    classItem.teacher.name}
                               </Link>
                            </td>
-                        </tr>
-                     );
-                  })}
+                        )}
+                        <td>{classItem.category.name}</td>
+                        <td>{classItem.day1}</td>
+                        <td>
+                           {classItem.hourin1 &&
+                              format(
+                                 new Date(classItem.hourin1.slice(0, -1)),
+                                 "HH:mm"
+                              )}
+                        </td>
+                        <td>
+                           {classItem.hourout1 &&
+                              format(
+                                 new Date(classItem.hourout1.slice(0, -1)),
+                                 "HH:mm"
+                              )}
+                        </td>
+                        <td>{classItem.day2}</td>
+                        <td>
+                           {classItem.hourin2 &&
+                              format(
+                                 new Date(classItem.hourin2.slice(0, -1)),
+                                 "HH:mm"
+                              )}
+                        </td>
+                        <td>
+                           {classItem.hourout2 &&
+                              format(
+                                 new Date(classItem.hourout2.slice(0, -1)),
+                                 "HH:mm"
+                              )}
+                        </td>
+                        <td>
+                           <Link
+                              onClick={() => {
+                                 clearClass();
+                                 window.scroll(0, 0);
+                              }}
+                              to={`/class/single/${classItem._id}`}
+                              className="btn-text"
+                           >
+                              Ver &rarr;
+                           </Link>
+                        </td>
+                     </tr>
+                  );
+               })}
             </tbody>
          </table>
          {classes.length === 0 && (

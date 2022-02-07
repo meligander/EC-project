@@ -55,7 +55,7 @@ const RegisterTab = ({
       <div className="register register-tab">
          <PopUp
             confirm={confirm}
-            text="¿Está seguro que desea cerrar la caja?"
+            info="¿Está seguro que desea cerrar la caja?"
          />
          <form
             className="form"

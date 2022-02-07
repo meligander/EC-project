@@ -20,6 +20,7 @@ router.get("/:class_id", auth, async (req, res) => {
             path: "student",
             model: "user",
             select: ["name", "lastname"],
+            options: { sort: { lastname: 1, name: 1 } },
          })
          .sort({ date: 1 });
 
@@ -300,7 +301,6 @@ router.delete("/date/:date/:classroom", auth, async (req, res) => {
 });
 
 const buildTable = async (attendances, class_id, res) => {
-   let users = [];
    let enrollments = [];
    try {
       enrollments = await Enrollment.find({
@@ -309,32 +309,29 @@ const buildTable = async (attendances, class_id, res) => {
          model: "user",
          path: "student",
          select: ["name", "lastname"],
+         options: { sort: { lastname: 1, name: 1 } },
       });
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });
    }
 
-   users = enrollments.sort((a, b) => {
-      if (a.student.lastname > b.student.lastname) return 1;
-      if (a.student.lastname < b.student.lastname) return -1;
-
-      if (a.student.name > b.student.name) return 1;
-      if (a.student.name < b.student.name) return -1;
-   });
-
    let header = [];
    let periods = [];
 
    //Get the student's header
-   let students = users.map((user) => {
-      return user.student.lastname + ", " + user.student.name;
+   let students = enrollments.map((user) => {
+      // return user.student.lastname + ", " + user.student.name;
+      return {
+         _id: user.student._id,
+         name: user.student.lastname + ", " + user.student.name,
+      };
    });
 
    //Add last row for the eliminate button
-   students = [...students, ""];
+   students = [...students, { name: "" }];
 
-   //Divide all the periods in different objects between '{}'
+   //Divide all the periods in different objects
    let allPeriods = attendances.reduce((res, curr) => {
       if (res[curr.period]) res[curr.period].push(curr);
       else Object.assign(res, { [curr.period]: [curr] });
@@ -345,115 +342,42 @@ const buildTable = async (attendances, class_id, res) => {
    //this for works only for objects
    for (const x in allPeriods) {
       let period = [];
-      let count = 0;
+      let count = -1;
 
-      //Get all the days for each period
-      let days = allPeriods[x].reduce((res, curr) => {
-         if (res[curr.date]) res[curr.date].push(curr);
-         else Object.assign(res, { [curr.date]: [curr] });
+      const dates = [
+         ...new Set(allPeriods[x].map((item) => item.date.toISOString())),
+      ];
 
-         return res;
-      }, {});
+      header.push(dates);
 
-      let daysHeader = Object.getOwnPropertyNames(days);
-
-      //Change the format of the date
-      daysHeader = daysHeader.map((day) => {
-         const date = new Date(day).toISOString();
-         return format(new Date(date.slice(0, -1)), "dd/MM");
-      });
-
-      header.push(daysHeader);
-
-      //Divide all grades per student in this particular period
-      let classStudents = allPeriods[x].reduce((res, curr) => {
-         if (curr.student) {
-            if (res[curr.student._id]) res[curr.student._id].push(curr);
-            else Object.assign(res, { [curr.student._id]: [curr] });
-         }
-         return res;
-      }, {});
-
-      //Amount of dates for this period
-      const daysNumber = Object.keys(days).length;
-
-      //Generates an array from every object
-      let studentsArray = Object.keys(classStudents).map(
-         (i) => classStudents[i]
-      );
-
-      //Sort them in the same order as users
-      studentsArray = studentsArray.sort((a, b) => {
-         if (a[0].student.lastname > b[0].student.lastname) return 1;
-         if (a[0].student.lastname < b[0].student.lastname) return -1;
-
-         if (a[0].student.name > b[0].student.name) return 1;
-         if (a[0].student.name < b[0].student.name) return -1;
-      });
-
-      let studentNumber = 0;
       for (let z = 0; z < students.length; z++) {
-         let rowNumber = 0;
+         const studentInassistance = students[z]._id
+            ? allPeriods[x].filter(
+                 (item) =>
+                    item.student &&
+                    item.student._id.toString() === students[z]._id.toString()
+              )
+            : [];
 
          //create an array with the amount of dates for the cells in the row
          //every item in the array goes with that basic info
-         let row = Array.from(Array(daysNumber), () => ({
-            _id: "",
-            classroom: class_id,
-            period: x,
-            inassistance: false,
-         }));
+         let row = Array.from(Array(dates.length), (item, index) => {
+            count++;
+            return {
+               _id: "",
+               classroom: class_id,
+               period: x,
+               date: dates[index],
+               ...(students[z]._id && {
+                  name: "input" + count,
+                  student: students[z]._id,
+                  inassistance: studentInassistance.some(
+                     (item) => item.date.toISOString() === dates[index]
+                  ),
+               }),
+            };
+         });
 
-         //Add or modify the info that is in every item in the array row
-         for (const index in days) {
-            row[rowNumber].date = new Date(index);
-
-            row[rowNumber].name = "input" + count;
-
-            //For the items that are buttons (doesnt have a user related)
-            if (!users[z]) {
-               count++;
-               rowNumber++;
-               continue;
-            }
-
-            row[rowNumber].student = users[z].student._id;
-
-            let added = false;
-
-            if (
-               studentsArray[studentNumber] &&
-               studentsArray[studentNumber][0].student._id.toString() ===
-                  users[z].student._id.toString()
-            ) {
-               for (let y = 0; y < studentsArray[studentNumber].length; y++) {
-                  if (
-                     studentsArray[studentNumber][y].date.toString() ===
-                     new Date(index).toString()
-                  ) {
-                     row[rowNumber].inassistance = true;
-                     row[rowNumber]._id = studentsArray[studentNumber][y]._id;
-
-                     count++;
-                     added = true;
-                     break;
-                  }
-               }
-            }
-            if (!added) {
-               count++;
-            }
-            rowNumber++;
-         }
-
-         if (
-            users[z] &&
-            studentsArray[studentNumber] &&
-            users[z].student._id.toString() ===
-               studentsArray[studentNumber][0].student._id.toString()
-         ) {
-            studentNumber++;
-         }
          period.push(row);
       }
       periods.push(period);

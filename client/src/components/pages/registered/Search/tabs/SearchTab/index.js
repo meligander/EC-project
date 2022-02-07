@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import { BiFilterAlt } from "react-icons/bi";
 import { ImFilePdf } from "react-icons/im";
 
-import { loadCategories } from "../../../../../../actions/category";
 import {
    clearProfile,
    loadUsers,
@@ -16,13 +15,16 @@ import RestTable from "../../../sharedComp/tables/RestTable";
 import NameField from "../../../sharedComp/NameField";
 
 const SearchTab = ({
-   users: { users, loadingUsers, userSearchType },
-   categories,
-   loadCategories,
+   users: {
+      users,
+      loadingUsers,
+      otherValues: { userSearchType },
+   },
+   categories: { categories },
+   typeF,
    loadUsers,
    clearProfile,
    clearClasses,
-   typeF,
    userPDF,
 }) => {
    const searchType = {
@@ -32,6 +34,8 @@ const SearchTab = ({
       Administradores: "admin",
    };
 
+   const type = searchType[typeF];
+
    const [filterForm, setFilterForm] = useState({
       name: "",
       lastname: "",
@@ -39,36 +43,17 @@ const SearchTab = ({
       category: "",
       studentname: "",
       studentlastname: "",
-      type: searchType[typeF],
    });
 
-   const {
-      name,
-      lastname,
-      active,
-      category,
-      studentlastname,
-      studentname,
-      type,
-   } = filterForm;
-
-   useEffect(() => {
-      if (type === "student") loadCategories();
-   }, [loadCategories, type]);
+   const { name, lastname, active, category, studentlastname, studentname } =
+      filterForm;
 
    const onChange = (e) => {
       e.persist();
       setFilterForm({
          ...filterForm,
-         [e.target.name]: e.target.value,
-      });
-   };
-
-   const onChangeCheckbox = (e) => {
-      e.persist();
-      setFilterForm({
-         ...filterForm,
-         active: e.target.checked,
+         [e.target.name]:
+            e.target.name === "active" ? e.target.checked : e.target.value,
       });
    };
 
@@ -78,7 +63,12 @@ const SearchTab = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               loadUsers(filterForm, true, true, false);
+               loadUsers(
+                  { ...filterForm, type, searchTab: true },
+                  true,
+                  true,
+                  false
+               );
             }}
          >
             <NameField
@@ -99,16 +89,15 @@ const SearchTab = ({
                      onChange={onChange}
                   >
                      <option value="">* Seleccione Categoría</option>
-                     {!categories.loading &&
-                        categories.categories.map((category) => (
-                           <React.Fragment key={category._id}>
-                              {category.name !== "Inscripción" && (
-                                 <option value={category._id}>
-                                    {category.name}
-                                 </option>
-                              )}
-                           </React.Fragment>
-                        ))}
+                     {categories.map((category) => (
+                        <React.Fragment key={category._id}>
+                           {category.name !== "Inscripción" && (
+                              <option value={category._id}>
+                                 {category.name}
+                              </option>
+                           )}
+                        </React.Fragment>
+                     ))}
                   </select>
                   <label
                      htmlFor="category"
@@ -132,7 +121,7 @@ const SearchTab = ({
             <div className="form-group mt-1">
                <input
                   className="form-checkbox"
-                  onChange={onChangeCheckbox}
+                  onChange={onChange}
                   type="checkbox"
                   checked={active}
                   name="active"
@@ -194,7 +183,6 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps, {
-   loadCategories,
    loadUsers,
    userPDF,
    clearProfile,

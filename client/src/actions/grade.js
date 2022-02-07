@@ -116,29 +116,39 @@ export const updateGrades = (formData, class_id) => async (dispatch) => {
    }
 };
 
-export const deleteGrades = (grade) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-   let error = false;
-
-   try {
-      const res = await api.delete(
-         `/grade/${grade.gradetype._id}/${grade.classroom}/${grade.period}`
+export const deleteGrades = (grade, last) => async (dispatch) => {
+   if (last) {
+      dispatch(
+         setAlert(
+            "No puede eliminar la última nota del bimestre",
+            "danger",
+            "3"
+         )
       );
+   } else {
+      dispatch(updateLoadingSpinner(true));
+      let error = false;
 
-      dispatch({
-         type: GRADES_DELETED,
-         payload: res.data,
-      });
+      try {
+         const res = await api.delete(
+            `/grade/${grade.gradetype._id}/${grade.classroom}/${grade.period}`
+         );
 
-      dispatch(setAlert("Tipo de Nota Eliminado", "success", "4"));
-   } catch (err) {
-      if (err.response.status !== 401) {
-         dispatch(setGradesError(GRADES_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "4"));
-      } else error = true;
+         dispatch({
+            type: GRADES_DELETED,
+            payload: res.data,
+         });
+
+         dispatch(setAlert("Tipo de Nota Eliminado", "success", "3"));
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setGradesError(GRADES_ERROR, err.response));
+            dispatch(setAlert(err.response.data.msg, "danger", "3"));
+         } else error = true;
+      }
+
+      if (!error) dispatch(updateLoadingSpinner(false));
    }
-
-   if (!error) dispatch(updateLoadingSpinner(false));
 };
 
 export const updateGradeTypes = (formData) => async (dispatch) => {
@@ -287,45 +297,56 @@ export const gradesPDF = (info, classInfo, type) => async (dispatch) => {
    }
 };
 
-export const certificatePDF =
-   (students, header, periods, classInfo, certificateDate, periodNumber) =>
-   async (dispatch) => {
+export const certificatePDF = (info, last) => async (dispatch) => {
+   if (last) {
+      dispatch(
+         setAlert("Las notas del final deben estar cargadas", "danger", "3")
+      );
+   } else {
       dispatch(updateLoadingSpinner(true));
       let error = false;
 
+      const {
+         students,
+         headers,
+         studentsPeriod,
+         classInfo,
+         date,
+         periodNumber,
+      } = info;
+
       try {
          for (let x = 0; x < students.length; x++) {
-            const period = periods[x];
-            const student = students[x];
-
-            const info = {
-               student,
-               header,
-               period,
-               classInfo,
-               certificateDate,
+            const infoForm = {
+               student: students[x],
+               header: headers,
+               period: studentsPeriod[x],
+               classInfo: classInfo,
+               date: date,
             };
 
             if (periodNumber === 6) {
                await api.post(
                   "/pdf/grade/certificate-cambridge/create-list",
-                  info
+                  infoForm
                );
             } else {
-               await api.post("/pdf/grade/certificate", info);
+               await api.post("/pdf/grade/certificate", infoForm);
             }
 
             const pdf = await api.get("/pdf/grade/fetch", {
                responseType: "blob",
             });
 
-            const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
+            const pdfBlob = new Blob([pdf.data], {
+               type: "application/pdf",
+            });
 
             saveAs(
                pdfBlob,
                `Certificado ${classInfo.category.name} ${
                   periodNumber === 6 ? "Cambridge" : ""
-               }  ${student.name}.pdf`
+               }  ${students[x].name}.pdf`
             );
          }
 
@@ -334,12 +355,13 @@ export const certificatePDF =
       } catch (err) {
          if (err.response.status !== 401) {
             dispatch(setGradesError(GRADES_ERROR, err.response));
-            dispatch(setAlert(err.response.data.msg, "danger", "4"));
+            dispatch(setAlert(err.response.data.msg, "danger", "3"));
          } else error = true;
       }
 
       if (!error) dispatch(updateLoadingSpinner(false));
-   };
+   }
+};
 
 export const clearGrades = () => (dispatch) => {
    dispatch({

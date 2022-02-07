@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import { FaPlus, FaTimes } from "react-icons/fa";
 import { FiSave } from "react-icons/fi";
 import { ImFilePdf } from "react-icons/im";
+import format from "date-fns/format";
 
 import {
    registerNewDate,
@@ -27,7 +28,7 @@ const AttendanceTab = ({
    attendancesPDF,
    togglePopup,
 }) => {
-   const date = new Date();
+   const year = new Date().getFullYear();
 
    const [adminValues, setAdminValues] = useState({
       popupType: "",
@@ -44,45 +45,16 @@ const AttendanceTab = ({
       }));
    }, [period, periods]);
 
-   const onChange = (e, row) => {
+   const onChange = (e, student, date) => {
       e.persist();
-      let number = Number(e.target.name.substring(5, e.target.name.length));
+      if (year === classInfo.year) {
+         newAttendances[student][date].inassistance = !e.target.checked;
 
-      const daysNumber = newAttendances[0].length;
-      const rowN = Math.ceil((number + 1) / daysNumber) - 1;
-      const mult = daysNumber * rowN;
-      number = number - mult;
-      newAttendances[rowN][number] = {
-         ...row,
-         inassistance: !row.inassistance,
-      };
-
-      setAdminValues((prev) => ({
-         ...prev,
-         newAttendances,
-      }));
-   };
-
-   const deleteDateAc = () => {
-      deleteDate(
-         toDelete.date,
-         classInfo._id,
-         periods[period] && header[period - 1].length === 1
-      );
-      setAdminValues((prev) => ({
-         ...prev,
-         newAttendances: periods[period - 1] ? periods[period - 1] : [],
-      }));
-   };
-
-   const pdfGenerator = () => {
-      attendancesPDF(
-         header[period - 1],
-         students,
-         periods[period - 1],
-         period - 1,
-         classInfo
-      );
+         setAdminValues((prev) => ({
+            ...prev,
+            newAttendances,
+         }));
+      }
    };
 
    return (
@@ -100,7 +72,11 @@ const AttendanceTab = ({
                      );
                      break;
                   case "delete":
-                     deleteDateAc();
+                     deleteDate(
+                        toDelete.date,
+                        classInfo._id,
+                        periods[period] && header[period - 1].length === 1
+                     );
                      break;
                   case "new-date":
                      registerNewDate(
@@ -112,7 +88,7 @@ const AttendanceTab = ({
                      break;
                }
             }}
-            text={
+            info={
                popupType !== "new-date"
                   ? `¿Está seguro que desea ${
                        popupType === "save"
@@ -129,15 +105,17 @@ const AttendanceTab = ({
                      <th>Nombre</th>
                      {header[period - 1] &&
                         header[period - 1].map((day, index) => (
-                           <th key={index}>{day}</th>
+                           <th key={index}>
+                              {format(new Date(day.slice(0, -1)), "dd/MM")}
+                           </th>
                         ))}
                   </tr>
                </thead>
                <tbody>
                   {students.map((student, i) => (
                      <tr key={i}>
-                        <td>{student}</td>
-                        {newAttendances[0] &&
+                        <td>{student.name}</td>
+                        {newAttendances[i] &&
                            newAttendances[i].map((row, key) => (
                               <td key={key}>
                                  {row.student ? (
@@ -146,24 +124,26 @@ const AttendanceTab = ({
                                        checked={!row.inassistance}
                                        className="option-input"
                                        name={row.name}
-                                       onChange={(e) => onChange(e, row)}
+                                       onChange={(e) => onChange(e, i, key)}
                                     />
                                  ) : (
-                                    <button
-                                       type="button"
-                                       className="btn btn-danger"
-                                       onClick={(e) => {
-                                          e.preventDefault();
-                                          setAdminValues({
-                                             ...adminValues,
-                                             popupType: "delete",
-                                             toDelete: row,
-                                          });
-                                          togglePopup("default");
-                                       }}
-                                    >
-                                       <FaTimes />
-                                    </button>
+                                    year === classInfo.year && (
+                                       <button
+                                          type="button"
+                                          className="btn btn-danger"
+                                          onClick={(e) => {
+                                             e.preventDefault();
+                                             setAdminValues({
+                                                ...adminValues,
+                                                popupType: "delete",
+                                                toDelete: row,
+                                             });
+                                             togglePopup("default");
+                                          }}
+                                       >
+                                          <FaTimes />
+                                       </button>
+                                    )
                                  )}
                               </td>
                            ))}
@@ -173,7 +153,7 @@ const AttendanceTab = ({
             </table>
          </div>
          <div className="btn-right">
-            {date.getFullYear() === classInfo.year && (
+            {year === classInfo.year && (
                <>
                   <button
                      className="btn btn-primary"
@@ -213,7 +193,13 @@ const AttendanceTab = ({
                   type="button"
                   onClick={(e) => {
                      e.preventDefault();
-                     pdfGenerator();
+                     attendancesPDF(
+                        header[period - 1],
+                        students,
+                        periods[period - 1],
+                        period - 1,
+                        classInfo
+                     );
                   }}
                >
                   <ImFilePdf />

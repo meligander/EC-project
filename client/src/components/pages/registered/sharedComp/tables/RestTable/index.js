@@ -33,46 +33,41 @@ const RestTable = ({
          <tbody>
             {!loadingUsers &&
                type === userSearchType &&
-               users.map((user) => {
-                  let name = "";
-                  if (type === "guardian" && user.children[0]) {
-                     name =
-                        user.children[0].lastname +
-                        ", " +
-                        user.children[0].name;
-                  }
-                  return (
-                     <tr key={user._id}>
+               users.map((user) => (
+                  <tr key={user._id}>
+                     <td>
+                        <Link
+                           className="btn-text"
+                           to={`/index/dashboard/${user._id}`}
+                           onClick={() => {
+                              window.scroll(0, 0);
+                              clearProfile();
+                              if (type === "teacher") clearClasses();
+                           }}
+                        >
+                           {user.lastname}, {user.name}
+                        </Link>
+                     </td>
+                     <td className="hide-sm email">
+                        {user.email && user.email}
+                     </td>
+                     <td>{user.cel}</td>
+                     {userSearchType !== "guardian" && (
+                        <td className="hide-sm">
+                           {user.dob &&
+                              format(new Date(user.dob.slice(0, -1)), "dd/MM")}
+                        </td>
+                     )}
+                     {type === "admin" && <td>{userType[user.type]}</td>}
+                     {type === "guardian" && user.children[0] && (
                         <td>
-                           <Link
-                              className="btn-text"
-                              to={`/index/dashboard/${user._id}`}
-                              onClick={() => {
-                                 window.scroll(0, 0);
-                                 clearProfile();
-                                 if (type === "teacher") clearClasses();
-                              }}
-                           >
-                              {user.lastname}, {user.name}
-                           </Link>
+                           {user.children[0].lastname +
+                              ", " +
+                              user.children[0].name}
                         </td>
-                        <td className="hide-sm email">
-                           {user.email && user.email}
-                        </td>
-                        <td>{user.cel}</td>
-                        {userSearchType !== "guardian" && (
-                           <td className="hide-sm">
-                              {user.dob &&
-                                 format(
-                                    new Date(user.dob.slice(0, -1), "dd/MM")
-                                 )}
-                           </td>
-                        )}
-                        {type === "admin" && <td>{userType[user.type]}</td>}
-                        {type === "guardian" && <td>{name}</td>}
-                     </tr>
-                  );
-               })}
+                     )}
+                  </tr>
+               ))}
          </tbody>
       </table>
    );

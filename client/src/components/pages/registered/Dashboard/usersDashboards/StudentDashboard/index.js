@@ -93,7 +93,7 @@ const StudentDashboard = ({
                               onClick={() => {
                                  window.scroll(0, 0);
                               }}
-                              to={`/class/${classInfo._id}`}
+                              to={`/class/single/${classInfo._id}`}
                            >
                               Ver Info
                            </Link>

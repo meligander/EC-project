@@ -63,7 +63,7 @@ const SingleClass = ({
          {!loadingClass && (
             <>
                <PopUp
-                  text={
+                  info={
                      popupType === "delete"
                         ? "¿Está seguro que desea eliminar el curso?"
                         : null

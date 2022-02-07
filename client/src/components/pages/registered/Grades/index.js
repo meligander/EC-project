@@ -22,20 +22,20 @@ const Grades = ({
    loadClass,
    gradesPDF,
 }) => {
+   const _id = match.params.class_id;
+
    useEffect(() => {
-      if (loading) loadGrades(match.params.class_id);
-      if (loadingClass) loadClass(match.params.class_id);
-      else if (loadingGT) loadGradeTypes(classInfo.category._id);
-   }, [
-      loading,
-      loadingClass,
-      classInfo,
-      match,
-      loadingGT,
-      loadGrades,
-      loadClass,
-      loadGradeTypes,
-   ]);
+      if (loading) loadGrades(_id, false);
+   }, [loading, loadGrades, _id]);
+
+   useEffect(() => {
+      if (loadingClass) loadClass(_id, false, false);
+   }, [loadingClass, loadClass, _id]);
+
+   useEffect(() => {
+      if (!loadingClass && loadingGT)
+         loadGradeTypes(classInfo.category._id, false);
+   }, [loadingClass, loadingGT, classInfo, loadGradeTypes]);
 
    const tabs = (className) => {
       switch (className) {
@@ -102,7 +102,7 @@ const Grades = ({
    return (
       <>
          <h1 className="text-center light-font p-1 mt-2">Notas</h1>
-         {!loadingClass && (
+         {!loadingClass && !loading && !loadingGT && (
             <>
                <div className="btn-right">
                   <div className="tooltip">

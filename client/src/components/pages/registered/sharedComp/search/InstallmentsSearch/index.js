@@ -12,7 +12,7 @@ import {
 import { addDetail } from "../../../../../../actions/invoice";
 import { clearProfile, clearUser } from "../../../../../../actions/user";
 
-import StudentSearch from "../StudentSearch";
+import UserSearch from "../UserSearch";
 import InstallmentsTable from "../../tables/InstallmentsTable";
 
 import "./style.scss";
@@ -47,10 +47,10 @@ const InstallmentsSearch = ({
    return (
       <div className="installment-search">
          <div className="form">
-            <StudentSearch
+            <UserSearch
                selectedStudent={student}
                actionForSelected={async () =>
-                  await loadInstallments({ student }, true, "student")
+                  await loadInstallments({ student }, true, true)
                }
                selectStudent={(user) => {
                   changeStudent({
@@ -58,7 +58,7 @@ const InstallmentsSearch = ({
                      name: user.lastname + ", " + user.name,
                   });
                }}
-               typeSearch={"installment"}
+               typeSearch="installment"
                block={!loading && installments.student}
             />
          </div>
@@ -93,7 +93,7 @@ const InstallmentsSearch = ({
          </div>
          {!loading && student._id === installments.student._id && (
             <>
-               {installments.rows.length > 0 ? (
+               {installments.rows ? (
                   <InstallmentsTable
                      installments={installments}
                      forAdmin={true}

@@ -165,7 +165,7 @@ export const attendancesPDF =
       } catch (err) {
          if (err.response.status !== 401) {
             dispatch(setAttendanceError(ATTENDANCES_ERROR, err.response));
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
+            dispatch(setAlert(err.response.data.msg, "danger", "3"));
          } else error = true;
       }
 

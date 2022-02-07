@@ -59,7 +59,7 @@ const Categories = ({
       <>
          <h2>Categorías y Precios</h2>
          <PopUp
-            text="¿Está seguro que los datos son correctos?"
+            info="¿Está seguro que los datos son correctos?"
             confirm={() => updateCategories({ categories: formData, date })}
          />
          <div className="form ">

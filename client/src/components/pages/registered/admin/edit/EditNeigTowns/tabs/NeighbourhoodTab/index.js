@@ -64,7 +64,7 @@ const NeighbourhoodTab = ({
                   } else deleteNeighbourhood(formData[toDelete]._id);
                }
             }}
-            text={`¿Está seguro que desea ${
+            info={`¿Está seguro que desea ${
                popupType === "save"
                   ? "guardar los cambios"
                   : "eliminar el barrio"

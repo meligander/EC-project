@@ -289,7 +289,7 @@ const RegisterUser = ({
                   });
                else setFormData((prev) => ({ ...prev, active: !active }));
             }}
-            text={
+            info={
                popupType === "save"
                   ? `¿Está seguro que desea ${
                        _id !== "0"

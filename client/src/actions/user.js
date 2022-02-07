@@ -15,7 +15,6 @@ import {
    USER_LOADED,
    USERS_LOADED,
    USERSBK_LOADED,
-   USERSEARCHTYPE_CHANGED,
    REGISTER_SUCCESS,
    USER_UPDATED,
    SEARCH_CLEARED,
@@ -110,12 +109,12 @@ export const loadUsers =
 
          dispatch({
             type: primary ? USERS_LOADED : USERSBK_LOADED,
-            payload: res.data,
-         });
-
-         dispatch({
-            type: USERSEARCHTYPE_CHANGED,
-            payload: filterData.type ? filterData.type : "",
+            payload: !primary
+               ? res.data
+               : {
+                    users: res.data,
+                    type: filterData.type ? filterData.type : "",
+                 },
          });
       } catch (err) {
          if (err.response.status !== 401) {

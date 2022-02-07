@@ -91,7 +91,7 @@ const TransactionList = ({
       <>
          <h2>Listado Movimientos</h2>
          <PopUp
-            text="¿Está seguro que desea eliminar el movimiento?"
+            info="¿Está seguro que desea eliminar el movimiento?"
             confirm={() => deleteExpence(toDelete)}
          />
          <form

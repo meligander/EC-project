@@ -24,7 +24,7 @@ import {
 } from "../../../../../../../../actions/mixvalues";
 
 import Alert from "../../../../../../sharedComp/Alert";
-import StudentSearch from "../../../../../sharedComp/search/StudentSearch";
+import UserSearch from "../../../../../sharedComp/search/UserSearch";
 import PopUp from "../../../../../../../modal/PopUp";
 
 import "./style.scss";
@@ -172,7 +172,7 @@ const InvoiceTab = ({
       <div className="invoice-tab">
          <PopUp
             confirm={confirm}
-            text="¿Está seguro que la factura es correcta?"
+            info="¿Está seguro que la factura es correcta?"
          />
          <form
             className="form bigger"
@@ -336,7 +336,7 @@ const InvoiceTab = ({
                </div>
             </div>
             {toggleSearch && (
-               <StudentSearch
+               <UserSearch
                   selectStudent={(user) => {
                      setAdminValues((prev) => ({
                         ...prev,

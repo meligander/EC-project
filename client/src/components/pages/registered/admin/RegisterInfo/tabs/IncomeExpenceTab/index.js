@@ -108,7 +108,7 @@ const IncomeExpenceTab = ({
          <Alert type="3" />
          <PopUp
             confirm={confirm}
-            text="¿Está seguro que desea registrar un nuevo movimiento?"
+            info="¿Está seguro que desea registrar un nuevo movimiento?"
          />
          {!register && (
             <p className="bg-secondary paragraph mb-3 p-2">

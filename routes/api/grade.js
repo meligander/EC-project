@@ -26,8 +26,6 @@ router.get("/:class_id", auth, async (req, res) => {
             select: ["name", "lastname"],
          });
 
-      console.log(grades, req.params.class_id);
-
       const tableGrades = await buildClassTable(
          grades,
          req.params.class_id,
@@ -60,7 +58,6 @@ router.get("/student/:class_id/:user_id", [auth], async (req, res) => {
          .populate({
             path: "gradetype",
             model: "gradetypes",
-            select: "name",
          })
          .sort({ gradetype: 1 });
 
@@ -234,7 +231,6 @@ router.post("/", auth, async (req, res) => {
          .populate({
             path: "gradetype",
             model: "gradetypes",
-            select: "name",
          });
 
       const tableGrades = await buildClassTable(grades, classroom, res);
@@ -259,7 +255,7 @@ router.delete("/:type/:classroom/:period", auth, async (req, res) => {
       });
 
       for (let x = 0; x < gradesToDelete.length; x++) {
-         await Grade.findOneAndRemove({ _id: gradesToDelete[x].id });
+         await Grade.findByIdAndRemove({ _id: gradesToDelete[x].id });
       }
       const grades = await Grade.find({
          classroom: req.params.classroom,
@@ -273,7 +269,6 @@ router.delete("/:type/:classroom/:period", auth, async (req, res) => {
          .populate({
             path: "gradetype",
             model: "gradetypes",
-            select: "name",
          });
 
       const tableGrades = await buildClassTable(
@@ -319,6 +314,7 @@ const buildStudentTable = (grades, reportCard) => {
 
 const buildClassTable = async (grades, class_id, res) => {
    let users = [];
+   let enrollments;
 
    try {
       enrollments = await Enrollment.find({

@@ -30,29 +30,40 @@ router.get("/", async (req, res) => {
       let search = true;
       const year = new Date().getFullYear();
 
+      const {
+         active,
+         type,
+         name,
+         lastname,
+         category,
+         classroom,
+         studentname,
+         studentlastname,
+         searchTab,
+      } = req.query;
+
       if (Object.entries(req.query).length === 0) {
          users = await User.find().sort({ lastname: 1, name: 1 });
       } else {
          let filter = {
-            ...(req.query.active && { active: req.query.active }),
-            ...(req.query.type && { type: req.query.type }),
-            ...(req.query.name && {
-               name: { $regex: `.*${req.query.name}.*`, $options: "i" },
+            ...(active && { active: active }),
+            ...(type && { type: type }),
+            ...(name && {
+               name: { $regex: `.*${name}.*`, $options: "i" },
             }),
-            ...(req.query.lastname && {
-               lastname: { $regex: `.*${req.query.lastname}.*`, $options: "i" },
+            ...(lastname && {
+               lastname: { $regex: `.*${lastname}.*`, $options: "i" },
             }),
          };
-         if (req.query.type) {
-            switch (req.query.type) {
+         if (type) {
+            switch (type) {
                case "student":
                   search = false;
-                  const classroom = req.query.classroom;
 
-                  if (req.query.category) {
+                  if (category) {
                      const enrollments = await Enrollment.find({
-                        "classroom._id": null,
-                        category: req.query.category,
+                        ...(!searchTab && { "classroom._id": null }),
+                        category: category,
                         year,
                      })
                         .populate({
@@ -68,7 +79,12 @@ router.get("/", async (req, res) => {
 
                      users = enrollments
                         .filter((item) => item.student)
-                        .map((item) => item.student)
+                        .map((item) => {
+                           return {
+                              ...item.student.toJSON(),
+                              category: item.category.name,
+                           };
+                        })
                         .sort((a, b) => {
                            if (a.lastname > b.lastname) return 1;
                            if (a.lastname < b.lastname) return -1;
@@ -98,8 +114,8 @@ router.get("/", async (req, res) => {
                   }
                   break;
                case "guardian":
-                  const name = req.query.studentname;
-                  const lastname = req.query.studentlastname;
+                  const name = studentname;
+                  const lastname = studentlastname;
 
                   if (name || lastname) {
                      search = false;

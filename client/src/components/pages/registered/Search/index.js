@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { FaUserPlus } from "react-icons/fa";
 
 import { clearTowns } from "../../../../actions/town";
+import { loadCategories } from "../../../../actions/category";
 import { clearUser, clearSearch, clearUsers } from "../../../../actions/user";
 
 import Tabs from "../sharedComp/Tabs";
@@ -11,17 +12,26 @@ import SearchTab from "./tabs/SearchTab";
 
 const Search = ({
    auth: { userLogged },
+   categories: { loading },
    clearUsers,
    clearUser,
    clearTowns,
    clearSearch,
+   loadCategories,
 }) => {
+   const isAdmin =
+      userLogged.type === "admin" ||
+      userLogged.type === "secretary" ||
+      userLogged.type === "admin&teacher";
+
+   useEffect(() => {
+      if (loading) loadCategories(true);
+   }, [loadCategories, loading]);
+
    return (
       <>
          <h1>Búsqueda</h1>
-         {(userLogged.type === "admin" ||
-            userLogged.type === "secretary" ||
-            userLogged.type === "admin&teacher") && (
+         {isAdmin && (
             <div className="btn-right">
                <Link
                   to="/user/edit/0"
@@ -40,10 +50,17 @@ const Search = ({
             </div>
          )}
          <div className="few-tabs">
-            <Tabs
-               tablist={["Alumnos", "Tutores", "Profesores", "Administradores"]}
-               panellist={[SearchTab, SearchTab, SearchTab, SearchTab]}
-            />
+            {!loading && (
+               <Tabs
+                  tablist={[
+                     "Alumnos",
+                     "Tutores",
+                     "Profesores",
+                     "Administradores",
+                  ]}
+                  panellist={[SearchTab, SearchTab, SearchTab, SearchTab]}
+               />
+            )}
          </div>
       </>
    );
@@ -51,6 +68,7 @@ const Search = ({
 
 const mapStateToProps = (state) => ({
    auth: state.auth,
+   categories: state.categories,
 });
 
 export default connect(mapStateToProps, {
@@ -58,4 +76,5 @@ export default connect(mapStateToProps, {
    clearUser,
    clearTowns,
    clearSearch,
+   loadCategories,
 })(Search);

@@ -1,0 +1,11 @@
+.new-grade-type {
+   width: 85%;
+   margin: 4rem auto 0;
+
+   display: flex;
+   justify-content: space-between;
+
+   &-form {
+      width: 85%;
+   }
+}

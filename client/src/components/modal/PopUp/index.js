@@ -10,19 +10,21 @@ import CertificateDate from "./CertificateDate";
 
 import logo from "../../../img/logoSinLetras.png";
 import "./style.scss";
+import NewGradeType from "./NewGradeType";
 
 const PopUp = ({
    mixvalues: { popupType, popupToggle },
-   penalties: { loading, penalty },
    togglePopup,
    confirm,
-   text,
+   info,
 }) => {
    const [newDate, setNewDate] = useState({
       fromDate: "",
       toDate: "",
       date: "",
    });
+
+   const [newGradeType, setNewGradeType] = useState("");
 
    const [certificateDate, setCertificateDate] = useState("");
 
@@ -44,6 +46,11 @@ const PopUp = ({
       }));
    };
 
+   const onChangeGradeType = (e) => {
+      e.persist();
+      setNewGradeType(e.target.value);
+   };
+
    const onChangePenaltyPercentage = (e) => {
       e.persist();
       setPenaltyPercentage(e.target.value);
@@ -54,13 +61,13 @@ const PopUp = ({
          case "penalty":
             return (
                <div className="popup-penalty">
-                  {!loading && (
+                  {
                      <PenaltyPercentage
                         onChange={onChangePenaltyPercentage}
-                        penalty={penalty}
+                        penalty={info.penalty}
                         percentage={penaltyPercentage}
                      />
-                  )}
+                  }
                </div>
             );
          case "certificate-date":
@@ -72,9 +79,9 @@ const PopUp = ({
             );
          case "active":
             return (
-               <div className="popup-text">
-                  <h3>{text.question}</h3>
-                  <p>{text.info}</p>
+               <div className="popup-info">
+                  <h3>{info.question}</h3>
+                  <p>{info.info}</p>
                </div>
             );
          case "new-date":
@@ -84,15 +91,31 @@ const PopUp = ({
                   toDate={newDate.toDate}
                   date={newDate.date}
                   onChange={onChangeNewDate}
-                  bimestre={text}
+                  bimestre={info}
                />
             );
-         default:
-            return (
-               <div className="popup-text">
-                  <h3>{text}</h3>
-               </div>
+         case "new-grade-type":
+            return typeof info === "object" ? (
+               <NewGradeType
+                  onChange={onChangeGradeType}
+                  gradetype={newGradeType}
+                  gradetypes={info.gradetypes}
+                  clearGradeTypes={info.clearGradeTypes}
+                  isAdmin={info.isAdmin}
+               />
+            ) : (
+               <></>
             );
+         case "default":
+            return typeof info === "string" ? (
+               <div className="popup-text">
+                  <h3>{info}</h3>
+               </div>
+            ) : (
+               <></>
+            );
+         default:
+            break;
       }
    };
 
@@ -105,7 +128,7 @@ const PopUp = ({
                   type="button"
                   onClick={(e) => {
                      e.preventDefault();
-                     togglePopup("default");
+                     togglePopup();
                   }}
                   className="btn-cancel"
                >
@@ -131,6 +154,10 @@ const PopUp = ({
                         case "new-date":
                            confirm(newDate);
                            setNewDate({ fromDate: "", toDate: "", date: "" });
+                           break;
+                        case "new-grade-type":
+                           confirm(newGradeType);
+                           setNewGradeType("");
                            break;
                         default:
                            confirm();
@@ -159,7 +186,6 @@ const PopUp = ({
 
 const mapStateToProps = (state) => ({
    mixvalues: state.mixvalues,
-   penalties: state.penalties,
 });
 
 export default connect(mapStateToProps, { togglePopup })(PopUp);

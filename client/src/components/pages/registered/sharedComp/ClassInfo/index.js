@@ -1,20 +1,31 @@
 import React from "react";
 import format from "date-fns/format";
-import PropTypes from "prop-types";
 
 import "./style.scss";
 
-const ClassInfo = ({ classInfo }) => {
+const ClassInfo = ({
+   classInfo: {
+      category,
+      teacher,
+      classroom,
+      day1,
+      day2,
+      hourin1,
+      hourin2,
+      hourout1,
+      hourout2,
+   },
+}) => {
    return (
       <div className="class-info">
-         <h3>{classInfo.category.name}</h3>
+         <h3>{category.name}</h3>
          <div className="heading-tertiary">
             <p>
                <span className="text-dark">Profesor: </span>
-               {classInfo.teacher.lastname}, {classInfo.teacher.name}
+               {teacher.lastname}, {teacher.name}
             </p>
             <p className="paragraph">
-               <span className="text-dark">Aula:</span> {classInfo.classroom}
+               <span className="text-dark">Aula:</span> {classroom}
             </p>
          </div>
          <p></p>
@@ -22,58 +33,42 @@ const ClassInfo = ({ classInfo }) => {
             <div>
                <p>
                   <span className="text-dark">Día 1: </span>
-                  {classInfo.day1}
+                  {day1}
                </p>
                <div className="schedule">
                   <p>
                      <span className="text-dark">Entrada: </span>
-                     {classInfo.hourin1 &&
-                        format(
-                           new Date(classInfo.hourin1.slice(0, -1)),
-                           "HH:mm"
-                        )}
+                     {hourin1 &&
+                        format(new Date(hourin1.slice(0, -1)), "HH:mm")}
                   </p>
                   <p>
                      <span className="text-dark">Salida: </span>
-                     {classInfo.hourout1 &&
-                        format(
-                           new Date(classInfo.hourout1.slice(0, -1)),
-                           "HH:mm"
-                        )}
+                     {hourout1 &&
+                        format(new Date(hourout1.slice(0, -1)), "HH:mm")}
                   </p>
                </div>
             </div>
             <div>
                <p>
                   <span className="text-dark">Día 2: </span>
-                  {classInfo.day2}
+                  {day2}
                </p>
                <div className="schedule">
                   <p>
                      <span className="text-dark">Entrada: </span>
-                     {classInfo.hourin2 &&
-                        format(
-                           new Date(classInfo.hourin2.slice(0, -1)),
-                           "HH:mm"
-                        )}
+                     {hourin2 &&
+                        format(new Date(hourin2.slice(0, -1)), "HH:mm")}
                   </p>
                   <p>
                      <span className="text-dark">Salida: </span>
-                     {classInfo.hourout2 &&
-                        format(
-                           new Date(classInfo.hourout2.slice(0, -1)),
-                           "HH:mm"
-                        )}
+                     {hourout2 &&
+                        format(new Date(hourout2.slice(0, -1)), "HH:mm")}
                   </p>
                </div>
             </div>
          </div>
       </div>
    );
-};
-
-ClassInfo.propTypes = {
-   classInfo: PropTypes.object.isRequired,
 };
 
 export default ClassInfo;

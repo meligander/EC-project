@@ -79,7 +79,7 @@ const EnrollmentList = ({
          <h2>Listado Inscripciones</h2>
          <PopUp
             confirm={() => deleteEnrollment(toDelete)}
-            text="¿Está seguro que desea eliminar la inscripción?"
+            info="¿Está seguro que desea eliminar la inscripción?"
          />
          <form
             className="form"

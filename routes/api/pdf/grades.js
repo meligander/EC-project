@@ -11,6 +11,9 @@ const pdfTemplateReportCard = require("../../../templates/reportCard");
 //Middlewares
 const auth = require("../../../middleware/auth");
 
+const Enrollment = require("../../../models/Enrollment");
+const Grade = require("../../../models/Grade");
+
 const cambridgeTests = [
    "Starters",
    "Movers",
@@ -239,9 +242,9 @@ router.post("/list", auth, (req, res) => {
 //@desc     Create all certificate pdfs of the class
 //@access   Private
 router.post("/certificate", auth, async (req, res) => {
-   let { student, header, period, classInfo, certificateDate } = req.body;
+   let { student, header, period, classInfo, date } = req.body;
 
-   if (!certificateDate)
+   if (!date)
       return res.status(400).json({
          msg: "Debe seleccionar una fecha",
       });
@@ -284,8 +287,7 @@ router.post("/certificate", auth, async (req, res) => {
       student.dni &&
       student.dni.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
-   const date = new Date();
-   const year = date.getFullYear();
+   const year = new Date().getFullYear();
 
    let certificateInfo = "";
    let finalGrades = "";
@@ -429,12 +431,9 @@ router.post("/certificate", auth, async (req, res) => {
    );
 
    try {
-      pdf.create(
-         pdfTemplateCertificate(css, img, student, body, certificateDate),
-         {
-            format: "A4",
-         }
-      ).toFile(fileName, (err) => {
+      pdf.create(pdfTemplateCertificate(css, img, student, body, date), {
+         format: "A4",
+      }).toFile(fileName, (err) => {
          if (err) res.send(Promise.reject());
          else res.send(Promise.resolve());
       });
@@ -448,7 +447,7 @@ router.post("/certificate", auth, async (req, res) => {
 //@desc     Create all cambridge certificate pdfs of the class (starter, movers, flyers)
 //@access   Private
 router.post("/cambridge", auth, (req, res) => {
-   let { student, header, period, classInfo, certificateDate } = req.body;
+   let { student, header, period, classInfo, date } = req.body;
 
    student.dni = student.dni.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
@@ -578,7 +577,7 @@ router.post("/cambridge", auth, (req, res) => {
             level,
             body,
             average,
-            certificateDate
+            date
          ),
          {
             format: "A4",

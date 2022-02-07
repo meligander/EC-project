@@ -80,7 +80,7 @@ const IncomeList = ({
    return (
       <>
          <PopUp
-            text="¿Está seguro que desea eliminar la factura?"
+            info="¿Está seguro que desea eliminar la factura?"
             confirm={() => deleteInvoice(toDelete)}
          />
          <h2>Listado Ingresos</h2>

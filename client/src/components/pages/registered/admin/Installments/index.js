@@ -18,7 +18,7 @@ import PopUp from "../../../../modal/PopUp";
 
 const Installments = ({
    match,
-   penalties: { loading: loadingPenalty },
+   penalties: { loading: loadingPenalty, penalty },
    installments: { loading, installments },
    auth: { userLogged },
    clearInstallments,
@@ -70,10 +70,15 @@ const Installments = ({
       <>
          <div>
             <h1>Cuotas</h1>
-            <PopUp confirm={(percentage) => updatePenalty({ percentage })} />
+            {!loadingPenalty && (
+               <PopUp
+                  confirm={(percentage) => updatePenalty({ percentage })}
+                  info={{ penalty }}
+               />
+            )}
 
             <div className="btn-right my-3">
-               {isAdmin && (
+               {isAdmin && !loadingPenalty && (
                   <button
                      className="btn btn-secondary"
                      type="button"

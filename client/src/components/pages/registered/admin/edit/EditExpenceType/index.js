@@ -59,7 +59,7 @@ const EditExpenceType = ({
                   }
                }
             }}
-            text={`¿Está seguro que desea ${
+            info={`¿Está seguro que desea ${
                popupType === "save"
                   ? "guardar los cambios"
                   : "eliminar el tipo de movimiento"

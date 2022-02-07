@@ -63,7 +63,7 @@ const TownsTab = ({
                      } else deleteTown(formData[toDelete]._id);
                   }
                }}
-               text={`¿Está seguro que desea ${
+               info={`¿Está seguro que desea ${
                   popupType === "save"
                      ? "guardar los cambios"
                      : "eliminar la localidad"

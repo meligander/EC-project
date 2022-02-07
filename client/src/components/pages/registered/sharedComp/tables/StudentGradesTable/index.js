@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 
 const StudentGradesTable = ({ studentGrades: { headers, rows }, category }) => {
    const kinderGrade = (value) => {
@@ -20,6 +19,14 @@ const StudentGradesTable = ({ studentGrades: { headers, rows }, category }) => {
             return "";
       }
    };
+
+   const getGrade = (grade, cambridge) => {
+      if (category === "Kinder") return kinderGrade(grade);
+      if (cambridge) return grade * 10 + "%";
+      if (grade % 1 !== 0) return grade.toFixed(2);
+      else return grade;
+   };
+
    return (
       <table>
          <thead>
@@ -46,17 +53,8 @@ const StudentGradesTable = ({ studentGrades: { headers, rows }, category }) => {
                      <th>{headers[index]}</th>
                      {row.map((item, i) => (
                         <td key={i}>
-                           {category === "Kinder"
-                              ? kinderGrade(item.value)
-                              : item.gradetype &&
-                                (item.gradetype.name === "Ket" ||
-                                   item.gradetype.name === "Pet" ||
-                                   item.gradetype.name === "First" ||
-                                   item.gradetype.name === "CAE" ||
-                                   item.gradetype.name === "Proficiency")
-                              ? item.value * 10 + "%"
-                              : item.value
-                              ? item.value.toFixed(2)
+                           {item.value
+                              ? getGrade(item.value, item.gradetype.cambridge)
                               : ""}
                         </td>
                      ))}
@@ -66,11 +64,6 @@ const StudentGradesTable = ({ studentGrades: { headers, rows }, category }) => {
          </tbody>
       </table>
    );
-};
-
-StudentGradesTable.prototypes = {
-   studentGrades: PropTypes.object.isRequired,
-   category: PropTypes.string.isRequired,
 };
 
 export default StudentGradesTable;
