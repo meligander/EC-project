@@ -18,7 +18,6 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    try {
       let expences = [];
       let invoices = [];
-      let transactions = [];
 
       if (Object.entries(req.query).length === 0) {
          expences = await Expence.find().populate("expencetype");
@@ -28,60 +27,48 @@ router.get("/", [auth, adminAuth], async (req, res) => {
             select: ["name", "lastname"],
          });
       } else {
-         const filter = req.query;
+         const { transactionType, startDate, endDate } = req.query;
 
-         if (!filter.transactionType || filter.transactionType === "income") {
+         const date = {
+            ...(startDate && {
+               $gte: new Date(startDate).setHours(00, 00, 00),
+            }),
+            ...(endDate && {
+               $lte: new Date(endDate).setHours(23, 59, 59),
+            }),
+         };
+
+         if (!transactionType || transactionType === "income") {
             invoices = await Invoice.find({
-               ...((filter.startDate || filter.endDate) && {
-                  date: {
-                     ...(filter.startDate && {
-                        $gte: new Date(filter.startDate).setHours(00, 00, 00),
-                     }),
-                     ...(filter.endDate && {
-                        $lte: new Date(filter.endDate).setHours(23, 59, 59),
-                     }),
-                  },
-               }),
-            }).populate("user");
-         }
-         if (filter.transactionType !== "income") {
-            expences = await Expence.find({
-               ...((filter.startDate || filter.endDate) && {
-                  date: {
-                     ...(filter.startDate && {
-                        $gte: new Date(filter.startDate).setHours(00, 00, 00),
-                     }),
-                     ...(filter.endDate && {
-                        $lte: new Date(filter.endDate).setHours(23, 59, 59),
-                     }),
-                  },
-               }),
+               ...((startDate || endDate) && { date }),
             }).populate({
-               path: "expencetype",
+               path: "user.user_id",
+               model: "user",
+               select: ["name", "lastname"],
             });
          }
-
-         if (filter.transactionType && filter.transactionType !== "income") {
-            let filteredExpences = [];
-            for (let x = 0; x < expences.length; x++) {
-               console.log(expences[x]);
-               if (expences[x].expencetype.type === filter.transactionType)
-                  filteredExpences.push(expences[x]);
-            }
-            expences = filteredExpences;
+         if (transactionType !== "income") {
+            expences = await Expence.find({
+               ...((startDate || endDate) && { date }),
+            }).populate({
+               path: "expencetype",
+               ...(transactionType && {
+                  match: { type: transactionType },
+               }),
+            });
          }
+         expences = expences.filter((item) => item.expencetype);
       }
 
-      transactions = expences.concat(invoices);
-      transactions = sortArray(transactions);
+      const total = sortArray([...invoices, ...expences]);
 
-      if (transactions.length === 0) {
+      if (total.length === 0) {
          return res.status(400).json({
             msg: "No se encontraron movimientos con dichas descripciones",
          });
       }
 
-      res.json(transactions);
+      res.json(total);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });
@@ -93,11 +80,10 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 //@access   Private && Admin
 router.get("/withdrawal", [auth, adminAuth], async (req, res) => {
    try {
-      let allWithdrawals = [];
       let withdrawals = [];
 
       if (Object.entries(req.query).length === 0) {
-         allWithdrawals = await Expence.find()
+         withdrawals = await Expence.find()
             .populate({
                path: "expencetype",
                model: "expencetype",
@@ -107,16 +93,16 @@ router.get("/withdrawal", [auth, adminAuth], async (req, res) => {
             })
             .sort({ date: -1 });
       } else {
-         const filter = req.query;
+         const { startDate, endDate, expencetype } = req.query;
 
-         allWithdrawals = await Expence.find({
-            ...((filter.startDate || filter.endDate) && {
+         withdrawals = await Expence.find({
+            ...((startDate || endDate) && {
                date: {
-                  ...(filter.startDate && {
-                     $gte: new Date(filter.startDate).setHours(00, 00, 00),
+                  ...(startDate && {
+                     $gte: new Date(startDate).setHours(00, 00, 00),
                   }),
-                  ...(filter.endDate && {
-                     $lte: new Date(filter.endDate).setHours(23, 59, 59),
+                  ...(endDate && {
+                     $lte: new Date(endDate).setHours(23, 59, 59),
                   }),
                },
             }),
@@ -126,15 +112,13 @@ router.get("/withdrawal", [auth, adminAuth], async (req, res) => {
                model: "expencetype",
                match: {
                   type: "withdrawal",
-                  ...(filter.expencetype && { _id: filter.expencetype }),
+                  ...(expencetype && { _id: expencetype }),
                },
             })
             .sort({ date: -1 });
       }
 
-      for (let x = 0; x < allWithdrawals.length; x++) {
-         if (allWithdrawals[x].expencetype) withdrawals.push(allWithdrawals[x]);
-      }
+      withdrawals = withdrawals.filter((item) => item.expencetype);
 
       if (withdrawals.length === 0) {
          return res.status(400).json({
@@ -163,6 +147,15 @@ router.post(
    async (req, res) => {
       let { value, expencetype, description } = req.body;
 
+      value = Number(
+         typeof value === "string" ? value.replace(/,/g, ".") : value
+      );
+
+      if (isNaN(value))
+         return res.status(400).json({
+            msg: "Ingrese un número válido",
+         });
+
       let errors = [];
       const errorsResult = validationResult(req);
       if (!errorsResult.isEmpty()) {
@@ -175,104 +168,44 @@ router.post(
             _id: expencetype,
          });
 
-         let last = await Register.find().sort({ $natural: -1 }).limit(1);
-         last = last[0];
+         let register = await Register.find().sort({ $natural: -1 }).limit(1);
+         register = register[0];
 
-         const msg =
-            "Primero debe ingresar dinero a la caja antes de hacer cualquier transacción";
-
-         if (!last)
+         if (!register || register.registermoney === 0)
             return res.status(400).json({
-               msg,
-            });
-
-         if (last.registermoney === 0)
-            return res.status(400).json({
-               msg,
+               msg: "Primero debe ingresar dinero a la caja antes de hacer cualquier transacción",
             });
 
          if (
-            expencetypeinfo.type !== "special-income" &&
-            last.registermoney < value
+            expencetypeinfo.type !== "cheatincome" &&
+            register.registermoney < value
          )
             return res.status(400).json({
                msg: "No se puede utilizar más dinero del que hay en caja",
             });
 
-         //search for the last expence
-         let expence = await Expence.find()
-            .populate("expencetype")
-            .sort({ $natural: -1 })
-            .limit(1);
-         expence = expence[0];
+         const registermoney =
+            expencetypeinfo.type !== "cheatincome"
+               ? register.registermoney - value
+               : register.registermoney + value;
 
-         if (typeof value === "string") {
-            value = value.replace(/,/g, ".");
-            value = Number(value);
-         }
-
-         if (Number.isNaN(value))
-            return res.status(400).json({
-               msg: "Ingrese un número válido",
-            });
-
-         const plusvalue = Math.floor((last.registermoney + value) * 100) / 100;
-         const minusvalue =
-            Math.floor((last.registermoney - value) * 100) / 100;
-
-         if (last.temporary) {
+         if (register.temporary) {
             await Register.findOneAndUpdate(
-               { _id: last.id },
-               {
-                  ...(expencetypeinfo.type === "expence" && {
-                     expence: !last.expence
-                        ? value
-                        : Math.floor((last.expence + value) * 100) / 100,
-                     registermoney: minusvalue,
-                  }),
-                  ...(expencetypeinfo.type === "special-income" && {
-                     cheatincome: !last.cheatincome
-                        ? value
-                        : Math.floor((last.cheatincome + value) * 100) / 100,
-                     registermoney: plusvalue,
-                  }),
-                  ...(expencetypeinfo.type === "withdrawal" && {
-                     withdrawal: !last.withdrawal
-                        ? value
-                        : Math.floor((last.withdrawal + value) * 100) / 100,
-                     registermoney: minusvalue,
-                  }),
-               }
+               { _id: register._id },
+               { $set: { registermoney } }
             );
          } else {
-            const data = {
-               temporary: true,
-               difference: 0,
-               ...(expencetypeinfo.type === "expence" && {
-                  expence: value,
-                  registermoney: minusvalue,
-               }),
-               ...(expencetypeinfo.type === "special-income" && {
-                  cheatincome: value,
-                  registermoney: plusvalue,
-               }),
-               ...(expencetypeinfo.type === "withdrawal" && {
-                  withdrawal: value,
-                  registermoney: minusvalue,
-               }),
-            };
-
-            const register = new Register(data);
+            register = new Register({ registermoney });
 
             await register.save();
-
-            last = await Register.find().sort({ $natural: -1 }).limit(1);
-            last = last[0];
          }
 
-         let data = { value, expencetype, description, register: last._id };
-
-         expence = new Expence(data);
+         const expence = new Expence({
+            value,
+            expencetype,
+            description,
+            register: register._id,
+         });
 
          await expence.save();
 
@@ -290,30 +223,26 @@ router.post(
 router.delete("/:id", [auth, adminAuth], async (req, res) => {
    try {
       //Remove Expence
-      const expence = await Expence.findOneAndRemove({ _id: req.params.id });
-      const expencetypeinfo = await ExpenceType.findOne({
-         _id: expence.expencetype,
-      });
+      const expence = await Expence.findOneAndRemove({
+         _id: req.params.id,
+      })
+         .populate({
+            path: "expencetype",
+            model: "expencetype",
+         })
+         .populate({
+            path: "register",
+            model: "register",
+         });
 
-      let last = await Register.find().sort({ $natural: -1 }).limit(1);
-      last = last[0];
+      const registermoney =
+         expence.expencetype.type !== "cheatincome"
+            ? expence.register.registermoney + expence.value
+            : expence.register.registermoney - expence.value;
 
       await Register.findByIdAndUpdate(
-         { _id: last.id },
-         {
-            ...(expencetypeinfo.type === "expence" && {
-               expence: last.expence - expence.value,
-               registermoney: last.registermoney + expence.value,
-            }),
-            ...(expencetypeinfo.type === "special-income" && {
-               cheatincome: last.cheatincome - expence.value,
-               registermoney: last.registermoney - expence.value,
-            }),
-            ...(expencetypeinfo.type === "withdrawal" && {
-               withdrawal: last.withdrawal - expence.value,
-               registermoney: last.registermoney + expence.value,
-            }),
-         }
+         { _id: expence.register._id },
+         { $set: { registermoney } }
       );
 
       res.json({ msg: "Expence deleted" });
@@ -323,17 +252,12 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
+//@desc Function to sort an array by date
 const sortArray = (array) => {
-   let sortedArray = array.sort((a, b) => {
+   return array.sort((a, b) => {
       if (a.date > b.date) return -1;
       if (a.date < b.date) return 1;
    });
-
-   return sortedArray;
 };
-
-// const formatNumber = (number) => {
-//    return new Intl.NumberFormat("de-DE").format(number);
-// };
 
 module.exports = router;

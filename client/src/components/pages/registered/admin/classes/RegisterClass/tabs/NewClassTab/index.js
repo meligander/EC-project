@@ -27,7 +27,7 @@ const NewClassTab = ({
    const _id = match.params.class_id;
 
    const [adminValues, setAdminValues] = useState({
-      sameSchedule: false,
+      sameSchedule: true,
    });
 
    const [formData, setFormData] = useState({
@@ -88,11 +88,6 @@ const NewClassTab = ({
       setFormData({
          ...formData,
          [e.target.name]: e.target.value,
-         ...(e.target.name.substring(0, 4) === "hour" &&
-            sameSchedule && {
-               [e.target.name.substring(0, e.target.name.length - 1) + "2"]:
-                  e.target.value,
-            }),
       });
    };
 
@@ -117,8 +112,9 @@ const NewClassTab = ({
             confirm={() =>
                registerUpdateClass({
                   ...formData,
-                  category: classInfo.category._id,
-                  students: classInfo.students,
+                  category: classInfo.category ? classInfo.category._id : "",
+                  students: classInfo.students ? classInfo.students : [],
+                  ...(sameSchedule && { hourin2: hourin1, hourout2: hourout1 }),
                })
             }
             info="¿Está seguro que los datos son correctos?"
@@ -203,10 +199,11 @@ const NewClassTab = ({
                   <input
                      className="form-input"
                      type="time"
+                     disabled={hourin1 === ""}
                      name="hourout1"
                      onChange={onChange}
                      value={hourout1}
-                     min="08:00"
+                     min={hourin1}
                      max="22:00"
                   />
                </div>
@@ -297,7 +294,7 @@ const NewClassTab = ({
             <div className="btn-center">
                <button className="btn btn-primary" type="submit">
                   {_id ? <FaEdit /> : <FiSave />}
-                  &nbsp; {!_id ? "Guardar Cambios" : "Registrar"}
+                  &nbsp; {_id ? "Guardar Cambios" : "Registrar"}
                </button>
             </div>
          </form>

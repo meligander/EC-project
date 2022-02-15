@@ -20,12 +20,8 @@ router.get("/", auth, async (req, res) => {
       let classes;
 
       let filter = {
-         ...(teacher && {
-            teacher,
-         }),
-         ...(category && {
-            category,
-         }),
+         ...(teacher && { teacher }),
+         ...(category && { category }),
          year: year ? year : new Date().getFullYear(),
       };
 
@@ -39,15 +35,13 @@ router.get("/", auth, async (req, res) => {
             path: "teacher",
             model: "user",
             select: ["lastname", "name"],
+            options: { sort: { lastname: 1, name: 1 } },
          });
 
-      if (classes.length === 0) {
+      if (classes.length === 0)
          return res
             .status(400)
             .json({ msg: "No se encontraron clases con dichas descripciones" });
-      }
-
-      classes = sortArray(classes);
 
       res.json(classes);
    } catch (err) {
@@ -61,7 +55,9 @@ router.get("/", auth, async (req, res) => {
 //@access   Private
 router.get("/:class_id", auth, async (req, res) => {
    try {
-      let classinfo = await Class.findOne({ _id: req.params.class_id })
+      const { class_id } = req.params;
+
+      let classinfo = await Class.findOne({ _id: class_id })
          .populate("category", ["name"])
          .populate("teacher", ["name", "lastname"])
          .lean();
@@ -72,11 +68,12 @@ router.get("/:class_id", auth, async (req, res) => {
             .json({ msg: "No se encontró una clase con dichas descripciones" });
 
       const enrollments = await Enrollment.find({
-         "classroom._id": req.params.class_id,
+         classroom: class_id,
       }).populate({
          path: "student",
          model: "user",
          select: "-password",
+         options: { sort: { lastname: 1, name: 1 } },
       });
 
       classinfo.students = enrollments
@@ -103,15 +100,16 @@ router.get("/student/:id", auth, async (req, res) => {
    try {
       const date = new Date();
 
-      let enroll = await Enrollment.findOne({
+      let enrollment = await Enrollment.findOne({
          student: req.params.id,
          year: date.getFullYear(),
       });
 
       let classinfo;
-      if (enroll) {
+
+      if (enrollment) {
          classinfo = await Class.findOne({
-            _id: enroll.classroom._id,
+            _id: enroll.classroom,
             year: date.getFullYear(),
          })
             .populate("category", ["name"])
@@ -156,8 +154,7 @@ router.post(
          students,
       } = req.body;
 
-      const date = new Date();
-      const year = date.getFullYear();
+      const year = new Date().getFullYear();
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -167,29 +164,16 @@ router.post(
       }
 
       try {
-         let hours = [hourin1, hourin2, hourout1, hourout2];
-         for (let x = 0; x < hours.length; x++) {
-            if (hours[x]) {
-               const hour = hours[x].substring(0, 2);
-               const minutes = hours[x].substring(3);
-
-               date.setUTCHours(hour, minutes, 0);
-
-               hours[x] = date;
-               hours[x] = date;
-            }
-         }
-
          let data = {
             teacher,
             category,
             ...(classroom && { classroom }),
             ...(day1 && { day1 }),
             ...(day2 && { day2 }),
-            ...(hours[0] && { hourin1: hours[0] }),
-            ...(hours[1] && { hourin2: hours[1] }),
-            ...(hours[2] && { hourout1: hours[2] }),
-            ...(hours[3] && { hourout2: hours[3] }),
+            ...(hourin1 && { hourin1: getTime(hourin1) }),
+            ...(hourin2 && { hourin2: getTime(hourin2) }),
+            ...(hourout1 && { hourout1: getTime(hourout1) }),
+            ...(hourout2 && { hourout2: getTime(hourout2) }),
             year,
          };
 
@@ -210,24 +194,24 @@ router.post(
                model: "user",
                select: ["lastname", "name"],
             });
-         const newClass = lastClass[0];
-         for (let x = 0; x < students.length; x++) {
-            await Enrollment.findOneAndUpdate(
-               {
-                  student: students[x]._id,
-                  year,
-               },
-               {
-                  classroom: {
-                     _id: newClass._id,
-                     periodAverage: [],
-                     periodAbsence: [],
-                  },
-               }
-            );
-         }
+         lastClass = lastClass[0];
 
-         res.json(newClass);
+         await students.forEach(
+            async (student) =>
+               await Enrollment.findOneAndUpdate(
+                  {
+                     student: student._id,
+                     year,
+                  },
+                  {
+                     classroom: {
+                        _id: lastClass._id,
+                     },
+                  }
+               )
+         );
+
+         res.json(lastClass);
       } catch (err) {
          console.error(err.message);
          res.status(500).json({ msg: "Server Error" });
@@ -265,50 +249,31 @@ router.put(
          return res.status(400).json({ errors });
       }
 
-      const date = new Date();
-      const year = date.getFullYear();
-
       try {
-         let hours = [hourin1, hourin2, hourout1, hourout2];
-         for (let x = 0; x < hours.length; x++) {
-            if (hours[x]) {
-               const hour = hours[x].substring(0, 2);
-               const minutes = hours[x].substring(3);
-
-               const date = new Date();
-
-               date.setUTCHours(hour, minutes, 0);
-
-               hours[x] = date;
-            }
-         }
-
          let data = {
             teacher,
             ...(classroom && { classroom: classroom }),
             ...(day1 && { day1: day1 }),
             ...(day2 && { day2: day2 }),
-            ...(hours[0] && { hourin1: hours[0] }),
-            ...(hours[1] && { hourin2: hours[1] }),
-            ...(hours[2] && { hourout1: hours[2] }),
-            ...(hours[3] && { hourout2: hours[3] }),
+            ...(hourin1 && { hourin1: getTime(hourin1) }),
+            ...(hourin2 && { hourin2: getTime(hourin2) }),
+            ...(hourout1 && { hourout1: getTime(hourout1) }),
+            ...(hourout2 && { hourout2: getTime(hourout2) }),
          };
 
          let toDelete = await Enrollment.find({
-            "classroom._id": req.params.id,
+            classroom: req.params.id,
          });
 
          for (let x = 0; x < students.length; x++) {
             await Enrollment.findOneAndUpdate(
                {
                   student: students[x]._id,
-                  year,
+                  year: new Date().getFullYear(),
                },
                {
                   classroom: {
                      _id: req.params.id,
-                     periodAverage: [],
-                     periodAbsence: [],
                   },
                }
             );
@@ -349,7 +314,7 @@ router.put(
 //@access   Private && Admin
 router.delete("/:id", [auth, adminAuth], async (req, res) => {
    try {
-      //Remove user
+      //Remove class
       await Class.findOneAndRemove({ _id: req.params.id });
 
       //Delete the property classroom form students enrollments
@@ -362,60 +327,55 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
+//@desc Function to delete the info related to a class
 const deleteInfoRelated = async (classroom, enrollmentsToDelete) => {
-   let enrollments = [];
-   if (classroom) {
-      enrollments = await Enrollment.find({
-         "classroom._id": classroom,
-      });
-      const attendances = await Attendance.find({ classroom });
-      for (let x = 0; x < attendances.length; x++) {
-         await Attendance.findOneAndDelete({ _id: attendances[x] });
-      }
+   let attendances = [];
+   let grades = [];
 
-      const grades = await Grade.find({ classroom });
-      for (let x = 0; x < grades.length; x++) {
-         await Grade.findOneAndDelete({ _id: grades[x] });
-      }
-   } else {
-      enrollments = enrollmentsToDelete;
-   }
+   const enrollments = classroom
+      ? await Enrollment.find({
+           classroom: classroom,
+        })
+      : enrollmentsToDelete;
 
    for (let x = 0; x < enrollments.length; x++) {
       await Enrollment.findOneAndUpdate(
          { _id: enrollments[x]._id },
-         { "classroom._id": null }
+         { classroom: null }
       );
 
-      if (enrollmentsToDelete) {
-         const attendances = await Attendance.find({
-            student: enrollments[x].student,
-         });
-         for (let y = 0; y < attendances.length; y++) {
-            await Attendance.findOneAndDelete({ _id: attendances[y] });
-         }
+      attendances = [
+         ...attendances,
+         ...(await Attendance.find({
+            ...(classroom && { student: enrollments[x].student }),
+            classroom: enrollments[x].classroom,
+         })),
+      ];
 
-         const grades = await Grade.find({ student: enrollments[x].student });
-         for (let y = 0; y < grades.length; y++) {
-            await Grade.findOneAndDelete({ _id: grades[y] });
-         }
-      }
+      grades = [
+         ...grades,
+         ...(await Grade.find({
+            ...(classroom && { student: enrollments[x].student }),
+            classroom: enrollments[x].classroom,
+         })),
+      ];
    }
+
+   attendances.forEach(
+      async (item) => await Attendance.findOneAndDelete({ _id: item._id })
+   );
+
+   grades.forEach(
+      async (item) => await Grade.findOneAndDelete({ _id: item._id })
+   );
 };
 
-const sortArray = (array) => {
-   const sortedArray = array.sort((a, b) => {
-      if (a.teacher.lastname > b.teacher.lastname) return 1;
-      if (a.teacher.lastname < b.teacher.lastname) return -1;
+//@desc Function to get the date with the correct time and hour in UTC
+const getTime = (time) => {
+   const hour = time.substring(0, 2);
+   const minute = time.substring(3);
 
-      if (a.teacher.name > b.teacher.name) return 1;
-      if (a.teacher.name < b.teacher.name) return -1;
-
-      if (a.category.name > b.category.name) return 1;
-      if (a.category.name < b.category.name) return -1;
-   });
-
-   return sortedArray;
+   return new Date(Date.UTC(2000, 0, 01, hour, minute, 0, 0));
 };
 
 module.exports = router;

@@ -169,9 +169,11 @@ const Classes = ({
                <Link
                   to={users.length !== 0 ? "/class/register" : "#"}
                   onClick={() => {
-                     window.scroll(0, 0);
-                     clearClass();
-                     clearSearch();
+                     if (users.length !== 0) {
+                        window.scroll(0, 0);
+                        clearClass();
+                        clearSearch();
+                     }
                   }}
                   className={`btn ${
                      users.length !== 0 ? "btn-dark" : "btn-black"

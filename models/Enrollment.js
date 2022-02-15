@@ -19,24 +19,32 @@ const EnrollmentSchema = new mongoose.Schema({
       ref: "category",
       required: true,
    },
+   // classroom: {
+   //    _id: {
+   //       type: mongoose.Schema.Types.ObjectId,
+   //       ref: "class",
+   //    },
+   //    periodAverage: {
+   //       type: Array,
+   //    },
+   //    average: {
+   //       type: Number,
+   //    },
+   //    periodAbsence: {
+   //       type: Array,
+   //    },
+   //    absence: {
+   //       type: Number,
+   //    },
+   // },
    classroom: {
-      _id: {
-         type: mongoose.Schema.Types.ObjectId,
-         ref: "class",
-      },
-      periodAverage: {
-         type: Array,
-      },
-      average: {
-         type: Number,
-      },
-      periodAbsence: {
-         type: Array,
-      },
-      absence: {
-         type: Number,
-      },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "class",
    },
+   // class_id: {
+   //    type: mongoose.Schema.Types.ObjectId,
+   //    ref: "class",
+   // },
 });
 
 const Enrollment = mongoose.model("enrollment", EnrollmentSchema);

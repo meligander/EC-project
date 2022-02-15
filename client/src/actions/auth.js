@@ -2,7 +2,7 @@ import api from "../utils/api";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
+import { newObject, updateLoadingSpinner } from "./mixvalues";
 import { updateExpiredIntallments } from "./installment";
 
 import {
@@ -35,11 +35,7 @@ export const loadUser = (login) => async (dispatch) => {
 export const loginUser = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
 
-   let user = {};
-
-   for (const prop in formData) {
-      if (formData[prop] !== "") user[prop] = formData[prop];
-   }
+   let user = newObject(formData);
 
    try {
       const res = await api.post("/auth", user);

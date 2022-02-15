@@ -62,6 +62,7 @@ const WithdrawalList = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
+               setAdminValues((prev) => ({ ...prev, page: 0 }));
                loadWithdrawals(filterData);
             }}
          >

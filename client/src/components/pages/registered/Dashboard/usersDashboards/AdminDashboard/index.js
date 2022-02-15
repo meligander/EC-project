@@ -29,7 +29,11 @@ import {
    getTotalDebt,
 } from "../../../../../../actions/installment";
 import { getYearEnrollments } from "../../../../../../actions/enrollment";
-import { clearSearch, getActiveUsers } from "../../../../../../actions/user";
+import {
+   clearUsers,
+   clearSearch,
+   getActiveUsers,
+} from "../../../../../../actions/user";
 import {
    clearClasses,
    getActiveClasses,
@@ -53,6 +57,7 @@ const AdminDashboard = ({
    getInvoiceNumber,
    clearInstallments,
    clearRegisters,
+   clearUsers,
    clearSearch,
    clearClasses,
    clearCategories,
@@ -148,7 +153,7 @@ const AdminDashboard = ({
                         to="/register/info"
                         onClick={() => {
                            clearRegisters();
-                           clearSearch();
+                           clearUsers();
                            window.scroll(0, 0);
                         }}
                      >
@@ -168,7 +173,7 @@ const AdminDashboard = ({
                      {capitalize(
                         format(
                            register && register.temporary
-                              ? register.date
+                              ? new Date(register.date)
                               : new Date(),
                            "EEEE, d 'de' LLLL 'de' yyyy",
                            {
@@ -219,6 +224,7 @@ const AdminDashboard = ({
                         to="/class/all"
                         onClick={() => {
                            clearClasses();
+                           clearUsers();
                            window.scroll(0, 0);
                         }}
                         className="side-nav-link"
@@ -332,4 +338,5 @@ export default connect(mapStateToProps, {
    clearClasses,
    clearCategories,
    clearInvoice,
+   clearUsers,
 })(AdminDashboard);

@@ -97,7 +97,7 @@ const FilterClassTab = ({
          </form>
          <div className="mt-2">
             <Alert type="3" />
-            {!loading && (
+            {!loading && users[0] && users[0].type === "student" && (
                <StudentTable
                   users={users}
                   clearProfile={clearProfile}

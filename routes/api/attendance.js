@@ -1,34 +1,116 @@
 const router = require("express").Router();
-const format = require("date-fns/format");
+const { check, validationResult } = require("express-validator");
 
 //Middlewares
 const auth = require("../../middleware/auth");
+const adminAuth = require("../../middleware/adminAuth");
 
 //Models
 const Attendance = require("../../models/Attendance");
 const Enrollment = require("../../models/Enrollment");
+
+//@route    GET /api/attendance/best
+//@desc     get students with less inassistances
+//@access   Private && Admin
+router.get("/best", [auth, adminAuth], async (req, res) => {
+   try {
+      let { quantity, year, category } = req.query;
+
+      quantity = quantity ? quantity : 4;
+
+      const thisYear = new Date().getFullYear();
+      let totalAtt = [];
+
+      const attendances = await Attendance.find({
+         student: { $exists: true },
+         date: {
+            $gte: new Date(Date.UTC(year ? year : thisYear, 0, 01, 0, 0, 0)),
+            $lte: new Date(Date.UTC(year ? year : thisYear, 11, 31, 0, 0, 0)),
+         },
+      })
+         .populate({
+            path: "classroom",
+            model: "class",
+            populate: {
+               path: "category",
+            },
+            ...(category && {
+               match: { _id: category },
+            }),
+         })
+         .populate({
+            path: "student",
+            model: "user",
+            select: ["lastname", "name", "studentnumber"],
+         });
+
+      let enrollments = await Enrollment.find({
+         year: year ? year : thisYear,
+         ...(category && { category }),
+         classroom: { $exists: true },
+      })
+         .populate({
+            path: "student",
+            model: "user",
+            select: ["lastname", "name", "studentnumber"],
+         })
+         .populate({
+            path: "category",
+            model: "category",
+         });
+
+      if (quantity > 0) {
+         const students = attendances
+            .filter((item) => item.classroom)
+            .reduce((res, curr) => {
+               if (res[curr.student]) res[curr.student].push(curr);
+               else {
+                  Object.assign(res, { [curr.student]: [curr] });
+                  enrollments = enrollments.filter(
+                     (enroll) =>
+                        enroll.student._id.toString() !==
+                        curr.student._id.toString()
+                  );
+               }
+
+               return res;
+            }, {});
+
+         for (const x in students) {
+            if (students[x].length <= quantity)
+               totalAtt.push({
+                  student: students[x][0].student,
+                  category: students[x][0].classroom.category,
+                  quantity: students[x].length,
+               });
+         }
+      }
+
+      totalAtt = [
+         ...totalAtt,
+         ...enrollments.map((item) => {
+            return {
+               student: item.student,
+               category: item.category,
+               quantity: 0,
+            };
+         }),
+      ];
+
+      res.json(totalAtt.sort((a, b) => a.quantity - b.quantity));
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: "Server Error" });
+   }
+});
 
 //@route    GET /api/attendance/:class_id
 //@desc     Get all attendances for a class
 //@access   Private
 router.get("/:class_id", auth, async (req, res) => {
    try {
-      const attendances = await Attendance.find({
-         classroom: req.params.class_id,
-      })
-         .populate({
-            path: "student",
-            model: "user",
-            select: ["name", "lastname"],
-            options: { sort: { lastname: 1, name: 1 } },
-         })
-         .sort({ date: 1 });
+      const attendancesTable = await buildTable(req.params.class_id, res);
 
-      const attendancesTable = await buildTable(
-         attendances,
-         req.params.class_id,
-         res
-      );
       res.json(attendancesTable);
    } catch (err) {
       console.error(err.message);
@@ -36,20 +118,16 @@ router.get("/:class_id", auth, async (req, res) => {
    }
 });
 
-//@route    GET /api/attendance/student/:id
+//@route    GET /api/attendance/:class/:id
 //@desc     Get a student's attendances
 //@access   Private
-router.get("/student/:class_id/:user_id", auth, async (req, res) => {
+router.get("/:class_id/:user_id", auth, async (req, res) => {
    try {
-      if (req.params.class_id === "null") {
-         return res.status(400).json({
-            msg: "No está registrado en ninguna clase",
-         });
-      }
+      const { class_id, user_id } = req.params;
 
       const attendances = await Attendance.find({
-         student: req.params.user_id,
-         classroom: req.params.class_id,
+         student: user_id,
+         classroom: class_id,
       }).sort({ date: 1 });
 
       if (attendances.length === 0) {
@@ -65,70 +143,139 @@ router.get("/student/:class_id/:user_id", auth, async (req, res) => {
    }
 });
 
-//@route    POST /api/attendance/period
+//@route    POST /api/attendance
+//@desc     Add a date column for the period
+//@access   Private
+router.post(
+   "/:class_id/:period",
+   [auth, check("date", "Primero debe elegir una fecha").not().isEmpty()],
+   async (req, res) => {
+      let errors = [];
+
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
+         return res.status(400).json({ errors });
+      }
+
+      const { class_id, period } = req.params;
+
+      try {
+         const data = {
+            period,
+            date: req.body.date,
+            classroom: class_id,
+         };
+
+         let attendance = await Attendance.findOne(data);
+
+         if (attendance)
+            return res
+               .status(400)
+               .json({ msg: "Ya se ha agregado dicha fecha" });
+
+         attendance = new Attendance(data);
+         await attendance.save();
+
+         const attendancesTable = await buildTable(class_id, res);
+
+         res.json(attendancesTable);
+      } catch (err) {
+         console.error(err.message);
+         res.status(500).json({ msg: "Server Error" });
+      }
+   }
+);
+
+//@route    POST /api/attendance
+//@desc     Add all dates for a bimester
+//@access   Private
+router.post(
+   "/:class_id/:period/bimester",
+   [
+      auth,
+      check("fromDate", "Debe seleccionar la fecha del comienzo del bimestre")
+         .not()
+         .isEmpty(),
+      check("toDate", "Debe seleccionar la fecha del fin del bimestre")
+         .not()
+         .isEmpty(),
+   ],
+   async (req, res) => {
+      const { class_id, period } = req.params;
+      const { fromDate, toDate, day1, day2, notAble } = req.body;
+
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
+         return res.status(400).json({ errors });
+      }
+
+      if (notAble)
+         return res.status(400).json({
+            msg: "Debe agregar por lo menos una fecha en los bimestres anteriores",
+         });
+
+      if (!day1 || !day2)
+         return res.status(400).json({
+            msg: "Deben estar cargadas los días en la que los alumno asisten a clases",
+         });
+
+      const dates = [
+         ...getDaysBetweenDates(fromDate, toDate, day1),
+         ...getDaysBetweenDates(fromDate, toDate, day2),
+      ];
+
+      try {
+         for (let x = 0; x < dates.length; x++) {
+            const attendance = new Attendance({
+               period,
+               date: dates[x],
+               classroom: class_id,
+            });
+            await attendance.save();
+         }
+
+         const attendancesTable = await buildTable(class_id, res);
+
+         console.log(attendancesTable.periods);
+
+         res.json(attendancesTable);
+      } catch (err) {
+         console.error(err.message);
+         res.status(500).json({ msg: "Server Error" });
+      }
+   }
+);
+
+//@route    PUT /api/attendance/period
 //@desc     Add or remove attendances from a period when save
 //@access   Private
-router.post("/period", auth, async (req, res) => {
-   const attendances = req.body;
+router.put("/:class_id/:period", auth, async (req, res) => {
+   let attendances = req.body;
 
-   const classroom = attendances[0][0].classroom;
-   const period = attendances[0][0].period;
+   attendances = attendances
+      .flat()
+      .filter(
+         (item) =>
+            (item.inassistance && item._id === "") ||
+            (!item.inassistance && item._id !== "")
+      );
 
-   const date = new Date();
-   const year = date.getFullYear();
+   const { class_id: classroom, period } = req.params;
 
    try {
       for (let x = 0; x < attendances.length; x++) {
-         let count = 0;
-         const student = attendances[x][0].student;
-
-         for (let y = 0; y < attendances[x].length; y++) {
-            if (attendances[x][y].inassistance) {
-               if (attendances[x][y]._id === "") {
-                  const data = {
-                     student,
-                     date: attendances[x][y].date,
-                     period,
-                     classroom,
-                  };
-                  const attendance = new Attendance(data);
-                  await attendance.save();
-               }
-               count++;
-            } else {
-               if (attendances[x][y]._id !== "") {
-                  await Attendance.findOneAndDelete({
-                     student,
-                     date: attendances[x][y].date,
-                     period,
-                     classroom,
-                  });
-               }
-            }
-         }
-
-         const filter2 = { year, student };
-
-         const enrollment = await Enrollment.findOne(filter2);
-
-         let periodAbsence = [];
-         let allAbsence = 0;
-
-         if (enrollment.classroom.periodAbsence.length === 0)
-            periodAbsence = new Array(4).fill(0);
-         else periodAbsence = [...enrollment.classroom.periodAbsence];
-         periodAbsence[period - 1] = parseInt(count);
-
-         for (let y = 0; y < 4; y++) {
-            allAbsence += periodAbsence[y];
-         }
-         await Enrollment.findOneAndUpdate(
-            { _id: enrollment._id },
-            {
-               "classroom.periodAbsence": periodAbsence,
-               "classroom.absence": allAbsence,
-            }
-         );
+         const data = {
+            student: attendances[x].student,
+            date: attendances[x].date,
+            classroom,
+            period,
+         };
+         if (attendances[x].inassistance) {
+            const attendance = new Attendance(data);
+            await attendance.save();
+         } else await Attendance.findOneAndRemove(data);
       }
 
       res.json({ msg: "Attendances Updated" });
@@ -138,160 +285,26 @@ router.post("/period", auth, async (req, res) => {
    }
 });
 
-//@route    POST /api/attendance
-//@desc     Add a date column for the period
-//@access   Private
-router.post("/", auth, async (req, res) => {
-   const { date, period, classroom } = req.body;
-
-   if (!date)
-      return res.status(400).json({ msg: "Primero debe elegir una fecha" });
-
-   const data = {
-      period,
-      date: new Date(date),
-      classroom: classroom._id,
-   };
-
-   try {
-      let attendance = await Attendance.findOne(data);
-
-      if (attendance) {
-         return res.status(400).json({ msg: "Ya se ha agregado dicha fecha" });
-      }
-
-      attendance = new Attendance(data);
-      await attendance.save();
-
-      const date = new Date();
-      const start = new Date(date.getFullYear(), 01, 01);
-      const end = new Date(date.getFullYear(), 12, 31);
-
-      let attendances = await Attendance.find({
-         classroom,
-         date: {
-            $gte: start,
-            $lt: end,
-         },
-      })
-         .populate({
-            path: "student",
-            model: "user",
-            select: ["name", "lastname"],
-         })
-         .sort({ date: 1 });
-
-      let attendancesTable = await buildTable(attendances, classroom, res);
-
-      res.json(attendancesTable);
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ msg: "Server Error" });
-   }
-});
-
-//@route    POST /api/attendance
-//@desc     Add all dates for a bimester
-//@access   Private
-router.post("/bimester", auth, async (req, res) => {
-   const { fromDate, toDate, period, classroom, periods } = req.body;
-
-   let dates = [];
-
-   if (!fromDate || !toDate)
-      return res.status(400).json({
-         msg: "Debe seleccionar las fechas del comienzo y fin del bimestre",
-      });
-
-   if (period !== 1 && !periods[period - 2])
-      return res.status(400).json({
-         msg: "Debe agregar por lo menos una fecha en los bimestres anteriores",
-      });
-
-   if (!classroom.day1 || !classroom.day2)
-      return res.status(400).json({
-         msg: "Deben estar cargadas los días en la que los alumno asisten a clases",
-      });
-
-   dates = getDaysBetweenDates(fromDate, toDate, classroom.day1);
-   const date2 = getDaysBetweenDates(fromDate, toDate, classroom.day2);
-
-   dates = dates.concat(date2);
-
-   try {
-      for (let x = 0; x < dates.length; x++) {
-         const data = {
-            period,
-            date: new Date(dates[x]),
-            classroom: classroom._id,
-         };
-
-         const attendance = new Attendance(data);
-         await attendance.save();
-      }
-
-      const date = new Date();
-      const start = new Date(date.getFullYear(), 01, 01);
-      const end = new Date(date.getFullYear(), 12, 31);
-
-      let attendances = await Attendance.find({
-         classroom,
-         date: {
-            $gte: start,
-            $lt: end,
-         },
-      })
-         .populate({
-            path: "student",
-            model: "user",
-            select: ["name", "lastname"],
-         })
-         .sort({ date: 1 });
-
-      let attendancesTable = await buildTable(attendances, classroom, res);
-
-      res.json(attendancesTable);
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ msg: "Server Error" });
-   }
-});
-
 //@route    DELETE api/attendance/date/:date
 //@desc     Delete attendances with the same date and the entire column
 //@access   Private
-router.delete("/date/:date/:classroom", auth, async (req, res) => {
+router.delete("/:class_id/:period/:date", auth, async (req, res) => {
    try {
+      const { class_id, period, date } = req.params;
+
       //Remove attendace
-      const classroom = req.params.classroom;
       const attendancesToDelete = await Attendance.find({
-         date: req.params.date,
-         classroom: classroom,
+         date,
+         classroom: class_id,
+         period,
       });
 
       for (let x = 0; x < attendancesToDelete.length; x++) {
-         await Attendance.findOneAndRemove({ _id: attendancesToDelete[x].id });
+         const _id = attendancesToDelete[x].id;
+         await Attendance.findOneAndRemove({ _id });
       }
 
-      const date = new Date();
-      const start = new Date(date.getFullYear(), 01, 01);
-      const end = new Date(date.getFullYear(), 12, 31);
-
-      const attendances = await Attendance.find({
-         classroom: classroom,
-         date: {
-            $gte: start,
-            $lte: end,
-         },
-      })
-         .populate({
-            path: "student",
-            model: "user",
-            select: ["name", "lastname"],
-         })
-         .sort({ date: 1 });
-
-      let attendancesTable = await buildTable(attendances, classroom, res);
+      const attendancesTable = await buildTable(class_id, res);
 
       res.json(attendancesTable);
    } catch (err) {
@@ -300,17 +313,32 @@ router.delete("/date/:date/:classroom", auth, async (req, res) => {
    }
 });
 
-const buildTable = async (attendances, class_id, res) => {
+//@desc Function to create the table to show on the front-end
+const buildTable = async (class_id, res) => {
+   let attendances = [];
    let enrollments = [];
+
    try {
+      attendances = await Attendance.find({
+         classroom: class_id,
+      })
+         .populate({
+            path: "student",
+            model: "user",
+            select: ["name", "lastname"],
+         })
+         .sort({ date: 1 });
+
       enrollments = await Enrollment.find({
-         "classroom._id": class_id,
+         classroom: class_id,
       }).populate({
          model: "user",
          path: "student",
          select: ["name", "lastname"],
          options: { sort: { lastname: 1, name: 1 } },
       });
+
+      enrollments = sortByName(enrollments);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });
@@ -320,29 +348,21 @@ const buildTable = async (attendances, class_id, res) => {
    let periods = [];
 
    //Get the student's header
-   let students = enrollments.map((user) => {
-      // return user.student.lastname + ", " + user.student.name;
-      return {
-         _id: user.student._id,
-         name: user.student.lastname + ", " + user.student.name,
-      };
-   });
-
-   //Add last row for the eliminate button
-   students = [...students, { name: "" }];
+   const students =
+      enrollments[0].year === new Date().getFullYear()
+         ? [...enrollments.map((user) => user.student), {}]
+         : enrollments.map((user) => user.student);
 
    //Divide all the periods in different objects
-   let allPeriods = attendances.reduce((res, curr) => {
+   const allPeriods = attendances.reduce((res, curr) => {
       if (res[curr.period]) res[curr.period].push(curr);
       else Object.assign(res, { [curr.period]: [curr] });
 
       return res;
    }, {});
 
-   //this for works only for objects
    for (const x in allPeriods) {
       let period = [];
-      let count = -1;
 
       const dates = [
          ...new Set(allPeriods[x].map((item) => item.date.toISOString())),
@@ -360,20 +380,19 @@ const buildTable = async (attendances, class_id, res) => {
             : [];
 
          //create an array with the amount of dates for the cells in the row
-         //every item in the array goes with that basic info
+         //every item in the array goes with that info
          let row = Array.from(Array(dates.length), (item, index) => {
-            count++;
+            const inassistance = studentInassistance.find(
+               (item) => item.date.toISOString() === dates[index]
+            );
             return {
-               _id: "",
+               _id: inassistance ? inassistance._id : "",
                classroom: class_id,
                period: x,
                date: dates[index],
                ...(students[z]._id && {
-                  name: "input" + count,
                   student: students[z]._id,
-                  inassistance: studentInassistance.some(
-                     (item) => item.date.toISOString() === dates[index]
-                  ),
+                  inassistance: inassistance ? true : false,
                }),
             };
          });
@@ -385,9 +404,17 @@ const buildTable = async (attendances, class_id, res) => {
    return { header, students, periods };
 };
 
+//@desc Function to get the weekday between a start and an end date
 const getDaysBetweenDates = (start, end, dayName) => {
    let result = [];
-   let days = { Lunes: 1, Martes: 2, Miércoles: 3, Jueves: 4, Viernes: 5 };
+   let days = {
+      Lunes: 1,
+      Martes: 2,
+      Miércoles: 3,
+      Jueves: 4,
+      Viernes: 5,
+      Sábado: 6,
+   };
 
    let day = days[dayName];
 
@@ -404,6 +431,18 @@ const getDaysBetweenDates = (start, end, dayName) => {
       current.setDate(current.getDate() + 7);
    }
    return result;
+};
+
+//@desc Function to sort and array by name
+const sortByName = (array) => {
+   console.log(array);
+   return array.sort((a, b) => {
+      if (a.student.lastname > b.student.lastname) return 1;
+      if (a.student.lastname < b.student.lastname) return -1;
+
+      if (a.student.name > b.student.name) return 1;
+      if (a.student.name < b.student.name) return -1;
+   });
 };
 
 module.exports = router;

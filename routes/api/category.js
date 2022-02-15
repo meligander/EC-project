@@ -37,8 +37,6 @@ router.post(
    "/",
    [auth, adminAuth, check("name", "El nombre es necesario").not().isEmpty()],
    async (req, res) => {
-      const { name, value } = req.body;
-
       let errors = [];
       const errorsResult = validationResult(req);
       if (!errorsResult.isEmpty()) {
@@ -47,9 +45,7 @@ router.post(
       }
 
       try {
-         let data = { name, value };
-
-         let category = new Category(data);
+         const category = new Category(req.body);
 
          await category.save();
 
@@ -75,10 +71,11 @@ router.put(
       //An array of categories
       const { categories, date } = req.body;
 
-      const dateToday = new Date();
+      // const month = parseInt(date.substring(5));
+      // const year = parseInt(date.substring(0, 4));
 
-      const month = parseInt(date.substring(5));
-      const year = parseInt(date.substring(0, 4));
+      const month = new Date(date).getMonth() + 1;
+      const year = new Date(date).getFullYear();
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -87,84 +84,78 @@ router.put(
          return res.status(400).json({ errors });
       }
 
-      for (let x = 0; x < categories.length; x++) {
-         if (categories[x].value === 0 || categories[x].value === "")
-            return res
-               .status(400)
-               .json({ msg: "El valor debe estar definido y ser mayor a 0" });
-      }
+      if (
+         categories.some(
+            (category) => category.value === 0 || category.value === ""
+         )
+      )
+         return res
+            .status(400)
+            .json({ msg: "El valor debe estar definido y ser mayor a 0" });
 
       try {
          for (let x = 0; x < categories.length; x++) {
-            let value = parseFloat(categories[x].value);
+            const category = categories[x];
 
-            await Category.findOneAndUpdate(
-               { _id: categories[x]._id },
-               { value }
-            );
+            const value = parseFloat(category.value);
 
-            const enrollments = await Enrollment.find({
-               year: { $in: [year, year + 1] },
-               category: categories[x]._id,
-            }).populate({ path: "student", select: "-password" });
+            await Category.findOneAndUpdate({ _id: category._id }, { value });
 
-            if (x === 0) {
-               const installmentsInsc = await Installment.find({
+            if (category.name === "Inscripción") {
+               const installments = await Installment.find({
                   number: 0,
                   year: { $in: [year, year + 1] },
                   value: { $ne: 0 },
+                  updatable: true,
                });
-               for (let y = 0; y < installmentsInsc.length; y++) {
-                  await Installment.findOneAndUpdate(
-                     { _id: installmentsInsc[y]._id },
-                     {
-                        value,
-                     }
-                  );
-               }
-               continue;
-            }
 
-            if (enrollments.length !== 0) {
-               for (let y = 0; y < enrollments.length; y++) {
-                  //changed
-                  const installments = await Installment.find({
-                     enrollment: enrollments[y]._id,
-                     number:
-                        enrollments[y].year === year &&
-                        year === dateToday.getFullYear()
-                           ? { $gte: month, $ne: 0 }
-                           : {
-                                $ne: 0,
-                             },
-                     year: { $in: [year, year + 1] },
-                     value: { $ne: 0 },
+               await installments.forEach(
+                  async (inst) =>
+                     await Installment.findOneAndUpdate(
+                        { _id: inst._id },
+                        { $set: { value } }
+                     )
+               );
+            } else {
+               let installments = await Installment.find({
+                  year: { $in: [year, year + 1] },
+                  value: { $ne: 0 },
+                  updatable: true,
+               })
+                  .populate({
+                     model: "user",
+                     path: "student",
+                     select: "-password",
+                  })
+                  .populate({
+                     model: "enrollment",
+                     path: "enrollment",
+                     match: {
+                        category: category._id,
+                     },
                   });
 
-                  let newValue =
-                     enrollments[y].student.discount &&
-                     enrollments[y].student.discount !== 0
-                        ? value -
-                          (value * enrollments[y].student.discount) / 100
-                        : value;
+               await installments.forEach(async (inst) => {
+                  if (
+                     inst.enrollment &&
+                     (inst.year > year || inst.number >= month)
+                  ) {
+                     const discount = inst.student.discount;
+                     let newValue =
+                        discount &&
+                        discount !== 0 &&
+                        (inst.number !== 3 || discount !== 50)
+                           ? value - (value * discount) / 100
+                           : value;
 
-                  for (let z = 0; z < installments.length; z++) {
-                     if (installments[z].halfPayed) continue;
+                     newValue = inst.number === 3 ? newValue / 2 : newValue;
 
                      await Installment.findOneAndUpdate(
-                        { _id: installments[z]._id },
-                        {
-                           value:
-                              installments[z].number !== 3
-                                 ? newValue
-                                 : enrollments[y].student.discount === 10
-                                 ? newValue / 2
-                                 : value / 2,
-                           expired: false,
-                        }
+                        { _id: inst._id },
+                        { $set: { value: newValue /*,expired:false*/ } }
                      );
                   }
-               }
+               });
             }
          }
 
@@ -175,9 +166,5 @@ router.put(
       }
    }
 );
-
-const formatNumber = (number) => {
-   return new Intl.NumberFormat("de-DE").format(number);
-};
 
 module.exports = router;

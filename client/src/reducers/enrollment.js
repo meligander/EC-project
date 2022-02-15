@@ -15,7 +15,6 @@ import {
 const initialState = {
    loading: true,
    enrollments: [],
-   type: "",
    enrollment: null,
    loadingEnrollment: true,
    otherValues: {
@@ -41,8 +40,7 @@ export default function (state = initialState, action) {
       case ENROLLMENTS_LOADED:
          return {
             ...state,
-            enrollments: payload.enrollments,
-            type: payload.type,
+            enrollments: payload,
             loading: false,
             error: {},
          };
@@ -67,8 +65,8 @@ export default function (state = initialState, action) {
             ...state,
             enrollments:
                state.enrollments.length > 0
-                  ? [payload]
-                  : [...state.enrollments, payload],
+                  ? [payload, ...state.enrollments]
+                  : [payload],
             loading: false,
             error: {},
          };

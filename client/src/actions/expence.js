@@ -2,8 +2,8 @@ import format from "date-fns/format";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
 
-import { updateLoadingSpinner } from "./mixvalues";
-import { clearRegisters } from "./register";
+import { filterData, newObject, updateLoadingSpinner } from "./mixvalues";
+import { clearRegister } from "./register";
 import { setAlert } from "./alert";
 
 import {
@@ -19,25 +19,15 @@ import {
    EXPENCE_ERROR,
    EXPENCETYPE_ERROR,
    TRANSACTIONS_ERROR,
+   REGISTER_LOADED,
 } from "./types";
 
-export const loadTransactions = (filterData, spinner) => async (dispatch) => {
+export const loadTransactions = (formData, spinner) => async (dispatch) => {
    if (spinner) dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
-      let filter = "";
-
-      const filternames = Object.keys(filterData);
-
-      for (let x = 0; x < filternames.length; x++) {
-         const name = filternames[x];
-         if (filterData[name] !== "") {
-            if (filter !== "") filter = filter + "&";
-            filter = filter + filternames[x] + "=" + filterData[name];
-         }
-      }
-      const res = await api.get(`/expence?${filter}`);
+      const res = await api.get(`/expence?${filterData(formData)}`);
       dispatch({
          type: TRANSACTIONS_LOADED,
          payload: res.data,
@@ -53,23 +43,12 @@ export const loadTransactions = (filterData, spinner) => async (dispatch) => {
    if (!error && spinner) dispatch(updateLoadingSpinner(false));
 };
 
-export const loadWithdrawals = (filterData, spinner) => async (dispatch) => {
+export const loadWithdrawals = (formData, spinner) => async (dispatch) => {
    if (spinner) dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
-      let filter = "";
-
-      const filternames = Object.keys(filterData);
-
-      for (let x = 0; x < filternames.length; x++) {
-         const name = filternames[x];
-         if (filterData[name] !== "") {
-            if (filter !== "") filter = filter + "&";
-            filter = filter + filternames[x] + "=" + filterData[name];
-         }
-      }
-      const res = await api.get(`/expence/withdrawal?${filter}`);
+      const res = await api.get(`/expence/withdrawal?${filterData(formData)}`);
       dispatch({
          type: TRANSACTIONS_LOADED,
          payload: res.data,
@@ -109,48 +88,52 @@ export const loadExpenceTypes = (spinner, expenceType) => async (dispatch) => {
 };
 
 //Update or register a user
-export const registerExpence = (formData) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-   let error = false;
-   let answer = false;
+export const registerExpence =
+   (formData, register, type) => async (dispatch) => {
+      dispatch(updateLoadingSpinner(true));
+      let error = false;
 
-   let expence = {};
-   for (const prop in formData) {
-      if (formData[prop] !== "" && formData[prop] !== 0) {
-         expence[prop] = formData[prop];
+      let expence = newObject(formData);
+
+      try {
+         await api.post("/expence", expence);
+
+         dispatch({
+            type: EXPENCE_REGISTERED,
+         });
+
+         const value = Number(expence.value);
+
+         dispatch({
+            type: REGISTER_LOADED,
+            payload: {
+               ...register,
+               [type]: register[type] + value,
+               registermoney:
+                  type === "cheatincome"
+                     ? register.registermoney + value
+                     : register.registermoney - value,
+            },
+         });
+
+         dispatch(setAlert("Gasto/Ingreso Registrado", "success", "2", 7000));
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setExpencesError(EXPENCE_ERROR, err.response));
+
+            if (err.response.data.errors)
+               err.response.data.errors.forEach((error) => {
+                  dispatch(setAlert(error.msg, "danger", "2"));
+               });
+            else dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         } else error = true;
       }
-   }
 
-   try {
-      await api.post("/expence", expence);
-
-      dispatch({
-         type: EXPENCE_REGISTERED,
-      });
-
-      dispatch(clearTransactions());
-      dispatch(clearRegisters());
-
-      dispatch(setAlert("Gasto/Ingreso Registrado", "success", "2", 7000));
-      answer = true;
-   } catch (err) {
-      if (err.response.status !== 401) {
-         dispatch(setExpencesError(EXPENCE_ERROR, err.response));
-
-         if (err.response.data.errors)
-            err.response.data.errors.forEach((error) => {
-               dispatch(setAlert(error.msg, "danger", "2"));
-            });
-         else dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      } else error = true;
-   }
-
-   if (!error) {
-      window.scrollTo(0, 0);
-      dispatch(updateLoadingSpinner(false));
-   }
-   return answer;
-};
+      if (!error) {
+         window.scrollTo(0, 0);
+         dispatch(updateLoadingSpinner(false));
+      }
+   };
 
 export const deleteExpence = (expence_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
@@ -166,7 +149,7 @@ export const deleteExpence = (expence_id) => async (dispatch) => {
 
       dispatch(setAlert("Movimiento Eliminado", "success", "2"));
 
-      dispatch(clearTransactions());
+      dispatch(clearRegister());
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setExpencesError(EXPENCE_ERROR, err.response));

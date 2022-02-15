@@ -7,6 +7,8 @@ const adminAuth = require("../../middleware/adminAuth");
 
 //Models
 const Register = require("../../models/Register");
+const Invoice = require("../../models/Invoice");
+const Expence = require("../../models/Expence");
 
 //@route    GET /api/register
 //@desc     get all cashier register || with filter
@@ -59,6 +61,44 @@ router.get("/last", [auth, adminAuth], async (req, res) => {
          return res.status(400).json({
             msg: "No se encontró información de la caja con dichas descripciones",
          });
+      }
+      if (register.temporary) {
+         const income = await Invoice.find({ register: register._id });
+         const expences = await Expence.find({
+            register: register._id,
+         }).populate({
+            path: "expencetype",
+         });
+
+         const allExpences = expences.reduce((res, curr) => {
+            if (res[curr.expencetype.type])
+               res[curr.expencetype.type].push(curr);
+            else Object.assign(res, { [curr.expencetype.type]: [curr] });
+
+            return res;
+         }, {});
+
+         register = {
+            ...register.toJSON(),
+            income: income.reduce((sum, item) => {
+               return item.value ? sum + item.value : sum + item.total;
+            }, 0),
+            expence:
+               allExpences.expence &&
+               allExpences.expence.reduce((sum, item) => sum + item.value, 0),
+            withdrawal:
+               allExpences.withdrawal &&
+               allExpences.withdrawal.reduce(
+                  (sum, item) => sum + item.value,
+                  0
+               ),
+            cheatincome:
+               allExpences.cheatincome &&
+               allExpences.cheatincome.reduce(
+                  (sum, item) => sum + item.value,
+                  0
+               ),
+         };
       }
 
       res.json(register);

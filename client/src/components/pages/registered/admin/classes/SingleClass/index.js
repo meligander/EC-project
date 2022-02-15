@@ -42,6 +42,7 @@ const SingleClass = ({
    gradesPDF,
 }) => {
    const _id = match.params.class_id;
+   const year = new Date().getFullYear();
 
    const userCanSeeButtons =
       userLogged.type !== "student" && userLogged.type !== "guardian";
@@ -102,9 +103,11 @@ const SingleClass = ({
                                        : "btn btn-black"
                                  }
                                  onClick={() => {
-                                    clearGrades();
-                                    clearGradeTypes();
-                                    window.scroll(0, 0);
+                                    if (classInfo.students.length > 0) {
+                                       clearGrades();
+                                       clearGradeTypes();
+                                       window.scroll(0, 0);
+                                    }
                                  }}
                               >
                                  <FaPenFancy />
@@ -122,8 +125,10 @@ const SingleClass = ({
                                        : "btn btn-black"
                                  }
                                  onClick={() => {
-                                    clearAttendances();
-                                    window.scroll(0, 0);
+                                    if (classInfo.students.length > 0) {
+                                       clearAttendances();
+                                       window.scroll(0, 0);
+                                    }
                                  }}
                               >
                                  <IoCheckmarkCircleSharp />
@@ -143,7 +148,8 @@ const SingleClass = ({
                                        : "btn btn-black"
                                  }
                                  onClick={() => {
-                                    window.scroll(0, 0);
+                                    if (classInfo.students.length > 0)
+                                       window.scroll(0, 0);
                                  }}
                               >
                                  <CgNotes />
@@ -206,24 +212,29 @@ const SingleClass = ({
                            </div> */}
                            {userLogged.type !== "teacher" && (
                               <>
-                                 {classInfo.year ===
-                                    new Date().getFullYear() && (
-                                    <div className="tooltip">
-                                       <Link
-                                          to={`/class/edit/${classInfo._id}`}
-                                          className="btn btn-mix-secondary"
-                                          onClick={() => {
+                                 <div className="tooltip">
+                                    <Link
+                                       to={
+                                          classInfo.year === year
+                                             ? `/class/edit/${classInfo._id}`
+                                             : "#"
+                                       }
+                                       className={`btn ${
+                                          classInfo.year === year
+                                             ? "btn-mix-secondary"
+                                             : "btn-black"
+                                       }`}
+                                       onClick={() => {
+                                          if (classInfo.year === year) {
                                              window.scroll(0, 0);
                                              clearSearch();
-                                          }}
-                                       >
-                                          <FaEdit />
-                                       </Link>
-                                       <span className="tooltiptext">
-                                          Editar
-                                       </span>
-                                    </div>
-                                 )}
+                                          }
+                                       }}
+                                    >
+                                       <FaEdit />
+                                    </Link>
+                                    <span className="tooltiptext">Editar</span>
+                                 </div>
 
                                  <div className="tooltip">
                                     <button

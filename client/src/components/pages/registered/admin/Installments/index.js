@@ -44,7 +44,7 @@ const Installments = ({
 
    useEffect(() => {
       if (_id !== "0") {
-         if (loading) loadInstallments({ student: { _id } }, true, "student");
+         if (loading) loadInstallments({ student: { _id } }, true, true);
          else
             setAdminValues((prev) => ({
                ...prev,
@@ -116,9 +116,11 @@ const Installments = ({
                         : "#"
                   }
                   onClick={() => {
-                     window.scroll(0, 0);
-                     clearInstallment();
-                     clearUser();
+                     if (!loading) {
+                        window.scroll(0, 0);
+                        clearInstallment();
+                        clearUser();
+                     }
                   }}
                >
                   <FaPlus />

@@ -57,3 +57,24 @@ export const formatNumber = (number) => {
    if (number) return new Intl.NumberFormat("de-DE").format(number);
    else return null;
 };
+
+export const filterData = (formData) => {
+   let filter = "";
+   const filternames = Object.keys(formData);
+   for (let x = 0; x < filternames.length; x++) {
+      const name = filternames[x];
+      if (formData[name] !== "") {
+         if (filter !== "") filter += "&";
+         filter += name + "=" + formData[name];
+      }
+   }
+   return filter;
+};
+
+export const newObject = (formData) => {
+   let newObject = {};
+   for (const prop in formData) {
+      if (formData[prop] !== "") newObject[prop] = formData[prop];
+   }
+   return newObject;
+};

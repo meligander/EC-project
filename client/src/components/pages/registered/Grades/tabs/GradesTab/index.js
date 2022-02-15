@@ -35,6 +35,8 @@ const GradesTab = ({
    certificatePDF,
    togglePopup,
 }) => {
+   const year = new Date().getFullYear();
+
    const getGradeTypes = () => {
       let gradetypes = [];
 
@@ -191,6 +193,8 @@ const GradesTab = ({
                                        name={row.name}
                                        onChange={(e) => onChange(e, row)}
                                        value={row.value}
+                                       min={0}
+                                       max={10}
                                        placeholder="Nota"
                                     />
                                  ) : (
@@ -218,40 +222,42 @@ const GradesTab = ({
             </table>
          </div>
          <div className="btn-right">
-            {new Date().getFullYear() === classInfo.year && (
-               <>
-                  <button
-                     className="btn btn-primary"
-                     type="button"
-                     onClick={(e) => {
-                        e.preventDefault();
-                        setAdminValues((prev) => ({
-                           ...prev,
-                           popupType: "save",
-                        }));
-                        togglePopup("default");
-                     }}
-                  >
-                     <FiSave />
-                     <span className="hide-md">&nbsp;Guardar Cambios</span>
-                  </button>
-                  <button
-                     className="btn btn-dark"
-                     type="button"
-                     onClick={(e) => {
-                        e.preventDefault();
-                        setAdminValues((prev) => ({
-                           ...prev,
-                           popupType: "new-grade-type",
-                        }));
-                        togglePopup("new-grade-type");
-                     }}
-                  >
-                     <FaPlus />
-                     <span className="hide-md">&nbsp; Nota</span>
-                  </button>
-               </>
-            )}
+            <button
+               disabled={year !== classInfo.year}
+               className={`btn ${
+                  year === classInfo.year ? "btn-primary" : "btn-black"
+               }`}
+               type="button"
+               onClick={(e) => {
+                  e.preventDefault();
+                  setAdminValues((prev) => ({
+                     ...prev,
+                     popupType: "save",
+                  }));
+                  togglePopup("default");
+               }}
+            >
+               <FiSave />
+               <span className="hide-md">&nbsp;Guardar Cambios</span>
+            </button>
+            <button
+               className={`btn ${
+                  year === classInfo.year ? "btn-dark" : "btn-black"
+               }`}
+               type="button"
+               disabled={year !== classInfo.year}
+               onClick={(e) => {
+                  e.preventDefault();
+                  setAdminValues((prev) => ({
+                     ...prev,
+                     popupType: "new-grade-type",
+                  }));
+                  togglePopup("new-grade-type");
+               }}
+            >
+               <FaPlus />
+               <span className="hide-md">&nbsp; Nota</span>
+            </button>
 
             <div className="tooltip">
                <button

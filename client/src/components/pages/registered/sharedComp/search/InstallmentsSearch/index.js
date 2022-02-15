@@ -91,9 +91,11 @@ const InstallmentsSearch = ({
                </>
             )}
          </div>
-         {!loading && student._id === installments.student._id && (
+         {!loading && (
             <>
-               {installments.rows ? (
+               {student._id &&
+               installments.student &&
+               student._id === installments.student._id ? (
                   <InstallmentsTable
                      installments={installments}
                      forAdmin={true}

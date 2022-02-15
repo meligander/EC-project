@@ -173,7 +173,7 @@ const Enrollment = ({
                   typeSearch="enrollment"
                />
             )}
-            <p className={`heading-tertiary ${_id === "" && "mt-3"}`}>
+            <p className={`heading-tertiary btn-end ${_id === "" && "mt-3"}`}>
                <span className="text-dark">Alumno: </span> &nbsp;
                {hideSearch && (
                   <>

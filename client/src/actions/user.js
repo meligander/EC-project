@@ -2,10 +2,9 @@ import format from "date-fns/format";
 import history from "../utils/history";
 import { saveAs } from "file-saver";
 import api from "../utils/api";
-import store from "../utils/store";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
+import { updateLoadingSpinner, filterData, newObject } from "./mixvalues";
 import { clearInstallments } from "./installment";
 import { clearAttendances } from "./attendance";
 import { clearGrades } from "./grade";
@@ -28,6 +27,7 @@ import {
    USERSBK_ERROR,
    OTHERVALUES_LOADED,
 } from "./types";
+import { clearClass } from "./class";
 
 //Load User
 export const loadUser = (user_id, spinner) => async (dispatch) => {
@@ -89,23 +89,12 @@ export const getActiveUsers = (type) => async (dispatch) => {
 
 //LoadUsers
 export const loadUsers =
-   (filterData, spinner, primary, studentSearch) => async (dispatch) => {
+   (formData, spinner, primary, studentSearch) => async (dispatch) => {
       if (spinner) dispatch(updateLoadingSpinner(true));
       let error = false;
 
       try {
-         let filter = "";
-
-         const filternames = Object.keys(filterData);
-         for (let x = 0; x < filternames.length; x++) {
-            const name = filternames[x];
-            if (filterData[name] !== "") {
-               if (filter !== "") filter = filter + "&";
-               filter = filter + filternames[x] + "=" + filterData[name];
-            }
-         }
-
-         let res = await api.get(`/user?${filter}`);
+         let res = await api.get(`/user?${filterData(formData)}`);
 
          dispatch({
             type: primary ? USERS_LOADED : USERSBK_LOADED,
@@ -113,7 +102,7 @@ export const loadUsers =
                ? res.data
                : {
                     users: res.data,
-                    type: filterData.type ? filterData.type : "",
+                    type: formData.type ? formData.type : "",
                  },
          });
       } catch (err) {
@@ -154,30 +143,27 @@ export const loadRelatives = (user_id) => async (dispatch) => {
 };
 
 //Update or register a user
-export const registerUpdateUser = (formData) => async (dispatch) => {
+export const registerUpdateUser = (formData, auth_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
-   let user = {};
-   for (const prop in formData)
-      if (formData[prop] !== "") user[prop] = formData[prop];
+   let user = newObject(formData);
 
    try {
       let res;
-      if (formData._id === "") res = await api.post("/user", user);
-      else res = await api.put(`/user/${formData._id}`, user);
+      if (!user._id) res = await api.post("/user", user);
+      else res = await api.put(`/user/${user._id}`, user);
 
-      if (formData._id === store.getState().auth.userLogged._id)
-         dispatch(updateAuthUser(res.data));
+      if (user._id === auth_id) dispatch(updateAuthUser(res.data));
       else
          dispatch({
-            type: formData._id === "" ? REGISTER_SUCCESS : USER_UPDATED,
+            type: !user._id ? REGISTER_SUCCESS : USER_UPDATED,
             payload: res.data,
          });
 
       dispatch(
          setAlert(
-            formData._id !== "" ? "Usuario modificado" : "Usuario registrado",
+            !user._id ? "Usuario registrado" : "Usuario modificado",
             "success",
             "1",
             7000
@@ -208,13 +194,10 @@ export const updateCredentials = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
-   let user = {};
-   for (const prop in formData) {
-      if (formData[prop] !== "") user[prop] = formData[prop];
-   }
+   const user = newObject(formData);
 
    try {
-      let res = await api.put(`/user/credentials/${formData._id}`, user);
+      let res = await api.put(`/user/credentials/${user._id}`, user);
 
       dispatch({
          type: USER_UPDATED,
@@ -332,6 +315,7 @@ export const clearProfile = () => (dispatch) => {
    dispatch({
       type: USER_CLEARED,
    });
+   dispatch(clearClass());
    dispatch(clearGrades());
    dispatch(clearInstallments());
    dispatch(clearAttendances());

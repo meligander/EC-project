@@ -17,11 +17,10 @@ const Category = require("../../models/Category");
 //@access   Private && Admin
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
-      let date = new Date();
       let enrollments;
       if (Object.entries(req.query).length === 0) {
          enrollments = await Enrollment.find({
-            year: { $in: [date.getFullYear(), date.getFullYear() + 1] },
+            year: new Date().getFullYear(),
          })
             .populate({
                path: "student",
@@ -49,26 +48,26 @@ router.get("/", [auth, adminAuth], async (req, res) => {
                },
             }),
             ...(category && { category: category }),
-            year: year
-               ? year
-               : { $in: [date.getFullYear(), date.getFullYear() + 1] },
+            ...(year && { year }),
             ...(student && { student: student }),
          })
             .populate({
                path: "student",
                model: "user",
                select: ["name", "lastname", "studentnumber"],
-               match: {
-                  ...(name && {
-                     name: { $regex: `.*${name}.*`, $options: "i" },
-                  }),
-                  ...(lastname && {
-                     lastname: {
-                        $regex: `.*${lastname}.*`,
-                        $options: "i",
-                     },
-                  }),
-               },
+               ...((name || lastname) && {
+                  match: {
+                     ...(name && {
+                        name: { $regex: `.*${name}.*`, $options: "i" },
+                     }),
+                     ...(lastname && {
+                        lastname: {
+                           $regex: `.*${lastname}.*`,
+                           $options: "i",
+                        },
+                     }),
+                  },
+               }),
             })
             .populate({
                path: "category",
@@ -76,94 +75,29 @@ router.get("/", [auth, adminAuth], async (req, res) => {
             })
             .sort({ date: -1 });
 
-         enrollments = enrollments.filter((enroll) => enroll.student);
+         if (name || lastname)
+            enrollments = enrollments.filter((enroll) => enroll.student);
       }
+
+      // //Para cambiar la base de datos
+      // enrollments.forEach(async (item) => {
+      // //Primero hacer esto
+      // if (item.classroom._id)
+      //    await Enrollment.findOneAndUpdate(
+      //       { _id: item._id },
+      //       { class_id: item.classroom._id, classroom: null }
+      //    );
+      // //Luego esto
+      // if (item.class_id)
+      //    await Enrollment.findOneAndUpdate(
+      //       { _id: item._id },
+      //       { classroom: item.class_id, class_id: undefined }
+      //    );
+      // });
 
       if (enrollments.length === 0) {
          return res.status(400).json({
             msg: "No se encontraron inscripciones con dichas descripciones",
-         });
-      }
-
-      res.json(enrollments);
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ msg: "Server Error" });
-   }
-});
-
-//@route    GET /api/enrollment/average
-//@desc     get all student's average
-//@access   Private && Admin
-router.get("/average", [auth, adminAuth], async (req, res) => {
-   try {
-      let year = new Date().getFullYear();
-
-      let enrollments;
-      const filter = req.query;
-
-      enrollments = await Enrollment.find({
-         category: filter.category
-            ? filter.category
-            : { $ne: "5ebb3498397c2d2610a4eab8" },
-         "classroom.average": { $exists: true },
-         year,
-      })
-         .populate({
-            path: "student",
-            model: "user",
-            select: ["name", "lastname", "studentnumber"],
-         })
-         .populate({
-            path: "category",
-            model: "category",
-         })
-         .sort({ "classroom.average": -1 })
-         .limit(filter.amount ? parseInt(filter.amount) : 50);
-
-      if (enrollments.length === 0) {
-         return res.status(400).json({
-            msg: "No se encontraron alumnos con dichas descripciones",
-         });
-      }
-
-      res.json(enrollments);
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ msg: "Server Error" });
-   }
-});
-
-//@route    GET /api/enrollment/attendance
-//@desc     get all student's attendance
-//@access   Private && Admin
-router.get("/attendance", [auth, adminAuth], async (req, res) => {
-   try {
-      let year = new Date().getFullYear();
-
-      const filter = req.query;
-
-      const enrollments = await Enrollment.find({
-         ...(filter.category && { category: filter.category }),
-         ...(filter.absence && {
-            "classroom.absence": { $lte: filter.absence },
-         }),
-         year,
-      })
-         .populate({
-            path: "student",
-            model: "user",
-            select: ["name", "lastname", "studentnumber"],
-         })
-         .populate({
-            path: "category",
-            model: "category",
-         })
-         .sort({ "classroom.absence": 1 });
-
-      if (enrollments.length === 0) {
-         return res.status(400).json({
-            msg: "No se encontraron alumnos con dichas descripciones",
          });
       }
 
@@ -279,79 +213,78 @@ router.post(
          return res.status(400).json({ errors });
       }
 
-      let enrollment;
-
       try {
-         enrollment = await Enrollment.findOne({ student, year });
+         let enrollment = await Enrollment.findOne({ student, year });
+
          if (enrollment)
             return res
                .status(400)
                .json({ msg: "El alumno ya está inscripto para dicho año" });
 
-         let data = { student, year, category };
+         const data = { student, year, category };
 
          enrollment = new Enrollment(data);
 
          await enrollment.save();
 
-         enrollment = await Enrollment.find()
-            .sort({ $natural: -1 })
+         enrollment = await Enrollment.findOne(data)
             .populate({ path: "category" })
             .populate({
                path: "student",
                model: "user",
                select: "-password",
-            })
-            .limit(1);
-         enrollment = enrollment[0];
+            });
 
          let number = 0;
-         let categoryInstallment = await Category.findOne({
+         const enrollmentCategory = await Category.findOne({
             name: "Inscripción",
          });
-         let installment;
 
-         installment = new Installment({
-            year,
-            student,
-            number,
-            value: categoryInstallment.value,
-            expired: false,
-            enrollment: enrollment.id,
-            debt: true,
-         });
-         installment.save();
+         let installment = await Installment.findOne({ year, student, number });
 
-         if (month !== 0) number = month;
+         if (!installment) {
+            installment = new Installment({
+               year,
+               student,
+               number,
+               value: enrollmentCategory.value,
+               // expired: false,
+               enrollment: enrollment._id,
+               // debt: true,
+            });
+            installment.save();
+         }
+
+         if (month !== 0) number = Number(month);
          else number = 3;
 
-         let value = enrollment.category.value;
-         let half = value / 2;
-
          const discount = enrollment.student.discount;
-         if (discount && discount !== 0) {
-            let disc = (value * discount) / 100;
-            value = Math.round((value - disc) / 10) * 10;
-            if (Number(number) === 3 && discount === 10) half = value / 2;
-         }
+         let value = enrollment.category.value;
+
+         if (discount && discount !== 0)
+            value = value - (value * discount) / 100;
+
+         const half = discount !== 50 ? value / 2 : value;
 
          const amount = 13 - number;
          for (let x = 0; x < amount; x++) {
-            installment = new Installment({
-               number,
-               year,
-               student,
-               value: Number(number) === 3 ? half : value,
-               expired: false,
-               enrollment: enrollment.id,
-            });
+            installment = await Installment.findOne({ year, student, number });
+            if (!installment) {
+               installment = new Installment({
+                  number,
+                  year,
+                  student,
+                  value: number === 3 ? half : value,
+                  // expired: false,
+                  enrollment: enrollment.id,
+               });
+               await installment.save();
+            }
 
             number++;
-
-            await installment.save();
          }
 
-         res.json({ msg: "Enrollment Registered" });
+         res.json(enrollment);
       } catch (err) {
          console.error(err.message);
          res.status(500).json({ msg: "Server Error" });
@@ -391,22 +324,16 @@ router.put(
          );
 
          if (enrollment.category._id.toString() !== category) {
-            await deleteInfoRelated(
-               enrollment.classroom._id,
-               enrollment.student
-            );
+            await deleteInfoRelated({
+               classroom: enrollment.classroom,
+               student: enrollment.student,
+            });
 
             enrollment = await Enrollment.findOneAndUpdate(
                { _id: req.params.id },
                {
                   category: category,
-                  classroom: {
-                     _id: null,
-                     average: null,
-                     absence: null,
-                     periodAbsence: [],
-                     periodAverage: [],
-                  },
+                  classroom: null,
                },
                { new: true }
             )
@@ -421,19 +348,16 @@ router.put(
                });
 
             let number = 0;
-            if (month !== 0) number = month;
+            if (month !== 0) number = Number(month);
             else number = 3;
 
-            let value = enrollment.category.value;
-            let half = value / 2;
-
             const discount = enrollment.student.discount;
+            let value = enrollment.category.value;
 
-            if (discount && discount !== 0) {
-               let disc = (value * discount) / 100;
-               value = Math.round((value - disc) / 10) * 10;
-               if (Number(number) === 3 && discount === 10) half = value / 2;
-            }
+            if (discount && discount !== 0)
+               value = value - (value * discount) / 100;
+
+            const half = discount !== 50 ? value / 2 : value;
 
             const amount = 13 - number;
             for (let x = 0; x < amount; x++) {
@@ -441,13 +365,13 @@ router.put(
                   enrollment: req.params.id,
                   number,
                   value: { $ne: 0 },
+                  updatable: true,
                });
-               if (installment.halfPayed || !installment) continue;
-
-               await Installment.findOneAndUpdate(
-                  { _id: installment._id },
-                  { value: Number(number) === 3 ? half : value }
-               );
+               if (installment)
+                  await Installment.findOneAndUpdate(
+                     { _id: installment._id },
+                     { value: number === 3 ? half : value }
+                  );
                number++;
             }
          } else {
@@ -477,11 +401,16 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       const installments = await Installment.find({
          enrollment: enrollment._id,
       });
-      for (let x = 0; x < installments.length; x++) {
-         await Installment.findOneAndRemove({ _id: installments[x].id });
-      }
 
-      await deleteInfoRelated(enrollment.classroom._id, enrollment.student);
+      await installments.forEach(async (inst) => {
+         if (inst.value !== 0 && inst.updatable)
+            await Installment.findOneAndRemove({ _id: inst._id });
+      });
+
+      await deleteInfoRelated({
+         classroom: enrollment.classroom,
+         student: enrollment.student,
+      });
 
       res.json({ msg: "Enrollment deleted" });
    } catch (err) {
@@ -490,22 +419,18 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-const deleteInfoRelated = async (classroom, student) => {
-   const attendances = await Attendance.find({
-      student: student,
-      classroom: classroom,
-   });
-   for (let x = 0; x < attendances.length; x++) {
-      await Attendance.findOneAndRemove({ _id: attendances[x]._id });
-   }
+//@desc Function to delete all the info related to an enrollment
+const deleteInfoRelated = async (data) => {
+   const attendances = await Attendance.find(data);
+   const grades = await Grade.find(data);
 
-   const grades = await Grade.find({
-      student: student,
-      classroom: classroom,
-   });
-   for (let x = 0; x < grades.length; x++) {
-      await Grade.findOneAndRemove({ _id: grades[x]._id });
-   }
+   await attendances.forEach(
+      async (item) => await Attendance.findOneAndRemove({ _id: item._id })
+   );
+
+   await grades.forEach(
+      async (item) => await Grade.findOneAndRemove({ _id: item._id })
+   );
 };
 
 module.exports = router;

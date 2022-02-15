@@ -1,43 +1,29 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const RegisterSchema = new mongoose.Schema({
-	income: {
-		type: Number,
-	},
-	expence: {
-		type: Number,
-	},
-	withdrawal: {
-		type: Number,
-	},
-	cheatincome: {
-		type: Number,
-	},
-	date: {
-		type: Date,
-		default: Date.now,
-	},
-	dateclose: {
-		type: Date,
-	},
-	registermoney: {
-		type: Number,
-	},
-	difference: {
-		type: Number,
-	},
-	negative: {
-		type: Boolean,
-	},
-	temporary: {
-		type: Boolean,
-		default: true,
-	},
-	description: {
-		type: String,
-	},
+   registermoney: {
+      type: Number,
+   },
+   difference: {
+      type: Number,
+      default: 0,
+   },
+   temporary: {
+      type: Boolean,
+      default: true,
+   },
+   description: {
+      type: String,
+   },
+   dateclose: {
+      type: Date,
+   },
+   date: {
+      type: Date,
+      default: Date.now,
+   },
 });
 
-const Register = mongoose.model('register', RegisterSchema);
+const Register = mongoose.model("register", RegisterSchema);
 
 module.exports = Register;

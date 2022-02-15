@@ -12,7 +12,7 @@ import {
 import { getInvoiceNumber } from "../../../../../actions/invoice";
 import { clearInstallments } from "../../../../../actions/installment";
 import { clearRegisters } from "../../../../../actions/register";
-import { clearSearch } from "../../../../../actions/user";
+import { clearSearch, clearUsers } from "../../../../../actions/user";
 import { clearClasses } from "../../../../../actions/class";
 import { updateCurrentNav } from "../../../../../actions/mixvalues";
 
@@ -25,6 +25,7 @@ const AdminNavbar = ({
    clearRegisters,
    clearSearch,
    clearClasses,
+   clearUsers,
    updateCurrentNav,
 }) => {
    return (
@@ -57,6 +58,7 @@ const AdminNavbar = ({
                to="/class/all"
                onClick={() => {
                   clearClasses();
+                  clearUsers();
                   updateCurrentNav("class", true);
                   window.scroll(0, 0);
                }}
@@ -114,7 +116,7 @@ const AdminNavbar = ({
                onClick={() => {
                   updateCurrentNav("register", true);
                   clearRegisters();
-                  clearSearch();
+                  clearUsers();
                   window.scroll(0, 0);
                }}
             >
@@ -136,5 +138,6 @@ export default connect(mapStateToProps, {
    clearRegisters,
    clearSearch,
    clearClasses,
+   clearUsers,
    updateCurrentNav,
 })(AdminNavbar);

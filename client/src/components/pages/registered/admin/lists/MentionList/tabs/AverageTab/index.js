@@ -5,29 +5,32 @@ import { BiFilterAlt } from "react-icons/bi";
 
 import { clearProfile } from "../../../../../../../../actions/user";
 import {
-   loadStudentsAvAtt,
-   enrollmentsPDF,
-} from "../../../../../../../../actions/enrollment";
+   loadGradesAv /*, enrollmentsPDF*/,
+} from "../../../../../../../../actions/grade";
 
 import ListButtons from "../../../sharedComp/ListButtons";
 
 function AverageTab({
-   enrollments: { enrollments, loading, type },
-   categories: { categories, loading: loadingCategories },
-   loadStudentsAvAtt,
-   enrollmentsPDF,
+   grades: { grades: students, loading },
+   categories: { categories },
+   // enrollmentsPDF,
+   loadGradesAv,
    clearProfile,
 }) {
+   const thisYear = new Date().getFullYear();
+   const yearArray = new Array(3).fill().map((item, index) => thisYear - index);
+
    const [filterData, setFilterData] = useState({
-      amount: "",
+      quantity: "",
       category: "",
+      year: thisYear,
    });
 
    const [adminValues, setAdminValues] = useState({
       page: 0,
    });
 
-   const { amount, category } = filterData;
+   const { quantity, category, year } = filterData;
 
    const { page } = adminValues;
 
@@ -45,20 +48,21 @@ function AverageTab({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               loadStudentsAvAtt(filterData, "average");
+               setAdminValues((prev) => ({ ...prev, page: 0 }));
+               loadGradesAv(filterData);
             }}
          >
             <div className="form-group">
-               <select
-                  className="form-input"
-                  id="category"
-                  name="category"
-                  onChange={onChange}
-                  value={category}
-               >
-                  <option value="">* Seleccione Categoría</option>
-                  {!loadingCategories &&
-                     categories.map(
+               <div className="two-in-row">
+                  <select
+                     className="form-input"
+                     id="category"
+                     name="category"
+                     onChange={onChange}
+                     value={category}
+                  >
+                     <option value="">* Seleccione Categoría</option>
+                     {categories.map(
                         (category) =>
                            category.name !== "Inscripción" && (
                               <option key={category._id} value={category._id}>
@@ -66,25 +70,48 @@ function AverageTab({
                               </option>
                            )
                      )}
-               </select>
-               <label
-                  htmlFor="category"
-                  className={`form-label ${category === "" ? "lbl" : ""}`}
-               >
-                  Categoría
-               </label>
+                  </select>
+                  <select
+                     className="form-input"
+                     id="year"
+                     name="year"
+                     onChange={onChange}
+                     value={year}
+                  >
+                     <option value="">* Seleccione el Año</option>
+                     {yearArray.map((item) => (
+                        <option key={item} value={item}>
+                           {item}
+                        </option>
+                     ))}
+                  </select>
+               </div>
+               <div className="two-in-row">
+                  <label
+                     htmlFor="category"
+                     className={`form-label ${category === "" ? "lbl" : ""}`}
+                  >
+                     Categoría
+                  </label>
+                  <label
+                     htmlFor="year"
+                     className={`form-label ${year === "" ? "lbl" : ""}`}
+                  >
+                     Año
+                  </label>
+               </div>
             </div>
             <div className="form-group">
                <input
                   className="form-input"
                   type="number"
-                  value={amount}
+                  value={quantity}
                   onChange={onChange}
-                  name="amount"
-                  id="amount"
+                  name="quantity"
+                  id="quantity"
                   placeholder="Cantidad"
                />
-               <label htmlFor="amount" className="form-label">
+               <label htmlFor="quantity" className="form-label">
                   Cantidad
                </label>
             </div>
@@ -107,29 +134,28 @@ function AverageTab({
                </thead>
                <tbody>
                   {!loading &&
-                     type === "average" &&
-                     enrollments.map(
-                        (enroll, i) =>
+                     students.map(
+                        (item, i) =>
                            i >= page * 10 &&
                            i < (page + 1) * 10 && (
-                              <tr key={enroll._id}>
-                                 <td>{enroll.student.studentnumber}</td>
+                              <tr key={i}>
+                                 <td>{item.student.studentnumber}</td>
                                  <td>
                                     <Link
                                        className="btn-text"
-                                       to={`/index/dashboard/${enroll.student._id}`}
+                                       to={`/index/dashboard/${item.student._id}`}
                                        onClick={() => {
                                           window.scroll(0, 0);
                                           clearProfile();
                                        }}
                                     >
-                                       {enroll.student.lastname +
+                                       {item.student.lastname +
                                           ", " +
-                                          enroll.student.name}
+                                          item.student.name}
                                     </Link>
                                  </td>
-                                 <td>{enroll.category.name}</td>
-                                 <td>{enroll.classroom.average}</td>
+                                 <td>{item.category.name}</td>
+                                 <td>{item.average}</td>
                               </tr>
                            )
                      )}
@@ -140,8 +166,8 @@ function AverageTab({
             <ListButtons
                type="mejores promedios"
                page={page}
-               items={enrollments}
-               pdfGenerator={() => enrollmentsPDF(enrollments, "averages")}
+               items={students}
+               // pdfGenerator={() => enrollmentsPDF(enrollments, "averages")}
                changePage={(page) =>
                   setAdminValues((prev) => ({ ...prev, page }))
                }
@@ -152,12 +178,12 @@ function AverageTab({
 }
 
 const mapStateToProps = (state) => ({
-   enrollments: state.enrollments,
+   grades: state.grades,
    categories: state.categories,
 });
 
 export default connect(mapStateToProps, {
-   loadStudentsAvAtt,
-   enrollmentsPDF,
+   //enrollmentsPDF,
+   loadGradesAv,
    clearProfile,
 })(AverageTab);

@@ -2,7 +2,6 @@
 
 .installment-search {
    .btn-end {
-      justify-content: flex-start;
       margin-bottom: 3rem;
 
       @include respond(small-phone) {
@@ -22,7 +21,7 @@
 
       .btn-cancel {
          //margin-left: 1.5rem;
-         margin-bottom: 1.6rem;
+         margin-bottom: 1.4rem;
 
          @include respond(small-phone) {
             margin-bottom: -2rem;

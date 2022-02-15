@@ -5,6 +5,7 @@
    &:visited {
       display: flex;
       align-items: center;
+      min-width: max-content;
       background: $light-color;
       color: $black-color;
       padding: 0.8rem 1.8rem;
@@ -162,7 +163,6 @@
 
    &-end {
       display: flex;
-      justify-content: center;
       align-items: center;
       width: 100%;
 

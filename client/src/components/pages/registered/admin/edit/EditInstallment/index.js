@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import getYear from "date-fns/getYear";
 import { FaTrashAlt } from "react-icons/fa";
 import { FiSave } from "react-icons/fi";
 
@@ -24,23 +23,23 @@ const EditInstallment = ({
    deleteInstallment,
    installments: { installment, loadingInstallment },
 }) => {
+   const _id = match.params.item_id;
+   const type = match.params.type;
+
+   const thisYear = new Date().getFullYear();
+   const yearArray = new Array(6)
+      .fill()
+      .map((item, index) => thisYear + 1 - index);
+
    const [formData, setformData] = useState({
       _id: "",
-      year: 0,
+      year: "",
       number: "",
       value: "",
       expired: false,
       student: "",
       halfPayed: false,
    });
-   const _id = match.params.item_id;
-   const type = match.params.type;
-
-   const day = new Date();
-   const thisYear = getYear(day);
-   const yearArray = new Array(6)
-      .fill()
-      .map((item, index) => thisYear + 1 - index);
 
    const [adminValues, setAdminValues] = useState({
       popupType: "",
@@ -140,7 +139,7 @@ const EditInstallment = ({
                   onChange={onChange}
                   value={year}
                >
-                  <option value={0}>* Seleccione el Año</option>
+                  <option value="">* Seleccione el Año</option>
                   {yearArray.map((item) => (
                      <option key={item} value={item}>
                         {item}
@@ -149,7 +148,7 @@ const EditInstallment = ({
                </select>
                <label
                   htmlFor="year"
-                  className={`form-label ${year === 0 ? "lbl" : ""}`}
+                  className={`form-label ${year === "" ? "lbl" : ""}`}
                >
                   Año
                </label>

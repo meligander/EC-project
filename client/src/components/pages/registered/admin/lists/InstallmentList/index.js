@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { getYear } from "date-fns";
 import { BiFilterAlt } from "react-icons/bi";
 
 import {
@@ -26,8 +25,7 @@ const InstallmentList = ({
    clearProfile,
    installmentsPDF,
 }) => {
-   const date = new Date();
-   const thisYear = getYear(date);
+   const thisYear = new Date().getFullYear();
    const installmentName =
       "Inscripción,,,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre".split(
          ","
@@ -40,7 +38,7 @@ const InstallmentList = ({
 
    const [filterData, setFilterData] = useState({
       number: "",
-      year: "",
+      year: thisYear,
       name: "",
       lastname: "",
    });
@@ -104,6 +102,7 @@ const InstallmentList = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
+               setAdminValues((prev) => ({ ...prev, page: 0 }));
                loadInstallments(filterData, true, "list");
             }}
          >

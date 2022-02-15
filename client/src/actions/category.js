@@ -53,7 +53,7 @@ export const updateCategories = (formData) => async (dispatch) => {
          dispatch(setCategoriesError(CATEGORY_ERROR, err.response));
 
          if (err.response.data.errors)
-            err.response.data.errorsforEach((error) => {
+            err.response.data.errors.forEach((error) => {
                dispatch(setAlert(error.msg, "danger", "2"));
             });
          else dispatch(setAlert(err.response.data.msg, "danger", "2"));

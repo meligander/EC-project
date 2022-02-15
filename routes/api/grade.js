@@ -2,10 +2,82 @@ const router = require("express").Router();
 
 //Middlewares
 const auth = require("../../middleware/auth");
+const adminAuth = require("../../middleware/adminAuth");
 
 //Models
 const Grade = require("../../models/Grade");
 const Enrollment = require("../../models/Enrollment");
+
+//@route    GET /api/grade/best
+//@desc     get students average
+//@access   Private && Admin
+router.get("/best", [auth, adminAuth], async (req, res) => {
+   try {
+      let { quantity, year, category } = req.query;
+
+      quantity = quantity ? quantity : 10;
+
+      const thisYear = new Date().getFullYear();
+      let totalGrades = [];
+
+      const grades = await Grade.find({
+         student: { $exists: true },
+         value: { $exists: true },
+         date: {
+            $gte: new Date(Date.UTC(year ? year : thisYear, 0, 01, 0, 0, 0)),
+            $lte: new Date(Date.UTC(year ? year : thisYear, 11, 31, 0, 0, 0)),
+         },
+      })
+         .populate({
+            path: "classroom",
+            model: "class",
+            populate: {
+               path: "category",
+            },
+            ...(category && {
+               match: { _id: category },
+            }),
+         })
+         .populate({
+            path: "student",
+            model: "user",
+            select: ["lastname", "name", "studentnumber"],
+         });
+
+      const students = grades
+         .filter((item) => item.classroom)
+         .reduce((res, curr) => {
+            if (res[curr.student]) res[curr.student].push(curr);
+            else Object.assign(res, { [curr.student]: [curr] });
+
+            return res;
+         }, {});
+
+      for (const x in students) {
+         const total = students[x].reduce(
+            (sum, detail) => sum + detail.value,
+            0
+         );
+
+         totalGrades.push({
+            student: students[x][0].student,
+            category: students[x][0].classroom.category,
+            average:
+               Math.round((total / students[x].length + Number.EPSILON) * 100) /
+               100,
+         });
+      }
+
+      totalGrades = totalGrades
+         .sort((a, b) => b.average - a.average)
+         .slice(0, quantity);
+
+      res.json(totalGrades);
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: "Server Error" });
+   }
+});
 
 //@route    GET /api/grade/:class_id
 //@desc     Get all grades for a class
@@ -107,10 +179,10 @@ router.post("/period", auth, async (req, res) => {
             if (value !== 0 && value !== "") {
                value = parseFloat(value);
 
-               if (value > 10 || value < 0) {
-                  return res.status(400).json({
-                     errors: [{ msg: "La nota debe ser entre 0 y 10" }],
-                  });
+               if (value > 10 || value <= 0) {
+                  return res
+                     .status(400)
+                     .json({ msg: "La nota debe ser entre 0 y 10" });
                }
 
                average += value;
@@ -134,47 +206,47 @@ router.post("/period", auth, async (req, res) => {
             }
          }
 
-         if (average !== 0) {
-            average = average / count;
-            average = Math.round((average + Number.EPSILON) * 100) / 100;
-         }
+         // if (average !== 0) {
+         //    average = average / count;
+         //    average = Math.round((average + Number.EPSILON) * 100) / 100;
+         // }
 
-         const filter2 = { year, student };
+         // const filter2 = { year, student };
 
-         const enrollment = await Enrollment.findOne(filter2);
+         // const enrollment = await Enrollment.findOne(filter2);
 
-         let periodAverage = [];
-         let allAverage = 0;
+         // let periodAverage = [];
+         // let allAverage = 0;
 
-         if (enrollment.classroom.periodAverage.length === 0)
-            periodAverage = new Array(6).fill(0);
-         else periodAverage = [...enrollment.classroom.periodAverage];
+         // if (enrollment.classroom.periodAverage.length === 0)
+         //    periodAverage = new Array(6).fill(0);
+         // else periodAverage = [...enrollment.classroom.periodAverage];
 
-         periodAverage[period - 1] = parseFloat(average);
+         // periodAverage[period - 1] = parseFloat(average);
 
-         let full = 0;
-         for (let y = 0; y < 5; y++) {
-            if (periodAverage[y] !== 0) {
-               allAverage += periodAverage[y];
-               full++;
-            }
-         }
+         // let full = 0;
+         // for (let y = 0; y < 5; y++) {
+         //    if (periodAverage[y] !== 0) {
+         //       allAverage += periodAverage[y];
+         //       full++;
+         //    }
+         // }
 
-         if (allAverage !== 0) {
-            allAverage = allAverage / full;
-            allAverage = Math.round((allAverage + Number.EPSILON) * 100) / 100;
-         }
+         // if (allAverage !== 0) {
+         //    allAverage = allAverage / full;
+         //    allAverage = Math.round((allAverage + Number.EPSILON) * 100) / 100;
+         // }
 
-         await Enrollment.findOneAndUpdate(
-            { _id: enrollment._id },
-            {
-               classroom: {
-                  ...enrollment.classroom,
-                  periodAverage,
-                  ...(allAverage !== 0 && { average: allAverage }),
-               },
-            }
-         );
+         // await Enrollment.findOneAndUpdate(
+         //    { _id: enrollment._id },
+         //    {
+         //       classroom: {
+         //          ...enrollment.classroom,
+         //          periodAverage,
+         //          ...(allAverage !== 0 && { average: allAverage }),
+         //       },
+         //    }
+         // );
       }
 
       res.json({ msg: "Grades Updated" });
@@ -318,7 +390,7 @@ const buildClassTable = async (grades, class_id, res) => {
 
    try {
       enrollments = await Enrollment.find({
-         "classroom._id": class_id,
+         classroom: class_id,
       }).populate({
          model: "user",
          path: "student",

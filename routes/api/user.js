@@ -62,7 +62,7 @@ router.get("/", async (req, res) => {
 
                   if (category) {
                      const enrollments = await Enrollment.find({
-                        ...(!searchTab && { "classroom._id": null }),
+                        ...(!searchTab && { classroom: null }),
                         category: category,
                         year,
                      })
@@ -101,7 +101,7 @@ router.get("/", async (req, res) => {
                         const enrollment = await Enrollment.findOne({
                            student: students[x]._id,
                            year,
-                           ...(classroom && { "classroom._id": classroom }),
+                           ...(classroom && { classroom }),
                         }).populate({ path: "category", select: "name" });
 
                         users.push({
@@ -674,10 +674,10 @@ const inactivateUser = async (user_id, type, completeDeletion) => {
             year: year + 1,
          });
 
-         if (enrollment && enrollment.classroom._id) {
+         if (enrollment && enrollment.classroom) {
             const grades = await Grade.find({
                student: user_id,
-               classroom: enrollment.classroom._id,
+               classroom: enrollment.classroom,
             });
             for (let x = 0; x < grades.length; x++) {
                await Grade.findOneAndRemove({ _id: grades[x]._id });
@@ -685,7 +685,7 @@ const inactivateUser = async (user_id, type, completeDeletion) => {
 
             const attendances = await Attendance.find({
                student: user_id,
-               classroom: enrollment.classroom._id,
+               classroom: enrollment.classroom,
             });
             for (let x = 0; x < attendances.length; x++) {
                await Attendance.findOneAndRemove({ _id: attendances[x]._id });
@@ -730,19 +730,13 @@ const inactivateUser = async (user_id, type, completeDeletion) => {
             }
 
             const enrollments = await Enrollment.find({
-               "classroom._id": classes[x]._id,
+               classroom: classes[x]._id,
             });
             for (let y = 0; y < enrollments.length; y++) {
                await User.findOneAndUpdate(
                   { _id: users[y]._id },
                   {
-                     classroom: {
-                        _id: null,
-                        periodAbsence: [],
-                        periodAverage: [],
-                        average: null,
-                        absence: null,
-                     },
+                     classroom: null,
                   }
                );
             }

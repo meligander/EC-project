@@ -83,6 +83,7 @@ const RegisterList = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
+               setAdminValues((prev) => ({ ...prev, page: 0 }));
                loadRegisters(filterData);
             }}
          >

@@ -68,19 +68,30 @@ const AttendanceTab = ({
                         newAttendances.filter(
                            (attendance) => attendance[0].student
                         ),
-                        classInfo._id
+                        classInfo._id,
+                        period
                      );
                      break;
                   case "delete":
                      deleteDate(
                         toDelete.date,
                         classInfo._id,
+                        period,
                         periods[period] && header[period - 1].length === 1
                      );
                      break;
                   case "new-date":
                      registerNewDate(
-                        { ...newDate, period, classroom: classInfo, periods },
+                        !periods[period - 1]
+                           ? {
+                                ...newDate,
+                                notAble: period !== 1 && !periods[period - 2],
+                                day1: classInfo.day1,
+                                day2: classInfo.day2,
+                             }
+                           : newDate,
+                        classInfo._id,
+                        period,
                         !periods[period - 1]
                      );
                      break;
@@ -114,7 +125,10 @@ const AttendanceTab = ({
                <tbody>
                   {students.map((student, i) => (
                      <tr key={i}>
-                        <td>{student.name}</td>
+                        <td>
+                           {student._id &&
+                              student.lastname + ", " + student.name}
+                        </td>
                         {newAttendances[i] &&
                            newAttendances[i].map((row, key) => (
                               <td key={key}>
@@ -127,23 +141,21 @@ const AttendanceTab = ({
                                        onChange={(e) => onChange(e, i, key)}
                                     />
                                  ) : (
-                                    year === classInfo.year && (
-                                       <button
-                                          type="button"
-                                          className="btn btn-danger"
-                                          onClick={(e) => {
-                                             e.preventDefault();
-                                             setAdminValues({
-                                                ...adminValues,
-                                                popupType: "delete",
-                                                toDelete: row,
-                                             });
-                                             togglePopup("default");
-                                          }}
-                                       >
-                                          <FaTimes />
-                                       </button>
-                                    )
+                                    <button
+                                       type="button"
+                                       className="btn btn-danger"
+                                       onClick={(e) => {
+                                          e.preventDefault();
+                                          setAdminValues({
+                                             ...adminValues,
+                                             popupType: "delete",
+                                             toDelete: row,
+                                          });
+                                          togglePopup("default");
+                                       }}
+                                    >
+                                       <FaTimes />
+                                    </button>
                                  )}
                               </td>
                            ))}
@@ -153,40 +165,42 @@ const AttendanceTab = ({
             </table>
          </div>
          <div className="btn-right">
-            {year === classInfo.year && (
-               <>
-                  <button
-                     className="btn btn-primary"
-                     type="button"
-                     onClick={(e) => {
-                        e.preventDefault();
-                        setAdminValues({
-                           ...adminValues,
-                           popupType: "save",
-                        });
-                        togglePopup("default");
-                     }}
-                  >
-                     <FiSave />
-                     <span className="hide-md">&nbsp;Guardar</span>
-                  </button>
-                  <button
-                     className="btn btn-dark"
-                     type="button"
-                     onClick={(e) => {
-                        e.preventDefault();
-                        setAdminValues((prev) => ({
-                           ...prev,
-                           popupType: "new-date",
-                        }));
-                        togglePopup("new-date");
-                     }}
-                  >
-                     <FaPlus />
-                     <span className="hide-md">&nbsp;Día</span>
-                  </button>
-               </>
-            )}
+            <button
+               className={`btn ${
+                  year === classInfo.year ? "btn-primary" : "btn-black"
+               }`}
+               type="button"
+               disabled={year !== classInfo.year}
+               onClick={(e) => {
+                  e.preventDefault();
+                  setAdminValues({
+                     ...adminValues,
+                     popupType: "save",
+                  });
+                  togglePopup("default");
+               }}
+            >
+               <FiSave />
+               <span className="hide-md">&nbsp;Guardar</span>
+            </button>
+            <button
+               className={`btn ${
+                  year === classInfo.year ? "btn-dark" : "btn-black"
+               }`}
+               type="button"
+               disabled={year !== classInfo.year}
+               onClick={(e) => {
+                  e.preventDefault();
+                  setAdminValues((prev) => ({
+                     ...prev,
+                     popupType: "new-date",
+                  }));
+                  togglePopup("new-date");
+               }}
+            >
+               <FaPlus />
+               <span className="hide-md">&nbsp;Día</span>
+            </button>
             <div className="tooltip">
                <button
                   className="btn btn-secondary"

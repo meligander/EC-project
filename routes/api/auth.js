@@ -7,39 +7,21 @@ const auth = require("../../middleware/auth");
 
 //Models
 const User = require("../../models/User");
-const Enrollment = require("../../models/Enrollment");
 
 //@route    GET /api/auth
 //@desc     Get user
 //@access   Private
 router.get("/", auth, async (req, res) => {
    try {
-      let user = {};
-
-      if (req.user.type === "student") {
-         const date = new Date();
-
-         const enrollment = await Enrollment.findOne({
-            student: req.user.id,
-            year: date.getFullYear(),
-         }).populate({
-            path: "student",
+      let user = await User.findById(req.user.id)
+         .select("-password")
+         .populate({ path: "town", select: "name" })
+         .populate({ path: "neighbourhood", select: "name" })
+         .populate({
+            path: "children",
             model: "user",
             select: ["name", "lastname", "studentnumber"],
          });
-
-         user = enrollment.student;
-      } else {
-         user = await User.findById(req.user.id)
-            .select("-password")
-            .populate({ path: "town", select: "name" })
-            .populate({ path: "neighbourhood", select: "name" })
-            .populate({
-               path: "children",
-               model: "user",
-               select: ["name", "lastname", "studentnumber"],
-            });
-      }
 
       res.json(user);
    } catch (err) {
@@ -72,10 +54,6 @@ router.post(
          const user = await User.findOne({ email });
 
          if (!user) return res.status(400).json({ msg: "Email Inválido" });
-
-         // const salt = await bcrypt.genSalt(10);
-
-         // console.log(await bcrypt.hash(password, salt));
 
          const OKPassword = await user.comparePassword(password);
 

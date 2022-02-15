@@ -2,9 +2,10 @@ import format from "date-fns/format";
 import api from "../utils/api";
 import { saveAs } from "file-saver";
 import history from "../utils/history";
+import store from "../utils/store";
 
-import { updateLoadingSpinner } from "./mixvalues";
-import { addUserToList, removeUserFromList } from "./user";
+import { filterData, newObject, updateLoadingSpinner } from "./mixvalues";
+import { addUserToList, clearUsers, removeUserFromList } from "./user";
 import { setAlert } from "./alert";
 
 import {
@@ -58,22 +59,12 @@ export const getActiveClasses = () => async (dispatch) => {
    }
 };
 
-export const loadClasses = (filterData, spinner) => async (dispatch) => {
+export const loadClasses = (formData, spinner) => async (dispatch) => {
    if (spinner) dispatch(updateLoadingSpinner(true));
    let error = false;
 
-   let filter = "";
-   const filternames = Object.keys(filterData);
-   for (let x = 0; x < filternames.length; x++) {
-      const name = filternames[x];
-      if (filterData[name] !== "") {
-         if (filter !== "") filter = filter + "&";
-         filter = filter + filternames[x] + "=" + filterData[name];
-      }
-   }
-
    try {
-      const res = await api.get(`/class?${filter}`);
+      const res = await api.get(`/class?${filterData(formData)}`);
 
       dispatch({
          type: CLASSES_LOADED,
@@ -94,12 +85,7 @@ export const registerUpdateClass = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
-   let newClass = {};
-   for (const prop in formData) {
-      if (formData[prop] !== "" && formData[prop] !== 0) {
-         newClass[prop] = formData[prop];
-      }
-   }
+   let newClass = newObject(formData);
 
    try {
       let res;
@@ -107,10 +93,12 @@ export const registerUpdateClass = (formData) => async (dispatch) => {
       if (!newClass._id) res = await api.post("/class", newClass);
       else res = await api.put(`/class/${newClass._id}`, newClass);
 
-      dispatch({
-         type: !newClass._id ? CLASS_REGISTERED : CLASS_UPDATED,
-         payload: res.data,
-      });
+      if (store.getState().classes.loading) loadClasses({}, false);
+      else
+         dispatch({
+            type: !newClass._id ? CLASS_REGISTERED : CLASS_UPDATED,
+            payload: res.data,
+         });
 
       dispatch(
          setAlert(
@@ -119,9 +107,8 @@ export const registerUpdateClass = (formData) => async (dispatch) => {
             "2"
          )
       );
-
-      dispatch(getActiveClasses());
       history.push("/class/all");
+      dispatch(clearUsers());
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setClassesError(CLASS_ERROR, err.response));
@@ -181,12 +168,12 @@ export const deleteClass = (class_id) => async (dispatch) => {
    try {
       await api.delete(`/class/${class_id}`);
 
-      dispatch({
-         type: CLASS_DELETED,
-         payload: class_id,
-      });
-
-      dispatch(getActiveClasses());
+      if (store.getState().classes.loading) dispatch(loadClasses({}, false));
+      else
+         dispatch({
+            type: CLASS_DELETED,
+            payload: class_id,
+         });
 
       history.push("/class/all");
       dispatch(setAlert("Clase Eliminada", "success", "2"));

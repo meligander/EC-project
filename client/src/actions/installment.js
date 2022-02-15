@@ -4,7 +4,7 @@ import { saveAs } from "file-saver";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
+import { filterData, newObject, updateLoadingSpinner } from "./mixvalues";
 import { clearSearch } from "./user";
 
 import {
@@ -23,24 +23,31 @@ import {
 
 export const loadInstallment =
    (installment_id, edit, spinner) => async (dispatch) => {
-      if (edit)
-         if (!installment_id) {
-            dispatch(
-               setAlert("Debe seleccionar una cuota primero", "danger", "4")
-            );
-            return false;
-         } else history.push(`/index/installment/edit/${installment_id}`);
-
+      if (spinner) dispatch(updateLoadingSpinner(true));
       try {
-         if (spinner) dispatch(updateLoadingSpinner(true));
+         if (edit)
+            if (!installment_id) {
+               const errorMessage = {
+                  response: {
+                     status: 402,
+                     data: {
+                        msg: "Debe seleccionar una cuota primero",
+                     },
+                  },
+               };
+               throw errorMessage;
+            } else history.push(`/index/installment/edit/${installment_id}`);
+
          const res = await api.get(`/installment/${installment_id}`);
          dispatch({
             type: INSTALLMENT_LOADED,
             payload: res.data,
          });
       } catch (err) {
-         if (err.response.status !== 401)
+         if (err.response.status !== 401) {
             dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));
+            dispatch(setAlert(err.response.data.msg, "danger", "4"));
+         }
       }
       if (spinner) dispatch(updateLoadingSpinner(false));
    };
@@ -62,36 +69,29 @@ export const getTotalDebt = () => async (dispatch) => {
 };
 
 export const loadInstallments =
-   (filterData, spinner, student) => async (dispatch) => {
+   (formData, spinner, student) => async (dispatch) => {
       if (spinner) dispatch(updateLoadingSpinner(true));
       let error = false;
       try {
          let res;
          if (student) {
-            if (!filterData.student._id) {
-               dispatch(
-                  setAlert("Debe seleccionar un usuario primero", "danger", "3")
-               );
-               return false;
+            if (!formData.student._id) {
+               const errorMessage = {
+                  response: {
+                     status: 402,
+                     data: {
+                        msg: "Debe seleccionar un usuario primero",
+                     },
+                  },
+               };
+               throw errorMessage;
             } else {
                res = await api.get(
-                  `/installment/student/${filterData.student._id}`
+                  `/installment/student/${formData.student._id}`
                );
-               dispatch(clearSearch());
+               if (spinner) dispatch(clearSearch());
             }
-         } else {
-            let filter = "";
-
-            const filternames = Object.keys(filterData);
-            for (let x = 0; x < filternames.length; x++) {
-               const name = filternames[x];
-               if (filterData[name] !== "") {
-                  if (filter !== "") filter = filter + "&";
-                  filter = filter + filternames[x] + "=" + filterData[name];
-               }
-            }
-            res = await api.get(`/installment?${filter}`);
-         }
+         } else res = await api.get(`/installment?${filterData(formData)}`);
 
          dispatch({
             type: INSTALLMENTS_LOADED,
@@ -100,8 +100,7 @@ export const loadInstallments =
       } catch (err) {
          if (err.response.status !== 401) {
             dispatch(setInstallmentsError(INSTALLMENTS_ERROR, err.response));
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-            window.scroll(0, 0);
+            dispatch(setAlert(err.response.data.msg, "danger", "3"));
          } else error = true;
       }
 
@@ -112,29 +111,23 @@ export const updateIntallment = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
-   let installment = {};
-   for (const prop in formData) {
-      if (formData[prop] !== "" && formData[prop] !== 0) {
-         installment[prop] = formData[prop];
-      }
-   }
+   let installment = newObject(formData);
 
    try {
       let res;
-      if (formData._id === "") {
+      if (!installment._id) {
          res = await api.post("/installment", installment);
       } else {
          //Update installment
-         res = await api.put(`/installment/${formData._id}`, installment);
+         res = await api.put(`/installment/${installment._id}`, installment);
       }
       dispatch({
-         type:
-            formData._id !== "" ? INSTALLMENT_UPDATED : INSTALLMENT_REGISTERED,
+         type: installment._id ? INSTALLMENT_UPDATED : INSTALLMENT_REGISTERED,
       });
 
       dispatch(setAlert(res.data.msg, "success", "2"));
       dispatch(clearInstallments());
-      history.push(`/index/installments/${formData.student._id}`);
+      history.push(`/index/installments/${installment.student._id}`);
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));

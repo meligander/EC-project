@@ -628,7 +628,7 @@ router.post("/report-card", auth, async (req, res) => {
          .sort({ gradetype: 1 });
 
       enrollment = await Enrollment.findOne({
-         "classroom._id": classInfo._id,
+         classroom: classInfo._id,
          student: student._id,
       });
    } catch (err) {

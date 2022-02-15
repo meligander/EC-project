@@ -72,7 +72,7 @@ export default function (state = initialState, action) {
       case CLASS_DELETED:
          return {
             ...state,
-            classes: state.classes.filter((item) => item !== payload),
+            classes: state.classes.filter((item) => item._id !== payload),
             loading: false,
             error: {},
          };

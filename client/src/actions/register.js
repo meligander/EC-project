@@ -4,7 +4,7 @@ import { saveAs } from "file-saver";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
+import { updateLoadingSpinner, filterData, newObject } from "./mixvalues";
 
 import {
    REGISTER_LOADED,
@@ -37,25 +37,15 @@ export const loadRegister = (spinner) => async (dispatch) => {
 };
 
 export const loadRegisters =
-   (filterData, spinner, byMonth) => async (dispatch) => {
+   (formData, spinner, byMonth) => async (dispatch) => {
       if (spinner) dispatch(updateLoadingSpinner(true));
       let error = false;
 
-      let filter = "";
-      if (!byMonth) {
-         const filternames = Object.keys(filterData);
-         for (let x = 0; x < filternames.length; x++) {
-            const name = filternames[x];
-            if (filterData[name] !== "") {
-               if (filter !== "") filter = filter + "&";
-               filter = filter + filternames[x] + "=" + filterData[name];
-            }
-         }
-      }
-
       try {
          const res = await api.get(
-            byMonth ? "/register/year/bymonth" : `/register?${filter}`
+            byMonth
+               ? "/register/year/bymonth"
+               : `/register?${filterData(formData)}`
          );
          dispatch({
             type: REGISTERS_LOADED,
@@ -76,12 +66,8 @@ export const createRegister = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
-   let register = {};
-   for (const prop in formData) {
-      if (formData[prop] !== "" && formData[prop] !== 0) {
-         register[prop] = formData[prop];
-      }
-   }
+   let register = newObject(formData);
+
    try {
       await api.post("/register", register);
 
@@ -115,11 +101,7 @@ export const closeRegister = (formData) => async (dispatch) => {
    let error = false;
 
    try {
-      let register = {};
-      for (const prop in formData) {
-         if (formData[prop] !== "" || formData[prop] === true)
-            register[prop] = formData[prop];
-      }
+      let register = newObject(formData);
 
       await api.put("/register", register);
 

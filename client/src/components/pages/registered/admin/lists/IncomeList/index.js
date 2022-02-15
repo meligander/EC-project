@@ -88,7 +88,7 @@ const IncomeList = ({
             className="form bigger"
             onSubmit={(e) => {
                e.preventDefault();
-               console.log(filterData);
+               setAdminValues((prev) => ({ ...prev, page: 0 }));
                loadInvoices(filterData, true);
             }}
          >

@@ -279,14 +279,17 @@ const RegisterUser = ({
          <PopUp
             confirm={() => {
                if (popupType === "save")
-                  registerUpdateUser({
-                     ...formData,
-                     children:
-                        type === "guardian"
-                           ? children.map((child) => child._id)
-                           : "",
-                     ...(selectedFile && { img: previewSource }),
-                  });
+                  registerUpdateUser(
+                     {
+                        ...formData,
+                        children:
+                           type === "guardian"
+                              ? children.map((child) => child._id)
+                              : "",
+                        ...(selectedFile && { img: previewSource }),
+                     },
+                     userLogged._id
+                  );
                else setFormData((prev) => ({ ...prev, active: !active }));
             }}
             info={

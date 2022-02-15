@@ -58,7 +58,7 @@ router.post("/list", [auth, adminAuth], (req, res) => {
       let typeName = "";
       if (transactions[x].expencetype) {
          switch (transactions[x].expencetype.type) {
-            case "special-income":
+            case "cheatincome":
                typeName = "Ingreso Especial";
                break;
             case "expence":

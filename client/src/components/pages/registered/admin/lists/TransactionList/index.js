@@ -31,7 +31,7 @@ const TransactionList = ({
    transactionsPDF,
 }) => {
    const expenceType = {
-      "special-income": {
+      cheatincome: {
          trClass: "bg-refund",
          nameType: "Ingreso Especial",
       },
@@ -98,6 +98,7 @@ const TransactionList = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
+               setAdminValues((prev) => ({ ...prev, page: 0 }));
                loadTransactions(filterData);
             }}
          >
@@ -118,7 +119,7 @@ const TransactionList = ({
                   <option value="income">Ingreso</option>
                   <option value="expence">Gasto</option>
                   <option value="withdrawal">Retiro</option>
-                  <option value="special-income">Ingreso Especial</option>
+                  <option value="cheatincome">Ingreso Especial</option>
                </select>
                <label
                   htmlFor="transactionType"

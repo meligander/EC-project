@@ -10,7 +10,10 @@ import {
    createRegister,
 } from "../../../../../../../actions/register";
 import { clearInvoices } from "../../../../../../../actions/invoice";
-import { clearTransactions } from "../../../../../../../actions/expence";
+import {
+   clearTransactions,
+   clearExpenceTypes,
+} from "../../../../../../../actions/expence";
 import {
    formatNumber,
    togglePopup,
@@ -27,6 +30,7 @@ const RegisterTab = ({
    clearInvoices,
    clearTransactions,
    clearRegisters,
+   clearExpenceTypes,
    togglePopup,
 }) => {
    const [formData, setFormData] = useState({
@@ -103,6 +107,7 @@ const RegisterTab = ({
                            onClick={() => {
                               window.scroll(0, 0);
                               clearTransactions();
+                              clearExpenceTypes();
                            }}
                            to="/register/transaction/list"
                         >
@@ -135,6 +140,7 @@ const RegisterTab = ({
                            onClick={() => {
                               window.scroll(0, 0);
                               clearTransactions();
+                              clearExpenceTypes();
                            }}
                            className="btn btn-light"
                         >
@@ -244,5 +250,6 @@ export default connect(mapStateToProps, {
    clearInvoices,
    clearTransactions,
    clearRegisters,
+   clearExpenceTypes,
    togglePopup,
 })(RegisterTab);

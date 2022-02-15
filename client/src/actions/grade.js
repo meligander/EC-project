@@ -4,7 +4,7 @@ import { saveAs } from "file-saver";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
+import { newObject, updateLoadingSpinner, filterData } from "./mixvalues";
 
 import {
    GRADES_LOADED,
@@ -58,17 +58,32 @@ export const loadGradeTypes = (category_id, spinner) => async (dispatch) => {
    if (spinner) dispatch(updateLoadingSpinner(false));
 };
 
+export const loadGradesAv = (formData) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
+   try {
+      const res = await api.get(`/grade/best?${filterData(formData)}`);
+
+      dispatch({
+         type: GRADES_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      if (err.response.status !== 401) {
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         dispatch(setGradesError(GRADES_ERROR, err.response));
+      }
+   }
+   dispatch(updateLoadingSpinner(false));
+};
+
 export const registerNewGrade = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
-      let newGrade = {};
-      for (const prop in formData) {
-         if (formData[prop] !== "") {
-            newGrade[prop] = formData[prop];
-         }
-      }
+      let newGrade = newObject(formData);
+
       const res = await api.post("/grade", newGrade);
 
       dispatch({
@@ -103,17 +118,15 @@ export const updateGrades = (formData, class_id) => async (dispatch) => {
       });
 
       history.push(`/class/single/${class_id}`);
+      window.scrollTo(0, 0);
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setGradesError(GRADES_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         dispatch(setAlert(err.response.data.msg, "danger", "3"));
       } else error = true;
    }
 
-   if (!error) {
-      dispatch(updateLoadingSpinner(false));
-      window.scrollTo(0, 0);
-   }
+   if (!error) dispatch(updateLoadingSpinner(false));
 };
 
 export const deleteGrades = (grade, last) => async (dispatch) => {

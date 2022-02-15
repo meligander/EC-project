@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { format, getYear } from "date-fns";
-import { FaEdit, FaTrashAlt } from "react-icons/fa";
+import format from "date-fns/format";
+import { FaEdit, FaTrashAlt, FaPlus } from "react-icons/fa";
 import { BiFilterAlt } from "react-icons/bi";
 
 import {
@@ -35,8 +35,7 @@ const EnrollmentList = ({
    loadCategories,
    enrollmentsPDF,
 }) => {
-   const day = new Date();
-   const thisYear = getYear(day);
+   const thisYear = new Date().getFullYear();
    const yearArray = new Array(3)
       .fill()
       .map((item, index) => thisYear - 1 + index);
@@ -47,7 +46,7 @@ const EnrollmentList = ({
       name: "",
       lastname: "",
       category: "",
-      year: "",
+      year: thisYear,
    });
 
    const [adminValues, setAdminValues] = useState({
@@ -81,10 +80,25 @@ const EnrollmentList = ({
             confirm={() => deleteEnrollment(toDelete)}
             info="¿Está seguro que desea eliminar la inscripción?"
          />
+         <div className="btn-right">
+            <Link
+               to="/enrollment/register"
+               className="btn btn-dark"
+               onClick={() => {
+                  window.scroll(0, 0);
+                  clearEnrollment();
+                  clearCategories();
+               }}
+            >
+               <FaPlus />
+               <span className="hide-sm">&nbsp; Inscripción</span>
+            </Link>
+         </div>
          <form
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
+               setAdminValues((prev) => ({ ...prev, page: 0 }));
                loadEnrollments(filterData, true);
             }}
          >
@@ -103,15 +117,14 @@ const EnrollmentList = ({
                   value={category}
                >
                   <option value="">* Seleccione Categoría</option>
-                  {!loadingCategories &&
-                     categories.map(
-                        (category) =>
-                           category.name !== "Inscripción" && (
-                              <option key={category._id} value={category._id}>
-                                 {category.name}
-                              </option>
-                           )
-                     )}
+                  {categories.map(
+                     (category) =>
+                        category.name !== "Inscripción" && (
+                           <option key={category._id} value={category._id}>
+                              {category.name}
+                           </option>
+                        )
+                  )}
                </select>
                <label
                   htmlFor="category"

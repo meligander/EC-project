@@ -6,7 +6,7 @@ import history from "../utils/history";
 import { setAlert } from "./alert";
 import { clearRegisters } from "./register";
 import { getTotalDebt } from "./installment";
-import { updateLoadingSpinner } from "./mixvalues";
+import { filterData, newObject, updateLoadingSpinner } from "./mixvalues";
 
 import {
    INVOICE_LOADED,
@@ -56,22 +56,12 @@ export const getInvoiceNumber = () => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const loadInvoices = (filterData, spinner) => async (dispatch) => {
+export const loadInvoices = (formData, spinner) => async (dispatch) => {
    if (spinner) dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
-      let filter = "";
-
-      const filternames = Object.keys(filterData);
-      for (let x = 0; x < filternames.length; x++) {
-         const name = filternames[x];
-         if (filterData[name] !== "") {
-            if (filter !== "") filter = filter + "&";
-            filter = filter + filternames[x] + "=" + filterData[name];
-         }
-      }
-      const res = await api.get(`/invoice?${filter}`);
+      const res = await api.get(`/invoice?${filterData(formData)}`);
       dispatch({
          type: INVOICES_LOADED,
          payload: res.data,
@@ -91,12 +81,7 @@ export const registerInvoice = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
-   let invoice = {};
-   for (const prop in formData) {
-      if (formData[prop] !== "" && formData[prop] !== 0) {
-         invoice[prop] = formData[prop];
-      }
-   }
+   let invoice = newObject(formData);
 
    try {
       const res = await api.post("/invoice", invoice);

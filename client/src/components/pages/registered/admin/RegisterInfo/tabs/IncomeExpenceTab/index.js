@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { FiSave } from "react-icons/fi";
@@ -8,7 +8,6 @@ import {
    clearExpenceTypes,
    registerExpence,
 } from "../../../../../../../actions/expence";
-import { loadUsers } from "../../../../../../../actions/user";
 import { setAlert } from "../../../../../../../actions/alert";
 import {
    formatNumber,
@@ -24,9 +23,8 @@ const IncomeExpenceTab = ({
    auth: { userLogged },
    registers: { register },
    expences: { expencetypes },
-   users: { users, loading },
+   users: { users },
    clearExpenceTypes,
-   loadUsers,
    registerExpence,
    togglePopup,
    setAlert,
@@ -41,11 +39,30 @@ const IncomeExpenceTab = ({
       expencetype: "",
       value: "",
       description: "",
-      hours: "",
-      teacher: {},
    });
 
-   const { expencetype, value, description, hours, teacher } = formData;
+   const [adminValues, setAdminValues] = useState({
+      hours: "",
+      teacher: {},
+      type: "",
+   });
+
+   const { expencetype, value, description } = formData;
+
+   const { hours, teacher, type } = adminValues;
+
+   useEffect(() => {
+      setFormData({
+         expencetype: "",
+         value: "",
+         description: "",
+      });
+      setAdminValues({
+         hours: "",
+         teacher: {},
+         type: "",
+      });
+   }, [register]);
 
    const onChange = (e) => {
       e.persist();
@@ -53,54 +70,56 @@ const IncomeExpenceTab = ({
          ...formData,
          [e.target.name]: e.target.value,
       });
-      if (e.target.value === employeePaymentID && loading)
-         loadUsers({ active: true, type: "team" }, true, true, false);
+
+      if (e.target.name === "expencetype")
+         setAdminValues((prev) => ({
+            ...prev,
+            type: e.target.options[e.target.selectedIndex].getAttribute("name"),
+         }));
    };
 
-   const onChangeTeacher = (e) => {
+   const onChangeAdmin = (e) => {
       e.persist();
-      setFormData({
-         ...formData,
-         teacher: users.find((user) => user._id === e.target.value),
-      });
+
+      setAdminValues((prev) => ({
+         ...prev,
+         [e.target.name]:
+            e.target.name === "teacher"
+               ? users.find((user) => user._id === e.target.value)
+               : e.target.value,
+      }));
+
+      if (e.target.name === "hours") {
+         if (teacher.salary && teacher.salary !== "") {
+            setFormData((prev) => ({
+               ...prev,
+               value: e.target.value * teacher.salary,
+            }));
+         } else {
+            window.scroll(0, 0);
+            setAlert(
+               "No está definido el salario del empleado seleccionado",
+               "danger",
+               "3"
+            );
+         }
+      }
    };
 
    const confirm = async () => {
-      const answer = await registerExpence({
-         expencetype,
-         value,
-         description: `${
-            expencetype === employeePaymentID && teacher._id
-               ? `Pago a ${teacher.lastname}, ${teacher.name}. `
-               : ""
-         }${description}`,
-      });
-      if (answer)
-         setFormData({
-            expencetype: "",
-            value: "",
-            description: "",
-            hours: "",
-            teacher: {},
-         });
-   };
-
-   const setValueAfterHours = (e) => {
-      e.persist();
-      if (teacher.salary && teacher.salary !== "") {
-         setFormData({
-            ...formData,
-            hours: e.target.value,
-            value: e.target.value * teacher.salary,
-         });
-      } else {
-         window.scroll(0, 0);
-         setAlert(
-            "No está definido el salario del empleado seleccionado",
-            "danger",
-            "3"
-         );
-      }
+      await registerExpence(
+         {
+            expencetype,
+            value,
+            description: `${
+               expencetype === employeePaymentID && teacher._id
+                  ? `Pago a ${teacher.lastname}, ${teacher.name}. `
+                  : ""
+            }${description}`,
+         },
+         register,
+         type
+      );
    };
 
    return (
@@ -138,11 +157,16 @@ const IncomeExpenceTab = ({
                            name="expencetype"
                            value={expencetype}
                            onChange={onChange}
-                           id="select"
                         >
-                           <option value="">* Tipo de Movimiento</option>
+                           <option value="" name="">
+                              * Tipo de Movimiento
+                           </option>
                            {expencetypes.map((expty) => (
-                              <option key={expty._id} value={expty._id}>
+                              <option
+                                 key={expty._id}
+                                 name={expty.type}
+                                 value={expty._id}
+                              >
                                  {expty.name}
                               </option>
                            ))}
@@ -157,20 +181,18 @@ const IncomeExpenceTab = ({
                               <select
                                  name="teacher"
                                  value={teacher._id}
-                                 onChange={onChangeTeacher}
-                                 id="select"
+                                 onChange={onChangeAdmin}
                               >
                                  <option value={0}>* Empleado</option>
-                                 {!loading &&
-                                    users.map((user) => (
-                                       <React.Fragment key={user._id}>
-                                          {user.type !== "admin&teacher" && (
-                                             <option value={user._id}>
-                                                {user.lastname}, {user.name}
-                                             </option>
-                                          )}
-                                       </React.Fragment>
-                                    ))}
+                                 {users.map((user) => (
+                                    <React.Fragment key={user._id}>
+                                       {user.type !== "admin&teacher" && (
+                                          <option value={user._id}>
+                                             {user.lastname}, {user.name}
+                                          </option>
+                                       )}
+                                    </React.Fragment>
+                                 ))}
                               </select>
                            </td>
                         </tr>
@@ -179,11 +201,10 @@ const IncomeExpenceTab = ({
                            <td>
                               <input
                                  type="number"
-                                 onChange={setValueAfterHours}
+                                 onChange={onChangeAdmin}
                                  placeholder="Horas"
                                  value={hours}
                                  name="hours"
-                                 id=""
                               />
                            </td>
                         </tr>
@@ -256,7 +277,6 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    registerExpence,
-   loadUsers,
    clearExpenceTypes,
    setAlert,
    togglePopup,

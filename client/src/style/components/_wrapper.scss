@@ -40,7 +40,6 @@
 
       &.stick th,
       &.stick td:first-child {
-         z-index: 1999;
          position: sticky;
          left: 0;
          top: 0;
@@ -48,10 +47,7 @@
 
       &.stick th:first-child {
          z-index: 2999;
-
-         @include respond(small-phone) {
-            opacity: 1;
-         }
+         opacity: 1;
       }
       &.stick td:first-child {
          z-index: 1799;
