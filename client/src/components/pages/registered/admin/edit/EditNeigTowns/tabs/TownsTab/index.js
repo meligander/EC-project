@@ -43,7 +43,7 @@ const TownsTab = ({
       let newFormData = [...formData];
 
       newFormData.push({
-         _id: "",
+         _id: 0,
          name: "",
       });
       setFormData(newFormData);
@@ -56,7 +56,7 @@ const TownsTab = ({
                confirm={() => {
                   if (popupType === "save") updateTowns(formData);
                   else {
-                     if (formData[toDelete]._id === "") {
+                     if (formData[toDelete]._id === 0) {
                         let newFormData = [...formData];
                         newFormData.splice(toDelete, 1);
                         setFormData(newFormData);

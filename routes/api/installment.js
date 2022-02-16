@@ -20,9 +20,9 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    try {
       let installments = [];
 
-      const filter = req.query;
+      const { year, number, name, lastname } = req.query;
 
-      if (Object.entries(filter).length === 0) {
+      if (Object.entries(req.query).length === 0) {
          installments = await Installment.find({
             value: { $ne: 0 },
             debt: true,
@@ -32,32 +32,29 @@ router.get("/", [auth, adminAuth], async (req, res) => {
             select: ["name", "lastname"],
          });
       } else {
-         let initialInstallments = await Installment.find({
+         installments = await Installment.find({
             value: { $ne: 0 },
             debt: true,
-            ...(filter.year && { year: filter.year }),
-            ...(filter.number && { number: filter.number }),
+            ...(year && { year }),
+            ...(number && { number }),
          }).populate({
             path: "student",
             model: "user",
             select: ["name", "lastname"],
             match: {
-               ...(filter.name && {
-                  name: { $regex: `.*${filter.name}.*`, $options: "i" },
+               ...(name && {
+                  name: { $regex: `.*${name}.*`, $options: "i" },
                }),
-               ...(filter.lastname && {
+               ...(lastname && {
                   lastname: {
-                     $regex: `.*${filter.lastname}.*`,
+                     $regex: `.*${lastname}.*`,
                      $options: "i",
                   },
                }),
             },
          });
 
-         for (let x = 0; x < initialInstallments.length; x++) {
-            if (initialInstallments[x].student)
-               installments.push(initialInstallments[x]);
-         }
+         installments = installments.filter((item) => item.student);
       }
 
       installments = sortArray(installments);
@@ -488,9 +485,5 @@ const sortArray = (array) => {
 
    return sortedArray;
 };
-
-// const formatNumber = (number) => {
-//    return new Intl.NumberFormat("de-DE").format(number);
-// };
 
 module.exports = router;

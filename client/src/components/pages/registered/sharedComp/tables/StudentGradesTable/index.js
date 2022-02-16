@@ -20,9 +20,9 @@ const StudentGradesTable = ({ studentGrades: { headers, rows }, category }) => {
       }
    };
 
-   const getGrade = (grade, cambridge) => {
+   const getGrade = (grade, percentage) => {
       if (category === "Kinder") return kinderGrade(grade);
-      if (cambridge) return grade * 10 + "%";
+      if (percentage) return grade * 10 + "%";
       if (grade % 1 !== 0) return grade.toFixed(2);
       else return grade;
    };
@@ -44,6 +44,11 @@ const StudentGradesTable = ({ studentGrades: { headers, rows }, category }) => {
                <th>
                   4° B<span className="hide-sm">imestre</span>
                </th>
+               {category !== "Kinder" && (
+                  <th>
+                     F<span className="hide-sm">inal</span>
+                  </th>
+               )}
             </tr>
          </thead>
          <tbody>
@@ -54,7 +59,7 @@ const StudentGradesTable = ({ studentGrades: { headers, rows }, category }) => {
                      {row.map((item, i) => (
                         <td key={i}>
                            {item.value
-                              ? getGrade(item.value, item.gradetype.cambridge)
+                              ? getGrade(item.value, item.gradetype.percentage)
                               : ""}
                         </td>
                      ))}

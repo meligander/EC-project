@@ -41,10 +41,9 @@ const GradesTab = ({
       let gradetypes = [];
 
       gradeTypes.forEach((type) => {
-         if (!header[period - 1].some((item) => item === type.name))
+         if (!header[period - 1].some((item) => item.name === type.name))
             gradetypes.push(type);
       });
-
       return gradetypes;
    };
 
@@ -64,22 +63,16 @@ const GradesTab = ({
       }));
    }, [period, periods]);
 
-   const onChange = (e, row) => {
+   const onChange = (e, student, grade) => {
       e.persist();
-      let number = Number(e.target.name.substring(5, e.target.name.length));
+      if (year === classInfo.year) {
+         newGrades[student][grade].value = e.target.value;
 
-      const gradesNumber = newGrades[0].length;
-      const rowN = Math.ceil((number + 1) / gradesNumber) - 1;
-      const mult = gradesNumber * rowN;
-      number = number - mult;
-      newGrades[rowN][number] = {
-         ...row,
-         value: e.target.value,
-      };
-      setAdminValues((prev) => ({
-         ...prev,
-         newGrades,
-      }));
+         setAdminValues((prev) => ({
+            ...prev,
+            newGrades,
+         }));
+      }
    };
 
    const info = () => {
@@ -112,18 +105,24 @@ const GradesTab = ({
                   case "save":
                      updateGrades(
                         newGrades.filter((grade) => grade[0].student),
-                        classInfo._id
+                        classInfo._id,
+                        period
                      );
                      break;
                   case "delete":
                      deleteGrades(
                         toDelete,
-                        periods[period] &&
-                           gradeTypes.length === gradetypes.length + 1
+                        classInfo._id,
+                        period,
+                        periods[period] && header[period - 1].length === 1
                      );
                      setAdminValues((prev) => ({
                         ...prev,
-                        gradetypes: [...gradetypes, toDelete.gradetype],
+                        gradetypes: [
+                           ...gradetypes,
+                           gradeTypes.find((item) => item._id === toDelete),
+                        ],
+                        toDelete: null,
                      }));
 
                      break;
@@ -150,12 +149,14 @@ const GradesTab = ({
                      );
                      break;
                   case "new-grade-type":
-                     registerNewGrade({
+                     registerNewGrade(
+                        {
+                           gradetype: formInfo,
+                        },
+                        classInfo._id,
                         period,
-                        classroom: classInfo._id,
-                        gradetype: formInfo,
-                        periods: periods,
-                     });
+                        period !== 1 && !periods[period - 2]
+                     );
                      setAdminValues((prev) => ({
                         ...prev,
                         gradetypes: gradetypes.filter(
@@ -176,22 +177,25 @@ const GradesTab = ({
                      <th>&nbsp; Nombre &nbsp;</th>
                      {header[period - 1] &&
                         header[period - 1].map((type, index) => (
-                           <th key={index}>{type}</th>
+                           <th key={index}>{type.name}</th>
                         ))}
                   </tr>
                </thead>
                <tbody>
                   {students.map((student, i) => (
                      <tr key={i}>
-                        <td>{student.name}</td>
+                        <td>
+                           {student._id &&
+                              student.lastname + ", " + student.name}
+                        </td>
                         {newGrades[i] &&
                            newGrades[i].map((row, key) => (
                               <td key={key}>
-                                 {row.student !== undefined ? (
+                                 {row.student ? (
                                     <input
                                        type="number"
                                        name={row.name}
-                                       onChange={(e) => onChange(e, row)}
+                                       onChange={(e) => onChange(e, i, key)}
                                        value={row.value}
                                        min={0}
                                        max={10}
@@ -206,7 +210,7 @@ const GradesTab = ({
                                           setAdminValues((prev) => ({
                                              ...prev,
                                              popupType: "delete",
-                                             toDelete: row,
+                                             toDelete: row.gradetype,
                                           }));
                                           togglePopup("default");
                                        }}

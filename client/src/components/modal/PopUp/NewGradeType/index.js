@@ -10,9 +10,10 @@ const NewGradeType = ({
    onChange,
    clearGradeTypes,
    isAdmin,
+   togglePopup,
 }) => {
    return (
-      <div className="new-grade-type">
+      <div className=" new-grade-type">
          <div className="new-grade-type-form">
             <select
                className="form-input center"
@@ -41,6 +42,7 @@ const NewGradeType = ({
                   onClick={() => {
                      window.scroll(0, 0);
                      clearGradeTypes();
+                     togglePopup();
                   }}
                   className="btn btn-mix-secondary"
                >

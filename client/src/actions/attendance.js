@@ -56,11 +56,24 @@ export const loadAttendancesAv = (formData) => async (dispatch) => {
 };
 
 export const registerNewDate =
-   (formData, class_id, period, bimester) => async (dispatch) => {
+   (formData, class_id, period, periods) => async (dispatch) => {
       dispatch(updateLoadingSpinner(true));
       let error = false;
+      const bimester = !periods[period - 1];
 
       try {
+         if (period !== 1 && !periods[period - 2]) {
+            const errorMessage = {
+               response: {
+                  status: 402,
+                  data: {
+                     msg: "Debe agregar por lo menos un día en los bimestres anteriores",
+                  },
+               },
+            };
+            throw errorMessage;
+         }
+
          let newDate = newObject(formData);
 
          const res = await api.post(
@@ -123,37 +136,39 @@ export const updateAttendances =
 
 export const deleteDate =
    (date, classroom, period, last) => async (dispatch) => {
-      if (last) {
-         dispatch(
-            setAlert(
-               "No puede eliminar la última fecha del bimestre",
-               "danger",
-               "3"
-            )
-         );
-      } else {
-         dispatch(updateLoadingSpinner(true));
-         let error = false;
-         try {
-            const res = await api.delete(
-               `/attendance/${classroom}/${period}/${date}`
-            );
+      dispatch(updateLoadingSpinner(true));
+      let error = false;
 
-            dispatch({
-               type: DATE_DELETED,
-               payload: res.data,
-            });
-
-            dispatch(setAlert("Fecha eliminada", "success", "3"));
-         } catch (err) {
-            if (err.response.status !== 401) {
-               dispatch(setAttendanceError(DATE_ERROR, err.response));
-               dispatch(setAlert(err.response.data.msg, "danger", "3"));
-            } else error = true;
+      try {
+         if (last) {
+            const errorMessage = {
+               response: {
+                  status: 402,
+                  data: {
+                     msg: "No puede eliminar la última fecha del bimestre",
+                  },
+               },
+            };
+            throw errorMessage;
          }
+         const res = await api.delete(
+            `/attendance/${classroom}/${period}/${date}`
+         );
 
-         if (!error) dispatch(updateLoadingSpinner(false));
+         dispatch({
+            type: DATE_DELETED,
+            payload: res.data,
+         });
+
+         dispatch(setAlert("Fecha eliminada", "success", "3"));
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setAttendanceError(DATE_ERROR, err.response));
+            dispatch(setAlert(err.response.data.msg, "danger", "3"));
+         } else error = true;
       }
+
+      if (!error) dispatch(updateLoadingSpinner(false));
    };
 
 export const attendancesPDF =

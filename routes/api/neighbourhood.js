@@ -12,7 +12,7 @@ const Neighbourhood = require("../../models/Neighbourhood");
 //@access   Private && Admin
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
-      let neighbourhoods = await Neighbourhood.find().sort({ name: 1 });
+      const neighbourhoods = await Neighbourhood.find().sort({ name: 1 });
 
       if (neighbourhoods.length === 0) {
          return res.status(400).json({
@@ -32,7 +32,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 //@access   Private
 router.get("/town/:id", auth, async (req, res) => {
    try {
-      let neighbourhoods = await Neighbourhood.find({
+      const neighbourhoods = await Neighbourhood.find({
          town: req.params.id,
       }).sort({ name: 1 });
 
@@ -54,36 +54,34 @@ router.get("/town/:id", auth, async (req, res) => {
 //@access   Private && Admin
 router.post("/", [auth, adminAuth], async (req, res) => {
    const neighbourhoods = req.body;
-   let neighbourhood = {};
-   let newNeighbourhoods = [];
 
-   let checkForValidMongoDbID = new RegExp("^[0-9a-fA-F]{24}$");
+   if (neighbourhoods.some((item) => item.name === "" || item.town === ""))
+      return res
+         .status(400)
+         .json({ msg: "El nombre y la localidad deben estar definidos" });
 
    try {
+      let newNeighbourhoods = [];
+
       for (let x = 0; x < neighbourhoods.length; x++) {
-         if (neighbourhoods[x].name === "")
-            return res
-               .status(400)
-               .json({ msg: "El nombre debe estar definido" });
-         if (neighbourhoods[x].town === "")
-            return res
-               .status(400)
-               .json({ msg: "La localidad debe estar definida" });
+         const data = {
+            name: neighbourhoods[x].name,
+            town: neighbourhoods[x].town,
+         };
 
-         let name = neighbourhoods[x].name;
-         let town = neighbourhoods[x].town;
-         let id = neighbourhoods[x]._id;
+         let neighbourhood;
 
-         if (!checkForValidMongoDbID.test(id)) {
-            neighbourhood = new Neighbourhood({ name, town });
+         if (neighbourhoods[x]._id === 0) {
+            neighbourhood = new Neighbourhood(data);
             await neighbourhood.save();
          } else {
             neighbourhood = await Neighbourhood.findOneAndUpdate(
-               { _id: id },
-               { $set: { name, town } },
+               { _id: neighbourhoods[x]._id },
+               { $set: data },
                { new: true }
             );
          }
+
          newNeighbourhoods.push(neighbourhood);
       }
 

@@ -13,7 +13,7 @@ const Neighbourhood = require("../../models/Neighbourhood");
 //@access   Private
 router.get("/", auth, async (req, res) => {
    try {
-      let towns = await Town.find().sort({ name: 1 });
+      const towns = await Town.find().sort({ name: 1 });
 
       if (towns.length === 0) {
          return res.status(400).json({
@@ -34,26 +34,23 @@ router.get("/", auth, async (req, res) => {
 router.post("/", [auth, adminAuth], async (req, res) => {
    //An array of towns
    const towns = req.body;
-   let town = {};
-   let newTowns = [];
+
+   if (towns.some((item) => item.name === ""))
+      return res.status(400).json({ msg: "El nombre debe estar definido" });
 
    try {
+      let newTowns = [];
+
       for (let x = 0; x < towns.length; x++) {
-         if (towns[x].name === "")
-            return res
-               .status(400)
-               .json({ msg: "El nombre debe estar definido" });
+         let town;
 
-         let name = towns[x].name;
-         let id = towns[x]._id;
-
-         if (id === "") {
-            town = new Town({ name });
+         if (towns[x]._id === 0) {
+            town = new Town({ name: towns[x].name });
             await town.save();
          } else {
             town = await Town.findOneAndUpdate(
-               { _id: id },
-               { $set: { name } },
+               { _id: towns[x]._id },
+               { $set: { name: towns[x].name } },
                { new: true }
             );
          }
@@ -77,9 +74,9 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
 
       const neighbh = await Neighbourhood.find({ town: req.params.id });
 
-      for (let x = 0; x < neighbh.length; x++) {
-         await Neighbourhood.findOneAndRemove({ _id: neighbh[x]._id });
-      }
+      await neighbh.forEach(
+         async (item) => await Neighbourhood.findOneAndRemove({ _id: item._id })
+      );
 
       res.json({ msg: "Town deleted" });
    } catch (err) {

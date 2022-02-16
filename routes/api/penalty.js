@@ -37,7 +37,7 @@ router.post(
    [
       auth,
       adminAuth,
-      check("percentage", "No se pudo registrar, agregue el porcentaje")
+      check("percentage", "Debe agregar el nuevo porcentaje de recargo")
          .not()
          .isEmpty(),
    ],
@@ -45,7 +45,6 @@ router.post(
       const { percentage } = req.body;
 
       let errors = [];
-
       const errorsResult = validationResult(req);
       if (!errorsResult.isEmpty()) {
          errors = errorsResult.array();
@@ -57,14 +56,15 @@ router.post(
 
          await penalty.save();
 
-         let penaltyToRemove = await Penalty.find().sort({ $natural: -1 });
+         let penaltyToRemove = await Penalty.find()
+            .sort({ $natural: -1 })
+            .limit(2);
 
          penalty = penaltyToRemove[0];
          penaltyToRemove = penaltyToRemove[1];
 
-         if (penaltyToRemove) {
+         if (penaltyToRemove)
             await Penalty.findOneAndRemove({ _id: penaltyToRemove._id });
-         }
 
          res.json(penalty);
       } catch (err) {

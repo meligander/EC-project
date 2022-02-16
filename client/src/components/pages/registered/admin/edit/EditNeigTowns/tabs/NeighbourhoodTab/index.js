@@ -44,7 +44,7 @@ const NeighbourhoodTab = ({
    const addNeighbourhood = () => {
       let newFormData = [...formData];
       newFormData.push({
-         _id: "",
+         _id: 0,
          name: "",
          town: "",
       });
@@ -57,7 +57,7 @@ const NeighbourhoodTab = ({
             confirm={() => {
                if (popupType === "save") updateNeighbourhoods(formData);
                else {
-                  if (formData[toDelete]._id === "") {
+                  if (formData[toDelete]._id === 0) {
                      let newFormData = [...formData];
                      newFormData.splice(toDelete, 1);
                      setFormData(newFormData);

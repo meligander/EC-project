@@ -56,42 +56,34 @@ router.post("/", [auth, adminAuth], async (req, res) => {
    //An array of expence types
 
    const expenceTypes = req.body;
-   let newExpeceTypes = [];
-   let expenceType = {};
 
-   let checkForValidMongoDbID = new RegExp("^[0-9a-fA-F]{24}$");
+   if (expenceTypes.some((item) => item.name === "" || item.type === ""))
+      return res
+         .status(400)
+         .json({ msg: "El nombre y el tipo debe estar definido" });
 
    try {
-      for (let x = 0; x < expenceTypes.length; x++) {
-         if (expenceTypes[x].name === "")
-            return res
-               .status(400)
-               .json({ msg: "El nombre debe estar definido" });
-         if (expenceTypes[x].type === "")
-            return res.status(400).json({ msg: "El tipo debe estar definido" });
-      }
-
-      for (let x = 0; x < expenceTypes.length; x++) {
-         expenceType = {
-            name: expenceTypes[x].name,
-            type: expenceTypes[x].type,
+      await expenceTypes.forEach(async (item) => {
+         const data = {
+            name: item.name,
+            type: item.type,
          };
 
-         if (!checkForValidMongoDbID.test(expenceTypes[x]._id)) {
-            expenceType = new ExpenceType(expenceType);
+         if (item._id === 0) {
+            let expenceType = await ExpenceType.findOne(data);
 
-            await expenceType.save();
-         } else {
-            expenceType = await ExpenceType.findOneAndUpdate(
-               { _id: expenceTypes[x]._id },
-               { $set: expenceType },
-               { new: true }
+            if (!expenceType) {
+               expenceType = new ExpenceType(data);
+               await expenceType.save();
+            }
+         } else
+            await ExpenceType.findOneAndUpdate(
+               { _id: item._id },
+               { $set: data }
             );
-         }
-         newExpeceTypes.push(expenceType);
-      }
+      });
 
-      res.json(newExpeceTypes);
+      res.json({ msg: "Expence Types Updated" });
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });

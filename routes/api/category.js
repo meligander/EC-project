@@ -8,7 +8,6 @@ const auth = require("../../middleware/auth");
 //Models
 const Category = require("../../models/Category");
 const Installment = require("../../models/Installment");
-const Enrollment = require("../../models/Enrollment");
 
 //@route    GET /api/category
 //@desc     get all categories
@@ -104,7 +103,7 @@ router.put(
             if (category.name === "Inscripción") {
                const installments = await Installment.find({
                   number: 0,
-                  year: { $in: [year, year + 1] },
+                  year: { $gte: year },
                   value: { $ne: 0 },
                   updatable: true,
                });
@@ -118,7 +117,7 @@ router.put(
                );
             } else {
                let installments = await Installment.find({
-                  year: { $in: [year, year + 1] },
+                  year: { $gte: year },
                   value: { $ne: 0 },
                   updatable: true,
                })
@@ -152,7 +151,7 @@ router.put(
 
                      await Installment.findOneAndUpdate(
                         { _id: inst._id },
-                        { $set: { value: newValue /*,expired:false*/ } }
+                        { $set: { value: newValue, expired: false } }
                      );
                   }
                });

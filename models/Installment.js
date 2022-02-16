@@ -18,10 +18,10 @@ const InstallmentSchema = new mongoose.Schema({
       type: Number,
       required: true,
    },
-   // expired: {
-   //    type: Boolean,
-   //    default: false,
-   // },
+   expired: {
+      type: Boolean,
+      default: false,
+   },
    emailSent: {
       type: Boolean,
    },
@@ -29,10 +29,10 @@ const InstallmentSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "enrollment",
    },
-   // debt: {
-   //    type: Boolean,
-   //    default: false,
-   // },
+   debt: {
+      type: Boolean,
+      default: false,
+   },
    updatable: {
       type: Boolean,
       default: true,

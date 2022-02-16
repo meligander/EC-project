@@ -85,14 +85,13 @@ const AttendanceTab = ({
                         !periods[period - 1]
                            ? {
                                 ...newDate,
-                                notAble: period !== 1 && !periods[period - 2],
                                 day1: classInfo.day1,
                                 day2: classInfo.day2,
                              }
                            : newDate,
                         classInfo._id,
                         period,
-                        !periods[period - 1]
+                        periods
                      );
                      break;
                   default:

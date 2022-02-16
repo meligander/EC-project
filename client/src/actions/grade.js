@@ -77,74 +77,96 @@ export const loadGradesAv = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(false));
 };
 
-export const registerNewGrade = (formData) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-   let error = false;
-
-   try {
-      let newGrade = newObject(formData);
-
-      const res = await api.post("/grade", newGrade);
-
-      dispatch({
-         type: NEWGRADE_REGISTERED,
-         payload: res.data,
-      });
-      dispatch(setAlert("Nuevo Tipo de Nota Agregado", "success", "3"));
-   } catch (err) {
-      if (err.response.status !== 401) {
-         dispatch(setGradesError(GRADES_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "3"));
-      } else error = true;
-   }
-
-   if (!error) dispatch(updateLoadingSpinner(false));
-};
-
-export const updateGrades = (formData, class_id) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-   let error = false;
-
-   try {
-      const res = await api.post("/grade/period", formData);
-      dispatch({
-         type: GRADES_UPDATED,
-         payload: res.data,
-      });
-
-      dispatch(setAlert("Calificaciones Modificadas", "success", "2"));
-      dispatch({
-         type: GRADES_CLEARED,
-      });
-
-      history.push(`/class/single/${class_id}`);
-      window.scrollTo(0, 0);
-   } catch (err) {
-      if (err.response.status !== 401) {
-         dispatch(setGradesError(GRADES_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "3"));
-      } else error = true;
-   }
-
-   if (!error) dispatch(updateLoadingSpinner(false));
-};
-
-export const deleteGrades = (grade, last) => async (dispatch) => {
-   if (last) {
-      dispatch(
-         setAlert(
-            "No puede eliminar la última nota del bimestre",
-            "danger",
-            "3"
-         )
-      );
-   } else {
+export const registerNewGrade =
+   (formData, class_id, period, last) => async (dispatch) => {
       dispatch(updateLoadingSpinner(true));
       let error = false;
 
       try {
+         if (last) {
+            const errorMessage = {
+               response: {
+                  status: 402,
+                  data: {
+                     msg: "Debe agregar por lo menos una nota en los bimestres anteriores",
+                  },
+               },
+            };
+            throw errorMessage;
+         }
+
+         let newGrade = newObject(formData);
+
+         const res = await api.post(`/grade/${class_id}/${period}`, newGrade);
+
+         dispatch({
+            type: NEWGRADE_REGISTERED,
+            payload: res.data,
+         });
+         dispatch(setAlert("Nuevo Tipo de Nota Agregado", "success", "3"));
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setGradesError(GRADES_ERROR, err.response));
+            if (err.response.data.errors)
+               err.response.data.errors.forEach((error) => {
+                  dispatch(setAlert(error.msg, "danger", "3"));
+               });
+            else dispatch(setAlert(err.response.data.msg, "danger", "3"));
+         } else error = true;
+      }
+
+      if (!error) dispatch(updateLoadingSpinner(false));
+   };
+
+export const updateGrades =
+   (formData, class_id, period) => async (dispatch) => {
+      dispatch(updateLoadingSpinner(true));
+      let error = false;
+
+      try {
+         const res = await api.put(`/grade/${class_id}/${period}`, formData);
+         dispatch({
+            type: GRADES_UPDATED,
+            payload: res.data,
+         });
+
+         dispatch(setAlert("Calificaciones Modificadas", "success", "2"));
+         dispatch({
+            type: GRADES_CLEARED,
+         });
+
+         history.push(`/class/single/${class_id}`);
+         window.scrollTo(0, 0);
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setGradesError(GRADES_ERROR, err.response));
+            dispatch(setAlert(err.response.data.msg, "danger", "3"));
+         } else error = true;
+      }
+
+      if (!error) dispatch(updateLoadingSpinner(false));
+   };
+
+export const deleteGrades =
+   (gradetype, class_id, period, last) => async (dispatch) => {
+      dispatch(updateLoadingSpinner(true));
+      let error = false;
+
+      try {
+         if (last) {
+            const errorMessage = {
+               response: {
+                  status: 402,
+                  data: {
+                     msg: "No puede eliminar la última nota del bimestre",
+                  },
+               },
+            };
+            throw errorMessage;
+         }
+
          const res = await api.delete(
-            `/grade/${grade.gradetype._id}/${grade.classroom}/${grade.period}`
+            `/grade/${class_id}/${period}/${gradetype}`
          );
 
          dispatch({
@@ -161,8 +183,7 @@ export const deleteGrades = (grade, last) => async (dispatch) => {
       }
 
       if (!error) dispatch(updateLoadingSpinner(false));
-   }
-};
+   };
 
 export const updateGradeTypes = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));

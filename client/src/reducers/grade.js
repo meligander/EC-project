@@ -46,7 +46,7 @@ export default function (state = initialState, action) {
          return {
             ...state,
             gradeTypes: state.gradeTypes.filter(
-               (gradeType) => gradeType[0]._id !== payload
+               (gradeType) => gradeType._id !== payload
             ),
             loadingGT: false,
          };

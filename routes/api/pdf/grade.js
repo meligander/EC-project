@@ -830,6 +830,34 @@ const buildAllGradesTable = (students, periods, className) => {
    return table;
 };
 
+const buildStudentTable = (grades) => {
+   let obj = grades.reduce((res, curr) => {
+      if (res[curr.gradetype.name]) {
+         res[curr.gradetype.name].push(curr);
+      } else Object.assign(res, { [curr.gradetype.name]: [curr] });
+      return res;
+   }, {});
+
+   console.log(obj);
+
+   let rows = [];
+
+   for (const x in obj) {
+      const dividedGrades = obj[x];
+      let row = Array.from(Array(4), () => ({
+         value: "",
+      }));
+      for (let x = 0; x < dividedGrades.length; x++) {
+         row[dividedGrades[x].period - 1] = dividedGrades[x];
+      }
+      rows.push(row);
+   }
+
+   let headers = Object.getOwnPropertyNames(obj);
+
+   return { headers, rows };
+};
+
 const kinderGrade = (grade) => {
    switch (true) {
       case grade === "":

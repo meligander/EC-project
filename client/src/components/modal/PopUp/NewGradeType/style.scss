@@ -1,11 +1,18 @@
 .new-grade-type {
    width: 85%;
    margin: 4rem auto 0;
+   text-align: start;
 
    display: flex;
    justify-content: space-between;
 
    &-form {
       width: 85%;
+
+      .lbl {
+         opacity: 0;
+         visibility: hidden;
+         transform: translateY(-4rem);
+      }
    }
 }

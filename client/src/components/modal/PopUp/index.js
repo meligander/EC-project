@@ -102,6 +102,7 @@ const PopUp = ({
                   gradetypes={info.gradetypes}
                   clearGradeTypes={info.clearGradeTypes}
                   isAdmin={info.isAdmin}
+                  togglePopup={togglePopup}
                />
             ) : (
                <></>

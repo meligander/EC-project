@@ -5,8 +5,9 @@ const GradeTypeSchema = new mongoose.Schema({
       type: String,
       required: true,
    },
-   cambridge: {
+   percentage: {
       type: Boolean,
+      default: false,
    },
    categories: [
       {

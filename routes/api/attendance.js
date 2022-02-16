@@ -203,18 +203,13 @@ router.post(
    ],
    async (req, res) => {
       const { class_id, period } = req.params;
-      const { fromDate, toDate, day1, day2, notAble } = req.body;
+      const { fromDate, toDate, day1, day2 } = req.body;
 
       const errorsResult = validationResult(req);
       if (!errorsResult.isEmpty()) {
          errors = errorsResult.array();
          return res.status(400).json({ errors });
       }
-
-      if (notAble)
-         return res.status(400).json({
-            msg: "Debe agregar por lo menos una fecha en los bimestres anteriores",
-         });
 
       if (!day1 || !day2)
          return res.status(400).json({
@@ -290,21 +285,20 @@ router.put("/:class_id/:period", auth, async (req, res) => {
 //@access   Private
 router.delete("/:class_id/:period/:date", auth, async (req, res) => {
    try {
-      const { class_id, period, date } = req.params;
+      const { class_id: classroom, period, date } = req.params;
 
       //Remove attendace
       const attendancesToDelete = await Attendance.find({
          date,
-         classroom: class_id,
+         classroom,
          period,
       });
 
-      for (let x = 0; x < attendancesToDelete.length; x++) {
-         const _id = attendancesToDelete[x].id;
-         await Attendance.findOneAndRemove({ _id });
-      }
+      await attendancesToDelete.forEach(
+         async (item) => await Attendance.findOneAndRemove({ _id: item._id })
+      );
 
-      const attendancesTable = await buildTable(class_id, res);
+      const attendancesTable = await buildTable(classroom, res);
 
       res.json(attendancesTable);
    } catch (err) {
@@ -335,7 +329,6 @@ const buildTable = async (class_id, res) => {
          model: "user",
          path: "student",
          select: ["name", "lastname"],
-         options: { sort: { lastname: 1, name: 1 } },
       });
 
       enrollments = sortByName(enrollments);
@@ -381,7 +374,7 @@ const buildTable = async (class_id, res) => {
 
          //create an array with the amount of dates for the cells in the row
          //every item in the array goes with that info
-         let row = Array.from(Array(dates.length), (item, index) => {
+         const row = Array.from(Array(dates.length), (item, index) => {
             const inassistance = studentInassistance.find(
                (item) => item.date.toISOString() === dates[index]
             );
@@ -435,7 +428,6 @@ const getDaysBetweenDates = (start, end, dayName) => {
 
 //@desc Function to sort and array by name
 const sortByName = (array) => {
-   console.log(array);
    return array.sort((a, b) => {
       if (a.student.lastname > b.student.lastname) return 1;
       if (a.student.lastname < b.student.lastname) return -1;

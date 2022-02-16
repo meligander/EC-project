@@ -109,7 +109,7 @@ router.get("/student/:id", auth, async (req, res) => {
 
       if (enrollment) {
          classinfo = await Class.findOne({
-            _id: enroll.classroom,
+            _id: enrollment.classroom,
             year: date.getFullYear(),
          })
             .populate("category", ["name"])

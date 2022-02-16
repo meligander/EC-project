@@ -38,35 +38,36 @@ const EditGradeType = ({
    }, [loadingGT, loadGradeTypes, gradeTypes]);
 
    useEffect(() => {
-      if (loading) loadCategories();
+      if (loading) loadCategories(false);
       else {
-         let newRow = [{ _id: 0, name: "" }];
-         for (let x = 1; x < categories.length; x++) {
-            newRow.push({ category: categories[x]._id, checks: false });
-         }
+         let row = [];
+         categories.forEach((item) => {
+            if (item.name !== "Inscripción")
+               row.push({ category: item._id, checks: false });
+         });
+
+         row.push({ category: null, percentage: false });
+
          setAdminValues((prev) => ({
             ...prev,
-            newRow,
+            newRow: { _id: 0, name: "", categories: row },
          }));
       }
    }, [categories, loading, loadCategories]);
 
    const onChange = (e, index, i) => {
       e.persist();
+
       let newFormData = [...formData];
-      if (e.target.type === "checkbox") {
-         newFormData[index][i] = {
-            ...newFormData[index][i],
-            checks: e.target.checked,
-         };
-      } else {
-         newFormData[index][0].name = e.target.value;
-      }
+
+      if (e.target.name === "name") newFormData[index].name = e.target.value;
+      else newFormData[index].categories[i].checks = e.target.checked;
+
       setFormData(newFormData);
    };
 
    const header = () => {
-      return "K,IC,IB,IA,P,J,1°,2°,3°,4°,5°,6°,C,PF"
+      return "K,IC,IB,IA,P,J,1°,2°,3°,4°,5°,6°,C,PF,%"
          .split(",")
          .map((header, index) => <th key={index}>{header}</th>);
    };
@@ -77,8 +78,8 @@ const EditGradeType = ({
             confirm={() => {
                if (popupType === "save") updateGradeTypes(formData);
                else {
-                  if (formData[toDelete][0]._id !== 0)
-                     deleteGradeType(formData[toDelete][0]._id);
+                  if (formData[toDelete]._id !== 0)
+                     deleteGradeType(formData[toDelete]._id);
                   else {
                      formData.splice(toDelete, 1);
                      setFormData(formData);
@@ -105,28 +106,26 @@ const EditGradeType = ({
                   {!loading &&
                      formData.map((row, index) => (
                         <tr key={index}>
-                           {row.map((item, i) =>
-                              i === 0 ? (
-                                 <td key={i}>
-                                    <input
-                                       type="text"
-                                       name="input"
-                                       value={item.name}
-                                       placeholder="Nombre"
-                                       onChange={(e) => onChange(e, index, i)}
-                                    />
-                                 </td>
-                              ) : (
-                                 <td key={i}>
-                                    <input
-                                       className="option-input"
-                                       type="checkbox"
-                                       onChange={(e) => onChange(e, index, i)}
-                                       checked={item.checks}
-                                    />
-                                 </td>
-                              )
-                           )}
+                           <td key={"name" + index}>
+                              <input
+                                 type="text"
+                                 name="name"
+                                 value={row.name}
+                                 placeholder="Nombre"
+                                 onChange={(e) => onChange(e, index)}
+                              />
+                           </td>
+                           {row.categories.map((category, i) => (
+                              <td key={i}>
+                                 <input
+                                    className="option-input"
+                                    type="checkbox"
+                                    name="checks"
+                                    onChange={(e) => onChange(e, index, i)}
+                                    checked={category.checks}
+                                 />
+                              </td>
+                           ))}
                            <td>
                               <button
                                  type="button"

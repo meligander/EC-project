@@ -248,9 +248,8 @@ router.post(
                student,
                number,
                value: enrollmentCategory.value,
-               // expired: false,
                enrollment: enrollment._id,
-               // debt: true,
+               debt: true,
             });
             installment.save();
          }
@@ -275,7 +274,6 @@ router.post(
                   year,
                   student,
                   value: number === 3 ? half : value,
-                  // expired: false,
                   enrollment: enrollment.id,
                });
                await installment.save();

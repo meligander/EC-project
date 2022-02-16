@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const { check, validationResult } = require("express-validator");
 
 //Middlewares
 const auth = require("../../middleware/auth");
@@ -84,25 +85,7 @@ router.get("/best", [auth, adminAuth], async (req, res) => {
 //@access   Private
 router.get("/:class_id", auth, async (req, res) => {
    try {
-      const grades = await Grade.find({
-         classroom: req.params.class_id,
-      })
-         .populate({
-            path: "gradetype",
-            model: "gradetypes",
-            select: "name",
-         })
-         .populate({
-            path: "student",
-            model: "user",
-            select: ["name", "lastname"],
-         });
-
-      const tableGrades = await buildClassTable(
-         grades,
-         req.params.class_id,
-         res
-      );
+      const tableGrades = await buildClassTable(req.params.class_id, res);
 
       res.json(tableGrades);
    } catch (err) {
@@ -116,16 +99,18 @@ router.get("/:class_id", auth, async (req, res) => {
 //@access   Private
 router.get("/student/:class_id/:user_id", [auth], async (req, res) => {
    try {
-      if (req.params.class_id === "null") {
+      const { class_id, user_id } = req.params;
+
+      if (class_id === "null") {
          return res.status(400).json({
             msg: "El alumno no está registrado en ninguna clase",
          });
       }
 
       const grades = await Grade.find({
-         classroom: req.params.class_id,
-         student: req.params.user_id,
-         period: { $in: [1, 2, 3, 4] },
+         classroom: class_id,
+         student: user_id,
+         period: { $in: [1, 2, 3, 4, 5] },
       })
          .populate({
             path: "gradetype",
@@ -148,105 +133,100 @@ router.get("/student/:class_id/:user_id", [auth], async (req, res) => {
    }
 });
 
-//@route    POST /api/grade/period
-//@desc     Add or remove grades from a period
+//@route    POST /api/grade/:class_id/:period"
+//@desc     Add a grade
 //@access   Private
-router.post("/period", auth, async (req, res) => {
-   const periodRows = req.body;
+router.post(
+   "/:class_id/:period",
+   [
+      auth,
+      check("gradetype", "Primero debe elegir un tipo de nota").not().isEmpty(),
+   ],
+   async (req, res) => {
+      let errors = [];
 
-   const date = new Date();
-   const year = date.getFullYear();
+      const errorsResult = validationResult(req);
+      if (!errorsResult.isEmpty()) {
+         errors = errorsResult.array();
+         return res.status(400).json({ errors });
+      }
 
-   try {
-      const period = periodRows[0][0].period;
-      const classroom = periodRows[0][0].classroom;
+      const { class_id: classroom, period } = req.params;
 
-      for (let x = 0; x < periodRows.length; x++) {
-         let average = 0;
-         let count = 0;
-         const student = periodRows[x][0].student;
+      const { gradetype } = req.body;
 
-         for (let y = 0; y < periodRows[x].length; y++) {
-            const filter = {
-               student,
-               gradetype: periodRows[x][y].gradetype,
-               classroom,
-               period,
-            };
+      let grade;
 
-            let value = periodRows[x][y].value;
+      try {
+         grade = new Grade({
+            period,
+            classroom,
+            gradetype,
+         });
 
-            if (value !== 0 && value !== "") {
-               value = parseFloat(value);
+         await grade.save();
 
-               if (value > 10 || value <= 0) {
-                  return res
-                     .status(400)
-                     .json({ msg: "La nota debe ser entre 0 y 10" });
-               }
-
-               average += value;
-               count++;
-
-               const grade = await Grade.findOneAndUpdate(filter, {
-                  value: value,
-               });
-
+         if (period === "1") {
+            for (let x = 0; x < 3; x++) {
+               const info = { period: x + 2, classroom, gradetype };
+               grade = await Grade.findOne(info);
                if (!grade) {
-                  const data = {
-                     ...filter,
-                     value: value,
-                  };
-                  const newGrade = new Grade(data);
-
-                  newGrade.save();
+                  grade = new Grade(info);
+                  await grade.save();
                }
-            } else {
-               await Grade.findOneAndRemove(filter);
             }
          }
 
-         // if (average !== 0) {
-         //    average = average / count;
-         //    average = Math.round((average + Number.EPSILON) * 100) / 100;
-         // }
+         const tableGrades = await buildClassTable(classroom, res);
 
-         // const filter2 = { year, student };
+         res.json(tableGrades);
+      } catch (err) {
+         console.error(err.message);
+         res.status(500).json({ msg: "Server Error" });
+      }
+   }
+);
 
-         // const enrollment = await Enrollment.findOne(filter2);
+//@route    PUT /api/grade/:class_id/:period"
+//@desc     Add or remove grades from a period
+//@access   Private
+router.put("/:class_id/:period", auth, async (req, res) => {
+   let grades = req.body;
 
-         // let periodAverage = [];
-         // let allAverage = 0;
+   grades = grades
+      .flat()
+      .filter(
+         (item) => item.value !== "" || (item.value === "" && item._id !== "")
+      );
 
-         // if (enrollment.classroom.periodAverage.length === 0)
-         //    periodAverage = new Array(6).fill(0);
-         // else periodAverage = [...enrollment.classroom.periodAverage];
+   const { class_id: classroom, period } = req.params;
 
-         // periodAverage[period - 1] = parseFloat(average);
+   if (
+      grades.some(
+         (item) => item.value !== "" && (item.value > 10 || item.value <= 0)
+      )
+   )
+      return res.status(400).json({ msg: "La nota debe ser entre 0 y 10" });
 
-         // let full = 0;
-         // for (let y = 0; y < 5; y++) {
-         //    if (periodAverage[y] !== 0) {
-         //       allAverage += periodAverage[y];
-         //       full++;
-         //    }
-         // }
-
-         // if (allAverage !== 0) {
-         //    allAverage = allAverage / full;
-         //    allAverage = Math.round((allAverage + Number.EPSILON) * 100) / 100;
-         // }
-
-         // await Enrollment.findOneAndUpdate(
-         //    { _id: enrollment._id },
-         //    {
-         //       classroom: {
-         //          ...enrollment.classroom,
-         //          periodAverage,
-         //          ...(allAverage !== 0 && { average: allAverage }),
-         //       },
-         //    }
-         // );
+   try {
+      for (let x = 0; x < grades.length; x++) {
+         const data = {
+            student: grades[x].student,
+            gradetype: grades[x].gradetype,
+            classroom,
+            period,
+            ...(grades[x].value !== "" && {
+               value: grades[x].value,
+            }),
+         };
+         if (grades[x]._id === "") {
+            const grade = new Grade(data);
+            grade.save();
+         } else {
+            if (data.value)
+               await Grade.findOneAndUpdate({ _id: grades[x]._id }, data);
+            else await Grade.findOneAndRemove(data);
+         }
       }
 
       res.json({ msg: "Grades Updated" });
@@ -256,98 +236,25 @@ router.post("/period", auth, async (req, res) => {
    }
 });
 
-//@route    POST /api/grades
-//@desc     Add a grade
-//@access   Private
-router.post("/", auth, async (req, res) => {
-   const { period, classroom, gradetype, periods } = req.body;
-
-   if (!gradetype)
-      return res.status(400).json({
-         msg: "Primero debe elegir un tipo de nota",
-      });
-
-   if (period !== 1 && !periods[period - 2])
-      return res.status(400).json({
-         msg: "Debe agregar por lo menos una nota en los bimestres anteriores",
-      });
-
-   const data = { period, classroom, gradetype };
-   let grade;
-
-   try {
-      grade = new Grade(data);
-
-      await grade.save();
-
-      if (period === 1) {
-         for (let x = 0; x < 3; x++) {
-            const info = { period: x + 2, classroom, gradetype };
-            grade = await Grade.findOne(info);
-            if (!grade) {
-               grade = new Grade(info);
-               await grade.save();
-            }
-         }
-      }
-
-      const grades = await Grade.find({
-         classroom,
-      })
-         .populate({
-            path: "student",
-            model: "user",
-            select: ["name", "lastname"],
-            option: { sort: { lastname: -1, name: -1 } },
-         })
-         .populate({
-            path: "gradetype",
-            model: "gradetypes",
-         });
-
-      const tableGrades = await buildClassTable(grades, classroom, res);
-
-      res.json(tableGrades);
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ msg: "Server Error" });
-   }
-});
-
-//@route    DELETE /api/grade/:type/:classroom/:period
+//@route    DELETE /api/grade/:class_id/:period/:type_id
 //@desc     Delete grades of the same type
 //@access   Private
-router.delete("/:type/:classroom/:period", auth, async (req, res) => {
+router.delete("/:class_id/:period/:type_id", auth, async (req, res) => {
    try {
+      const { class_id: classroom, period, type_id: gradetype } = req.params;
+
       //Remove grades
       const gradesToDelete = await Grade.find({
-         gradetype: req.params.type,
-         classroom: req.params.classroom,
-         period: req.params.period,
+         gradetype,
+         classroom,
+         period,
       });
 
-      for (let x = 0; x < gradesToDelete.length; x++) {
-         await Grade.findByIdAndRemove({ _id: gradesToDelete[x].id });
-      }
-      const grades = await Grade.find({
-         classroom: req.params.classroom,
-      })
-         .populate({
-            path: "student",
-            model: "user",
-            select: ["name", "lastname"],
-            option: { sort: { lastname: -1, name: -1 } },
-         })
-         .populate({
-            path: "gradetype",
-            model: "gradetypes",
-         });
-
-      const tableGrades = await buildClassTable(
-         grades,
-         req.params.classroom,
-         res
+      await gradesToDelete.forEach(
+         async (item) => await Grade.findByIdAndRemove({ _id: item.id })
       );
+
+      const tableGrades = await buildClassTable(classroom, res);
 
       res.json(tableGrades);
    } catch (err) {
@@ -356,7 +263,8 @@ router.delete("/:type/:classroom/:period", auth, async (req, res) => {
    }
 });
 
-const buildStudentTable = (grades, reportCard) => {
+//@desc Function to create the table for student's grades
+const buildStudentTable = (grades) => {
    let obj = grades.reduce((res, curr) => {
       if (res[curr.gradetype.name]) {
          res[curr.gradetype.name].push(curr);
@@ -367,15 +275,12 @@ const buildStudentTable = (grades, reportCard) => {
    let rows = [];
 
    for (const x in obj) {
-      if (!reportCard && obj[x][0].value === "") delete obj[x];
-
-      const dividedGrades = obj[x];
-      let row = Array.from(Array(4), () => ({
-         value: "",
-      }));
-      for (let x = 0; x < dividedGrades.length; x++) {
-         row[dividedGrades[x].period - 1] = dividedGrades[x];
-      }
+      let row = Array.from(Array(5), (item, index) => {
+         const grade = obj[x].find((item) => item.period === index + 1);
+         return {
+            ...(grade ? { ...grade.toJSON() } : { value: "" }),
+         };
+      });
       rows.push(row);
    }
 
@@ -384,46 +289,49 @@ const buildStudentTable = (grades, reportCard) => {
    return { headers, rows };
 };
 
-const buildClassTable = async (grades, class_id, res) => {
-   let users = [];
-   let enrollments;
+//@desc Function to create the table for saving grades and to show on the front-end
+const buildClassTable = async (class_id, res) => {
+   let grades = [];
+   let enrollments = [];
 
    try {
+      grades = await Grade.find({
+         classroom: class_id,
+      })
+         .populate({
+            path: "gradetype",
+            model: "gradetypes",
+            select: "name",
+         })
+         .populate({
+            path: "student",
+            model: "user",
+            select: ["name", "lastname"],
+         });
+
       enrollments = await Enrollment.find({
          classroom: class_id,
       }).populate({
          model: "user",
          path: "student",
-         select: ["name", "lastname", "dni"],
+         select: ["name", "lastname"],
       });
+      enrollments = sortByName(enrollments);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });
    }
 
-   users = enrollments.sort((a, b) => {
-      if (a.student.lastname > b.student.lastname) return 1;
-      if (a.student.lastname < b.student.lastname) return -1;
-
-      if (a.student.name > b.student.name) return 1;
-      if (a.student.name < b.student.name) return -1;
-   });
-
    let header = [];
    let periods = [];
 
-   let students = users.map((user) => {
-      return {
-         _id: user.student._id,
-         name: user.student.lastname + ", " + user.student.name,
-         dni: user.student.dni,
-      };
-   });
+   //Get the student's header
+   const students =
+      enrollments[0].year === new Date().getFullYear()
+         ? [...enrollments.map((user) => user.student), {}]
+         : enrollments.map((user) => user.student);
 
-   //Add last row for the eliminate button
-   students = [...students, { name: "", dni: "" }];
-
-   //Divide all the periods in different objects between '{}'
+   //Divide all the periods in different object
    let allPeriods = grades.reduce((res, curr) => {
       if (res[curr.period]) res[curr.period].push(curr);
       else Object.assign(res, { [curr.period]: [curr] });
@@ -431,116 +339,59 @@ const buildClassTable = async (grades, class_id, res) => {
       return res;
    }, {});
 
-   //this for works only for objects
    for (const x in allPeriods) {
-      let count = 0;
       let period = [];
 
-      //Get all the grade types for each period
-      let gradeType = allPeriods[x].reduce((res, curr) => {
-         if (res[curr.gradetype.name]) res[curr.gradetype.name].push(curr);
-         else Object.assign(res, { [curr.gradetype.name]: [curr] });
+      const gradeTypes = [
+         ...new Set(allPeriods[x].map((item) => item.gradetype)),
+      ];
 
-         return res;
-      }, {});
+      header.push(gradeTypes);
 
-      header.push(Object.getOwnPropertyNames(gradeType));
-
-      //Divide all grades per student in this particular period
-      let classStudents = allPeriods[x].reduce((res, curr) => {
-         if (curr.student !== null && curr.student !== undefined) {
-            if (res[curr.student._id]) res[curr.student._id].push(curr);
-            else Object.assign(res, { [curr.student._id]: [curr] });
-         }
-         return res;
-      }, {});
-
-      //Amount of grade types for this period
-      const gradesNumber = Object.keys(gradeType).length;
-
-      //Generates an array from every object
-      let studentsArray = Object.keys(classStudents).map(
-         (i) => classStudents[i]
-      );
-
-      //Sort them in the same order as users
-      studentsArray = studentsArray.sort((a, b) => {
-         if (a[0].student.lastname > b[0].student.lastname) return 1;
-         if (a[0].student.lastname < b[0].student.lastname) return -1;
-
-         if (a[0].student.name > b[0].student.name) return 1;
-         if (a[0].student.name < b[0].student.name) return -1;
-      });
-
-      let studentNumber = 0;
       for (let z = 0; z < students.length; z++) {
-         let rowNumber = 0;
+         const studentGrades = students[z]._id
+            ? allPeriods[x].filter(
+                 (item) =>
+                    item.student &&
+                    item.student._id.toString() === students[z]._id.toString()
+              )
+            : [];
 
          //create an array with the amount of grade types for the cells in the row
-         //every item in the array goes with that basic info
-         let row = Array.from(Array(gradesNumber), () => ({
-            _id: "",
-            classroom: class_id,
-            period: x,
-            value: "",
-            name: "",
-         }));
+         //every item in the array goes with that info
+         const row = Array.from(Array(gradeTypes.length), (item, index) => {
+            const grade = studentGrades.find(
+               (item) => item.gradetype.name === gradeTypes[index].name
+            );
+            return {
+               _id: grade ? grade._id : "",
+               classroom: class_id,
+               period: x,
+               gradetype: gradeTypes[index]._id,
+               ...(students[z]._id && {
+                  student: students[z]._id,
+                  value: grade ? grade.value : "",
+               }),
+            };
+         });
 
-         //Add or modify the info that is in every item in the array row
-         for (const index in gradeType) {
-            row[rowNumber].gradetype = gradeType[index][0].gradetype;
-            row[rowNumber].name = "input" + count;
-
-            //For the items that are buttons (doesnt have a user related)
-            if (!users[z]) {
-               count++;
-               rowNumber++;
-               continue;
-            }
-
-            row[rowNumber].student = users[z].student._id;
-
-            let added = false;
-
-            if (
-               studentsArray[studentNumber] &&
-               studentsArray[studentNumber][0].student._id.toString() ===
-                  users[z].student._id.toString()
-            ) {
-               for (let y = 0; y < studentsArray[studentNumber].length; y++) {
-                  if (
-                     studentsArray[studentNumber][y].gradetype.name === index
-                  ) {
-                     row[rowNumber]._id = studentsArray[studentNumber][y]._id;
-                     row[rowNumber].value =
-                        studentsArray[studentNumber][y].value;
-
-                     count++;
-                     added = true;
-                     break;
-                  }
-               }
-            }
-
-            if (!added) count++;
-
-            rowNumber++;
-         }
-
-         if (
-            users[z] &&
-            studentsArray[studentNumber] &&
-            users[z].student._id.toString() ===
-               studentsArray[studentNumber][0].student._id.toString()
-         ) {
-            studentNumber++;
-         }
          period.push(row);
       }
       periods.push(period);
    }
 
    return { header, students, periods };
+};
+
+//@desc Function to sort and array by name
+const sortByName = (array) => {
+   return array.sort((a, b) => {
+      if (a.student.lastname > b.student.lastname) return 1;
+      if (a.student.lastname < b.student.lastname) return -1;
+
+      if (a.student.name > b.student.name) return 1;
+      if (a.student.name < b.student.name) return -1;
+   });
 };
 
 module.exports = router;

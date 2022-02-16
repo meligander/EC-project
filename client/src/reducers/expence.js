@@ -34,10 +34,15 @@ export default function (state = initialState, action) {
             error: {},
          };
       case EXPENCETYPES_LOADED:
-      case EXPENCETYPES_UPDATED:
          return {
             ...state,
             expencetypes: payload,
+            loadingET: false,
+            error: {},
+         };
+      case EXPENCETYPES_UPDATED:
+         return {
+            ...state,
             loadingET: false,
             error: {},
          };
@@ -55,7 +60,7 @@ export default function (state = initialState, action) {
          return {
             ...state,
             expencetypes: state.expencetypes.filter(
-               (expencetypes) => expencetypes._id !== payload
+               (item) => item._id !== payload
             ),
             loadingET: false,
          };
