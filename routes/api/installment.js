@@ -2,7 +2,7 @@ const router = require("express").Router();
 const { check, validationResult } = require("express-validator");
 
 //Sending Email
-const emailSender = require("../../config/emailSender");
+const { sendEmail } = require("../../config/emailSender");
 
 //Middleware
 const auth = require("../../middleware/auth");
@@ -10,7 +10,6 @@ const adminAuth = require("../../middleware/adminAuth");
 
 //Models
 const Installment = require("../../models/Installment");
-const Enrollment = require("../../models/Enrollment");
 const Penalty = require("../../models/Penalty");
 
 //@route    GET /api/installment
@@ -95,18 +94,29 @@ router.get("/:id", [auth, adminAuth], async (req, res) => {
 //@route    GET /api/installment/student/:id
 //@desc     Get all student's installments
 //@access   Private
-router.get("/student/:id", auth, async (req, res) => {
+router.get("/student/:id/:type", auth, async (req, res) => {
    try {
-      const student = req.params.id;
+      const { type, id } = req.params;
 
-      let installments = await Installment.find({
-         student,
+      const installments = await Installment.find({
+         student: id,
+         ...(type === "student" && {
+            debt: true,
+            value: { $ne: 0 },
+         }),
       })
          .sort({ year: -1, number: 1 })
          .populate({
             path: "student",
             model: "user",
             select: ["name", "lastname", "studentnumber"],
+         })
+         .populate({
+            path: "enrollment",
+            model: "enrollment",
+            populate: {
+               path: "category",
+            },
          });
 
       if (installments.length === 0) {
@@ -114,11 +124,6 @@ router.get("/student/:id", auth, async (req, res) => {
             msg: "No se encontraron deudas con dichas descripciones",
          });
       }
-
-      installments = buildTable(
-         installments,
-         req.user.type === "admin" || req.user.type === "admin&teacher"
-      );
 
       res.json(installments);
    } catch (err) {
@@ -137,38 +142,7 @@ router.get("/month/debts", [auth, adminAuth], async (req, res) => {
          debt: true,
       });
 
-      let totalDebt = 0;
-      for (let x = 0; x < installments.length; x++) {
-         totalDebt = totalDebt + installments[x].value;
-      }
-
-      res.json(totalDebt);
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ msg: "Server Error" });
-   }
-});
-
-//@route    GET /api/installment/month/:month_id
-//@desc     Get the debt of the month
-//@access   Private && Admin
-router.get("/month/:month_id", [auth, adminAuth], async (req, res) => {
-   try {
-      const date = new Date();
-      const year = date.getFullYear();
-
-      const installments = await Installment.find({
-         value: { $ne: 0 },
-         number: req.params.month_id,
-         year,
-      });
-
-      let totalDebt = 0;
-      for (let x = 0; x < installments.length; x++) {
-         totalDebt = totalDebt + installments[x].value;
-      }
-
-      res.json(totalDebt);
+      res.json(installments.reduce((sum, item) => sum + item.value, 0));
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });
@@ -189,7 +163,7 @@ router.post(
       check("value", "El valor es necesario").not().isEmpty(),
    ],
    async (req, res) => {
-      const { number, year, student, value, expired, halfPayed } = req.body;
+      const { number, year, expired, enrollment, updatable } = req.body;
 
       try {
          let errors = [];
@@ -199,10 +173,11 @@ router.post(
             return res.status(400).json({ errors });
          }
 
-         const enrollment = await Enrollment.findOne({ year, student });
+         let installment;
+
          if (enrollment) {
-            const installment = await Installment.findOne({
-               enrollment: enrollment.id,
+            installment = await Installment.findOne({
+               enrollment,
                year,
                number,
             });
@@ -214,21 +189,31 @@ router.post(
             }
          }
 
-         let data = {
-            number,
-            value,
+         installment = new Installment({
+            ...req.body,
             ...(enrollment && { enrollment: enrollment.id }),
-            ...(halfPayed && { halfPayed }),
-            student,
-            year,
-            expired,
-         };
-
-         installment = new Installment(data);
+            updatable: number === 1 ? false : updatable,
+            debt: number === 0,
+            expired: number === 1 ? true : expired,
+         });
 
          await installment.save();
 
-         res.json({ msg: "Cuota Agregada" });
+         installment = await Installment.findOne({ _id: installment._id })
+            .populate({
+               path: "student",
+               model: "user",
+               select: ["name", "lastname", "studentnumber"],
+            })
+            .populate({
+               path: "enrollment",
+               model: "enrollment",
+               populate: {
+                  path: "category",
+               },
+            });
+
+         res.json(installment);
       } catch (err) {
          console.error(err.message);
          res.status(500).json({ msg: "Server Error" });
@@ -243,7 +228,7 @@ router.put(
    "/:id",
    [auth, adminAuth, check("value", "El valor es necesario").not().isEmpty()],
    async (req, res) => {
-      const { value, expired, halfPayed } = req.body;
+      const { expired, updatable } = req.body;
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -253,19 +238,31 @@ router.put(
       }
 
       try {
-         await Installment.findOneAndUpdate(
+         const installment = await Installment.findOneAndUpdate(
             { _id: req.params.id },
             {
                $set: {
-                  value,
-                  expired,
-                  ...(halfPayed !== undefined && { halfPayed }),
+                  ...req.body,
+                  expired: number === 1 ? true : expired,
+                  updatable: number === 1 ? false : updatable,
                },
             },
             { new: true }
-         );
+         )
+            .populate({
+               path: "student",
+               model: "user",
+               select: ["name", "lastname", "studentnumber"],
+            })
+            .populate({
+               path: "enrollment",
+               model: "enrollment",
+               populate: {
+                  path: "category",
+               },
+            });
 
-         res.json({ msg: "Cuota Modificada" });
+         res.json(installment);
       } catch (err) {
          console.error(err.message);
          res.status(500).json({ msg: "Server Error" });
@@ -283,15 +280,12 @@ router.put("/", auth, async (req, res) => {
       const year = date.getFullYear();
       const day = date.getDate();
 
-      let lessDay = false;
-      const thirtyDays = [4, 6, 9, 11];
-      for (let x = 0; x < thirtyDays.length; x++) {
-         if (thirtyDays[x] === month) lessDay = true;
-      }
+      const lessDay = [4, 6, 9, 11].some((item) => item === month);
 
       let installments = await Installment.find({
          number: { $lte: month, $ne: 0 },
          year,
+         expired: false,
          value: { $ne: 0 },
       }).populate({
          path: "student",
@@ -299,16 +293,18 @@ router.put("/", auth, async (req, res) => {
          select: ["chargeday", "discount"],
       });
 
-      let previusYearsInstallments = await Installment.find({
-         year: { $lt: year },
-         value: { $ne: 0 },
-      }).populate({
-         path: "student",
-         model: "user",
-         select: ["chargeday", "discount"],
-      });
-
-      installments = installments.concat(previusYearsInstallments);
+      installments = [
+         ...installments,
+         ...(await Installment.find({
+            year: { $lt: year },
+            value: { $ne: 0 },
+            expired: false,
+         }).populate({
+            path: "student",
+            model: "user",
+            select: ["chargeday", "discount"],
+         })),
+      ];
 
       let penalty = await Penalty.find().sort({ $natural: -1 }).limit(1);
       penalty = penalty[0];
@@ -321,10 +317,9 @@ router.put("/", auth, async (req, res) => {
             if (
                installments[x].student.email &&
                chargeDay - 3 <= day &&
-               !installments[x].emailSent &&
-               !installments[x].expired
+               !installments[x].emailSent
             ) {
-               emailSender(
+               await sendEmail(
                   installments[x].student.email,
                   "Cuota por vencer",
                   `La cuota del corriente mes está proxima a su vencimiento.
@@ -338,10 +333,9 @@ router.put("/", auth, async (req, res) => {
             }
 
             if (
-               (installments[x].year < year ||
-                  installments[x].number < month ||
-                  chargeDay < day) &&
-               !installments[x].expired
+               installments[x].year < year ||
+               installments[x].number < month ||
+               chargeDay < day
             ) {
                if (installments[x].number === 3 && month === 3) {
                   if (!installments[x].debt) {
@@ -405,69 +399,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-const buildTable = (installments, admin) => {
-   let rows = [];
-   let years = [];
-
-   //Divide the installments by years
-   let installmentsByYear = [];
-
-   let count = 0;
-   let sameYear = 0;
-
-   for (let x = 0; x < installments.length; x++) {
-      if (installments[x].year === sameYear) {
-         installmentsByYear[count].push(installments[x]);
-      } else {
-         if (x !== 0) count++;
-         sameYear = installments[x].year;
-         years.push(installments[x].year);
-         installmentsByYear[count] = [];
-         installmentsByYear[count].push(installments[x]);
-      }
-   }
-
-   let newYears = [];
-
-   for (let x = 0; x < installmentsByYear.length; x++) {
-      //get all the installments for that year
-      const dividedInstallments = installmentsByYear[x];
-
-      //Create a row with all the items in the table
-      let row = Array.from(Array(11), () => ({
-         _id: "",
-         expired: false,
-         value: "",
-         year: x,
-      }));
-
-      let valid = false;
-
-      for (let x = 0; x < dividedInstallments.length; x++) {
-         valid = dividedInstallments[x].value !== 0;
-         const number =
-            dividedInstallments[x].number !== 0
-               ? dividedInstallments[x].number - 2
-               : 0;
-
-         row[number] = dividedInstallments[x];
-      }
-
-      if (valid) {
-         rows.push(row);
-      } else {
-         if (admin) {
-            rows.push(row);
-         } else {
-            const yearOut = years[x];
-            newYears = years.filter((year) => year !== yearOut);
-         }
-      }
-   }
-   if (newYears.length > 0) years = newYears;
-   return { years, rows, student: installments[0].student };
-};
-
+//@desc Function to sort and array by name
 const sortArray = (array) => {
    const sortedArray = array.sort((a, b) => {
       if (a.student.lastname > b.student.lastname) return 1;

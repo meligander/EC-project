@@ -157,7 +157,7 @@ const InvoiceTab = ({
    };
 
    const removeItem = (item) => {
-      removeDetail(item.installment);
+      removeDetail(item);
       setAdminValues((prev) => ({ ...prev, toDelete: item }));
    };
 

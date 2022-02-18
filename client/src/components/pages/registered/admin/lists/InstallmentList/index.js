@@ -53,7 +53,7 @@ const InstallmentList = ({
    const { number, year, name, lastname } = filterData;
 
    useEffect(() => {
-      if (loading) loadInstallments({}, true, false);
+      if (loading) loadInstallments({}, true, false, "all");
       else
          setAdminValues((prev) => ({
             ...prev,
@@ -103,7 +103,7 @@ const InstallmentList = ({
             onSubmit={(e) => {
                e.preventDefault();
                setAdminValues((prev) => ({ ...prev, page: 0 }));
-               loadInstallments(filterData, true, false);
+               loadInstallments(filterData, true, false, "all");
             }}
          >
             <div className="form-group">

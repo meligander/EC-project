@@ -11,10 +11,8 @@ const GradeTypeSchema = new mongoose.Schema({
    },
    categories: [
       {
-         category: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "category",
-         },
+         type: mongoose.Schema.Types.ObjectId,
+         ref: "category",
       },
    ],
 });

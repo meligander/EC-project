@@ -10,6 +10,7 @@ import {
    INSTALLMENTS_CLEARED,
    INSTALLMENTS_ERROR,
    INSTALLMENT_ERROR,
+   INSTALLMENT_ADDED,
 } from "../actions/types";
 
 const initialState = {
@@ -48,9 +49,32 @@ export default function (state = initialState, action) {
                totalDebt: payload,
             },
          };
-      case INSTALLMENT_UPDATED:
       case INSTALLMENT_REGISTERED:
+      case INSTALLMENT_ADDED:
+         return {
+            ...state,
+            installments: [payload, ...state.installments],
+            loading: false,
+            error: {},
+         };
+      case INSTALLMENT_UPDATED:
+         return {
+            ...state,
+            installments: state.installments.map((item) =>
+               item._id === payload._id ? payload : item
+            ),
+            loading: false,
+            error: {},
+         };
       case INSTALLMENT_DELETED:
+         return {
+            ...state,
+            installments: state.installments.filter(
+               (item) => item._id !== payload
+            ),
+            loading: false,
+            error: {},
+         };
       case EXPIREDINSTALLMENTS_UPDATED:
          return state;
       case INSTALLMENT_CLEARED:

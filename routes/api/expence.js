@@ -145,7 +145,7 @@ router.post(
       check("expencetype", "El tipo de gasto es necesario").not().isEmpty(),
    ],
    async (req, res) => {
-      let { value, expencetype, description } = req.body;
+      let { value, expencetype } = req.body;
 
       value = Number(
          typeof value === "string" ? value.replace(/,/g, ".") : value
@@ -201,9 +201,7 @@ router.post(
          }
 
          const expence = new Expence({
-            value,
-            expencetype,
-            description,
+            ...req.body,
             register: register._id,
          });
 

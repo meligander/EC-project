@@ -44,7 +44,7 @@ export const loadRegisters =
       try {
          const res = await api.get(
             byMonth
-               ? "/register/year/bymonth"
+               ? `/register/year/bymonth?${filterData(formData)}`
                : `/register?${filterData(formData)}`
          );
          dispatch({
@@ -135,6 +135,8 @@ export const deleteRegister = (register_id) => async (dispatch) => {
          type: REGISTER_DELETED,
          payload: register_id,
       });
+
+      dispatch(clearRegister());
 
       dispatch(setAlert("Cierre de Caja Eliminado", "success", "2"));
    } catch (err) {

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { FaTrashAlt } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import { FiSave } from "react-icons/fi";
 
 import {
    loadInstallment,
    updateIntallment,
-   deleteInstallment,
 } from "../../../../../../actions/installment";
+import { loadEnrollments } from "../../../../../../actions/enrollment";
 import { loadUser } from "../../../../../../actions/user";
 import { togglePopup } from "../../../../../../actions/mixvalues";
 
@@ -16,12 +16,13 @@ import PopUp from "../../../../../modal/PopUp";
 const EditInstallment = ({
    match,
    users: { user, loadingUser },
+   installments: { installment, loadingInstallment, installments },
+   enrollments: { enrollments, loading },
    loadInstallment,
+   loadEnrollments,
    loadUser,
    updateIntallment,
    togglePopup,
-   deleteInstallment,
-   installments: { installment, loadingInstallment },
 }) => {
    const _id = match.params.item_id;
    const type = match.params.type;
@@ -38,16 +39,12 @@ const EditInstallment = ({
       value: "",
       expired: false,
       student: "",
-      halfPayed: false,
+      updatable: true,
+      enrollment: "",
    });
 
-   const [adminValues, setAdminValues] = useState({
-      popupType: "",
-   });
-
-   const { popupType } = adminValues;
-
-   const { year, number, value, expired, student, halfPayed } = formData;
+   const { year, number, value, expired, student, updatable, enrollment } =
+      formData;
 
    useEffect(() => {
       if (type === "new") {
@@ -80,6 +77,14 @@ const EditInstallment = ({
       type,
    ]);
 
+   useEffect(() => {
+      if (student !== "" && year !== "")
+         loadEnrollments(
+            { student: student._id ? student._id : student, year },
+            true
+         );
+   }, [student, year, loadEnrollments]);
+
    const onChange = (e) => {
       e.persist();
       setformData({
@@ -90,7 +95,7 @@ const EditInstallment = ({
    };
 
    const installmentNames = () => {
-      return "Inscripción,,,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre"
+      return "Inscripción,Clases Particulares,,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre"
          .split(",")
          .map((item, index) => (
             <React.Fragment key={index}>
@@ -102,26 +107,22 @@ const EditInstallment = ({
    return (
       <>
          <PopUp
-            info={`¿Está seguro que desea ${
-               popupType === "save"
-                  ? "guardar los cambios"
-                  : "eliminar la cuota"
-            }?`}
-            confirm={() => {
-               if (popupType === "save")
-                  updateIntallment({
+            info="¿Está seguro que desea guardar los cambios?"
+            confirm={() =>
+               updateIntallment(
+                  {
                      ...formData,
                      ...(type === "new" && { student: student._id }),
-                  });
-               else deleteInstallment(_id, student._id);
-            }}
+                  },
+                  installments.length > 0
+               )
+            }
          />
          <h2>{type === "edit" ? "Editar Cuota" : "Crear Cuota"}</h2>
          <form
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               setAdminValues({ ...adminValues, popupType: "save" });
                togglePopup("default");
             }}
          >
@@ -156,6 +157,31 @@ const EditInstallment = ({
             <div className="form-group">
                <select
                   className="form-input"
+                  disabled={year === ""}
+                  name="enrollment"
+                  id="enrollment"
+                  onChange={onChange}
+                  value={enrollment}
+               >
+                  <option value="">
+                     * Seleccione la inscripción vinculada
+                  </option>
+                  {enrollments.map((item) => (
+                     <option key={item._id} value={item._id}>
+                        {item.category.name}
+                     </option>
+                  ))}
+               </select>
+               <label
+                  htmlFor="enrollment"
+                  className={`form-label ${enrollment === "" ? "lbl" : ""}`}
+               >
+                  Inscripción vinculada
+               </label>
+            </div>
+            <div className="form-group">
+               <select
+                  className="form-input"
                   value={number}
                   name="number"
                   id="number"
@@ -163,7 +189,6 @@ const EditInstallment = ({
                   onChange={onChange}
                >
                   <option value="">* Seleccione la cuota</option>
-                  <option value={0}>Inscripción</option>
                   {installmentNames()}
                </select>
                <label
@@ -204,13 +229,13 @@ const EditInstallment = ({
                <input
                   className="form-checkbox"
                   type="checkbox"
-                  checked={halfPayed}
+                  checked={updatable}
                   onChange={onChange}
-                  name="halfPayed"
-                  id="halfPayed"
+                  name="updatable"
+                  id="updatable"
                />
-               <label className="checkbox-lbl" htmlFor="halfPayed">
-                  {halfPayed ? "No Actualizar" : "Permitir actualizar"}
+               <label className="checkbox-lbl" htmlFor="updatable">
+                  {!updatable ? "No Actualizar" : "Permitir actualizar"}
                </label>
             </div>
             <div className="btn-center py-2">
@@ -218,23 +243,12 @@ const EditInstallment = ({
                   <FiSave />
                   &nbsp;Guardar
                </button>
-               {_id !== "0" && (
-                  <button
-                     type="button"
-                     onClick={(e) => {
-                        e.preventDefault();
-                        setAdminValues({
-                           ...adminValues,
-                           popupType: "delete",
-                        });
-                        togglePopup("default");
-                     }}
-                     className="btn btn-danger"
-                  >
-                     <FaTrashAlt />
-                     &nbsp;Eliminar
-                  </button>
-               )}
+               <Link
+                  className="btn btn-danger"
+                  to={`/index/installments/${student._id}`}
+               >
+                  Cancelar
+               </Link>
             </div>
          </form>
       </>
@@ -244,12 +258,13 @@ const EditInstallment = ({
 const mapStateToProps = (state) => ({
    users: state.users,
    installments: state.installments,
+   enrollments: state.enrollments,
 });
 
 export default connect(mapStateToProps, {
    loadInstallment,
+   loadEnrollments,
    loadUser,
-   deleteInstallment,
    updateIntallment,
    togglePopup,
 })(EditInstallment);

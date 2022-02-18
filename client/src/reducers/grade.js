@@ -14,7 +14,7 @@ import {
 
 const initialState = {
    loading: true,
-   grades: null,
+   grades: [],
    gradeTypes: [],
    loadingGT: true,
    error: {},
@@ -53,7 +53,7 @@ export default function (state = initialState, action) {
       case GRADES_CLEARED:
          return {
             ...state,
-            grades: null,
+            grades: [],
             loading: true,
          };
       case GRADETYPES_CLEARED:

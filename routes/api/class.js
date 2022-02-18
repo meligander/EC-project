@@ -141,18 +141,7 @@ router.post(
       check("category", "La categoría es necesaria").not().isEmpty(),
    ],
    async (req, res) => {
-      let {
-         teacher,
-         category,
-         classroom,
-         day1,
-         day2,
-         hourin1,
-         hourin2,
-         hourout1,
-         hourout2,
-         students,
-      } = req.body;
+      let { hourin1, hourin2, hourout1, hourout2, students } = req.body;
 
       const year = new Date().getFullYear();
 
@@ -165,11 +154,7 @@ router.post(
 
       try {
          let data = {
-            teacher,
-            category,
-            ...(classroom && { classroom }),
-            ...(day1 && { day1 }),
-            ...(day2 && { day2 }),
+            ...req.body,
             ...(hourin1 && { hourin1: getTime(hourin1) }),
             ...(hourin2 && { hourin2: getTime(hourin2) }),
             ...(hourout1 && { hourout1: getTime(hourout1) }),
@@ -177,13 +162,11 @@ router.post(
             year,
          };
 
-         const classinfo = new Class(data);
+         let classinfo = new Class(data);
 
          await classinfo.save();
 
-         let lastClass = await Class.find()
-            .sort({ $natural: -1 })
-            .limit(1)
+         lastClass = await Class.findOne({ _id: classinfo._id })
             .populate({
                path: "category",
                model: "category",
@@ -194,7 +177,6 @@ router.post(
                model: "user",
                select: ["lastname", "name"],
             });
-         lastClass = lastClass[0];
 
          await students.forEach(
             async (student) =>
@@ -204,8 +186,8 @@ router.post(
                      year,
                   },
                   {
-                     classroom: {
-                        _id: lastClass._id,
+                     $set: {
+                        classroom: lastClass._id,
                      },
                   }
                )
@@ -230,17 +212,7 @@ router.put(
       check("teacher", "El profesor es necesario").not().isEmpty(),
    ],
    async (req, res) => {
-      let {
-         teacher,
-         classroom,
-         day1,
-         day2,
-         hourin1,
-         hourin2,
-         hourout1,
-         hourout2,
-         students,
-      } = req.body;
+      let { hourin1, hourin2, hourout1, hourout2, students } = req.body;
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -251,10 +223,7 @@ router.put(
 
       try {
          let data = {
-            teacher,
-            ...(classroom && { classroom: classroom }),
-            ...(day1 && { day1: day1 }),
-            ...(day2 && { day2: day2 }),
+            ...req.body,
             ...(hourin1 && { hourin1: getTime(hourin1) }),
             ...(hourin2 && { hourin2: getTime(hourin2) }),
             ...(hourout1 && { hourout1: getTime(hourout1) }),
@@ -272,8 +241,8 @@ router.put(
                   year: new Date().getFullYear(),
                },
                {
-                  classroom: {
-                     _id: req.params.id,
+                  $set: {
+                     classroom: req.params.id,
                   },
                }
             );

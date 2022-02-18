@@ -79,7 +79,7 @@ const PopUp = ({
             );
          case "active":
             return (
-               <div className="popup-info">
+               <div className="popup-text">
                   <h3>{info.question}</h3>
                   <p>{info.info}</p>
                </div>
@@ -129,7 +129,7 @@ const PopUp = ({
                   type="button"
                   onClick={(e) => {
                      e.preventDefault();
-                     togglePopup();
+                     togglePopup("default");
                   }}
                   className="btn-cancel"
                >
@@ -174,7 +174,7 @@ const PopUp = ({
                   className="btn btn-danger"
                   onClick={(e) => {
                      e.preventDefault();
-                     togglePopup();
+                     togglePopup("default");
                   }}
                >
                   Cancelar

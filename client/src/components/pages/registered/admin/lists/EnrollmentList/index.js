@@ -208,7 +208,7 @@ const EnrollmentList = ({
                                        <td>
                                           <Link
                                              to={`/enrollment/edit/${enroll._id}`}
-                                             className="btn-text"
+                                             className="btn btn-success"
                                              onClick={() => {
                                                 window.scroll(0, 0);
                                                 clearEnrollment();

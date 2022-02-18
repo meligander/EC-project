@@ -19,6 +19,7 @@ const UserSearch = ({
    selectedStudent,
    typeSearch,
    block,
+   newInvoice,
 }) => {
    const instStudent = typeSearch === "installment" || typeSearch === "student";
 
@@ -49,7 +50,6 @@ const UserSearch = ({
                lastname={lastname}
                onChange={onChangeFilter}
             />
-
             <div className="btn-right mb-2">
                <button
                   className={`btn ${
@@ -64,7 +64,7 @@ const UserSearch = ({
                      loadUsers(
                         {
                            ...filterForm,
-                           active: true,
+                           ...(newInvoice && { active: true }),
                            type:
                               typeSearch === "guardian/student"
                                  ? "guardian/student"

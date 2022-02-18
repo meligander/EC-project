@@ -30,9 +30,6 @@ const StudentDashboard = ({
    installments: { installments, loading: loadingInstallments },
    grades: { grades, loading: loadingGrades },
 }) => {
-   const date = new Date();
-   const year = date.getFullYear();
-
    const isAdmin =
       userLogged.type === "secretary" ||
       userLogged.type === "admin&teacher" ||
@@ -55,7 +52,12 @@ const StudentDashboard = ({
 
    useEffect(() => {
       if (user.active && allowedUsers && loadingInstallments)
-         loadInstallments({ student: { _id: user._id } }, false, true);
+         loadInstallments(
+            { student: { _id: user._id } },
+            false,
+            true,
+            "student"
+         );
    }, [allowedUsers, loadingInstallments, loadInstallments, user]);
 
    useEffect(() => {
@@ -203,7 +205,7 @@ const StudentDashboard = ({
                         Notas
                      </h3>
                      <div className="pb-2">
-                        {!grades ? (
+                        {grades.length === 0 ? (
                            <p className="heading-tertiary text-center">
                               No hay notas registradas hasta el momento
                            </p>
@@ -252,28 +254,17 @@ const StudentDashboard = ({
                {!loadingInstallments && (
                   <div className="bg-lightest-secondary p-3">
                      <h3 className="heading-tertiary text-primary p-1">
-                        Cuotas
+                        Cuotas Pendientes
                      </h3>
                      <div className="pb-2">
-                        {installments.rows ? (
-                           <>
-                              {installments.rows[0][0].year !== year + 1 ||
-                              (installments.rows[1] &&
-                                 installments.rows[1][0].year !== year + 1) ? (
-                                 <InstallmentsTable
-                                    installments={installments}
-                                    forAdmin={false}
-                                 />
-                              ) : (
-                                 <p className="heading-tertiary text-center">
-                                    No hay ninguna cuota registrada del
-                                    corriente año
-                                 </p>
-                              )}
-                           </>
+                        {installments.length > 0 ? (
+                           <InstallmentsTable
+                              installments={installments}
+                              forAdmin={false}
+                           />
                         ) : (
                            <p className="heading-tertiary text-center">
-                              No hay ninguna cuota registrada
+                              Está al día
                            </p>
                         )}
                      </div>

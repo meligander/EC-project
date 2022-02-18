@@ -69,7 +69,7 @@ export const getTotalDebt = () => async (dispatch) => {
 };
 
 export const loadInstallments =
-   (formData, spinner, student) => async (dispatch) => {
+   (formData, spinner, student, type) => async (dispatch) => {
       if (spinner) dispatch(updateLoadingSpinner(true));
       let error = false;
       try {
@@ -87,7 +87,7 @@ export const loadInstallments =
                throw errorMessage;
             } else {
                res = await api.get(
-                  `/installment/student/${formData.student._id}`
+                  `/installment/student/${formData.student._id}/${type}`
                );
                if (spinner) dispatch(clearSearch());
             }
@@ -107,27 +107,34 @@ export const loadInstallments =
       if (spinner && !error) dispatch(updateLoadingSpinner(false));
    };
 
-export const updateIntallment = (formData) => async (dispatch) => {
+export const updateIntallment = (formData, loaded) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
-   let installment = newObject(formData);
+   let installment = newObject({
+      ...formData,
+      ...(formData.student._id && { student: formData.student._id }),
+   });
 
    try {
+      if (!loaded) dispatch(loadInstallments({ student: installment.student }));
+
       let res;
-      if (!installment._id) {
-         res = await api.post("/installment", installment);
-      } else {
-         //Update installment
-         res = await api.put(`/installment/${installment._id}`, installment);
-      }
+      if (!installment._id) res = await api.post("/installment", installment);
+      else res = await api.put(`/installment/${installment._id}`, installment);
       dispatch({
          type: installment._id ? INSTALLMENT_UPDATED : INSTALLMENT_REGISTERED,
+         payload: res.data,
       });
 
-      dispatch(setAlert(res.data.msg, "success", "2"));
-      dispatch(clearInstallments());
-      history.push(`/index/installments/${installment.student._id}`);
+      dispatch(
+         setAlert(
+            installment._id ? "Cuota Modificada" : "Cuota Agregada",
+            "success",
+            "2"
+         )
+      );
+      history.push(`/index/installments/${installment.student}`);
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));
@@ -161,7 +168,7 @@ export const updateExpiredIntallments = () => async (dispatch) => {
    }
 };
 
-export const deleteInstallment = (_id, student) => async (dispatch) => {
+export const deleteInstallment = (_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
@@ -174,7 +181,6 @@ export const deleteInstallment = (_id, student) => async (dispatch) => {
       });
 
       dispatch(setAlert("Cuota eliminada", "success", "2"));
-      history.push(`/index/installments/${student}`);
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));

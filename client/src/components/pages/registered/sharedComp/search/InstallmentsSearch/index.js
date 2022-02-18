@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { connect } from "react-redux";
 import { withRouter, Link } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
@@ -8,7 +8,9 @@ import {
    loadInstallments,
    clearInstallments,
    loadInstallment,
+   deleteInstallment,
 } from "../../../../../../actions/installment";
+import { togglePopup } from "../../../../../../actions/mixvalues";
 import { addDetail } from "../../../../../../actions/invoice";
 import { clearProfile, clearUser } from "../../../../../../actions/user";
 
@@ -24,19 +26,15 @@ const InstallmentsSearch = ({
    invoices: { invoice },
    loadInstallments,
    clearInstallments,
+   deleteInstallment,
    loadInstallment,
+   togglePopup,
    clearProfile,
    addDetail,
    changeStudent,
    student,
 }) => {
    const newInvoice = match.params.user_id === undefined;
-
-   const [adminValues, setAdminValues] = useState({
-      selectedItem: {},
-   });
-
-   const { selectedItem } = adminValues;
 
    const restore = () => {
       changeStudent({});
@@ -50,7 +48,7 @@ const InstallmentsSearch = ({
             <UserSearch
                selectedStudent={student}
                actionForSelected={async () =>
-                  await loadInstallments({ student }, true, true)
+                  await loadInstallments({ student }, true, true, "all")
                }
                selectStudent={(user) => {
                   changeStudent({
@@ -59,7 +57,8 @@ const InstallmentsSearch = ({
                   });
                }}
                typeSearch="installment"
-               block={!loading && installments.student}
+               block={!loading}
+               newInvoice={newInvoice}
             />
          </div>
          <div className="btn-end">
@@ -94,29 +93,18 @@ const InstallmentsSearch = ({
          {!loading && (
             <>
                {student._id &&
-               installments.student &&
-               student._id === installments.student._id ? (
+               installments[0] &&
+               student._id === installments[0].student._id ? (
                   <InstallmentsTable
                      installments={installments}
                      forAdmin={true}
-                     selectedItem={selectedItem}
                      student={student._id}
-                     selectItem={(item) =>
-                        setAdminValues((prev) => ({
-                           ...prev,
-                           selectedItem: item._id !== "" ? item : {},
-                        }))
-                     }
-                     actionForSelected={() => {
-                        if (newInvoice) {
-                           addDetail(selectedItem, invoice && invoice.details);
-
-                           setAdminValues((prev) => ({
-                              ...prev,
-                              selectedItem: {},
-                           }));
-                        } else loadInstallment(selectedItem._id, true);
+                     deleteInstallment={deleteInstallment}
+                     actionForSelected={(item) => {
+                        if (newInvoice) addDetail(item);
+                        else loadInstallment(item._id, true);
                      }}
+                     togglePopup={togglePopup}
                   />
                ) : (
                   <p className="heading-tertiary text-center my-4">
@@ -142,4 +130,6 @@ export default connect(mapStateToProps, {
    clearProfile,
    clearUser,
    addDetail,
+   deleteInstallment,
+   togglePopup,
 })(withRouter(InstallmentsSearch));

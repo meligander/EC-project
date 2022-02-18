@@ -14,7 +14,7 @@ import {
    USER_LOADED,
    USERS_LOADED,
    USERSBK_LOADED,
-   REGISTER_SUCCESS,
+   USER_REGISTERED,
    USER_UPDATED,
    SEARCH_CLEARED,
    USER_DELETED,
@@ -154,10 +154,16 @@ export const registerUpdateUser = (formData, auth_id) => async (dispatch) => {
       if (!user._id) res = await api.post("/user", user);
       else res = await api.put(`/user/${user._id}`, user);
 
+      if (!user.active) {
+         dispatch(clearAttendances());
+         dispatch(clearGrades());
+         dispatch(clearClass());
+      }
+
       if (user._id === auth_id) dispatch(updateAuthUser(res.data));
       else
          dispatch({
-            type: !user._id ? REGISTER_SUCCESS : USER_UPDATED,
+            type: !user._id ? USER_REGISTERED : USER_UPDATED,
             payload: res.data,
          });
 
@@ -170,7 +176,7 @@ export const registerUpdateUser = (formData, auth_id) => async (dispatch) => {
          )
       );
 
-      history.push("/index/dashboard/0");
+      history.push(`/index/dashboard/${res.data._id}`);
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setUsersError(USER_ERROR, err.response));
@@ -206,7 +212,7 @@ export const updateCredentials = (formData) => async (dispatch) => {
 
       dispatch(setAlert("Credenciales modificadas", "success", "1", 7000));
 
-      history.push("/index/dashboard/0");
+      history.push(`/index/dashboard/${user._id}`);
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setUsersError(USER_ERROR, err.response));
@@ -241,19 +247,19 @@ export const deleteUser = (user, self) => async (dispatch) => {
    try {
       await api.delete(`/user/${user._id}/${user.type}`);
 
+      if (self) dispatch(logOut());
+      else history.push("/index/dashboard/0");
+
       dispatch({
          type: USER_DELETED,
       });
       dispatch(setAlert("Usuario Eliminado", "success", "1", 7000));
 
-      if (self) dispatch(logOut());
-      else history.push("/index/dashboard/0");
-
       dispatch(clearUsers());
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setUsersError(USER_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         dispatch(setUsersError(USERS_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "1"));
       } else error = true;
    }
 

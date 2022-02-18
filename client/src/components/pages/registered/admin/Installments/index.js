@@ -44,16 +44,16 @@ const Installments = ({
 
    useEffect(() => {
       if (_id !== "0") {
-         if (loading) loadInstallments({ student: { _id } }, true, true);
+         if (loading) loadInstallments({ student: { _id } }, true, true, "all");
          else
             setAdminValues((prev) => ({
                ...prev,
                student: {
-                  _id: installments.student._id,
+                  _id: installments[0].student._id,
                   name:
-                     installments.student.lastname +
+                     installments[0].student.lastname +
                      ", " +
-                     installments.student.name,
+                     installments[0].student.name,
                },
             }));
       }

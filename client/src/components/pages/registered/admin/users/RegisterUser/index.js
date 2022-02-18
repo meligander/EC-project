@@ -61,6 +61,8 @@ const RegisterUser = ({
 
    const isAdmin = userLogged.type === "secretary" || isOwner;
 
+   const _id = match.params.user_id;
+
    const [adminValues, setAdminValues] = useState({
       popupType: "",
       previewSource: "",
@@ -72,7 +74,7 @@ const RegisterUser = ({
       adminValues;
 
    const [formData, setFormData] = useState({
-      _id: match.params.user_id,
+      _id: "",
       studentnumber: "",
       name: "",
       lastname: "",
@@ -102,7 +104,6 @@ const RegisterUser = ({
    });
 
    const {
-      _id,
       studentnumber,
       name,
       lastname,
@@ -133,12 +134,11 @@ const RegisterUser = ({
    }, [loadTowns, loadingTowns]);
 
    useEffect(() => {
-      if (_id !== "0") {
+      if (_id !== "0" && (userLogged._id === _id || !loadingUser)) {
          const user = userLogged._id !== _id ? otherUser : userLogged;
-
          if (user.town && loading) loadNeighbourhoods(user.town._id, false);
       }
-   }, [userLogged, otherUser, loading, loadNeighbourhoods, _id]);
+   }, [userLogged, otherUser, loading, loadNeighbourhoods, _id, loadingUser]);
 
    useEffect(() => {
       if (_id === "0") {
@@ -149,11 +149,10 @@ const RegisterUser = ({
    }, [_id, getStudentNumber, studentNumber]);
 
    useEffect(() => {
-      if (_id !== "0") {
+      if (_id !== "0" && formData._id === "") {
          if (loadingUser && userLogged._id !== _id) loadUser(_id, true);
          else {
             const user = userLogged._id !== _id ? otherUser : userLogged;
-
             setFormData((prev) => {
                let oldUser = {};
                for (const x in prev) {
@@ -167,11 +166,13 @@ const RegisterUser = ({
                }
                return {
                   ...oldUser,
+                  discount: user.discount,
+                  active: user.active,
                };
             });
          }
       }
-   }, [_id, loadUser, loadingUser, otherUser, userLogged]);
+   }, [_id, loadUser, loadingUser, otherUser, userLogged, formData._id]);
 
    const onChange = (e) => {
       e.persist();
@@ -543,6 +544,7 @@ const RegisterUser = ({
                               type="date"
                               value={dob}
                               onChange={onChange}
+                              max={`${new Date().getFullYear() - 4}-01-01`}
                               name="dob"
                               id="dob"
                            />
@@ -627,7 +629,7 @@ const RegisterUser = ({
                                     )}
                                  </>
                               ) : (
-                                 <option value="0">
+                                 <option value="">
                                     Seleccione primero una localidad
                                  </option>
                               )}

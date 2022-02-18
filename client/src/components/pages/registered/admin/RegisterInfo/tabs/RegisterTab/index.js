@@ -35,11 +35,10 @@ const RegisterTab = ({
 }) => {
    const [formData, setFormData] = useState({
       difference: "",
-      negative: true,
       description: "",
    });
 
-   const { difference, negative, description } = formData;
+   const { difference, description } = formData;
 
    const onChange = (e) => {
       e.persist();
@@ -183,28 +182,7 @@ const RegisterTab = ({
                            }
                         />
                      </td>
-                     <td>
-                        {register && (
-                           <>
-                              <input
-                                 className="form-checkbox"
-                                 type="checkbox"
-                                 checked={negative}
-                                 disabled={!register.temporary}
-                                 onChange={onChange}
-                                 name="negative"
-                                 id="cb1"
-                              />
-                              <label
-                                 className="checkbox-lbl"
-                                 id="check"
-                                 htmlFor="cb1"
-                              >
-                                 {negative ? "Negativa" : "Positiva"}
-                              </label>
-                           </>
-                        )}
-                     </td>
+                     <td></td>
                   </tr>
                   <tr>
                      <td>Detalles</td>

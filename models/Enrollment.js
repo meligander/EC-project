@@ -6,10 +6,6 @@ const EnrollmentSchema = new mongoose.Schema({
       ref: "user",
       required: true,
    },
-   date: {
-      type: Date,
-      default: Date.now,
-   },
    year: {
       type: Number,
       required: true,
@@ -40,11 +36,16 @@ const EnrollmentSchema = new mongoose.Schema({
    classroom: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "class",
+      default: null,
    },
    // class_id: {
    //    type: mongoose.Schema.Types.ObjectId,
    //    ref: "class",
    // },
+   date: {
+      type: Date,
+      default: Date.now,
+   },
 });
 
 const Enrollment = mongoose.model("enrollment", EnrollmentSchema);

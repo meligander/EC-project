@@ -214,14 +214,16 @@ router.post(
       }
 
       try {
-         let enrollment = await Enrollment.findOne({ student, year });
+         const data = { student, year, category };
+
+         let enrollment = await Enrollment.findOne(data);
 
          if (enrollment)
             return res
                .status(400)
-               .json({ msg: "El alumno ya está inscripto para dicho año" });
-
-         const data = { student, year, category };
+               .json({
+                  msg: "El alumno ya está inscripto en esa categoría para dicho año",
+               });
 
          enrollment = new Enrollment(data);
 
@@ -240,12 +242,11 @@ router.post(
             name: "Inscripción",
          });
 
-         let installment = await Installment.findOne({ year, student, number });
+         let installment = await Installment.findOne(data);
 
          if (!installment) {
             installment = new Installment({
-               year,
-               student,
+               ...data,
                number,
                value: enrollmentCategory.value,
                enrollment: enrollment._id,
@@ -270,9 +271,8 @@ router.post(
             installment = await Installment.findOne({ year, student, number });
             if (!installment) {
                installment = new Installment({
+                  ...data,
                   number,
-                  year,
-                  student,
                   value: number === 3 ? half : value,
                   enrollment: enrollment.id,
                });

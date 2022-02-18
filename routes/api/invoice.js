@@ -94,59 +94,6 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 //@access   Private && Admin
 router.get("/:id", [auth, adminAuth], async (req, res) => {
    try {
-      // const invoices = await Invoice.find();
-
-      // for (let x = 0; x < invoices.length; x++) {
-      //    if (invoices[x].lastname || invoices[x].name) {
-      //       console.log("error lastname");
-      //       await Invoice.findOneAndUpdate(
-      //          { _id: invoices[x]._id },
-      //          {
-      //             $set: {
-      //                user: {
-      //                   ...(invoices[x].lastname && {
-      //                      lastname: invoices[x].lastname,
-      //                   }),
-      //                   ...(invoices[x].name && { name: invoices[x].name }),
-      //                   ...(invoices[x].email && { email: invoices[x].email }),
-      //                },
-      //                ...(invoices[x].lastname && { lastname: undefined }),
-      //                ...(invoices[x].name && { name: undefined }),
-      //                ...(invoices[x].email && { email: undefined }),
-      //             },
-      //          }
-      //       );
-      //    } else {
-      //       if (
-      //          invoices[x].user.user_id === undefined &&
-      //          invoices[x].user.toString() !== "{}"
-      //       ) {
-      //          await Invoice.findOneAndUpdate(
-      //             { _id: invoices[x]._id },
-      //             {
-      //                $set: {
-      //                   user: {
-      //                      user_id: invoices[x].user.toString(),
-      //                   },
-      //                },
-      //             }
-      //          );
-      //       }
-      //       if (invoices[x].user.toString() === "{}")
-      //          await Invoice.findOneAndUpdate(
-      //             { _id: invoices[x]._id },
-      //             {
-      //                $set: {
-      //                   user: {
-      //                      name: "varios",
-      //                      lastname: "varios",
-      //                   },
-      //                },
-      //             }
-      //          );
-      //    }
-      // }
-
       const invoice = await Invoice.findOne({ _id: req.params.id })
          .populate({
             path: "details.installment",
@@ -244,7 +191,7 @@ router.post(
 
             await Installment.findOneAndUpdate(
                { _id: details[x].installment },
-               { value: newValue, ...(newValue !== 0 && { halfPayed: true }) }
+               { value: newValue, ...(newValue !== 0 && { updatable: false }) }
             );
          }
 
@@ -254,28 +201,21 @@ router.post(
             await Register.findOneAndUpdate(
                { _id: last._id },
                {
-                  income: last.income ? last.income + total : total,
                   registermoney: plusvalue,
                }
             );
          } else {
-            const data = {
+            last = new Register({
                registermoney: plusvalue,
-               income: total,
                temporary: true,
                difference: 0,
-            };
+            });
 
-            const register = new Register(data);
-
-            await register.save();
-
-            last = await Register.find().sort({ $natural: -1 }).limit(1);
-            last = last[0];
+            await last.save();
          }
 
-         let data = {
-            invoiceid,
+         let invoice = new Invoice({
+            ...req.body,
             user: {
                ...(_id !== ""
                   ? { user_id: _id }
@@ -285,7 +225,6 @@ router.post(
                        ...(email !== "" && { email }),
                     }),
             },
-            total,
             details: details.map((item) => {
                return {
                   installment: item.installment,
@@ -293,16 +232,12 @@ router.post(
                   value: item.value,
                };
             }),
-            remaining,
             register: last._id,
-         };
-
-         let invoice = new Invoice(data);
+         });
 
          await invoice.save();
 
-         invoice = await Invoice.find()
-            .sort({ $natural: -1 })
+         invoice = await Invoice.findOne({ _id: invoice._id })
             .populate({
                path: "user.user_id",
                model: "user",
@@ -316,9 +251,7 @@ router.post(
                   model: "user",
                   select: ["name", "lastname"],
                },
-            })
-            .limit(1);
-         invoice = invoice[0];
+            });
 
          res.json(invoice);
       } catch (err) {
@@ -334,29 +267,35 @@ router.post(
 router.delete("/:id", [auth, adminAuth], async (req, res) => {
    try {
       //Remove Expence
-      const invoice = await Invoice.findOneAndRemove({ _id: req.params.id });
-
-      for (let x = 0; x < invoice.details.length; x++) {
-         const installment = await Installment.findOne({
-            _id: invoice.details[x].installment,
+      const invoice = await Invoice.findOneAndRemove({ _id: req.params.id })
+         .populate({
+            path: "details.installment",
+            model: "installment",
+         })
+         .populate({
+            path: "register",
+            model: "register",
          });
-         await Installment.findOneAndUpdate(
-            { _id: installment.id },
-            { value: installment.value + invoice.details[x].payment }
-         );
-      }
 
-      let last = await Register.find().sort({ $natural: -1 }).limit(1);
-      last = last[0];
+      for (let x = 0; x < invoice.details.length; x++)
+         await Installment.findOneAndUpdate(
+            { _id: invoice.details[x].installment._id },
+            {
+               $set: {
+                  value:
+                     invoice.details[x].installment.value +
+                     invoice.details[x].payment,
+               },
+            }
+         );
+
       const minusvalue =
-         Math.floor((last.registermoney - invoice.total) * 100) / 100;
+         Math.floor((invoice.register.registermoney - invoice.total) * 100) /
+         100;
 
       await Register.findOneAndUpdate(
-         { _id: last.id },
-         {
-            income: last.income - invoice.total,
-            registermoney: minusvalue,
-         }
+         { _id: invoice.register._id },
+         { $set: { registermoney: minusvalue } }
       );
 
       res.json({ msg: "Invoice deleted" });
@@ -365,16 +304,5 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
       res.status(500).json({ msg: "Server Error" });
    }
 });
-
-Array.prototype.unique = function () {
-   var a = this.concat();
-   for (var i = 0; i < a.length; ++i) {
-      for (var j = i + 1; j < a.length; ++j) {
-         if (a[i].invoiceid === a[j].invoiceid) a.splice(j--, 1);
-      }
-   }
-
-   return a;
-};
 
 module.exports = router;

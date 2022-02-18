@@ -39,7 +39,7 @@ const Login = ({ loginUser }) => {
             <FaUserAlt /> Inicie sesión en su cuenta
          </p>
          <form onSubmit={onSubmit} className="form">
-            <Alert type="1" />
+            <Alert type="0" />
             <div className="form-group">
                <input
                   className="form-input"

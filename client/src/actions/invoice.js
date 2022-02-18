@@ -4,7 +4,7 @@ import { saveAs } from "file-saver";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { clearRegisters } from "./register";
+import { clearRegister } from "./register";
 import { getTotalDebt } from "./installment";
 import { filterData, newObject, updateLoadingSpinner } from "./mixvalues";
 
@@ -20,6 +20,8 @@ import {
    INVOICES_ERROR,
    INVOICEDETAIL_ADDED,
    INVOICEDETAIL_REMOVED,
+   INSTALLMENT_DELETED,
+   INSTALLMENT_ADDED,
 } from "./types";
 
 export const loadInvoice = (invoice_id, spinner) => async (dispatch) => {
@@ -84,16 +86,16 @@ export const registerInvoice = (formData) => async (dispatch) => {
    let invoice = newObject(formData);
 
    try {
-      const res = await api.post("/invoice", invoice);
+      /*const res =*/ await api.post("/invoice", invoice);
 
       dispatch({
          type: INVOICE_REGISTERED,
       });
 
-      await dispatch(invoicesPDF(res.data, "invoice"));
+      // await dispatch(invoicesPDF(res.data, "invoice"));
 
       dispatch(getTotalDebt());
-      dispatch(clearRegisters());
+      dispatch(clearRegister());
 
       dispatch(setAlert("Factura Registrada", "success", "1", 7000));
       history.push("/index/dashboard/0");
@@ -128,7 +130,7 @@ export const deleteInvoice = (invoice_id) => async (dispatch) => {
       });
 
       dispatch(getTotalDebt());
-      dispatch(clearRegisters());
+      dispatch(clearRegister());
 
       dispatch(setAlert("Factura Eliminada", "success", "2"));
    } catch (err) {
@@ -205,24 +207,19 @@ export const clearInvoices = () => (dispatch) => {
    dispatch({ type: INVOICES_CLEARED });
 };
 
-export const addDetail = (detail, details) => (dispatch) => {
-   if (!detail._id)
-      dispatch(setAlert("No se ha seleccionado ninguna cuota", "danger", "4"));
-   else {
-      if (
-         !details ||
-         (details && !details.some((item) => item.installment === detail._id))
-      ) {
-         dispatch(setAlert("Cuota agregada correctamente", "success", "4"));
-         dispatch({ type: INVOICEDETAIL_ADDED, payload: detail });
-      } else {
-         dispatch(setAlert("Ya se ha agregado dicha cuota", "danger", "4"));
-      }
-   }
+export const addDetail = (detail) => (dispatch) => {
+   dispatch(setAlert("Cuota agregada correctamente", "success", "4"));
+   dispatch({ type: INVOICEDETAIL_ADDED, payload: detail });
+   dispatch({ type: INSTALLMENT_DELETED, payload: detail._id });
 };
 
-export const removeDetail = (installment) => (dispatch) => {
-   dispatch({ type: INVOICEDETAIL_REMOVED, payload: installment });
+export const removeDetail = (item) => (dispatch) => {
+   const installment = {
+      ...item,
+      _id: item.installment,
+   };
+   dispatch({ type: INVOICEDETAIL_REMOVED, payload: installment._id });
+   dispatch({ type: INSTALLMENT_ADDED, payload: installment });
 };
 
 const setInvoicesError = (type, response) => (dispatch) => {

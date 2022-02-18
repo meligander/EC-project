@@ -10,7 +10,7 @@ import {
 
 const initialState = {
    loading: true,
-   attendances: null,
+   attendances: [],
    error: {},
 };
 
@@ -34,7 +34,7 @@ export default function (state = initialState, action) {
          return {
             ...state,
             loading: false,
-            attendances: null,
+            attendances: [],
             error: payload,
          };
       case DATE_ERROR:

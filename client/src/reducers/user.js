@@ -2,7 +2,7 @@ import {
    USER_LOADED,
    USERS_LOADED,
    USERSBK_LOADED,
-   REGISTER_SUCCESS,
+   USER_REGISTERED,
    USER_UPDATED,
    USER_DELETED,
    USERFORLIST_ADDED,
@@ -69,7 +69,7 @@ export default function (state = initialState, action) {
                [payload.type]: payload.info,
             },
          };
-      case REGISTER_SUCCESS:
+      case USER_REGISTERED:
       case USER_UPDATED:
          return {
             ...state,

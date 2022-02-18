@@ -7,7 +7,7 @@ const { check, validationResult } = require("express-validator");
 const cloudinaryUploader = require("../../config/imageUploading");
 
 //Sending Email
-const emailSender = require("../../config/emailSender");
+const { newUser, changeCredentials } = require("../../config/emailSender");
 
 //Middleware
 const auth = require("../../middleware/auth");
@@ -20,6 +20,8 @@ const Installment = require("../../models/Installment");
 const Grade = require("../../models/Grade");
 const Attendance = require("../../models/Attendance");
 const Class = require("../../models/Class");
+
+const regex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
 
 //@route    GET /api/user
 //@desc     Get all user || with filter
@@ -269,31 +271,9 @@ router.post(
       check("type", "Debe seleccionar un tipo de usuario").not().isEmpty(),
    ],
    async (req, res) => {
-      let studentnumber = 1;
       let user = {};
 
-      const {
-         name,
-         lastname,
-         email,
-         tel,
-         cel,
-         type,
-         dni,
-         town,
-         neighbourhood,
-         address,
-         dob,
-         discount,
-         chargeday,
-         birthprov,
-         birthtown,
-         sex,
-         degree,
-         school,
-         salary,
-         children,
-      } = req.body;
+      const { email, type, studentnumber, discount, children } = req.body;
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -302,7 +282,6 @@ router.post(
          return res.status(400).json({ errors });
       }
 
-      var regex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
       if (email && !regex.test(email))
          return res.status(400).json({
             value: email,
@@ -322,58 +301,35 @@ router.post(
                   .json({ msg: "Ya existe un usuario con ese mail" });
          }
 
-         const number = await User.find({ type: "student" })
-            .sort({ $natural: -1 })
-            .limit(1);
-
-         if (number[0]) {
-            studentnumber = Number(number[0].studentnumber) + 1;
-         }
-
          let data = {
-            name,
-            lastname,
+            ...req.body,
             password: "12345678",
-            email,
-            tel,
-            cel,
-            type,
-            dni,
-            town,
-            neighbourhood,
-            address,
-            dob,
-            discount,
-            chargeday,
-            birthprov,
-            birthtown,
-            sex,
-            degree,
-            school,
-            salary,
-            studentnumber,
-            children,
+            ...(type === "student"
+               ? {
+                    studentnumber,
+                    discount: discount ? discount : 0,
+                 }
+               : { studentnumber: undefined }),
+            ...(type === "guardian" && { children }),
          };
-
-         user = new User(data);
 
          //Encrypt password -- agregarlo a cuando se cambia el password
          const salt = await bcrypt.genSalt(10);
 
-         user.password = await bcrypt.hash(user.password, salt);
+         data.password = await bcrypt.hash(data.password, salt);
+
+         user = new User(data);
 
          await user.save();
 
-         if (email) newUserEmail(type, email);
+         //Send email
+         if (email) newUser(type, email);
 
-         user = await User.find()
-            .sort({ $natural: -1 })
+         user = await User.findOne({ _id: user._id })
             .select("-password")
             .populate({ path: "town", select: "name" })
             .populate({ path: "neighbourhood", select: "name" })
-            .populate({ path: "children", select: "-password" })
-            .limit(1);
-         user = user[0];
+            .populate({ path: "children", select: "-password" });
 
          res.json(user);
       } catch (err) {
@@ -394,29 +350,7 @@ router.put(
       check("lastname", "El apellido es necesario").not().isEmpty(),
    ],
    async (req, res) => {
-      const {
-         name,
-         lastname,
-         tel,
-         cel,
-         type,
-         dni,
-         town,
-         neighbourhood,
-         address,
-         dob,
-         discount,
-         chargeday,
-         birthprov,
-         birthtown,
-         sex,
-         degree,
-         school,
-         salary,
-         children,
-         active,
-         img,
-      } = req.body;
+      const { type, children, active, img, discount } = req.body;
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -450,28 +384,8 @@ router.put(
          if (!active) await inactivateUser(user._id, type, false);
 
          let data = {
-            name,
-            lastname,
-            active,
-            sex,
-            tel,
-            cel,
-            type,
-            dni,
-            town,
-            neighbourhood,
-            address,
-            discount,
-            chargeday,
-            birthprov,
-            birthtown,
-            degree,
-            school,
-            salary,
-            dob,
-            ...(children
-               ? { children }
-               : user.children.length > 0 && { children: [] }),
+            ...req.body,
+            ...(type === "guardian" && { children }),
             ...(imgObject.public_id !== "" && { img: imgObject }),
          };
 
@@ -480,38 +394,40 @@ router.put(
             const month = date.getMonth() + 1;
             const year = date.getFullYear();
 
-            let enrollments = await Enrollment.find({
-               student: req.params.id,
-               year: { $in: [year, year + 1] },
-            }).populate({ path: "category", model: "category" });
+            const installments = await Installment.find({
+               value: { $ne: 0 },
+               year: { $gte: year },
+               updatable: true,
+            }).populate({
+               model: "enrollment",
+               path: "enrollment",
+               populate: {
+                  path: "category",
+               },
+            });
 
-            for (let x = 0; x < enrollments.length; x++) {
-               const installments = await Installment.find({
-                  enrollment: enrollments[x]._id,
-                  value: { $ne: 0 },
-                  number: { $gte: enrollments[x].year === year ? month : 3 },
-               });
-               let value = enrollments[x].category.value;
+            await installments.forEach(async (inst) => {
+               if (
+                  inst.enrollment &&
+                  (inst.year > year || inst.number >= month)
+               ) {
+                  const value = parseFloat(inst.enrollment.category.value);
 
-               if (discount !== 0)
-                  value =
-                     Math.round((value - (value * discount) / 100) / 10) * 10;
+                  let newValue =
+                     discount &&
+                     discount !== 0 &&
+                     (inst.number !== 3 || discount !== 50)
+                        ? value - (value * discount) / 100
+                        : value;
 
-               for (let y = 0; y < installments.length; y++)
-                  if (!installments[y].halfPayed)
-                     await Installment.findOneAndUpdate(
-                        { _id: installments[y]._id },
-                        {
-                           $set: {
-                              value:
-                                 installments[y].number === 3
-                                    ? value / 2
-                                    : value,
-                              expired: false,
-                           },
-                        }
-                     );
-            }
+                  newValue = inst.number === 3 ? newValue / 2 : newValue;
+
+                  await Installment.findOneAndUpdate(
+                     { _id: inst._id },
+                     { $set: { value: newValue, expired: false } }
+                  );
+               }
+            });
          }
 
          user = await User.findOneAndUpdate(
@@ -536,7 +452,8 @@ router.put(
 router.put("/credentials/:id", auth, async (req, res) => {
    const { password, password2, email } = req.body;
 
-   var regex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
+   let user;
+
    if (email && !regex.test(email))
       return res.status(400).json({
          value: email,
@@ -597,33 +514,9 @@ router.put("/credentials/:id", auth, async (req, res) => {
          .populate({ path: "neighbourhood", select: "name" })
          .populate({ path: "children", select: "-password" });
 
-      if ((email && password) || email !== oldCredentials.email) {
-         if (password && email !== oldCredentials.email)
-            emailSender(
-               email,
-               "Cambio de credenciales",
-               `El email y la constraseña se han modificado correctamente. 
-               Desde ahora en más utilice este email para poder ingresar a nuestra página web.`
-            );
-         else {
-            if (password)
-               emailSender(
-                  email,
-                  "Cambio de contraseña",
-                  "Se ha modificado correctamente la constraseña para poder ingresar a nuestra página web."
-               );
-            else {
-               if (oldCredentials.email === "")
-                  newUserEmail(oldCredentials.type, email);
-               else
-                  emailSender(
-                     email,
-                     "Cambio de email",
-                     `Ahora puede ingresar a nuestra página web utilizando este email.`
-                  );
-            }
-         }
-      }
+      //Send email
+      if ((email && password) || email !== oldCredentials.email)
+         await changeCredentials({ email, password }, oldCredentials);
 
       res.json(user);
    } catch (err) {
@@ -637,6 +530,16 @@ router.put("/credentials/:id", auth, async (req, res) => {
 //@access   Private && Admin
 router.delete("/:id/:type", [auth, adminAuth], async (req, res) => {
    try {
+      const anyInstallment = await Installment.findOne({
+         student: req.params.id,
+         value: 0,
+      });
+
+      if (anyInstallment)
+         return res.status(400).json({
+            msg: "El alumno tiene cuotas relacionadas y no se puede eliminar. Para eso primero borre dichas cuotas.",
+         });
+
       //Remove user
       await User.findOneAndRemove({ _id: req.params.id });
 
@@ -649,6 +552,7 @@ router.delete("/:id/:type", [auth, adminAuth], async (req, res) => {
    }
 });
 
+//@desc Function to delete an img from the cloud
 const deletePictures = (img) => {
    cloudinary.v2.uploader.destroy(img.public_id, function (error, result) {
       if (error) {
@@ -658,126 +562,81 @@ const deletePictures = (img) => {
    });
 };
 
+//@desc Function to eliminate all the info related to a user
 const inactivateUser = async (user_id, type, completeDeletion) => {
+   let filter = {};
+   let enrollments = [];
+
    switch (type) {
       case "student":
          const date = new Date();
          const month = date.getMonth() + 1;
          const year = date.getFullYear();
 
-         const enrollment = await Enrollment.findOneAndRemove({
+         enrollments = await Enrollment.find({
             student: user_id,
-            year,
-         });
-         await Enrollment.findOneAndRemove({
-            student: user_id,
-            year: year + 1,
+            ...(!completeDeletion && { year: { $gte: year } }),
          });
 
-         if (enrollment && enrollment.classroom) {
-            const grades = await Grade.find({
-               student: user_id,
-               classroom: enrollment.classroom,
+         for (let x = 0; x < enrollments.length; x++) {
+            const installments = await Installment.find({
+               enrollment: enrollments[x]._id,
+               value: { $ne: 0 },
+               updatable: true,
             });
-            for (let x = 0; x < grades.length; x++) {
-               await Grade.findOneAndRemove({ _id: grades[x]._id });
-            }
 
-            const attendances = await Attendance.find({
-               student: user_id,
-               classroom: enrollment.classroom,
+            await installments.forEach(async (item) => {
+               if (completeDeletion || item.year > year || item.number >= month)
+                  await Installment.findOneAndRemove({ _id: item._id });
             });
-            for (let x = 0; x < attendances.length; x++) {
-               await Attendance.findOneAndRemove({ _id: attendances[x]._id });
-            }
          }
-
-         let installments = await Installment.find({
+         filter = {
             student: user_id,
             ...(!completeDeletion && {
-               year,
-               number: { $gt: month },
+               classroom: enrollments
+                  .filter((item) => item.classroom)
+                  .map((item) => item.classroom),
             }),
-         });
-         for (let x = 0; x < installments.length; x++) {
-            await Installment.findOneAndRemove({ _id: installments[x]._id });
-         }
-         if (!completeDeletion) {
-            installments = await Installment.find({
-               student: user_id,
-               year: year + 1,
-            });
-            for (let x = 0; x < installments.length; x++) {
-               await Installment.findOneAndRemove({ _id: installments[x]._id });
-            }
-         }
+         };
 
          break;
       case "teacher":
+      case "admin&teacher":
          const classes = await Class.find({ teacher: user_id });
 
-         for (let x = 0; x < classes.length; x++) {
-            const attendances = await Attendance.find({
-               classroom: classes[x]._id,
-            });
-            for (let y = 0; y < attendances.length; y++) {
-               await Attendance.findOneAndRemove({ _id: attendances[y]._id });
-            }
+         filter = { classroom: { $in: classes.map((item) => item._id) } };
 
-            const grades = await Grade.find({ classroom: classes[x]._id });
-            for (let y = 0; y < grades.length; y++) {
-               await Grade.findOneAndRemove({ _id: grades[y]._id });
-            }
+         enrollments = await Enrollment.find(filter);
 
-            const enrollments = await Enrollment.find({
-               classroom: classes[x]._id,
-            });
-            for (let y = 0; y < enrollments.length; y++) {
-               await User.findOneAndUpdate(
-                  { _id: users[y]._id },
-                  {
-                     classroom: null,
-                  }
-               );
-            }
-
-            await Class.findOneAndRemove({ _id: classes[x]._id });
-         }
+         await classes.forEach(
+            async (item) => await Class.findOneAndRemove({ _id: item._id })
+         );
          break;
       default:
          break;
    }
-};
 
-const newUserEmail = (type, email) => {
-   let text = "";
+   const attendances = await Attendance.find(filter);
 
-   switch (type) {
-      case "teacher":
-         text = `revisar los cursos que tiene asignado, agregar notas e inasistencias como 
-         también ver la información tanto de sus alumnos como de todas las personas involucradas 
-         en la academia.`;
-         break;
-      case "student":
-         text = `revisar sus notas, inasistencias y cuotas a pagar y ver información para contactar a 
-      compañeros y profesor.`;
-         break;
-      case "guardian":
-         text = `revisar las notas, inasistencias, cuotas a pagar y ver información 
-         para contactar a los profesores.`;
-         break;
-      default:
-         text = `realizar todo lo relacionado a la administración de la acamedia.`;
-         break;
-   }
-
-   emailSender(
-      email,
-      "¡Bienvenido!",
-      `¡Bienvenido a Villa de Merlo English Centre! <br/>Ahora podrá ingresar a nuestra página web
-      utilizando este mail y la contraseña '12345678'. Le recomendamos que cambie la contraseña
-       para que sea más seguro. <br/>En la página podrá ${text}`
+   await attendances.forEach(
+      async (item) => await Attendance.findOneAndRemove({ _id: item._id })
    );
+
+   const grades = await Grade.find(filter);
+
+   await grades.forEach(
+      async (item) => await Grade.findOneAndRemove({ _id: item._id })
+   );
+
+   await enrollments.forEach(async (item) => {
+      if (type === "student")
+         await Enrollment.findOneAndRemove({ _id: item._id });
+      else
+         await Enrollment.findOneAndUpdate(
+            { _id: item._id },
+            { $set: { classroom: null } }
+         );
+   });
 };
 
 module.exports = router;

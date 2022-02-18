@@ -35,8 +35,9 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 //@access   Private
 router.get("/category/:id", auth, async (req, res) => {
    try {
+      console.log(req.params.id);
       const gradetypes = await GradeType.find({
-         "categories.category": req.params.id,
+         categories: req.params.id,
       }).sort({ name: 1 });
 
       if (gradetypes.length === 0) {
@@ -70,10 +71,9 @@ router.post("/", [auth, adminAuth], async (req, res) => {
             percentage: false,
          };
 
-         gradeTypes[x].categories.forEach((item) => {
+         await gradeTypes[x].categories.forEach((item) => {
             if (item.category) {
-               if (item.checks)
-                  data.categories.push({ category: item.category });
+               if (item.checks) data.categories.push(item.category);
             } else data.percentage = item.checks;
          });
 
@@ -133,8 +133,7 @@ const buildTable = async (res) => {
    for (let x = 0; x < gradetypes.length; x++) {
       let row = Array.from(Array(categories.length), (item, index) => {
          const exists = gradetypes[x].categories.some(
-            (item) =>
-               item.category.toString() === categories[index]._id.toString()
+            (item) => item.toString() === categories[index]._id.toString()
          );
          return {
             category: categories[index]._id,

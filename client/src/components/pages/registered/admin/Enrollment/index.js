@@ -22,7 +22,7 @@ import PopUp from "../../../../modal/PopUp";
 
 const Enrollment = ({
    categories: { categories, loading },
-   enrollments: { enrollment, loadingEnrollment },
+   enrollments: { enrollment, loadingEnrollment, enrollments },
    match,
    loadCategories,
    registerUpdateEnrollment,
@@ -123,11 +123,16 @@ const Enrollment = ({
          {_id === "" ? <h1>Inscripción</h1> : <h2>Editar inscripción</h2>}
          <PopUp
             confirm={() =>
-               registerUpdateEnrollment({
-                  ...formData,
-                  month:
-                     thisYear === Number(year) && currentMonth > 2 ? month : 0,
-               })
+               registerUpdateEnrollment(
+                  {
+                     ...formData,
+                     month:
+                        thisYear === Number(year) && currentMonth > 2
+                           ? month
+                           : 0,
+                  },
+                  enrollments.length > 0
+               )
             }
             info={`¿Está seguro que ${
                _id !== ""

@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { differenceInYears, format } from "date-fns";
 import { FaTrashAlt, FaPlus } from "react-icons/fa";
 
+import { formatNumber } from "../../../../../../actions/mixvalues";
+
 const StudentTable = ({
    userSearchType = "student",
    actionWChild,
@@ -62,7 +64,11 @@ const StudentTable = ({
                         </td>
                         {type !== "add-child" &&
                            type !== "chosen-child" &&
-                           user.dni && <td className="hide-sm">{user.dni}</td>}
+                           user.dni && (
+                              <td className="hide-sm">
+                                 {formatNumber(user.dni)}
+                              </td>
+                           )}
                         {type === "search" && <td>{user.category}</td>}
                         {(type === "add-child" || type === "chosen-child") && (
                            <td>

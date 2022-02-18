@@ -12,12 +12,15 @@ import PopUp from "../../../../../modal/PopUp";
 const Credentials = ({
    match,
    auth: { userLogged },
-   users: { user, loadingUser },
+   users: { user: otherUser, loadingUser },
    updateCredentials,
    loadUser,
    togglePopup,
 }) => {
+   const _id = match.params.user_id;
+
    const [formData, setFormData] = useState({
+      _id: "",
       email: "",
       password: "",
       password2: "",
@@ -31,13 +34,16 @@ const Credentials = ({
       userLogged.type === "secretary";
 
    useEffect(() => {
-      if (!loadingUser)
+      if (loadingUser && userLogged._id !== _id) loadUser(_id, true);
+      else {
+         const user = userLogged._id !== _id ? otherUser : userLogged;
          setFormData((prev) => ({
             ...prev,
+            _id: user._id,
             email: !user.email ? "" : user.email,
          }));
-      else loadUser(match.params.user_id, true);
-   }, [loadingUser, match.params.user_id, loadUser, user]);
+      }
+   }, [loadingUser, _id, loadUser, otherUser, userLogged]);
 
    const onChange = (e) => {
       e.persist();
@@ -76,7 +82,7 @@ const Credentials = ({
                         id="email"
                         type="text"
                         value={email}
-                        autocomplete="off"
+                        autoComplete="off"
                         name="email"
                         onChange={onChange}
                         placeholder="Dirección de correo electrónico"
@@ -93,7 +99,7 @@ const Credentials = ({
                      id="password"
                      type="password"
                      value={password}
-                     autocomplete="new-password"
+                     autoComplete="new-password"
                      placeholder="Nueva contraseña"
                      onChange={onChange}
                      name="password"

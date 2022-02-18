@@ -42,8 +42,6 @@ router.post(
          .isEmpty(),
    ],
    async (req, res) => {
-      const { percentage } = req.body;
-
       let errors = [];
       const errorsResult = validationResult(req);
       if (!errorsResult.isEmpty()) {
@@ -52,7 +50,7 @@ router.post(
       }
 
       try {
-         let penalty = new Penalty({ percentage });
+         let penalty = new Penalty(req.body);
 
          await penalty.save();
 

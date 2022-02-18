@@ -30,7 +30,7 @@ api.interceptors.response.use(
                .getState()
                .alert.some((item) => item.msg === err.response.data.msg)
          ) {
-            store.dispatch(setAlert(err.response.data.msg, "danger", "1"));
+            store.dispatch(setAlert(err.response.data.msg, "danger", "0"));
             store.dispatch(setAuthError(AUTH_ERROR, err.response));
             store.dispatch(updateLoadingSpinner(false));
             window.scrollTo(0, 0);

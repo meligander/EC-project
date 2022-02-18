@@ -112,6 +112,7 @@ const Invoice = ({
                         <tr>
                            <th>Nombre</th>
                            <th>Cuota</th>
+                           <th>Año</th>
                            <th>Importe</th>
                            <th>Pago</th>
                         </tr>
@@ -130,6 +131,11 @@ const Invoice = ({
                                  {invoice.installment
                                     ? installment[invoice.installment.number]
                                     : "Indefinida"}
+                              </td>
+                              <td>
+                                 {invoice.installment
+                                    ? invoice.installment.year
+                                    : "Indefinido"}
                               </td>
                               <td>${formatNumber(invoice.value)}</td>
                               <td>${formatNumber(invoice.payment)}</td>

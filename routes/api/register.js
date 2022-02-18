@@ -18,23 +18,25 @@ router.get("/", [auth, adminAuth], async (req, res) => {
       let registers;
 
       if (Object.entries(req.query).length === 0) {
-         registers = await Register.find().sort({ date: -1 });
+         registers = await Register.find().sort({ date: -1 }).limit(10);
       } else {
-         const filter = req.query;
+         const { startDate, endDate } = req.query;
 
          registers = await Register.find({
-            ...((filter.startDate || filter.endDate) && {
+            ...((startDate || endDate) && {
                date: {
-                  ...(filter.startDate && {
-                     $gte: new Date(filter.startDate).setHours(00, 00, 00),
+                  ...(startDate && {
+                     $gte: new Date(startDate).setHours(00, 00, 00),
                   }),
-                  ...(filter.endDate && {
-                     $lte: new Date(filter.endDate).setHours(23, 59, 59),
+                  ...(endDate && {
+                     $lte: new Date(endDate).setHours(23, 59, 59),
                   }),
                },
             }),
          }).sort({ date: -1 });
       }
+      for (let x = 0; x < registers.length; x++)
+         registers[x] = await getInfo(registers[x]);
 
       if (registers.length === 0) {
          return res.status(400).json({
@@ -62,44 +64,7 @@ router.get("/last", [auth, adminAuth], async (req, res) => {
             msg: "No se encontró información de la caja con dichas descripciones",
          });
       }
-      if (register.temporary) {
-         const income = await Invoice.find({ register: register._id });
-         const expences = await Expence.find({
-            register: register._id,
-         }).populate({
-            path: "expencetype",
-         });
-
-         const allExpences = expences.reduce((res, curr) => {
-            if (res[curr.expencetype.type])
-               res[curr.expencetype.type].push(curr);
-            else Object.assign(res, { [curr.expencetype.type]: [curr] });
-
-            return res;
-         }, {});
-
-         register = {
-            ...register.toJSON(),
-            income: income.reduce((sum, item) => {
-               return item.value ? sum + item.value : sum + item.total;
-            }, 0),
-            expence:
-               allExpences.expence &&
-               allExpences.expence.reduce((sum, item) => sum + item.value, 0),
-            withdrawal:
-               allExpences.withdrawal &&
-               allExpences.withdrawal.reduce(
-                  (sum, item) => sum + item.value,
-                  0
-               ),
-            cheatincome:
-               allExpences.cheatincome &&
-               allExpences.cheatincome.reduce(
-                  (sum, item) => sum + item.value,
-                  0
-               ),
-         };
-      }
+      if (register.temporary) register = await getInfo(register);
 
       res.json(register);
    } catch (err) {
@@ -108,13 +73,16 @@ router.get("/last", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET /api/register/year/bymonth
+//@route    GET /api/register/year
 //@desc     get money collected every month
 //@access   Private && Admin
 router.get("/year/bymonth", [auth, adminAuth], async (req, res) => {
    try {
-      let registerByMonth = [];
-      const months = [
+      const { year } = req.query;
+
+      let allMonths = [];
+
+      const month = [
          "Enero",
          "Febrero",
          "Marzo",
@@ -128,87 +96,43 @@ router.get("/year/bymonth", [auth, adminAuth], async (req, res) => {
          "Noviembre",
          "Diciembre",
       ];
-      let firstDay = new Date();
-      firstDay.setUTCMonth(0);
-      firstDay.setUTCDate(1);
-      firstDay.setUTCHours(0, 0, 0, 0);
 
-      let lastDate = new Date();
-      lastDate.setUTCMonth(11);
-      lastDate.setUTCDate(31);
-      lastDate.setUTCHours(23, 59, 59);
+      for (let x = 0; x < 12; x++) {
+         const registers = await Register.find({
+            date: {
+               $gte: new Date(year ? year : new Date().getFullYear(), x, 1),
+               $lte: new Date(year ? year : new Date().getFullYear(), x + 1, 1),
+            },
+         });
+         const find = {
+            register: { $in: registers.map((item) => item._id) },
+         };
 
-      let registers = await Register.find({
-         date: {
-            $gte: firstDay,
-            $lte: lastDate,
-         },
-      });
+         const income = await Invoice.find(find);
+         const expences = await Expence.find(find).populate({
+            path: "expencetype",
+         });
 
-      let monthCount = 0;
-      let monthRegister = {
-         month: "",
-         income: 0,
-         expence: 0,
-         withdrawal: 0,
-         cheatincome: 0,
-         difference: 0,
-      };
-
-      for (let x = 0; x < registers.length; x++) {
-         const date = new Date(registers[x].date);
-         if (date.getMonth() === monthCount) {
-            monthRegister.income += registers[x].income
-               ? registers[x].income
-               : 0;
-            monthRegister.expence += registers[x].expence
-               ? registers[x].expence
-               : 0;
-            monthRegister.withdrawal += registers[x].withdrawal
-               ? registers[x].withdrawal
-               : 0;
-            monthRegister.cheatincome += registers[x].cheatincome
-               ? registers[x].cheatincome
-               : 0;
-            monthRegister.difference = !registers[x].difference
-               ? monthRegister.difference
-               : registers[x].negative
-               ? monthRegister.difference - registers[x].difference
-               : monthRegister.difference + registers[x].difference;
-         } else {
-            monthRegister = roundData(monthRegister, monthCount, months);
-            registerByMonth.push(monthRegister);
-            monthRegister = {
-               month: "",
-               income: 0,
-               expence: 0,
-               withdrawal: 0,
-               cheatincome: 0,
-               difference: 0,
-            };
-            monthCount++;
-            x--;
-         }
-      }
-
-      monthRegister = roundData(monthRegister, monthCount, months);
-      registerByMonth.push(monthRegister);
-      monthCount++;
-
-      for (let x = monthCount; x < 12; x++) {
-         monthRegister = {
-            month: months[x],
-            income: 0,
+         let monthRegister = {
+            month: month[x],
+            income: income.reduce((sum, item) => sum + item.total, 0),
             expence: 0,
             withdrawal: 0,
             cheatincome: 0,
-            difference: 0,
+            difference: registers.reduce(
+               (sum, item) => sum + item.difference,
+               0
+            ),
          };
 
-         registerByMonth.push(monthRegister);
+         expences.forEach(
+            (item) => (monthRegister[item.expencetype.type] += item.value)
+         );
+
+         allMonths.push(monthRegister);
       }
 
-      res.json(registerByMonth);
+      res.json(allMonths);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });
@@ -260,10 +184,10 @@ router.post(
 );
 
 //@route    PUT /api/register
-//@desc     Update a register
+//@desc     Update the last register
 //@access   Private && Admin
 router.put("/", [auth, adminAuth], async (req, res) => {
-   const { difference, negative, description } = req.body;
+   const { difference, description } = req.body;
 
    try {
       let last = await Register.find().sort({ $natural: -1 }).limit(1);
@@ -276,32 +200,24 @@ router.put("/", [auth, adminAuth], async (req, res) => {
       }
       let value = last.registermoney;
 
-      if (difference) {
-         if (negative) {
-            value =
-               Math.floor((last.registermoney - Number(difference)) * 100) /
-               100;
-         } else {
-            value =
-               Math.floor((last.registermoney + Number(difference)) * 100) /
-               100;
+      if (difference)
+         value =
+            Math.floor((last.registermoney + Number(difference)) * 100) / 100;
+
+      await Register.findOneAndUpdate(
+         { _id: last.id },
+         {
+            $set: {
+               ...(difference && {
+                  difference,
+                  registermoney: value,
+               }),
+               ...(description && description),
+               temporary: false,
+               dateclose: new Date(),
+            },
          }
-      }
-
-      const date = new Date();
-
-      let data = {
-         ...(difference && {
-            difference,
-            registermoney: value,
-            negative,
-         }),
-         ...(description && description),
-         temporary: false,
-         dateclose: date,
-      };
-
-      await Register.findOneAndUpdate({ _id: last.id }, data);
+      );
 
       res.json({ msg: "Register Closed" });
    } catch (err) {
@@ -322,30 +238,19 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
             .status(400)
             .json({ msg: "La caja no se ha cerrado todavía" });
       }
-      if (register.difference !== 0) {
-         let registermoney;
-         if (register.negative) {
-            registermoney = register.registermoney + register.difference;
-         } else {
-            registermoney = register.registermoney - register.difference;
+
+      await Register.findOneAndUpdate(
+         { _id: req.params.id },
+         {
+            $set: {
+               temporary: true,
+               ...(register.difference !== 0 && {
+                  registermoney: register.registermoney - register.difference,
+                  difference: 0,
+               }),
+            },
          }
-         await Register.findOneAndUpdate(
-            { _id: req.params.id },
-            {
-               temporary: true,
-               difference: 0,
-               registermoney,
-            }
-         );
-      } else {
-         //Remove register
-         await Register.findOneAndUpdate(
-            { _id: req.params.id },
-            {
-               temporary: true,
-            }
-         );
-      }
+      );
 
       res.json({ msg: "Register deleted" });
    } catch (err) {
@@ -354,17 +259,28 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-const roundData = (monthRegister, monthCount, months) => {
-   const monthRegisters = {
-      month: months[monthCount],
-      income: Math.floor(monthRegister.income * 100) / 100,
-      expence: Math.floor(monthRegister.expence * 100) / 100,
-      withdrawal: Math.floor(monthRegister.withdrawal * 100) / 100,
-      cheatincome: Math.floor(monthRegister.cheatincome * 100) / 100,
-      difference: Math.floor(monthRegister.difference * 100) / 100,
+//@desc Function to get the register related info
+const getInfo = async (register) => {
+   const income = await Invoice.find({ register: register._id });
+   const expences = await Expence.find({
+      register: register._id,
+   }).populate({
+      path: "expencetype",
+   });
+
+   register = {
+      ...register.toJSON(),
+      income: income.reduce((sum, item) => {
+         return item.value ? sum + item.value : sum + item.total;
+      }, 0),
+      expence: 0,
+      withdrawal: 0,
+      cheatincome: 0,
    };
 
-   return monthRegisters;
+   expences.forEach((item) => (register[item.expencetype.type] += item.value));
+
+   return register;
 };
 
 module.exports = router;

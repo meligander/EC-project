@@ -90,51 +90,55 @@ export const loadEnrollments = (formData, spinner) => async (dispatch) => {
    if (!error && spinner) dispatch(updateLoadingSpinner(false));
 };
 
-export const registerUpdateEnrollment = (formData) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-   let error = false;
+export const registerUpdateEnrollment =
+   (formData, loaded) => async (dispatch) => {
+      dispatch(updateLoadingSpinner(true));
+      let error = false;
 
-   let enrollment = newObject(formData);
+      let enrollment = newObject(formData);
 
-   try {
-      let res;
-      if (!enrollment._id) res = await api.post("/enrollment", enrollment);
-      else res = await api.put(`/enrollment/${enrollment._id}`, enrollment);
+      try {
+         if (!loaded)
+            dispatch(loadEnrollments({ year: new Date().getFullYear() }));
 
-      dispatch({
-         type: !enrollment._id ? ENROLLMENT_REGISTERED : ENROLLMENT_UPDATED,
-         payload: res.data,
-      });
+         let res;
+         if (!enrollment._id) res = await api.post("/enrollment", enrollment);
+         else res = await api.put(`/enrollment/${enrollment._id}`, enrollment);
 
-      dispatch(
-         setAlert(
-            `Inscripción ${!enrollment._id ? "Registrada" : "Modificada"}`,
-            "success",
-            "2",
-            7000
-         )
-      );
-      dispatch(getYearEnrollments());
-      dispatch(getTotalDebt());
+         dispatch({
+            type: !enrollment._id ? ENROLLMENT_REGISTERED : ENROLLMENT_UPDATED,
+            payload: res.data,
+         });
 
-      history.push("/enrollment/list");
-   } catch (err) {
-      if (err.response.status !== 401) {
-         dispatch(setEnrollmentsError(ENROLLMENT_ERROR, err.response));
+         dispatch(
+            setAlert(
+               `Inscripción ${!enrollment._id ? "Registrada" : "Modificada"}`,
+               "success",
+               "2",
+               7000
+            )
+         );
+         dispatch(getYearEnrollments());
+         dispatch(getTotalDebt());
 
-         if (err.response.data.errors)
-            err.response.data.errors.forEach((error) => {
-               dispatch(setAlert(error.msg, "danger", "2"));
-            });
-         else dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      } else error = true;
-   }
+         history.push("/enrollment/list");
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setEnrollmentsError(ENROLLMENT_ERROR, err.response));
 
-   if (!error) {
-      dispatch(updateLoadingSpinner(false));
-      window.scrollTo(0, 0);
-   }
-};
+            if (err.response.data.errors)
+               err.response.data.errors.forEach((error) => {
+                  dispatch(setAlert(error.msg, "danger", "2"));
+               });
+            else dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         } else error = true;
+      }
+
+      if (!error) {
+         dispatch(updateLoadingSpinner(false));
+         window.scrollTo(0, 0);
+      }
+   };
 
 export const deleteEnrollment = (enroll_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));

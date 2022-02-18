@@ -9,6 +9,7 @@ import { BiFilterAlt } from "react-icons/bi";
 import { formatNumber, togglePopup } from "../../../../../../actions/mixvalues";
 import {
    loadRegisters,
+   loadRegister,
    deleteRegister,
    registerPDF,
    clearRegisters,
@@ -20,8 +21,9 @@ import PopUp from "../../../../../modal/PopUp";
 
 const RegisterList = ({
    auth: { userLogged },
-   registers: { registers, loading },
+   registers: { registers, loading, loadingRegister, register: last },
    loadRegisters,
+   loadRegister,
    deleteRegister,
    clearRegisters,
    togglePopup,
@@ -48,6 +50,10 @@ const RegisterList = ({
          loadRegisters({}, true, false);
    }, [loading, loadRegisters, registers]);
 
+   useEffect(() => {
+      if (loadingRegister) loadRegister(false);
+   }, [loadingRegister, loadRegister]);
+
    const onChange = (e) => {
       e.persist();
       setFilterData({
@@ -59,7 +65,7 @@ const RegisterList = ({
    return (
       <>
          <PopUp
-            confirm={() => deleteRegister(registers[0]._id)}
+            confirm={() => deleteRegister(last._id)}
             info="¿Está seguro que desea eliminar el cierre de caja?"
          />
          <h2>Caja Diaria</h2>
@@ -111,7 +117,7 @@ const RegisterList = ({
                      <th>Plata Caja</th>
                      <th>Diferencia</th>
                      <th>Detalles</th>
-                     {isAdmin && registers[0] && !registers[0].temporary && (
+                     {isAdmin && !loadingRegister && !last.temporary && (
                         <th>&nbsp;</th>
                      )}
                   </tr>
@@ -151,13 +157,17 @@ const RegisterList = ({
                                     ${formatNumber(register.registermoney)}
                                  </td>
                                  <td
-                                    className={register.negative ? "debt" : ""}
+                                    className={
+                                       register.difference < 0 ? "debt" : ""
+                                    }
                                  >
                                     {register.difference !== 0 &&
                                        register.difference &&
-                                       (register.negative
+                                       (register.difference < 0
                                           ? "-$" +
-                                            formatNumber(register.difference)
+                                            formatNumber(
+                                               Math.abs(register.difference)
+                                            )
                                           : "+$" +
                                             formatNumber(register.difference))}
                                  </td>
@@ -165,22 +175,24 @@ const RegisterList = ({
                                     {register.description &&
                                        register.description}
                                  </td>
-                                 {!registers[0].temporary && (
-                                    <td>
-                                       {isAdmin && i === 0 && (
-                                          <button
-                                             type="button"
-                                             className="btn btn-danger"
-                                             onClick={(e) => {
-                                                e.preventDefault();
-                                                togglePopup("default");
-                                             }}
-                                          >
-                                             <FaTrashAlt />
-                                          </button>
-                                       )}
-                                    </td>
-                                 )}
+                                 {!loadingRegister &&
+                                    !last.temporary &&
+                                    isAdmin && (
+                                       <td>
+                                          {i === 0 && (
+                                             <button
+                                                type="button"
+                                                className="btn btn-danger"
+                                                onClick={(e) => {
+                                                   e.preventDefault();
+                                                   togglePopup("default");
+                                                }}
+                                             >
+                                                <FaTrashAlt />
+                                             </button>
+                                          )}
+                                       </td>
+                                    )}
                               </tr>
                            )
                      )}
@@ -209,6 +221,7 @@ const mapStatetoProps = (state) => ({
 
 export default connect(mapStatetoProps, {
    loadRegisters,
+   loadRegister,
    deleteRegister,
    clearRegisters,
    togglePopup,
