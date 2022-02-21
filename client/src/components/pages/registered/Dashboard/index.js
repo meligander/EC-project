@@ -76,15 +76,17 @@ const Dashboard = ({
    const dashboardType = () => {
       switch (user.type) {
          case "student":
-            return <StudentDashboard />;
+            return <StudentDashboard user={user} />;
          case "teacher":
             return (
                <>
-                  {(isAdmin || userLogged._id === _id) && <TeacherDashboard />}
+                  {(isAdmin || userLogged._id === _id) && (
+                     <TeacherDashboard user={user} />
+                  )}
                </>
             );
          case "guardian":
-            return <RelativeDashboard />;
+            return <RelativeDashboard user={user} />;
          case "secretary":
          case "admin":
          case "admin&teacher":

@@ -8,7 +8,7 @@ import ClassesTable from "../../../sharedComp/tables/ClassesTable";
 
 const TeacherDashboard = ({
    classes: { classes, loading },
-   users: { user },
+   user,
    loadClasses,
    clearClass,
    clearSearch,

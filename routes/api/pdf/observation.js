@@ -47,15 +47,19 @@ router.post("/report-card", auth, async (req, res) => {
          period: { $lte: period },
       };
 
-      grades = await Grade.find(filter).populate({
-         path: "gradetype",
-         model: "gradetype",
-      });
+      grades = await Grade.find(filter)
+         .populate({
+            path: "gradetype",
+            model: "gradetype",
+         })
+         .sort({ gradetype: 1 });
 
-      finalGrades = await Grade.find({ ...filter, period: 5 }).populate({
-         path: "gradetype",
-         model: "gradetype",
-      });
+      finalGrades = await Grade.find({ ...filter, period: 5 })
+         .populate({
+            path: "gradetype",
+            model: "gradetype",
+         })
+         .sort({ gradetype: 1 });
 
       attendances = await Attendance.find(filter);
 

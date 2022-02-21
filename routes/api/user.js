@@ -273,7 +273,7 @@ router.post(
    async (req, res) => {
       let user = {};
 
-      const { email, type, studentnumber, discount, children } = req.body;
+      const { email, type, dni, studentnumber, discount, children } = req.body;
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -283,12 +283,10 @@ router.post(
       }
 
       if (email && !regex.test(email))
-         return res.status(400).json({
-            value: email,
-            msg: "El mail es inválido",
-            params: "email",
-            location: "body",
-         });
+         return res.status(400).json({ msg: "El mail es inválido" });
+
+      if (dni && dni.toString().length < 8)
+         return res.status(400).json({ msg: "El DNI es inválido" });
 
       try {
          //See if users exists

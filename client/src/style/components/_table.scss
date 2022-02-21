@@ -40,6 +40,21 @@ table {
       }
    }
 
+   &.final-grades {
+      width: 70%;
+
+      &.small {
+         width: 50%;
+      }
+
+      @include respond(small-phone) {
+         width: 90%;
+         &.small {
+            width: 70%;
+         }
+      }
+   }
+
    &.search tr:hover {
       background-color: lighten($light-color, 15%);
    }

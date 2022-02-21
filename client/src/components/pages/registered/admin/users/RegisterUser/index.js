@@ -176,13 +176,15 @@ const RegisterUser = ({
 
    const onChange = (e) => {
       e.persist();
-      setFormData({
-         ...formData,
-         [e.target.name]:
-            e.target.type === "checkbox" ? e.target.checked : e.target.value,
-         ...(e.target.name === "town" && { neighbourhood: "" }),
-      });
-      if (e.target.name === "town") loadNeighbourhoods(e.target.value, true);
+      if (e.target.name !== "dni" || !isNaN(e.target.value)) {
+         setFormData({
+            ...formData,
+            [e.target.name]:
+               e.target.type === "checkbox" ? e.target.checked : e.target.value,
+            ...(e.target.name === "town" && { neighbourhood: "" }),
+         });
+         if (e.target.name === "town") loadNeighbourhoods(e.target.value, true);
+      }
    };
 
    const onChangeImg = (e) => {
@@ -411,7 +413,7 @@ const RegisterUser = ({
                            <div className="form-group">
                               <input
                                  className="form-input"
-                                 type="number"
+                                 type="text"
                                  value={dni}
                                  disabled={!isAdmin}
                                  onChange={onChange}

@@ -22,7 +22,7 @@ const Observations = ({
    }, [_id, loadClass, loadingClass]);
 
    useEffect(() => {
-      if (loading) loadObservations(_id, true, false);
+      if (loading) loadObservations(_id, null, true);
    }, [_id, loadObservations, loading]);
 
    return (

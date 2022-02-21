@@ -12,24 +12,25 @@ import {
    OBSERVATIONS_UPDATED,
 } from "./types";
 
-export const loadObservations = (_id, spinner, student) => async (dispatch) => {
-   if (spinner) dispatch(updateLoadingSpinner(true));
-   try {
-      const res = await api.get(
-         `/observation/${student ? "student/" : ""}${_id}`
-      );
-      dispatch({
-         type: OBSERVATIONS_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      if (err.response.status !== 401) {
-         dispatch(setError(OBSERVATIONS_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+export const loadObservations =
+   (class_id, user_id, spinner) => async (dispatch) => {
+      if (spinner) dispatch(updateLoadingSpinner(true));
+      try {
+         const res = await api.get(
+            `/observation/${class_id}${user_id ? "/" + user_id : ""}`
+         );
+         dispatch({
+            type: OBSERVATIONS_LOADED,
+            payload: res.data,
+         });
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setError(OBSERVATIONS_ERROR, err.response));
+            dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         }
       }
-   }
-   if (spinner) dispatch(updateLoadingSpinner(false));
-};
+      if (spinner) dispatch(updateLoadingSpinner(false));
+   };
 
 export const updateObservations =
    (formData, class_id, period) => async (dispatch) => {

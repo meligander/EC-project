@@ -14,18 +14,12 @@ const PrivateRoutes = ({
 }) => {
    if (userLogged) {
       if (Component === Dashboard)
-         return (
-            <Route
-               exact
-               path="/index/dashboard/:user_id"
-               component={Dashboard}
-            />
-         );
+         return <Route exact path={path} component={Dashboard} />;
 
-      let pass =
-         types.length === 0 || types.some((type) => type === userLogged.type);
-
-      if (pass) {
+      if (
+         types.length === 0 ||
+         types.some((type) => type === userLogged.type)
+      ) {
          return (
             <>
                <Loading />

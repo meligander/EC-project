@@ -113,7 +113,7 @@ router.get("/student/:class_id/:user_id", [auth], async (req, res) => {
       const grades = await Grade.find({
          classroom: class_id,
          student: user_id,
-         period: { $in: [1, 2, 3, 4, 5] },
+         period: { $in: [1, 2, 3, 4] },
       })
          .populate({
             path: "gradetype",
@@ -127,9 +127,22 @@ router.get("/student/:class_id/:user_id", [auth], async (req, res) => {
          });
       }
 
+      let finalGrades = await Grade.find({
+         classroom: class_id,
+         student: user_id,
+         period: 5,
+      })
+         .populate({
+            path: "gradetype",
+            model: "gradetype",
+         })
+         .sort({ gradetype: 1 });
+
+      finalGrades = buildFinalsTable(finalGrades);
+
       const studentTable = buildStudentTable(grades);
 
-      res.json(studentTable);
+      res.json({ ...studentTable, ...(finalGrades && { finalGrades }) });
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });
@@ -261,7 +274,7 @@ router.delete("/:class_id/:period/:type_id", auth, async (req, res) => {
 
 //@desc Function to create the table for student's grades
 const buildStudentTable = (grades) => {
-   let obj = grades.reduce((res, curr) => {
+   grades = grades.reduce((res, curr) => {
       if (res[curr.gradetype.name]) {
          res[curr.gradetype.name].push(curr);
       } else Object.assign(res, { [curr.gradetype.name]: [curr] });
@@ -270,9 +283,9 @@ const buildStudentTable = (grades) => {
 
    let rows = [];
 
-   for (const x in obj) {
-      let row = Array.from(Array(5), (item, index) => {
-         const grade = obj[x].find((item) => item.period === index + 1);
+   for (const x in grades) {
+      let row = Array.from(Array(4), (item, index) => {
+         const grade = grades[x].find((item) => item.period === index + 1);
          return {
             ...(grade ? { ...grade.toJSON() } : { value: "" }),
          };
@@ -280,9 +293,48 @@ const buildStudentTable = (grades) => {
       rows.push(row);
    }
 
-   let headers = Object.getOwnPropertyNames(obj);
+   let headers = Object.getOwnPropertyNames(grades);
 
    return { headers, rows };
+};
+
+//@desc Function to create the table for student's final grades
+const buildFinalsTable = (grades) => {
+   if (grades.length === 0) return null;
+
+   const num = grades.length > 4 ? 3 : 2;
+
+   let rows = new Array(grades.length > 2 ? 4 : 2)
+      .fill()
+      .map(() => new Array(num).fill());
+
+   const average =
+      grades.length === 5 &&
+      grades.reduce((accum, item) => accum + item.value, 0) / grades.length;
+
+   let y = 0;
+   for (let x = 0; x < grades.length; x++) {
+      const count = x < num ? 0 : 2;
+
+      rows[count][y] = grades[x].gradetype.name;
+      rows[count + 1][y] = {
+         value: grades[x].value,
+         percentage: grades[x].gradetype.percentage,
+      };
+
+      if (y + 1 >= num) y = 0;
+      else y++;
+
+      if (x === grades.length - 1 && average) {
+         rows[count][y] = "Priomedio";
+         rows[count + 1][y] = {
+            value: Math.round((average * 10 + Number.EPSILON) * 100) / 100,
+            percentage: true,
+         };
+      }
+   }
+
+   return rows;
 };
 
 //@desc Function to create the table for saving grades and to show on the front-end
@@ -297,7 +349,8 @@ const buildClassTable = async (class_id) => {
       .populate({
          path: "student",
          model: "user",
-      });
+      })
+      .sort({ gradetype: 1 });
 
    let enrollments = await Enrollment.find({
       classroom: class_id,

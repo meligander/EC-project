@@ -28,13 +28,16 @@ router.get("/:class_id", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    GET /api/observation/student/:user_id
+//@route    GET /api/observation/:class_id/:user_id
 //@desc     get the observations for a student
 //@access   Private
-router.get("/student/:user_id", auth, async (req, res) => {
+router.get("/:class_id/:user_id", auth, async (req, res) => {
    try {
+      const { class_id: classroom, user_id } = req.params;
+
       const observations = await Observation.find({
-         categories: req.params.id,
+         student: user_id,
+         classroom,
       }).sort({ period: 1 });
 
       if (observations.length === 0) {

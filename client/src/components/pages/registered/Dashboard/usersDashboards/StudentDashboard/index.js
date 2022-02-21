@@ -1,11 +1,13 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import format from "date-fns/format";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 
 import { loadGrades } from "../../../../../../actions/grade";
 import { loadAttendances } from "../../../../../../actions/attendance";
 import { loadInstallments } from "../../../../../../actions/installment";
+import { loadObservations } from "../../../../../../actions/observation";
+import { loadEnrollments } from "../../../../../../actions/enrollment";
 import { clearProfile, loadRelatives } from "../../../../../../actions/user";
 import { loadClass } from "../../../../../../actions/class";
 
@@ -17,19 +19,27 @@ import "./style.scss";
 import { FaTimesCircle } from "react-icons/fa";
 
 const StudentDashboard = ({
+   match,
+   user,
+   auth: { userLogged },
+   classes: { classInfo, loadingClass },
+   users: { loadingBK },
+   attendances: { attendances, loading },
+   installments: { installments, loading: loadingInstallments },
+   grades: { grades, loading: loadingGrades },
+   observations: { observations, loading: loadingObservations },
+   enrollments: { enrollments, loading: loadingEnrollments },
    loadGrades,
    loadAttendances,
    loadInstallments,
    loadClass,
    loadRelatives,
+   loadObservations,
+   loadEnrollments,
    clearProfile,
-   auth: { userLogged },
-   classes: { classInfo, loadingClass },
-   users: { user, loadingBK },
-   attendances: { attendances, loading },
-   installments: { installments, loading: loadingInstallments },
-   grades: { grades, loading: loadingGrades },
 }) => {
+   const class_id = match.params.class_id;
+
    const isAdmin =
       userLogged.type === "secretary" ||
       userLogged.type === "admin&teacher" ||
@@ -47,8 +57,8 @@ const StudentDashboard = ({
 
    useEffect(() => {
       if (user.active && allowedUsers && loadingClass)
-         loadClass(user._id, false, true);
-   }, [allowedUsers, loadingClass, loadClass, user]);
+         loadClass(class_id ? class_id : user._id, false, !class_id);
+   }, [allowedUsers, loadingClass, loadClass, user, class_id]);
 
    useEffect(() => {
       if (user.active && allowedUsers && loadingInstallments)
@@ -66,13 +76,47 @@ const StudentDashboard = ({
    }, [loadingClass, loadingGrades, loadGrades, user, classInfo]);
 
    useEffect(() => {
+      if (loadingEnrollments)
+         loadEnrollments({ classroom: true, student: user._id });
+   }, [loadEnrollments, user, loadingEnrollments]);
+
+   useEffect(() => {
+      if (user.active && !loadingClass && classInfo && loadingObservations)
+         loadObservations(classInfo._id, user._id, false, true);
+   }, [user, loadObservations, loadingObservations, loadingClass, classInfo]);
+
+   useEffect(() => {
       if (user.active && !loadingClass && classInfo && loading)
          loadAttendances(classInfo._id, user._id);
    }, [loadingClass, loading, loadAttendances, user, classInfo]);
 
    return (
       <>
-         {!loadingBK && <RelativeDashboard />}
+         {!loadingBK && <RelativeDashboard user={user} />}
+         {!loadingEnrollments && enrollments.length > 0 && (
+            <div className="bg-white p-3">
+               <h3 className="heading-tertiary text-primary text-center">
+                  Cursos
+               </h3>
+               <div className="student-classes">
+                  {enrollments.map((item) => (
+                     <div key={item._id} className="class-item">
+                        <p>{item.category.name}</p>
+                        <Link
+                           className="btn-text"
+                           to={`/index/dashboard/${user._id}/${item.classroom}`}
+                           onClick={() => {
+                              window.scroll(0, 0);
+                              clearProfile();
+                           }}
+                        >
+                           Ver Info
+                        </Link>
+                     </div>
+                  ))}
+               </div>
+            </div>
+         )}
          {!loadingClass && (
             <>
                <div
@@ -89,6 +133,9 @@ const StudentDashboard = ({
                            <p className="heading-tertiary text-dark m-1">
                               Categoría:{" "}
                               <small>{classInfo.category.name}</small>
+                           </p>
+                           <p className="text-dark m-1">
+                              Año: <small>{classInfo.year}</small>
                            </p>
                            <Link
                               className="btn-text"
@@ -231,13 +278,12 @@ const StudentDashboard = ({
 
                      {attendances.length > 0 ? (
                         <div className="absence">
-                           {" "}
                            {attendances.map((attendance, index) => (
                               <div key={index} className="paragraph p-1">
                                  <FaTimesCircle />{" "}
                                  {format(
                                     new Date(attendance.date.slice(0, -1)),
-                                    "dd/MM"
+                                    `dd/MM${class_id ? "/yy" : ""}`
                                  )}
                               </div>
                            ))}
@@ -250,23 +296,38 @@ const StudentDashboard = ({
                   </div>
                )}
 
-               {/* Installments */}
-               {!loadingInstallments && (
+               {/* Observaciones */}
+               {!loading && (
                   <div className="bg-lightest-secondary p-3">
+                     <h3 className="heading-tertiary p-1 text-primary">
+                        Observaciones
+                     </h3>
+                     {observations.length === 0 ? (
+                        <p className="heading-tertiary text-center ">
+                           No hay observaciones registradas
+                        </p>
+                     ) : (
+                        observations.map((item) => (
+                           <div className="observation" key={item._id}>
+                              <h4>{item.period}° Bimestre</h4>
+                              <p>{item.description}</p>
+                           </div>
+                        ))
+                     )}
+                  </div>
+               )}
+
+               {/* Installments */}
+               {!loadingInstallments && installments.length > 0 && (
+                  <div className="bg-white p-3">
                      <h3 className="heading-tertiary text-primary p-1">
                         Cuotas Pendientes
                      </h3>
                      <div className="pb-2">
-                        {installments.length > 0 ? (
-                           <InstallmentsTable
-                              installments={installments}
-                              forAdmin={false}
-                           />
-                        ) : (
-                           <p className="heading-tertiary text-center">
-                              Está al día
-                           </p>
-                        )}
+                        <InstallmentsTable
+                           installments={installments}
+                           forAdmin={false}
+                        />
                      </div>
                   </div>
                )}
@@ -283,6 +344,8 @@ const mapStateToProps = (state) => ({
    grades: state.grades,
    auth: state.auth,
    installments: state.installments,
+   observations: state.observations,
+   enrollments: state.enrollments,
 });
 
 export default connect(mapStateToProps, {
@@ -291,5 +354,7 @@ export default connect(mapStateToProps, {
    loadInstallments,
    loadClass,
    loadRelatives,
+   loadObservations,
+   loadEnrollments,
    clearProfile,
-})(StudentDashboard);
+})(withRouter(StudentDashboard));

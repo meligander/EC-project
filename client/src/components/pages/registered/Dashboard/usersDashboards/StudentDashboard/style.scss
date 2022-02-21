@@ -3,11 +3,17 @@
 .class {
    text-align: center;
    max-width: 100%;
+   border: 1px solid $primary-color;
    font-size: $default-font-size;
    justify-content: space-around;
 
+   @include respond(phone) {
+      border: none;
+   }
+
    &.row {
       max-width: 100%;
+      align-items: stretch;
    }
 
    & > * {
@@ -21,10 +27,15 @@
       }
    }
    .description {
+      border-left: 1px solid $primary-color;
       width: 60%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
       @include respond(phone) {
-         width: 90%;
-         margin-bottom: 3rem;
+         border: none;
+         width: 100%;
       }
    }
 
@@ -52,4 +63,34 @@
    margin-left: 0.5rem;
    backface-visibility: hidden;
    @include background($light-color);
+}
+
+.observation {
+   margin-left: 3rem;
+   margin-bottom: 1.5rem;
+
+   h4 {
+      color: $dark-color;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+   }
+
+   p {
+      margin-left: 1rem;
+   }
+}
+
+.student-classes {
+   display: flex;
+   justify-content: space-evenly;
+   align-items: center;
+   flex-wrap: wrap;
+
+   .class-item {
+      padding: 1rem;
+      p {
+         margin-right: 1rem;
+         display: inline-block;
+      }
+   }
 }

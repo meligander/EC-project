@@ -11,6 +11,7 @@ const StudentTable = ({
    users,
    type,
    clearProfile,
+   class_id,
 }) => {
    return (
       <table>
@@ -45,7 +46,9 @@ const StudentTable = ({
                         <td>
                            <Link
                               className="btn-text"
-                              to={`/index/dashboard/${user._id}`}
+                              to={`/index/dashboard/${user._id}${
+                                 class_id ? `/${class_id}` : ""
+                              }`}
                               onClick={() => {
                                  window.scroll(0, 0);
                                  clearProfile();

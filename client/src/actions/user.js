@@ -14,6 +14,9 @@ import { clearInstallments } from "./installment";
 import { clearAttendances } from "./attendance";
 import { clearGrades } from "./grade";
 import { logOut, updateAuthUser } from "./auth";
+import { clearClass } from "./class";
+import { clearObservations } from "./observation";
+import { clearEnrollments } from "./enrollment";
 
 import {
    USER_LOADED,
@@ -32,7 +35,6 @@ import {
    USERSBK_ERROR,
    OTHERVALUES_LOADED,
 } from "./types";
-import { clearClass } from "./class";
 
 //Load User
 export const loadUser = (user_id, spinner) => async (dispatch) => {
@@ -327,6 +329,8 @@ export const clearProfile = () => (dispatch) => {
    dispatch(clearGrades());
    dispatch(clearInstallments());
    dispatch(clearAttendances());
+   dispatch(clearObservations());
+   dispatch(clearEnrollments());
 };
 
 export const clearUser = () => (dispatch) => {

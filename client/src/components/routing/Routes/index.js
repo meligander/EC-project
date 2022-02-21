@@ -62,10 +62,17 @@ const Routes = ({ location, mixvalues: { navbar, footer } }) => {
             />
             <PrivateRoutes
                exact
+               path="/index/dashboard/:user_id/:class_id"
+               types={[]}
+               component={Dashboard}
+            />
+            <PrivateRoutes
+               exact
                path="/user/edit/:user_id"
                types={[]}
                component={RegisterUser}
             />
+
             <PrivateRoutes
                exact
                types={[]}

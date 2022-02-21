@@ -202,9 +202,10 @@ router.post("/certificate", auth, async (req, res) => {
    if (average < 6 || info.category === "Kinder") {
       body = `
       <p>Quien ha cursado durante el año el curso de inglés denominado: </p>
-      <p class="category ${info.category !== "Kinder" ? "not-passed" : ""}">${
+      <p class="category alone">${info.category}</p>
+      <p class='certificate-name'>conforme al nivel <span>${getCertificateTitle(
          info.category
-      }</p>
+      )}</span></p>
       ${
          info.category === "Kinder"
             ? `<p class="mention"><span class="title">Mención:</span> &nbsp; ${kinderGraden(
@@ -266,9 +267,9 @@ router.post("/certificate", auth, async (req, res) => {
          }
       }
 
-      body += `<div class="table"> <table class="grades-table ${
+      body += `<table class="grades-table ${
          high ? "full" : ""
-      }">${finalGrades} </div>`;
+      }">${finalGrades}`;
    }
 
    try {

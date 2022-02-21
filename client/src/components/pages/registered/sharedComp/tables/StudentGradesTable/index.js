@@ -1,6 +1,9 @@
 import React from "react";
 
-const StudentGradesTable = ({ studentGrades: { headers, rows }, category }) => {
+const StudentGradesTable = ({
+   studentGrades: { headers, rows, finalGrades },
+   category,
+}) => {
    const kinderGraden = (value) => {
       switch (true) {
          case value === "":
@@ -28,46 +31,77 @@ const StudentGradesTable = ({ studentGrades: { headers, rows }, category }) => {
    };
 
    return (
-      <table>
-         <thead>
-            <tr>
-               <th className="inherit">&nbsp;</th>
-               <th>
-                  1° B<span className="hide-sm">imestre</span>
-               </th>
-               <th>
-                  2° B<span className="hide-sm">imestre</span>
-               </th>
-               <th>
-                  3° B<span className="hide-sm">imestre</span>
-               </th>
-               <th>
-                  4° B<span className="hide-sm">imestre</span>
-               </th>
-               {category !== "Kinder" && (
+      <>
+         <table>
+            <thead>
+               <tr>
+                  <th className="inherit">&nbsp;</th>
                   <th>
-                     F<span className="hide-sm">inal</span>
+                     1° B<span className="hide-sm">imestre</span>
                   </th>
-               )}
-            </tr>
-         </thead>
-         <tbody>
-            {rows.map((row, index) => {
-               return (
-                  <tr key={index}>
-                     <th>{headers[index]}</th>
-                     {row.map((item, i) => (
-                        <td key={i}>
-                           {item.value
-                              ? getGrade(item.value, item.gradetype.percentage)
-                              : ""}
-                        </td>
+                  <th>
+                     2° B<span className="hide-sm">imestre</span>
+                  </th>
+                  <th>
+                     3° B<span className="hide-sm">imestre</span>
+                  </th>
+                  <th>
+                     4° B<span className="hide-sm">imestre</span>
+                  </th>
+               </tr>
+            </thead>
+            <tbody>
+               {rows.map((row, index) => {
+                  return (
+                     <tr key={index}>
+                        <th>{headers[index]}</th>
+                        {row.map((item, i) => (
+                           <td key={i}>
+                              {item.value
+                                 ? getGrade(
+                                      item.value,
+                                      item.gradetype.percentage
+                                   )
+                                 : ""}
+                           </td>
+                        ))}
+                     </tr>
+                  );
+               })}
+            </tbody>
+         </table>
+
+         {finalGrades && (
+            <>
+               <h3 className="text-primary text-center mt-3 pb-1">
+                  Exámenes Finales
+               </h3>
+               <table
+                  className={`final-grades ${
+                     finalGrades.length === 2 ? "small" : ""
+                  }`}
+               >
+                  <tbody>
+                     {finalGrades.map((rows, index) => (
+                        <tr key={index + "rows"}>
+                           {rows.map((item, i) => (
+                              <React.Fragment key={i + "finals"}>
+                                 {index % 2 === 0 ? (
+                                    <th>{item}</th>
+                                 ) : (
+                                    <td>
+                                       {getGrade(item.value, item.percentage)}
+                                    </td>
+                                 )}
+                              </React.Fragment>
+                           ))}
+                        </tr>
                      ))}
-                  </tr>
-               );
-            })}
-         </tbody>
-      </table>
+                  </tbody>
+               </table>
+            </>
+         )}
+      </>
    );
 };
 

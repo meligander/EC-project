@@ -7,11 +7,12 @@ import { clearProfile } from "../../../../../../actions/user";
 import "./style.scss";
 
 const RelativeDashboard = ({
-   users: { user, usersBK },
+   user,
+   users: { usersBK },
    auth: { userLogged },
    clearProfile,
 }) => {
-   const student = user.type === "student";
+   const student = user && user.type === "student";
 
    const relatives = (user) => {
       return (

@@ -66,6 +66,7 @@ const SingleClass = ({
                            clearProfile={clearProfile}
                            type="class-students"
                            users={classInfo.students}
+                           class_id={classInfo._id}
                         />
                      ) : (
                         <p className="heading-tertiary text-secondary my-5 text-center">

@@ -33,8 +33,16 @@ router.get("/", [auth, adminAuth], async (req, res) => {
             })
             .sort({ date: -1 });
       } else {
-         const { startDate, endDate, category, year, student, name, lastname } =
-            req.query;
+         const {
+            startDate,
+            endDate,
+            category,
+            year,
+            student,
+            name,
+            lastname,
+            classroom,
+         } = req.query;
 
          enrollments = await Enrollment.find({
             ...((startDate || endDate) && {
@@ -46,6 +54,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
             ...(category && { category: category }),
             ...(year && { year }),
             ...(student && { student: student }),
+            ...(classroom && { classroom: { $ne: null } }),
          })
             .populate({
                path: "student",
@@ -260,7 +269,8 @@ router.post(
 
          const half = discount !== 50 ? value / 2 : value;
 
-         const amount = 13 - number;
+         const amount =
+            (enrollment.category.name !== "Kinder" ? 13 : 12) - number;
          for (let x = 0; x < amount; x++) {
             installment = await Installment.findOne({ year, student, number });
             if (!installment) {

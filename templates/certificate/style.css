@@ -72,7 +72,7 @@ table.header .logo img {
    text-transform: uppercase;
    font-weight: bold;
    text-align: right;
-   margin: -3.7rem 1rem -1rem 0;
+   margin: -3.2rem 4rem -1rem 0;
 }
 
 .grades .mention {
@@ -83,19 +83,23 @@ table.header .logo img {
    margin: 10rem 2rem 0 0;
 }
 
+.grades p.certificate-name {
+   margin: 4rem 2.5rem;
+}
+.grades p.certificate-name span {
+   text-transform: uppercase;
+   font-weight: bold;
+   font-size: 1.8rem;
+}
+
 .grades .mention .title {
    font-size: 2.1rem;
    font-weight: lighter;
 }
 
-.grades .not-passed {
-   margin-top: 10rem;
-   text-align: center;
-   font-size: 3rem;
-}
-
-.grades .table {
-   margin: 4rem 0 6rem 0;
+.grades .category.alone {
+   font-size: 2rem;
+   margin-top: -3.6rem;
 }
 
 .grades .subtitle p {
@@ -103,7 +107,7 @@ table.header .logo img {
 }
 
 .grades .grades-table {
-   margin: 0 0 0 auto;
+   margin: 4rem auto 0;
    width: 75%;
    table-layout: fixed;
 }
