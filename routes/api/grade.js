@@ -46,7 +46,10 @@ router.get("/best", [auth, adminAuth], async (req, res) => {
          });
 
       const students = grades
-         .filter((item) => item.classroom)
+         .filter(
+            (item) =>
+               item.classroom && item.classroom.category.name !== "Kinder"
+         )
          .reduce((res, curr) => {
             if (res[curr.student]) res[curr.student].push(curr);
             else Object.assign(res, { [curr.student]: [curr] });
@@ -85,7 +88,7 @@ router.get("/best", [auth, adminAuth], async (req, res) => {
 //@access   Private
 router.get("/:class_id", auth, async (req, res) => {
    try {
-      const tableGrades = await buildClassTable(req.params.class_id, res);
+      const tableGrades = await buildClassTable(req.params.class_id);
 
       res.json(tableGrades);
    } catch (err) {
@@ -114,7 +117,7 @@ router.get("/student/:class_id/:user_id", [auth], async (req, res) => {
       })
          .populate({
             path: "gradetype",
-            model: "gradetypes",
+            model: "gradetype",
          })
          .sort({ gradetype: 1 });
 
@@ -177,7 +180,7 @@ router.post(
             }
          }
 
-         const tableGrades = await buildClassTable(classroom, res);
+         const tableGrades = await buildClassTable(classroom);
 
          res.json(tableGrades);
       } catch (err) {
@@ -200,13 +203,6 @@ router.put("/:class_id/:period", auth, async (req, res) => {
       );
 
    const { class_id: classroom, period } = req.params;
-
-   if (
-      grades.some(
-         (item) => item.value !== "" && (item.value > 10 || item.value <= 0)
-      )
-   )
-      return res.status(400).json({ msg: "La nota debe ser entre 0 y 10" });
 
    try {
       for (let x = 0; x < grades.length; x++) {
@@ -254,7 +250,7 @@ router.delete("/:class_id/:period/:type_id", auth, async (req, res) => {
          async (item) => await Grade.findByIdAndRemove({ _id: item.id })
       );
 
-      const tableGrades = await buildClassTable(classroom, res);
+      const tableGrades = await buildClassTable(classroom);
 
       res.json(tableGrades);
    } catch (err) {
@@ -290,37 +286,27 @@ const buildStudentTable = (grades) => {
 };
 
 //@desc Function to create the table for saving grades and to show on the front-end
-const buildClassTable = async (class_id, res) => {
-   let grades = [];
-   let enrollments = [];
-
-   try {
-      grades = await Grade.find({
-         classroom: class_id,
+const buildClassTable = async (class_id) => {
+   const grades = await Grade.find({
+      classroom: class_id,
+   })
+      .populate({
+         path: "gradetype",
+         model: "gradetype",
       })
-         .populate({
-            path: "gradetype",
-            model: "gradetypes",
-            select: "name",
-         })
-         .populate({
-            path: "student",
-            model: "user",
-            select: ["name", "lastname"],
-         });
-
-      enrollments = await Enrollment.find({
-         classroom: class_id,
-      }).populate({
-         model: "user",
+      .populate({
          path: "student",
-         select: ["name", "lastname"],
+         model: "user",
       });
-      enrollments = sortByName(enrollments);
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ msg: "Server Error" });
-   }
+
+   let enrollments = await Enrollment.find({
+      classroom: class_id,
+   }).populate({
+      model: "user",
+      path: "student",
+      select: ["name", "lastname", "dni"],
+   });
+   enrollments = sortByName(enrollments);
 
    let header = [];
    let periods = [];
@@ -367,9 +353,9 @@ const buildClassTable = async (class_id, res) => {
                _id: grade ? grade._id : "",
                classroom: class_id,
                period: x,
-               gradetype: gradeTypes[index]._id,
+               gradetype: gradeTypes[index],
                ...(students[z]._id && {
-                  student: students[z]._id,
+                  student: students[z],
                   value: grade ? grade.value : "",
                }),
             };

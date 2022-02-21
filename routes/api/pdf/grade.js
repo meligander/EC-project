@@ -1,29 +1,43 @@
 const router = require("express").Router();
 const path = require("path");
-const pdf = require("html-pdf");
+
+const generatePDF = require("../../../config/generatePDF");
 
 //PDF Templates
 const pdfTemplateAssitanceGrades = require("../../../templates/assistanceGrades");
 const pdfTemplateCertificate = require("../../../templates/certificate");
 const pdfTemplateCambridgeCertificate = require("../../../templates/cambridgeCertificate");
-const pdfTemplateReportCard = require("../../../templates/reportCard");
+const pdfTemplateList = require("../../../templates/list");
 
 //Middlewares
 const auth = require("../../../middleware/auth");
+const adminAuth = require("../../../middleware/adminAuth");
 
-const Enrollment = require("../../../models/Enrollment");
-const Grade = require("../../../models/Grade");
-
-const cambridgeTests = [
-   "Starters",
-   "Movers",
-   "Flyers",
-   "Ket",
-   "Pet",
-   "First",
-   "CAE",
-   "Proficiency",
+const periodName = [
+   "1° Bimestre",
+   "2° Bimestre",
+   "3° Bimestre",
+   "4° Bimestre",
+   "Final",
 ];
+
+const highDegree = ["6° Año", "CAE", "Proficency"];
+
+const imgBlack = path.join(
+   "file://",
+   __dirname,
+   "../../../templates/assets/logo.png"
+);
+const imgGray = path.join(
+   "file://",
+   __dirname,
+   "../../../templates/assets/grayLogo.png"
+);
+const imgHalfAndHalf = path.join(
+   "file://",
+   __dirname,
+   "../../../templates/assets/halfAndHalf.png"
+);
 
 const fileName = path.join(__dirname, "../../../reports/grades.pdf");
 
@@ -38,86 +52,42 @@ router.get("/fetch", auth, (req, res) => {
 //@desc     Create a pdf of the class grades during a period
 //@access   Private
 router.post("/period-list", auth, (req, res) => {
-   const { students, header, period, classInfo, periodNumber } = req.body;
+   const { header, grades, info } = req.body;
 
-   const periodName = [
-      "1° Bimestre",
-      "2° Bimestre",
-      "3° Bimestre",
-      "4° Bimestre",
-      "Final",
-   ];
+   if (!header || header.length === 0)
+      return res.status(400).json({
+         msg: "Debe registrar fechas antes de generar el PDF",
+      });
 
-   let tbody = "";
+   const thead = `<tr><th>Nombre</th>${header
+      .map((item) => `<th>${item.name}</th>`)
+      .join("")}</tr>`;
 
-   let thead = "<tr><th>Nombre</th>";
-
-   const title = "Notas " + periodName[periodNumber];
-
-   for (let x = 0; x < header.length; x++) {
-      thead += "<th>" + header[x] + "</th>";
-   }
-
-   thead += "</tr>";
-
-   for (let x = 0; x < students.length; x++) {
-      if (students[x].name !== "") {
-         tbody +=
-            "<tr> <td>" +
-            students[x].lastname +
-            ", " +
-            students[x].name +
-            "</td>";
-
-         for (let y = 0; y < period[x].length; y++) {
-            if (classInfo.category.name === "Kinder")
-               tbody += `<td>${kinderGrade(period[x][y].value)}</td>`;
-            else
-               tbody += `<td> ${
-                  cambridgeTests.some(
-                     (test) => test === period[x][y].gradetype.name
-                  ) && period[x][y].value !== ""
-                     ? period[x][y].value * 10 + "%"
-                     : period[x][y].value
-               }</td>`;
-         }
-
-         tbody += "</tr>";
-      }
-   }
-
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assistanceGrades/style.css"
-   );
-
-   const options = {
-      format: "A4",
-      header: {
-         height: "15mm",
-         contents: `<div></div>`,
-      },
-      footer: {
-         height: "17mm",
-         contents:
-            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
-      },
-   };
+   const tbody = info.students
+      .map(
+         (item, i) =>
+            `<tr><td>${item.lastname + ", " + item.name}</td>${grades[i]
+               .map(
+                  (grade) => `<td>${getGrade(grade, info.category, false)}</td>`
+               )
+               .join("")}</tr>`
+      )
+      .join("");
 
    try {
-      pdf.create(
-         pdfTemplateAssitanceGrades(css, img, title, thead, tbody, classInfo),
-         options
-      ).toFile(fileName, (err) => {
-         if (err) res.send(Promise.reject());
-         else res.send(Promise.resolve());
-      });
+      generatePDF(
+         fileName,
+         pdfTemplateAssitanceGrades,
+         "assistanceGrades",
+         {
+            title: "Notas " + periodName[info.period],
+            info,
+            table: { thead, tbody },
+         },
+         "portrait",
+         "",
+         res
+      );
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });
@@ -128,737 +98,307 @@ router.post("/period-list", auth, (req, res) => {
 //@desc     Create a pdf of all the class grades
 //@access   Private
 router.post("/list", auth, (req, res) => {
-   const { students, header, period, classInfo } = req.body;
+   const { header, grades, info } = req.body;
 
-   const tableGrades = buildAllGradesTable(
-      students,
-      period,
-      classInfo.category.name
-   );
+   const periodName = ["1° B", "2° B", "3° B", "4° B", "Final"];
 
-   let periodName = [];
-   if (classInfo.category.name === "Kinder")
-      periodName = ["1° B", "2° B", "3° B", "4° B"];
-   else periodName = ["1° B", "2° B", "3° B", "4° B", "Final"];
+   let tbody = info.students
+      .map(
+         (item, i) =>
+            `<tr><td>${item.lastname + ", " + item.name}</td>${grades
+               .map((period) =>
+                  period[i]
+                     .map(
+                        (grade) =>
+                           `<td>${getGrade(grade, info.category, true)}</td>`
+                     )
+                     .join("")
+               )
+               .join("")}</tr>`
+      )
+      .join("");
 
-   let tbody = "";
-
-   let thead = "<tr><th class='no-border'></th>";
-
-   const title = "Todas las notas";
-
-   for (let x = 0; x < periodName.length; x++) {
-      thead += `<th class='border' colspan=${
-         !header[x] || header[x].length === 0 ? 1 : header[x].length
-      } >${periodName[x]}</th>`;
-   }
-
-   thead += "</tr><tr><th class='no-border border-right'></th>";
-
-   for (let x = 0; x < periodName.length; x++) {
-      if (header[x]) {
-         for (let y = 0; y < header[x].length; y++) {
-            thead += `<th class='${
-               y + 1 === header[x].length
-                  ? "border-right border-bottom"
-                  : "border-bottom"
-            }'> ${header[x][y]
-               .split(" ")
-               .map((x) => x[0])
-               .join("")}</th>`;
-         }
-      } else {
-         thead += "<th class='border-right border-bottom'></th>";
-      }
-   }
-
-   thead += "</tr><tr>";
-
-   for (let x = 0; x < tableGrades.length; x++) {
-      let border = 0;
-      let number = 0;
-      tbody += "<tr>";
-      for (let y = 0; y < tableGrades[x].length; y++) {
-         if (number < y) {
-            number += header[border] ? header[border].length : 1;
-            border++;
-         }
-         tbody += `<${y === 0 ? "th" : "td"} class='${
-            y === number ? "border-right" : ""
-         }'>${tableGrades[x][y]}</${y === 0 ? "th" : "td"}>`;
-      }
-      tbody += "</tr>";
-   }
-
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assistanceGrades/style.css"
-   );
-
-   const options = {
-      format: "A4",
-      orientation: "landscape",
-      header: {
-         height: "15mm",
-         contents: `<div></div>`,
-      },
-      footer: {
-         height: "17mm",
-         contents:
-            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
-      },
-   };
+   const thead = `<tr>
+         <th class='no-border'></th>
+         ${periodName
+            .map(
+               (item, i) =>
+                  header[i] &&
+                  `<th class='border' colspan=${
+                     header[i].length === 0 ? 1 : header[i].length
+                  }>${item}</th>`
+            )
+            .join("")}
+      </tr>
+      <tr>
+            <th class='no-border border-right'></th>
+            ${periodName
+               .map(
+                  (item, i) =>
+                     header[i] &&
+                     header[i]
+                        .map(
+                           (item2, index) =>
+                              `<th class='${
+                                 index + 1 === header[i].length
+                                    ? "border-right border-bottom"
+                                    : "border-bottom"
+                              }'>
+                        ${item2.name
+                           .split(" ")
+                           .map((x) => x[0])
+                           .join("")}
+                     </th>`
+                        )
+                        .join("")
+               )
+               .join("")}
+      </tr>`;
 
    try {
-      pdf.create(
-         pdfTemplateAssitanceGrades(
-            css,
-            img,
-            title,
-            thead,
-            tbody,
-            classInfo,
-            null,
-            true
-         ),
-         options
-      ).toFile(fileName, (err) => {
-         if (err) res.send(Promise.reject());
-         else res.send(Promise.resolve());
-      });
+      generatePDF(
+         fileName,
+         pdfTemplateAssitanceGrades,
+         "assistanceGrades",
+         {
+            title: `Notas ${info.category}`,
+            info: { category: info.category },
+            table: { thead, tbody },
+            type: "all-grades",
+         },
+         "landscape",
+         ` - ${info.category} de ${info.teacher}`,
+         res
+      );
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });
    }
 });
 
-//@route    POST /api/grade/certificate
-//@desc     Create all certificate pdfs of the class
+//@route    POST /api/pdf/grade/certificate
+//@desc     Create a certificate for the class
 //@access   Private
 router.post("/certificate", auth, async (req, res) => {
-   let { student, header, period, classInfo, date } = req.body;
+   const { student, header, grades, info, date } = req.body;
 
-   if (!date)
+   if (!student.dni)
       return res.status(400).json({
-         msg: "Debe seleccionar una fecha",
+         msg: `Debe registrar el dni del alumno ${student.name} para generar el certificado`,
       });
 
-   // if (!student.dni || student.dni === "")
-   //    return res
-   //       .status(400)
-   //       .json({ msg: "Todos los alumnos deben tener el dni cargado" });
-
-   if (
-      !student.dni ||
-      student.dni === "" ||
-      period.some((periodA) => periodA.some((grade) => grade.value === ""))
-   )
+   if (grades.some((grade) => grade.value === ""))
       return res.status(400).json({
-         msg: `Todos los alumnos deben tener ${
-            !student.dni || student.dni === ""
-               ? "el dni cargado"
-               : "las notas cargadas"
-         }las notas cargadas`,
+         msg: `Las notas del alumno ${student.name} deben estar cargadas`,
       });
 
-   // let pass = true;
-   // for (let x = 0; x < period.length; x++) {
-   //    for (let y = 0; y < period[x].length; y++) {
-   //       if (period[x][y].value === "") {
-   //          pass = false;
-   //          break;
-   //       }
-   //    }
-   //    if (!pass) break;
-   // }
+   let average =
+      grades.reduce((accum, item) => accum + item.value, 0) / grades.length;
 
-   // if (!pass)
-   //    return res.status(400).json({
-   //       msg: "Todos los alumnos deben tener las notas cargadas",
-   //    });
+   const high = highDegree.some((cat) => cat === info.category);
 
-   student.dni =
-      student.dni &&
-      student.dni.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-
-   const year = new Date().getFullYear();
-
-   let certificateInfo = "";
-   let finalGrades = "";
    let body = "";
-   let highCertificate = false;
-   let average = 0;
 
-   const high =
-      classInfo.category.name === "6° Año" ||
-      classInfo.category.name === "CAE" ||
-      classInfo.category.name === "Proficency";
-
-   let enrollment;
-
-   if (high || classInfo.category.name === "Kinder") {
-      try {
-         enrollment = await Enrollment.findOne({
-            year,
-            student: student._id,
-         });
-      } catch (err) {
-         console.error(err.message);
-         res.status(500).json({ msg: "Server Error" });
+   if (average < 6 || info.category === "Kinder") {
+      body = `
+      <p>Quien ha cursado durante el año el curso de inglés denominado: </p>
+      <p class="category ${info.category !== "Kinder" ? "not-passed" : ""}">${
+         info.category
+      }</p>
+      ${
+         info.category === "Kinder"
+            ? `<p class="mention"><span class="title">Mención:</span> &nbsp; ${kinderGraden(
+                 average
+              )}</p>`
+            : ""
       }
-   }
-
-   if (high) {
-      if (enrollment.classroom.periodAverage[4] < 6) {
-         pass = false;
-      } else {
-         highCertificate = true;
-      }
-   }
-
-   let fBody = "";
-   let fHeader = "";
-
-   for (let x = 0; x < period.length; x++) {
+      `;
+   } else {
       if (high) {
-         fHeader += `<th>${header[x]}</th>`;
-         fBody += `<td>${period[x].value * 10}%</td>`;
+         body = `
+         <div class='subtitle'>
+            <p>Quien ha culminado el curso de inglés conforme al plan de estudios, </p>
+            <p>correspondiente a
+               <span class="capital"> &nbsp; ${info.category} &nbsp;</span>
+                a nivel <span class="capital">&nbsp;${getCertificateTitle(
+                   info.category
+                )}</span>
+            </p>
+            <p>con las siguientes calificaciones:</p>
+         </div>`;
+      } else {
+         body = `
+         <p>Quien ha rendido los exámenes correspondientes a:</p>
+         <p class="category">${info.category}</p>
+         <p>con las siguientes calificaciones: </p>
+         `;
+      }
 
-         if (x + 1 === period.length) {
-            average = enrollment.classroom.periodAverage[4] * 10;
-            average = Math.round((average + Number.EPSILON) * 100) / 100;
+      let finalGrades = "";
+      let fBody = "";
+      let fHeader = "";
 
-            fBody += `<td>${average}%</td>`;
-            fHeader += "<th>Promedio</th>";
-            finalGrades +=
-               "<tr>" + fHeader + "</tr><tr>" + fBody + "</tr></table>";
+      for (let x = 0; x < grades.length; x++) {
+         fHeader += `<th>${header[x].name}</th>`;
+         fBody += `<td>${getGrade(grades[x], info.category, false)}</td>`;
+
+         if (x + 1 === grades.length) {
+            if (high) {
+               average =
+                  Math.round((average * 10 + Number.EPSILON) * 100) / 100;
+
+               fBody += `<td>${average}%</td>`;
+               fHeader += "<th>Promedio</th>";
+               finalGrades +=
+                  "<tr>" + fHeader + "</tr><tr>" + fBody + "</tr></table>";
+            } else {
+               if (fHeader !== "")
+                  finalGrades +=
+                     "<tr>" + fHeader + "</tr><tr>" + fBody + "</tr></table>";
+               else finalGrades += "</table>";
+            }
          } else {
-            if ((x + 1) % 3 === 0) {
+            if ((high && (x + 1) % 3 === 0) || (!high && (x + 1) % 2 === 0)) {
                finalGrades += "<tr>" + fHeader + "</tr><tr>" + fBody + "</tr>";
                fHeader = "";
                fBody = "";
             }
          }
-      } else {
-         if (classInfo.category.name === "Kinder") {
-            average = enrollment.classroom.average;
-         } else {
-            if (period[x].value < 6) {
-               pass = false;
-               break;
-            } else {
-               fHeader += `<th>${header[x]}</th>`;
-               fBody += `<td>${period[x].value.toFixed(2)}</td>`;
-
-               if ((x + 1) % 2 === 0) {
-                  finalGrades +=
-                     "<tr>" + fHeader + "</tr><tr>" + fBody + "</tr>";
-                  fHeader = "";
-                  fBody = "";
-               }
-               if (x + 1 === period.length) {
-                  if (fHeader !== "")
-                     finalGrades +=
-                        "<tr>" +
-                        fHeader +
-                        "</tr><tr>" +
-                        fBody +
-                        "</tr></table>";
-                  else finalGrades += "</table>";
-               }
-            }
-         }
       }
+
+      body += `<div class="table"> <table class="grades-table ${
+         high ? "full" : ""
+      }">${finalGrades} </div>`;
    }
-
-   if (!pass || classInfo.category.name === "Kinder") {
-      body = `<p>Quien ha cursado durante el año el curso de inglés denominado: </p>`;
-      body += `<p class="category ${
-         classInfo.category.name !== "Kinder" ? "not-passed" : ""
-      }">${classInfo.category.name}</p>`;
-   } else {
-      if (highCertificate) {
-         let certificate = "";
-         switch (classInfo.category.name) {
-            case "6° Año":
-               certificate = "First Certificate in English";
-               break;
-            case "CAE":
-               certificate = "Certificate of Advanced English";
-               break;
-            case "Proficency":
-               certificate = "Certificate of Proficiency in English";
-               break;
-            default:
-               break;
-         }
-         certificateInfo =
-            "<div class='subtitle'><p>Quien ha culminado el curso de inglés conforme al plan de estudios, </p>";
-         certificateInfo += `<p>correspondiente a <span class="capital"> &nbsp; ${classInfo.category.name} &nbsp;</span> a nivel <span class="capital">&nbsp;${certificate}</span> </p>`;
-         certificateInfo +=
-            "<p>con las siguientes calificaciones:</p> </div>" +
-            '<div class="table"> <table class="grades-table full">';
-      } else {
-         certificateInfo =
-            "<p>Quien ha rendido los exámenes correspondientes a:</p>";
-         certificateInfo += `<p class="category">${classInfo.category.name}</p>`;
-         certificateInfo += "<p>con las siguientes calificaciones: </p>";
-         certificateInfo += ' <div class="table"> <table class="grades-table">';
-      }
-   }
-
-   if (classInfo.category.name === "Kinder")
-      body += `<p class="mention"><span class="title">Mención:</span> &nbsp; ${kinderGrade(
-         average
-      )}</p>`;
-   else if (pass) body = certificateInfo + finalGrades + "</div>";
-
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/certificate/style.css"
-   );
 
    try {
-      pdf.create(pdfTemplateCertificate(css, img, student, body, date), {
-         format: "A4",
-      }).toFile(fileName, (err) => {
-         if (err) res.send(Promise.reject());
-         else res.send(Promise.resolve());
-      });
+      generatePDF(
+         fileName,
+         pdfTemplateCertificate,
+         "certificate",
+         {
+            student: {
+               ...student,
+               dni: new Intl.NumberFormat("de-DE").format(student.dni),
+            },
+            body,
+            date,
+         },
+         null,
+         null,
+         res
+      );
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });
    }
 });
 
-//@route    POST /api/grade/cambridge
+//@route    POST /api/pdf/grade/cambridge
 //@desc     Create all cambridge certificate pdfs of the class (starter, movers, flyers)
 //@access   Private
 router.post("/cambridge", auth, (req, res) => {
-   let { student, header, period, classInfo, date } = req.body;
+   const { student, header, grades, info, date } = req.body;
 
-   student.dni = student.dni.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+   if (!student.dni)
+      return res.status(400).json({
+         msg: `Debe registrar el dni del alumno ${student.name} para generar el certificado`,
+      });
 
-   let level = "";
+   if (grades.some((grade) => grade.value === ""))
+      return res.status(400).json({
+         msg: `Las notas del alumno ${student.name} deben estar cargadas`,
+      });
+
    let body = "<table>";
-   let average = 0;
 
-   const imgBlack = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const imgGray = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/grayLogo.png"
-   );
-   const imgHalfAndHalf = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/halfAndHalf.png"
-   );
+   const average =
+      grades.reduce((accum, item) => accum + item.value, 0) / grades.length;
 
-   switch (classInfo.category.name) {
-      case "Infantil A":
-      case "Infantil B":
-         level = "Starter";
-         break;
-      case "Preparatorio":
-         level = "Movers";
-         break;
-      case "Junior":
-         level = "Flyers";
-         break;
-      default:
-         break;
+   for (let x = 0; x < grades.length; x++) {
+      body += `<tr>
+                     <td class='name'>${header[x].name}</td>
+                     ${getImages(Math.ceil(grades[x].value - 0.4) / 2)}
+                     <td class='percentage'>${getGrade(
+                        grades[x],
+                        info.category,
+                        false
+                     )}</td>
+               </tr>`;
    }
-
-   const even = (num) => {
-      for (let y = 0; y < 5; y++) {
-         if (y <= num) body += `<td><img src="${imgBlack}" alt="logo"/></td>`;
-         else body += `<td><img src="${imgGray}" alt="logo gris"/></td>`;
-      }
-   };
-
-   const odd = (num) => {
-      for (let y = 0; y < 5; y++) {
-         if (y < num) body += `<td><img src="${imgBlack}" alt="logo"/></td>`;
-         else {
-            if (y === num)
-               body += `<td><img src="${imgHalfAndHalf}" alt="logo a la mitad"/></td>`;
-            else body += `<td><img src="${imgGray}" alt="logo gris"/></td>`;
-         }
-      }
-   };
-
-   for (let x = 0; x < period.length; x++) {
-      average += period[x].value * 10;
-      let value = period[x].value * 10;
-      if (x === period.length - 1) {
-         average = average / period.length;
-         average = Math.round((average + Number.EPSILON) * 100) / 100;
-      }
-      body += `<tr> <td class='name'>${header[x]}</td>`;
-
-      switch (true) {
-         case value < 15:
-            for (let y = 0; y < 5; y++) {
-               if (y === 0)
-                  body += `<td><img src="${imgHalfAndHalf}" alt="logo a la mitad"/></td>`;
-               else body += `<td><img src="${imgGray}" alt="logo gris"/></td>`;
-            }
-            break;
-         case value < 25:
-            even(0);
-            break;
-         case value < 35:
-            odd(1);
-            break;
-         case value < 45:
-            even(1);
-            break;
-         case value < 55:
-            odd(2);
-            break;
-         case value < 65:
-            even(2);
-            break;
-         case value < 75:
-            odd(3);
-            break;
-         case value < 85:
-            even(3);
-            break;
-         case value < 95:
-            odd(4);
-            break;
-         case value <= 100:
-            for (let y = 0; y < 5; y++) {
-               if (y < 5)
-                  body += `<td><img src="${imgBlack}" alt="logo"/></td>`;
-               else
-                  body += `<td><img src="${imgHalfAndHalf}" alt="logo a la mitad"/></td>`;
-            }
-            break;
-         default:
-            break;
-      }
-
-      body += `<td class='percentage'>${value}%</td></tr>`;
-   }
-
    body += "</table>";
 
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/cambridgeCertificate/style.css"
-   );
-
    try {
-      pdf.create(
-         pdfTemplateCambridgeCertificate(
-            css,
-            imgBlack,
-            student,
-            level,
-            body,
-            average,
-            date
-         ),
+      generatePDF(
+         fileName,
+         pdfTemplateCambridgeCertificate,
+         "cambridgeCertificate",
          {
-            format: "A4",
-         }
-      ).toFile(fileName, (err) => {
-         if (err) res.send(Promise.reject());
-         else res.send(Promise.resolve());
-      });
+            student: {
+               ...student,
+               dni: new Intl.NumberFormat("de-DE").format(student.dni),
+            },
+            body,
+            date,
+            level: getCertificateTitle(info.category),
+            average: Math.round((average * 10 + Number.EPSILON) * 100) / 100,
+         },
+         null,
+         null,
+         res
+      );
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });
    }
 });
 
-//@route    POST /api/grade/report-card
-//@desc     Create a pdf of student's report card
-//@access   Private
-router.post("/report-card", auth, async (req, res) => {
-   const { student, observation, classInfo } = req.body;
+//@route    POST /api/pdf/grade/best
+//@desc     Create a pdf of the students' averages
+//@access   Private && Admin
+router.post("/best", [auth, adminAuth], (req, res) => {
+   const { grades } = req.body;
 
-   let grades = [];
-   let finalExamGrades = [];
-   let enrollment = {};
+   if (grades.length === 0)
+      return res
+         .status(400)
+         .json({ msg: "Primero debe realizar una búsqueda" });
+
+   const tbody = grades
+      .map(
+         (item) => `<tr>
+      <td>${item.student.studentnumber}</td>
+      <td>${item.student.lastname + ", " + item.student.name}</td>
+      <td>${item.category.name}</td>
+      <td>${item.average}</td>
+   </tr>`
+      )
+      .join("");
+
+   const thead =
+      "<th>Legajo</th> <th>Nombre</th> <th>Categoría</th> <th>Promedio</th>";
 
    try {
-      grades = await Grade.find({
-         classroom: classInfo._id,
-         student: student._id,
-         period: { $in: [1, 2, 3, 4] },
-      })
-         .populate({
-            path: "gradetype",
-            model: "gradetypes",
-            select: "name",
-         })
-         .sort({ gradetype: 1 });
-
-      finalExamGrades = await Grade.find({
-         classroom: classInfo._id,
-         student: student._id,
-         period: 5,
-      })
-         .populate({
-            path: "gradetype",
-            model: "gradetypes",
-            select: "name",
-         })
-         .sort({ gradetype: 1 });
-
-      enrollment = await Enrollment.findOne({
-         classroom: classInfo._id,
-         student: student._id,
-      });
+      generatePDF(
+         fileName,
+         pdfTemplateList,
+         "list",
+         {
+            title: "Mejores Promedios",
+            table: { thead, tbody },
+         },
+         "portrait",
+         "",
+         res
+      );
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });
    }
-
-   if (grades.length > 0) {
-      const studentTable = buildStudentTable(grades, true);
-
-      let finalGrades = "";
-      let allGrades = "";
-      let attendance = "";
-
-      const higherExams =
-         classInfo.category === "6° Año" ||
-         classInfo.category === "CAE" ||
-         classInfo.category === "Proficency";
-
-      if (classInfo.category !== "Kinder") {
-         finalGrades = `<h3 class='center'>Exámen Final</h3> <table class='final-grades ${
-            !higherExams ? "small" : ""
-         }'><tbody>`;
-
-         let header = "";
-         let body = "";
-
-         for (let x = 0; x < finalExamGrades.length; x++) {
-            header += `<th>${finalExamGrades[x].gradetype.name}</th>`;
-            body += `<td>${
-               !higherExams
-                  ? finalExamGrades[x].value.toFixed(2)
-                  : finalExamGrades[x].value * 10 + "%"
-            }</td>`;
-
-            if (
-               ((x + 1) % 3 === 0 && higherExams) ||
-               (!higherExams && (x + 1) % 2 === 0)
-            ) {
-               finalGrades += "<tr>" + header + "</tr><tr>" + body + "</tr>";
-               header = "";
-               body = "";
-            }
-
-            if (x + 1 === finalExamGrades.length) {
-               if (higherExams) {
-                  let average = enrollment.classroom.periodAverage[4] * 10;
-                  average = Math.round((average + Number.EPSILON) * 100) / 100;
-
-                  header += "<th>Promedio</th>";
-                  body += `<td>${average}%</td>`;
-
-                  finalGrades +=
-                     "<tr>" +
-                     header +
-                     "</tr><tr>" +
-                     body +
-                     "</tr></tbody></table>";
-               } else {
-                  if (header !== "")
-                     finalGrades +=
-                        "<tr>" +
-                        header +
-                        "</tr><tr>" +
-                        body +
-                        "</tr></tbody></table>";
-                  else finalGrades += "</tbody></table>";
-               }
-            }
-         }
-
-         if (finalExamGrades.length === 0) finalGrades = "";
-      }
-
-      for (let x = 0; x < studentTable.rows.length; x++) {
-         if (studentTable.headers[x]) {
-            allGrades += `<tr><th>${studentTable.headers[x]}</th>`;
-            for (let y = 0; y < studentTable.rows[x].length; y++) {
-               if (
-                  cambridgeTests.some(
-                     (test) => test === studentTable.headers[x]
-                  )
-               ) {
-                  allGrades += `<td>${
-                     studentTable.rows[x][y].value
-                        ? studentTable.rows[x][y].value * 10 + "%"
-                        : ""
-                  }</td>`;
-               } else {
-                  let value = "";
-                  if (studentTable.rows[x][y].value)
-                     value = studentTable.rows[x][y].value.toFixed(2);
-                  allGrades += `<td>${
-                     classInfo.category !== "Kinder"
-                        ? value
-                        : kinderGrade(studentTable.rows[x][y].value)
-                  }</td>`;
-               }
-            }
-            allGrades += "</tr>";
-         }
-      }
-
-      for (let x = 0; x < 4; x++) {
-         attendance += `<td>${
-            enrollment.classroom.periodAbsence[x]
-               ? enrollment.classroom.periodAbsence[x]
-               : ""
-         }</td>`;
-      }
-
-      attendance += `<td>${
-         enrollment.classroom.absence ? enrollment.classroom.absence : 0
-      }</td>`;
-
-      const img = path.join(
-         "file://",
-         __dirname,
-         "../../templates/assets/logo.png"
-      );
-      const css = path.join(
-         "file://",
-         __dirname,
-         "../../templates/reportCard/style.css"
-      );
-
-      const options = {
-         format: "A4",
-      };
-
-      try {
-         pdf.create(
-            pdfTemplateReportCard(
-               css,
-               img,
-               student.name,
-               classInfo.teacher,
-               classInfo.category,
-               allGrades,
-               finalGrades,
-               attendance,
-               observation
-            ),
-            options
-         ).toFile(fileName, (err) => {
-            if (err) res.send(Promise.reject());
-            else res.send(Promise.resolve());
-         });
-      } catch (err) {
-         console.error(err.message);
-         res.status(500).json({ msg: "PDF Error" });
-      }
-   } else {
-      res.json({ msg: "Alumno sin notas" });
-   }
 });
 
-const buildAllGradesTable = (students, periods, className) => {
-   let table = [];
-
-   for (let x = 0; x < students.length; x++) {
-      let row = [];
-      let count = 0;
-      row[count] = students[x].lastname + ", " + students[x].name;
-      let numberOfPeriods = 5;
-      if (className === "Kinder") numberOfPeriods = 4;
-
-      for (let y = 0; y < numberOfPeriods; y++) {
-         if (periods[y] && periods[y][x]) {
-            for (let z = 0; z < periods[y][x].length; z++) {
-               count++;
-               if (periods[y][x][z]) {
-                  if (className === "Kinder")
-                     row[count] =
-                        kinderGrade(periods[y][x][z].value) === "Muy Bueno"
-                           ? "MB"
-                           : kinderGrade(periods[y][x][z].value).substring(
-                                0,
-                                1
-                             );
-                  else if (periods[y][x]) {
-                     row[count] =
-                        cambridgeTests.some(
-                           (test) => test === periods[y][x][z].gradetype.name
-                        ) && periods[y][x][z].value !== ""
-                           ? periods[y][x][z].value * 10 + "%"
-                           : periods[y][x][z].value;
-                  }
-               } else row[count] = "";
-            }
-         } else {
-            count++;
-            row[count] = "";
-         }
-      }
-      table.push(row);
-   }
-
-   return table;
-};
-
-const buildStudentTable = (grades) => {
-   let obj = grades.reduce((res, curr) => {
-      if (res[curr.gradetype.name]) {
-         res[curr.gradetype.name].push(curr);
-      } else Object.assign(res, { [curr.gradetype.name]: [curr] });
-      return res;
-   }, {});
-
-   console.log(obj);
-
-   let rows = [];
-
-   for (const x in obj) {
-      const dividedGrades = obj[x];
-      let row = Array.from(Array(4), () => ({
-         value: "",
-      }));
-      for (let x = 0; x < dividedGrades.length; x++) {
-         row[dividedGrades[x].period - 1] = dividedGrades[x];
-      }
-      rows.push(row);
-   }
-
-   let headers = Object.getOwnPropertyNames(obj);
-
-   return { headers, rows };
-};
-
-const kinderGrade = (grade) => {
+//@desc Function to get the type of grade when the category is Kinder
+const kinderGraden = (grade) => {
    switch (true) {
       case grade === "":
          return "";
@@ -875,6 +415,75 @@ const kinderGrade = (grade) => {
       default:
          return "";
    }
+};
+
+//@desc Function to get the value of a grade
+const getGrade = (grade, category, small) => {
+   let value = grade.value;
+
+   if (category === "Kinder") {
+      value = small
+         ? kinderGraden(value)
+              .split(" ")
+              .map((x) => x[0])
+              .join("")
+         : kinderGraden(value);
+   } else {
+      if (value !== "") {
+         if (grade.gradetype.percentage) value = value * 10 + "%";
+         else if (value % 1 !== 0) value = Number(value).toFixed(2);
+      }
+   }
+
+   return value;
+};
+
+//@desc Function to get the value of a grade
+const getCertificateTitle = (category) => {
+   switch (category) {
+      case "Infantil A":
+      case "Infantil B":
+         return "Starter";
+      case "Preparatorio":
+         return "Movers";
+      case "Junior":
+         return "Flyers";
+      case "6° Año":
+         return "First Certificate in English";
+      case "CAE":
+         return "Certificate of Advanced English";
+      case "Proficency":
+         return "Certificate of Proficiency in English";
+      default:
+         return "";
+   }
+};
+
+//@desc Function to get the correct img depending on the grade
+const getImages = (num) => {
+   let images = "";
+
+   const even = num % 1 === 0;
+
+   num = Math.floor(num);
+
+   if (even) {
+      for (let y = 0; y < 5; y++) {
+         if (y < num) images += `<td><img src="${imgBlack}" alt="logo"/></td>`;
+         else images += `<td><img src="${imgGray}" alt="logo gris"/></td>`;
+      }
+   } else {
+      for (let y = 0; y < 5; y++) {
+         if (y < num) images += `<td><img src="${imgBlack}" alt="logo"/></td>`;
+         else {
+            if (y === num)
+               images += `<td><img src="${imgHalfAndHalf}" alt="logo a la mitad"/></td>`;
+            else images += `<td><img src="${imgGray}" alt="logo gris"/></td>`;
+         }
+      }
+   }
+
+   return images;
 };
 
 module.exports = router;

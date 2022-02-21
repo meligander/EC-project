@@ -53,9 +53,29 @@ export const setNavbarHeight = (height) => (dispatch) => {
    });
 };
 
+export const setError = (type, response, userType) => (dispatch) => {
+   dispatch({
+      type: type,
+      payload: response.data.errors
+         ? response.data.errors
+         : {
+              type: response.statusText,
+              status: response.status,
+              msg: response.data.msg,
+              ...(userType && {
+                 userType:
+                    userType === "student"
+                       ? "activeStudents"
+                       : "activeTeachers",
+              }),
+           },
+   });
+};
+
 export const formatNumber = (number) => {
-   if (number) return new Intl.NumberFormat("de-DE").format(number);
-   else return null;
+   if (number || number !== 0)
+      return new Intl.NumberFormat("de-DE").format(number);
+   else return 0;
 };
 
 export const filterData = (formData) => {

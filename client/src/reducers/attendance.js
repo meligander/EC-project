@@ -34,7 +34,6 @@ export default function (state = initialState, action) {
          return {
             ...state,
             loading: false,
-            attendances: [],
             error: payload,
          };
       case DATE_ERROR:

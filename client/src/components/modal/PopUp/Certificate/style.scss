@@ -1,0 +1,30 @@
+@import "../../../../style/abstract.scss";
+
+.popup-certificate {
+   padding-top: 2rem;
+
+   @include respond(small-phone) {
+      padding-top: 0.5rem;
+      .form-input,
+      .form-label {
+         width: 60%;
+         margin: 0 auto;
+      }
+   }
+
+   h4 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+   }
+
+   h5 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+   }
+
+   .student {
+      display: flex;
+      color: black;
+      justify-content: space-between;
+   }
+}

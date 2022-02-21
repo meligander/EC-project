@@ -2,7 +2,7 @@ import api from "../utils/api";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { newObject, updateLoadingSpinner } from "./mixvalues";
+import { newObject, updateLoadingSpinner, setError } from "./mixvalues";
 import { updateExpiredIntallments } from "./installment";
 
 import {
@@ -27,7 +27,7 @@ export const loadUser = (login) => async (dispatch) => {
       }
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setAuthError(AUTH_ERROR, err.response));
+         dispatch(setError(AUTH_ERROR, err.response));
       }
    }
 };
@@ -47,7 +47,7 @@ export const loginUser = (formData) => async (dispatch) => {
       dispatch(loadUser(true));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setAuthError(LOGIN_FAIL, err.response));
+         dispatch(setError(LOGIN_FAIL, err.response));
 
          if (err.response.data.errors)
             err.response.data.errors.forEach((error) => {
@@ -72,18 +72,5 @@ export const updateAuthUser = (user) => (dispatch) => {
    dispatch({
       type: USERAUTH_UPDATED,
       payload: user,
-   });
-};
-
-export const setAuthError = (type, response) => (dispatch) => {
-   dispatch({
-      type: type,
-      payload: response.data.errors
-         ? response.data.errors
-         : {
-              type: response.statusText,
-              status: response.status,
-              msg: response.data.msg,
-           },
    });
 };

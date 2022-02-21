@@ -1,11 +1,17 @@
+html {
+   /* deploy */
+   font-size: 52%;
+   font-family: Times, serif;
+}
+
 .container {
-   margin: 5rem;
+   margin: -1rem 4.4rem 0 4.4rem;
    padding: 0 3rem 3rem 3rem;
    font-size: 1.5rem;
    font-family: "Courgette", cursive;
    font-weight: lighter;
    border: 1px solid black;
-   height: 92rem;
+   min-height: 88rem;
    position: relative;
 }
 

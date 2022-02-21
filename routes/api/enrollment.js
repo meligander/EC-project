@@ -39,12 +39,8 @@ router.get("/", [auth, adminAuth], async (req, res) => {
          enrollments = await Enrollment.find({
             ...((startDate || endDate) && {
                date: {
-                  ...(startDate && {
-                     $gte: new Date(startDate).setHours(00, 00, 00),
-                  }),
-                  ...(endDate && {
-                     $lte: new Date(endDate).setHours(23, 59, 59),
-                  }),
+                  ...(startDate && { $gte: new Date(startDate) }),
+                  ...(endDate && { $lte: new Date(endDate) }),
                },
             }),
             ...(category && { category: category }),
@@ -219,11 +215,9 @@ router.post(
          let enrollment = await Enrollment.findOne(data);
 
          if (enrollment)
-            return res
-               .status(400)
-               .json({
-                  msg: "El alumno ya está inscripto en esa categoría para dicho año",
-               });
+            return res.status(400).json({
+               msg: "El alumno ya está inscripto en esa categoría para dicho año",
+            });
 
          enrollment = new Enrollment(data);
 

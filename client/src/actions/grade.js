@@ -4,7 +4,12 @@ import { saveAs } from "file-saver";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { newObject, updateLoadingSpinner, filterData } from "./mixvalues";
+import {
+   newObject,
+   updateLoadingSpinner,
+   filterData,
+   setError,
+} from "./mixvalues";
 
 import {
    GRADES_LOADED,
@@ -35,7 +40,7 @@ export const loadGrades = (class_id, user_id) => async (dispatch) => {
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         dispatch(setGradesError(GRADES_ERROR, err.response));
+         dispatch(setError(GRADES_ERROR, err.response));
       }
    }
    if (!user_id) dispatch(updateLoadingSpinner(false));
@@ -53,7 +58,7 @@ export const loadGradeTypes = (category_id, spinner) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401)
-         dispatch(setGradesError(GRADETYPE_ERROR, err.response));
+         dispatch(setError(GRADETYPE_ERROR, err.response));
    }
    if (spinner) dispatch(updateLoadingSpinner(false));
 };
@@ -71,7 +76,7 @@ export const loadGradesAv = (formData) => async (dispatch) => {
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         dispatch(setGradesError(GRADES_ERROR, err.response));
+         dispatch(setError(GRADES_ERROR, err.response));
       }
    }
    dispatch(updateLoadingSpinner(false));
@@ -106,7 +111,7 @@ export const registerNewGrade =
          dispatch(setAlert("Nuevo Tipo de Nota Agregado", "success", "3"));
       } catch (err) {
          if (err.response.status !== 401) {
-            dispatch(setGradesError(GRADES_ERROR, err.response));
+            dispatch(setError(GRADES_ERROR, err.response));
             if (err.response.data.errors)
                err.response.data.errors.forEach((error) => {
                   dispatch(setAlert(error.msg, "danger", "3"));
@@ -139,7 +144,7 @@ export const updateGrades =
          window.scrollTo(0, 0);
       } catch (err) {
          if (err.response.status !== 401) {
-            dispatch(setGradesError(GRADES_ERROR, err.response));
+            dispatch(setError(GRADES_ERROR, err.response));
             dispatch(setAlert(err.response.data.msg, "danger", "3"));
          } else error = true;
       }
@@ -177,7 +182,7 @@ export const deleteGrades =
          dispatch(setAlert("Tipo de Nota Eliminado", "success", "3"));
       } catch (err) {
          if (err.response.status !== 401) {
-            dispatch(setGradesError(GRADES_ERROR, err.response));
+            dispatch(setError(GRADES_ERROR, err.response));
             dispatch(setAlert(err.response.data.msg, "danger", "3"));
          } else error = true;
       }
@@ -200,7 +205,7 @@ export const updateGradeTypes = (formData) => async (dispatch) => {
       dispatch(setAlert("Tipos de Notas Modificados", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setGradesError(GRADES_ERROR, err.response));
+         dispatch(setError(GRADES_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -226,7 +231,7 @@ export const deleteGradeType = (toDelete) => async (dispatch) => {
       dispatch(setAlert("Tipo de Nota Eliminado", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setGradesError(GRADES_ERROR, err.response));
+         dispatch(setError(GRADES_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -237,90 +242,38 @@ export const deleteGradeType = (toDelete) => async (dispatch) => {
    }
 };
 
-export const gradesPDF = (info, classInfo, type) => async (dispatch) => {
+export const gradesPDF = (header, grades, info) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
-   let tableInfo = {
-      students: classInfo.students,
-      header: info.header,
-      period: info.period,
-      classInfo,
-      ...(type === "bimester" && { periodNumber: info.periodNumber }),
-   };
-
+   const data = { header, grades, info };
    try {
-      let pdf;
-      let name = "";
-      const date = format(new Date(), "dd-MM-yy");
-
-      switch (type) {
-         case "bimester":
-            await api.post("/pdf/grade/period-list", tableInfo);
-            break;
-         case "all":
-            await api.post("/pdf/grade/list", tableInfo);
-            break;
-         case "report-cards":
-            for (let x = 0; x < classInfo.students.length; x++) {
-               const reportInfo = {
-                  student: {
-                     _id: classInfo.students[x]._id,
-                     name:
-                        classInfo.students[x].lastname +
-                        ", " +
-                        classInfo.students[x].name,
-                  },
-                  observation: info[x],
-                  classInfo: {
-                     _id: classInfo._id,
-                     teacher:
-                        classInfo.teacher.lastname +
-                        ", " +
-                        classInfo.teacher.name,
-                     category: classInfo.category.name,
-                  },
-               };
-
-               const res = await api.post("/pdf/grade/report-card", reportInfo);
-
-               if (res.data.msg !== "Alumno sin notas") {
-                  pdf = await api.get("/pdf/grade/fetch", {
-                     responseType: "blob",
-                  });
-
-                  name = `Libreta de ${reportInfo.student.name} de ${reportInfo.classInfo.category}`;
-
-                  const pdfBlob = new Blob([pdf.data], {
-                     type: "application/pdf",
-                  });
-
-                  saveAs(pdfBlob, `${name} ${date}.pdf`);
-               }
-            }
-            break;
-         default:
-            break;
+      if (!header) await api.post("/pdf/grade/best", { grades });
+      else {
+         if (info.period !== undefined)
+            await api.post("/pdf/grade/period-list", data);
+         else await api.post("/pdf/grade/list", data);
       }
 
-      if (type !== "report-cards") {
-         name = `Notas de ${classInfo.category.name} de ${
-            classInfo.teacher.lastname + ", " + classInfo.teacher.name
-         }  ${date}.pdf`;
+      const name = !header
+         ? `Mejores Asistencias ${info.year}`
+         : `Notas de ${info.category} de ${info.teacher} ${format(
+              new Date(),
+              "dd-MM-yy"
+           )}`;
 
-         pdf = await api.get("/pdf/grade/fetch", {
-            responseType: "blob",
-         });
+      const pdf = await api.get("/pdf/grade/fetch", {
+         responseType: "blob",
+      });
 
-         const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
+      const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-         saveAs(pdfBlob, name);
-      }
+      saveAs(pdfBlob, name);
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setGradesError(GRADES_ERROR, err.response));
+         dispatch(setError(GRADES_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -331,71 +284,76 @@ export const gradesPDF = (info, classInfo, type) => async (dispatch) => {
    }
 };
 
-export const certificatePDF = (info, last) => async (dispatch) => {
-   if (last) {
-      dispatch(
-         setAlert("Las notas del final deben estar cargadas", "danger", "3")
-      );
-   } else {
+export const certificatePDF =
+   (header, grades, date, info, last) => async (dispatch) => {
       dispatch(updateLoadingSpinner(true));
       let error = false;
 
-      const {
-         students,
-         headers,
-         studentsPeriod,
-         classInfo,
-         date,
-         periodNumber,
-      } = info;
-
       try {
-         for (let x = 0; x < students.length; x++) {
-            const infoForm = {
-               student: students[x],
-               header: headers,
-               period: studentsPeriod[x],
-               classInfo: classInfo,
-               date: date,
+         if (last || !date || info.students.length === 0) {
+            const errorMessage = {
+               response: {
+                  status: 402,
+                  data: {
+                     msg: !date
+                        ? "Debe ingresar la fecha"
+                        : last
+                        ? "Las notas del final deben estar cargadas"
+                        : "Debe seleccionar al menos un alumno",
+                  },
+               },
             };
+            throw errorMessage;
+         }
 
-            if (periodNumber === 6) {
-               await api.post(
-                  "/pdf/grade/certificate-cambridge/create-list",
-                  infoForm
+         let newInfo = {
+            header,
+            info,
+            date,
+         };
+
+         for (let x = 0; x < info.students.length; x++) {
+            if (info.students[x].checked) {
+               newInfo = {
+                  ...newInfo,
+                  student: info.students[x],
+                  grades: grades[x],
+               };
+
+               if (info.period === 5)
+                  await api.post("/pdf/grade/cambridge", newInfo);
+               else await api.post("/pdf/grade/certificate", newInfo);
+
+               const pdf = await api.get("/pdf/grade/fetch", {
+                  responseType: "blob",
+               });
+
+               const pdfBlob = new Blob([pdf.data], {
+                  type: "application/pdf",
+               });
+
+               saveAs(
+                  pdfBlob,
+                  `Certificado ${info.category} ${
+                     info.period === 6 ? "Cambridge" : ""
+                  }  ${info.students[x].name}.pdf`
                );
-            } else {
-               await api.post("/pdf/grade/certificate", infoForm);
             }
-
-            const pdf = await api.get("/pdf/grade/fetch", {
-               responseType: "blob",
-            });
-
-            const pdfBlob = new Blob([pdf.data], {
-               type: "application/pdf",
-            });
-
-            saveAs(
-               pdfBlob,
-               `Certificado ${classInfo.category.name} ${
-                  periodNumber === 6 ? "Cambridge" : ""
-               }  ${students[x].name}.pdf`
-            );
          }
 
          dispatch(setAlert("Certificados Generados", "success", "2"));
-         window.scrollTo(0, 0);
       } catch (err) {
          if (err.response.status !== 401) {
-            dispatch(setGradesError(GRADES_ERROR, err.response));
-            dispatch(setAlert(err.response.data.msg, "danger", "3"));
+            dispatch(setError(GRADES_ERROR, err.response));
+            dispatch(setAlert(err.response.data.msg, "danger", "2"));
          } else error = true;
       }
 
-      if (!error) dispatch(updateLoadingSpinner(false));
-   }
-};
+      if (!error) {
+         dispatch(updateLoadingSpinner(false));
+         window.scrollTo(0, 0);
+      }
+   };
 
 export const clearGrades = () => (dispatch) => {
    dispatch({
@@ -406,16 +364,5 @@ export const clearGrades = () => (dispatch) => {
 export const clearGradeTypes = () => (dispatch) => {
    dispatch({
       type: GRADETYPES_CLEARED,
-   });
-};
-
-const setGradesError = (type, response) => (dispatch) => {
-   dispatch({
-      type: type,
-      payload: {
-         type: response.statusText,
-         status: response.status,
-         msg: response.data.msg,
-      },
    });
 };

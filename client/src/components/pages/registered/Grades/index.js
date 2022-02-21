@@ -16,13 +16,18 @@ import Tabs from "../sharedComp/Tabs";
 const Grades = ({
    match,
    classes: { loadingClass, classInfo },
-   grades: { loadingGT, loading, grades },
+   grades: {
+      loadingGT,
+      loading,
+      grades: { header, periods, students },
+   },
    loadGrades,
    loadGradeTypes,
    loadClass,
    gradesPDF,
 }) => {
    const _id = match.params.class_id;
+   const year = new Date().getFullYear();
 
    useEffect(() => {
       if (loading) loadGrades(_id, false);
@@ -112,9 +117,21 @@ const Grades = ({
                         onClick={(e) => {
                            e.preventDefault();
                            gradesPDF(
-                              { header: grades.header, period: grades.periods },
-                              classInfo,
-                              "all"
+                              header,
+                              periods.lenght > 5
+                                 ? periods.slice(0, -1)
+                                 : periods,
+                              {
+                                 students:
+                                    year === classInfo.year
+                                       ? students.slice(0, -1)
+                                       : students,
+                                 teacher:
+                                    classInfo.teacher.lastname +
+                                    ", " +
+                                    classInfo.teacher.name,
+                                 category: classInfo.category.name,
+                              }
                            );
                         }}
                      >

@@ -17,6 +17,6 @@ const GradeTypeSchema = new mongoose.Schema({
    ],
 });
 
-const GradeType = mongoose.model("gradetypes", GradeTypeSchema);
+const GradeType = mongoose.model("gradetype", GradeTypeSchema);
 
 module.exports = GradeType;

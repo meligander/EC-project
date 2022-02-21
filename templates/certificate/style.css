@@ -1,3 +1,9 @@
+html {
+   /* deploy */
+   font-size: 49.9%;
+   font-family: Times, serif;
+}
+
 .container {
    margin: 5rem;
    font-size: 1.7rem;

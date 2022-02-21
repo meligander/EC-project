@@ -616,27 +616,29 @@ const inactivateUser = async (user_id, type, completeDeletion) => {
          break;
    }
 
-   const attendances = await Attendance.find(filter);
+   if (Object.keys(filter).length > 0) {
+      const attendances = await Attendance.find(filter);
 
-   await attendances.forEach(
-      async (item) => await Attendance.findOneAndRemove({ _id: item._id })
-   );
+      await attendances.forEach(
+         async (item) => await Attendance.findOneAndRemove({ _id: item._id })
+      );
 
-   const grades = await Grade.find(filter);
+      const grades = await Grade.find(filter);
 
-   await grades.forEach(
-      async (item) => await Grade.findOneAndRemove({ _id: item._id })
-   );
+      await grades.forEach(
+         async (item) => await Grade.findOneAndRemove({ _id: item._id })
+      );
 
-   await enrollments.forEach(async (item) => {
-      if (type === "student")
-         await Enrollment.findOneAndRemove({ _id: item._id });
-      else
-         await Enrollment.findOneAndUpdate(
-            { _id: item._id },
-            { $set: { classroom: null } }
-         );
-   });
+      await enrollments.forEach(async (item) => {
+         if (type === "student")
+            await Enrollment.findOneAndRemove({ _id: item._id });
+         else
+            await Enrollment.findOneAndUpdate(
+               { _id: item._id },
+               { $set: { classroom: null } }
+            );
+      });
+   }
 };
 
 module.exports = router;

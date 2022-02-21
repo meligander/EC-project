@@ -3,7 +3,10 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { BiFilterAlt } from "react-icons/bi";
 
-import { loadAttendancesAv } from "../../../../../../../../actions/attendance";
+import {
+   loadAttendancesAv,
+   attendancesPDF,
+} from "../../../../../../../../actions/attendance";
 import { clearProfile } from "../../../../../../../../actions/user";
 
 import ListButtons from "../../../sharedComp/ListButtons";
@@ -13,7 +16,7 @@ function AttendanceTab({
    categories: { categories },
    loadAttendancesAv,
    clearProfile,
-   // enrollmentsPDF,
+   attendancesPDF,
 }) {
    const thisYear = new Date().getFullYear();
    const yearArray = new Array(3).fill().map((item, index) => thisYear - index);
@@ -165,7 +168,7 @@ function AttendanceTab({
                type="asistencias"
                page={page}
                items={students}
-               // pdfGenerator={() => enrollmentsPDF(enrollments, "attendances")}
+               pdfGenerator={() => attendancesPDF(null, students, { year })}
                changePage={(page) =>
                   setAdminValues((prev) => ({ ...prev, page }))
                }
@@ -182,6 +185,6 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    loadAttendancesAv,
-   // enrollmentsPDF,
+   attendancesPDF,
    clearProfile,
 })(AttendanceTab);

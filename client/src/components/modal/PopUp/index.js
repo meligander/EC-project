@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { FaTimes } from "react-icons/fa";
 
@@ -6,7 +6,7 @@ import { togglePopup } from "../../../actions/mixvalues";
 
 import NewDate from "./NewDate";
 import PenaltyPercentage from "./PenaltyPercentage";
-import CertificateDate from "./CertificateDate";
+import Certificate from "./Certificate";
 
 import logo from "../../../img/logoSinLetras.png";
 import "./style.scss";
@@ -26,13 +26,40 @@ const PopUp = ({
 
    const [newGradeType, setNewGradeType] = useState("");
 
-   const [certificateDate, setCertificateDate] = useState("");
+   const [certificate, setCertificate] = useState({
+      date: "",
+      students: [],
+   });
 
    const [penaltyPercentage, setPenaltyPercentage] = useState("");
 
-   const onChangeCertificateDate = (e) => {
+   useEffect(() => {
+      if (info && info.students)
+         setCertificate((prev) => ({
+            ...prev,
+            students: info.students.map((item) => {
+               return {
+                  ...item,
+                  name: item.lastname + ", " + item.name,
+                  checked: false,
+               };
+            }),
+         }));
+   }, [info]);
+
+   const onChangeCertificate = (e, i) => {
       e.persist();
-      setCertificateDate(e.target.value);
+      if (e.target.name === "date")
+         setCertificate((prev) => ({ ...prev, date: e.target.value }));
+      else {
+         let newStudents = [...certificate.students];
+         newStudents[i].checked = e.target.checked;
+
+         setCertificate((prev) => ({
+            ...prev,
+            students: newStudents,
+         }));
+      }
    };
 
    const onChangeNewDate = (e) => {
@@ -70,12 +97,16 @@ const PopUp = ({
                   }
                </div>
             );
-         case "certificate-date":
-            return (
-               <CertificateDate
-                  date={certificateDate}
-                  onChange={onChangeCertificateDate}
+         case "certificate":
+            return typeof info === "object" ? (
+               <Certificate
+                  date={certificate.date}
+                  students={certificate.students}
+                  period={info.period}
+                  onChange={onChangeCertificate}
                />
+            ) : (
+               <></>
             );
          case "active":
             return (
@@ -94,7 +125,7 @@ const PopUp = ({
                   bimestre={info}
                />
             );
-         case "new-grade-type":
+         case "new-grade":
             return typeof info === "object" ? (
                <NewGradeType
                   onChange={onChangeGradeType}
@@ -136,7 +167,9 @@ const PopUp = ({
                   <FaTimes />
                </button>
             </div>
-            {chooseType(popupType)}
+            <div className={popupType === "certificate" ? "wrapper both" : ""}>
+               {chooseType(popupType)}
+            </div>
             <div className="btn-center">
                <button
                   type="button"
@@ -148,15 +181,15 @@ const PopUp = ({
                            confirm(penaltyPercentage);
                            setPenaltyPercentage("");
                            break;
-                        case "certificate-date":
-                           confirm(certificateDate);
-                           setCertificateDate("");
+                        case "certificate":
+                           confirm(certificate);
+                           setCertificate({ date: "", students: [] });
                            break;
                         case "new-date":
                            confirm(newDate);
                            setNewDate({ fromDate: "", toDate: "", date: "" });
                            break;
-                        case "new-grade-type":
+                        case "new-grade":
                            confirm(newGradeType);
                            setNewGradeType("");
                            break;

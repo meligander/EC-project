@@ -4,7 +4,12 @@ import { saveAs } from "file-saver";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, filterData, newObject } from "./mixvalues";
+import {
+   updateLoadingSpinner,
+   filterData,
+   newObject,
+   setError,
+} from "./mixvalues";
 
 import {
    REGISTER_LOADED,
@@ -15,6 +20,7 @@ import {
    REGISTER_ERROR,
    REGISTERS_ERROR,
    REGISTER_CLEARED,
+   REGISTERS_PDF_ERROR,
 } from "./types";
 
 export const loadRegister = (spinner) => async (dispatch) => {
@@ -29,7 +35,7 @@ export const loadRegister = (spinner) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401)
-         dispatch(setRegistersError(REGISTER_ERROR, err.response));
+         dispatch(setError(REGISTER_ERROR, err.response));
       else error = true;
    }
 
@@ -53,7 +59,7 @@ export const loadRegisters =
          });
       } catch (err) {
          if (err.response.status !== 401) {
-            dispatch(setRegistersError(REGISTERS_ERROR, err.response));
+            dispatch(setError(REGISTERS_ERROR, err.response));
             dispatch(setAlert(err.response.data.msg, "danger", "2"));
             window.scrollTo(0, 0);
          } else error = true;
@@ -80,7 +86,7 @@ export const createRegister = (formData) => async (dispatch) => {
       );
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setRegistersError(REGISTER_ERROR, err.response));
+         dispatch(setError(REGISTER_ERROR, err.response));
 
          if (err.response.data.errors)
             err.response.data.errors.forEach((error) => {
@@ -113,7 +119,7 @@ export const closeRegister = (formData) => async (dispatch) => {
       dispatch(setAlert("Caja del día Cerrada", "success", "1", 7000));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setRegistersError(REGISTER_ERROR, err.response));
+         dispatch(setError(REGISTER_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -141,7 +147,7 @@ export const deleteRegister = (register_id) => async (dispatch) => {
       dispatch(setAlert("Cierre de Caja Eliminado", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setRegistersError(REGISTER_ERROR, err.response));
+         dispatch(setError(REGISTER_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -177,7 +183,7 @@ export const registerPDF = (registers) => async (dispatch) => {
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setRegistersError(REGISTER_ERROR, err.response));
+         dispatch(setError(REGISTERS_PDF_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -194,17 +200,4 @@ export const clearRegister = () => (dispatch) => {
 
 export const clearRegisters = () => (dispatch) => {
    dispatch({ type: REGISTERS_CLEARED });
-};
-
-const setRegistersError = (type, response) => (dispatch) => {
-   dispatch({
-      type: type,
-      payload: response.data.errors
-         ? response.data.errors
-         : {
-              type: response.statusText,
-              status: response.status,
-              msg: response.data.msg,
-           },
-   });
 };

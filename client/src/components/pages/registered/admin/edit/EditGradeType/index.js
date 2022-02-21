@@ -97,7 +97,7 @@ const EditGradeType = ({
             <table className="stick">
                <thead>
                   <tr>
-                     <th>Nombre</th>
+                     <th> &nbsp; Nombre &nbsp; </th>
                      {header()}
                      <th colSpan="2">&nbsp;</th>
                   </tr>

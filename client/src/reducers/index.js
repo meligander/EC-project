@@ -15,6 +15,7 @@ import mixvalues from "./mixvalues";
 import invoices from "./invoice";
 import enrollments from "./enrollment";
 import penalties from "./penalty";
+import observations from "./observation";
 
 export default combineReducers({
    alert,
@@ -29,6 +30,7 @@ export default combineReducers({
    invoices,
    mixvalues,
    neighbourhoods,
+   observations,
    penalties,
    registers,
    towns,

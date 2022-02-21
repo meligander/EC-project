@@ -35,8 +35,15 @@ router.get("/", auth, async (req, res) => {
             path: "teacher",
             model: "user",
             select: ["lastname", "name"],
-            options: { sort: { lastname: 1, name: 1 } },
          });
+
+      classes = classes.sort((a, b) => {
+         if (a.teacher.lastname > b.teacher.lastname) return 1;
+         if (a.teacher.lastname < b.teacher.lastname) return -1;
+
+         if (a.teacher.name > b.teacher.name) return 1;
+         if (a.teacher.name < b.teacher.name) return -1;
+      });
 
       if (classes.length === 0)
          return res
@@ -73,7 +80,6 @@ router.get("/:class_id", auth, async (req, res) => {
          path: "student",
          model: "user",
          select: "-password",
-         options: { sort: { lastname: 1, name: 1 } },
       });
 
       classinfo.students = enrollments

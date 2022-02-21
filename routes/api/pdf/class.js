@@ -1,7 +1,8 @@
 const router = require("express").Router();
 const path = require("path");
-const pdf = require("html-pdf");
 const format = require("date-fns/format");
+
+const generatePDF = require("../../../config/generatePDF");
 
 //PDF Templates
 const pdfTemplate = require("../../../templates/list");
@@ -25,92 +26,50 @@ router.get("/fetch", auth, (req, res) => {
 router.post("/list", auth, (req, res) => {
    const classes = req.body;
 
-   let htmlstring = "";
+   const tbody = classes
+      .map(
+         (item) => `<tr>
+      <td>${item.teacher.lastname + ", " + item.teacher.name}</td>
+      <td>${item.category.name}</td>
+      <td>${item.day1 ? item.day1 : ""}</td>
+      <td>${
+         item.hourin1
+            ? format(new Date(item.hourin1.slice(0, -1)), "HH:mm")
+            : ""
+      }</td>
+      <td>${
+         item.hourout1
+            ? format(new Date(item.hourout1.slice(0, -1)), "HH:mm")
+            : ""
+      }</td>
+      <td>${item.day2 ? item.day2 : ""}</td>
+      <td>${
+         item.hourin2
+            ? format(new Date(item.hourin2.slice(0, -1)), "HH:mm")
+            : ""
+      }</td>
+      <td>${
+         item.hourout2
+            ? format(new Date(item.hourout2.slice(0, -1)), "HH:mm")
+            : ""
+      }</td>
+   </tr>`
+      )
+      .join("");
 
-   for (let x = 0; x < classes.length; x++) {
-      const teacher =
-         "<td>" +
-         classes[x].teacher.lastname +
-         ", " +
-         classes[x].teacher.name +
-         "</td>";
-      const category = "<td>" + classes[x].category.name + "</td>";
-      const day1 = "<td>" + (classes[x].day1 ? classes[x].day1 : "") + "</td>";
-      const hourin1 =
-         "<td>" +
-         (classes[x].hourin1
-            ? format(new Date(classes[x].hourin1.slice(0, -1)), "HH:mm")
-            : "") +
-         "</td>";
-      const hourout1 =
-         "<td>" +
-         (classes[x].hourout1
-            ? format(new Date(classes[x].hourout1.slice(0, -1)), "HH:mm")
-            : "") +
-         "</td>";
-      const day2 = "<td>" + (classes[x].day2 ? classes[x].day2 : "") + "</td>";
-      const hourin2 =
-         "<td>" +
-         (classes[x].hourin2
-            ? format(new Date(classes[x].hourin2.slice(0, -1)), "HH:mm")
-            : "") +
-         "</td>";
-      const hourout2 =
-         "<td>" +
-         (classes[x].hourout2
-            ? format(new Date(classes[x].hourout2.slice(0, -1)), "HH:mm")
-            : "") +
-         "</td>";
-
-      htmlstring +=
-         "<tr>" +
-         teacher +
-         category +
-         day1 +
-         hourin1 +
-         hourout1 +
-         day2 +
-         hourin2 +
-         hourout2 +
-         "</tr>";
-   }
-
-   const table =
-      "<th>Profesor</th> <th>Categoría</th> <th>Día 1</th> <th>Comienzo</th> <th>Fin</th> <th>Día 2</th> <th>Comienzo</th> <th>Fin</th>";
-
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/list/style.css"
-   );
-
-   const options = {
-      format: "A4",
-      orientation: "landscape",
-      header: {
-         height: "15mm",
-         contents: `<div></div>`,
-      },
-      footer: {
-         height: "17mm",
-         contents:
-            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
-      },
-   };
+   const thead =
+      "<th>Profesor</th> <th>Categoría</th> <th>Día 1</th> <th>Entrada</th> <th>Salida</th> <th>Día 2</th> <th>Entrada</th> <th>Salida</th>";
 
    try {
-      pdf.create(
-         pdfTemplate(css, img, "cursos", table, htmlstring),
-         options
-      ).toFile(fileName, (err) => {
-         if (err) res.send(Promise.reject());
-         else res.send(Promise.resolve());
-      });
+      generatePDF(
+         fileName,
+         pdfTemplate,
+         "list",
+         { title: "Cursos", table: { thead, tbody }, small: false },
+         "landscape",
+         "",
+         res
+      );
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });
@@ -123,137 +82,53 @@ router.post("/list", auth, (req, res) => {
 router.post("/one", auth, (req, res) => {
    const classInfo = req.body;
 
-   let tbody = "";
-
-   for (let x = 0; x < classInfo.students.length; x++) {
-      const studentnumber =
-         "<td>" + classInfo.students[x].studentnumber + "</td>";
-      const studentname =
-         "<td>" +
-         classInfo.students[x].lastname +
-         ", " +
-         classInfo.students[x].name +
-         "</td>";
-      const dob =
-         "<td>" +
-         (classInfo.students[x].dob
-            ? format(
-                 new Date(classInfo.students[x].dob.slice(0, -1)),
-                 "dd/MM/yy"
-              )
-            : "") +
-         "</td>";
-      const cel =
-         "<td>" +
-         (classInfo.students[x].cel ? classInfo.students[x].cel : "") +
-         "</td>";
-
-      tbody += "<tr>" + studentnumber + studentname + dob + cel + "</tr>";
-   }
-
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/classInfo/style.css"
-   );
-
-   const options = {
-      format: "A4",
-      header: {
-         height: "15mm",
-         contents: `<div></div>`,
-      },
-      footer: {
-         height: "17mm",
-         contents:
-            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
-      },
-   };
+   const tbody = classInfo.students
+      .map(
+         (item) => `<tr>
+      <td>${item.studentnumber}</td>
+      <td>${item.lastname + ", " + item.name}</td>
+      <td>${
+         item.dob ? format(new Date(item.dob.slice(0, -1)), "dd/MM/yy") : ""
+      }</td>
+      <td>${
+         item.dni ? new Intl.NumberFormat("de-DE").format(item.dni) : ""
+      }</td>
+      <td>${item.cel ? item.cel : ""}</td>
+   </tr>`
+      )
+      .join("");
 
    try {
-      pdf.create(pdfTemplate2(css, img, tbody, classInfo), options).toFile(
+      generatePDF(
          fileName,
-         (err) => {
-            if (err) res.send(Promise.reject());
-            else res.send(Promise.resolve());
-         }
+         pdfTemplate2,
+         "classInfo",
+         {
+            title: "Cursos",
+            table: { tbody },
+            info: {
+               ...classInfo,
+               category: classInfo.category.name,
+               teacher:
+                  classInfo.teacher.lastname + ", " + classInfo.teacher.name,
+               hourin1: classInfo.hourin1
+                  ? format(new Date(classInfo.hourin1.slice(0, -1)), "HH:mm")
+                  : "",
+               hourout1: classInfo.hourout1
+                  ? format(new Date(classInfo.hourout1.slice(0, -1)), "HH:mm")
+                  : "",
+               hourin2: classInfo.hourin2
+                  ? format(new Date(classInfo.hourin2.slice(0, -1)), "HH:mm")
+                  : "",
+               hourout2: classInfo.hourout2
+                  ? format(new Date(classInfo.hourout2.slice(0, -1)), "HH:mm")
+                  : "",
+            },
+         },
+         "",
+         "portrait",
+         res
       );
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ msg: "PDF Error" });
-   }
-});
-
-//@route    POST /api/pdf/class/blank
-//@desc     Create a pdf of the class  for attendances and grades
-//@access   Private
-router.post("/blank", auth, (req, res) => {
-   const classInfo = req.body;
-
-   let tbody = "";
-
-   const columns = 23;
-
-   let thead = "<tr><th>Nombre</th>";
-   for (let y = 0; y < columns; y++) {
-      thead += "<th class='blank'></th>";
-   }
-
-   thead += "</tr>";
-
-   for (let x = 0; x < classInfo.students.length; x++) {
-      tbody +=
-         "<tr> <td class='name'>" +
-         classInfo.students[x].lastname +
-         ", " +
-         classInfo.students[x].name +
-         "</td>";
-
-      for (let y = 0; y < columns; y++) {
-         tbody += "<td></td>";
-      }
-
-      tbody += "</tr>";
-   }
-
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/classInfo/style.css"
-   );
-
-   const options = {
-      format: "A4",
-      orientation: "landscape",
-      header: {
-         height: "15mm",
-         contents: `<div></div>`,
-      },
-      footer: {
-         height: "17mm",
-         contents:
-            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
-      },
-   };
-
-   try {
-      pdf.create(
-         pdfTemplate2(css, img, tbody, classInfo, thead),
-         options
-      ).toFile(fileName, (err) => {
-         if (err) res.send(Promise.reject());
-         else res.send(Promise.resolve());
-      });
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });

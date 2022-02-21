@@ -1,8 +1,8 @@
 import axios from "axios";
 import store from "./store";
 
-import { logOut, setAuthError } from "../actions/auth";
-import { updateLoadingSpinner } from "../actions/mixvalues";
+import { logOut } from "../actions/auth";
+import { updateLoadingSpinner, setError } from "../actions/mixvalues";
 import { setAlert } from "../actions/alert";
 import { AUTH_ERROR } from "../actions/types";
 
@@ -31,7 +31,7 @@ api.interceptors.response.use(
                .alert.some((item) => item.msg === err.response.data.msg)
          ) {
             store.dispatch(setAlert(err.response.data.msg, "danger", "0"));
-            store.dispatch(setAuthError(AUTH_ERROR, err.response));
+            store.dispatch(setError(AUTH_ERROR, err.response));
             store.dispatch(updateLoadingSpinner(false));
             window.scrollTo(0, 0);
          }

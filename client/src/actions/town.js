@@ -1,7 +1,7 @@
 import api from "../utils/api";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
+import { updateLoadingSpinner, setError } from "./mixvalues";
 import { clearNeighbourhoods } from "./neighbourhood";
 
 import {
@@ -22,7 +22,7 @@ export const loadTowns = (spinner) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setTownsError(TOWNS_ERROR, err.response));
+         dispatch(setError(TOWNS_ERROR, err.response));
          window.scrollTo(0, 0);
       }
    }
@@ -46,7 +46,7 @@ export const updateTowns = (formData) => async (dispatch) => {
       dispatch(setAlert("Localidades Modificadas", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setTownsError(TOWNS_ERROR, err.response));
+         dispatch(setError(TOWNS_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -76,7 +76,7 @@ export const deleteTown = (town_id) => async (dispatch) => {
       );
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setTownsError(TOWNS_ERROR, err.response));
+         dispatch(setError(TOWNS_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -90,16 +90,5 @@ export const deleteTown = (town_id) => async (dispatch) => {
 export const clearTowns = () => (dispatch) => {
    dispatch({
       type: TOWNS_CLEARED,
-   });
-};
-
-const setTownsError = (type, response) => (dispatch) => {
-   dispatch({
-      type: type,
-      payload: {
-         type: response.statusText,
-         status: response.status,
-         msg: response.data.msg,
-      },
    });
 };

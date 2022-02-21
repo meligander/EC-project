@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const path = require("path");
-const pdf = require("html-pdf");
+
+const generatePDF = require("../../../config/generatePDF");
 
 //PDF Templates
 const pdfTemplate = require("../../../templates/list");
@@ -24,49 +25,31 @@ router.get("/fetch", [auth, adminAuth], (req, res) => {
 router.post("/list", [auth, adminAuth], (req, res) => {
    const category = req.body;
 
-   let tbody = "";
-
-   for (let x = 0; x < category.length; x++) {
-      const name = "<td>" + category[x].name + "</td>";
-      const value = "<td>$" + formatNumber(category[x].value) + "</td>";
-
-      tbody += "<tr>" + name + value + "</tr>";
-   }
+   const tbody = category
+      .map(
+         (item) =>
+            `<tr><td>${item.name}</td><td>$${new Intl.NumberFormat(
+               "de-DE"
+            ).format(item.value)}</td></tr>`
+      )
+      .join("");
 
    const thead = "<th>Nombre</th> <th>Valor</th>";
 
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/list/style.css"
-   );
-
-   const options = {
-      format: "A4",
-      header: {
-         height: "15mm",
-         contents: `<div></div>`,
-      },
-      footer: {
-         height: "17mm",
-         contents:
-            '<footer class="footer">Villa de Merlo English Center</footer>',
-      },
-   };
-
    try {
-      pdf.create(
-         pdfTemplate(css, img, "categorías", thead, tbody, true),
-         options
-      ).toFile(fileName, (err) => {
-         if (err) res.send(Promise.reject());
-         else res.send(Promise.resolve());
-      });
+      generatePDF(
+         fileName,
+         pdfTemplate,
+         "list",
+         {
+            title: "Categorías",
+            table: { thead, tbody },
+            small: true,
+         },
+         "portrait",
+         null,
+         res
+      );
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });

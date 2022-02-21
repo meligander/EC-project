@@ -1,81 +1,63 @@
-const format = require("date-fns/format");
-
-module.exports = (css, img, tbody, classInfo, table) => {
+module.exports = (data) => {
    return `
       <!doctype html>
       <html>
-         <head> 
+         <head>
             <meta charset="utf-8">
-            <link href=${css} rel="stylesheet" />
+            <link href=${data.style.css} rel="stylesheet" />
             <link
                  href="https://fonts.googleapis.com/css2?family=Courgette&family=Dancing+Script:wght@700&display=swap"
               rel="stylesheet"
             />
-            <title>Clase de ${
-               classInfo.teacher.lastname + " " + classInfo.teacher.name
-            }</title>          
+            <title>Clase de ${data.info.teacher}</title>
          </head>
          <body>
             <div class="header">
-              <img class='header-img' src=${img} alt="logo">
-            </div> 
-            <div class='container'>                       
-              <h2 class='teacher'> 
-                Profesor: ${
-                   classInfo.teacher.lastname + " " + classInfo.teacher.name
-                }
-              </h2> 
+              <img class='header-img' src=${data.style.img} alt="logo">
+            </div>
+            <div class='container'>
+              <h2 class='teacher'>
+                Profesor: ${data.info.teacher}
+              </h2>
               <div class="class-info">
-                <h3 class='category'>${classInfo.category.name}</h3>
-                <table class="schedule ${table ? "none" : ""}">
+                <h3 class='category'>${data.info.category}</h3>
+                <table class="schedule ${data.table.thead ? "none" : ""}">
                     <tbody>
                         <tr>
                             <td>
-                                <p>Día 1: ${classInfo.day1}</p>
+                                <p>Día 1: ${data.info.day1}</p>
                                 <p>
-                                    <span class="space">Entrada: ${format(
-                                       new Date(classInfo.hourin1.slice(0, -1)),
-                                       "HH:mm"
-                                    )}</span>
-                                    Salida: ${format(
-                                       new Date(
-                                          classInfo.hourout1.slice(0, -1)
-                                       ),
-                                       "HH:mm"
-                                    )}
+                                    <span class="space">Entrada: ${
+                                       data.info.hourin1
+                                    }</span>
+                                    Salida: ${data.info.hourout1}
                                 </p>
                             </td>
                             <td>
-                                <p>Día 1: ${classInfo.day2}</p>
+                                <p>Día 1: ${data.info.day2}</p>
                                 <p>
-                                    <span class="space">Entrada: ${format(
-                                       new Date(classInfo.hourin2.slice(0, -1)),
-                                       "HH:mm"
-                                    )}</span>
-                                    Salida: ${format(
-                                       new Date(
-                                          classInfo.hourout2.slice(0, -1)
-                                       ),
-                                       "HH:mm"
-                                    )}
+                                    <span class="space">Entrada: ${
+                                       data.info.hourin2
+                                    }</span>
+                                    Salida: ${data.info.hourout2}
                                 </p>
                             </td>
                         </tr>
                     </tbody>
-                </table>    
-              </div>       
-              <table class='${table ? "blank" : ""}'>
+                </table>
+              </div>
+              <table class='${data.table.thead ? "blank" : ""}'>
                  <thead>
                     <tr>
                         ${
-                           table
-                              ? table
-                              : "<th>Legajo</th> <th>Nombre</th> <th>Fecha de Nacimiento</th> <th>Celular</th>"
-                        }                                   
+                           data.table.thead
+                              ? data.table.thead
+                              : "<th>Legajo</th> <th>Nombre</th> <th>Fecha de Nacimiento</th> <th>DNI</th> <th>Celular</th>"
+                        }
                     </tr>
                  </thead>
                  <tbody>
-                    ${tbody}
+                    ${data.table.tbody}
                  </tbody>
               </table>
             </div>

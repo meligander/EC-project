@@ -39,6 +39,8 @@ import {
    getActiveClasses,
 } from "../../../../../../actions/class";
 import { clearCategories } from "../../../../../../actions/category";
+import { clearAttendances } from "../../../../../../actions/attendance";
+import { clearGrades } from "../../../../../../actions/grade";
 import { formatNumber } from "../../../../../../actions/mixvalues";
 
 import "./style.scss";
@@ -62,6 +64,8 @@ const AdminDashboard = ({
    clearClasses,
    clearCategories,
    clearInvoice,
+   clearAttendances,
+   clearGrades,
 }) => {
    const date = new Date();
 
@@ -256,6 +260,8 @@ const AdminDashboard = ({
                         to="/index/mentions-list"
                         onClick={() => {
                            clearSearch();
+                           clearAttendances();
+                           clearGrades();
                            window.scroll(0, 0);
                         }}
                         className="side-nav-link"
@@ -339,4 +345,6 @@ export default connect(mapStateToProps, {
    clearCategories,
    clearInvoice,
    clearUsers,
+   clearAttendances,
+   clearGrades,
 })(AdminDashboard);

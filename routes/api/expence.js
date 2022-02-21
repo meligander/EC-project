@@ -30,12 +30,8 @@ router.get("/", [auth, adminAuth], async (req, res) => {
          const { transactionType, startDate, endDate } = req.query;
 
          const date = {
-            ...(startDate && {
-               $gte: new Date(startDate).setHours(00, 00, 00),
-            }),
-            ...(endDate && {
-               $lte: new Date(endDate).setHours(23, 59, 59),
-            }),
+            ...(startDate && { $gte: new Date(startDate) }),
+            ...(endDate && { $lte: new Date(endDate) }),
          };
 
          if (!transactionType || transactionType === "income") {

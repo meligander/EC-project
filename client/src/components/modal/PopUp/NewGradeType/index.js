@@ -13,8 +13,8 @@ const NewGradeType = ({
    togglePopup,
 }) => {
    return (
-      <div className=" new-grade-type">
-         <div className="new-grade-type-form">
+      <div className=" new-grade">
+         <div className="new-grade-form">
             <select
                className="form-input center"
                id="gradetype"

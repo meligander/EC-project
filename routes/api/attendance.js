@@ -109,7 +109,7 @@ router.get("/best", [auth, adminAuth], async (req, res) => {
 //@access   Private
 router.get("/:class_id", auth, async (req, res) => {
    try {
-      const attendancesTable = await buildTable(req.params.class_id, res);
+      const attendancesTable = await buildTable(req.params.class_id);
 
       res.json(attendancesTable);
    } catch (err) {
@@ -177,7 +177,7 @@ router.post(
          attendance = new Attendance(data);
          await attendance.save();
 
-         const attendancesTable = await buildTable(class_id, res);
+         const attendancesTable = await buildTable(class_id);
 
          res.json(attendancesTable);
       } catch (err) {
@@ -231,7 +231,7 @@ router.post(
             await attendance.save();
          }
 
-         const attendancesTable = await buildTable(class_id, res);
+         const attendancesTable = await buildTable(class_id);
 
          console.log(attendancesTable.periods);
 
@@ -298,7 +298,7 @@ router.delete("/:class_id/:period/:date", auth, async (req, res) => {
          async (item) => await Attendance.findOneAndRemove({ _id: item._id })
       );
 
-      const attendancesTable = await buildTable(classroom, res);
+      const attendancesTable = await buildTable(classroom);
 
       res.json(attendancesTable);
    } catch (err) {
@@ -308,34 +308,24 @@ router.delete("/:class_id/:period/:date", auth, async (req, res) => {
 });
 
 //@desc Function to create the table to show on the front-end
-const buildTable = async (class_id, res) => {
-   let attendances = [];
-   let enrollments = [];
-
-   try {
-      attendances = await Attendance.find({
-         classroom: class_id,
-      })
-         .populate({
-            path: "student",
-            model: "user",
-            select: ["name", "lastname"],
-         })
-         .sort({ date: 1 });
-
-      enrollments = await Enrollment.find({
-         classroom: class_id,
-      }).populate({
-         model: "user",
+const buildTable = async (class_id) => {
+   const attendances = await Attendance.find({
+      classroom: class_id,
+   })
+      .populate({
          path: "student",
+         model: "user",
          select: ["name", "lastname"],
-      });
+      })
+      .sort({ date: 1 });
 
-      enrollments = sortByName(enrollments);
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ msg: "Server Error" });
-   }
+   const enrollments = await Enrollment.find({
+      classroom: class_id,
+   }).populate({
+      model: "user",
+      path: "student",
+      select: ["name", "lastname"],
+   });
 
    let header = [];
    let periods = [];
@@ -384,7 +374,7 @@ const buildTable = async (class_id, res) => {
                period: x,
                date: dates[index],
                ...(students[z]._id && {
-                  student: students[z]._id,
+                  student: students[z],
                   inassistance: inassistance ? true : false,
                }),
             };

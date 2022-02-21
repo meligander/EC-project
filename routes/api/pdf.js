@@ -9,6 +9,7 @@ const apiExpenceRouter = require("./pdf/expence");
 const apiGradeRouter = require("./pdf/grade");
 const apiInsallmentRouter = require("./pdf/installment");
 const apiInvoiceRouter = require("./pdf/invoice");
+const apiObservationRouter = require("./pdf/observation");
 const apiRegisterRouter = require("./pdf/register");
 
 router.use("/user", apiUserRouter);
@@ -20,6 +21,7 @@ router.use("/expence", apiExpenceRouter);
 router.use("/grade", apiGradeRouter);
 router.use("/installment", apiInsallmentRouter);
 router.use("/invoice", apiInvoiceRouter);
+router.use("/observation", apiObservationRouter);
 router.use("/register", apiRegisterRouter);
 
 module.exports = router;

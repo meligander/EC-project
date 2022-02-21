@@ -4,14 +4,14 @@ import { saveAs } from "file-saver";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
+import { updateLoadingSpinner, setError } from "./mixvalues";
 import { clearProfile } from "./user";
 
 import {
    CATEGORIES_LOADED,
    CATEGORIES_UPDATED,
    CATEGORIES_CLEARED,
-   CATEGORY_ERROR,
+   CATEGORIES_ERROR,
 } from "./types";
 
 export const loadCategories = (spinner) => async (dispatch) => {
@@ -24,7 +24,7 @@ export const loadCategories = (spinner) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setCategoriesError(CATEGORY_ERROR, err.response));
+         dispatch(setError(CATEGORIES_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       }
    }
@@ -50,7 +50,7 @@ export const updateCategories = (formData) => async (dispatch) => {
       history.push("/index/dashboard/0");
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setCategoriesError(CATEGORY_ERROR, err.response));
+         dispatch(setError(CATEGORIES_ERROR, err.response));
 
          if (err.response.data.errors)
             err.response.data.errors.forEach((error) => {
@@ -84,7 +84,7 @@ export const categoriesPDF = (categories) => async (dispatch) => {
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setCategoriesError(CATEGORY_ERROR, err.response));
+         dispatch(setError(CATEGORIES_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -97,17 +97,4 @@ export const categoriesPDF = (categories) => async (dispatch) => {
 
 export const clearCategories = () => (dispatch) => {
    dispatch({ type: CATEGORIES_CLEARED });
-};
-
-const setCategoriesError = (type, response) => (dispatch) => {
-   dispatch({
-      type: type,
-      payload: response.data.errors
-         ? response.data.errors
-         : {
-              type: response.statusText,
-              status: response.status,
-              msg: response.data.msg,
-           },
-   });
 };

@@ -109,58 +109,6 @@
       }
    }
 
-   &-penalty {
-      h3 {
-         padding-top: 2rem;
-         font-size: 3rem;
-         color: $dark-color;
-
-         @include respond(phone) {
-            padding-top: 0;
-         }
-      }
-
-      h4 {
-         font-size: 2rem;
-      }
-
-      p {
-         text-align: start;
-      }
-
-      input {
-         text-align: inherit;
-         margin-left: -3.5rem;
-         font-size: inherit;
-         padding: 0.96rem;
-         border-radius: 2px;
-         background-color: inherit;
-         border: none;
-
-         &:focus {
-            outline: none;
-         }
-      }
-   }
-
-   &-date {
-      h3 {
-         font-size: 2rem;
-         padding: 3rem 0 1rem 0;
-
-         @include respond(small-phone) {
-            font-size: 1.8rem;
-         }
-      }
-
-      @include respond(small-phone) {
-         .form-input {
-            width: 60%;
-            margin: 0 auto;
-         }
-      }
-   }
-
    &-img {
       display: flex;
       justify-content: space-between;

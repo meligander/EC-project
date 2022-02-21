@@ -251,7 +251,7 @@ const EnrollmentList = ({
                page={page}
                items={enrollments}
                type="inscripciones"
-               pdfGenerator={() => enrollmentsPDF(enrollments, "enrollments")}
+               pdfGenerator={() => enrollmentsPDF(enrollments)}
                changePage={(page) =>
                   setAdminValues((prev) => ({ ...prev, page }))
                }

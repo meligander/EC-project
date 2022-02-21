@@ -1,53 +1,39 @@
-module.exports = (
-   css,
-   img,
-   title,
-   thead,
-   tbody,
-   classInfo,
-   attendance,
-   allGrades
-) => {
+module.exports = (data) => {
    return `
       <!doctype html>
       <html>
-         <head> 
+         <head>
             <meta charset="utf-8">
-            <link href=${css} rel="stylesheet" />
+            <link href=${data.style.css} rel="stylesheet" />
             <link
                  href="https://fonts.googleapis.com/css2?family=Courgette&family=Dancing+Script:wght@700&display=swap"
               rel="stylesheet"
             />
-            <title>Curso de ${
-               classInfo.teacher.lastname + " " + classInfo.teacher.name
-            }</title>          
+            <title>Curso ${data.info.category}</title>
          </head>
          <body>
             <div class="header">
-              <img class='header-img' src=${img} alt="logo">
-            </div> 
+              <img class='header-img' src=${data.style.img} alt="logo">
+            </div>
             <div class='container'>
-              <h1 class='title'>${title}</h1>   
-              <div class="subtitle">
-                <h3 class="teacher">
-                    Profesor: ${
-                       classInfo.teacher.lastname + " " + classInfo.teacher.name
-                    }                
-                </h3>                 
-                <h4 class='category'>${classInfo.category.name}</h4>
-              </div>
-              <table ${
-                 attendance
-                    ? "class='attendance'"
-                    : allGrades
-                    ? "class='all-grades'"
+              <h1 class='title'>${data.title}</h1>
+              ${
+                 data.info.teacher
+                    ? `
+               <div class="subtitle">
+                  <h3 class="teacher">
+                     Profesor: ${data.info.teacher}
+                  </h3>
+                  <h4 class='category'>${data.info.category}</h4>
+               </div>`
                     : ""
-              } >
+              }
+              <table class='${data.type}'>
                  <thead>
-                  ${thead}
+                  ${data.table.thead}
                  </thead>
                  <tbody>
-                    ${tbody}
+                    ${data.table.tbody}
                  </tbody>
               </table>
             </div>

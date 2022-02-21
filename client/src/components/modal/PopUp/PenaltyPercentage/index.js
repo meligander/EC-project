@@ -1,6 +1,8 @@
 import React from "react";
 import format from "date-fns/format";
 
+import "./style.scss";
+
 const PenaltyPercentage = ({ onChange, penalty, percentage }) => {
    return (
       <>

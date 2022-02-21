@@ -25,12 +25,8 @@ router.get("/", [auth, adminAuth], async (req, res) => {
          registers = await Register.find({
             ...((startDate || endDate) && {
                date: {
-                  ...(startDate && {
-                     $gte: new Date(startDate).setHours(00, 00, 00),
-                  }),
-                  ...(endDate && {
-                     $lte: new Date(endDate).setHours(23, 59, 59),
-                  }),
+                  ...(startDate && { $gte: new Date(startDate) }),
+                  ...(endDate && { $lte: new Date(endDate) }),
                },
             }),
          }).sort({ date: -1 });

@@ -4,7 +4,12 @@ import { saveAs } from "file-saver";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { filterData, newObject, updateLoadingSpinner } from "./mixvalues";
+import {
+   filterData,
+   newObject,
+   updateLoadingSpinner,
+   setError,
+} from "./mixvalues";
 import { clearSearch } from "./user";
 
 import {
@@ -45,7 +50,7 @@ export const loadInstallment =
          });
       } catch (err) {
          if (err.response.status !== 401) {
-            dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));
+            dispatch(setError(INSTALLMENT_ERROR, err.response));
             dispatch(setAlert(err.response.data.msg, "danger", "4"));
          }
       }
@@ -62,7 +67,7 @@ export const getTotalDebt = () => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setInstallmentsError(INSTALLMENTS_ERROR, err.response));
+         dispatch(setError(INSTALLMENTS_ERROR, err.response));
          window.scroll(0, 0);
       }
    }
@@ -99,7 +104,7 @@ export const loadInstallments =
          });
       } catch (err) {
          if (err.response.status !== 401) {
-            dispatch(setInstallmentsError(INSTALLMENTS_ERROR, err.response));
+            dispatch(setError(INSTALLMENTS_ERROR, err.response));
             dispatch(setAlert(err.response.data.msg, "danger", "3"));
          } else error = true;
       }
@@ -137,7 +142,7 @@ export const updateIntallment = (formData, loaded) => async (dispatch) => {
       history.push(`/index/installments/${installment.student}`);
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));
+         dispatch(setError(INSTALLMENT_ERROR, err.response));
          if (err.response.data.errors)
             err.response.data.errors.forEach((error) => {
                dispatch(setAlert(error.msg, "danger", "2"));
@@ -161,7 +166,7 @@ export const updateExpiredIntallments = () => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setInstallmentsError(INSTALLMENTS_ERROR, err.response));
+         dispatch(setError(INSTALLMENTS_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "1", 7000));
          window.scroll(0, 0);
       }
@@ -183,7 +188,7 @@ export const deleteInstallment = (_id) => async (dispatch) => {
       dispatch(setAlert("Cuota eliminada", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setInstallmentsError(INSTALLMENT_ERROR, err.response));
+         dispatch(setError(INSTALLMENT_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -212,7 +217,7 @@ export const installmentsPDF = (installments) => async (dispatch) => {
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setInstallmentsError(INSTALLMENTS_ERROR, err.response));
+         dispatch(setError(INSTALLMENTS_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -232,18 +237,5 @@ export const clearInstallment = () => (dispatch) => {
 export const clearInstallments = () => (dispatch) => {
    dispatch({
       type: INSTALLMENTS_CLEARED,
-   });
-};
-
-const setInstallmentsError = (type, response) => (dispatch) => {
-   dispatch({
-      type: type,
-      payload: response.data.errors
-         ? response.data.errors
-         : {
-              type: response.statusText,
-              status: response.status,
-              msg: response.data.msg,
-           },
    });
 };

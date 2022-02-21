@@ -34,32 +34,53 @@ const Invoice = ({
 
    const [adminValues, setAdminValues] = useState({
       remaining: 0,
+      user: {},
    });
 
-   const { remaining } = adminValues;
+   const { remaining, user } = adminValues;
 
    useEffect(() => {
       if (loadingInvoice) loadInvoice(match.params.invoice_id, true);
-      else
+      else {
+         let fullName = "";
+         if (invoice.user.user_id === null) fullName = "Usuario Eliminado";
+         else {
+            const lastname = invoice.user.user_id
+               ? invoice.user.user_id.lastname
+               : invoice.user.lastname;
+            const name = invoice.user.user_id
+               ? invoice.user.user_id.name
+               : invoice.user.name;
+            fullName = `${lastname ? `${lastname}${name ? ", " : ""}` : ""}${
+               name ? name : ""
+            }`;
+         }
+
+         const email = invoice.user.user_id
+            ? invoice.user.user_id.email
+            : invoice.user.email
+            ? invoice.user.email
+            : "";
+         const cel = invoice.user.user_id
+            ? invoice.user.user_id.cel
+            : invoice.user.cel
+            ? invoice.user.cel
+            : "";
+
          setAdminValues((prev) => ({
             ...prev,
             remaining: invoice.details.reduce(
                (sum, detail) => sum + (detail.value - detail.payment),
                0
             ),
+            user: {
+               name: fullName,
+               email,
+               cel,
+            },
          }));
+      }
    }, [loadInvoice, match.params.invoice_id, loadingInvoice, invoice]);
-
-   const name = (user) => {
-      if (user.user_id === null) return "Usuario Eliminado";
-
-      const lastname = user.user_id ? user.user_id.lastname : user.lastname;
-      const name = user.user_id ? user.user_id.name : user.name;
-
-      return `${lastname ? `${lastname}${name ? ", " : ""}` : ""}${
-         name ? name : ""
-      }`;
-   };
 
    return (
       !loadingInvoice && (
@@ -83,19 +104,9 @@ const Invoice = ({
                <div className="row mt-3">
                   <div>
                      <p className="paragraph text-dark">Cliente:</p>
-                     <p className="paragraph">{name(invoice.user)}</p>
-                     <p className="paragraph">
-                        {invoice.user.email
-                           ? invoice.user.email
-                           : invoice.user.user_id && invoice.user.user_id.email
-                           ? invoice.user.user_id.email
-                           : ""}
-                     </p>
-                     <p className="paragraph">
-                        {invoice.user.user_id && invoice.user.user_id.cel
-                           ? invoice.user.user_id.cel
-                           : ""}
-                     </p>
+                     <p className="paragraph">{user.name}</p>
+                     <p className="paragraph">{user.email}</p>
+                     <p className="paragraph">{user.cel}</p>
                   </div>
                   <div className="invoice-info">
                      <p className="paragraph">
@@ -149,9 +160,7 @@ const Invoice = ({
                      <span className="heading-tertiary text-dark">Saldo:</span>
                      <input
                         className="value paragraph"
-                        value={`$${
-                           remaining > 0 ? formatNumber(remaining) : remaining
-                        }`}
+                        value={`$${formatNumber(remaining)}`}
                         disabled
                      />
                   </p>
@@ -172,7 +181,7 @@ const Invoice = ({
                   className="btn btn-secondary"
                   onClick={(e) => {
                      e.preventDefault();
-                     invoicesPDF({ invoice, remaining }, "invoice");
+                     invoicesPDF({ ...invoice, user, remaining }, "invoice");
                   }}
                >
                   <ImFilePdf />

@@ -1,0 +1,35 @@
+@import "../../../../style//abstract.scss";
+
+.penalty-penalty {
+   h3 {
+      padding-top: 2rem;
+      font-size: 3rem;
+      color: $dark-color;
+
+      @include respond(phone) {
+         padding-top: 0;
+      }
+   }
+
+   h4 {
+      font-size: 2rem;
+   }
+
+   p {
+      text-align: start;
+   }
+
+   input {
+      text-align: inherit;
+      margin-left: -3.5rem;
+      font-size: inherit;
+      padding: 0.96rem;
+      border-radius: 2px;
+      background-color: inherit;
+      border: none;
+
+      &:focus {
+         outline: none;
+      }
+   }
+}

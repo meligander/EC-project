@@ -47,31 +47,29 @@ const GradesTab = ({
       return gradetypes;
    };
 
+   const [newGrades, setNewGrades] = useState([]);
+
    const [adminValues, setAdminValues] = useState({
-      newGrades: [],
       gradetypes: header[period - 1] ? getGradeTypes() : gradeTypes,
       popupType: "",
       toDelete: null,
    });
 
-   const { newGrades, popupType, gradetypes, toDelete } = adminValues;
+   const { popupType, gradetypes, toDelete } = adminValues;
 
    useEffect(() => {
-      setAdminValues((prev) => ({
-         ...prev,
-         newGrades: periods[period - 1] ? periods[period - 1] : [],
-      }));
+      setNewGrades(periods[period - 1] ? periods[period - 1] : []);
    }, [period, periods]);
 
    const onChange = (e, student, grade) => {
       e.persist();
-      if (year === classInfo.year) {
-         newGrades[student][grade].value = e.target.value;
+      const value = e.target.value;
 
-         setAdminValues((prev) => ({
-            ...prev,
-            newGrades,
-         }));
+      if ((value > 0 && value <= 10) || value === "") {
+         const newG = [...newGrades];
+         newG[student][grade].value = value;
+
+         setNewGrades(newG);
       }
    };
 
@@ -81,7 +79,7 @@ const GradesTab = ({
             return "¿Está seguro que desea guardar los cambios?";
          case "delete":
             return "¿Está seguro que desea eliminar el tipo de nota?";
-         case "new-grade-type":
+         case "new-grade":
             return {
                gradetypes,
                isAdmin:
@@ -89,8 +87,11 @@ const GradesTab = ({
                   userLogged.type === "admin&teacher",
                clearGradeTypes,
             };
-         case "certificate-date":
-            return null;
+         case "certificate":
+            return {
+               students:
+                  year === classInfo.year ? students.slice(0, -1) : students,
+            };
          default:
             break;
       }
@@ -126,29 +127,32 @@ const GradesTab = ({
                      }));
 
                      break;
-                  case "certificate-date":
+                  case "certificate":
                      certificatePDF(
+                        header[period - 1],
+                        periods[period - 1],
+                        formInfo.date !== ""
+                           ? format(
+                                new Date(formInfo.date),
+                                "EEEE, do 'de' LLLL 'de' yyyy",
+                                {
+                                   locale: es,
+                                }
+                             )
+                           : null,
                         {
-                           students: students.slice(0, -1),
-                           headers: header[period - 1],
-                           studentsPeriod: periods[period - 1].slice(0, -1),
-                           classInfo,
-                           date:
-                              formInfo !== ""
-                                 ? format(
-                                      new Date(formInfo),
-                                      "EEEE, do 'de' LLLL 'de' yyyy",
-                                      {
-                                         locale: es,
-                                      }
-                                   )
-                                 : null,
-                           periodNumber: period,
+                           students: formInfo.students,
+                           teacher:
+                              classInfo.teacher.lastname +
+                              ", " +
+                              classInfo.teacher.name,
+                           category: classInfo.category.name,
+                           period: period - 1,
                         },
                         !periods[period - 1]
                      );
                      break;
-                  case "new-grade-type":
+                  case "new-grade":
                      registerNewGrade(
                         {
                            gradetype: formInfo,
@@ -197,8 +201,7 @@ const GradesTab = ({
                                        name={row.name}
                                        onChange={(e) => onChange(e, i, key)}
                                        value={row.value}
-                                       min={0}
-                                       max={10}
+                                       disabled={year !== classInfo.year}
                                        placeholder="Nota"
                                     />
                                  ) : (
@@ -254,9 +257,9 @@ const GradesTab = ({
                   e.preventDefault();
                   setAdminValues((prev) => ({
                      ...prev,
-                     popupType: "new-grade-type",
+                     popupType: "new-grade",
                   }));
-                  togglePopup("new-grade-type");
+                  togglePopup("new-grade");
                }}
             >
                <FaPlus />
@@ -269,15 +272,18 @@ const GradesTab = ({
                   type="button"
                   onClick={(e) => {
                      e.preventDefault();
-                     gradesPDF(
-                        {
-                           header: header[period - 1],
-                           period: periods[period - 1],
-                           periodNumber: period - 1,
-                        },
-                        classInfo,
-                        "bimester"
-                     );
+                     gradesPDF(header[period - 1], periods[period - 1], {
+                        students:
+                           year === classInfo.year
+                              ? students.slice(0, -1)
+                              : students,
+                        teacher:
+                           classInfo.teacher.lastname +
+                           ", " +
+                           classInfo.teacher.name,
+                        category: classInfo.category.name,
+                        period: period - 1,
+                     });
                   }}
                >
                   <ImFilePdf />
@@ -295,9 +301,9 @@ const GradesTab = ({
                         e.preventDefault();
                         setAdminValues((prev) => ({
                            ...prev,
-                           popupType: "certificate-date",
+                           popupType: "certificate",
                         }));
-                        togglePopup("certificate-date");
+                        togglePopup("certificate");
                      }}
                   >
                      <FaGraduationCap />

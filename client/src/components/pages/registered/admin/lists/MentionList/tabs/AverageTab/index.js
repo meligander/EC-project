@@ -4,16 +4,14 @@ import { Link } from "react-router-dom";
 import { BiFilterAlt } from "react-icons/bi";
 
 import { clearProfile } from "../../../../../../../../actions/user";
-import {
-   loadGradesAv /*, enrollmentsPDF*/,
-} from "../../../../../../../../actions/grade";
+import { loadGradesAv, gradesPDF } from "../../../../../../../../actions/grade";
 
 import ListButtons from "../../../sharedComp/ListButtons";
 
 function AverageTab({
    grades: { grades: students, loading },
    categories: { categories },
-   // enrollmentsPDF,
+   gradesPDF,
    loadGradesAv,
    clearProfile,
 }) {
@@ -167,7 +165,7 @@ function AverageTab({
                type="mejores promedios"
                page={page}
                items={students}
-               // pdfGenerator={() => enrollmentsPDF(enrollments, "averages")}
+               pdfGenerator={() => gradesPDF(null, students, { year })}
                changePage={(page) =>
                   setAdminValues((prev) => ({ ...prev, page }))
                }
@@ -183,7 +181,7 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps, {
-   //enrollmentsPDF,
+   gradesPDF,
    loadGradesAv,
    clearProfile,
 })(AverageTab);

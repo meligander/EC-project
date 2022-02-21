@@ -1,7 +1,7 @@
 import React from "react";
 
 const StudentGradesTable = ({ studentGrades: { headers, rows }, category }) => {
-   const kinderGrade = (value) => {
+   const kinderGraden = (value) => {
       switch (true) {
          case value === "":
             return <></>;
@@ -21,7 +21,7 @@ const StudentGradesTable = ({ studentGrades: { headers, rows }, category }) => {
    };
 
    const getGrade = (grade, percentage) => {
-      if (category === "Kinder") return kinderGrade(grade);
+      if (category === "Kinder") return kinderGraden(grade);
       if (percentage) return grade * 10 + "%";
       if (grade % 1 !== 0) return grade.toFixed(2);
       else return grade;

@@ -21,7 +21,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
          });
       }
 
-      const tableGrades = await buildTable(res);
+      const tableGrades = await buildTable(gradetypes);
 
       res.json(tableGrades);
    } catch (err) {
@@ -35,7 +35,6 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 //@access   Private
 router.get("/category/:id", auth, async (req, res) => {
    try {
-      console.log(req.params.id);
       const gradetypes = await GradeType.find({
          categories: req.params.id,
       }).sort({ name: 1 });
@@ -60,6 +59,8 @@ router.post("/", [auth, adminAuth], async (req, res) => {
    //An array of expence types
    const gradeTypes = req.body;
 
+   let newGradeTypes = [];
+
    if (gradeTypes.some((item) => item.name === ""))
       return res.status(400).json({ msg: "El nombre debe estar definido" });
 
@@ -77,14 +78,21 @@ router.post("/", [auth, adminAuth], async (req, res) => {
             } else data.percentage = item.checks;
          });
 
+         let gradeType = {};
          if (gradeTypes[x]._id === 0) {
-            const gradeType = new GradeType(data);
+            gradeType = new GradeType(data);
             await gradeType.save();
          } else
-            await GradeType.findOneAndUpdate({ _id: gradeTypes[x]._id }, data);
+            gradeType = await GradeType.findOneAndUpdate(
+               { _id: gradeTypes[x]._id },
+               { $set: data },
+               { new: true }
+            );
+
+         newGradeTypes.push(gradeType);
       }
 
-      const table = await buildTable(res);
+      const table = await buildTable(newGradeTypes);
 
       res.json(table);
    } catch (err) {
@@ -109,24 +117,8 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
 });
 
 //@desc Function to create the table to show on the front-end
-const buildTable = async (res) => {
-   let categories = [];
-   let gradetypes = [];
-
-   try {
-      categories = await Category.find({ name: { $ne: "Inscripción" } });
-
-      gradetypes = await GradeType.find().sort({ name: 1 });
-
-      if (gradetypes.length === 0) {
-         return res.status(400).json({
-            msg: "No se encontraron tipo de notas con esas características",
-         });
-      }
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ msg: "Server Error" });
-   }
+const buildTable = async (gradetypes) => {
+   const categories = await Category.find({ name: { $ne: "Inscripción" } });
 
    let rows = [];
 

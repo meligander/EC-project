@@ -1,7 +1,7 @@
 import api from "../utils/api";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner } from "./mixvalues";
+import { updateLoadingSpinner, setError } from "./mixvalues";
 
 import {
    PENALTY_LOADED,
@@ -19,7 +19,7 @@ export const loadPenalty = () => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setPenaltiesError(PENALTY_ERROR, err.response));
+         dispatch(setError(PENALTY_ERROR, err.response));
          window.scrollTo(0, 0);
       }
    }
@@ -38,7 +38,7 @@ export const updatePenalty = (penalty) => async (dispatch) => {
       dispatch(setAlert("Recargo Modificado", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setPenaltiesError(PENALTY_ERROR, err.response));
+         dispatch(setError(PENALTY_ERROR, err.response));
 
          if (err.response.data.errors)
             err.response.data.errors.forEach((error) => {
@@ -57,16 +57,5 @@ export const updatePenalty = (penalty) => async (dispatch) => {
 export const clearPenalty = () => (dispatch) => {
    dispatch({
       type: PENALTY_CLEARED,
-   });
-};
-
-const setPenaltiesError = (type, response) => (dispatch) => {
-   dispatch({
-      type: type,
-      payload: {
-         type: response.statusText,
-         status: response.status,
-         msg: response.data.msg,
-      },
    });
 };

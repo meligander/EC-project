@@ -129,6 +129,7 @@ const RegisterList = ({
                         (register, i) =>
                            i >= page * 10 &&
                            i < (page + 1) * 10 &&
+                           register &&
                            !register.temporary && (
                               <tr key={i}>
                                  <td>
@@ -138,19 +139,19 @@ const RegisterList = ({
                                     )}
                                  </td>
                                  <td>
-                                    {register.income &&
+                                    {register.income !== 0 &&
                                        "$" + formatNumber(register.income)}
                                  </td>
                                  <td>
-                                    {register.expence &&
+                                    {register.expence !== 0 &&
                                        "$" + formatNumber(register.expence)}
                                  </td>
                                  <td>
-                                    {register.cheatincome &&
+                                    {register.cheatincome !== 0 &&
                                        "$" + formatNumber(register.cheatincome)}
                                  </td>
                                  <td>
-                                    {register.withdrawal &&
+                                    {register.withdrawal !== 0 &&
                                        "$" + formatNumber(register.withdrawal)}
                                  </td>
                                  <td>

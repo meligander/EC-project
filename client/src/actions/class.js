@@ -4,7 +4,12 @@ import { saveAs } from "file-saver";
 import history from "../utils/history";
 import store from "../utils/store";
 
-import { filterData, newObject, updateLoadingSpinner } from "./mixvalues";
+import {
+   filterData,
+   newObject,
+   updateLoadingSpinner,
+   setError,
+} from "./mixvalues";
 import { addUserToList, clearUsers, removeUserFromList } from "./user";
 import { setAlert } from "./alert";
 
@@ -22,6 +27,7 @@ import {
    CLASS_ERROR,
    CLASSES_ERROR,
    CLASSCATEGORY_UPDATED,
+   CLASSES_PDF_ERROR,
 } from "./types";
 
 export const loadClass = (_id, spinner, user) => async (dispatch) => {
@@ -38,7 +44,7 @@ export const loadClass = (_id, spinner, user) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401)
-         dispatch(setClassesError(CLASS_ERROR, err.response));
+         dispatch(setError(CLASS_ERROR, err.response));
    }
    if (spinner) dispatch(updateLoadingSpinner(false));
 };
@@ -53,7 +59,7 @@ export const getActiveClasses = () => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setClassesError(CLASSES_ERROR, err.response));
+         dispatch(setError(CLASSES_ERROR, err.response));
          window.scroll(0, 0);
       }
    }
@@ -72,7 +78,7 @@ export const loadClasses = (formData, spinner) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setClassesError(CLASSES_ERROR, err.response));
+         dispatch(setError(CLASSES_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
          window.scrollTo(0, 0);
       } else error = true;
@@ -111,7 +117,7 @@ export const registerUpdateClass = (formData) => async (dispatch) => {
       dispatch(clearUsers());
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setClassesError(CLASS_ERROR, err.response));
+         dispatch(setError(CLASS_ERROR, err.response));
 
          if (err.response.data.errors)
             err.response.data.errors.forEach((error) => {
@@ -179,7 +185,7 @@ export const deleteClass = (class_id) => async (dispatch) => {
       dispatch(setAlert("Clase Eliminada", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setClassesError(CLASS_ERROR, err.response));
+         dispatch(setError(CLASS_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -190,7 +196,7 @@ export const deleteClass = (class_id) => async (dispatch) => {
    }
 };
 
-export const classPDF = (classInfo, type) => async (dispatch) => {
+export const classPDF = (info, type) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
@@ -200,23 +206,16 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
 
       switch (type) {
          case "classes":
-            await api.post("/pdf/class/list", classInfo);
+            await api.post("/pdf/class/list", info);
 
             name = "Clases";
             break;
          case "class":
-            await api.post("/pdf/class/one", classInfo);
+            await api.post("/pdf/class/one", info);
 
-            name = `Clase ${
-               classInfo.teacher.lastname + ", " + classInfo.teacher.name
-            } ${classInfo.category.name} `;
-            break;
-         case "blank":
-            await api.post("/pdf/class/blank", classInfo);
-
-            name = `${classInfo.category.name} de ${
-               classInfo.teacher.lastname + ", " + classInfo.teacher.name
-            } blanco`;
+            name = `Clase ${info.teacher.lastname + ", " + info.teacher.name} ${
+               info.category.name
+            } `;
             break;
          default:
             break;
@@ -233,7 +232,7 @@ export const classPDF = (classInfo, type) => async (dispatch) => {
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setClassesError(CLASS_ERROR, err.response));
+         dispatch(setError(CLASSES_PDF_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       }
    }
@@ -253,18 +252,5 @@ export const clearClass = () => (dispatch) => {
 export const clearClasses = () => (dispatch) => {
    dispatch({
       type: CLASSES_CLEARED,
-   });
-};
-
-const setClassesError = (type, response) => (dispatch) => {
-   dispatch({
-      type: type,
-      payload: response.data.errors
-         ? response.data.errors
-         : {
-              type: response.statusText,
-              status: response.status,
-              msg: response.data.msg,
-           },
    });
 };

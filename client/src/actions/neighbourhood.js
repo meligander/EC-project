@@ -1,6 +1,6 @@
 import api from "../utils/api";
 
-import { updateLoadingSpinner } from "./mixvalues";
+import { updateLoadingSpinner, setError } from "./mixvalues";
 import { setAlert } from "./alert";
 
 import {
@@ -26,7 +26,7 @@ export const loadNeighbourhoods = (town_id, spinner) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setNeightbourhoodError(NEIGHBOURHOODS_ERROR, err.response));
+         dispatch(setError(NEIGHBOURHOODS_ERROR, err.response));
          if (!town_id) window.scroll(0, 0);
       } else error = true;
    }
@@ -49,7 +49,7 @@ export const updateNeighbourhoods = (formData) => async (dispatch) => {
       dispatch(setAlert("Barrios Modificados", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setNeightbourhoodError(NEIGHBOURHOOD_ERROR, err.response));
+         dispatch(setError(NEIGHBOURHOOD_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -75,7 +75,7 @@ export const deleteNeighbourhood = (toDelete) => async (dispatch) => {
       dispatch(setAlert("Barrio Eliminado", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setNeightbourhoodError(NEIGHBOURHOOD_ERROR, err.response));
+         dispatch(setError(NEIGHBOURHOOD_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -89,16 +89,5 @@ export const deleteNeighbourhood = (toDelete) => async (dispatch) => {
 export const clearNeighbourhoods = () => (dispatch) => {
    dispatch({
       type: NEIGHBOURHOODS_CLEARED,
-   });
-};
-
-const setNeightbourhoodError = (type, response) => (dispatch) => {
-   dispatch({
-      type: type,
-      payload: {
-         type: response.statusText,
-         status: response.status,
-         msg: response.data.msg,
-      },
    });
 };

@@ -4,7 +4,12 @@ import { saveAs } from "file-saver";
 import api from "../utils/api";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, filterData, newObject } from "./mixvalues";
+import {
+   updateLoadingSpinner,
+   filterData,
+   newObject,
+   setError,
+} from "./mixvalues";
 import { clearInstallments } from "./installment";
 import { clearAttendances } from "./attendance";
 import { clearGrades } from "./grade";
@@ -42,7 +47,7 @@ export const loadUser = (user_id, spinner) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401)
-         dispatch(setUsersError(USER_ERROR, err.response));
+         dispatch(setError(USER_ERROR, err.response));
       else error = true;
    }
 
@@ -61,7 +66,7 @@ export const getStudentNumber = () => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setUsersError(USERS_ERROR, err.response));
+         dispatch(setError(USERS_ERROR, err.response));
          window.scroll(0, 0);
       }
    }
@@ -81,7 +86,7 @@ export const getActiveUsers = (type) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setUsersError(USERS_ERROR, err.response, type));
+         dispatch(setError(USERS_ERROR, err.response, type));
          window.scroll(0, 0);
       }
    }
@@ -115,10 +120,7 @@ export const loadUsers =
                )
             );
             dispatch(
-               setUsersError(
-                  primary ? USERS_ERROR : USERSBK_ERROR,
-                  err.response
-               )
+               setError(primary ? USERS_ERROR : USERSBK_ERROR, err.response)
             );
             if (!studentSearch) window.scrollTo(0, 0);
          } else error = true;
@@ -138,7 +140,7 @@ export const loadRelatives = (user_id) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401)
-         dispatch(setUsersError(USERSBK_ERROR, err.response));
+         dispatch(setError(USERSBK_ERROR, err.response));
    }
 };
 
@@ -179,7 +181,7 @@ export const registerUpdateUser = (formData, auth_id) => async (dispatch) => {
       history.push(`/index/dashboard/${res.data._id}`);
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setUsersError(USER_ERROR, err.response));
+         dispatch(setError(USER_ERROR, err.response));
 
          if (err.response.data.errors)
             err.response.data.errors.forEach((error) => {
@@ -215,7 +217,7 @@ export const updateCredentials = (formData) => async (dispatch) => {
       history.push(`/index/dashboard/${user._id}`);
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setUsersError(USER_ERROR, err.response));
+         dispatch(setError(USER_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -258,7 +260,7 @@ export const deleteUser = (user, self) => async (dispatch) => {
       dispatch(clearUsers());
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setUsersError(USERS_ERROR, err.response));
+         dispatch(setError(USERS_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "1"));
       } else error = true;
    }
@@ -306,7 +308,7 @@ export const userPDF = (users, userSearchType) => async (dispatch) => {
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setUsersError(USERS_ERROR, err.response));
+         dispatch(setError(USERS_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -342,24 +344,5 @@ export const clearUsers = () => (dispatch) => {
 export const clearSearch = () => (dispatch) => {
    dispatch({
       type: SEARCH_CLEARED,
-   });
-};
-
-const setUsersError = (type, response, userType) => (dispatch) => {
-   dispatch({
-      type: type,
-      payload: response.data.errors
-         ? response.data.errors
-         : {
-              type: response.statusText,
-              status: response.status,
-              msg: response.data.msg,
-              ...(userType && {
-                 userType:
-                    userType === "student"
-                       ? "activeStudents"
-                       : "activeTeachers",
-              }),
-           },
    });
 };

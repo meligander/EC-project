@@ -12,6 +12,7 @@ import {
    CLASS_ERROR,
    CLASSES_ERROR,
    CLASSCATEGORY_UPDATED,
+   CLASSES_PDF_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -142,6 +143,11 @@ export default function (state = initialState, action) {
             otherValues: {
                activeClasses: 0,
             },
+         };
+      case CLASSES_PDF_ERROR:
+         return {
+            ...state,
+            error: payload,
          };
       default:
          return state;

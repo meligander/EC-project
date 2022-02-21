@@ -7,6 +7,7 @@ import {
    REGISTER_ERROR,
    REGISTER_CLEARED,
    REGISTERS_ERROR,
+   REGISTERS_PDF_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -69,6 +70,11 @@ export default function (state = initialState, action) {
             ...state,
             registers: [],
             loading: false,
+            error: payload,
+         };
+      case REGISTERS_PDF_ERROR:
+         return {
+            ...state,
             error: payload,
          };
       default:

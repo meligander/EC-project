@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { FaPlus, FaTimes } from "react-icons/fa";
+import { FaPlus, FaTimes, FaScroll } from "react-icons/fa";
 import { FiSave } from "react-icons/fi";
 import { ImFilePdf } from "react-icons/im";
 import format from "date-fns/format";
@@ -30,30 +30,26 @@ const AttendanceTab = ({
 }) => {
    const year = new Date().getFullYear();
 
+   const [newAttendances, setNewAttendances] = useState([]);
+
    const [adminValues, setAdminValues] = useState({
       popupType: "",
       toDelete: null,
-      newAttendances: [],
    });
 
-   const { popupType, toDelete, newAttendances } = adminValues;
+   const { popupType, toDelete } = adminValues;
 
    useEffect(() => {
-      setAdminValues((prev) => ({
-         ...prev,
-         newAttendances: periods[period - 1] ? periods[period - 1] : [],
-      }));
+      setNewAttendances(periods[period - 1] ? periods[period - 1] : []);
    }, [period, periods]);
 
    const onChange = (e, student, date) => {
       e.persist();
       if (year === classInfo.year) {
-         newAttendances[student][date].inassistance = !e.target.checked;
+         const newA = [...newAttendances];
+         newA[student][date].inassistance = !e.target.checked;
 
-         setAdminValues((prev) => ({
-            ...prev,
-            newAttendances,
-         }));
+         setNewAttendances(newA);
       }
    };
 
@@ -206,19 +202,49 @@ const AttendanceTab = ({
                   type="button"
                   onClick={(e) => {
                      e.preventDefault();
-                     attendancesPDF(
-                        header[period - 1],
-                        students,
-                        periods[period - 1],
-                        period - 1,
-                        classInfo
-                     );
+                     attendancesPDF(header[period - 1], periods[period - 1], {
+                        students:
+                           year === classInfo.year
+                              ? students.slice(0, -1)
+                              : students,
+                        teacher:
+                           classInfo.teacher.lastname +
+                           ", " +
+                           classInfo.teacher.name,
+                        category: classInfo.category.name,
+                        period: period - 1,
+                     });
                   }}
                >
                   <ImFilePdf />
                </button>
                <span className="tooltiptext">PDF asistencias del bimestre</span>
             </div>
+            {year === classInfo.year && (
+               <div className="tooltip">
+                  <button
+                     type="button"
+                     className="btn btn-secondary"
+                     onClick={(e) => {
+                        e.preventDefault();
+                        attendancesPDF(header[period - 1], null, {
+                           students: students.slice(0, -1),
+                           teacher:
+                              classInfo.teacher.lastname +
+                              ", " +
+                              classInfo.teacher.name,
+                           category: classInfo.category.name,
+                           period: period - 1,
+                        });
+                     }}
+                  >
+                     <FaScroll />
+                  </button>
+                  <span className="tooltiptext">
+                     PDF en blanco para notas y asistencias
+                  </span>
+               </div>
+            )}
          </div>
       </>
    );

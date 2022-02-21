@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { FaEdit, FaPenFancy, FaScroll, FaTrashAlt } from "react-icons/fa";
+import { FaEdit, FaPenFancy, FaTrashAlt } from "react-icons/fa";
 import { IoCheckmarkCircleSharp } from "react-icons/io5";
 import { ImFilePdf } from "react-icons/im";
 import { CgNotes } from "react-icons/cg";
@@ -13,12 +13,9 @@ import {
 } from "../../../../../../actions/class";
 import { clearAttendances } from "../../../../../../actions/attendance";
 import { togglePopup } from "../../../../../../actions/mixvalues";
-import {
-   clearGrades,
-   clearGradeTypes,
-   gradesPDF,
-} from "../../../../../../actions/grade";
+import { clearGrades, clearGradeTypes } from "../../../../../../actions/grade";
 import { clearProfile, clearSearch } from "../../../../../../actions/user";
+import { clearObservations } from "../../../../../../actions/observation";
 
 import PopUp from "../../../../../modal/PopUp";
 import ClassInfo from "../../../sharedComp/ClassInfo";
@@ -37,21 +34,15 @@ const SingleClass = ({
    clearGradeTypes,
    clearSearch,
    clearProfile,
+   clearObservations,
    togglePopup,
    classPDF,
-   gradesPDF,
 }) => {
    const _id = match.params.class_id;
    const year = new Date().getFullYear();
 
    const userCanSeeButtons =
       userLogged.type !== "student" && userLogged.type !== "guardian";
-
-   const [adminValues, setAdminValues] = useState({
-      popupType: "",
-   });
-
-   const { popupType } = adminValues;
 
    useEffect(() => {
       if (loadingClass) loadClass(_id, true);
@@ -64,15 +55,8 @@ const SingleClass = ({
          {!loadingClass && (
             <>
                <PopUp
-                  info={
-                     popupType === "delete"
-                        ? "¿Está seguro que desea eliminar el curso?"
-                        : null
-                  }
-                  confirm={(observations) => {
-                     if (popupType === "delete") deleteClass(classInfo._id);
-                     else gradesPDF(observations, classInfo, "report-cards");
-                  }}
+                  info="¿Está seguro que desea eliminar el curso?"
+                  confirm={() => deleteClass(classInfo._id)}
                />
                <ClassInfo classInfo={classInfo} />
                {classInfo.students && (
@@ -139,7 +123,7 @@ const SingleClass = ({
                               <Link
                                  to={
                                     classInfo.students.length > 0
-                                       ? `/class/notes/${classInfo._id}`
+                                       ? `/class/observations/${classInfo._id}`
                                        : "!#"
                                  }
                                  className={
@@ -149,7 +133,8 @@ const SingleClass = ({
                                  }
                                  onClick={() => {
                                     if (classInfo.students.length > 0)
-                                       window.scroll(0, 0);
+                                       clearObservations();
+                                    window.scroll(0, 0);
                                  }}
                               >
                                  <CgNotes />
@@ -178,38 +163,7 @@ const SingleClass = ({
                                  PDF lista de alumnos de la clase e info
                               </span>
                            </div>
-                           <div className="tooltip">
-                              <button
-                                 type="button"
-                                 className="btn btn-secondary"
-                                 onClick={(e) => {
-                                    e.preventDefault();
-                                    classPDF(classInfo, "blank");
-                                 }}
-                              >
-                                 <FaScroll />
-                              </button>
-                              <span className="tooltiptext">
-                                 PDF en blanco para notas y asistencias
-                              </span>
-                           </div>
-                           {/* <div className="tooltip">
-                              <button
-                                 type="button"
-                                 className="btn btn-secondary"
-                                 onClick={(e) => {
-                                    e.preventDefault();
-                                    setAdminValues((prev) => ({
-                                       ...prev,
-                                       popupType: "report-cards",
-                                    }));
-                                    togglePopup("report-cards");
-                                 }}
-                              >
-                                 <FaAddressCard />
-                              </button>
-                              <span className="tooltiptext">PDF libretas</span>
-                           </div> */}
+
                            {userLogged.type !== "teacher" && (
                               <>
                                  <div className="tooltip">
@@ -242,10 +196,6 @@ const SingleClass = ({
                                        className="btn btn-danger"
                                        onClick={(e) => {
                                           e.preventDefault();
-                                          setAdminValues((prev) => ({
-                                             ...prev,
-                                             popupType: "delete",
-                                          }));
                                           togglePopup("default");
                                        }}
                                     >
@@ -277,10 +227,10 @@ export default connect(mapStateToProps, {
    deleteClass,
    togglePopup,
    classPDF,
-   gradesPDF,
    clearGrades,
    clearAttendances,
    clearProfile,
    clearSearch,
    clearGradeTypes,
+   clearObservations,
 })(SingleClass);

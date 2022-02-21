@@ -11,6 +11,7 @@ import Credentials from "../../pages/registered/admin/users/Credentials";
 import SingleClass from "../../pages/registered/admin/classes/SingleClass";
 import Attendance from "../../pages/registered/Attendance";
 import Grades from "../../pages/registered/Grades";
+import Observations from "../../pages/registered/Observations";
 
 //Admin Pages
 import RegisterUser from "../../pages/registered/admin/users/RegisterUser";
@@ -148,6 +149,12 @@ const Routes = ({ location, mixvalues: { navbar, footer } }) => {
                types={["admin", "secretary", "teacher", "admin&teacher"]}
                path="/class/grades/:class_id"
                component={Grades}
+            />
+            <PrivateRoutes
+               exact
+               types={["admin", "secretary", "teacher", "admin&teacher"]}
+               path="/class/observations/:class_id"
+               component={Observations}
             />
             <PrivateRoutes
                exact

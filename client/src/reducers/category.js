@@ -2,7 +2,7 @@ import {
    CATEGORIES_LOADED,
    CATEGORIES_UPDATED,
    CATEGORIES_CLEARED,
-   CATEGORY_ERROR,
+   CATEGORIES_ERROR,
 } from "../actions/types";
 
 const initialState = {
@@ -25,7 +25,7 @@ export default function (state = initialState, action) {
          return state;
       case CATEGORIES_CLEARED:
          return initialState;
-      case CATEGORY_ERROR:
+      case CATEGORIES_ERROR:
          return {
             ...state,
             loading: false,

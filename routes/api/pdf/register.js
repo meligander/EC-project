@@ -1,7 +1,8 @@
 const router = require("express").Router();
 const path = require("path");
-const pdf = require("html-pdf");
 const format = require("date-fns/format");
+
+const generatePDF = require("../../../config/generatePDF");
 
 //PDF Templates
 const pdfTemplate = require("../../../templates/list");
@@ -25,69 +26,48 @@ router.get("/fetch", [auth, adminAuth], (req, res) => {
 router.post("/list", [auth, adminAuth], (req, res) => {
    const register = req.body;
 
-   let tbody = "";
-
-   for (let x = 0; x < register.length; x++) {
-      if (register[x].temporary) continue;
-
-      const income =
-         "<td>" +
-         (register[x].income ? " $" + register[x].income : "") +
-         "</td>";
-      const expence =
-         "<td>" +
-         (register[x].expence ? " $" + register[x].expence : "") +
-         "</td>";
-      const cheatincome =
-         "<td>" +
-         (register[x].cheatincome ? " $" + register[x].cheatincome : "") +
-         "</td>";
-      const withdrawal =
-         "<td>" +
-         (register[x].withdrawal ? " $" + register[x].withdrawal : "") +
-         "</td>";
-      const diference =
-         "<td>" +
-         (register[x].difference !== 0 && register[x].difference
-            ? register[x].negative
-               ? "-$" + register[x].difference
-               : "+$" + register[x].difference
-            : "") +
-         "</td>";
-      if (register[x].temporary !== undefined) {
-         const date =
-            "<td>" + format(new Date(register[x].date), "dd/MM/yy") + "</td>";
-         const registermoney = "<td> $" + register[x].registermoney + "</td>";
-
-         const description =
-            "<td>" +
-            (register[x].description ? register[x].description : "") +
-            "</td>";
-
-         tbody +=
-            "<tr>" +
-            date +
-            income +
-            expence +
-            cheatincome +
-            withdrawal +
-            registermoney +
-            diference +
-            description +
-            "</tr>";
-      } else {
-         const month = "<th>" + register[x].month + "</th>";
-         tbody +=
-            "<tr>" +
-            month +
-            income +
-            expence +
-            cheatincome +
-            withdrawal +
-            diference +
-            "</tr>";
-      }
-   }
+   const tbody = register
+      .map(
+         (item) =>
+            `<tr>
+            <td>${
+               item.temporary !== undefined
+                  ? format(new Date(item.date), "dd/MM/yy")
+                  : item.month
+            }</td>
+            <td>${item.income !== 0 ? `$${formatNumber(item.income)}` : ""}</td>
+            <td>${
+               item.expence !== 0 ? `$${formatNumber(item.expence)}` : ""
+            }</td>
+            <td>${
+               item.cheatincome !== 0
+                  ? `$${formatNumber(item.cheatincome)}`
+                  : ""
+            }</td>
+            <td>${
+               item.withdrawal !== 0 ? `$${formatNumber(item.withdrawal)}` : ""
+            }</td>
+            ${
+               item.registermoney
+                  ? `<td>$${formatNumber(item.registermoney)}</td>`
+                  : ""
+            }
+            
+            <td>${
+               item.difference !== 0
+                  ? `${item.difference > 0 ? "+" : "-"}$${formatNumber(
+                       item.difference
+                    )}`
+                  : ""
+            }</td>
+            ${
+               item.temporary !== undefined
+                  ? `<td>${item.description ? item.description : ""}</td>`
+                  : ""
+            }
+      </tr>`
+      )
+      .join("");
 
    let thead = "";
 
@@ -98,49 +78,31 @@ router.post("/list", [auth, adminAuth], (req, res) => {
       thead =
          "<th class='blank'></th> <th>Ingresos</th> <th>Egresos</th> <th>Otros Ing</th> <th>Retiro</th><th>Diferencia</th>";
 
-   const img = path.join(
-      "file://",
-      __dirname,
-      "../../templates/assets/logo.png"
-   );
-   const css = path.join(
-      "file://",
-      __dirname,
-      "../../templates/list/style.css"
-   );
-
-   const options = {
-      format: "A4",
-      header: {
-         height: "15mm",
-         contents: `<div></div>`,
-      },
-      ...(register[0].temporary !== undefined && { orientation: "landscape" }),
-      footer: {
-         height: "17mm",
-         contents:
-            '<footer class="footer">Villa de Merlo English Center <span class="pages">{{page}}/{{pages}}</span></footer>',
-      },
-   };
-
    try {
-      pdf.create(
-         pdfTemplate(
-            css,
-            img,
-            register[0].temporary !== undefined ? "caja" : "cajas mensuales",
-            thead,
-            tbody
-         ),
-         options
-      ).toFile(fileName, (err) => {
-         if (err) res.send(Promise.reject());
-         else res.send(Promise.resolve());
-      });
+      generatePDF(
+         fileName,
+         pdfTemplate,
+         "list",
+         {
+            title:
+               register[0].temporary !== undefined ? "Caja" : "Cajas Mensuales",
+            table: { thead, tbody },
+         },
+         "landscape",
+         "",
+         res
+      );
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });
    }
 });
+
+//@desc Function to format a number
+const formatNumber = (number) => {
+   if (number || number !== 0)
+      return new Intl.NumberFormat("de-DE").format(Math.abs(number));
+   else return 0;
+};
 
 module.exports = router;

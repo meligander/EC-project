@@ -6,7 +6,12 @@ import history from "../utils/history";
 import { setAlert } from "./alert";
 import { clearRegister } from "./register";
 import { getTotalDebt } from "./installment";
-import { filterData, newObject, updateLoadingSpinner } from "./mixvalues";
+import {
+   filterData,
+   newObject,
+   updateLoadingSpinner,
+   setError,
+} from "./mixvalues";
 
 import {
    INVOICE_LOADED,
@@ -35,7 +40,7 @@ export const loadInvoice = (invoice_id, spinner) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401)
-         dispatch(setInvoicesError(INVOICE_ERROR, err.response));
+         dispatch(setError(INVOICE_ERROR, err.response));
    }
    if (spinner) dispatch(updateLoadingSpinner(false));
 };
@@ -51,7 +56,7 @@ export const getInvoiceNumber = () => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setInvoicesError(INVOICES_ERROR, err.response));
+         dispatch(setError(INVOICES_ERROR, err.response));
          window.scroll(0, 0);
       }
    }
@@ -70,7 +75,7 @@ export const loadInvoices = (formData, spinner) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setInvoicesError(INVOICES_ERROR, err.response));
+         dispatch(setError(INVOICES_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
          window.scroll(0, 0);
       } else error = true;
@@ -86,13 +91,43 @@ export const registerInvoice = (formData) => async (dispatch) => {
    let invoice = newObject(formData);
 
    try {
-      /*const res =*/ await api.post("/invoice", invoice);
+      const res = await api.post("/invoice", invoice);
 
       dispatch({
          type: INVOICE_REGISTERED,
       });
 
-      // await dispatch(invoicesPDF(res.data, "invoice"));
+      let fullName = "";
+      if (invoice.user.user_id === null) fullName = "Usuario Eliminado";
+      else {
+         const lastname = invoice.user.user_id
+            ? invoice.user.user_id.lastname
+            : invoice.user.lastname;
+         const name = invoice.user.user_id
+            ? invoice.user.user_id.name
+            : invoice.user.name;
+         fullName = `${lastname ? `${lastname}${name ? ", " : ""}` : ""}${
+            name ? name : ""
+         }`;
+      }
+
+      const email = invoice.user.user_id
+         ? invoice.user.user_id.email
+         : invoice.user.email
+         ? invoice.user.email
+         : "";
+      const cel = invoice.user.user_id
+         ? invoice.user.user_id.cel
+         : invoice.user.cel
+         ? invoice.user.cel
+         : "";
+
+      await dispatch(
+         invoicesPDF(
+            { ...res.data, user: { name: fullName, email, cel } },
+            "invoice"
+         )
+      );
 
       dispatch(getTotalDebt());
       dispatch(clearRegister());
@@ -101,7 +136,7 @@ export const registerInvoice = (formData) => async (dispatch) => {
       history.push("/index/dashboard/0");
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setInvoicesError(INVOICE_ERROR, err.response));
+         dispatch(setError(INVOICE_ERROR, err.response));
 
          if (err.response.data.errors)
             err.response.data.errors.forEach((error) => {
@@ -135,7 +170,7 @@ export const deleteInvoice = (invoice_id) => async (dispatch) => {
       dispatch(setAlert("Factura Eliminada", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setInvoicesError(INVOICE_ERROR, err.response));
+         dispatch(setError(INVOICE_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -151,21 +186,8 @@ export const invoicesPDF = (formData, type) => async (dispatch) => {
    let error = false;
 
    try {
-      let fileName = "";
-
       if (type === "list") await api.post("/pdf/invoice/list", formData);
-      else {
-         const { name, lastname, _id } = formData.user;
-
-         if ((name && name !== "") || (lastname && lastname !== ""))
-            fileName = lastname + ", " + name;
-         else {
-            if (_id === null) fileName = "Usuario Eliminado";
-            else fileName = _id.lastname + ", " + _id.name;
-         }
-
-         await api.post("/invoice/create-invoice", formData);
-      }
+      else await api.post("/pdf/invoice", formData);
 
       const pdf = await api.get("/pdf/invoice/fetch", {
          responseType: "blob",
@@ -182,13 +204,13 @@ export const invoicesPDF = (formData, type) => async (dispatch) => {
          pdfBlob,
          type === "list"
             ? `Ingresos ${date}.pdf`
-            : `Factura ${fileName} ${date}.pdf`
+            : `Factura ${formData.user.name} ${date}.pdf`
       );
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setInvoicesError(INVOICES_ERROR, err.response));
+         dispatch(setError(INVOICES_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -220,17 +242,4 @@ export const removeDetail = (item) => (dispatch) => {
    };
    dispatch({ type: INVOICEDETAIL_REMOVED, payload: installment._id });
    dispatch({ type: INSTALLMENT_ADDED, payload: installment });
-};
-
-const setInvoicesError = (type, response) => (dispatch) => {
-   dispatch({
-      type: type,
-      payload: response.data.errors
-         ? response.data.errors
-         : {
-              type: response.statusText,
-              status: response.status,
-              msg: response.data.msg,
-           },
-   });
 };

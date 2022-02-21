@@ -4,7 +4,12 @@ import { saveAs } from "file-saver";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, filterData, newObject } from "./mixvalues";
+import {
+   updateLoadingSpinner,
+   filterData,
+   newObject,
+   setError,
+} from "./mixvalues";
 import { getTotalDebt } from "./installment";
 
 import {
@@ -31,7 +36,7 @@ export const loadEnrollment = (enrollment_id, spinner) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401)
-         dispatch(setEnrollmentsError(ENROLLMENT_ERROR, err.response));
+         dispatch(setError(ENROLLMENT_ERROR, err.response));
    }
    if (spinner) dispatch(updateLoadingSpinner(false));
 };
@@ -46,7 +51,7 @@ export const getYearEnrollments = () => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setEnrollmentsError(ENROLLMENTS_ERROR, err.response));
+         dispatch(setError(ENROLLMENTS_ERROR, err.response));
          window.scroll(0, 0);
       }
    }
@@ -62,7 +67,7 @@ export const getEstimatedProfit = () => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setEnrollmentsError(ENROLLMENTS_ERROR, err.response));
+         dispatch(setError(ENROLLMENTS_ERROR, err.response));
          window.scroll(0, 0);
       }
    }
@@ -81,7 +86,7 @@ export const loadEnrollments = (formData, spinner) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setEnrollmentsError(ENROLLMENTS_ERROR, err.response));
+         dispatch(setError(ENROLLMENTS_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
          window.scroll(0, 0);
       } else error = true;
@@ -124,7 +129,7 @@ export const registerUpdateEnrollment =
          history.push("/enrollment/list");
       } catch (err) {
          if (err.response.status !== 401) {
-            dispatch(setEnrollmentsError(ENROLLMENT_ERROR, err.response));
+            dispatch(setError(ENROLLMENT_ERROR, err.response));
 
             if (err.response.data.errors)
                err.response.data.errors.forEach((error) => {
@@ -155,7 +160,7 @@ export const deleteEnrollment = (enroll_id) => async (dispatch) => {
       dispatch(setAlert("Inscripción Eliminada", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setEnrollmentsError(ENROLLMENT_ERROR, err.response));
+         dispatch(setError(ENROLLMENT_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       }
    }
@@ -166,46 +171,25 @@ export const deleteEnrollment = (enroll_id) => async (dispatch) => {
    }
 };
 
-export const enrollmentsPDF = (enrollments, average) => async (dispatch) => {
+export const enrollmentsPDF = (enrollments) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
-      let pdf;
-      let name;
+      await api.post("/pdf/enrollment/list", enrollments);
 
-      switch (average) {
-         case "enrollments":
-            await api.post("/pdf/enrollment/list", enrollments);
-
-            name = "Inscripciones";
-            break;
-         case "averages":
-            await api.post("/pdf/enrollment/averages-list", enrollments);
-
-            name = "Mejores Promedios";
-            break;
-         case "attendances":
-            await api.post("/pdf/enrollment/absences-list", enrollments);
-
-            name = "Mejores Asistencias";
-            break;
-         default:
-            break;
-      }
-
-      pdf = await api.get("/pdf/enrollment/fetch", {
+      const pdf = await api.get("/pdf/enrollment/fetch", {
          responseType: "blob",
       });
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-      saveAs(pdfBlob, `${name} ${format(new Date(), "dd-MM-yy")}.pdf`);
+      saveAs(pdfBlob, `Inscripciones ${format(new Date(), "dd-MM-yy")}.pdf`);
 
       dispatch(setAlert("PDF Generado", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setEnrollmentsError(ENROLLMENT_ERROR, err.response));
+         dispatch(setError(ENROLLMENT_ERROR, err.response));
          dispatch(setAlert(err.response.data.msg, "danger", "2"));
       } else error = true;
    }
@@ -222,17 +206,4 @@ export const clearEnrollment = () => (dispatch) => {
 
 export const clearEnrollments = () => (dispatch) => {
    dispatch({ type: ENROLLMENTS_CLEARED });
-};
-
-const setEnrollmentsError = (type, response) => (dispatch) => {
-   dispatch({
-      type: type,
-      payload: response.data.errors
-         ? response.data.errors
-         : {
-              type: response.statusText,
-              status: response.status,
-              msg: response.data.msg,
-           },
-   });
 };
