@@ -1,0 +1,119 @@
+@import "../../../../../../style/abstract.scss";
+
+.form-search {
+   position: relative;
+
+   &-display {
+      width: 100%;
+      transform: scale(0.99);
+      font-weight: 300;
+      color: $dark-color;
+      background-color: lighten($secondary-color, 25%);
+      position: absolute;
+      z-index: 200;
+      top: 4.1rem;
+
+      &.danger {
+         background-color: lighten($danger-color, 40%);
+         color: $white-color;
+      }
+   }
+
+   &-list {
+      overflow-y: auto;
+      max-height: 20vh;
+
+      &::-webkit-scrollbar {
+         width: 1rem;
+
+         &-track {
+            box-shadow: inset 0 0 4px $dark-color;
+            border-radius: 10px;
+         }
+
+         &-thumb {
+            box-shadow: inset 0 0 5px $primary-color;
+            background: $light-color;
+            border-radius: 10px;
+            cursor: pointer;
+
+            &:hover {
+               background: darken($secondary-color, 5%);
+            }
+         }
+      }
+   }
+
+   &-item {
+      padding: 0.6rem;
+      margin: 0.3rem;
+      display: flex;
+      justify-content: space-between;
+
+      &:not(.bg-danger) {
+         cursor: pointer;
+
+         &:hover {
+            background-color: lighten($light-color, 15%);
+         }
+      }
+   }
+
+   &-close {
+      display: flex;
+      justify-content: flex-end;
+      padding: 0.5rem 0.5rem 0.3rem;
+
+      &-icon {
+         font-size: 2rem;
+      }
+   }
+
+   &-user,
+   &-close-icon {
+      &,
+      &:link,
+      &:visited {
+         display: flex;
+         background-color: inherit;
+         text-decoration: none;
+         cursor: pointer;
+         border: none;
+         text-align: right;
+         color: $dark-color;
+         transition: all 0.2s ease-out;
+      }
+
+      &:hover {
+         transform: scale(1.1);
+      }
+
+      &:active,
+      &:focus {
+         outline: none;
+      }
+   }
+
+   &-user {
+      font-size: 2.5rem;
+
+      &.cancel,
+      &.profile {
+         font-size: 2rem;
+         position: absolute;
+         right: 1rem;
+         top: 1rem;
+      }
+
+      &.profile {
+         right: 4rem;
+      }
+
+      &.disabled {
+         &:hover {
+            transform: none;
+            cursor: not-allowed;
+         }
+      }
+   }
+}

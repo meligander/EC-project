@@ -172,6 +172,10 @@
          margin-right: -3.5rem;
          z-index: 1;
       }
+
+      &.name {
+         align-items: baseline;
+      }
    }
 
    &-cancel {

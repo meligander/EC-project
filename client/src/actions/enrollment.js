@@ -87,7 +87,7 @@ export const loadEnrollments = (formData, spinner) => async (dispatch) => {
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setError(ENROLLMENTS_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         if (spinner) dispatch(setAlert(err.response.data.msg, "danger", "2"));
          window.scroll(0, 0);
       } else error = true;
    }

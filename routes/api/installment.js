@@ -163,7 +163,7 @@ router.post(
       check("value", "El valor es necesario").not().isEmpty(),
    ],
    async (req, res) => {
-      const { number, year, expired, enrollment, updatable } = req.body;
+      const { number, year, expired, enrollment, updatable, value } = req.body;
 
       try {
          let errors = [];
@@ -190,7 +190,7 @@ router.post(
          }
 
          installment = new Installment({
-            ...req.body,
+            value: Math.ceil(value),
             ...(enrollment && { enrollment: enrollment.id }),
             updatable: number === 1 ? false : updatable,
             debt: number === 0,
@@ -228,7 +228,7 @@ router.put(
    "/:id",
    [auth, adminAuth, check("value", "El valor es necesario").not().isEmpty()],
    async (req, res) => {
-      const { expired, updatable } = req.body;
+      const { expired, updatable, number } = req.body;
 
       let errors = [];
       const errorsResult = validationResult(req);

@@ -1,25 +1,46 @@
 import React, { useState } from "react";
+import { FaPlus } from "react-icons/fa";
 
-import UserSearch from "../../../../../sharedComp/search/UserSearch";
+import UsersSearch from "../../../../../sharedComp/search/UsersSearch";
 import StudentTable from "../../../../../sharedComp/tables/StudentTable";
+import Alert from "../../../../../../sharedComp/Alert";
 
 const TutorInfo = ({ setChildren, children, clearProfile, isAdmin }) => {
-   const [selectedStudent, setSelectedStudent] = useState({});
+   const [selectedUser, setSelectedUser] = useState(null);
 
    return (
       <div className="my-4">
          {isAdmin && (
-            <UserSearch
-               actionForSelected={() => {
-                  setSelectedStudent({});
-                  setChildren(selectedStudent, true);
-               }}
-               selectedStudent={selectedStudent}
-               selectStudent={(user) => setSelectedStudent(user)}
-               typeSearch="student"
-            />
+            <>
+               <h3 className="heading-tertiary text-primary">
+                  Búsqueda de Alumnos
+               </h3>
+               <Alert type="3" />
+               <UsersSearch
+                  autoComplete="off"
+                  selectUser={(user) => setSelectedUser(user)}
+                  selectedUser={selectedUser}
+                  usersType="student"
+                  primary={true}
+                  restore={() => setSelectedUser(null)}
+               />
+               <div className="btn-right mt-2">
+                  <button
+                     type="button"
+                     className="btn btn-dark"
+                     onClick={(e) => {
+                        e.preventDefault();
+                        setChildren(selectedUser, true);
+                        setSelectedUser(null);
+                     }}
+                  >
+                     <FaPlus />
+                     <span className="hide-md">&nbsp; Agregar</span>
+                  </button>
+               </div>
+            </>
          )}
-         <h3 className="heading-tertiary text-primary pt-2">
+         <h3 className="heading-tertiary text-primary pt-4">
             Lista de Alumnos a Cargo
          </h3>
          <StudentTable

@@ -80,12 +80,12 @@ export const loadInstallments =
       try {
          let res;
          if (student) {
-            if (!formData.student._id) {
+            if (!formData.student) {
                const errorMessage = {
                   response: {
                      status: 402,
                      data: {
-                        msg: "Debe seleccionar un usuario primero",
+                        msg: "Debe buscar un usuario primero",
                      },
                   },
                };
@@ -105,7 +105,7 @@ export const loadInstallments =
       } catch (err) {
          if (err.response.status !== 401) {
             dispatch(setError(INSTALLMENTS_ERROR, err.response));
-            dispatch(setAlert(err.response.data.msg, "danger", "3"));
+            dispatch(setAlert(err.response.data.msg, "danger", "2"));
          } else error = true;
       }
 
@@ -122,7 +122,10 @@ export const updateIntallment = (formData, loaded) => async (dispatch) => {
    });
 
    try {
-      if (!loaded) dispatch(loadInstallments({ student: installment.student }));
+      if (!loaded)
+         dispatch(
+            loadInstallments({ student: installment.student }, true, true)
+         );
 
       let res;
       if (!installment._id) res = await api.post("/installment", installment);

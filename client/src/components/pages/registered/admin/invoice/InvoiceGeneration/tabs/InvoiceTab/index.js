@@ -1,19 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import format from "date-fns/format";
-import {
-   FaFileInvoiceDollar,
-   FaTimes,
-   FaTrashAlt,
-   FaUserCircle,
-} from "react-icons/fa";
-import { ImSearch } from "react-icons/im";
+import { FaFileInvoiceDollar, FaTrashAlt } from "react-icons/fa";
 
-import {
-   clearProfile,
-   clearSearch,
-} from "../../../../../../../../actions/user";
 import {
    registerInvoice,
    removeDetail,
@@ -24,7 +13,7 @@ import {
 } from "../../../../../../../../actions/mixvalues";
 
 import Alert from "../../../../../../sharedComp/Alert";
-import UserSearch from "../../../../../sharedComp/search/UserSearch";
+import UsersSearch from "../../../../../sharedComp/search/UsersSearch";
 import PopUp from "../../../../../../../modal/PopUp";
 
 import "./style.scss";
@@ -35,23 +24,18 @@ const InvoiceTab = ({
       otherValues: { invoiceNumber },
    },
    togglePopup,
-   clearSearch,
    registerInvoice,
-   clearProfile,
    removeDetail,
 }) => {
    const [adminValues, setAdminValues] = useState({
       day: format(new Date(), "dd/MM/yyyy"),
-      selectedUser: {},
-      registeredUser: false,
-      toggleSearch: false,
       toDelete: "",
       installmentTotal: 0,
    });
 
    const [formData, setFormData] = useState({
       user: {
-         _id: "",
+         _id: null,
          lastname: "",
          name: "",
          email: "",
@@ -67,16 +51,7 @@ const InvoiceTab = ({
 
    const { invoiceid, details, total, user } = formData;
 
-   const { _id, email, name, lastname } = user;
-
-   const {
-      day,
-      selectedUser,
-      installmentTotal,
-      registeredUser,
-      toggleSearch,
-      toDelete,
-   } = adminValues;
+   const { day, installmentTotal, toDelete } = adminValues;
 
    useEffect(() => {
       if (invoice) {
@@ -106,19 +81,6 @@ const InvoiceTab = ({
          }
       }
    }, [invoice, invoiceid, details.length, toDelete]);
-
-   const addUser = () => {
-      setAdminValues((prev) => ({
-         ...prev,
-         registeredUser: true,
-         toggleSearch: !toggleSearch,
-      }));
-      setFormData((prev) => ({
-         ...prev,
-         user: selectedUser,
-      }));
-      clearSearch();
-   };
 
    const onChange = (e) => {
       e.persist();
@@ -154,6 +116,10 @@ const InvoiceTab = ({
             ),
          }));
       }
+   };
+
+   const selectUser = (user) => {
+      setFormData((prev) => ({ ...prev, user }));
    };
 
    const removeItem = (item) => {
@@ -202,130 +168,41 @@ const InvoiceTab = ({
                   <label className="form-label">Fecha</label>
                </div>
             </div>
-            <div className="paying-user">
-               <h3 className="paragraph text-primary ">Usuario a Pagar</h3>
-               <div className="tooltip">
-                  <button
-                     onClick={(e) => {
-                        e.preventDefault();
-                        setAdminValues((prev) => ({
-                           ...prev,
-                           toggleSearch: !toggleSearch,
-                        }));
-                     }}
-                     type="button"
-                     className="btn-cancel search"
-                  >
-                     <ImSearch />
-                  </button>
-                  <span className="tooltiptext">Buscar usuario registrado</span>
-               </div>
-            </div>
+            <h3 className="paragraph text-primary ">Usuario a Pagar</h3>
             <div className="mb-2">
-               <div className="form-group">
-                  {!registeredUser ? (
-                     <>
-                        <div className="two-in-row">
-                           <input
-                              className="form-input"
-                              type="text"
-                              onChange={onChange}
-                              name="name"
-                              id="user"
-                              value={name}
-                              placeholder="Nombre"
-                           />
-                           <input
-                              className="form-input"
-                              type="text"
-                              onChange={onChange}
-                              id="user"
-                              value={lastname}
-                              name="lastname"
-                              placeholder="Apellido"
-                           />
-                        </div>
-                        <div className="two-in-row">
-                           <label
-                              className={`form-label ${
-                                 name === "" ? "lbl" : ""
-                              }`}
-                           >
-                              Nombre
-                           </label>
-                           <label
-                              className={`form-label ${
-                                 lastname === "" ? "lbl" : ""
-                              }`}
-                           >
-                              Apellido
-                           </label>
-                        </div>
-                     </>
-                  ) : (
-                     <>
-                        <div className="btn-end">
-                           <input
-                              className="form-input"
-                              type="text"
-                              value={lastname + ", " + name}
-                              placeholder="Alumno"
-                              disabled
-                              id="full-name"
-                           />
-                           <div className="tooltip">
-                              <Link
-                                 onClick={() => {
-                                    window.scroll(0, 0);
-                                    clearProfile();
-                                 }}
-                                 className="btn-cancel search"
-                                 to={`/index/dashboard/${_id}`}
-                              >
-                                 <FaUserCircle />
-                              </Link>
-                              <span className="tooltiptext">Ver perfil</span>
-                           </div>
-                           <div className="tooltip">
-                              <button
-                                 type="button"
-                                 onClick={(e) => {
-                                    e.preventDefault();
-                                    setAdminValues((prev) => ({
-                                       ...prev,
-                                       registeredUser: !registeredUser,
-                                    }));
-                                 }}
-                                 className="btn-cancel"
-                              >
-                                 <FaTimes />
-                              </button>
-                              <span className="tooltiptext">
-                                 Quitar usuario
-                              </span>
-                           </div>
-                        </div>
-                        <label htmlFor="full-name" className="form-label">
-                           Nombre
-                        </label>
-                     </>
-                  )}
-               </div>
+               <UsersSearch
+                  primary={false}
+                  selectUser={selectUser}
+                  usersType="guardian/student"
+                  onChangeForm={onChange}
+                  autoComplete="new-password"
+                  restore={() =>
+                     setFormData((prev) => ({
+                        ...prev,
+                        user: {
+                           _id: null,
+                           lastname: "",
+                           name: "",
+                           email: "",
+                        },
+                     }))
+                  }
+               />
                <div className="form-group">
                   <input
                      className={`form-input ${
-                        registeredUser && !user.email ? "text-danger" : ""
+                        user._id && !user.email ? "text-danger" : ""
                      }`}
                      type="email"
                      name="email"
                      id="user"
                      onChange={onChange}
-                     disabled={registeredUser}
+                     disabled={user._id}
                      value={
-                        !registeredUser
-                           ? email
-                           : email
-                           ? email
+                        !user._id
+                           ? user.email
+                           : user.email
+                           ? user.email
                            : "No tiene email registrado"
                      }
                      placeholder="Email"
@@ -335,19 +212,6 @@ const InvoiceTab = ({
                   </label>
                </div>
             </div>
-            {toggleSearch && (
-               <UserSearch
-                  selectStudent={(user) => {
-                     setAdminValues((prev) => ({
-                        ...prev,
-                        selectedUser: user,
-                     }));
-                  }}
-                  selectedStudent={selectedUser}
-                  actionForSelected={addUser}
-                  typeSearch="guardian/student"
-               />
-            )}
             <h3 className="text-primary heading-tertiary">
                Detalle de Factura
             </h3>
@@ -384,8 +248,6 @@ const InvoiceTab = ({
                                           onChange={onChangeValue}
                                           id={index}
                                           placeholder="Monto"
-                                          min="0"
-                                          max={install.value}
                                           value={install.payment}
                                        />
                                     </td>
@@ -440,9 +302,7 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps, {
-   clearSearch,
    registerInvoice,
-   clearProfile,
    removeDetail,
    togglePopup,
 })(InvoiceTab);

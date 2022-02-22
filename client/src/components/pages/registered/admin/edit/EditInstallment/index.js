@@ -38,7 +38,7 @@ const EditInstallment = ({
       number: "",
       value: "",
       expired: false,
-      student: "",
+      student: null,
       updatable: true,
       enrollment: "",
    });
@@ -53,17 +53,19 @@ const EditInstallment = ({
       } else {
          if (loadingInstallment) loadInstallment(_id, false, true);
          else {
-            setformData((prev) => {
-               let oldInstallment = {};
-               for (const x in prev) {
-                  oldInstallment[x] = !installment[x]
-                     ? prev[x]
-                     : installment[x];
-               }
-               return {
-                  ...oldInstallment,
-               };
-            });
+            if (installment)
+               setformData((prev) => {
+                  let oldInstallment = {};
+                  for (const x in prev) {
+                     oldInstallment[x] = !installment[x]
+                        ? prev[x]
+                        : installment[x];
+                  }
+                  return {
+                     ...oldInstallment,
+                     number: installment.number,
+                  };
+               });
          }
       }
    }, [
@@ -78,12 +80,14 @@ const EditInstallment = ({
    ]);
 
    useEffect(() => {
-      if (student !== "" && year !== "")
+      if (student && year !== "" && loading) {
          loadEnrollments(
             { student: student._id ? student._id : student, year },
-            true
+            false
          );
-   }, [student, year, loadEnrollments]);
+      }
+      // eslint-disable-next-line
+   }, [loadEnrollments, year, loading]);
 
    const onChange = (e) => {
       e.persist();
@@ -108,15 +112,15 @@ const EditInstallment = ({
       <>
          <PopUp
             info="¿Está seguro que desea guardar los cambios?"
-            confirm={() =>
+            confirm={() => {
                updateIntallment(
                   {
                      ...formData,
                      ...(type === "new" && { student: student._id }),
                   },
                   installments.length > 0
-               )
-            }
+               );
+            }}
          />
          <h2>{type === "edit" ? "Editar Cuota" : "Crear Cuota"}</h2>
          <form
@@ -126,10 +130,9 @@ const EditInstallment = ({
                togglePopup("default");
             }}
          >
-            <p className="heading-tertiary">
-               <span className="text-dark">Alumno:</span>
-               &nbsp;&nbsp;&nbsp;
-               {student !== "" && `${student.lastname} ${student.name}`}
+            <p className="heading-tertiary btn-end name">
+               <span className="text-dark">Alumno: </span> &nbsp;
+               {student && `${student.lastname} ${student.name}`}
             </p>
             <div className="form-group">
                <select
@@ -157,14 +160,16 @@ const EditInstallment = ({
             <div className="form-group">
                <select
                   className="form-input"
-                  disabled={year === ""}
+                  disabled={enrollments.length === 0}
                   name="enrollment"
                   id="enrollment"
                   onChange={onChange}
                   value={enrollment}
                >
                   <option value="">
-                     * Seleccione la inscripción vinculada
+                     {enrollments.length === 0
+                        ? "No hay inscripción vinculada"
+                        : "* Seleccione la inscripción vinculada"}
                   </option>
                   {enrollments.map((item) => (
                      <option key={item._id} value={item._id}>
@@ -243,12 +248,14 @@ const EditInstallment = ({
                   <FiSave />
                   &nbsp;Guardar
                </button>
-               <Link
-                  className="btn btn-danger"
-                  to={`/index/installments/${student._id}`}
-               >
-                  Cancelar
-               </Link>
+               {student && (
+                  <Link
+                     className="btn btn-danger"
+                     to={`/index/installments/${student._id}`}
+                  >
+                     Cancelar
+                  </Link>
+               )}
             </div>
          </form>
       </>

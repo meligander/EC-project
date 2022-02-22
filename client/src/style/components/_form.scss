@@ -15,7 +15,8 @@
       width: 90%;
    }
 
-   .border {
+   .border,
+   &.border {
       border: 1px $secondary-color solid;
       padding: 1.6rem;
 

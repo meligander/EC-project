@@ -434,7 +434,8 @@ router.put(
             { new: true }
          )
             .populate({ path: "town", select: "name" })
-            .populate({ path: "neighbourhood", select: "name" });
+            .populate({ path: "neighbourhood", select: "name" })
+            .populate({ path: "children", model: "user" });
 
          res.json(user);
       } catch (err) {

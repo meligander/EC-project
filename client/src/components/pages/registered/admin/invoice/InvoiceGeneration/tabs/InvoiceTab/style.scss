@@ -1,27 +1,6 @@
 @import "../../../../../../../../style/abstract.scss";
 
 .invoice-tab {
-   .paying-user {
-      display: flex;
-      align-items: center;
-      margin-bottom: 2rem;
-
-      .paragraph {
-         margin-bottom: 0;
-      }
-
-      .search {
-         font-size: 2rem;
-         background-color: inherit;
-         margin-left: 1.5rem;
-
-         &:active,
-         &:focus {
-            box-shadow: none;
-         }
-      }
-   }
-
    table {
       td:last-child {
          display: flex;

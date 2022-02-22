@@ -8,6 +8,7 @@ const NameField = ({
    onChange,
    namePlaceholder,
    lastnamePlaceholder,
+   autoComplete,
 }) => {
    return (
       <div className="form-group">
@@ -18,6 +19,8 @@ const NameField = ({
                name={nameAttribute ? nameAttribute : "name"}
                placeholder={namePlaceholder ? namePlaceholder : "Nombre"}
                value={name}
+               id="user"
+               autoComplete={autoComplete && autoComplete}
                onChange={onChange}
             />
             <input
@@ -27,18 +30,22 @@ const NameField = ({
                placeholder={
                   lastnamePlaceholder ? lastnamePlaceholder : "Apellido"
                }
+               id="user"
+               autoComplete={autoComplete && autoComplete}
                value={lastname}
                onChange={onChange}
             />
          </div>
-         <div className="two-in-row">
-            <label className={`form-label ${name === "" ? "lbl" : ""}`}>
-               {namePlaceholder ? namePlaceholder : "Nombre"}
-            </label>
-            <label className={`form-label ${lastname === "" ? "lbl" : ""}`}>
-               {lastnamePlaceholder ? lastnamePlaceholder : "Apellido"}
-            </label>
-         </div>
+         {!autoComplete && (
+            <div className="two-in-row">
+               <label className={`form-label ${name === "" ? "lbl" : ""}`}>
+                  {namePlaceholder ? namePlaceholder : "Nombre"}
+               </label>
+               <label className={`form-label ${lastname === "" ? "lbl" : ""}`}>
+                  {lastnamePlaceholder ? lastnamePlaceholder : "Apellido"}
+               </label>
+            </div>
+         )}
       </div>
    );
 };

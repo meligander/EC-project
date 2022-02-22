@@ -345,8 +345,9 @@ export const clearUsers = () => (dispatch) => {
    });
 };
 
-export const clearSearch = () => (dispatch) => {
+export const clearSearch = (primary) => (dispatch) => {
    dispatch({
       type: SEARCH_CLEARED,
+      payload: primary,
    });
 };

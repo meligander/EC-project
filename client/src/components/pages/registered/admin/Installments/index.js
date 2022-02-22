@@ -12,6 +12,7 @@ import {
 import { loadPenalty, updatePenalty } from "../../../../../actions/penalty";
 import { clearUser } from "../../../../../actions/user";
 import { togglePopup } from "../../../../../actions/mixvalues";
+import { clearEnrollments } from "../../../../../actions/enrollment";
 
 import InstallmentsSearch from "../../sharedComp/search/InstallmentsSearch";
 import PopUp from "../../../../modal/PopUp";
@@ -24,6 +25,7 @@ const Installments = ({
    clearInstallments,
    clearInstallment,
    clearUser,
+   clearEnrollments,
    updatePenalty,
    loadPenalty,
    loadInstallments,
@@ -34,7 +36,7 @@ const Installments = ({
       userLogged.type === "admin" || userLogged.type === "admin&teacher";
 
    const [adminValues, setAdminValues] = useState({
-      student: {},
+      student: null,
    });
    const { student } = adminValues;
 
@@ -45,16 +47,10 @@ const Installments = ({
    useEffect(() => {
       if (_id !== "0") {
          if (loading) loadInstallments({ student: { _id } }, true, true, "all");
-         else
+         else if (installments.length > 0)
             setAdminValues((prev) => ({
                ...prev,
-               student: {
-                  _id: installments[0].student._id,
-                  name:
-                     installments[0].student.lastname +
-                     ", " +
-                     installments[0].student.name,
-               },
+               student: installments[0].student,
             }));
       }
    }, [_id, loading, loadInstallments, installments]);
@@ -109,9 +105,11 @@ const Installments = ({
             />
             <div className="btn-right">
                <Link
-                  className={`btn ${!loading ? "btn-primary" : "btn-black"}`}
+                  className={`btn ${
+                     !loading && student ? "btn-primary" : "btn-black"
+                  }`}
                   to={
-                     !loading && student._id
+                     !loading && student
                         ? `/index/installment/new/${student._id}`
                         : "#"
                   }
@@ -119,6 +117,7 @@ const Installments = ({
                      if (!loading) {
                         window.scroll(0, 0);
                         clearInstallment();
+                        clearEnrollments();
                         clearUser();
                      }
                   }}
@@ -143,6 +142,7 @@ export default connect(mapStateToProps, {
    clearInstallment,
    loadPenalty,
    clearUser,
+   clearEnrollments,
    updatePenalty,
    loadInstallments,
    togglePopup,

@@ -203,7 +203,7 @@ router.post(
          .isEmpty(),
    ],
    async (req, res) => {
-      let { invoiceid, user, total, details, remaining } = req.body;
+      let { user, total, details } = req.body;
 
       const { _id, name, lastname, email } = user;
 
@@ -216,12 +216,19 @@ router.post(
          return res.status(400).json({ errors });
       }
 
+      if (
+         details.some((item) => item.payment > item.value || item.payment <= 0)
+      )
+         return res.status(400).json({
+            msg: "El pago no puede ser mayor al valor de la cuota o un número negativo",
+         });
+
       if (details.some((item) => item.payment === ""))
          return res.status(400).json({
             msg: "Debe ingresar el pago de todas las cuotas agregadas",
          });
 
-      if (_id === "" && name === "" && lastname === "")
+      if (!_id && name === "" && lastname === "")
          return res.status(400).json({
             msg: "Debe ingresar el usuario que paga la factura",
          });
@@ -266,7 +273,7 @@ router.post(
          let invoice = new Invoice({
             ...req.body,
             user: {
-               ...(_id !== ""
+               ...(_id
                   ? { user_id: _id }
                   : {
                        ...(name !== "" && { name }),
@@ -276,9 +283,9 @@ router.post(
             },
             details: details.map((item) => {
                return {
-                  installment: item.installment,
                   payment: item.payment,
                   value: item.value,
+                  installment: item.installment,
                };
             }),
             register: last._id,

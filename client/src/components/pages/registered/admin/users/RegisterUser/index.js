@@ -209,16 +209,20 @@ const RegisterUser = ({
    };
 
    const setChildren = (student, add = true) => {
-      if (add) {
-         if (!children.some((item) => item._id === student._id)) {
-            children.push(student);
-            clearSearch();
-         } else setAlert("El alumno ya ha sido agregado", "danger", "3");
+      if (!student) {
+         setAlert("Busque un alumno para agregar", "danger", "3");
       } else {
-         setFormData({
-            ...formData,
-            children: children.filter((child) => child._id !== student._id),
-         });
+         if (add) {
+            if (!children.some((item) => item._id === student._id)) {
+               children.push(student);
+               clearSearch();
+            } else setAlert("El alumno ya ha sido agregado", "danger", "3");
+         } else {
+            setFormData({
+               ...formData,
+               children: children.filter((child) => child._id !== student._id),
+            });
+         }
       }
    };
 

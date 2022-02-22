@@ -4,7 +4,7 @@ import InstallmentsSearch from "../../../../../sharedComp/search/InstallmentsSea
 
 const InstallmentsSearchTab = () => {
    const [adminValues, setAdminValues] = useState({
-      student: {},
+      student: null,
    });
    const { student } = adminValues;
 
@@ -16,7 +16,9 @@ const InstallmentsSearchTab = () => {
    };
 
    return (
-      <InstallmentsSearch student={student} changeStudent={changeStudent} />
+      <div className="mt-4">
+         <InstallmentsSearch student={student} changeStudent={changeStudent} />
+      </div>
    );
 };
 

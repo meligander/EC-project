@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
-import { withRouter, Link } from "react-router-dom";
-import { FaTimes } from "react-icons/fa";
+import { withRouter } from "react-router-dom";
+import { FaMoneyCheckAlt } from "react-icons/fa";
 
 import { setAlert } from "../../../../../../actions/alert";
 import {
@@ -10,12 +10,12 @@ import {
    loadInstallment,
    deleteInstallment,
 } from "../../../../../../actions/installment";
+import { clearEnrollments } from "../../../../../../actions/enrollment";
 import { togglePopup } from "../../../../../../actions/mixvalues";
 import { addDetail } from "../../../../../../actions/invoice";
-import { clearProfile, clearUser } from "../../../../../../actions/user";
 
-import UserSearch from "../UserSearch";
 import InstallmentsTable from "../../tables/InstallmentsTable";
+import UsersSearch from "../UsersSearch";
 
 import "./style.scss";
 
@@ -23,13 +23,12 @@ const InstallmentsSearch = ({
    match,
    history,
    installments: { loading, installments },
-   invoices: { invoice },
    loadInstallments,
    clearInstallments,
+   clearEnrollments,
    deleteInstallment,
    loadInstallment,
    togglePopup,
-   clearProfile,
    addDetail,
    changeStudent,
    student,
@@ -37,75 +36,56 @@ const InstallmentsSearch = ({
    const newInvoice = match.params.user_id === undefined;
 
    const restore = () => {
-      changeStudent({});
+      changeStudent(null);
       clearInstallments();
       if (!newInvoice) history.push("/index/installments/0");
    };
 
    return (
       <div className="installment-search">
-         <div className="form">
-            <UserSearch
-               selectedStudent={student}
-               actionForSelected={async () =>
-                  await loadInstallments({ student }, true, true, "all")
-               }
-               selectStudent={(user) => {
-                  changeStudent({
-                     _id: user._id,
-                     name: user.lastname + ", " + user.name,
-                  });
-               }}
-               typeSearch="installment"
-               block={!loading}
-               newInvoice={newInvoice}
+         <form className="form">
+            <h3 className="text-dark">Búsqueda de Alumnos</h3>
+            <UsersSearch
+               usersType="student"
+               selectUser={changeStudent}
+               selectedUser={student}
+               autoComplete="off"
+               primary={true}
+               restore={restore}
             />
-         </div>
-         <div className="btn-end">
-            {student._id && !loading && (
-               <>
-                  <p className="heading-tertiary">
-                     <span className="text-dark">Alumno: </span> &nbsp;
-                     <Link
-                        to={`/index/dashboard/${student._id}`}
-                        className="btn-text"
-                        onClick={() => {
-                           clearProfile();
-                           window.scroll(0, 0);
-                        }}
-                     >
-                        {student.name}
-                     </Link>
-                  </p>
-                  <button
-                     className="btn-cancel"
-                     type="button"
-                     onClick={(e) => {
-                        e.preventDefault();
-                        restore();
-                     }}
-                  >
-                     <FaTimes />
-                  </button>
-               </>
-            )}
-         </div>
-         {!loading && (
+            <div className="btn-right mt-2">
+               <button
+                  type="button"
+                  className={`btn ${student ? "btn-dark" : ""}`}
+                  onClick={(e) => {
+                     e.preventDefault();
+                     loadInstallments({ student }, true, true, "all");
+                  }}
+               >
+                  <FaMoneyCheckAlt />
+                  <span className="hide-md">&nbsp; Ver Cuotas</span>
+               </button>
+            </div>
+         </form>
+         {!loading && student && student._id === installments[0].student._id && (
             <>
-               {student._id &&
-               installments[0] &&
-               student._id === installments[0].student._id ? (
-                  <InstallmentsTable
-                     installments={installments}
-                     forAdmin={true}
-                     student={student._id}
-                     deleteInstallment={deleteInstallment}
-                     actionForSelected={(item) => {
-                        if (newInvoice) addDetail(item);
-                        else loadInstallment(item._id, true);
-                     }}
-                     togglePopup={togglePopup}
-                  />
+               {installments[0] ? (
+                  <div className="mt-3">
+                     <InstallmentsTable
+                        installments={installments}
+                        forAdmin={true}
+                        student={student._id}
+                        deleteInstallment={deleteInstallment}
+                        actionForSelected={(item) => {
+                           if (newInvoice) addDetail(item);
+                           else {
+                              loadInstallment(item._id, true);
+                              clearEnrollments();
+                           }
+                        }}
+                        togglePopup={togglePopup}
+                     />
+                  </div>
                ) : (
                   <p className="heading-tertiary text-center my-4">
                      El alumno no tiene deudas hasta el momento
@@ -119,16 +99,14 @@ const InstallmentsSearch = ({
 
 const mapStateToProps = (state) => ({
    installments: state.installments,
-   invoices: state.invoices,
 });
 
 export default connect(mapStateToProps, {
    loadInstallments,
    setAlert,
    clearInstallments,
+   clearEnrollments,
    loadInstallment,
-   clearProfile,
-   clearUser,
    addDetail,
    deleteInstallment,
    togglePopup,

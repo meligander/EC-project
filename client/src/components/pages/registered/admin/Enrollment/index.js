@@ -5,7 +5,7 @@ import { format, getYear, getMonth, addMonths } from "date-fns";
 import { es } from "date-fns/locale";
 import { FiSave } from "react-icons/fi";
 import { IoIosListBox } from "react-icons/io";
-import { FaTimes, FaUserEdit } from "react-icons/fa";
+import { FaUserEdit } from "react-icons/fa";
 
 import { loadCategories } from "../../../../../actions/category";
 import {
@@ -17,7 +17,7 @@ import { clearSearch, clearProfile } from "../../../../../actions/user";
 import { setAlert } from "../../../../../actions/alert";
 import { togglePopup } from "../../../../../actions/mixvalues";
 
-import UserSearch from "../../sharedComp/search/UserSearch";
+import UsersSearch from "../../sharedComp/search/UsersSearch";
 import PopUp from "../../../../modal/PopUp";
 
 const Enrollment = ({
@@ -39,33 +39,17 @@ const Enrollment = ({
 
    const [formData, setFormData] = useState({
       _id: match.params.enrollment_id ? match.params.enrollment_id : "",
-      student: "",
+      student: null,
       category: "",
       year: "",
       month: "",
    });
 
-   const [adminValues, setAdminValues] = useState({
-      selectedStudent: {
-         _id: "",
-         name: "",
-      },
-      enrollmentValue: 0,
-      hideSearch: false,
-   });
-
-   const { enrollmentValue, selectedStudent, hideSearch } = adminValues;
-
-   const { year, category, month, _id } = formData;
+   const { year, category, month, _id, student } = formData;
 
    useEffect(() => {
-      if (loading) loadCategories(_id === "" ? true : false);
-      else
-         setAdminValues((prev) => ({
-            ...prev,
-            enrollmentValue: categories[0].value,
-         }));
-   }, [loading, loadCategories, categories, _id]);
+      if (loading) loadCategories(false);
+   }, [loading, loadCategories]);
 
    useEffect(() => {
       if (_id !== "") {
@@ -73,6 +57,7 @@ const Enrollment = ({
          else
             setFormData((prev) => ({
                ...prev,
+               student: enrollment.student,
                category: enrollment.category._id,
                year: enrollment.year,
             }));
@@ -82,32 +67,12 @@ const Enrollment = ({
    const restore = () => {
       setFormData({
          ...formData,
-         student: "",
-      });
-      setAdminValues({
-         ...adminValues,
-         hideSearch: false,
-         selectedStudent: {
-            _id: "",
-            name: "",
-         },
+         student: null,
       });
    };
 
-   const addStudent = () => {
-      if (selectedStudent._id === "") {
-         setAlert("Primero debe seleccionar un alumno.", "danger", "3");
-      } else {
-         setFormData({
-            ...formData,
-            student: selectedStudent._id,
-         });
-         setAdminValues({
-            ...adminValues,
-            hideSearch: true,
-         });
-         clearSearch();
-      }
+   const selectUser = (user) => {
+      setFormData((prev) => ({ ...prev, student: user }));
    };
 
    const onChange = (e) => {
@@ -126,6 +91,7 @@ const Enrollment = ({
                registerUpdateEnrollment(
                   {
                      ...formData,
+                     student: student._id,
                      month:
                         thisYear === Number(year) && currentMonth > 2
                            ? month
@@ -162,51 +128,17 @@ const Enrollment = ({
                togglePopup("default");
             }}
          >
-            {_id === "" && !hideSearch && (
-               <UserSearch
-                  selectStudent={(user) =>
-                     setAdminValues({
-                        ...adminValues,
-                        selectedStudent: {
-                           _id: user._id,
-                           name: `${user.lastname} ${user.name}`,
-                        },
-                     })
-                  }
-                  selectedStudent={selectedStudent}
-                  actionForSelected={addStudent}
-                  typeSearch="enrollment"
-               />
-            )}
-            <p className={`heading-tertiary btn-end ${_id === "" && "mt-3"}`}>
-               <span className="text-dark">Alumno: </span> &nbsp;
-               {hideSearch && (
-                  <>
-                     <Link
-                        to={`/index/dashboard/${selectedStudent._id}`}
-                        className="text-secondary"
-                        onClick={() => {
-                           clearProfile();
-                           window.scroll(0, 0);
-                        }}
-                     >
-                        {selectedStudent.name}
-                     </Link>
-                     &nbsp;
-                     <button
-                        className="btn-cancel"
-                        type="button"
-                        onClick={(e) => {
-                           e.preventDefault();
-                           restore();
-                        }}
-                     >
-                        <FaTimes />
-                     </button>
-                  </>
-               )}
-            </p>
-            <div className="form-group mt-3">
+            <h3 className="text-dark">Búsqueda de Alumno</h3>
+            <UsersSearch
+               primary={true}
+               disabled
+               autoComplete="off"
+               selectUser={selectUser}
+               selectedUser={student}
+               usersType="student"
+               restore={restore}
+            />
+            <div className={`form-group ${!student ? "mt-3" : ""}`}>
                <select
                   className="form-input"
                   id="category"
@@ -282,20 +214,6 @@ const Enrollment = ({
                      className={`form-label ${month === "" && "lbl"}`}
                   >
                      Mes
-                  </label>
-               </div>
-            )}
-            {_id === "" && (
-               <div className="form-group">
-                  <input
-                     className="form-input"
-                     type="text"
-                     id="value"
-                     value={`$${enrollmentValue}`}
-                     disabled
-                  />
-                  <label htmlFor="value" className="form-label show">
-                     Importe
                   </label>
                </div>
             )}

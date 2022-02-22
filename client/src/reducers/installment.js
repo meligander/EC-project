@@ -98,7 +98,7 @@ export default function (state = initialState, action) {
          return {
             ...state,
             installments: [],
-            loading: false,
+            // loading: false,
             error: payload,
          };
       case INSTALLMENT_ERROR:

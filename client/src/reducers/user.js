@@ -119,10 +119,17 @@ export default function (state = initialState, action) {
       case SEARCH_CLEARED:
          return {
             ...state,
-            users: [],
-            loading: true,
-            usersBK: [],
-            loadingBK: true,
+            ...(payload === undefined
+               ? {
+                    users: [],
+                    loading: true,
+                    usersBK: [],
+                    loadingBK: true,
+                 }
+               : payload
+               ? { users: [], loading: true }
+               : { usersBK: [], loadingBK: true }),
+
             otherValues: {
                ...state.otherValues,
                userSearchType: "",

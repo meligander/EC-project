@@ -21,8 +21,6 @@ import PopUp from "../../../../../modal/PopUp";
 import ClassInfo from "../../../sharedComp/ClassInfo";
 import StudentTable from "../../../sharedComp/tables/StudentTable";
 
-import "./style.scss";
-
 const SingleClass = ({
    match,
    classes: { classInfo, loadingClass },
@@ -118,7 +116,7 @@ const SingleClass = ({
                               >
                                  <IoCheckmarkCircleSharp />
                                  <span className="hide-sm">
-                                    &nbsp;Inasistencias
+                                    &nbsp; Inasistencias
                                  </span>
                               </Link>
                               <Link
@@ -140,7 +138,7 @@ const SingleClass = ({
                               >
                                  <CgNotes />
                                  <span className="hide-sm">
-                                    &nbsp;Observaciones
+                                    &nbsp; Observaciones
                                  </span>
                               </Link>
                            </>
