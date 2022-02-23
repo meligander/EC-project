@@ -13,13 +13,6 @@
       z-index: 200;
       top: 4.1rem;
 
-      &.danger {
-         background-color: lighten($danger-color, 40%);
-         color: $white-color;
-      }
-   }
-
-   &-list {
       overflow-y: auto;
       max-height: 20vh;
 
@@ -42,8 +35,12 @@
             }
          }
       }
-   }
 
+      &.danger {
+         background-color: lighten($danger-color, 40%);
+         color: $white-color;
+      }
+   }
    &-item {
       padding: 0.6rem;
       margin: 0.3rem;
@@ -56,16 +53,6 @@
          &:hover {
             background-color: lighten($light-color, 15%);
          }
-      }
-   }
-
-   &-close {
-      display: flex;
-      justify-content: flex-end;
-      padding: 0.5rem 0.5rem 0.3rem;
-
-      &-icon {
-         font-size: 2rem;
       }
    }
 

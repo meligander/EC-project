@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { FaTimes, FaUserCircle, FaPlus, FaMoneyCheckAlt } from "react-icons/fa";
@@ -36,7 +36,6 @@ const UsersSearch = ({
    });
 
    const [adminValues, setAdminValues] = useState({
-      searchDisplay: false,
       user: null,
       users: [],
       loading: true,
@@ -44,7 +43,7 @@ const UsersSearch = ({
 
    const { name, lastname } = filterData;
 
-   const { searchDisplay, user, users, loading } = adminValues;
+   const { user, users, loading } = adminValues;
 
    useEffect(() => {
       setAdminValues((prev) => ({
@@ -59,7 +58,7 @@ const UsersSearch = ({
    }, [selectedUser]);
 
    const chooseUser = (user) => {
-      setAdminValues((prev) => ({ ...prev, user, searchDisplay: false }));
+      setAdminValues((prev) => ({ ...prev, user }));
       setFilterData((prev) => ({ ...prev, name: "", lastname: "" }));
       selectUser(user);
       clearSearch(primary);
@@ -71,23 +70,12 @@ const UsersSearch = ({
 
       if (onChangeForm) onChangeForm(e);
 
-      if (e.target.value.length > 0) {
-         if (!searchDisplay)
-            setAdminValues((prev) => ({ ...prev, searchDisplay: true }));
+      if (e.target.value.length > 0)
          loadUsers(
             { ...filterData, [e.target.name]: e.target.value, type: usersType },
             false,
             primary
          );
-      }
-      if (
-         e.target.value === "" &&
-         ((e.target.name === "name" && lastname === "") ||
-            (e.target.name === "lastname" && name === ""))
-      ) {
-         setAdminValues((prev) => ({ ...prev, searchDisplay: false }));
-         clearSearch(primary);
-      }
    };
 
    const cancelUser = () => {
@@ -149,57 +137,25 @@ const UsersSearch = ({
                   autoComplete={autoComplete}
                />
             )}
-            {searchDisplay && (
-               <div
-                  className={`form-search-display ${
-                     users.length === 0 ? "danger" : ""
-                  }`}
-               >
-                  <div className="form-search-close">
-                     <button
-                        type="button"
-                        className="form-search-close-icon"
-                        onClick={() =>
-                           setAdminValues((prev) => ({
-                              ...prev,
-                              searchDisplay: false,
-                           }))
-                        }
+            {!loading && users.length > 0 && (
+               <ul className="form-search-display">
+                  {users.map((user) => (
+                     <li
+                        className="form-search-item"
+                        onClick={() => chooseUser(user)}
+                        key={user._id}
                      >
-                        <FaTimes />
-                     </button>
-                  </div>
-                  <ul className="form-search-list">
-                     {!loading && (
-                        <Fragment>
-                           {users.length > 0 ? (
-                              users.map((user) => (
-                                 <li
-                                    className="form-search-item"
-                                    onClick={() => chooseUser(user)}
-                                    key={user._id}
-                                 >
-                                    <span>
-                                       {user.lastname + ", " + user.name}
-                                    </span>
-                                    <span>
-                                       {usersType === "student"
-                                          ? user.category
-                                          : user.type === "student"
-                                          ? "Alumno"
-                                          : "Tutor"}
-                                    </span>
-                                 </li>
-                              ))
-                           ) : (
-                              <li className="bg-danger form-search-item">
-                                 No matching results
-                              </li>
-                           )}
-                        </Fragment>
-                     )}
-                  </ul>
-               </div>
+                        <span>{user.lastname + ", " + user.name}</span>
+                        <span>
+                           {usersType === "student"
+                              ? user.category
+                              : user.type === "student"
+                              ? "Alumno"
+                              : "Tutor"}
+                        </span>
+                     </li>
+                  ))}
+               </ul>
             )}
          </div>
          {button && (
