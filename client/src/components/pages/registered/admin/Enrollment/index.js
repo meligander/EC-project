@@ -13,8 +13,6 @@ import {
    loadEnrollment,
    clearEnrollments,
 } from "../../../../../actions/enrollment";
-import { clearSearch, clearProfile } from "../../../../../actions/user";
-import { setAlert } from "../../../../../actions/alert";
 import { togglePopup } from "../../../../../actions/mixvalues";
 
 import UsersSearch from "../../sharedComp/search/UsersSearch";
@@ -28,9 +26,6 @@ const Enrollment = ({
    registerUpdateEnrollment,
    loadEnrollment,
    clearEnrollments,
-   clearSearch,
-   clearProfile,
-   setAlert,
    togglePopup,
 }) => {
    const date = new Date();
@@ -247,8 +242,5 @@ export default connect(mapStateToProps, {
    registerUpdateEnrollment,
    loadEnrollment,
    clearEnrollments,
-   clearSearch,
-   clearProfile,
-   setAlert,
    togglePopup,
 })(Enrollment);

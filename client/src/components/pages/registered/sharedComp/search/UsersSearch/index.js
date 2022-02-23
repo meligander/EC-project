@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { FaTimes, FaUserCircle, FaPlus, FaMoneyCheckAlt } from "react-icons/fa";
@@ -30,6 +30,8 @@ const UsersSearch = ({
    button,
    actionForSelected,
 }) => {
+   const modalRef = useRef();
+
    const [filterData, setFilterData] = useState({
       name: "",
       lastname: "",
@@ -39,11 +41,12 @@ const UsersSearch = ({
       user: null,
       users: [],
       loading: true,
+      searchDisplay: false,
    });
 
    const { name, lastname } = filterData;
 
-   const { user, users, loading } = adminValues;
+   const { user, users, loading, searchDisplay } = adminValues;
 
    useEffect(() => {
       setAdminValues((prev) => ({
@@ -56,6 +59,17 @@ const UsersSearch = ({
    useEffect(() => {
       setAdminValues((prev) => ({ ...prev, user: selectedUser }));
    }, [selectedUser]);
+
+   useEffect(() => {
+      const handler = (event) =>
+         setAdminValues((prev) => ({
+            ...prev,
+            searchDisplay: modalRef.current?.contains(event.target),
+         }));
+
+      window.addEventListener("click", handler);
+      return () => window.removeEventListener("click", handler);
+   }, []);
 
    const chooseUser = (user) => {
       setAdminValues((prev) => ({ ...prev, user }));
@@ -95,7 +109,7 @@ const UsersSearch = ({
                : "Usuario a Pagar"}
          </h3>
          <Alert type="3" />
-         <div className="form-group form-search">
+         <div className="form-group form-search" ref={modalRef}>
             {user ? (
                <div>
                   <input
@@ -137,7 +151,7 @@ const UsersSearch = ({
                   autoComplete={autoComplete}
                />
             )}
-            {!loading && users.length > 0 && (
+            {!loading && users.length > 0 && searchDisplay && (
                <ul className="form-search-display">
                   {users.map((user) => (
                      <li
