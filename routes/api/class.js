@@ -64,7 +64,7 @@ router.get("/:class_id", auth, async (req, res) => {
    try {
       const { class_id } = req.params;
 
-      let classinfo = await Class.findOne({ _id: class_id })
+      const classinfo = await Class.findOne({ _id: class_id })
          .populate("category", ["name"])
          .populate("teacher", ["name", "lastname"])
          .lean();
@@ -82,7 +82,7 @@ router.get("/:class_id", auth, async (req, res) => {
          select: "-password",
       });
 
-      classinfo.students = enrollments
+      const students = enrollments
          .map((item) => item.student)
          .sort((a, b) => {
             if (a.lastname > b.lastname) return 1;
@@ -92,7 +92,7 @@ router.get("/:class_id", auth, async (req, res) => {
             if (a.name < b.name) return -1;
          });
 
-      res.json(classinfo);
+      res.json({ ...classinfo, students });
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });
@@ -106,10 +106,19 @@ router.get("/student/:id", auth, async (req, res) => {
    try {
       const date = new Date();
 
-      let enrollment = await Enrollment.findOne({
+      let enrollment = await Enrollment.find({
          student: req.params.id,
          year: date.getFullYear(),
-      });
+      })
+         .sort({ $natural: -1 })
+         .limit(1);
+      enrollment = enrollment[0];
+
+      if (!enrollment) {
+         return res
+            .status(400)
+            .json({ msg: "No se encontró una clase con dichas descripciones" });
+      }
 
       let classinfo;
 
@@ -122,13 +131,25 @@ router.get("/student/:id", auth, async (req, res) => {
             .populate("teacher", ["name", "lastname"]);
       }
 
-      if (!classinfo) {
-         return res
-            .status(400)
-            .json({ msg: "No se encontró una clase con dichas descripciones" });
-      }
+      const enrollments = await Enrollment.find({
+         classroom: enrollment.classroom,
+      }).populate({
+         path: "student",
+         model: "user",
+         select: "-password",
+      });
 
-      res.json(classinfo);
+      const students = enrollments
+         .map((item) => item.student)
+         .sort((a, b) => {
+            if (a.lastname > b.lastname) return 1;
+            if (a.lastname < b.lastname) return -1;
+
+            if (a.name > b.name) return 1;
+            if (a.name < b.name) return -1;
+         });
+
+      res.json({ ...classinfo.toJSON(), students });
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });
@@ -147,7 +168,8 @@ router.post(
       check("category", "La categoría es necesaria").not().isEmpty(),
    ],
    async (req, res) => {
-      let { hourin1, hourin2, hourout1, hourout2, students } = req.body;
+      const { hourin1, hourin2, hourout1, hourout2, students, category } =
+         req.body;
 
       const year = new Date().getFullYear();
 
@@ -188,6 +210,7 @@ router.post(
             async (student) =>
                await Enrollment.findOneAndUpdate(
                   {
+                     category,
                      student: student._id,
                      year,
                   },
@@ -218,7 +241,8 @@ router.put(
       check("teacher", "El profesor es necesario").not().isEmpty(),
    ],
    async (req, res) => {
-      let { hourin1, hourin2, hourout1, hourout2, students } = req.body;
+      let { hourin1, hourin2, hourout1, hourout2, students, category } =
+         req.body;
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -243,6 +267,7 @@ router.put(
          for (let x = 0; x < students.length; x++) {
             await Enrollment.findOneAndUpdate(
                {
+                  category,
                   student: students[x]._id,
                   year: new Date().getFullYear(),
                },

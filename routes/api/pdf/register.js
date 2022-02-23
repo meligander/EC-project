@@ -40,11 +40,6 @@ router.post("/list", [auth, adminAuth], (req, res) => {
                item.expence !== 0 ? `$${formatNumber(item.expence)}` : ""
             }</td>
             <td>${
-               item.cheatincome !== 0
-                  ? `$${formatNumber(item.cheatincome)}`
-                  : ""
-            }</td>
-            <td>${
                item.withdrawal !== 0 ? `$${formatNumber(item.withdrawal)}` : ""
             }</td>
             ${
@@ -73,10 +68,10 @@ router.post("/list", [auth, adminAuth], (req, res) => {
 
    if (register[0].temporary !== undefined)
       thead =
-         "<th>Fecha</th> <th>Ingresos</th> <th>Egresos</th> <th>Otros Ing</th> <th>Retiro</th> <th>Plata Caja</th> <th>Diferencia</th> <th>Detalles</th>";
+         "<th>Fecha</th> <th>Ingresos</th> <th>Egresos</th> <th>Retiro</th> <th>Plata Caja</th> <th>Diferencia</th> <th>Detalles</th>";
    else
       thead =
-         "<th class='blank'></th> <th>Ingresos</th> <th>Egresos</th> <th>Otros Ing</th> <th>Retiro</th><th>Diferencia</th>";
+         "<th class='blank'></th> <th>Ingresos</th> <th>Egresos</th> <th>Retiro</th><th>Diferencia</th>";
 
    try {
       generatePDF(

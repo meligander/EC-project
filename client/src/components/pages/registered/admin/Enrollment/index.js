@@ -128,10 +128,9 @@ const Enrollment = ({
                togglePopup("default");
             }}
          >
-            <h3 className="text-dark">Búsqueda de Alumno</h3>
             <UsersSearch
                primary={true}
-               disabled
+               disabled={_id}
                autoComplete="off"
                selectUser={selectUser}
                selectedUser={student}

@@ -9,7 +9,7 @@ import Attendance from "./tabs/AttendanceTab";
 
 const MentionList = ({ loadCategories, categories: { loading } }) => {
    useEffect(() => {
-      loadCategories(true);
+      loadCategories(false);
    }, [loadCategories]);
 
    return (

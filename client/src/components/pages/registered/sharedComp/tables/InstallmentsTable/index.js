@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { withRouter } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { FaEdit, FaPlus, FaTrashAlt } from "react-icons/fa";
 
 import { formatNumber } from "../../../../../../actions/mixvalues";
@@ -8,15 +8,14 @@ import Alert from "../../../../sharedComp/Alert";
 import PopUp from "../../../../../modal/PopUp";
 
 const InstallmentsTable = ({
-   location,
    forAdmin,
    installments,
-   actionForSelected,
+   addDetail,
    deleteInstallment,
+   clearCategories,
+   loadInstallment,
    togglePopup,
 }) => {
-   const invoice = location.pathname === "/invoice/register";
-
    const installment = [
       "Inscripción",
       "Clase Particular",
@@ -56,7 +55,7 @@ const InstallmentsTable = ({
                         <th>Categoría</th>
                         <th>Importe</th>
                         <th className="fit">&nbsp;</th>
-                        {!invoice && <th className="fit">&nbsp;</th>}
+                        {!addDetail && <th className="fit">&nbsp;</th>}
                      </tr>
                   </thead>
                )}
@@ -64,7 +63,7 @@ const InstallmentsTable = ({
                <tbody>
                   {installments.map((item, i) => (
                      <React.Fragment key={i}>
-                        {(!invoice || (invoice && item.value > 0)) && (
+                        {
                            <tr>
                               <td>{installment[item.number]}</td>
                               <td>{item.year}</td>
@@ -89,17 +88,29 @@ const InstallmentsTable = ({
                               {forAdmin && (
                                  <>
                                     <td>
-                                       <button
-                                          type="button"
-                                          className="btn btn-success"
-                                          onClick={() =>
-                                             actionForSelected(item)
-                                          }
-                                       >
-                                          {invoice ? <FaPlus /> : <FaEdit />}
-                                       </button>
+                                       {addDetail ? (
+                                          <button
+                                             type="button"
+                                             className="btn btn-success"
+                                             onClick={() => addDetail(item)}
+                                          >
+                                             <FaPlus />
+                                          </button>
+                                       ) : (
+                                          <Link
+                                             to={`/index/installment/edit/${item._id}`}
+                                             className="btn btn-success"
+                                             onClick={() => {
+                                                window.scroll(0, 0);
+                                                clearCategories();
+                                                loadInstallment(item._id, true);
+                                             }}
+                                          >
+                                             <FaEdit />
+                                          </Link>
+                                       )}
                                     </td>
-                                    {!invoice && (
+                                    {!addDetail && (
                                        <td>
                                           <button
                                              className="btn btn-danger"
@@ -119,7 +130,7 @@ const InstallmentsTable = ({
                                  </>
                               )}
                            </tr>
-                        )}
+                        }
                      </React.Fragment>
                   ))}
                </tbody>
@@ -129,4 +140,4 @@ const InstallmentsTable = ({
    );
 };
 
-export default withRouter(InstallmentsTable);
+export default InstallmentsTable;

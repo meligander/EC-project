@@ -11,6 +11,7 @@ import {
    toggleMenu,
 } from "../../../actions/mixvalues";
 import { logOut } from "../../../actions/auth";
+import { clearProfile } from "../../../actions/user";
 
 import GuestNavbar from "./usersLinks/GuestNavbar";
 import AdminNavbar from "./usersLinks/AdminNavbar";
@@ -25,10 +26,12 @@ import "./style.scss";
 const Navbar = ({
    location,
    auth: { userLogged, loading, isAuthenticated },
+   enrollments: { enrollments },
    mixvalues: { currentNav, menuToggle },
    logOut,
    setNavbarHeight,
    updateCurrentNav,
+   clearProfile,
    toggleMenu,
 }) => {
    const ref = useRef();
@@ -43,27 +46,35 @@ const Navbar = ({
          let currentNav = path[1];
 
          if (path[2] === "dashboard") {
-            if (path[3] !== "0")
-               switch (userLogged.type) {
-                  case "guardian":
+            switch (userLogged.type) {
+               case "guardian":
+                  if (path[3] !== "0")
                      currentNav =
                         "child" +
                         userLogged.children.findIndex(
                            (item) => item._id === path[3]
                         );
-                     break;
-                  case "student":
-                     currentNav = "class";
-                     break;
-                  default:
-                     currentNav = "user";
-                     break;
-               }
+                  break;
+               case "student":
+                  if (enrollments.length > 0) {
+                     if (path[3] === "0") currentNav = "class-" + 0;
+                     else {
+                        const index = enrollments.findIndex(
+                           (item) => path[4] === item.classroom
+                        );
+                        currentNav = "class-" + index;
+                     }
+                  } else currentNav = "index";
+                  break;
+               default:
+                  currentNav = "user";
+                  break;
+            }
          }
 
          updateCurrentNav(currentNav, false);
       }
-   }, [userLogged, updateCurrentNav, location.pathname]);
+   }, [userLogged, updateCurrentNav, location.pathname, enrollments]);
 
    useEffect(() => {
       setTimeout(() => {
@@ -95,6 +106,7 @@ const Navbar = ({
             to={userLogged ? "/index/dashboard/0" : "/"}
             onClick={() => {
                updateCurrentNav("index", false);
+               if (userLogged && userLogged.type === "student") clearProfile();
                window.scroll(0, 0);
             }}
          >
@@ -153,25 +165,33 @@ const Navbar = ({
                         menuToggle ? " show" : ""
                      }`}
                   >
-                     <li
-                        className={`nav-item${isAdmin ? " smaller" : ""}${
-                           menuToggle ? " show" : ""
-                        }${currentNav === "index" ? " current" : ""}`}
-                     >
-                        <Link
-                           className="nav-link"
-                           to="/index/dashboard/0"
-                           onClick={() => {
-                              window.scroll(0, 0);
-                              updateCurrentNav("index", true);
-                           }}
+                     {userLogged.type !== "student" && (
+                        <li
+                           className={`nav-item${isAdmin ? " smaller" : ""}${
+                              menuToggle ? " show" : ""
+                           }${currentNav === "index" ? " current" : ""}`}
                         >
-                           <GoHome />
-                           <span className="hide-md">
-                              &nbsp; Página Principal
-                           </span>
-                        </Link>
-                     </li>
+                           <Link
+                              className="nav-link"
+                              to="/index/dashboard/0"
+                              onClick={() => {
+                                 window.scroll(0, 0);
+                                 if (
+                                    userLogged &&
+                                    userLogged.type === "student"
+                                 )
+                                    clearProfile();
+                                 updateCurrentNav("index", true);
+                              }}
+                           >
+                              <GoHome />
+                              <span className="hide-md">
+                                 &nbsp; Página Principal
+                              </span>
+                           </Link>
+                        </li>
+                     )}
+
                      {type()}
                      <li
                         className={`nav-item${isAdmin ? " smaller" : ""}${
@@ -204,11 +224,13 @@ const Navbar = ({
 const mapStateToProps = (state) => ({
    auth: state.auth,
    mixvalues: state.mixvalues,
+   enrollments: state.enrollments,
 });
 
 export default connect(mapStateToProps, {
    setNavbarHeight,
    logOut,
    updateCurrentNav,
+   clearProfile,
    toggleMenu,
 })(withRouter(Navbar));

@@ -60,7 +60,8 @@ export const loadRegisters =
       } catch (err) {
          if (err.response.status !== 401) {
             dispatch(setError(REGISTERS_ERROR, err.response));
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
+            if (spinner)
+               dispatch(setAlert(err.response.data.msg, "danger", "2"));
             window.scrollTo(0, 0);
          } else error = true;
       }

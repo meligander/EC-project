@@ -58,6 +58,10 @@ const NewClassTab = ({
    useEffect(() => {
       if (!loadingClass && _id) {
          if (
+            classInfo.hourin1 &&
+            classInfo.hourin2 &&
+            classInfo.hourout1 &&
+            classInfo.hourout2 &&
             format(new Date(classInfo.hourin1), "HH:mm") ===
                format(new Date(classInfo.hourin2), "HH:mm") &&
             format(new Date(classInfo.hourout1), "HH:mm") ===
@@ -71,7 +75,10 @@ const NewClassTab = ({
                oldClass[x] = !classInfo[x]
                   ? prev[x]
                   : x.substring(0, 4) === "hour"
-                  ? format(new Date(classInfo[x].slice(0, -1)), "HH:mm")
+                  ? format(
+                       new Date(classInfo[x] && classInfo[x].slice(0, -1)),
+                       "HH:mm"
+                    )
                   : x === "teacher"
                   ? classInfo[x]._id
                   : classInfo[x];

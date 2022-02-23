@@ -57,7 +57,7 @@ const StudentDashboard = ({
 
    useEffect(() => {
       if (user.active && allowedUsers && loadingClass)
-         loadClass(class_id ? class_id : user._id, false, !class_id);
+         loadClass(!class_id ? user._id : class_id, class_id, !class_id);
    }, [allowedUsers, loadingClass, loadClass, user, class_id]);
 
    useEffect(() => {
@@ -76,13 +76,13 @@ const StudentDashboard = ({
    }, [loadingClass, loadingGrades, loadGrades, user, classInfo]);
 
    useEffect(() => {
-      if (loadingEnrollments)
-         loadEnrollments({ classroom: true, student: user._id });
-   }, [loadEnrollments, user, loadingEnrollments]);
+      if (loadingEnrollments && allowedUsers)
+         loadEnrollments({ classroom: false, student: user._id }, false);
+   }, [loadEnrollments, user, loadingEnrollments, userLogged, allowedUsers]);
 
    useEffect(() => {
       if (user.active && !loadingClass && classInfo && loadingObservations)
-         loadObservations(classInfo._id, user._id, false, true);
+         loadObservations(classInfo._id, user._id, false);
    }, [user, loadObservations, loadingObservations, loadingClass, classInfo]);
 
    useEffect(() => {
@@ -93,7 +93,7 @@ const StudentDashboard = ({
    return (
       <>
          {!loadingBK && <RelativeDashboard user={user} />}
-         {!loadingEnrollments && enrollments.length > 0 && (
+         {!loadingEnrollments && allowedUsers && enrollments.length > 0 && (
             <div className="bg-white p-3">
                <h3 className="heading-tertiary text-primary text-center">
                   Cursos
@@ -105,10 +105,7 @@ const StudentDashboard = ({
                         <Link
                            className="btn-text"
                            to={`/index/dashboard/${user._id}/${item.classroom}`}
-                           onClick={() => {
-                              window.scroll(0, 0);
-                              clearProfile();
-                           }}
+                           onClick={() => clearProfile(true)}
                         >
                            Ver Info
                         </Link>
@@ -161,7 +158,7 @@ const StudentDashboard = ({
                                  to={`/index/dashboard/${classInfo.teacher._id}`}
                                  onClick={() => {
                                     window.scroll(0, 0);
-                                    clearProfile(userLogged.type !== "student");
+                                    clearProfile();
                                  }}
                               >
                                  Ver Info

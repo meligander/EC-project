@@ -14,6 +14,7 @@ import {
    USER_ERROR,
    USERSBK_ERROR,
    OTHERVALUES_LOADED,
+   USERSBK_CLEARED,
 } from "../actions/types";
 
 const initialState = {
@@ -99,6 +100,15 @@ export default function (state = initialState, action) {
             ...state,
             loadingUser: true,
             user: null,
+            usersBK: [],
+            loadingBK: true,
+            error: {},
+         };
+      case USERSBK_CLEARED:
+         return {
+            ...state,
+            usersBK: [],
+            loadingBK: true,
             error: {},
          };
       case USERS_CLEARED:

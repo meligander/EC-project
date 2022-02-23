@@ -168,7 +168,6 @@ const InvoiceTab = ({
                   <label className="form-label">Fecha</label>
                </div>
             </div>
-            <h3 className="paragraph text-primary ">Usuario a Pagar</h3>
             <div className="mb-2">
                <UsersSearch
                   primary={false}

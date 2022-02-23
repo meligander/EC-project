@@ -12,7 +12,7 @@ const Installment = require("../../models/Installment");
 //@route    GET /api/category
 //@desc     get all categories
 //@access   Private && Admin
-router.get("/", [auth, adminAuth], async (req, res) => {
+router.get("/", auth, async (req, res) => {
    try {
       let categories = await Category.find();
 

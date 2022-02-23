@@ -14,7 +14,7 @@ const Team = ({ users: { loading, users }, loadUsers }) => {
    const [teamNumber, setTeamNumber] = useState(0);
 
    useEffect(() => {
-      if (loading) loadUsers({ active: true, type: "team" }, true, true, false);
+      if (loading) loadUsers({ active: true, type: "team" }, false, true);
    }, [loading, loadUsers]);
 
    const moveUp = () => {

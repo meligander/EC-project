@@ -43,7 +43,7 @@ const SingleClass = ({
       userLogged.type !== "student" && userLogged.type !== "guardian";
 
    useEffect(() => {
-      if (loadingClass) loadClass(_id, true);
+      if (loadingClass) loadClass(_id, true, false);
    }, [loadClass, _id, loadingClass]);
 
    return (

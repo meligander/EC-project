@@ -35,6 +35,9 @@ const GuardianNavbar = ({
                      <span className="hide-md">
                         &nbsp; {child.lastname + ", " + child.name}
                      </span>
+                     <span className="show-md">
+                        &nbsp;{child.lastname[0] + child.name[0]}
+                     </span>
                   </Link>
                </li>
             ))}

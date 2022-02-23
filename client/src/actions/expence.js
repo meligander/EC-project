@@ -40,7 +40,7 @@ export const loadTransactions = (formData, spinner) => async (dispatch) => {
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setError(TRANSACTIONS_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         if (spinner) dispatch(setAlert(err.response.data.msg, "danger", "2"));
          window.scroll(0, 0);
       } else error = true;
    }
@@ -61,7 +61,7 @@ export const loadWithdrawals = (formData, spinner) => async (dispatch) => {
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setError(TRANSACTIONS_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         if (spinner) dispatch(setAlert(err.response.data.msg, "danger", "2"));
          window.scroll(0, 0);
       } else error = true;
    }
@@ -114,10 +114,7 @@ export const registerExpence =
             payload: {
                ...register,
                [type]: register[type] + value,
-               registermoney:
-                  type === "cheatincome"
-                     ? register.registermoney + value
-                     : register.registermoney - value,
+               registermoney: register.registermoney - value,
             },
          });
 

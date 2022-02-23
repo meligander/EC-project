@@ -9,6 +9,7 @@ import {
    deleteUser,
    clearUser,
    clearSearch,
+   clearProfile,
 } from "../../../../actions/user";
 import { clearTowns } from "../../../../actions/town";
 import { clearNeighbourhoods } from "../../../../actions/neighbourhood";
@@ -33,6 +34,7 @@ const Dashboard = ({
    clearSearch,
    clearNeighbourhoods,
    clearUser,
+   clearProfile,
    deleteUser,
    togglePopup,
 }) => {
@@ -68,23 +70,22 @@ const Dashboard = ({
             }));
          }
       } else {
-         if ((_id && user._id !== _id) || (!_id && user._id !== userLogged._id))
+         if (
+            (_id && user._id !== _id) ||
+            (!_id && user._id !== userLogged._id)
+         ) {
             setAdminValues((prev) => ({ ...prev, user: null }));
+            clearProfile();
+         }
       }
-   }, [loadUser, _id, loadingUser, otherUser, user, userLogged]);
+   }, [loadUser, _id, loadingUser, otherUser, user, userLogged, clearProfile]);
 
    const dashboardType = () => {
       switch (user.type) {
          case "student":
             return <StudentDashboard user={user} />;
          case "teacher":
-            return (
-               <>
-                  {(isAdmin || userLogged._id === _id) && (
-                     <TeacherDashboard user={user} />
-                  )}
-               </>
-            );
+            return <>{(isAdmin || !_id) && <TeacherDashboard user={user} />}</>;
          case "guardian":
             return <RelativeDashboard user={user} />;
          case "secretary":
@@ -296,6 +297,7 @@ export default connect(mapStateToProps, {
    clearTowns,
    clearSearch,
    clearUser,
+   clearProfile,
    clearNeighbourhoods,
    togglePopup,
 })(Dashboard);

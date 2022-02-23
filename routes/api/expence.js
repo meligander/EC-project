@@ -172,18 +172,12 @@ router.post(
                msg: "Primero debe ingresar dinero a la caja antes de hacer cualquier transacción",
             });
 
-         if (
-            expencetypeinfo.type !== "cheatincome" &&
-            register.registermoney < value
-         )
+         if (register.registermoney < value)
             return res.status(400).json({
                msg: "No se puede utilizar más dinero del que hay en caja",
             });
 
-         const registermoney =
-            expencetypeinfo.type !== "cheatincome"
-               ? register.registermoney - value
-               : register.registermoney + value;
+         const registermoney = register.registermoney - value;
 
          if (register.temporary) {
             await Register.findOneAndUpdate(
@@ -229,10 +223,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
             model: "register",
          });
 
-      const registermoney =
-         expence.expencetype.type !== "cheatincome"
-            ? expence.register.registermoney + expence.value
-            : expence.register.registermoney - expence.value;
+      const registermoney = expence.register.registermoney + expence.value;
 
       await Register.findByIdAndUpdate(
          { _id: expence.register._id },

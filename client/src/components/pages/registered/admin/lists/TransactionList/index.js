@@ -31,10 +31,6 @@ const TransactionList = ({
    transactionsPDF,
 }) => {
    const expenceType = {
-      cheatincome: {
-         trClass: "bg-refund",
-         nameType: "Ingreso Especial",
-      },
       withdrawal: {
          trClass: "bg-withdrawal",
          nameType: "Retiro",
@@ -99,7 +95,7 @@ const TransactionList = ({
             onSubmit={(e) => {
                e.preventDefault();
                setAdminValues((prev) => ({ ...prev, page: 0 }));
-               loadTransactions(filterData);
+               loadTransactions(filterData, true);
             }}
          >
             <DateFilter
@@ -119,7 +115,6 @@ const TransactionList = ({
                   <option value="income">Ingreso</option>
                   <option value="expence">Gasto</option>
                   <option value="withdrawal">Retiro</option>
-                  <option value="cheatincome">Ingreso Especial</option>
                </select>
                <label
                   htmlFor="transactionType"

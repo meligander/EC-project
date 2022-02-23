@@ -25,7 +25,7 @@ const Search = ({
       userLogged.type === "admin&teacher";
 
    useEffect(() => {
-      if (loading) loadCategories(true);
+      if (loading) loadCategories(false);
    }, [loadCategories, loading]);
 
    return (

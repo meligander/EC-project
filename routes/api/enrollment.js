@@ -15,7 +15,7 @@ const Category = require("../../models/Category");
 //@route    GET /api/enrollment
 //@desc     get all enrollments || with filter
 //@access   Private && Admin
-router.get("/", [auth, adminAuth], async (req, res) => {
+router.get("/", auth, async (req, res) => {
    try {
       let enrollments;
       if (Object.entries(req.query).length === 0) {
@@ -54,7 +54,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
             ...(category && { category: category }),
             ...(year && { year }),
             ...(student && { student: student }),
-            ...(classroom && { classroom: { $ne: null } }),
+            ...(classroom === false && { classroom: { $ne: null } }),
          })
             .populate({
                path: "student",
@@ -78,7 +78,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
                path: "category",
                model: "category",
             })
-            .sort({ date: -1 });
+            .sort({ date: !classroom ? -1 : 1 });
 
          if (name || lastname)
             enrollments = enrollments.filter((enroll) => enroll.student);

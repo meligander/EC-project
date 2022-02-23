@@ -116,16 +116,6 @@ const RegisterTab = ({
                      </td>
                   </tr>
                   <tr>
-                     <td>Ingreso Especial</td>
-                     <td>
-                        $
-                        {register && register.temporary && register.cheatincome
-                           ? formatNumber(register.cheatincome)
-                           : 0}
-                     </td>
-                     <td>&nbsp;</td>
-                  </tr>
-                  <tr>
                      <td>Retiro de Dinero</td>
                      <td>
                         $

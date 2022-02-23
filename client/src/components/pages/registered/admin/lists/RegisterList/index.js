@@ -90,7 +90,7 @@ const RegisterList = ({
             onSubmit={(e) => {
                e.preventDefault();
                setAdminValues((prev) => ({ ...prev, page: 0 }));
-               loadRegisters(filterData);
+               loadRegisters(filterData, true, false);
             }}
          >
             <DateFilter
@@ -112,7 +112,6 @@ const RegisterList = ({
                      <th>Fecha</th>
                      <th>Ingresos</th>
                      <th>Egresos</th>
-                     <th>Otros Ing.</th>
                      <th>Retiro</th>
                      <th>Plata Caja</th>
                      <th>Diferencia</th>
@@ -124,6 +123,7 @@ const RegisterList = ({
                </thead>
                <tbody>
                   {!loading &&
+                     registers[0] &&
                      registers[0].temporary !== undefined &&
                      registers.map(
                         (register, i) =>
@@ -145,10 +145,6 @@ const RegisterList = ({
                                  <td>
                                     {register.expence !== 0 &&
                                        "$" + formatNumber(register.expence)}
-                                 </td>
-                                 <td>
-                                    {register.cheatincome !== 0 &&
-                                       "$" + formatNumber(register.cheatincome)}
                                  </td>
                                  <td>
                                     {register.withdrawal !== 0 &&

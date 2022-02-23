@@ -63,7 +63,7 @@ const WithdrawalList = ({
             onSubmit={(e) => {
                e.preventDefault();
                setAdminValues((prev) => ({ ...prev, page: 0 }));
-               loadWithdrawals(filterData);
+               loadWithdrawals(filterData, true);
             }}
          >
             <DateFilter

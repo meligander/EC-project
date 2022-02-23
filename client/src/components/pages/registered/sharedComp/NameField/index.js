@@ -36,16 +36,14 @@ const NameField = ({
                onChange={onChange}
             />
          </div>
-         {!autoComplete && (
-            <div className="two-in-row">
-               <label className={`form-label ${name === "" ? "lbl" : ""}`}>
-                  {namePlaceholder ? namePlaceholder : "Nombre"}
-               </label>
-               <label className={`form-label ${lastname === "" ? "lbl" : ""}`}>
-                  {lastnamePlaceholder ? lastnamePlaceholder : "Apellido"}
-               </label>
-            </div>
-         )}
+         <div className="two-in-row">
+            <label className={`form-label ${name === "" ? "lbl" : ""}`}>
+               {namePlaceholder ? namePlaceholder : "Nombre"}
+            </label>
+            <label className={`form-label ${lastname === "" ? "lbl" : ""}`}>
+               {lastnamePlaceholder ? lastnamePlaceholder : "Apellido"}
+            </label>
+         </div>
       </div>
    );
 };

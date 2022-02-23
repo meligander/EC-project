@@ -4,6 +4,7 @@ import history from "../utils/history";
 import { setAlert } from "./alert";
 import { newObject, updateLoadingSpinner, setError } from "./mixvalues";
 import { updateExpiredIntallments } from "./installment";
+import { clearProfile } from "./user";
 
 import {
    USERAUTH_LOADED,
@@ -65,6 +66,7 @@ export const logOut = () => (dispatch) => {
    dispatch({
       type: LOGOUT,
    });
+   dispatch(clearProfile());
    history.push("/login");
 };
 

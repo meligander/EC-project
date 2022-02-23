@@ -211,6 +211,8 @@
    .nav-link {
       display: flex;
       align-items: center;
+      background-color: inherit;
+      border: none;
       color: set-text-color($primary-color);
       font-size: 3.2rem;
       padding: 0.4rem 1.4rem;

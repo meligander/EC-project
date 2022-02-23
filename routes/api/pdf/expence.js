@@ -109,10 +109,7 @@ router.post("/withdrawal-list", [auth, adminAuth], (req, res) => {
 
 //@desc Function to get the type of expence
 const getType = (type) => {
-   console.log(type);
    switch (type) {
-      case "cheatincome":
-         return "Ingreso Especial";
       case "expence":
          return "Gasto";
       case "withdrawal":

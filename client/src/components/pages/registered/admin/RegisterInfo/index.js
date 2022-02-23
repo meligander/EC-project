@@ -10,29 +10,28 @@ import { loadUsers } from "../../../../../actions/user";
 
 import Tabs from "../../sharedComp/Tabs";
 import RegisterTab from "./tabs/RegisterTab";
-import IncomeExpenceTab from "./tabs/IncomeExpenceTab";
+import ExpenceTab from "./tabs/ExpenceTab";
 
 import "./style.scss";
 
 const RegisterInfo = ({
    registers: { register, loadingRegister },
-   expences: { loadingET },
+   expences: { loadingET, expencetypes },
    users: { loading },
    loadRegister,
    loadExpenceTypes,
    loadUsers,
 }) => {
    useEffect(() => {
-      if (loadingET) loadExpenceTypes(false, true);
-   }, [loadingET, loadExpenceTypes]);
+      if (loadingET || expencetypes.length < 4) loadExpenceTypes(false, true);
+   }, [loadingET, loadExpenceTypes, expencetypes]);
 
    useEffect(() => {
       if (loadingRegister) loadRegister(true);
    }, [loadingRegister, loadRegister]);
 
    useEffect(() => {
-      if (loading)
-         loadUsers({ active: true, type: "team" }, false, true, false);
+      if (loading) loadUsers({ active: true, type: "team" }, false, true);
    }, [loading, loadUsers]);
 
    return (
@@ -50,8 +49,8 @@ const RegisterInfo = ({
                   )}
                </h3>
                <Tabs
-                  tablist={["Caja Diaria", "Ingreso/Egreso"]}
-                  panellist={[RegisterTab, IncomeExpenceTab]}
+                  tablist={["Caja Diaria", "Egreso"]}
+                  panellist={[RegisterTab, ExpenceTab]}
                />
             </>
          )}

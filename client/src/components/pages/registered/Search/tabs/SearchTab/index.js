@@ -63,12 +63,7 @@ const SearchTab = ({
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
-               loadUsers(
-                  { ...filterForm, type, searchTab: true },
-                  true,
-                  true,
-                  false
-               );
+               loadUsers({ ...filterForm, type, searchTab: true }, true, true);
             }}
          >
             <NameField

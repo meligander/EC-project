@@ -1,7 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
-import { FaMoneyCheckAlt } from "react-icons/fa";
 
 import { setAlert } from "../../../../../../actions/alert";
 import {
@@ -10,6 +9,7 @@ import {
    loadInstallment,
    deleteInstallment,
 } from "../../../../../../actions/installment";
+import { clearCategories } from "../../../../../../actions/category";
 import { clearEnrollments } from "../../../../../../actions/enrollment";
 import { togglePopup } from "../../../../../../actions/mixvalues";
 import { addDetail } from "../../../../../../actions/invoice";
@@ -25,7 +25,7 @@ const InstallmentsSearch = ({
    installments: { loading, installments },
    loadInstallments,
    clearInstallments,
-   clearEnrollments,
+   clearCategories,
    deleteInstallment,
    loadInstallment,
    togglePopup,
@@ -43,8 +43,7 @@ const InstallmentsSearch = ({
 
    return (
       <div className="installment-search">
-         <form className="form">
-            <h3 className="text-dark">Búsqueda de Alumnos</h3>
+         <div className="form">
             <UsersSearch
                usersType="student"
                selectUser={changeStudent}
@@ -52,21 +51,18 @@ const InstallmentsSearch = ({
                autoComplete="off"
                primary={true}
                restore={restore}
+               button="installments"
+               actionForSelected={(e) => {
+                  e.preventDefault();
+                  loadInstallments(
+                     { student },
+                     true,
+                     true,
+                     newInvoice ? "student" : "all"
+                  );
+               }}
             />
-            <div className="btn-right mt-2">
-               <button
-                  type="button"
-                  className={`btn ${student ? "btn-dark" : ""}`}
-                  onClick={(e) => {
-                     e.preventDefault();
-                     loadInstallments({ student }, true, true, "all");
-                  }}
-               >
-                  <FaMoneyCheckAlt />
-                  <span className="hide-md">&nbsp; Ver Cuotas</span>
-               </button>
-            </div>
-         </form>
+         </div>
          {!loading && student && student._id === installments[0].student._id && (
             <>
                {installments[0] ? (
@@ -76,13 +72,11 @@ const InstallmentsSearch = ({
                         forAdmin={true}
                         student={student._id}
                         deleteInstallment={deleteInstallment}
-                        actionForSelected={(item) => {
-                           if (newInvoice) addDetail(item);
-                           else {
-                              loadInstallment(item._id, true);
-                              clearEnrollments();
-                           }
-                        }}
+                        addDetail={
+                           newInvoice ? (item) => addDetail(item) : null
+                        }
+                        clearCategories={clearCategories}
+                        loadInstallment={loadInstallment}
                         togglePopup={togglePopup}
                      />
                   </div>
@@ -106,6 +100,7 @@ export default connect(mapStateToProps, {
    setAlert,
    clearInstallments,
    clearEnrollments,
+   clearCategories,
    loadInstallment,
    addDetail,
    deleteInstallment,

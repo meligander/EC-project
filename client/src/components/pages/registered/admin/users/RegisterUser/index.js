@@ -550,7 +550,7 @@ const RegisterUser = ({
                               type="date"
                               value={dob}
                               onChange={onChange}
-                              max={`${new Date().getFullYear() - 4}-01-01`}
+                              max={`${new Date().getFullYear()}-01-01`}
                               name="dob"
                               id="dob"
                            />

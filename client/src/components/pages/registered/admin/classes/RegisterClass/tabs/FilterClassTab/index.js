@@ -43,11 +43,10 @@ const FilterClassTab = ({
                type: "student",
                active: true,
                category: category,
-               classroom: "null",
+               classroom: null,
             },
             true,
-            true,
-            false
+            true
          );
          updateClassCategory(categories.find((item) => item._id === category));
       }

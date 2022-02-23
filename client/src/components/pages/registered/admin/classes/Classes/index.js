@@ -44,7 +44,7 @@ const Classes = ({
 
    useEffect(() => {
       if (userLogged.type !== "teacher" && loadingUsers)
-         loadUsers({ type: "teacher", active: true }, false, true, false);
+         loadUsers({ type: "teacher", active: true }, false, true);
    }, [loadUsers, userLogged, loadingUsers]);
 
    useEffect(() => {
@@ -72,7 +72,7 @@ const Classes = ({
                className="form"
                onSubmit={(e) => {
                   e.preventDefault();
-                  loadClasses(filterForm);
+                  loadClasses(filterForm, true);
                }}
             >
                <div className="form-group">

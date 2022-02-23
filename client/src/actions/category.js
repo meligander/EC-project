@@ -25,7 +25,7 @@ export const loadCategories = (spinner) => async (dispatch) => {
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setError(CATEGORIES_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         if (spinner) dispatch(setAlert(err.response.data.msg, "danger", "2"));
       }
    }
    if (spinner) dispatch(updateLoadingSpinner(false));

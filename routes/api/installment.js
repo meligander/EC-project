@@ -11,6 +11,7 @@ const adminAuth = require("../../middleware/adminAuth");
 //Models
 const Installment = require("../../models/Installment");
 const Penalty = require("../../models/Penalty");
+const User = require("../../models/User");
 
 //@route    GET /api/installment
 //@desc     Get all installments || with filters
@@ -98,12 +99,12 @@ router.get("/student/:id/:type", auth, async (req, res) => {
    try {
       const { type, id } = req.params;
 
+      console.log(req.params);
+
       const installments = await Installment.find({
          student: id,
-         ...(type === "student" && {
-            debt: true,
-            value: { $ne: 0 },
-         }),
+         ...((type === "student") & { debt: true }),
+         ...(type !== "all" && { value: { $ne: 0 } }),
       })
          .sort({ year: -1, number: 1 })
          .populate({
@@ -290,7 +291,7 @@ router.put("/", auth, async (req, res) => {
       }).populate({
          path: "student",
          model: "user",
-         select: ["chargeday", "discount"],
+         select: "-password",
       });
 
       installments = [
@@ -302,7 +303,7 @@ router.put("/", auth, async (req, res) => {
          }).populate({
             path: "student",
             model: "user",
-            select: ["chargeday", "discount"],
+            select: "-password",
          })),
       ];
 
@@ -311,21 +312,44 @@ router.put("/", auth, async (req, res) => {
 
       if (penalty) {
          for (let x = 0; x < installments.length; x++) {
-            const chargeDay =
-               installments[x].student.chargeday - (lessDay ? 1 : 0);
+            const chargeDay = installments[x].student.chargeday
+               ? installments[x].student.chargeday - (lessDay ? 1 : 0)
+               : lessDay
+               ? 30
+               : 31;
 
             if (
                installments[x].student.email &&
                chargeDay - 3 <= day &&
                !installments[x].emailSent
             ) {
-               await sendEmail(
-                  installments[x].student.email,
-                  "Cuota por vencer",
-                  `La cuota del corriente mes está proxima a su vencimiento.
-                  <br/>
-                  El día ${chargeDay} se le aplicará un recargo del ${penalty.percentage}%.`
-               );
+               const greeting =
+                  (hours >= 6 && hours < 12
+                     ? "¡Buen día!"
+                     : hours >= 12 && hours < 19
+                     ? "¡Buenas tardes!"
+                     : "¡Buenas noches!") + "<br/>";
+
+               let users = await User.find({
+                  children: installments[x].student._id,
+               }).select("-password");
+
+               users.push({ ...installments[x].student });
+
+               for (let x = 0; x < users.length; x++) {
+                  await sendEmail(
+                     users[x].email,
+                     "Cuota por vencer",
+                     `${greeting}
+                     Le queríamos comunicar que la cuota del corriente mes del alumno
+                      ${users[x].lastname}, ${users[x].name} está proxima a su vencimiento.
+                     <br/>
+                     El día ${chargeDay} se le aplicará un recargo del ${penalty.percentage}%.
+                     <br/><br/>
+                     Muchas gracias y disculpe las molestias`
+                  );
+               }
+
                await Installment.findOneAndUpdate(
                   { _id: installments[x].id },
                   { emailSent: true }

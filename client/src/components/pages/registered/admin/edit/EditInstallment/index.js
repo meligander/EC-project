@@ -51,7 +51,7 @@ const EditInstallment = ({
          if (loadingUser) loadUser(_id, false);
          else setformData((prev) => ({ ...prev, student: user }));
       } else {
-         if (loadingInstallment) loadInstallment(_id, false, true);
+         if (loadingInstallment) loadInstallment(_id, true);
          else {
             if (installment)
                setformData((prev) => {

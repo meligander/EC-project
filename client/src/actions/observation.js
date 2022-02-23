@@ -24,10 +24,8 @@ export const loadObservations =
             payload: res.data,
          });
       } catch (err) {
-         if (err.response.status !== 401) {
+         if (err.response.status !== 401)
             dispatch(setError(OBSERVATIONS_ERROR, err.response));
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         }
       }
       if (spinner) dispatch(updateLoadingSpinner(false));
    };

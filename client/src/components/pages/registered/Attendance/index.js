@@ -18,7 +18,7 @@ const Attendance = ({
    const _id = match.params.class_id;
 
    useEffect(() => {
-      if (loadingClass) loadClass(_id, false);
+      if (loadingClass) loadClass(_id, false, false);
    }, [_id, loadClass, loadingClass]);
 
    useEffect(() => {

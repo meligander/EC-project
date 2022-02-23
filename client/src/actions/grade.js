@@ -274,7 +274,13 @@ export const gradesPDF = (header, grades, info) => async (dispatch) => {
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setError(GRADES_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         dispatch(
+            setAlert(
+               err.response.data.msg,
+               "danger",
+               info.period !== undefined && header ? "3" : "2"
+            )
+         );
       } else error = true;
    }
 
@@ -345,14 +351,11 @@ export const certificatePDF =
       } catch (err) {
          if (err.response.status !== 401) {
             dispatch(setError(GRADES_ERROR, err.response));
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
+            dispatch(setAlert(err.response.data.msg, "danger", "3"));
          } else error = true;
       }
 
-      if (!error) {
-         dispatch(updateLoadingSpinner(false));
-         window.scrollTo(0, 0);
-      }
+      if (!error) dispatch(updateLoadingSpinner(false));
    };
 
 export const clearGrades = () => (dispatch) => {

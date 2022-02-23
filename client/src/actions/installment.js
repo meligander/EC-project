@@ -27,22 +27,9 @@ import {
 } from "./types";
 
 export const loadInstallment =
-   (installment_id, edit, spinner) => async (dispatch) => {
+   (installment_id, spinner) => async (dispatch) => {
       if (spinner) dispatch(updateLoadingSpinner(true));
       try {
-         if (edit)
-            if (!installment_id) {
-               const errorMessage = {
-                  response: {
-                     status: 402,
-                     data: {
-                        msg: "Debe seleccionar una cuota primero",
-                     },
-                  },
-               };
-               throw errorMessage;
-            } else history.push(`/index/installment/edit/${installment_id}`);
-
          const res = await api.get(`/installment/${installment_id}`);
          dispatch({
             type: INSTALLMENT_LOADED,
@@ -51,7 +38,8 @@ export const loadInstallment =
       } catch (err) {
          if (err.response.status !== 401) {
             dispatch(setError(INSTALLMENT_ERROR, err.response));
-            dispatch(setAlert(err.response.data.msg, "danger", "4"));
+            if (spinner)
+               dispatch(setAlert(err.response.data.msg, "danger", "4"));
          }
       }
       if (spinner) dispatch(updateLoadingSpinner(false));
@@ -105,7 +93,8 @@ export const loadInstallments =
       } catch (err) {
          if (err.response.status !== 401) {
             dispatch(setError(INSTALLMENTS_ERROR, err.response));
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
+            if (spinner)
+               dispatch(setAlert(err.response.data.msg, "danger", "2"));
          } else error = true;
       }
 
@@ -124,7 +113,12 @@ export const updateIntallment = (formData, loaded) => async (dispatch) => {
    try {
       if (!loaded)
          dispatch(
-            loadInstallments({ student: installment.student }, true, true)
+            loadInstallments(
+               { student: installment.student },
+               false,
+               true,
+               "all"
+            )
          );
 
       let res;

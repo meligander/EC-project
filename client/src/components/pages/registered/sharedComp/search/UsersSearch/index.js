@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Fragment } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { FaTimes, FaUserCircle } from "react-icons/fa";
+import { FaTimes, FaUserCircle, FaPlus, FaMoneyCheckAlt } from "react-icons/fa";
 
 import {
    loadUsers,
@@ -10,10 +10,11 @@ import {
 } from "../../../../../../actions/user";
 
 import NameField from "../../NameField";
+import Alert from "../../../../sharedComp/Alert";
 
 import "./style.scss";
 
-const UserField = ({
+const UsersSearch = ({
    users: { users: primaryUsers, loading: primaryLoading, loadingBK, usersBK },
    autoComplete,
    selectUser,
@@ -26,6 +27,8 @@ const UserField = ({
    loadUsers,
    restore,
    disabled,
+   button,
+   actionForSelected,
 }) => {
    const [filterData, setFilterData] = useState({
       name: "",
@@ -74,8 +77,7 @@ const UserField = ({
          loadUsers(
             { ...filterData, [e.target.name]: e.target.value, type: usersType },
             false,
-            primary,
-            true
+            primary
          );
       }
       if (
@@ -94,99 +96,134 @@ const UserField = ({
    };
 
    return (
-      <div className="form-group form-search">
-         {user ? (
-            <div>
-               <input
-                  className="form-input"
-                  type="text"
-                  value={user.lastname + ", " + user.name}
-                  disabled
-                  onChange={onChange}
-               />
-               <label htmlFor="name" className="form-label">
-                  Nombre
-               </label>
-               <Link
-                  onClick={() => {
-                     window.scroll(0, 0);
-                     clearProfile();
-                  }}
-                  className="form-search-user profile"
-                  to={`/index/dashboard/${user._id}`}
-               >
-                  <FaUserCircle />
-               </Link>
-               <button
-                  disabled={disabled}
-                  type="button"
-                  onClick={cancelUser}
-                  className={`form-search-user cancel ${
-                     disabled ? "disabled" : ""
-                  }`}
-               >
-                  <FaTimes />
-               </button>
-            </div>
-         ) : (
-            <NameField
-               name={name}
-               lastname={lastname}
-               onChange={onChange}
-               autoComplete={autoComplete}
-            />
-         )}
-         {searchDisplay && (
-            <div
-               className={`form-search-display ${
-                  users.length === 0 ? "danger" : ""
-               }`}
-            >
-               <div className="form-search-close">
+      <>
+         <h3
+            className={`${
+               primary ? "heading-tertiary" : "paragraph"
+            } text-primary`}
+         >
+            {usersType === "student"
+               ? "Búsqueda de Alumnos"
+               : "Usuario a Pagar"}
+         </h3>
+         <Alert type="3" />
+         <div className="form-group form-search">
+            {user ? (
+               <div>
+                  <input
+                     className="form-input"
+                     type="text"
+                     value={user.lastname + ", " + user.name}
+                     disabled
+                     onChange={onChange}
+                  />
+                  <label htmlFor="name" className="form-label">
+                     Nombre
+                  </label>
+                  <Link
+                     onClick={() => {
+                        window.scroll(0, 0);
+                        clearProfile();
+                     }}
+                     className="form-search-user profile"
+                     to={`/index/dashboard/${user._id}`}
+                  >
+                     <FaUserCircle />
+                  </Link>
                   <button
+                     disabled={disabled}
                      type="button"
-                     className="form-search-close-icon"
-                     onClick={() =>
-                        setAdminValues((prev) => ({
-                           ...prev,
-                           searchDisplay: false,
-                        }))
-                     }
+                     onClick={cancelUser}
+                     className={`form-search-user cancel ${
+                        disabled ? "disabled" : ""
+                     }`}
                   >
                      <FaTimes />
                   </button>
                </div>
-               <ul className="form-search-list">
-                  {!loading && (
-                     <Fragment>
-                        {users.length > 0 ? (
-                           users.map((user) => (
-                              <li
-                                 className="form-search-item"
-                                 onClick={() => chooseUser(user)}
-                                 key={user._id}
-                              >
-                                 <span>{user.lastname + ", " + user.name}</span>
-                                 <span>
-                                    {usersType === "student"
-                                       ? user.category
-                                       : user.type === "student"
-                                       ? "Alumno"
-                                       : "Tutor"}
-                                 </span>
+            ) : (
+               <NameField
+                  name={name}
+                  lastname={lastname}
+                  onChange={onChange}
+                  autoComplete={autoComplete}
+               />
+            )}
+            {searchDisplay && (
+               <div
+                  className={`form-search-display ${
+                     users.length === 0 ? "danger" : ""
+                  }`}
+               >
+                  <div className="form-search-close">
+                     <button
+                        type="button"
+                        className="form-search-close-icon"
+                        onClick={() =>
+                           setAdminValues((prev) => ({
+                              ...prev,
+                              searchDisplay: false,
+                           }))
+                        }
+                     >
+                        <FaTimes />
+                     </button>
+                  </div>
+                  <ul className="form-search-list">
+                     {!loading && (
+                        <Fragment>
+                           {users.length > 0 ? (
+                              users.map((user) => (
+                                 <li
+                                    className="form-search-item"
+                                    onClick={() => chooseUser(user)}
+                                    key={user._id}
+                                 >
+                                    <span>
+                                       {user.lastname + ", " + user.name}
+                                    </span>
+                                    <span>
+                                       {usersType === "student"
+                                          ? user.category
+                                          : user.type === "student"
+                                          ? "Alumno"
+                                          : "Tutor"}
+                                    </span>
+                                 </li>
+                              ))
+                           ) : (
+                              <li className="bg-danger form-search-item">
+                                 No matching results
                               </li>
-                           ))
-                        ) : (
-                           <li className="bg-danger form-search-item">
-                              No matching results
-                           </li>
-                        )}
-                     </Fragment>
+                           )}
+                        </Fragment>
+                     )}
+                  </ul>
+               </div>
+            )}
+         </div>
+         {button && (
+            <div className="btn-right mt-1">
+               <button
+                  type="button"
+                  className="btn btn-dark"
+                  onClick={actionForSelected}
+               >
+                  {button === "children" ? (
+                     <>
+                        <FaPlus />
+                        <span className="hide-md">&nbsp; Agregar</span>
+                     </>
+                  ) : (
+                     <>
+                        <FaMoneyCheckAlt />
+                        <span className="hide-md">&nbsp; Ver Cuotas</span>
+                     </>
                   )}
-               </ul>
+               </button>
             </div>
          )}
-      </div>
+      </>
    );
 };
 
@@ -198,4 +235,4 @@ export default connect(mapStateToProps, {
    loadUsers,
    clearSearch,
    clearProfile,
-})(UserField);
+})(UsersSearch);

@@ -19,7 +19,7 @@ import Alert from "../../../../../sharedComp/Alert";
 
 import "./style.scss";
 
-const IncomeExpenceTab = ({
+const ExpenceTab = ({
    auth: { userLogged },
    registers: { register },
    expences: { expencetypes },
@@ -29,9 +29,7 @@ const IncomeExpenceTab = ({
    togglePopup,
    setAlert,
 }) => {
-   const employeePaymentID = expencetypes.find(
-      (item) => item.name === "Pago a Empleados"
-   )._id;
+   const employeePaymentID = "5fe813b999e13c3f807a0d79";
    const isAdmin =
       userLogged.type === "admin" || userLogged.type === "admin&teacher";
 
@@ -280,4 +278,4 @@ export default connect(mapStateToProps, {
    clearExpenceTypes,
    setAlert,
    togglePopup,
-})(IncomeExpenceTab);
+})(ExpenceTab);

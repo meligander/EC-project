@@ -21,7 +21,7 @@ const RegisterClass = ({
    const _id = match.params.class_id;
 
    useEffect(() => {
-      if (_id && loadingClass) loadClass(_id, true);
+      if (_id && loadingClass) loadClass(_id, true, false);
    }, [_id, loadingClass, loadClass]);
 
    useEffect(() => {
@@ -29,8 +29,7 @@ const RegisterClass = ({
    }, [loadingCategories, loadCategories, _id]);
 
    useEffect(() => {
-      if (loadingBK)
-         loadUsers({ type: "teacher", active: true }, false, false, false);
+      if (loadingBK) loadUsers({ type: "teacher", active: true }, false, false);
    }, [loadingBK, loadUsers]);
 
    useEffect(() => {
@@ -39,12 +38,11 @@ const RegisterClass = ({
             {
                type: "student",
                active: true,
-               classroom: "null",
+               classroom: null,
                category: classInfo.category._id,
             },
             false,
-            true,
-            false
+            true
          );
       }
    }, [loading, loadUsers, _id, loadingClass, classInfo]);

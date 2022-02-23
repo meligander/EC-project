@@ -14,7 +14,7 @@ const TeacherDashboard = ({
    clearSearch,
 }) => {
    useEffect(() => {
-      if (loading) loadClasses({ teacher: user._id });
+      if (loading) loadClasses({ teacher: user._id }, false);
    }, [user._id, loadClasses, loading]);
 
    return (

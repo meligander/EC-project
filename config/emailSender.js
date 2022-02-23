@@ -59,9 +59,7 @@ const sendEmail = async (user_email, subject, text) => {
       <div>
          <div style='font-size: 18px;'>
             ${text}
-            <br/><br/>
-            Muchas gracias por elegirnos.
-         </div>        
+         </div>
          <div style='text-align: center; width: min-content;'>
             <img style='width: 130px; height: 130px;margin: 50px 40px 0' src="cid:uniq-logo.png" alt="logo"/>
             <h3>Villa de Merlo English Centre</h3>
@@ -94,37 +92,37 @@ const sendEmail = async (user_email, subject, text) => {
    });
 };
 
-const changeCredentials = async (newC, oldC) => {
+const changeCredentials = async (email, password, user) => {
    let subject;
    const hours = new Date().getHours();
 
    let text =
-      (hours < 12
+      (hours >= 6 && hours < 12
          ? "¡Buen día!"
-         : hours < 20
+         : hours >= 12 && hours < 19
          ? "¡Buenas tardes!"
-         : "¡Buenas noches!") + "<br/><br/>";
+         : "¡Buenas noches!") + "<br/>";
 
-   if (newC.password && newC.email !== oldC.email) {
-      subject = "Cambio de credenciales";
-      text += `El email y la constraseña en nuestra página se han modificado correctamente.
+   if (password) {
+      if (email !== user.email) {
+         subject = "Cambio de credenciales";
+         text += `El email y la constraseña en nuestra página se han modificado.
       Desde ahora en más utilice este email para poder ingresar a nuestra página web.`;
-   } else {
-      if (newC.password) {
+      } else {
          subject = "Cambio de contraseña";
          text +=
             "Se ha modificado correctamente la constraseña para poder ingresar a nuestra página web.";
-      } else {
-         if (oldC.email === "") newUser(oldC.type, newC.email);
-         else {
-            subject = "Cambio de email";
-            text +=
-               "Ahora puede ingresar a nuestra página web utilizando este email.";
-         }
       }
+   } else {
+      subject = "Cambio de email";
+      text += `Se ha realizado un cambio de email en nuestra página web.
+          Ahora puede ingresar a esta utilizando el mail ${email}.`;
    }
 
-   await sendEmail(newC.email, subject, text);
+   text += "<br/><br/>Muchas gracias por elegirnos.";
+
+   if (user.email === "") await newUser(user.type, email);
+   else await sendEmail(email, subject, text);
 };
 
 const newUser = async (type, email) => {
@@ -154,7 +152,7 @@ const newUser = async (type, email) => {
       "¡Bienvenido!",
       `¡Bienvenido a Villa de Merlo English Centre! <br/><br/>Ahora podrá ingresar a nuestra página web
    utilizando este mail y la contraseña '12345678'. Le recomendamos que cambie la contraseña
-    para que sea más seguro. <br/>En la página podrá ${text}`
+    para que sea más seguro. <br/>En la página podrá ${text} <br/><br/>Muchas gracias por elegirnos.`
    );
 };
 

@@ -114,7 +114,6 @@ router.get("/year/bymonth", [auth, adminAuth], async (req, res) => {
             income: income.reduce((sum, item) => sum + item.total, 0),
             expence: 0,
             withdrawal: 0,
-            cheatincome: 0,
             difference: registers.reduce(
                (sum, item) => sum + item.difference,
                0
@@ -271,7 +270,6 @@ const getInfo = async (register) => {
       }, 0),
       expence: 0,
       withdrawal: 0,
-      cheatincome: 0,
    };
 
    expences.forEach((item) => (register[item.expencetype.type] += item.value));

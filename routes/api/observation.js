@@ -11,7 +11,7 @@ const Enrollment = require("../../models/Enrollment");
 //@route    GET /api/observation/:class_id
 //@desc     get all observations from a class
 //@access   Private && Admin
-router.get("/:class_id", [auth, adminAuth], async (req, res) => {
+router.get("/:class_id", auth, async (req, res) => {
    try {
       const class_id = req.params.class_id;
 
@@ -56,7 +56,7 @@ router.get("/:class_id/:user_id", auth, async (req, res) => {
 //@route    PUT /api/observation
 //@desc     Update all observations from a class
 //@access   Private && Admin
-router.put("/:class_id/:period", [auth, adminAuth], async (req, res) => {
+router.put("/:class_id/:period", auth, async (req, res) => {
    //An array of expence types
    const observations = req.body.flat().map((item) => item.observation);
 

@@ -34,6 +34,7 @@ import {
    USERS_ERROR,
    USERSBK_ERROR,
    OTHERVALUES_LOADED,
+   USERSBK_CLEARED,
 } from "./types";
 
 //Load User
@@ -95,41 +96,36 @@ export const getActiveUsers = (type) => async (dispatch) => {
 };
 
 //LoadUsers
-export const loadUsers =
-   (formData, spinner, primary, studentSearch) => async (dispatch) => {
-      if (spinner) dispatch(updateLoadingSpinner(true));
-      let error = false;
+export const loadUsers = (formData, spinner, primary) => async (dispatch) => {
+   if (spinner) dispatch(updateLoadingSpinner(true));
+   let error = false;
 
-      try {
-         let res = await api.get(`/user?${filterData(formData)}`);
+   try {
+      const res = await api.get(`/user?${filterData(formData)}`);
 
-         dispatch({
-            type: primary ? USERS_LOADED : USERSBK_LOADED,
-            payload: !primary
-               ? res.data
-               : {
-                    users: res.data,
-                    type: formData.type ? formData.type : "",
-                 },
-         });
-      } catch (err) {
-         if (err.response.status !== 401) {
-            dispatch(
-               setAlert(
-                  err.response.data.msg,
-                  "danger",
-                  studentSearch ? "3" : "2"
-               )
-            );
-            dispatch(
-               setError(primary ? USERS_ERROR : USERSBK_ERROR, err.response)
-            );
-            if (!studentSearch) window.scrollTo(0, 0);
-         } else error = true;
-      }
+      dispatch({
+         type: primary ? USERS_LOADED : USERSBK_LOADED,
+         payload: !primary
+            ? res.data
+            : {
+                 users: res.data,
+                 type: formData.type ? formData.type : "",
+              },
+      });
+   } catch (err) {
+      if (err.response.status !== 401) {
+         if (spinner) {
+            dispatch(setAlert(err.response.data.msg, "danger", "2"));
+            window.scrollTo(0, 0);
+         }
+         dispatch(
+            setError(primary ? USERS_ERROR : USERSBK_ERROR, err.response)
+         );
+      } else error = true;
+   }
 
-      if (!error && spinner) dispatch(updateLoadingSpinner(false));
-   };
+   if (!error && spinner) dispatch(updateLoadingSpinner(false));
+};
 
 //Load Relatives
 export const loadRelatives = (user_id) => async (dispatch) => {
@@ -321,7 +317,7 @@ export const userPDF = (users, userSearchType) => async (dispatch) => {
    }
 };
 
-export const clearProfile = () => (dispatch) => {
+export const clearProfile = (sameUser) => (dispatch) => {
    dispatch({
       type: USER_CLEARED,
    });
@@ -330,7 +326,12 @@ export const clearProfile = () => (dispatch) => {
    dispatch(clearInstallments());
    dispatch(clearAttendances());
    dispatch(clearObservations());
-   dispatch(clearEnrollments());
+   if (!sameUser) {
+      dispatch(clearEnrollments());
+      dispatch({
+         type: USERSBK_CLEARED,
+      });
+   }
 };
 
 export const clearUser = () => (dispatch) => {

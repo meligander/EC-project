@@ -451,8 +451,6 @@ router.put(
 router.put("/credentials/:id", auth, async (req, res) => {
    const { password, password2, email } = req.body;
 
-   let user;
-
    if (email && !regex.test(email))
       return res.status(400).json({
          value: email,
@@ -462,9 +460,9 @@ router.put("/credentials/:id", auth, async (req, res) => {
       });
 
    try {
-      const oldCredentials = await User.findOne({ _id: req.params.id });
+      let user = await User.findOne({ _id: req.params.id });
 
-      if (!password && email === oldCredentials.email)
+      if (!password && email === user.email)
          return res.status(400).json({
             msg: "Modifique alguno de los datos para poder guardar los cambios",
          });
@@ -476,22 +474,28 @@ router.put("/credentials/:id", auth, async (req, res) => {
 
       //See if users exists
       if (email) {
-         user = await User.findOne({ email });
+         const exists = await User.findOne({
+            _id: { $ne: req.params.id },
+            email,
+         });
 
-         if (user && user.id !== req.params.id)
+         if (exists)
             return res
                .status(400)
                .json({ msg: "Ya existe un usuario con ese mail" });
+      } else {
+         if (password)
+            return res.status(400).json({
+               msg: "No puede modificar la constraseña sin la existencia de un email",
+            });
       }
 
       let data = {
-         ...(email
-            ? { email }
-            : !email && oldCredentials.email && { email: "" }),
+         ...(email ? { email } : !email && user.email && { email: "" }),
       };
 
-      if (password) {
-         if (password.length < 6) {
+      if (password || (!password && user.email === "")) {
+         if (password && password.length < 6) {
             return res
                .status(400)
                .json({ msg: "La contraseña debe contener 6 carácteres o más" });
@@ -500,8 +504,15 @@ router.put("/credentials/:id", auth, async (req, res) => {
          //Encrypt password -- agregarlo a cuando se cambia el password
          const salt = await bcrypt.genSalt(10);
 
-         data.password = await bcrypt.hash(password, salt);
+         data.password = await bcrypt.hash(
+            !password && user.email === "" ? "12345678" : password,
+            salt
+         );
       }
+
+      //Send email
+      if (email && (password || email !== user.email))
+         await changeCredentials(email, password, user);
 
       user = await User.findOneAndUpdate(
          { _id: req.params.id },
@@ -512,10 +523,6 @@ router.put("/credentials/:id", auth, async (req, res) => {
          .populate({ path: "town", select: "name" })
          .populate({ path: "neighbourhood", select: "name" })
          .populate({ path: "children", select: "-password" });
-
-      //Send email
-      if ((email && password) || email !== oldCredentials.email)
-         await changeCredentials({ email, password }, oldCredentials);
 
       res.json(user);
    } catch (err) {

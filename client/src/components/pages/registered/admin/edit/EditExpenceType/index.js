@@ -96,9 +96,6 @@ const EditExpenceType = ({
                                  Seleccione el tipo de movimiento
                               </option>
                               <option value="expence">Gasto</option>
-                              <option value="cheatincome">
-                                 Ingreso Especial
-                              </option>
                               <option value="withdrawal">Retiro</option>
                            </select>
                         </td>
