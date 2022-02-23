@@ -43,7 +43,7 @@ const RegisterInfo = ({
                   <FaCalendarDay />
                   &nbsp;
                   {format(
-                     new Date(register.temporary ? register.date : null),
+                     register.temporary ? new Date(register.date) : new Date(),
                      "EEEE, do 'de' LLLL 'de' yyyy",
                      { locale: es }
                   )}

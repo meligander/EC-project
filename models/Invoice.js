@@ -20,16 +20,6 @@ const InvoiceSchema = new mongoose.Schema({
          type: String,
       },
    },
-   //Borrar despues de modificar la base de datos
-   // name: {
-   //    type: String,
-   // },
-   // lastname: {
-   //    type: String,
-   // },
-   // email: {
-   //    type: String,
-   // },
    date: {
       type: Date,
       default: Date.now,

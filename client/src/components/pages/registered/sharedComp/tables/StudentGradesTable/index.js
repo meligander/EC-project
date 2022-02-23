@@ -26,7 +26,8 @@ const StudentGradesTable = ({
    const getGrade = (grade, percentage) => {
       if (category === "Kinder") return kinderGraden(grade);
       if (percentage) return grade * 10 + "%";
-      if (grade % 1 !== 0) return grade.toFixed(2);
+      if (grade % 1 !== 0)
+         return Math.round((grade + Number.EPSILON) * 100) / 100;
       else return grade;
    };
 

@@ -90,59 +90,6 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 //@access   Private && Admin
 router.get("/:id", [auth, adminAuth], async (req, res) => {
    try {
-      // const invoices = await Invoice.find();
-
-      // for (let x = 0; x < invoices.length; x++) {
-      //    if (invoices[x].lastname || invoices[x].name) {
-      //       console.log("error lastname");
-      //       await Invoice.findOneAndUpdate(
-      //          { _id: invoices[x]._id },
-      //          {
-      //             $set: {
-      //                user: {
-      //                   ...(invoices[x].lastname && {
-      //                      lastname: invoices[x].lastname,
-      //                   }),
-      //                   ...(invoices[x].name && { name: invoices[x].name }),
-      //                   ...(invoices[x].email && { email: invoices[x].email }),
-      //                },
-      //                ...(invoices[x].lastname && { lastname: undefined }),
-      //                ...(invoices[x].name && { name: undefined }),
-      //                ...(invoices[x].email && { email: undefined }),
-      //             },
-      //          }
-      //       );
-      //    } else {
-      //       if (
-      //          invoices[x].user.user_id === undefined &&
-      //          invoices[x].user.toString() !== "{}"
-      //       ) {
-      //          await Invoice.findOneAndUpdate(
-      //             { _id: invoices[x]._id },
-      //             {
-      //                $set: {
-      //                   user: {
-      //                      user_id: invoices[x].user.toString(),
-      //                   },
-      //                },
-      //             }
-      //          );
-      //       }
-      //       if (invoices[x].user.toString() === "{}")
-      //          await Invoice.findOneAndUpdate(
-      //             { _id: invoices[x]._id },
-      //             {
-      //                $set: {
-      //                   user: {
-      //                      name: "varios",
-      //                      lastname: "varios",
-      //                   },
-      //                },
-      //             }
-      //          );
-      //    }
-      // }
-
       const invoice = await Invoice.findOne({ _id: req.params.id })
          .populate({
             path: "details.installment",

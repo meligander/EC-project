@@ -321,14 +321,13 @@ const buildFinalsTable = (grades) => {
          value: grades[x].value,
          percentage: grades[x].gradetype.percentage,
       };
-
       if (y + 1 >= num) y = 0;
       else y++;
 
       if (x === grades.length - 1 && average) {
          rows[count][y] = "Priomedio";
          rows[count + 1][y] = {
-            value: Math.round((average * 10 + Number.EPSILON) * 100) / 100,
+            value: average,
             percentage: true,
          };
       }

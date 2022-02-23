@@ -15,33 +15,11 @@ const EnrollmentSchema = new mongoose.Schema({
       ref: "category",
       required: true,
    },
-   // classroom: {
-   //    _id: {
-   //       type: mongoose.Schema.Types.ObjectId,
-   //       ref: "class",
-   //    },
-   //    periodAverage: {
-   //       type: Array,
-   //    },
-   //    average: {
-   //       type: Number,
-   //    },
-   //    periodAbsence: {
-   //       type: Array,
-   //    },
-   //    absence: {
-   //       type: Number,
-   //    },
-   // },
    classroom: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "class",
       default: null,
    },
-   // class_id: {
-   //    type: mongoose.Schema.Types.ObjectId,
-   //    ref: "class",
-   // },
    date: {
       type: Date,
       default: Date.now,

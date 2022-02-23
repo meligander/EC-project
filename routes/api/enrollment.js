@@ -84,22 +84,6 @@ router.get("/", auth, async (req, res) => {
             enrollments = enrollments.filter((enroll) => enroll.student);
       }
 
-      // //Para cambiar la base de datos
-      // enrollments.forEach(async (item) => {
-      // //Primero hacer esto
-      // if (item.classroom._id)
-      //    await Enrollment.findOneAndUpdate(
-      //       { _id: item._id },
-      //       { class_id: item.classroom._id, classroom: null }
-      //    );
-      // //Luego esto
-      // if (item.class_id)
-      //    await Enrollment.findOneAndUpdate(
-      //       { _id: item._id },
-      //       { classroom: item.class_id, class_id: undefined }
-      //    );
-      // });
-
       if (enrollments.length === 0) {
          return res.status(400).json({
             msg: "No se encontraron inscripciones con dichas descripciones",
