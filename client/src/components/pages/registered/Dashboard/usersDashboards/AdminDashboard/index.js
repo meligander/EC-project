@@ -18,7 +18,7 @@ import { ImSearch } from "react-icons/im";
 
 import {
    loadRegister,
-   clearRegisters,
+   clearRegister,
 } from "../../../../../../actions/register";
 import {
    getInvoiceNumber,
@@ -58,7 +58,7 @@ const AdminDashboard = ({
    getActiveClasses,
    getInvoiceNumber,
    clearInstallments,
-   clearRegisters,
+   clearRegister,
    clearUsers,
    clearSearch,
    clearClasses,
@@ -156,7 +156,7 @@ const AdminDashboard = ({
                         className="side-nav-link"
                         to="/register/info"
                         onClick={() => {
-                           clearRegisters();
+                           clearRegister();
                            clearUsers();
                            window.scroll(0, 0);
                         }}
@@ -339,7 +339,7 @@ export default connect(mapStateToProps, {
    getActiveClasses,
    clearInstallments,
    getInvoiceNumber,
-   clearRegisters,
+   clearRegister,
    clearSearch,
    clearClasses,
    clearCategories,

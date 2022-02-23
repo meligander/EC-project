@@ -16,16 +16,8 @@ table {
       @include respond(small-phone) {
          width: 100%;
 
-         thead {
-            display: none;
-         }
-
          td {
             padding: 1rem;
-
-            &[data-th]:before {
-               content: attr(data-th);
-            }
 
             input,
             select {

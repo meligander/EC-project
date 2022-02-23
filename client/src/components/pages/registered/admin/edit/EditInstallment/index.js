@@ -64,6 +64,7 @@ const EditInstallment = ({
                   return {
                      ...oldInstallment,
                      number: installment.number,
+                     value: installment.value,
                   };
                });
          }
@@ -206,7 +207,7 @@ const EditInstallment = ({
             <div className="form-group">
                <input
                   className="form-input"
-                  type="number"
+                  type="text"
                   id="value"
                   onChange={onChange}
                   name="value"

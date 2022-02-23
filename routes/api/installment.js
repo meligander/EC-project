@@ -99,8 +99,6 @@ router.get("/student/:id/:type", auth, async (req, res) => {
    try {
       const { type, id } = req.params;
 
-      console.log(req.params);
-
       const installments = await Installment.find({
          student: id,
          ...((type === "student") & { debt: true }),
@@ -191,7 +189,7 @@ router.post(
          }
 
          installment = new Installment({
-            value: Math.ceil(value),
+            value: Number(value.replace(/,/g, ".")),
             ...(enrollment && { enrollment: enrollment.id }),
             updatable: number === 1 ? false : updatable,
             debt: number === 0,
@@ -229,7 +227,7 @@ router.put(
    "/:id",
    [auth, adminAuth, check("value", "El valor es necesario").not().isEmpty()],
    async (req, res) => {
-      const { expired, updatable, number } = req.body;
+      const { expired, updatable, number, value } = req.body;
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -244,6 +242,7 @@ router.put(
             {
                $set: {
                   ...req.body,
+                  value: Number(value.replace(/,/g, ".")),
                   expired: number === 1 ? true : expired,
                   updatable: number === 1 ? false : updatable,
                },

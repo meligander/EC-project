@@ -81,7 +81,7 @@ const NeighbourhoodTab = ({
             <tbody>
                {formData.map((item, i) => (
                   <tr key={i}>
-                     <td data-th="Nombre">
+                     <td>
                         <input
                            type="text"
                            name="name"
@@ -90,7 +90,7 @@ const NeighbourhoodTab = ({
                            placeholder="Nombre"
                         />
                      </td>
-                     <td data-th="Localidad">
+                     <td>
                         <select
                            name="town"
                            onChange={(e) => onChange(e, i)}

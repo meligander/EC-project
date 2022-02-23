@@ -92,8 +92,8 @@ const Categories = ({
                   {formData.length > 0 &&
                      formData.map((category, index) => (
                         <tr key={index}>
-                           <td data-th="Nombre">{category.name}</td>
-                           <td data-th="Valor">
+                           <td>{category.name}</td>
+                           <td>
                               <input
                                  type="number"
                                  name={`value${index}`}

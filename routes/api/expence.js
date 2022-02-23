@@ -141,11 +141,9 @@ router.post(
       check("expencetype", "El tipo de gasto es necesario").not().isEmpty(),
    ],
    async (req, res) => {
-      let { value, expencetype } = req.body;
+      let { value } = req.body;
 
-      value = Number(
-         typeof value === "string" ? value.replace(/,/g, ".") : value
-      );
+      value = Number(value.replace(/,/g, "."));
 
       if (isNaN(value))
          return res.status(400).json({
@@ -160,10 +158,6 @@ router.post(
       }
 
       try {
-         const expencetypeinfo = await ExpenceType.findOne({
-            _id: expencetype,
-         });
-
          let register = await Register.find().sort({ $natural: -1 }).limit(1);
          register = register[0];
 
@@ -177,7 +171,9 @@ router.post(
                msg: "No se puede utilizar más dinero del que hay en caja",
             });
 
-         const registermoney = register.registermoney - value;
+         const registermoney = Math.round(
+            ((register.registermoney - value + Number.EPSILON) * 100) / 100
+         );
 
          if (register.temporary) {
             await Register.findOneAndUpdate(
@@ -192,6 +188,7 @@ router.post(
 
          const expence = new Expence({
             ...req.body,
+            value,
             register: register._id,
          });
 

@@ -101,7 +101,10 @@ const InvoiceTab = ({
       e.persist();
       let newDetails = [...details];
 
-      if (newDetails[e.target.id].value >= e.target.value) {
+      if (
+         newDetails[e.target.id].value >=
+         Number(e.target.value.replace(/,/g, "."))
+      ) {
          newDetails[e.target.id] = {
             ...newDetails[e.target.id],
             payment: e.target.value,
@@ -111,7 +114,7 @@ const InvoiceTab = ({
             ...prev,
             details: newDetails,
             total: newDetails.reduce(
-               (accum, item) => accum + Number(item.payment),
+               (accum, item) => accum + Number(item.payment.replace(/,/g, ".")),
                0
             ),
          }));
@@ -131,6 +134,12 @@ const InvoiceTab = ({
       registerInvoice({
          ...formData,
          remaining: installmentTotal - total,
+         details: details.map((item) => {
+            return {
+               ...item,
+               payment: Number(item.payment.replace(/,/g, ".")),
+            };
+         }),
       });
    };
 
@@ -243,7 +252,7 @@ const InvoiceTab = ({
                                     <td>${formatNumber(install.value)}</td>
                                     <td>
                                        <input
-                                          type="number"
+                                          type="text"
                                           onChange={onChangeValue}
                                           id={index}
                                           placeholder="Monto"

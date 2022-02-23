@@ -77,7 +77,7 @@ const EditExpenceType = ({
                {!loadingET &&
                   formData.map((exptyp, index) => (
                      <tr key={index}>
-                        <td data-th="Nombre">
+                        <td>
                            <input
                               type="text"
                               name="name"
@@ -86,7 +86,7 @@ const EditExpenceType = ({
                               value={exptyp.name}
                            />
                         </td>
-                        <td data-th="Tipo">
+                        <td>
                            <select
                               name="type"
                               onChange={(e) => onChange(e, index)}

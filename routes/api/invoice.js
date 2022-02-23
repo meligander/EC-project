@@ -198,7 +198,7 @@ router.post(
             );
          }
 
-         const plusvalue = Math.floor((last.registermoney + total) * 100) / 100;
+         const plusvalue = Math.round((last.registermoney + total) * 100) / 100;
 
          if (last.temporary) {
             await Register.findOneAndUpdate(
@@ -230,9 +230,9 @@ router.post(
             },
             details: details.map((item) => {
                return {
-                  payment: item.payment,
-                  value: item.value,
                   installment: item.installment,
+                  value: item.value,
+                  payment: Number(item.payment.replace(/,/g, ".")),
                };
             }),
             register: last._id,

@@ -11,7 +11,7 @@ import {
 
 import { getInvoiceNumber } from "../../../../../actions/invoice";
 import { clearInstallments } from "../../../../../actions/installment";
-import { clearRegisters } from "../../../../../actions/register";
+import { clearRegister } from "../../../../../actions/register";
 import { clearSearch, clearUsers } from "../../../../../actions/user";
 import { clearClasses } from "../../../../../actions/class";
 import { updateCurrentNav } from "../../../../../actions/mixvalues";
@@ -22,7 +22,7 @@ const AdminNavbar = ({
    mixvalues: { currentNav, menuToggle },
    clearInstallments,
    getInvoiceNumber,
-   clearRegisters,
+   clearRegister,
    clearSearch,
    clearClasses,
    clearUsers,
@@ -115,7 +115,7 @@ const AdminNavbar = ({
                to="/register/info"
                onClick={() => {
                   updateCurrentNav("register", true);
-                  clearRegisters();
+                  clearRegister();
                   clearUsers();
                   window.scroll(0, 0);
                }}
@@ -135,7 +135,7 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, {
    clearInstallments,
    getInvoiceNumber,
-   clearRegisters,
+   clearRegister,
    clearSearch,
    clearClasses,
    clearUsers,

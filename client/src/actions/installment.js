@@ -111,15 +111,16 @@ export const updateIntallment = (formData, loaded) => async (dispatch) => {
    });
 
    try {
-      if (!loaded)
+      if (!loaded) {
          dispatch(
             loadInstallments(
-               { student: installment.student },
+               { student: { _id: installment.student } },
                false,
                true,
                "all"
             )
          );
+      }
 
       let res;
       if (!installment._id) res = await api.post("/installment", installment);

@@ -229,7 +229,7 @@ router.post(
             name: "Inscripción",
          });
 
-         let installment = await Installment.findOne(data);
+         let installment = await Installment.findOne({ ...data, number });
 
          if (!installment) {
             installment = new Installment({
@@ -256,7 +256,7 @@ router.post(
          const amount =
             (enrollment.category.name !== "Kinder" ? 13 : 12) - number;
          for (let x = 0; x < amount; x++) {
-            installment = await Installment.findOne({ year, student, number });
+            installment = await Installment.findOne({ ...data, number });
             if (!installment) {
                installment = new Installment({
                   ...data,

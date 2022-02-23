@@ -43,6 +43,7 @@ const InstallmentsSearch = ({
 
    return (
       <div className="installment-search">
+         {/* {console.log(student)} */}
          <div className="form">
             <UsersSearch
                usersType="student"
@@ -63,30 +64,33 @@ const InstallmentsSearch = ({
                }}
             />
          </div>
-         {!loading && student && student._id === installments[0].student._id && (
-            <>
-               {installments[0] ? (
-                  <div className="mt-3">
-                     <InstallmentsTable
-                        installments={installments}
-                        forAdmin={true}
-                        student={student._id}
-                        deleteInstallment={deleteInstallment}
-                        addDetail={
-                           newInvoice ? (item) => addDetail(item) : null
-                        }
-                        clearCategories={clearCategories}
-                        loadInstallment={loadInstallment}
-                        togglePopup={togglePopup}
-                     />
-                  </div>
-               ) : (
-                  <p className="heading-tertiary text-center my-4">
-                     El alumno no tiene deudas hasta el momento
-                  </p>
-               )}
-            </>
-         )}
+         {!loading &&
+            installments[0] &&
+            student &&
+            student._id === installments[0].student._id && (
+               <>
+                  {installments[0] ? (
+                     <div className="mt-3">
+                        <InstallmentsTable
+                           installments={installments}
+                           forAdmin={true}
+                           student={student._id}
+                           deleteInstallment={deleteInstallment}
+                           addDetail={
+                              newInvoice ? (item) => addDetail(item) : null
+                           }
+                           clearCategories={clearCategories}
+                           loadInstallment={loadInstallment}
+                           togglePopup={togglePopup}
+                        />
+                     </div>
+                  ) : (
+                     <p className="heading-tertiary text-center my-4">
+                        El alumno no tiene deudas hasta el momento
+                     </p>
+                  )}
+               </>
+            )}
       </div>
    );
 };

@@ -182,7 +182,7 @@ router.post(
 //@desc     Update the last register
 //@access   Private && Admin
 router.put("/", [auth, adminAuth], async (req, res) => {
-   const { difference, description } = req.body;
+   let { difference, description } = req.body;
 
    try {
       let last = await Register.find().sort({ $natural: -1 }).limit(1);
@@ -195,9 +195,11 @@ router.put("/", [auth, adminAuth], async (req, res) => {
       }
       let value = last.registermoney;
 
-      if (difference)
+      if (difference) {
+         difference = Number(difference.replace(/,/g, "."));
          value =
-            Math.floor((last.registermoney + Number(difference)) * 100) / 100;
+            Math.round((last.registermoney + Number(difference)) * 100) / 100;
+      }
 
       await Register.findOneAndUpdate(
          { _id: last.id },

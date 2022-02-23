@@ -79,7 +79,7 @@ const TownsTab = ({
                <tbody>
                   {formData.map((town, i) => (
                      <tr key={i}>
-                        <td data-th="Nombre">
+                        <td>
                            <input
                               type="text"
                               name={`input${i}`}
