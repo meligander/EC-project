@@ -44,7 +44,7 @@ const EmployeeInfo = ({ type, userType, salary, degree, school, onChange }) => {
             <div className="form-group">
                <input
                   className="form-input"
-                  type="number"
+                  type="text"
                   onChange={onChange}
                   value={salary}
                   name="salary"

@@ -49,8 +49,13 @@ router.post(
          return res.status(400).json({ errors });
       }
 
+      let { percentage } = req.body;
+
+      if (typeof percentage === "string")
+         percentage = Number(percentage.replace(/,/g, "."));
+
       try {
-         let penalty = new Penalty(req.body);
+         let penalty = new Penalty({ percentage });
 
          await penalty.save();
 

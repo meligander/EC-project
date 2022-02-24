@@ -232,7 +232,10 @@ router.post(
                return {
                   installment: item.installment,
                   value: item.value,
-                  payment: Number(item.payment.replace(/,/g, ".")),
+                  payment:
+                     typeof item.payment === "string"
+                        ? Number(item.payment.replace(/,/g, "."))
+                        : item.payment,
                };
             }),
             register: last._id,

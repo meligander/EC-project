@@ -26,6 +26,7 @@ const InstallmentsSearch = ({
    loadInstallments,
    clearInstallments,
    clearCategories,
+   clearEnrollments,
    deleteInstallment,
    loadInstallment,
    togglePopup,
@@ -80,6 +81,7 @@ const InstallmentsSearch = ({
                               newInvoice ? (item) => addDetail(item) : null
                            }
                            clearCategories={clearCategories}
+                           clearEnrollments={clearEnrollments}
                            loadInstallment={loadInstallment}
                            togglePopup={togglePopup}
                         />

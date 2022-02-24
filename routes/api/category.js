@@ -36,6 +36,10 @@ router.post(
    "/",
    [auth, adminAuth, check("name", "El nombre es necesario").not().isEmpty()],
    async (req, res) => {
+      let { name, value } = req.body;
+
+      if (typeof value === "string") value = Number(value.replace(/,/g, "."));
+
       let errors = [];
       const errorsResult = validationResult(req);
       if (!errorsResult.isEmpty()) {
@@ -44,7 +48,7 @@ router.post(
       }
 
       try {
-         const category = new Category(req.body);
+         const category = new Category({ name, value });
 
          await category.save();
 
@@ -70,9 +74,6 @@ router.put(
       //An array of categories
       const { categories, date } = req.body;
 
-      // const month = parseInt(date.substring(5));
-      // const year = parseInt(date.substring(0, 4));
-
       const month = new Date(date).getMonth() + 1;
       const year = new Date(date).getFullYear();
 
@@ -96,7 +97,10 @@ router.put(
          for (let x = 0; x < categories.length; x++) {
             const category = categories[x];
 
-            const value = parseFloat(category.value);
+            const value =
+               typeof category.value === "string"
+                  ? Number(category.value.replace(/,/g, "."))
+                  : category.value;
 
             await Category.findOneAndUpdate({ _id: category._id }, { value });
 

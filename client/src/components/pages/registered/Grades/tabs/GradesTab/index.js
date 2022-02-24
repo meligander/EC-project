@@ -197,7 +197,7 @@ const GradesTab = ({
                               <td key={key}>
                                  {row.student ? (
                                     <input
-                                       type="number"
+                                       type="text"
                                        name={row.name}
                                        onChange={(e) => onChange(e, i, key)}
                                        value={row.value}

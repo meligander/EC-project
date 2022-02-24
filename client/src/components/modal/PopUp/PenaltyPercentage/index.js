@@ -28,7 +28,7 @@ const PenaltyPercentage = ({ onChange, penalty, percentage }) => {
          <h4>
             <input
                id="percentage"
-               type="number"
+               type="text"
                name="percentage"
                placeholder="Nuevo Recargo"
                value={percentage}

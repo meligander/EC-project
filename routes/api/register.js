@@ -196,7 +196,10 @@ router.put("/", [auth, adminAuth], async (req, res) => {
       let value = last.registermoney;
 
       if (difference) {
-         difference = Number(difference.replace(/,/g, "."));
+         difference =
+            typeof difference === "string"
+               ? Number(difference.replace(/,/g, "."))
+               : difference;
          value =
             Math.round((last.registermoney + Number(difference)) * 100) / 100;
       }

@@ -131,6 +131,12 @@ router.get("/student/:id", auth, async (req, res) => {
             .populate("teacher", ["name", "lastname"]);
       }
 
+      if (!classinfo) {
+         return res
+            .status(400)
+            .json({ msg: "No se encontró una clase con dichas descripciones" });
+      }
+
       const enrollments = await Enrollment.find({
          classroom: enrollment.classroom,
       }).populate({

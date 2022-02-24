@@ -95,7 +95,7 @@ const Categories = ({
                            <td>{category.name}</td>
                            <td>
                               <input
-                                 type="number"
+                                 type="text"
                                  name={`value${index}`}
                                  value={category.value}
                                  placeholder="Valor"

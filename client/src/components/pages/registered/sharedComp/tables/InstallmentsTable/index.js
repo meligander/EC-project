@@ -13,6 +13,7 @@ const InstallmentsTable = ({
    addDetail,
    deleteInstallment,
    clearCategories,
+   clearEnrollments,
    loadInstallment,
    togglePopup,
 }) => {
@@ -103,6 +104,7 @@ const InstallmentsTable = ({
                                              onClick={() => {
                                                 window.scroll(0, 0);
                                                 clearCategories();
+                                                clearEnrollments();
                                                 loadInstallment(item._id, true);
                                              }}
                                           >

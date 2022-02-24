@@ -162,7 +162,7 @@ const RegisterTab = ({
                      <td>{!register ? "Dinero Inicial" : "Diferencia"}</td>
                      <td>
                         <input
-                           type="number"
+                           type="text"
                            name="difference"
                            disabled={register && !register.temporary}
                            value={difference}

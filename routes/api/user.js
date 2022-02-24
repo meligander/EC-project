@@ -273,7 +273,11 @@ router.post(
    async (req, res) => {
       let user = {};
 
-      const { email, type, dni, studentnumber, discount, children } = req.body;
+      let { email, type, dni, studentnumber, discount, children, salary } =
+         req.body;
+
+      if (salary && typeof salary === "string")
+         salary = Number(salary.replace(/,/g, "."));
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -309,6 +313,7 @@ router.post(
                  }
                : { studentnumber: undefined }),
             ...(type === "guardian" && { children }),
+            ...(salary && { salary }),
          };
 
          //Encrypt password -- agregarlo a cuando se cambia el password

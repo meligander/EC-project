@@ -107,7 +107,10 @@ export const registerExpence =
             type: EXPENCE_REGISTERED,
          });
 
-         const value = Number(expence.value.replace(/,/g, "."));
+         const value =
+            typeof value === "string"
+               ? Number(expence.value.replace(/,/g, "."))
+               : expence.value;
 
          dispatch({
             type: REGISTER_LOADED,

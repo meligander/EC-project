@@ -225,7 +225,10 @@ router.put("/:class_id/:period", auth, async (req, res) => {
             classroom,
             period,
             ...(grades[x].value !== "" && {
-               value: grades[x].value,
+               value:
+                  typeof grades[x].value === "string"
+                     ? Number(grades[x].value.replace(/,/g, "."))
+                     : grades[x].value,
             }),
          };
          if (grades[x]._id === "") {

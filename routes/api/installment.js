@@ -101,7 +101,7 @@ router.get("/student/:id/:type", auth, async (req, res) => {
 
       const installments = await Installment.find({
          student: id,
-         ...((type === "student") & { debt: true }),
+         ...(type === "student" && { debt: true }),
          ...(type !== "all" && { value: { $ne: 0 } }),
       })
          .sort({ year: -1, number: 1 })
@@ -189,7 +189,10 @@ router.post(
          }
 
          installment = new Installment({
-            value: Number(value.replace(/,/g, ".")),
+            value:
+               typeof value === "string"
+                  ? Number(value.replace(/,/g, "."))
+                  : value,
             ...(enrollment && { enrollment: enrollment.id }),
             updatable: number === 1 ? false : updatable,
             debt: number === 0,
@@ -242,7 +245,10 @@ router.put(
             {
                $set: {
                   ...req.body,
-                  value: Number(value.replace(/,/g, ".")),
+                  value:
+                     typeof value === "string"
+                        ? Number(value.replace(/,/g, "."))
+                        : value,
                   expired: number === 1 ? true : expired,
                   updatable: number === 1 ? false : updatable,
                },

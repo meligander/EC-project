@@ -143,7 +143,7 @@ router.post(
    async (req, res) => {
       let { value } = req.body;
 
-      value = Number(value.replace(/,/g, "."));
+      if (typeof value === "string") value = Number(value.replace(/,/g, "."));
 
       if (isNaN(value))
          return res.status(400).json({
