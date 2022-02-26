@@ -82,9 +82,7 @@ export const createRegister = (formData) => async (dispatch) => {
 
       history.push("/index/dashboard/0");
 
-      dispatch(
-         setAlert("Caja Abierta para Transacciones", "success", "1", 7000)
-      );
+      dispatch(setAlert("Caja Abierta para Transacciones", "success", "1"));
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setError(REGISTER_ERROR, err.response));
@@ -117,7 +115,7 @@ export const closeRegister = (formData) => async (dispatch) => {
       });
 
       history.push("/index/dashboard/0");
-      dispatch(setAlert("Caja del día Cerrada", "success", "1", 7000));
+      dispatch(setAlert("Caja del día Cerrada", "success", "1"));
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setError(REGISTER_ERROR, err.response));

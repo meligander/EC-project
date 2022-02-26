@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 
 import { getInvoiceNumber } from "../../../../../actions/invoice";
+import { clearEnrollments } from "../../../../../actions/enrollment";
 import { clearInstallments } from "../../../../../actions/installment";
 import { clearRegister } from "../../../../../actions/register";
 import { clearSearch, clearUsers } from "../../../../../actions/user";
@@ -26,6 +27,7 @@ const AdminNavbar = ({
    clearSearch,
    clearClasses,
    clearUsers,
+   clearEnrollments,
    updateCurrentNav,
 }) => {
    return (
@@ -78,6 +80,7 @@ const AdminNavbar = ({
                onClick={() => {
                   window.scroll(0, 0);
                   clearSearch();
+                  clearEnrollments();
                   updateCurrentNav("enrollment", true);
                }}
             >
@@ -139,5 +142,6 @@ export default connect(mapStateToProps, {
    clearSearch,
    clearClasses,
    clearUsers,
+   clearEnrollments,
    updateCurrentNav,
 })(AdminNavbar);

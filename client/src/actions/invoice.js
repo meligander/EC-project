@@ -132,7 +132,7 @@ export const registerInvoice = (formData) => async (dispatch) => {
       dispatch(getTotalDebt());
       dispatch(clearRegister());
 
-      dispatch(setAlert("Factura Registrada", "success", "1", 7000));
+      dispatch(setAlert("Factura Registrada", "success", "1"));
       history.push("/index/dashboard/0");
    } catch (err) {
       if (err.response.status !== 401) {
@@ -230,7 +230,7 @@ export const clearInvoices = () => (dispatch) => {
 };
 
 export const addDetail = (detail) => (dispatch) => {
-   dispatch(setAlert("Cuota agregada correctamente", "success", "4"));
+   dispatch(setAlert("Cuota agregada correctamente", "success", "3"));
    dispatch({ type: INVOICEDETAIL_ADDED, payload: detail });
    dispatch({ type: INSTALLMENT_DELETED, payload: detail._id });
 };

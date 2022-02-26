@@ -28,7 +28,10 @@ import {
    clearInstallments,
    getTotalDebt,
 } from "../../../../../../actions/installment";
-import { getYearEnrollments } from "../../../../../../actions/enrollment";
+import {
+   getYearEnrollments,
+   clearEnrollments,
+} from "../../../../../../actions/enrollment";
 import {
    clearUsers,
    clearSearch,
@@ -65,6 +68,7 @@ const AdminDashboard = ({
    clearCategories,
    clearInvoice,
    clearAttendances,
+   clearEnrollments,
    clearGrades,
 }) => {
    const date = new Date();
@@ -244,6 +248,7 @@ const AdminDashboard = ({
                         to="/enrollment/register"
                         onClick={() => {
                            clearSearch();
+                           clearEnrollments();
                            window.scroll(0, 0);
                         }}
                         className="side-nav-link"
@@ -347,4 +352,5 @@ export default connect(mapStateToProps, {
    clearUsers,
    clearAttendances,
    clearGrades,
+   clearEnrollments,
 })(AdminDashboard);

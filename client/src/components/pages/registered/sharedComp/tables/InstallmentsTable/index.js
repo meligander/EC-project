@@ -41,7 +41,7 @@ const InstallmentsTable = ({
 
    return (
       <>
-         <Alert type="4" />
+         <Alert type="3" />
          <PopUp
             confirm={() => deleteInstallment(toDelete)}
             info="¿Está seguro que desea eliminar la cuota?"

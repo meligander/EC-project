@@ -74,10 +74,11 @@ const Installments = ({
             )}
 
             <div className="btn-right my-3">
-               {isAdmin && !loadingPenalty && (
+               {isAdmin && (
                   <button
                      className="btn btn-secondary"
                      type="button"
+                     disabled={loadingPenalty}
                      onClick={(e) => {
                         e.preventDefault();
                         togglePopup("penalty");

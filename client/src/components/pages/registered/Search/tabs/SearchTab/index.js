@@ -20,7 +20,7 @@ const SearchTab = ({
       loadingUsers,
       otherValues: { userSearchType },
    },
-   categories: { categories },
+   categories: { categories, loading },
    typeF,
    loadUsers,
    clearProfile,
@@ -84,15 +84,16 @@ const SearchTab = ({
                      onChange={onChange}
                   >
                      <option value="">* Seleccione Categoría</option>
-                     {categories.map((category) => (
-                        <React.Fragment key={category._id}>
-                           {category.name !== "Inscripción" && (
-                              <option value={category._id}>
-                                 {category.name}
-                              </option>
-                           )}
-                        </React.Fragment>
-                     ))}
+                     {!loading &&
+                        categories.map((category) => (
+                           <React.Fragment key={category._id}>
+                              {category.name !== "Inscripción" && (
+                                 <option value={category._id}>
+                                    {category.name}
+                                 </option>
+                              )}
+                           </React.Fragment>
+                        ))}
                   </select>
                   <label
                      htmlFor="category"

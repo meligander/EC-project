@@ -65,7 +65,7 @@ router.get("/", async (req, res) => {
                   if (category) {
                      const enrollments = await Enrollment.find({
                         ...(!searchTab && { classroom: null }),
-                        category: category,
+                        category,
                         year,
                      })
                         .populate({

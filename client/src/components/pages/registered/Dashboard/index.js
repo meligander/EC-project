@@ -194,10 +194,12 @@ const Dashboard = ({
                                  <span className="text-dark">
                                     Lugar de Nacimiento:{" "}
                                  </span>
-                                 {`${user.birthtown}${
+                                 {`${
+                                    user.birthtown ? user.birthprov + ", " : ""
+                                 }${
                                     user.birthprov === "."
                                        ? user.birthprov
-                                       : ", " + user.birthprov
+                                       : user.birthprov
                                  }`}
                               </p>
                            )}

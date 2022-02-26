@@ -39,7 +39,7 @@ export const loadInstallment =
          if (err.response.status !== 401) {
             dispatch(setError(INSTALLMENT_ERROR, err.response));
             if (spinner)
-               dispatch(setAlert(err.response.data.msg, "danger", "4"));
+               dispatch(setAlert(err.response.data.msg, "danger", "3"));
          }
       }
       if (spinner) dispatch(updateLoadingSpinner(false));
@@ -165,7 +165,7 @@ export const updateExpiredIntallments = () => async (dispatch) => {
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setError(INSTALLMENTS_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "1", 7000));
+         dispatch(setAlert(err.response.data.msg, "danger", "1"));
          window.scroll(0, 0);
       }
    }

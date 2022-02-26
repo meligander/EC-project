@@ -50,17 +50,10 @@ const Search = ({
             </div>
          )}
          <div className="few-tabs">
-            {!loading && (
-               <Tabs
-                  tablist={[
-                     "Alumnos",
-                     "Tutores",
-                     "Profesores",
-                     "Administradores",
-                  ]}
-                  panellist={[SearchTab, SearchTab, SearchTab, SearchTab]}
-               />
-            )}
+            <Tabs
+               tablist={["Alumnos", "Tutores", "Profesores", "Administradores"]}
+               panellist={[SearchTab, SearchTab, SearchTab, SearchTab]}
+            />
          </div>
       </>
    );

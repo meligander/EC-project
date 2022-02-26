@@ -108,7 +108,7 @@ export const registerExpence =
          });
 
          const value =
-            typeof value === "string"
+            typeof expence.value === "string"
                ? Number(expence.value.replace(/,/g, "."))
                : expence.value;
 
@@ -121,7 +121,7 @@ export const registerExpence =
             },
          });
 
-         dispatch(setAlert("Gasto/Ingreso Registrado", "success", "2", 7000));
+         dispatch(setAlert("Gasto/Ingreso Registrado", "success", "2"));
       } catch (err) {
          if (err.response.status !== 401) {
             dispatch(setError(EXPENCE_ERROR, err.response));

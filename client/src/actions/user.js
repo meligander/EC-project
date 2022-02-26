@@ -210,7 +210,7 @@ export const updateCredentials = (formData) => async (dispatch) => {
          payload: res.data,
       });
 
-      dispatch(setAlert("Credenciales modificadas", "success", "1", 7000));
+      dispatch(setAlert("Credenciales modificadas", "success", "1"));
 
       history.push(`/index/dashboard/${user._id}`);
    } catch (err) {
@@ -253,7 +253,7 @@ export const deleteUser = (user, self) => async (dispatch) => {
       dispatch({
          type: USER_DELETED,
       });
-      dispatch(setAlert("Usuario Eliminado", "success", "1", 7000));
+      dispatch(setAlert("Usuario Eliminado", "success", "1"));
 
       dispatch(clearUsers());
    } catch (err) {

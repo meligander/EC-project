@@ -1,6 +1,5 @@
 import React from "react";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
 
 import "./style.scss";
 
@@ -13,11 +12,6 @@ const Alert = ({ alerts, type }) =>
          )}
       </React.Fragment>
    ));
-
-Alert.propTypes = {
-   alerts: PropTypes.array.isRequired,
-   type: PropTypes.string,
-};
 
 const mapStateToProps = (state) => ({
    alerts: state.alert,

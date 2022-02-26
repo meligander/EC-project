@@ -11,7 +11,6 @@ import { loadCategories } from "../../../../../actions/category";
 import {
    registerUpdateEnrollment,
    loadEnrollment,
-   clearEnrollments,
 } from "../../../../../actions/enrollment";
 import { togglePopup } from "../../../../../actions/mixvalues";
 
@@ -25,7 +24,6 @@ const Enrollment = ({
    loadCategories,
    registerUpdateEnrollment,
    loadEnrollment,
-   clearEnrollments,
    togglePopup,
 }) => {
    const date = new Date();
@@ -105,10 +103,7 @@ const Enrollment = ({
             <div className="btn-right">
                <Link
                   to="/enrollment/list"
-                  onClick={() => {
-                     window.scroll(0, 0);
-                     clearEnrollments();
-                  }}
+                  onClick={() => window.scroll(0, 0)}
                   className="btn btn-light"
                >
                   <IoIosListBox />
@@ -241,6 +236,5 @@ export default connect(mapStateToProps, {
    loadCategories,
    registerUpdateEnrollment,
    loadEnrollment,
-   clearEnrollments,
    togglePopup,
 })(Enrollment);
