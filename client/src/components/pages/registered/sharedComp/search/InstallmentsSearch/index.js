@@ -60,7 +60,7 @@ const InstallmentsSearch = ({
                      { student },
                      true,
                      true,
-                     newInvoice ? "student" : "all"
+                     newInvoice ? "invoice" : "all"
                   );
                }}
             />

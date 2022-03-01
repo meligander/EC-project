@@ -9,6 +9,7 @@ import {
    updateLoadingSpinner,
    filterData,
    setError,
+   togglePopup,
 } from "./mixvalues";
 
 import {
@@ -98,15 +99,16 @@ export const registerNewDate =
                "3"
             )
          );
+         dispatch(togglePopup("default"));
       } catch (err) {
          if (err.response.status !== 401) {
             dispatch(setError(DATE_ERROR, err.response));
 
             if (err.response.data.errors)
                err.response.data.errors.forEach((error) => {
-                  dispatch(setAlert(error.msg, "danger", "3"));
+                  dispatch(setAlert(error.msg, "danger", "4"));
                });
-            else dispatch(setAlert(err.response.data.msg, "danger", "3"));
+            else dispatch(setAlert(err.response.data.msg, "danger", "4"));
          } else error = true;
       }
 

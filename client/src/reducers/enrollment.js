@@ -102,6 +102,7 @@ export default function (state = initialState, action) {
                   year: "",
                   length: "",
                },
+               estimatedProfit: "",
             },
          };
       case ENROLLMENT_ERROR:
@@ -122,6 +123,7 @@ export default function (state = initialState, action) {
                   year: "",
                   length: "",
                },
+               estimatedProfit: "",
             },
          };
       default:

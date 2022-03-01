@@ -7,16 +7,18 @@ import { togglePopup } from "../../../actions/mixvalues";
 import NewDate from "./NewDate";
 import PenaltyPercentage from "./PenaltyPercentage";
 import Certificate from "./Certificate";
+import NewGradeType from "./NewGradeType";
+import Alert from "../../pages/sharedComp/Alert";
 
 import logo from "../../../img/logoSinLetras.png";
 import "./style.scss";
-import NewGradeType from "./NewGradeType";
 
 const PopUp = ({
    mixvalues: { popupType, popupToggle },
    togglePopup,
    confirm,
    info,
+   error,
 }) => {
    const [newDate, setNewDate] = useState({
       fromDate: "",
@@ -167,6 +169,7 @@ const PopUp = ({
                   <FaTimes />
                </button>
             </div>
+            <Alert type="4" />
             <div className={popupType === "certificate" ? "wrapper both" : ""}>
                {chooseType(popupType)}
             </div>
@@ -197,7 +200,7 @@ const PopUp = ({
                            confirm();
                            break;
                      }
-                     togglePopup();
+                     if (!error) togglePopup("default");
                   }}
                >
                   Aceptar

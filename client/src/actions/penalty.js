@@ -1,7 +1,7 @@
 import api from "../utils/api";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, setError } from "./mixvalues";
+import { updateLoadingSpinner, setError, togglePopup } from "./mixvalues";
 
 import {
    PENALTY_LOADED,
@@ -30,21 +30,24 @@ export const updatePenalty = (penalty) => async (dispatch) => {
    let error = false;
 
    try {
-      await api.post("/penalty", penalty);
+      const res = await api.post("/penalty", penalty);
+
       dispatch({
          type: PENALTY_REGISTERED,
+         payload: res.data,
       });
-      dispatch(clearPenalty());
+
       dispatch(setAlert("Recargo Modificado", "success", "2"));
+      dispatch(togglePopup("default"));
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setError(PENALTY_ERROR, err.response));
 
          if (err.response.data.errors)
             err.response.data.errors.forEach((error) => {
-               dispatch(setAlert(error.msg, "danger", "2"));
+               dispatch(setAlert(error.msg, "danger", "4"));
             });
-         else dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         else dispatch(setAlert(err.response.data.msg, "danger", "4"));
       } else error = true;
    }
 

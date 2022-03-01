@@ -14,6 +14,7 @@ const initialState = {
    userLogged: null,
    loading: true,
    isAuthenticated: false,
+   error: "",
 };
 
 export default function (state = initialState, action) {
@@ -55,6 +56,7 @@ export default function (state = initialState, action) {
             isAuthenticated: false,
             userLogged: null,
             loading: false,
+            error: payload,
          };
       default:
          return state;

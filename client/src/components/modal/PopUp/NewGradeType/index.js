@@ -42,7 +42,7 @@ const NewGradeType = ({
                   onClick={() => {
                      window.scroll(0, 0);
                      clearGradeTypes();
-                     togglePopup();
+                     togglePopup("default");
                   }}
                   className="btn btn-mix-secondary"
                >

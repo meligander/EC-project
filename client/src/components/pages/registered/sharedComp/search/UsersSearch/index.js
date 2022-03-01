@@ -10,7 +10,6 @@ import {
 } from "../../../../../../actions/user";
 
 import NameField from "../../NameField";
-import Alert from "../../../../sharedComp/Alert";
 
 import "./style.scss";
 
@@ -108,7 +107,6 @@ const UsersSearch = ({
                ? "Búsqueda de Alumnos"
                : "Usuario a Pagar"}
          </h3>
-         <Alert type="3" />
          <div className="form-group form-search" ref={modalRef}>
             {user ? (
                <div>

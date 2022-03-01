@@ -78,7 +78,7 @@ const Enrollment = ({
 
    return (
       <>
-         {_id === "" ? <h1>Inscripción</h1> : <h2>Editar inscripción</h2>}
+         {_id === "" ? <h1>Nueva Inscripción</h1> : <h2>Editar inscripción</h2>}
          <PopUp
             confirm={() =>
                registerUpdateEnrollment(

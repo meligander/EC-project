@@ -94,6 +94,7 @@ const AttendanceTab = ({
                      break;
                }
             }}
+            error={popupType === "new-date"}
             info={
                popupType !== "new-date"
                   ? `¿Está seguro que desea ${

@@ -172,6 +172,7 @@ const GradesTab = ({
                      break;
                }
             }}
+            error={popupType === "new-grade" || popupType === "certificate"}
             info={info()}
          />
          <div className="wrapper both mt-2">

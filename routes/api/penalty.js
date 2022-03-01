@@ -55,19 +55,16 @@ router.post(
          percentage = Number(percentage.replace(/,/g, "."));
 
       try {
-         let penalty = new Penalty({ percentage });
+         const penalty = new Penalty({ percentage });
 
          await penalty.save();
 
-         let penaltyToRemove = await Penalty.find()
-            .sort({ $natural: -1 })
-            .limit(2);
+         const penaltiesToRemove = await Penalty.find({
+            _id: { $ne: penalty._id },
+         });
 
-         penalty = penaltyToRemove[0];
-         penaltyToRemove = penaltyToRemove[1];
-
-         if (penaltyToRemove)
-            await Penalty.findOneAndRemove({ _id: penaltyToRemove._id });
+         for (let x = 0; x < penaltiesToRemove.length; x++)
+            await Penalty.findOneAndRemove({ _id: penaltiesToRemove[x]._id });
 
          res.json(penalty);
       } catch (err) {

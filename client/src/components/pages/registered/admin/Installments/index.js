@@ -70,6 +70,7 @@ const Installments = ({
                <PopUp
                   confirm={(percentage) => updatePenalty({ percentage })}
                   info={{ penalty }}
+                  error
                />
             )}
 
