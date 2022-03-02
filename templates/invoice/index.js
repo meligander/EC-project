@@ -9,6 +9,7 @@ module.exports = (data) => {
                     href="https://fonts.googleapis.com/css2?family=Courgette&family=Dancing+Script:wght@700&display=swap"
                     rel="stylesheet"
                 />
+                <link href="https://fonts.googleapis.com/css2?family=Tinos:wght@400;700&display=swap" rel="stylesheet">
                 <link
 			        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap"
 			        rel="stylesheet"

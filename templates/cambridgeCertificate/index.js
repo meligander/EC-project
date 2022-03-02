@@ -5,6 +5,7 @@ module.exports = (data) => {
              <head>
                  <meta charset="utf-8">
                  <link href=${data.style.css} rel="stylesheet" />
+                 <link href="https://fonts.googleapis.com/css2?family=Tinos:wght@400;700&display=swap" rel="stylesheet">
                  <title>Certificado fin de año</title>
              </head>
              <body>

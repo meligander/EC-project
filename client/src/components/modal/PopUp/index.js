@@ -36,7 +36,6 @@ const PopUp = ({
    const [penaltyPercentage, setPenaltyPercentage] = useState("");
 
    useEffect(() => {
-      console.log("hola");
       if (info && info.students)
          setCertificate((prev) => ({
             ...prev,
