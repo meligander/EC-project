@@ -95,17 +95,21 @@ const EditInstallment = ({
       setformData({
          ...formData,
          [e.target.name]:
-            e.target.type !== "checkbox" ? e.target.value : e.target.checked,
+            e.target.type === "checkbox"
+               ? e.target.checked
+               : isNaN(e.target.value)
+               ? e.target.value
+               : Number(e.target.value),
       });
    };
 
    const installmentNames = () => {
-      return "Inscripción,Clases Particulares,,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre"
+      return "Inscripción,Clases Particulares,Examen Libre,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre"
          .split(",")
          .map((item, index) => (
-            <React.Fragment key={index}>
-               {item !== "" && <option value={index}>{item}</option>}
-            </React.Fragment>
+            <option key={index} value={index}>
+               {item}
+            </option>
          ));
    };
 
@@ -118,6 +122,10 @@ const EditInstallment = ({
                   {
                      ...formData,
                      ...(type === "new" && { student: student._id }),
+                     ...((number === "1" || number === "2") && {
+                        expired: true,
+                        updatable: false,
+                     }),
                   },
                   installments.length > 0
                );
@@ -199,7 +207,7 @@ const EditInstallment = ({
                </select>
                <label
                   htmlFor="number"
-                  className={`form-label ${number === 1 ? "lbl" : ""}`}
+                  className={`form-label ${number === "" ? "lbl" : ""}`}
                >
                   Cuota
                </label>
@@ -218,32 +226,37 @@ const EditInstallment = ({
                   Valor
                </label>
             </div>
-            <div className="form-group">
-               <input
-                  className="form-checkbox"
-                  type="checkbox"
-                  checked={expired}
-                  onChange={onChange}
-                  name="expired"
-                  id="expired"
-               />
-               <label className="checkbox-lbl" htmlFor="expired">
-                  {expired ? "Vencida" : "Vigente"}
-               </label>
-            </div>
-            <div className="form-group">
-               <input
-                  className="form-checkbox"
-                  type="checkbox"
-                  checked={updatable}
-                  onChange={onChange}
-                  name="updatable"
-                  id="updatable"
-               />
-               <label className="checkbox-lbl" htmlFor="updatable">
-                  {!updatable ? "No Actualizar" : "Permitir actualizar"}
-               </label>
-            </div>
+            {number !== 1 && number !== 2 && (
+               <>
+                  <div className="form-group">
+                     <input
+                        className="form-checkbox"
+                        type="checkbox"
+                        checked={expired}
+                        onChange={onChange}
+                        name="expired"
+                        id="expired"
+                     />
+                     <label className="checkbox-lbl" htmlFor="expired">
+                        {expired ? "Vencida" : "Vigente"}
+                     </label>
+                  </div>
+                  <div className="form-group">
+                     <input
+                        className="form-checkbox"
+                        type="checkbox"
+                        checked={updatable}
+                        onChange={onChange}
+                        name="updatable"
+                        id="updatable"
+                     />
+                     <label className="checkbox-lbl" htmlFor="updatable">
+                        {!updatable ? "No Actualizar" : "Permitir actualizar"}
+                     </label>
+                  </div>
+               </>
+            )}
+
             <div className="btn-center py-2">
                <button type="submit" className="btn btn-primary">
                   <FiSave />

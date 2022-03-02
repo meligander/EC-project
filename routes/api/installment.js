@@ -162,7 +162,7 @@ router.post(
       check("value", "El valor es necesario").not().isEmpty(),
    ],
    async (req, res) => {
-      const { number, year, expired, enrollment, updatable, value } = req.body;
+      const { number, year, enrollment, value } = req.body;
 
       try {
          let errors = [];
@@ -189,14 +189,13 @@ router.post(
          }
 
          installment = new Installment({
+            ...req.body,
             value:
                typeof value === "string"
                   ? Number(value.replace(/,/g, "."))
                   : value,
             ...(enrollment && { enrollment: enrollment.id }),
-            updatable: number === 1 ? false : updatable,
-            debt: number === 0,
-            expired: number === 1 ? true : expired,
+            debt: number < 3,
          });
 
          await installment.save();
@@ -230,7 +229,7 @@ router.put(
    "/:id",
    [auth, adminAuth, check("value", "El valor es necesario").not().isEmpty()],
    async (req, res) => {
-      const { expired, updatable, number, value } = req.body;
+      const { value } = req.body;
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -249,8 +248,6 @@ router.put(
                      typeof value === "string"
                         ? Number(value.replace(/,/g, "."))
                         : value,
-                  expired: number === 1 ? true : expired,
-                  updatable: number === 1 ? false : updatable,
                },
             },
             { new: true }
