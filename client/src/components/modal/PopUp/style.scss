@@ -11,7 +11,7 @@
    left: 0;
    background-color: rgba($black-color, 0.8);
    padding: 15rem 0;
-   z-index: 9999;
+   z-index: 5000;
    transition: all 0.3s;
    visibility: visible;
 
@@ -27,7 +27,7 @@
    &-content {
       display: flex;
       flex-direction: column;
-      z-index: 9999;
+      z-index: 5000;
       opacity: 0.82;
       margin: 0 auto;
       width: 70%;

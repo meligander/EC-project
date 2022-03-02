@@ -298,7 +298,7 @@ export const certificatePDF =
       let error = false;
 
       try {
-         if (last || !date || info.students.length === 0) {
+         if (last || !date || !info.students.some((item) => item.checked)) {
             const errorMessage = {
                response: {
                   status: 402,
