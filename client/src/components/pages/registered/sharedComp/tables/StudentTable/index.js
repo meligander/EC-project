@@ -35,7 +35,7 @@ const StudentTable = ({
             {userSearchType === "student" &&
                users.map((user) => {
                   let years = "";
-                  if (type !== "class-students")
+                  if (type !== "class-students" && user.dob)
                      years = differenceInYears(
                         new Date(),
                         new Date(user.dob.slice(0, -1))
@@ -58,7 +58,7 @@ const StudentTable = ({
                            </Link>
                         </td>
                         <td className="hide-sm">
-                           {user.dob && type !== "class-students"
+                           {type !== "class-students"
                               ? years
                               : format(
                                    new Date(user.dob.slice(0, -1)),
