@@ -305,7 +305,6 @@ router.post(
 
          let data = {
             ...req.body,
-            password: "12345678",
             ...(type === "student"
                ? {
                     studentnumber,
@@ -319,7 +318,7 @@ router.post(
          //Encrypt password -- agregarlo a cuando se cambia el password
          const salt = await bcrypt.genSalt(10);
 
-         data.password = await bcrypt.hash(data.password, salt);
+         data.password = await bcrypt.hash("12345678", salt);
 
          user = new User(data);
 
