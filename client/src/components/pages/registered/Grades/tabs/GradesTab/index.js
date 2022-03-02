@@ -133,7 +133,7 @@ const GradesTab = ({
                         periods[period - 1],
                         formInfo.date !== ""
                            ? format(
-                                new Date(formInfo.date),
+                                new Date(formInfo.date.replace("-", ",")),
                                 "EEEE, do 'de' LLLL 'de' yyyy",
                                 {
                                    locale: es,
