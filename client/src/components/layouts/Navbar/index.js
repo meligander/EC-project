@@ -37,7 +37,9 @@ const Navbar = ({
    const ref = useRef();
    const isAdmin =
       userLogged &&
-      (userLogged.type === "admin" || userLogged.type === "admin&teacher");
+      (userLogged.type === "admin" ||
+         userLogged.type === "admin&teacher" ||
+         userLogged.type === "secretary");
 
    useEffect(() => {
       if (userLogged) {
