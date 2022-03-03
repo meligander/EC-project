@@ -119,8 +119,12 @@ const NewClassTab = ({
             confirm={() =>
                registerUpdateClass({
                   ...formData,
-                  category: classInfo.category ? classInfo.category._id : "",
-                  students: classInfo.students ? classInfo.students : [],
+                  category:
+                     classInfo && classInfo.category
+                        ? classInfo.category._id
+                        : "",
+                  students:
+                     classInfo && classInfo.students ? classInfo.students : [],
                   ...(sameSchedule && { hourin2: hourin1, hourout2: hourout1 }),
                })
             }
@@ -135,7 +139,8 @@ const NewClassTab = ({
          >
             <div className="form-group my-3 heading-tertiary">
                <p>
-                  Categoría: &nbsp; {!loadingClass && classInfo.category.name}
+                  Categoría: &nbsp;{" "}
+                  {!loadingClass && classInfo && classInfo.category.name}
                </p>
             </div>
             <div className="form-group">
@@ -282,7 +287,7 @@ const NewClassTab = ({
             <h3 className="text-primary heading-tertiary my-2 pt-2">
                Lista de Alumnos
             </h3>
-            {!loadingClass && classInfo.students.length > 0 ? (
+            {!loadingClass && classInfo && classInfo.students.length > 0 ? (
                <StudentTable
                   users={classInfo.students}
                   clearProfile={clearProfile}

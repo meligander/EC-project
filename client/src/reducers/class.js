@@ -130,7 +130,7 @@ export default function (state = initialState, action) {
       case CLASS_ERROR:
          return {
             ...state,
-            classInfo: null,
+            //classInfo: null,
             loadingClass: false,
             error: payload,
          };
