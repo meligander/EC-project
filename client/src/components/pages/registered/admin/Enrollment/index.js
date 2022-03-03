@@ -84,7 +84,7 @@ const Enrollment = ({
                registerUpdateEnrollment(
                   {
                      ...formData,
-                     student: student._id,
+                     student: student ? student._id : null,
                      month:
                         thisYear === Number(year) && currentMonth > 2
                            ? month

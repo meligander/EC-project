@@ -44,7 +44,6 @@ const InstallmentsSearch = ({
 
    return (
       <div className="installment-search">
-         {/* {console.log(student)} */}
          <div className="form">
             <UsersSearch
                usersType="student"
