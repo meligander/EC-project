@@ -34,14 +34,6 @@ module.exports = (data) => {
                   ${data.table.tbody}
                </tbody>
             </table>
-            ${
-               data.total
-                  ? `
-            <div class='total'>
-               Total: $${data.total}
-            </div>`
-                  : ""
-            }
           </div>
        </body>
     </html>

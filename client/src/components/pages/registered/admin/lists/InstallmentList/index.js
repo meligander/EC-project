@@ -88,13 +88,15 @@ const InstallmentList = ({
       <>
          <h2 className="p-1">Lista de Deudas</h2>
 
-         <p className="heading-tertiary text-moved-right">
-            Total: ${formatNumber(total)}
-         </p>
          {isAdmin && (
-            <p className="heading-tertiary text-moved-right">
-               Ganancia Estimada por Mes: ${formatNumber(estimatedProfit)}
-            </p>
+            <>
+               <p className="heading-tertiary text-moved-right">
+                  Total: ${formatNumber(total)}
+               </p>
+               <p className="heading-tertiary text-moved-right">
+                  Ganancia Estimada por Mes: ${formatNumber(estimatedProfit)}
+               </p>
+            </>
          )}
 
          <form
@@ -208,9 +210,7 @@ const InstallmentList = ({
                   setAdminValues((prev) => ({ ...prev, page }))
                }
                items={installments}
-               pdfGenerator={() =>
-                  installmentsPDF({ debts: installments, total })
-               }
+               pdfGenerator={() => installmentsPDF(installments)}
             />
          )}
       </>

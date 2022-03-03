@@ -344,7 +344,7 @@ export const certificatePDF =
                   pdfBlob,
                   `Certificado ${info.category} ${
                      info.period === 6 ? "Cambridge" : ""
-                  }  ${info.students[x].name}.pdf`
+                  } ${info.students[x].name}.pdf`
                );
             }
          }

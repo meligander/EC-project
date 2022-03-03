@@ -39,7 +39,7 @@ router.get("/fetch", [auth, adminAuth], (req, res) => {
 //@desc     Create a pdf of installments
 //@access   Private && Admin
 router.post("/list", [auth, adminAuth], (req, res) => {
-   const { debts, total } = req.body;
+   const debts = req.body;
 
    const tbody = debts
       .map(
@@ -63,7 +63,6 @@ router.post("/list", [auth, adminAuth], (req, res) => {
          {
             title: "Deudas",
             table: { thead, tbody },
-            total: new Intl.NumberFormat("de-DE").format(total),
          },
          "portrait",
          "Deudas",
