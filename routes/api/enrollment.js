@@ -247,8 +247,12 @@ router.post(
          const discount = enrollment.student.discount;
          let value = enrollment.category.value;
 
+         console.log(value, enrollment.student, discount);
+
          if (discount && discount !== 0)
             value = value - (value * discount) / 100;
+
+         console.log(value);
 
          const half = discount !== 50 ? value / 2 : value;
 

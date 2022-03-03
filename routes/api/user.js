@@ -396,6 +396,7 @@ router.put(
                value: { $ne: 0 },
                year: { $gte: year },
                updatable: true,
+               student: user._id,
             }).populate({
                model: "enrollment",
                path: "enrollment",
