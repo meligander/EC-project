@@ -85,7 +85,12 @@ const UsersSearch = ({
 
       if (e.target.value.length > 0)
          loadUsers(
-            { ...filterData, [e.target.name]: e.target.value, type: usersType },
+            {
+               ...filterData,
+               [e.target.name]: e.target.value,
+               type: usersType,
+               ...(disabled !== undefined && { active: true }),
+            },
             false,
             primary
          );

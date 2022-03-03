@@ -195,12 +195,15 @@ const Dashboard = ({
                                     Lugar de Nacimiento:{" "}
                                  </span>
                                  {`${
-                                    user.birthtown ? user.birthprov + ", " : ""
-                                 }${
-                                    user.birthprov === "."
-                                       ? user.birthprov
-                                       : user.birthprov
-                                 }`}
+                                    user.birthtown
+                                       ? `${user.birthtown}${
+                                            user.birthprov &&
+                                            user.birthprov !== "."
+                                               ? ", "
+                                               : ""
+                                         }`
+                                       : ""
+                                 }${user.birthprov ? user.birthprov : ""}`}
                               </p>
                            )}
                            {user.type === "teacher" && (

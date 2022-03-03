@@ -2,4 +2,15 @@ node_modules/
 
 config/default.json
 config/.env
-reports
+
+reports/attendances.pdf
+reports/categories.pdf
+reports/classes.pdf
+reports/enrollments.pdf
+reports/grades.pdf
+reports/installments.pdf
+reports/invoices.pdf
+reports/registers.pdf
+registers/reportCard.pdf
+registers/transactions.pdf
+registers/users.pdf

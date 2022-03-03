@@ -379,7 +379,8 @@ router.put(
             };
          }
 
-         if (!active) await inactivateUser(user._id, type, false);
+         if (!active && user.active)
+            await inactivateUser(user._id, type, false);
 
          let data = {
             ...req.body,
@@ -571,7 +572,7 @@ const deletePictures = (img) => {
 
 //@desc Function to eliminate all the info related to a user
 const inactivateUser = async (user_id, type, completeDeletion) => {
-   let filter = {};
+   let filter;
    let enrollments = [];
 
    switch (type) {
@@ -623,7 +624,7 @@ const inactivateUser = async (user_id, type, completeDeletion) => {
          break;
    }
 
-   if (Object.keys(filter).length > 0) {
+   if (filter) {
       const attendances = await Attendance.find(filter);
 
       await attendances.forEach(
