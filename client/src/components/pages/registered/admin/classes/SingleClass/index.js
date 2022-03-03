@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
+import format from "date-fns/format";
 import { FaEdit, FaPenFancy, FaTrashAlt } from "react-icons/fa";
 import { IoCheckmarkCircleSharp } from "react-icons/io5";
 import { ImFilePdf } from "react-icons/im";
@@ -153,7 +154,61 @@ const SingleClass = ({
                                  className="btn btn-secondary"
                                  onClick={(e) => {
                                     e.preventDefault();
-                                    classPDF(classInfo, "class");
+                                    classPDF(
+                                       {
+                                          ...classInfo,
+                                          category: classInfo.category.name,
+                                          teacher:
+                                             classInfo.teacher.lastname +
+                                             ", " +
+                                             classInfo.teacher.name,
+                                          hourin1: classInfo.hourin1
+                                             ? format(
+                                                  new Date(
+                                                     classInfo.hourin1.slice(
+                                                        0,
+                                                        -1
+                                                     )
+                                                  ),
+                                                  "HH:mm"
+                                               )
+                                             : "",
+                                          hourout1: classInfo.hourout1
+                                             ? format(
+                                                  new Date(
+                                                     classInfo.hourout1.slice(
+                                                        0,
+                                                        -1
+                                                     )
+                                                  ),
+                                                  "HH:mm"
+                                               )
+                                             : "",
+                                          hourin2: classInfo.hourin2
+                                             ? format(
+                                                  new Date(
+                                                     classInfo.hourin2.slice(
+                                                        0,
+                                                        -1
+                                                     )
+                                                  ),
+                                                  "HH:mm"
+                                               )
+                                             : "",
+                                          hourout2: classInfo.hourout2
+                                             ? format(
+                                                  new Date(
+                                                     classInfo.hourout2.slice(
+                                                        0,
+                                                        -1
+                                                     )
+                                                  ),
+                                                  "HH:mm"
+                                               )
+                                             : "",
+                                       },
+                                       "class"
+                                    );
                                  }}
                               >
                                  <ImFilePdf />

@@ -56,7 +56,7 @@ router.post("/list", auth, (req, res) => {
             table: { thead, tbody },
          },
          "landscape",
-         "",
+         title,
          res
       );
    } catch (err) {

@@ -26,10 +26,10 @@ const generatePDF = (
                height: "15mm",
                contents: `<div></div>`,
             },
-            ...(footer && {
+            ...(footer !== null && {
                footer: {
                   height: "17mm",
-                  contents: `<footer class="footer">Villa de Merlo English Center${footer}<span class="pages">{{page}}/{{pages}}</span></footer>`,
+                  contents: `<footer class="footer">Villa de Merlo English Center - ${footer}<span class="pages">{{page}}/{{pages}}</span></footer>`,
                },
             }),
          }),

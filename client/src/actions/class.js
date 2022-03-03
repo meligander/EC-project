@@ -213,9 +213,7 @@ export const classPDF = (info, type) => async (dispatch) => {
          case "class":
             await api.post("/pdf/class/one", info);
 
-            name = `Clase ${info.teacher.lastname + ", " + info.teacher.name} ${
-               info.category.name
-            } `;
+            name = `Clase ${info.category} de ${info.teacher}`;
             break;
          default:
             break;

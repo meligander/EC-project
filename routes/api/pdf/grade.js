@@ -85,7 +85,7 @@ router.post("/period-list", auth, (req, res) => {
             table: { thead, tbody },
          },
          "portrait",
-         "",
+         `Notas ${periodName[info.period]} ${info.category} de ${info.teacher}`,
          res
       );
    } catch (err) {
@@ -167,7 +167,7 @@ router.post("/list", auth, (req, res) => {
             type: "all-grades",
          },
          "landscape",
-         ` - ${info.category} de ${info.teacher}`,
+         ` - Notas ${info.category} de ${info.teacher}`,
          res
       );
    } catch (err) {
@@ -389,7 +389,7 @@ router.post("/best", [auth, adminAuth], (req, res) => {
             table: { thead, tbody },
          },
          "portrait",
-         "",
+         "Mejores Promedios",
          res
       );
    } catch (err) {

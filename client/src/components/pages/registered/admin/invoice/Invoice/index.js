@@ -56,16 +56,18 @@ const Invoice = ({
             }`;
          }
 
-         const email = invoice.user.user_id
-            ? invoice.user.user_id.email
-            : invoice.user.email
-            ? invoice.user.email
-            : "";
-         const cel = invoice.user.user_id
-            ? invoice.user.user_id.cel
-            : invoice.user.cel
-            ? invoice.user.cel
-            : "";
+         const email =
+            invoice.user.user_id && invoice.user.user_id.email !== undefined
+               ? invoice.user.user_id.email
+               : invoice.user.email !== undefined
+               ? invoice.user.email
+               : "";
+         const cel =
+            invoice.user.user_id && invoice.user.user_id.cel !== undefined
+               ? invoice.user.user_id.cel
+               : invoice.user.cel !== undefined
+               ? invoice.user.cel
+               : "";
 
          setAdminValues((prev) => ({
             ...prev,

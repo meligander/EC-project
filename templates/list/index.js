@@ -42,7 +42,6 @@ module.exports = (data) => {
             </div>`
                   : ""
             }
-            
           </div>
        </body>
     </html>

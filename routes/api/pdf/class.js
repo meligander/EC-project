@@ -65,9 +65,9 @@ router.post("/list", auth, (req, res) => {
          fileName,
          pdfTemplate,
          "list",
-         { title: "Cursos", table: { thead, tbody }, small: false },
+         { title: "Clases", table: { thead, tbody }, small: false },
          "landscape",
-         "",
+         "Clases",
          res
       );
    } catch (err) {
@@ -80,9 +80,9 @@ router.post("/list", auth, (req, res) => {
 //@desc     Create a pdf of a class
 //@access   Private
 router.post("/one", auth, (req, res) => {
-   const classInfo = req.body;
+   const info = req.body;
 
-   const tbody = classInfo.students
+   const tbody = info.students
       .map(
          (item) => `<tr>
       <td>${item.studentnumber}</td>
@@ -104,29 +104,12 @@ router.post("/one", auth, (req, res) => {
          pdfTemplate2,
          "classInfo",
          {
-            title: "Cursos",
+            title: "Alumnos",
             table: { tbody },
-            info: {
-               ...classInfo,
-               category: classInfo.category.name,
-               teacher:
-                  classInfo.teacher.lastname + ", " + classInfo.teacher.name,
-               hourin1: classInfo.hourin1
-                  ? format(new Date(classInfo.hourin1.slice(0, -1)), "HH:mm")
-                  : "",
-               hourout1: classInfo.hourout1
-                  ? format(new Date(classInfo.hourout1.slice(0, -1)), "HH:mm")
-                  : "",
-               hourin2: classInfo.hourin2
-                  ? format(new Date(classInfo.hourin2.slice(0, -1)), "HH:mm")
-                  : "",
-               hourout2: classInfo.hourout2
-                  ? format(new Date(classInfo.hourout2.slice(0, -1)), "HH:mm")
-                  : "",
-            },
+            info,
          },
-         "",
          "portrait",
+         ` - Alumnos ${info.category} de ${info.teacher}`,
          res
       );
    } catch (err) {

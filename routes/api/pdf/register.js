@@ -84,7 +84,7 @@ router.post("/list", [auth, adminAuth], (req, res) => {
             table: { thead, tbody },
          },
          "landscape",
-         "",
+         register[0].temporary !== undefined ? "Caja" : "Cajas Mensuales",
          res
       );
    } catch (err) {

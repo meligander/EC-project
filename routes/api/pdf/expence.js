@@ -35,7 +35,7 @@ router.post("/list", [auth, adminAuth], (req, res) => {
             ? `<td>${getType(item.expencetype.type)}</td>
                <td>${formatNumber(item.value)}</td>
                <td>${item.expencetype.name}${
-                 item.description ? " - " + item.description : ""
+                 item.description ? "" + item.description : ""
               }</td>`
             : `<td>Ingreso</td>
                <td>${formatNumber(item.total)}</td>
@@ -58,7 +58,7 @@ router.post("/list", [auth, adminAuth], (req, res) => {
             table: { thead, tbody },
          },
          "portrait",
-         "",
+         "Transacciones",
          res
       );
    } catch (err) {
@@ -97,7 +97,7 @@ router.post("/withdrawal-list", [auth, adminAuth], (req, res) => {
             table: { thead, tbody },
             total: formatNumber(total),
          },
-         "",
+         "Retiros",
          "portrait",
          res
       );

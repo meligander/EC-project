@@ -74,7 +74,9 @@ router.post("/list", auth, (req, res) => {
             table: { thead, tbody },
          },
          "landscape",
-         "",
+         ` - Asistencias ${periodName[info.period]} ${info.category} de ${
+            info.teacher
+         }`,
          res
       );
    } catch (err) {
@@ -119,7 +121,7 @@ router.post("/best", [auth, adminAuth], (req, res) => {
             table: { thead, tbody },
          },
          "portrait",
-         "",
+         "Mejores Asistencias",
          res
       );
    } catch (err) {

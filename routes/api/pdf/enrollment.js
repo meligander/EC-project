@@ -56,7 +56,7 @@ router.post("/list", [auth, adminAuth], (req, res) => {
             table: { thead, tbody },
          },
          "portrait",
-         "",
+         "Inscripciones",
          res
       );
    } catch (err) {

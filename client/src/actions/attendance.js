@@ -199,7 +199,7 @@ export const attendancesPDF =
          saveAs(
             pdfBlob,
             header
-               ? `Asistencia de ${info.category} de ${info.teacher}  ${format(
+               ? `Asistencia ${info.category} de ${info.teacher}  ${format(
                     new Date(),
                     "dd-MM-yy"
                  )}.pdf`

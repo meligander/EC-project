@@ -17,7 +17,7 @@ const fileName = path.join(__dirname, "../../../reports/invoices.pdf");
 const installment = [
    "Insc",
    "Clases Particulares",
-   "",
+   "Examen Libre",
    "Mar",
    "Abr",
    "May",
@@ -70,7 +70,7 @@ router.post("/list", [auth, adminAuth], (req, res) => {
             total: formatNumber(total),
          },
          "portrait",
-         "",
+         "Facturas",
          res
       );
    } catch (err) {
@@ -98,6 +98,7 @@ router.post("/", [auth, adminAuth], (req, res) => {
    </tr>`
       )
       .join("");
+
    try {
       generatePDF(
          fileName,
@@ -116,7 +117,7 @@ router.post("/", [auth, adminAuth], (req, res) => {
             },
          },
          "portrait",
-         "",
+         null,
          res
       );
    } catch (err) {

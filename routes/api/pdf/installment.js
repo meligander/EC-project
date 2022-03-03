@@ -15,7 +15,7 @@ const fileName = path.join(__dirname, "../../../reports/installments.pdf");
 const installments = [
    "Inscripción",
    "Clases Particulares",
-   "",
+   "Examen Libre",
    "Marzo",
    "Abril",
    "Mayo",
@@ -66,7 +66,7 @@ router.post("/list", [auth, adminAuth], (req, res) => {
             total: new Intl.NumberFormat("de-DE").format(total),
          },
          "portrait",
-         "",
+         "Deudas",
          res
       );
    } catch (err) {
