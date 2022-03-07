@@ -9,7 +9,7 @@ import {
    FaUserEdit,
 } from "react-icons/fa";
 
-import { getInvoiceNumber } from "../../../../../actions/invoice";
+import { getInvoiceNumber, clearInvoice } from "../../../../../actions/invoice";
 import { clearEnrollments } from "../../../../../actions/enrollment";
 import { clearInstallments } from "../../../../../actions/installment";
 import { clearRegister } from "../../../../../actions/register";
@@ -27,6 +27,7 @@ const AdminNavbar = ({
    clearSearch,
    clearClasses,
    clearUsers,
+   clearInvoice,
    clearEnrollments,
    updateCurrentNav,
 }) => {
@@ -101,6 +102,7 @@ const AdminNavbar = ({
                   clearInstallments();
                   getInvoiceNumber();
                   clearSearch();
+                  clearInvoice();
                   window.scroll(0, 0);
                }}
             >
@@ -141,6 +143,7 @@ export default connect(mapStateToProps, {
    clearRegister,
    clearSearch,
    clearClasses,
+   clearInvoice,
    clearUsers,
    clearEnrollments,
    updateCurrentNav,
