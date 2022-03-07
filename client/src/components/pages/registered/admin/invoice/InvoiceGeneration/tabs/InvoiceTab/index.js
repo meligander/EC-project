@@ -79,7 +79,7 @@ const InvoiceTab = ({
                installmentTotal: prev.installmentTotal - toDelete.value,
             }));
          }
-      }
+      } else setFormData((prev) => ({ ...prev, details: [] }));
    }, [invoice, invoiceid, details.length, toDelete]);
 
    const onChange = (e) => {
