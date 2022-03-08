@@ -49,6 +49,7 @@ import { formatNumber } from "../../../../../../actions/mixvalues";
 import "./style.scss";
 
 const AdminDashboard = ({
+   auth: { userLogged },
    registers: { register, loadingRegister },
    yearEnrollments,
    totalDebt,
@@ -86,8 +87,8 @@ const AdminDashboard = ({
    }, [activeUsers.activeStudents, getActiveUsers]);
 
    useEffect(() => {
-      if (totalDebt === "") getTotalDebt();
-   }, [totalDebt, getTotalDebt]);
+      if (totalDebt === "" && userLogged.type !== "secretary") getTotalDebt();
+   }, [totalDebt, getTotalDebt, userLogged]);
 
    useEffect(() => {
       if (activeClasses === "") getActiveClasses();
@@ -329,6 +330,7 @@ const AdminDashboard = ({
 };
 
 const mapStateToProps = (state) => ({
+   auth: state.auth,
    registers: state.registers,
    yearEnrollments: state.enrollments.otherValues.yearEnrollments,
    totalDebt: state.installments.otherValues.totalDebt,

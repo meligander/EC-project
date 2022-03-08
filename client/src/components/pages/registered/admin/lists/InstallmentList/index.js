@@ -54,19 +54,21 @@ const InstallmentList = ({
 
    useEffect(() => {
       if (loading) loadInstallments({}, true, false, "all");
-      else
-         setAdminValues((prev) => ({
-            ...prev,
-            total: installments.reduce(
-               (sum, installment) => sum + installment.value,
-               0
-            ),
-         }));
-   }, [installments, loading, loadInstallments]);
+      else {
+         if (isAdmin)
+            setAdminValues((prev) => ({
+               ...prev,
+               total: installments.reduce(
+                  (sum, installment) => sum + installment.value,
+                  0
+               ),
+            }));
+      }
+   }, [installments, loading, loadInstallments, isAdmin]);
 
    useEffect(() => {
-      if (estimatedProfit === "") getEstimatedProfit();
-   }, [estimatedProfit, getEstimatedProfit]);
+      if (estimatedProfit === "" && isAdmin) getEstimatedProfit();
+   }, [estimatedProfit, getEstimatedProfit, isAdmin]);
 
    const onChange = (e) => {
       e.persist();

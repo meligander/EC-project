@@ -22,7 +22,6 @@ import PopUp from "../../../../../modal/PopUp";
 import "./style.scss";
 
 const IncomeList = ({
-   auth: { userLogged },
    invoices: { loading, invoices },
    registers: { register, loadingRegister },
    loadInvoices,
@@ -32,9 +31,6 @@ const IncomeList = ({
    deleteInvoice,
    togglePopup,
 }) => {
-   const isAdmin =
-      userLogged.type === "admin" || userLogged.type === "admin&teacher";
-
    const [filterData, setFilterData] = useState({
       startDate: "",
       endDate: "",
@@ -123,8 +119,7 @@ const IncomeList = ({
                         <th>Nombre</th>
                         <th>Total</th>
                         <th>&nbsp;</th>
-                        {isAdmin &&
-                           invoices[0].register &&
+                        {invoices[0].register &&
                            invoices[0].register === register._id &&
                            register.temporary && <th>&nbsp;</th>}
                      </tr>
@@ -153,8 +148,7 @@ const IncomeList = ({
                                        Ver más &rarr;
                                     </Link>
                                  </td>
-                                 {isAdmin &&
-                                    arr[0].register &&
+                                 {arr[0].register &&
                                     arr[0].register === register._id &&
                                     register.temporary && (
                                        <td>
@@ -204,7 +198,6 @@ const IncomeList = ({
 };
 
 const mapStatetoProps = (state) => ({
-   auth: state.auth,
    invoices: state.invoices,
    registers: state.registers,
 });

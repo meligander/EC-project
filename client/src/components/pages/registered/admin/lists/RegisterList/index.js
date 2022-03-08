@@ -116,9 +116,7 @@ const RegisterList = ({
                      <th>Plata Caja</th>
                      <th>Diferencia</th>
                      <th>Detalles</th>
-                     {isAdmin && !loadingRegister && !last.temporary && (
-                        <th>&nbsp;</th>
-                     )}
+                     {!loadingRegister && !last.temporary && <th>&nbsp;</th>}
                   </tr>
                </thead>
                <tbody>
@@ -172,24 +170,22 @@ const RegisterList = ({
                                     {register.description &&
                                        register.description}
                                  </td>
-                                 {!loadingRegister &&
-                                    !last.temporary &&
-                                    isAdmin && (
-                                       <td>
-                                          {i === 0 && (
-                                             <button
-                                                type="button"
-                                                className="btn btn-danger"
-                                                onClick={(e) => {
-                                                   e.preventDefault();
-                                                   togglePopup("default");
-                                                }}
-                                             >
-                                                <FaTrashAlt />
-                                             </button>
-                                          )}
-                                       </td>
-                                    )}
+                                 {!loadingRegister && !last.temporary && (
+                                    <td>
+                                       {i === 0 && (
+                                          <button
+                                             type="button"
+                                             className="btn btn-danger"
+                                             onClick={(e) => {
+                                                e.preventDefault();
+                                                togglePopup("default");
+                                             }}
+                                          >
+                                             <FaTrashAlt />
+                                          </button>
+                                       )}
+                                    </td>
+                                 )}
                               </tr>
                            )
                      )}
