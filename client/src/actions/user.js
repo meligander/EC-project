@@ -196,7 +196,7 @@ export const registerUpdateUser = (formData, auth_id) => async (dispatch) => {
 };
 
 //Update user's credentials
-export const updateCredentials = (formData) => async (dispatch) => {
+export const updateCredentials = (formData, auth_id) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
@@ -205,10 +205,12 @@ export const updateCredentials = (formData) => async (dispatch) => {
    try {
       let res = await api.put(`/user/credentials/${user._id}`, user);
 
-      dispatch({
-         type: USER_UPDATED,
-         payload: res.data,
-      });
+      if (user._id === auth_id) dispatch(updateAuthUser(res.data));
+      else
+         dispatch({
+            type: USER_UPDATED,
+            payload: res.data,
+         });
 
       dispatch(setAlert("Credenciales modificadas", "success", "1"));
 

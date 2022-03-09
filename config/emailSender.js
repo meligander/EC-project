@@ -19,7 +19,8 @@ const createTransporter = async () => {
    const accessToken = await new Promise((resolve, reject) => {
       client.getAccessToken((err, token) => {
          if (err) {
-            reject("Failed to create access token :(");
+            reject(err.message);
+            console.log("Failed to create access token :(");
          }
          resolve(token);
       });
@@ -41,6 +42,9 @@ const createTransporter = async () => {
          clientId: process.env.GOOGLE_CLIENTID,
          clientSecret: process.env.GOOGLE_SECRET,
          refreshToken: process.env.REFRESH_TOKEN,
+      },
+      tls: {
+         rejectUnauthorized: false,
       },
    });
 

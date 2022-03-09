@@ -56,7 +56,7 @@ const Credentials = ({
    return (
       <div className="p-4">
          <PopUp
-            confirm={() => updateCredentials(formData)}
+            confirm={() => updateCredentials(formData, userLogged._id)}
             info="¿Está seguro que desea aplicar los cambios?"
          />
          <h3 className="heading-secondary text-primary">
