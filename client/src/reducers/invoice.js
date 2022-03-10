@@ -101,7 +101,7 @@ export default function (state = initialState, action) {
       case INVOICE_ERROR:
          return {
             ...state,
-            invoice: null,
+            //invoice: null,
             loadingInvoice: false,
             error: payload,
          };
