@@ -38,7 +38,7 @@ const StudentInfo = ({ isAdmin, discount, chargeday, onChange }) => {
                      </option>
                      <option value="10">10</option>
                      <option value="15">15</option>
-                     <option value="31">30/31</option>
+                     <option value="31">Fin de Mes</option>
                   </select>
                   <label
                      htmlFor="chargeday"

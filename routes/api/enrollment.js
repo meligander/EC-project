@@ -203,20 +203,25 @@ router.post(
       }
 
       try {
-         const data = { student, year, category };
+         let data = { student, year };
 
          let enrollment = await Enrollment.findOne(data);
 
          if (enrollment)
             return res.status(400).json({
-               msg: "El alumno ya está inscripto en esa categoría para dicho año",
+               msg: "El alumno ya está inscripto en el año seleccionado",
             });
+
+         data = {
+            ...data,
+            category,
+         };
 
          enrollment = new Enrollment(data);
 
          await enrollment.save();
 
-         enrollment = await Enrollment.findOne(data)
+         enrollment = await Enrollment.findOne({ _id: enrollment._id })
             .populate({ path: "category" })
             .populate({
                path: "student",
@@ -246,8 +251,6 @@ router.post(
 
          const discount = enrollment.student.discount;
          let value = enrollment.category.value;
-
-         console.log(value, enrollment.student, discount);
 
          if (discount && discount !== 0)
             value = value - (value * discount) / 100;

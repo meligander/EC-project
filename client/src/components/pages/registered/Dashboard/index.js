@@ -239,7 +239,9 @@ const Dashboard = ({
                                     <span className="text-dark">
                                        Día recargo:{" "}
                                     </span>
-                                    {user.chargeday}
+                                    {user.chargeday === 31
+                                       ? "Fin de Mes"
+                                       : user.chargeday}
                                  </p>
                               </>
                            )}

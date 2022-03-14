@@ -282,6 +282,7 @@ router.put("/", auth, async (req, res) => {
       const month = date.getMonth() + 1;
       const year = date.getFullYear();
       const day = date.getDate();
+      const hours = date.getHours();
 
       const lessDay = [4, 6, 9, 11].some((item) => item === month);
 
@@ -301,6 +302,7 @@ router.put("/", auth, async (req, res) => {
          ...(await Installment.find({
             year: { $lt: year },
             value: { $ne: 0 },
+            number: { $ne: 0 },
             expired: false,
          }).populate({
             path: "student",
@@ -312,95 +314,92 @@ router.put("/", auth, async (req, res) => {
       let penalty = await Penalty.find().sort({ $natural: -1 }).limit(1);
       penalty = penalty[0];
 
-      if (penalty) {
-         for (let x = 0; x < installments.length; x++) {
-            const chargeDay = installments[x].student.chargeday
-               ? installments[x].student.chargeday - (lessDay ? 1 : 0)
-               : lessDay
-               ? 30
-               : 31;
+      if (!penalty)
+         return res.status(400).json({
+            msg: "Por favor, establezca el recargo a aplicar a las cuotas",
+         });
 
-            if (
-               installments[x].student.email &&
-               chargeDay - 3 <= day &&
-               !installments[x].emailSent
-            ) {
-               const greeting =
-                  (hours >= 6 && hours < 12
-                     ? "¡Buen día!"
-                     : hours >= 12 && hours < 19
-                     ? "¡Buenas tardes!"
-                     : "¡Buenas noches!") + "<br/>";
+      for (let x = 0; x < installments.length; x++) {
+         const student = installments[x].student;
+         const chargeDay = student.chargeday
+            ? student.chargeday - (lessDay ? 1 : 0)
+            : lessDay
+            ? 30
+            : 31;
 
-               let users = await User.find({
-                  children: installments[x].student._id,
-               }).select("-password");
+         if (chargeDay - 3 <= day && !installments[x].emailSent) {
+            const greeting =
+               (hours >= 6 && hours < 12
+                  ? "¡Buen día!"
+                  : hours >= 12 && hours < 19
+                  ? "¡Buenas tardes!"
+                  : "¡Buenas noches!") + "<br/>";
 
-               users.push({ ...installments[x].student });
+            let users = await User.find({
+               children: student._id,
+            }).select("-password");
 
-               for (let x = 0; x < users.length; x++) {
+            users.push(student);
+
+            for (let x = 0; x < users.length; x++) {
+               if (users[x].email)
                   await sendEmail(
                      users[x].email,
                      "Cuota por vencer",
                      `${greeting}
                      Le queríamos comunicar que la cuota del corriente mes del alumno
-                      ${users[x].lastname}, ${users[x].name} está proxima a su vencimiento.
+                      ${student.lastname}, ${student.name} está proxima a su vencimiento.
                      <br/>
                      El día ${chargeDay} se le aplicará un recargo del ${penalty.percentage}%.
                      <br/><br/>
-                     Muchas gracias y disculpe las molestias`
+                     Muchas gracias y disculpe las molestias.`
                   );
-               }
-
-               await Installment.findOneAndUpdate(
-                  { _id: installments[x].id },
-                  { emailSent: true }
-               );
             }
 
-            if (
-               installments[x].year < year ||
-               installments[x].number < month ||
-               chargeDay < day
-            ) {
-               if (installments[x].number === 3 && month === 3) {
-                  if (!installments[x].debt) {
-                     await Installment.findOneAndUpdate(
-                        { _id: installments[x].id },
-                        { debt: true }
-                     );
-                  }
-                  continue;
-               }
+            await Installment.findOneAndUpdate(
+               { _id: installments[x].id },
+               { emailSent: true }
+            );
+         }
 
-               let charge = 0;
-
-               if (installments[x].student.discount === 10) {
-                  charge = installments[x].value * 1.1112;
-               } else {
-                  charge =
-                     (installments[x].value * penalty.percentage) / 100 +
-                     installments[x].value;
-               }
-               const value = Math.round(charge / 10) * 10;
-
-               await Installment.findOneAndUpdate(
-                  { _id: installments[x].id },
-                  { value, expired: true }
-               );
-            } else {
+         if (
+            installments[x].year < year ||
+            installments[x].number < month ||
+            chargeDay < day
+         ) {
+            if (installments[x].number === 3 && month === 3) {
                if (!installments[x].debt) {
                   await Installment.findOneAndUpdate(
                      { _id: installments[x].id },
                      { debt: true }
                   );
                }
+               continue;
+            }
+
+            let charge = 0;
+
+            if (student.discount === 10) {
+               charge = installments[x].value * 1.1112;
+            } else {
+               charge =
+                  (installments[x].value * penalty.percentage) / 100 +
+                  installments[x].value;
+            }
+            const value = Math.round(charge / 10) * 10;
+
+            await Installment.findOneAndUpdate(
+               { _id: installments[x].id },
+               { value, expired: true }
+            );
+         } else {
+            if (!installments[x].debt) {
+               await Installment.findOneAndUpdate(
+                  { _id: installments[x].id },
+                  { debt: true }
+               );
             }
          }
-      } else {
-         return res.status(400).json({
-            msg: "Por favor, establezca el recargo a aplicar a las cuotas",
-         });
       }
 
       res.json({ msg: "Installments updated" });
