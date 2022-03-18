@@ -4,3 +4,5 @@ config/default.json
 config/.env
 
 reports/
+backup/backupFile.gz
+uploads/backup.gz
