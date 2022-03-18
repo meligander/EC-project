@@ -12,7 +12,7 @@ import {
 } from "../../../../../../actions/expence";
 import { clearInvoice } from "../../../../../../actions/invoice";
 import { loadRegister } from "../../../../../../actions/register";
-import { formatNumber, togglePopup } from "../../../../../../actions/mixvalues";
+import { formatNumber, togglePopup } from "../../../../../../actions/global";
 
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";

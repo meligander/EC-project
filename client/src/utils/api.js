@@ -2,7 +2,7 @@ import axios from "axios";
 import store from "./store";
 
 import { logOut } from "../actions/auth";
-import { updateLoadingSpinner, setError } from "../actions/mixvalues";
+import { updateLoadingSpinner, setError } from "../actions/global";
 import { setAlert } from "../actions/alert";
 import { AUTH_ERROR } from "../actions/types";
 

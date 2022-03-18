@@ -9,7 +9,7 @@ import {
    updateCategories,
    categoriesPDF,
 } from "../../../../../actions/category";
-import { togglePopup } from "../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../actions/global";
 
 import PopUp from "../../../../modal/PopUp";
 

@@ -2,6 +2,7 @@ const router = require("express").Router();
 
 const apiUserRouter = require("./api/user");
 const apiAuthRouter = require("./api/auth");
+const apiBackupRouter = require("./api/backup");
 const apiAttendanceRouter = require("./api/attendance");
 const apiCategoryRouter = require("./api/category");
 const apiClassRouter = require("./api/class");
@@ -22,6 +23,7 @@ const apiPdfRouter = require("./api/pdf");
 
 router.use("/user", apiUserRouter);
 router.use("/auth", apiAuthRouter);
+router.use("/backup", apiBackupRouter);
 router.use("/attendance", apiAttendanceRouter);
 router.use("/category", apiCategoryRouter);
 router.use("/class", apiClassRouter);

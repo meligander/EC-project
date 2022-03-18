@@ -4,11 +4,11 @@ import { Link } from "react-router-dom";
 import { FaUserCircle, FaRegUserCircle } from "react-icons/fa";
 
 import { clearProfile } from "../../../../../actions/user";
-import { updateCurrentNav } from "../../../../../actions/mixvalues";
+import { updateCurrentNav } from "../../../../../actions/global";
 
 const GuardianNavbar = ({
    auth: { userLogged },
-   mixvalues: { currentNav, menuToggle },
+   global: { currentNav, menuToggle },
    updateCurrentNav,
    clearProfile,
 }) => {
@@ -47,7 +47,7 @@ const GuardianNavbar = ({
 
 const mapStateToProps = (state) => ({
    auth: state.auth,
-   mixvalues: state.mixvalues,
+   global: state.global,
 });
 
 export default connect(mapStateToProps, { clearProfile, updateCurrentNav })(

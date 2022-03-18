@@ -1,7 +1,7 @@
 import api from "../utils/api";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, setError, togglePopup } from "./mixvalues";
+import { updateLoadingSpinner, setError, togglePopup } from "./global";
 
 import {
    PENALTY_LOADED,

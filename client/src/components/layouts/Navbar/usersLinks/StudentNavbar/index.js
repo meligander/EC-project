@@ -3,13 +3,13 @@ import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import { FaChalkboardTeacher } from "react-icons/fa";
 
-import { updateCurrentNav } from "../../../../../actions/mixvalues";
+import { updateCurrentNav } from "../../../../../actions/global";
 import { loadEnrollments } from "../../../../../actions/enrollment";
 import { clearProfile } from "../../../../../actions/user";
 
 const StudentNavbar = ({
    auth: { userLogged },
-   mixvalues: { menuToggle, currentNav },
+   global: { menuToggle, currentNav },
    enrollments: { enrollments, loading },
    clearProfile,
    updateCurrentNav,
@@ -68,7 +68,7 @@ const StudentNavbar = ({
 
 const mapStateToProps = (state) => ({
    auth: state.auth,
-   mixvalues: state.mixvalues,
+   global: state.global,
    enrollments: state.enrollments,
 });
 

@@ -44,7 +44,7 @@ import {
 import { clearCategories } from "../../../../../../actions/category";
 import { clearAttendances } from "../../../../../../actions/attendance";
 import { clearGrades } from "../../../../../../actions/grade";
-import { formatNumber } from "../../../../../../actions/mixvalues";
+import { formatNumber, togglePopup } from "../../../../../../actions/global";
 
 import "./style.scss";
 
@@ -71,8 +71,10 @@ const AdminDashboard = ({
    clearAttendances,
    clearEnrollments,
    clearGrades,
+   togglePopup,
 }) => {
    const date = new Date();
+   const isAdmin = userLogged.type !== "secretary";
 
    useEffect(() => {
       if (yearEnrollments.year === "") getYearEnrollments();
@@ -322,6 +324,19 @@ const AdminDashboard = ({
                         {activeClasses}
                      </p>
                   )}
+                  {isAdmin && (
+                     <div className="btn-right">
+                        <button
+                           className="btn btn-secondary"
+                           onClick={() => {
+                              togglePopup("backup");
+                           }}
+                           type="button"
+                        >
+                           Restaurar BD
+                        </button>
+                     </div>
+                  )}
                </div>
             </div>
          </section>
@@ -355,4 +370,5 @@ export default connect(mapStateToProps, {
    clearAttendances,
    clearGrades,
    clearEnrollments,
+   togglePopup,
 })(AdminDashboard);

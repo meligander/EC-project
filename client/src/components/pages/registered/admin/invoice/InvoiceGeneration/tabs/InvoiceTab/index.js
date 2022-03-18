@@ -10,7 +10,7 @@ import {
 import {
    formatNumber,
    togglePopup,
-} from "../../../../../../../../actions/mixvalues";
+} from "../../../../../../../../actions/global";
 
 import Alert from "../../../../../../sharedComp/Alert";
 import UsersSearch from "../../../../../sharedComp/search/UsersSearch";
@@ -27,9 +27,9 @@ const InvoiceTab = ({
    registerInvoice,
    removeDetail,
 }) => {
+   const day = format(new Date(), "dd/MM/yyyy");
+
    const [adminValues, setAdminValues] = useState({
-      day: format(new Date(), "dd/MM/yyyy"),
-      toDelete: "",
       installmentTotal: 0,
    });
 
@@ -45,42 +45,48 @@ const InvoiceTab = ({
       details: [],
    });
 
-   const installment = "Insc,,,Mar,Abr,May,Jun,Jul,Agto,Sept,Oct,Nov,Dic".split(
-      ","
-   );
+   const installment =
+      "Insc,Cl Pa,Ex Li,Mar,Abr,May,Jun,Jul,Agto,Sept,Oct,Nov,Dic".split(",");
 
-   const { invoiceid, details, total, user } = formData;
+   const { details, total, user } = formData;
 
-   const { day, installmentTotal, toDelete } = adminValues;
+   const { installmentTotal } = adminValues;
 
    useEffect(() => {
       if (invoice) {
-         if (invoice.details.length > details.length) {
-            const newItem = invoice.details[invoice.details.length - 1];
-            setFormData((prev) => ({
-               ...prev,
-               details: [...prev.details, newItem],
-            }));
-            setAdminValues((prev) => ({
-               ...prev,
-               installmentTotal: prev.installmentTotal + newItem.value,
-            }));
-         } else if (invoice.details.length < details.length) {
-            setFormData((prev) => ({
-               ...prev,
-               total: prev.total - toDelete.payment,
-               details: prev.details.filter(
-                  (detail) => detail.installment !== toDelete.installment
+         setFormData((prev) => ({
+            ...prev,
+            details: invoice.details,
+            ...(invoice.studentsD && {
+               total: invoice.details.reduce(
+                  (sum, detail) => (detail.discount ? sum + detail.value : sum),
+                  0
                ),
-            }));
-            setAdminValues((prev) => ({
-               ...prev,
-               toDelete: "",
-               installmentTotal: prev.installmentTotal - toDelete.value,
-            }));
-         }
-      } else setFormData((prev) => ({ ...prev, details: [] }));
-   }, [invoice, invoiceid, details.length, toDelete]);
+            }),
+         }));
+         setAdminValues((prev) => ({
+            ...prev,
+            installmentTotal: invoice.details.reduce(
+               (sum, detail) => sum + detail.value,
+               0
+            ),
+         }));
+      } else {
+         setFormData((prev) => ({
+            ...prev,
+            details: [],
+            total: 0,
+            user: {
+               _id: null,
+               lastname: "",
+               name: "",
+               email: "",
+            },
+            invoiceid: invoiceNumber,
+         }));
+         setAdminValues((prev) => ({ ...prev, installmentTotal: 0 }));
+      }
+   }, [invoice, invoiceNumber]);
 
    const onChange = (e) => {
       e.persist();
@@ -114,39 +120,35 @@ const InvoiceTab = ({
             ...prev,
             details: newDetails,
             total: newDetails.reduce(
-               (accum, item) => accum + Number(item.payment.replace(/,/g, ".")),
+               (accum, item) =>
+                  accum +
+                  (typeof item.payment === "number"
+                     ? item.payment
+                     : Number(item.payment.replace(/,/g, "."))),
                0
             ),
          }));
       }
    };
 
-   const selectUser = (user) => {
-      setFormData((prev) => ({ ...prev, user }));
-   };
-
-   const removeItem = (item) => {
-      removeDetail(item);
-      setAdminValues((prev) => ({ ...prev, toDelete: item }));
-   };
-
-   const confirm = () => {
-      registerInvoice({
-         ...formData,
-         remaining: installmentTotal - total,
-         details: details.map((item) => {
-            return {
-               ...item,
-               payment: Number(item.payment.replace(/,/g, ".")),
-            };
-         }),
-      });
-   };
-
    return (
       <div className="invoice-tab">
          <PopUp
-            confirm={confirm}
+            confirm={() =>
+               registerInvoice({
+                  ...formData,
+                  remaining: installmentTotal - total,
+                  details: details.map((item) => {
+                     return {
+                        ...item,
+                        payment:
+                           typeof item.payment === "number"
+                              ? item.payment
+                              : Number(item.payment.replace(/,/g, ".")),
+                     };
+                  }),
+               })
+            }
             info="¿Está seguro que la factura es correcta?"
          />
          <form
@@ -180,7 +182,9 @@ const InvoiceTab = ({
             <div className="mb-2">
                <UsersSearch
                   primary={false}
-                  selectUser={selectUser}
+                  selectUser={(user) =>
+                     setFormData((prev) => ({ ...prev, user }))
+                  }
                   usersType="guardian/student"
                   onChangeForm={onChange}
                   autoComplete="new-password"
@@ -255,6 +259,7 @@ const InvoiceTab = ({
                                           type="text"
                                           onChange={onChangeValue}
                                           id={index}
+                                          disabled={install.discount}
                                           placeholder="Monto"
                                           value={install.payment}
                                        />
@@ -264,7 +269,7 @@ const InvoiceTab = ({
                                           type="button"
                                           onClick={(e) => {
                                              e.preventDefault();
-                                             removeItem(install);
+                                             removeDetail(install);
                                           }}
                                           className="btn btn-danger"
                                        >

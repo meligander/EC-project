@@ -8,7 +8,7 @@ import {
    installmentsPDF,
 } from "../../../../../../actions/installment";
 import { getEstimatedProfit } from "../../../../../../actions/enrollment";
-import { formatNumber } from "../../../../../../actions/mixvalues";
+import { formatNumber } from "../../../../../../actions/global";
 import { clearProfile } from "../../../../../../actions/user";
 
 import ListButtons from "../sharedComp/ListButtons";

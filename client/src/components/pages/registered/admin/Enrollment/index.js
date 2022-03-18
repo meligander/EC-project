@@ -12,7 +12,7 @@ import {
    registerUpdateEnrollment,
    loadEnrollment,
 } from "../../../../../actions/enrollment";
-import { togglePopup } from "../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../actions/global";
 
 import UsersSearch from "../../sharedComp/search/UsersSearch";
 import PopUp from "../../../../modal/PopUp";

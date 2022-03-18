@@ -15,12 +15,12 @@ import { clearInstallments } from "../../../../../actions/installment";
 import { clearRegister } from "../../../../../actions/register";
 import { clearSearch, clearUsers } from "../../../../../actions/user";
 import { clearClasses } from "../../../../../actions/class";
-import { updateCurrentNav } from "../../../../../actions/mixvalues";
+import { updateCurrentNav } from "../../../../../actions/global";
 
 import "./style.scss";
 
 const AdminNavbar = ({
-   mixvalues: { currentNav, menuToggle },
+   global: { currentNav, menuToggle },
    clearInstallments,
    getInvoiceNumber,
    clearRegister,
@@ -134,7 +134,7 @@ const AdminNavbar = ({
 };
 
 const mapStateToProps = (state) => ({
-   mixvalues: state.mixvalues,
+   global: state.global,
 });
 
 export default connect(mapStateToProps, {

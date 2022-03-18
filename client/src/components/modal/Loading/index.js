@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import spinner from "../../../img/spinner.gif";
 import "./style.scss";
 
-const Loading = ({ mixvalues: { loadingSpinner } }) => {
+const Loading = ({ global: { loadingSpinner } }) => {
    return (
       <>
          {loadingSpinner && (
@@ -25,7 +25,7 @@ const Loading = ({ mixvalues: { loadingSpinner } }) => {
 };
 
 const mapStateToProps = (state) => ({
-   mixvalues: state.mixvalues,
+   global: state.global,
 });
 
 export default connect(mapStateToProps)(Loading);

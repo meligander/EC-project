@@ -9,7 +9,8 @@ import {
    filterData,
    newObject,
    setError,
-} from "./mixvalues";
+} from "./global";
+
 import { clearInstallments } from "./installment";
 import { clearAttendances } from "./attendance";
 import { clearGrades } from "./grade";
@@ -154,10 +155,13 @@ export const registerUpdateUser = (formData, auth_id) => async (dispatch) => {
       if (!user._id) res = await api.post("/user", user);
       else res = await api.put(`/user/${user._id}`, user);
 
-      if (!user.active) {
+      if (!user.active || !user._id) {
+         dispatch(clearEnrollments());
          dispatch(clearAttendances());
          dispatch(clearGrades());
          dispatch(clearClass());
+
+         if (!user._id) dispatch(clearInstallments());
       }
 
       if (user._id === auth_id) dispatch(updateAuthUser(res.data));
@@ -171,8 +175,7 @@ export const registerUpdateUser = (formData, auth_id) => async (dispatch) => {
          setAlert(
             !user._id ? "Usuario registrado" : "Usuario modificado",
             "success",
-            "1",
-            7000
+            "1"
          )
       );
 

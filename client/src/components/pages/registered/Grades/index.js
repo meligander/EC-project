@@ -106,7 +106,7 @@ const Grades = ({
 
    return (
       <>
-         <h1 className="text-center light-font p-1 mt-2">Notas</h1>
+         <h1 className="light-font p-1 mt-2">Notas</h1>
          {!loadingClass && !loading && !loadingGT && (
             <>
                <div className="btn-right">

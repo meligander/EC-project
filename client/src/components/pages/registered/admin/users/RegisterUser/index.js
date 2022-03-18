@@ -24,7 +24,7 @@ import {
    clearNeighbourhoods,
 } from "../../../../../../actions/neighbourhood";
 import { setAlert } from "../../../../../../actions/alert";
-import { togglePopup } from "../../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../../actions/global";
 
 import PopUp from "../../../../../modal/PopUp";
 import TutorInfo from "./usersInfo/TutorInfo";
@@ -758,7 +758,7 @@ const mapStateToProps = (state) => ({
    auth: state.auth,
    towns: state.towns,
    neighbourhoods: state.neighbourhoods,
-   mixvalues: state.mixvalues,
+   global: state.global,
 });
 
 export default connect(mapStateToProps, {

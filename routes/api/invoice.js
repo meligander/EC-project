@@ -232,10 +232,8 @@ router.post(
                return {
                   installment: item.installment,
                   value: item.value,
-                  payment:
-                     typeof item.payment === "string"
-                        ? Number(item.payment.replace(/,/g, "."))
-                        : item.payment,
+                  payment: item.payment,
+                  ...(item.discount && { discount: item.discount }),
                };
             }),
             register: last._id,
@@ -290,7 +288,10 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
                $set: {
                   value:
                      invoice.details[x].installment.value +
-                     invoice.details[x].payment,
+                     invoice.details[x].payment +
+                     (invoice.details[x].discount
+                        ? invoice.details[x].discount
+                        : 0),
                },
             }
          );

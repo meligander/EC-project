@@ -4,7 +4,7 @@ import { ImFilePdf } from "react-icons/im";
 import { BiFilterAlt } from "react-icons/bi";
 
 import { loadRegisters, registerPDF } from "../../../../../../actions/register";
-import { formatNumber } from "../../../../../../actions/mixvalues";
+import { formatNumber } from "../../../../../../actions/global";
 
 const RegisterByMonth = ({
    registers: { registers, loading },

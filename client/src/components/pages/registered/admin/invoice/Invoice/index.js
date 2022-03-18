@@ -4,7 +4,7 @@ import format from "date-fns/format";
 import { ImFilePdf } from "react-icons/im";
 
 import { loadInvoice, invoicesPDF } from "../../../../../../actions/invoice";
-import { formatNumber } from "../../../../../../actions/mixvalues";
+import { formatNumber } from "../../../../../../actions/global";
 
 import logo from "../../../../../../img/fondoBlanco.png";
 
@@ -18,8 +18,8 @@ const Invoice = ({
 }) => {
    const installment = [
       "Insc",
-      "",
-      "",
+      "Cl Pa",
+      "Ex Li",
       "Mar",
       "Abr",
       "May",

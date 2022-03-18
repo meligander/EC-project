@@ -14,10 +14,7 @@ import {
    clearTransactions,
    clearExpenceTypes,
 } from "../../../../../../../actions/expence";
-import {
-   formatNumber,
-   togglePopup,
-} from "../../../../../../../actions/mixvalues";
+import { formatNumber, togglePopup } from "../../../../../../../actions/global";
 
 import PopUp from "../../../../../../modal/PopUp";
 

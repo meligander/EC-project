@@ -16,7 +16,7 @@ import {
    clearCategories,
 } from "../../../../../../actions/category";
 import { clearProfile } from "../../../../../../actions/user";
-import { togglePopup } from "../../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../../actions/global";
 
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";

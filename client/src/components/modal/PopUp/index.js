@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { FaTimes } from "react-icons/fa";
 
-import { togglePopup } from "../../../actions/mixvalues";
+import { togglePopup } from "../../../actions/global";
+import { setAlert } from "../../../actions/alert";
 
 import NewDate from "./NewDate";
 import PenaltyPercentage from "./PenaltyPercentage";
@@ -12,10 +13,12 @@ import Alert from "../../pages/sharedComp/Alert";
 
 import logo from "../../../img/logoSinLetras.png";
 import "./style.scss";
+import RestoreDB from "./RestoreDB";
 
 const PopUp = ({
-   mixvalues: { popupType, popupToggle },
+   global: { popupType, popupToggle },
    togglePopup,
+   setAlert,
    confirm,
    info,
    error,
@@ -34,6 +37,8 @@ const PopUp = ({
    });
 
    const [penaltyPercentage, setPenaltyPercentage] = useState("");
+
+   const [backup, setBackup] = useState("");
 
    useEffect(() => {
       if (info && info.students)
@@ -83,6 +88,10 @@ const PopUp = ({
    const onChangePenaltyPercentage = (e) => {
       e.persist();
       setPenaltyPercentage(e.target.value);
+   };
+
+   const onChangeBackup = (file) => {
+      setBackup(file);
    };
 
    const chooseType = () => {
@@ -140,6 +149,8 @@ const PopUp = ({
             ) : (
                <></>
             );
+         case "backup":
+            return <RestoreDB onChange={onChangeBackup} setAlert={setAlert} />;
          case "default":
             return typeof info === "string" ? (
                <div className="popup-text">
@@ -169,9 +180,13 @@ const PopUp = ({
                   <FaTimes />
                </button>
             </div>
-            <Alert type="4" />
-            <div className={popupType === "certificate" ? "wrapper both" : ""}>
-               {chooseType(popupType)}
+            <div className="mt-2">
+               <Alert type="4" />
+               <div
+                  className={popupType === "certificate" ? "wrapper both" : ""}
+               >
+                  {chooseType(popupType)}
+               </div>
             </div>
             <div className="btn-center">
                <button
@@ -195,6 +210,10 @@ const PopUp = ({
                         case "new-grade":
                            confirm(newGradeType);
                            setNewGradeType("");
+                           break;
+                        case "backup":
+                           confirm(backup);
+                           setBackup("");
                            break;
                         default:
                            confirm();
@@ -222,7 +241,7 @@ const PopUp = ({
 };
 
 const mapStateToProps = (state) => ({
-   mixvalues: state.mixvalues,
+   global: state.global,
 });
 
-export default connect(mapStateToProps, { togglePopup })(PopUp);
+export default connect(mapStateToProps, { togglePopup, setAlert })(PopUp);

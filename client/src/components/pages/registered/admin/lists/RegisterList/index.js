@@ -6,7 +6,7 @@ import { FaTrashAlt } from "react-icons/fa";
 import { IoIosListBox } from "react-icons/io";
 import { BiFilterAlt } from "react-icons/bi";
 
-import { formatNumber, togglePopup } from "../../../../../../actions/mixvalues";
+import { formatNumber, togglePopup } from "../../../../../../actions/global";
 import {
    loadRegisters,
    loadRegister,

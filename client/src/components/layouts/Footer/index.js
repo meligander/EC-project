@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from "react";
 import getYear from "date-fns/getYear";
 import { connect } from "react-redux";
 
-import { setFooterHeight } from "../../../actions/mixvalues";
+import { setFooterHeight } from "../../../actions/global";
 
 import "./style.scss";
 

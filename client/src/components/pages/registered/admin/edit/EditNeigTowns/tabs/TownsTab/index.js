@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { FaTrashAlt } from "react-icons/fa";
 
 import { deleteTown, updateTowns } from "../../../../../../../../actions/town";
-import { togglePopup } from "../../../../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../../../../actions/global";
 
 import PopUp from "../../../../../../../modal/PopUp";
 import EditButtons from "../../../sharedComp/EditButtons";

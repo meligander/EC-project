@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 import "./style.scss";
 
-const Landing = ({ mixvalues: { footer, navbar } }) => {
+const Landing = ({ global: { footer, navbar } }) => {
    return (
       <section
          className="landing"
@@ -32,7 +32,7 @@ const Landing = ({ mixvalues: { footer, navbar } }) => {
 };
 
 const mapStateToProps = (state) => ({
-   mixvalues: state.mixvalues,
+   global: state.global,
 });
 
 export default connect(mapStateToProps)(Landing);

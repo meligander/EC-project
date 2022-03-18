@@ -41,7 +41,7 @@ import PrivateRoutes from "../PrivateRoutes";
 import PublicRoutes from "../PublicRoutes";
 import NotFound from "../../layouts/NotFound";
 
-const Routes = ({ location, mixvalues: { navbar, footer } }) => {
+const Routes = ({ location, global: { navbar, footer } }) => {
    return (
       <section
          style={{
@@ -248,7 +248,7 @@ const Routes = ({ location, mixvalues: { navbar, footer } }) => {
 };
 
 const mapStateToProps = (state) => ({
-   mixvalues: state.mixvalues,
+   global: state.global,
 });
 
 export default connect(mapStateToProps)(withRouter(Routes));

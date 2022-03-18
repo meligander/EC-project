@@ -10,7 +10,7 @@ import {
    filterData,
    setError,
    togglePopup,
-} from "./mixvalues";
+} from "./global";
 
 import {
    ATTENDANCES_LOADED,

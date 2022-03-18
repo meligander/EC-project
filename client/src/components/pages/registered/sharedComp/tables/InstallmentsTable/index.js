@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaEdit, FaPlus, FaTrashAlt } from "react-icons/fa";
 
-import { formatNumber } from "../../../../../../actions/mixvalues";
+import { formatNumber } from "../../../../../../actions/global";
 
 import Alert from "../../../../sharedComp/Alert";
 import PopUp from "../../../../../modal/PopUp";
@@ -42,10 +42,13 @@ const InstallmentsTable = ({
    return (
       <>
          <Alert type="3" />
-         <PopUp
-            confirm={() => deleteInstallment(toDelete)}
-            info="¿Está seguro que desea eliminar la cuota?"
-         />
+         {!addDetail && (
+            <PopUp
+               confirm={() => deleteInstallment(toDelete)}
+               info="¿Está seguro que desea eliminar la cuota?"
+            />
+         )}
+
          <div className="wrapper">
             <table>
                {forAdmin && (

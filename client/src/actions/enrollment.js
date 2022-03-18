@@ -9,7 +9,7 @@ import {
    filterData,
    newObject,
    setError,
-} from "./mixvalues";
+} from "./global";
 import { getTotalDebt } from "./installment";
 
 import {
@@ -119,8 +119,7 @@ export const registerUpdateEnrollment =
             setAlert(
                `Inscripción ${!enrollment._id ? "Registrada" : "Modificada"}`,
                "success",
-               "2",
-               7000
+               "2"
             )
          );
          dispatch(getYearEnrollments());

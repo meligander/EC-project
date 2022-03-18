@@ -6,7 +6,7 @@ import {
    deleteNeighbourhood,
    updateNeighbourhoods,
 } from "../../../../../../../../actions/neighbourhood";
-import { togglePopup } from "../../../../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../../../../actions/global";
 
 import PopUp from "../../../../../../../modal/PopUp";
 import EditButtons from "../../../sharedComp/EditButtons";

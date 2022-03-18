@@ -7,10 +7,10 @@ import { FaAddressBook } from "react-icons/fa";
 import { RiLoginCircleLine } from "react-icons/ri";
 
 import { clearSearch } from "../../../../../actions/user";
-import { updateCurrentNav, toggleMenu } from "../../../../../actions/mixvalues";
+import { updateCurrentNav, toggleMenu } from "../../../../../actions/global";
 
 const GuestNavbar = ({
-   mixvalues: { currentNav, menuToggle },
+   global: { currentNav, menuToggle },
    clearSearch,
    toggleMenu,
    updateCurrentNav,
@@ -91,7 +91,7 @@ const GuestNavbar = ({
 };
 
 const mapStateToProps = (state) => ({
-   mixvalues: state.mixvalues,
+   global: state.global,
 });
 
 export default connect(mapStateToProps, {

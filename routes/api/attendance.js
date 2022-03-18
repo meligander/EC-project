@@ -319,13 +319,15 @@ const buildTable = async (class_id) => {
       })
       .sort({ date: 1 });
 
-   const enrollments = await Enrollment.find({
+   let enrollments = await Enrollment.find({
       classroom: class_id,
    }).populate({
       model: "user",
       path: "student",
       select: ["name", "lastname"],
    });
+
+   enrollments = sortByName(enrollments);
 
    let header = [];
    let periods = [];

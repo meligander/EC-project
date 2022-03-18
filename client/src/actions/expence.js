@@ -7,7 +7,7 @@ import {
    newObject,
    updateLoadingSpinner,
    setError,
-} from "./mixvalues";
+} from "./global";
 import { clearRegister } from "./register";
 import { setAlert } from "./alert";
 

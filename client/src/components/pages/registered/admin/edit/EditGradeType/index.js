@@ -8,7 +8,7 @@ import {
    deleteGradeType,
 } from "../../../../../../actions/grade";
 import { loadCategories } from "../../../../../../actions/category";
-import { togglePopup } from "../../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../../actions/global";
 
 import PopUp from "../../../../../modal/PopUp";
 import EditButtons from "../sharedComp/EditButtons";

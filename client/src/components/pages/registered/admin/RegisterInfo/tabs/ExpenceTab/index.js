@@ -9,10 +9,7 @@ import {
    registerExpence,
 } from "../../../../../../../actions/expence";
 import { setAlert } from "../../../../../../../actions/alert";
-import {
-   formatNumber,
-   togglePopup,
-} from "../../../../../../../actions/mixvalues";
+import { formatNumber, togglePopup } from "../../../../../../../actions/global";
 
 import PopUp from "../../../../../../modal/PopUp";
 import Alert from "../../../../../sharedComp/Alert";

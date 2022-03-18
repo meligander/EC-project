@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { differenceInYears, format } from "date-fns";
 import { FaTrashAlt, FaPlus } from "react-icons/fa";
 
-import { formatNumber } from "../../../../../../actions/mixvalues";
+import { formatNumber } from "../../../../../../actions/global";
 
 const StudentTable = ({
    userSearchType = "student",

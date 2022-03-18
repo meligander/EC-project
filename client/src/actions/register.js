@@ -9,7 +9,7 @@ import {
    filterData,
    newObject,
    setError,
-} from "./mixvalues";
+} from "./global";
 
 import {
    REGISTER_LOADED,

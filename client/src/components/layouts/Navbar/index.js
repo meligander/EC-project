@@ -9,7 +9,7 @@ import {
    setNavbarHeight,
    updateCurrentNav,
    toggleMenu,
-} from "../../../actions/mixvalues";
+} from "../../../actions/global";
 import { logOut } from "../../../actions/auth";
 import { clearProfile } from "../../../actions/user";
 
@@ -27,7 +27,7 @@ const Navbar = ({
    location,
    auth: { userLogged, loading, isAuthenticated },
    enrollments: { enrollments },
-   mixvalues: { currentNav, menuToggle },
+   global: { currentNav, menuToggle },
    logOut,
    setNavbarHeight,
    updateCurrentNav,
@@ -225,7 +225,7 @@ const Navbar = ({
 
 const mapStateToProps = (state) => ({
    auth: state.auth,
-   mixvalues: state.mixvalues,
+   global: state.global,
    enrollments: state.enrollments,
 });
 

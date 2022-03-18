@@ -11,7 +11,7 @@ import {
 } from "../../../../../../actions/installment";
 import { clearCategories } from "../../../../../../actions/category";
 import { clearEnrollments } from "../../../../../../actions/enrollment";
-import { togglePopup } from "../../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../../actions/global";
 import { addDetail } from "../../../../../../actions/invoice";
 
 import InstallmentsTable from "../../tables/InstallmentsTable";

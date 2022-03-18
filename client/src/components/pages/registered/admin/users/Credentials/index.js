@@ -5,7 +5,7 @@ import { FiSave } from "react-icons/fi";
 
 //Actions
 import { updateCredentials, loadUser } from "../../../../../../actions/user";
-import { togglePopup } from "../../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../../actions/global";
 
 import PopUp from "../../../../../modal/PopUp";
 

@@ -11,7 +11,7 @@ import {
 } from "../../../../../actions/installment";
 import { loadPenalty, updatePenalty } from "../../../../../actions/penalty";
 import { clearUser } from "../../../../../actions/user";
-import { togglePopup } from "../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../actions/global";
 import { clearEnrollments } from "../../../../../actions/enrollment";
 
 import InstallmentsSearch from "../../sharedComp/search/InstallmentsSearch";

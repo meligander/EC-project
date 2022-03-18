@@ -1,6 +1,6 @@
 import api from "../utils/api";
 
-import { updateLoadingSpinner, setError } from "./mixvalues";
+import { updateLoadingSpinner, setError } from "./global";
 import { setAlert } from "./alert";
 
 import {

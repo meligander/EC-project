@@ -3,7 +3,7 @@ import { saveAs } from "file-saver";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, setError } from "./mixvalues";
+import { updateLoadingSpinner, setError } from "./global";
 
 import {
    OBSERVATIONS_CLEARED,

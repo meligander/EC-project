@@ -9,7 +9,7 @@ import {
 } from "../../../../../../actions/installment";
 import { loadEnrollments } from "../../../../../../actions/enrollment";
 import { loadUser } from "../../../../../../actions/user";
-import { togglePopup } from "../../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../../actions/global";
 
 import PopUp from "../../../../../modal/PopUp";
 

@@ -7,7 +7,7 @@ import {
    loadExpenceTypes,
    updateExpenceTypes,
 } from "../../../../../../actions/expence";
-import { togglePopup } from "../../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../../actions/global";
 
 import EditButtons from "../sharedComp/EditButtons";
 import PopUp from "../../../../../modal/PopUp";

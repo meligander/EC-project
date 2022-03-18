@@ -8,7 +8,7 @@ import {
    loadExpenceTypes,
    transactionsPDF,
 } from "../../../../../../actions/expence";
-import { formatNumber } from "../../../../../../actions/mixvalues";
+import { formatNumber } from "../../../../../../actions/global";
 
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";

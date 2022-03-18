@@ -10,7 +10,7 @@ import {
    removeStudent,
 } from "../../../../../../../../actions/class";
 import { clearProfile } from "../../../../../../../../actions/user";
-import { togglePopup } from "../../../../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../../../../actions/global";
 
 import PopUp from "../../../../../../../modal/PopUp";
 import StudentTable from "../../../../../sharedComp/tables/StudentTable";

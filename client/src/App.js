@@ -22,7 +22,7 @@ import Routes from "./components/routing/Routes";
 
 import "./style/main.scss";
 
-const App = ({ loadUser, mixvalues: { navbar } }) => {
+const App = ({ loadUser, global: { navbar } }) => {
    useEffect(() => {
       if (localStorage.token) {
          setAuthToken(localStorage.token);
@@ -50,7 +50,7 @@ const App = ({ loadUser, mixvalues: { navbar } }) => {
 };
 
 const mapStateToProps = (state) => ({
-   mixvalues: state.mixvalues,
+   global: state.global,
 });
 
 export default connect(mapStateToProps, { loadUser })(App);

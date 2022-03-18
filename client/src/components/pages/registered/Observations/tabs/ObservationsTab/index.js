@@ -7,7 +7,7 @@ import {
    updateObservations,
    reportcardPDF,
 } from "../../../../../../actions/observation";
-import { togglePopup } from "../../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../../actions/global";
 
 import PopUp from "../../../../../modal/PopUp";
 import Alert from "../../../../sharedComp/Alert";

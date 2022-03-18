@@ -11,7 +11,7 @@ import {
    newObject,
    updateLoadingSpinner,
    setError,
-} from "./mixvalues";
+} from "./global";
 
 import {
    INVOICE_LOADED,
@@ -27,6 +27,7 @@ import {
    INVOICEDETAIL_REMOVED,
    INSTALLMENT_DELETED,
    INSTALLMENT_ADDED,
+   DISCOUNT_ADDED,
 } from "./types";
 
 export const loadInvoice = (invoice_id, spinner) => async (dispatch) => {
@@ -233,6 +234,10 @@ export const addDetail = (detail) => (dispatch) => {
    dispatch(setAlert("Cuota agregada correctamente", "success", "3"));
    dispatch({ type: INVOICEDETAIL_ADDED, payload: detail });
    dispatch({ type: INSTALLMENT_DELETED, payload: detail._id });
+};
+
+export const addDiscount = (student) => (dispatch) => {
+   dispatch({ type: DISCOUNT_ADDED, payload: student });
 };
 
 export const removeDetail = (item) => (dispatch) => {

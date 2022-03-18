@@ -9,7 +9,7 @@ import {
    newObject,
    updateLoadingSpinner,
    setError,
-} from "./mixvalues";
+} from "./global";
 import { addUserToList, clearUsers, removeUserFromList } from "./user";
 import { setAlert } from "./alert";
 

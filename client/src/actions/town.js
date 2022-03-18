@@ -1,7 +1,7 @@
 import api from "../utils/api";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, setError } from "./mixvalues";
+import { updateLoadingSpinner, setError } from "./global";
 import { clearNeighbourhoods } from "./neighbourhood";
 
 import {

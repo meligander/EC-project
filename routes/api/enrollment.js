@@ -255,8 +255,6 @@ router.post(
          if (discount && discount !== 0)
             value = value - (value * discount) / 100;
 
-         console.log(value);
-
          const half = discount !== 50 ? value / 2 : value;
 
          const amount =

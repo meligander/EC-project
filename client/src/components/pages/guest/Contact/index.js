@@ -6,7 +6,7 @@ import { FaMapMarkedAlt } from "react-icons/fa";
 
 import "./style.scss";
 
-const Contact = ({ mixvalues: { footer, navbar } }) => {
+const Contact = ({ global: { footer, navbar } }) => {
    return (
       <section
          className="contact"
@@ -59,7 +59,7 @@ const Contact = ({ mixvalues: { footer, navbar } }) => {
 };
 
 const mapStateToProps = (state) => ({
-   mixvalues: state.mixvalues,
+   global: state.global,
 });
 
 export default connect(mapStateToProps)(Contact);

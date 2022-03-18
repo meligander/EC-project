@@ -27,7 +27,7 @@ const Attendance = ({
 
    return (
       <>
-         <h1 className="text-center light-font p-1 mt-2">Inasistencias</h1>
+         <h1 className="light-font p-1 mt-2">Inasistencias</h1>
          {!loadingClass && <ClassInfo classInfo={classInfo} />}
          <div className="few-tabs">
             {!loading && !loadingClass && (

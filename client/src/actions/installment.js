@@ -9,7 +9,7 @@ import {
    newObject,
    updateLoadingSpinner,
    setError,
-} from "./mixvalues";
+} from "./global";
 import { clearSearch } from "./user";
 
 import {

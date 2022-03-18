@@ -1,10 +1,7 @@
 @import "../../../../style/abstract.scss";
 
 .popup-certificate {
-   padding-top: 2rem;
-
    @include respond(small-phone) {
-      padding-top: 0.5rem;
       .form-input,
       .form-label {
          width: 60%;

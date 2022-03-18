@@ -2,7 +2,13 @@ import api from "../utils/api";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { newObject, updateLoadingSpinner, setError } from "./mixvalues";
+import {
+   newObject,
+   updateLoadingSpinner,
+   setError,
+   checkBackup,
+   togglePopup,
+} from "./global";
 import { updateExpiredIntallments } from "./installment";
 import { clearProfile } from "./user";
 
@@ -22,9 +28,12 @@ export const loadUser = (login) => async (dispatch) => {
          type: USERAUTH_LOADED,
          payload: res.data,
       });
+
       if (login) {
          dispatch(updateLoadingSpinner(false));
          dispatch(updateExpiredIntallments());
+         if (res.data.type === "secretary" && (await dispatch(checkBackup())))
+            dispatch(togglePopup("default"));
       }
    } catch (err) {
       if (err.response.status !== 401) {

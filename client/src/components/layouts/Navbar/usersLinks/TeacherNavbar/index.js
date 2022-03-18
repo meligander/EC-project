@@ -5,10 +5,10 @@ import { ImSearch } from "react-icons/im";
 import { FaChalkboardTeacher } from "react-icons/fa";
 
 import { clearSearch } from "../../../../../actions/user";
-import { updateCurrentNav } from "../../../../../actions/mixvalues";
+import { updateCurrentNav } from "../../../../../actions/global";
 
 const TeacherNavbar = ({
-   mixvalues: { currentNav, menuToggle },
+   global: { currentNav, menuToggle },
    clearSearch,
    updateCurrentNav,
 }) => {
@@ -54,7 +54,7 @@ const TeacherNavbar = ({
 };
 
 const mapStateToProps = (state) => ({
-   mixvalues: state.mixvalues,
+   global: state.global,
 });
 
 export default connect(mapStateToProps, {

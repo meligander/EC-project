@@ -13,7 +13,7 @@ import {
    classPDF,
 } from "../../../../../../actions/class";
 import { clearAttendances } from "../../../../../../actions/attendance";
-import { togglePopup } from "../../../../../../actions/mixvalues";
+import { togglePopup } from "../../../../../../actions/global";
 import { clearGrades, clearGradeTypes } from "../../../../../../actions/grade";
 import { clearProfile, clearSearch } from "../../../../../../actions/user";
 import { clearObservations } from "../../../../../../actions/observation";

@@ -10,6 +10,7 @@ import {
    INVOICES_ERROR,
    INVOICEDETAIL_ADDED,
    INVOICEDETAIL_REMOVED,
+   DISCOUNT_ADDED,
 } from "../actions/types";
 
 const initialState = {
@@ -50,15 +51,30 @@ export default function (state = initialState, action) {
       case INVOICE_REGISTERED:
          return state;
       case INVOICEDETAIL_ADDED:
+         let value;
+         if (
+            state.invoice &&
+            state.invoice.studentsD &&
+            state.invoice.studentsD.some((item) => item === payload.student._id)
+         )
+            value = payload.value - (payload.value * 10) / 100;
+
          const detail = {
             ...payload,
             _id: "",
             installment: payload._id,
             payment: "",
+            ...(value && {
+               value,
+               discount: payload.value - value,
+               payment: value,
+            }),
          };
+
          return {
             ...state,
             invoice: {
+               ...(state.invoice && state.invoice),
                details: state.invoice
                   ? [...state.invoice.details, detail]
                   : [detail],
@@ -68,9 +84,32 @@ export default function (state = initialState, action) {
          return {
             ...state,
             invoice: {
+               ...(state.invoice && state.invoice),
                details: state.invoice.details.filter(
                   (item) => item.installment !== payload
                ),
+            },
+         };
+      case DISCOUNT_ADDED:
+         return {
+            ...state,
+            invoice: {
+               ...state.invoice,
+               studentsD: state.invoice.studentsD
+                  ? [...state.invoice.studentsD, payload]
+                  : [payload],
+               details: state.invoice.details.map((item) => {
+                  const value = item.value - (item.value * 10) / 100;
+
+                  return item.student._id === payload
+                     ? {
+                          ...item,
+                          value,
+                          payment: value,
+                          discount: item.value - value,
+                       }
+                     : item;
+               }),
             },
          };
       case INVOICE_DELETED:

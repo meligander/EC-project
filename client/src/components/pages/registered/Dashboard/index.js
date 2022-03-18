@@ -13,7 +13,11 @@ import {
 } from "../../../../actions/user";
 import { clearTowns } from "../../../../actions/town";
 import { clearNeighbourhoods } from "../../../../actions/neighbourhood";
-import { togglePopup } from "../../../../actions/mixvalues";
+import {
+   togglePopup,
+   createBackup,
+   restoreBackup,
+} from "../../../../actions/global";
 
 import PopUp from "../../../modal/PopUp";
 import Alert from "../../sharedComp/Alert";
@@ -29,6 +33,7 @@ const Dashboard = ({
    match,
    auth: { userLogged },
    users: { user: otherUser, loadingUser },
+   global: { popupType: popupRealType },
    loadUser,
    clearTowns,
    clearSearch,
@@ -37,12 +42,15 @@ const Dashboard = ({
    clearProfile,
    deleteUser,
    togglePopup,
+   createBackup,
+   restoreBackup,
 }) => {
    const [adminValues, setAdminValues] = useState({
       user: null,
+      popupType: "",
    });
 
-   const { user } = adminValues;
+   const { user, popupType } = adminValues;
 
    const isOwner =
       userLogged &&
@@ -103,8 +111,23 @@ const Dashboard = ({
          {user !== null && (
             <>
                <PopUp
-                  confirm={() => deleteUser(user)}
-                  info="¿Está seguro que desea eliminar el usuario?"
+                  confirm={(data) => {
+                     if (popupRealType === "default") {
+                        if (popupType === "delete") {
+                           deleteUser(user);
+                           setAdminValues((prev) => ({
+                              ...prev,
+                              popupType: "",
+                           }));
+                        } else createBackup();
+                     } else restoreBackup(data);
+                  }}
+                  error={popupRealType === "backup"}
+                  info={
+                     popupType === "delete"
+                        ? "¿Está seguro que desea eliminar el usuario?"
+                        : "¿Desea guardar un backup de la base de datos?"
+                  }
                />
                <Alert type="1" />
                <div className="mt-1">
@@ -271,6 +294,10 @@ const Dashboard = ({
                                        className="btn btn-danger"
                                        onClick={(e) => {
                                           e.preventDefault();
+                                          setAdminValues((prev) => ({
+                                             ...prev,
+                                             popupType: "delete",
+                                          }));
                                           togglePopup("default");
                                        }}
                                     >
@@ -296,6 +323,7 @@ const Dashboard = ({
 const mapStateToProps = (state) => ({
    auth: state.auth,
    users: state.users,
+   global: state.global,
 });
 
 export default connect(mapStateToProps, {
@@ -307,4 +335,6 @@ export default connect(mapStateToProps, {
    clearProfile,
    clearNeighbourhoods,
    togglePopup,
+   createBackup,
+   restoreBackup,
 })(Dashboard);
