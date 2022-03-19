@@ -59,7 +59,8 @@ const InvoiceTab = ({
             details: invoice.details,
             ...(invoice.studentsD && {
                total: invoice.details.reduce(
-                  (sum, detail) => (detail.discount ? sum + detail.value : sum),
+                  (sum, detail) =>
+                     detail.discount !== undefined ? sum + detail.value : sum,
                   0
                ),
             }),
@@ -259,7 +260,9 @@ const InvoiceTab = ({
                                           type="text"
                                           onChange={onChangeValue}
                                           id={index}
-                                          disabled={install.discount}
+                                          disabled={
+                                             install.discount !== undefined
+                                          }
                                           placeholder="Monto"
                                           value={install.payment}
                                        />

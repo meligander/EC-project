@@ -57,7 +57,10 @@ export default function (state = initialState, action) {
             state.invoice.studentsD &&
             state.invoice.studentsD.some((item) => item === payload.student._id)
          )
-            value = payload.value - (payload.value * 10) / 100;
+            value =
+               payload.number > 2
+                  ? payload.value - (payload.value * 10) / 100
+                  : payload.value;
 
          const detail = {
             ...payload,
@@ -99,14 +102,17 @@ export default function (state = initialState, action) {
                   ? [...state.invoice.studentsD, payload]
                   : [payload],
                details: state.invoice.details.map((item) => {
-                  const value = item.value - (item.value * 10) / 100;
+                  const value =
+                     item.number > 2
+                        ? item.value - (item.value * 10) / 100
+                        : item.value;
 
                   return item.student._id === payload
                      ? {
                           ...item,
                           value,
                           payment: value,
-                          discount: item.value - value,
+                          discount: item.number > 2 ? item.value - value : 0,
                        }
                      : item;
                }),
