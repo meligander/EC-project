@@ -168,7 +168,7 @@ export const formatNumber = (number) => {
 };
 
 export const whenNull = (value) => {
-   return value !== null && value !== undefined;
+   return value !== null && value !== undefined && value !== "";
 };
 
 export const filterData = (formData) => {
