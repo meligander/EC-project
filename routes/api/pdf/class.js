@@ -93,7 +93,13 @@ router.post("/one", auth, (req, res) => {
       <td>${
          item.dni ? new Intl.NumberFormat("de-DE").format(item.dni) : ""
       }</td>
-      <td>${item.cel ? item.cel : ""}</td>
+      <td>${
+         item.cel
+            ? item.cel
+            : item.relatedCellphones.length > 0
+            ? `${item.relatedCellphones[0].cel} - ${item.relatedCellphones[0].name} (${item.relatedCellphones[0].relation})`
+            : ""
+      }</td>
    </tr>`
       )
       .join("");

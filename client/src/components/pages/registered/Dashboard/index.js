@@ -17,6 +17,7 @@ import {
    togglePopup,
    createBackup,
    restoreBackup,
+   whenNull,
 } from "../../../../actions/global";
 
 import PopUp from "../../../modal/PopUp";
@@ -45,6 +46,17 @@ const Dashboard = ({
    createBackup,
    restoreBackup,
 }) => {
+   const relationTypes = {
+      mother: "Mamá",
+      father: "Papá",
+      grandmother: "Abuela",
+      grandfather: "Abuelo",
+      aunt: "Tía",
+      uncle: "Tío",
+      sibling: "Hermano/a",
+      other: "Otro",
+   };
+
    const [adminValues, setAdminValues] = useState({
       user: null,
       popupType: "",
@@ -163,7 +175,7 @@ const Dashboard = ({
                            <h4 className="heading-tertiary">
                               Info {userTypeName[user.type]}:
                            </h4>
-                           {user.dni && (
+                           {whenNull(user.dni) && (
                               <p>
                                  <span className="text-dark">DNI: </span>
                                  {user.dni
@@ -176,19 +188,41 @@ const Dashboard = ({
                               <span className="text-dark">Sexo: </span>
                               {user.sex}
                            </p>
-                           <p>
-                              <span className="text-dark">Email: </span>
-                              {user.email}
-                           </p>
-                           <p>
-                              <span className="text-dark">Celular: </span>
-                              {user.cel}
-                           </p>
-                           <p>
-                              <span className="text-dark">Teléfono: </span>
-                              {user.tel}
-                           </p>
-                           {(user._id === userLogged._id || isAdmin) && (
+                           {whenNull(user.email) && (
+                              <p>
+                                 <span className="text-dark">Email: </span>
+                                 {user.email}
+                              </p>
+                           )}
+                           {whenNull(user.tel) && (
+                              <p>
+                                 <span className="text-dark">Teléfono: </span>
+                                 {user.tel}
+                              </p>
+                           )}
+                           {whenNull(user.cel) && (
+                              <p>
+                                 <span className="text-dark">Celular: </span>
+                                 {user.cel}
+                              </p>
+                           )}
+                           {user.relatedCellphones &&
+                              user.relatedCellphones.map((item) => (
+                                 <div key={item.cel}>
+                                    <p>
+                                       <span className="text-dark">
+                                          Celular {relationTypes[item.relation]}
+                                          :{" "}
+                                       </span>
+                                       {item.cel} ({item.name})
+                                    </p>
+                                 </div>
+                              ))}
+                           {(user._id === userLogged._id ||
+                              (isAdmin &&
+                                 (whenNull(user.address) ||
+                                    whenNull(user.neighbourhood) ||
+                                    whenNull(user.town)))) && (
                               <p>
                                  <span className="text-dark">Dirección: </span>
                                  {user.address ? user.address + ", " : ""}
@@ -199,7 +233,7 @@ const Dashboard = ({
                               </p>
                            )}
 
-                           {user.dob && (
+                           {whenNull(user.dob) && (
                               <p>
                                  <span className="text-dark">
                                     Fecha de Nacimiento:{" "}
@@ -212,7 +246,8 @@ const Dashboard = ({
                                  )}
                               </p>
                            )}
-                           {(user.birthtown || user.birthprov) && (
+                           {(whenNull(user.birthtown) ||
+                              whenNull(user.birthprov)) && (
                               <p>
                                  <span className="text-dark">
                                     Lugar de Nacimiento:{" "}
@@ -231,19 +266,25 @@ const Dashboard = ({
                            )}
                            {user.type === "teacher" && (
                               <>
-                                 <p>
-                                    <span className="text-dark">Título: </span>
-                                    {user.degree}
-                                 </p>
-                                 <p>
-                                    <span className="text-dark">
-                                       Institución:{" "}
-                                    </span>
-                                    {user.school}
-                                 </p>
+                                 {whenNull(user.degree) && (
+                                    <p>
+                                       <span className="text-dark">
+                                          Título:{" "}
+                                       </span>
+                                       {user.degree}
+                                    </p>
+                                 )}
+                                 {whenNull(user.school) && (
+                                    <p>
+                                       <span className="text-dark">
+                                          Institución:{" "}
+                                       </span>
+                                       {user.school}
+                                    </p>
+                                 )}
                               </>
                            )}
-                           {isOwner && user.salary && (
+                           {isOwner && whenNull(user.salary) && (
                               <p>
                                  <span className="text-dark">Salario: </span>
                                  {user.salary}
@@ -252,20 +293,24 @@ const Dashboard = ({
 
                            {user.type === "student" && isAdmin && (
                               <>
-                                 <p>
-                                    <span className="text-dark">
-                                       Descuento:{" "}
-                                    </span>
-                                    {user.discount}%
-                                 </p>
-                                 <p>
-                                    <span className="text-dark">
-                                       Día recargo:{" "}
-                                    </span>
-                                    {user.chargeday === 31
-                                       ? "Fin de Mes"
-                                       : user.chargeday}
-                                 </p>
+                                 {whenNull(user.discount) && (
+                                    <p>
+                                       <span className="text-dark">
+                                          Descuento:{" "}
+                                       </span>
+                                       {user.discount}%
+                                    </p>
+                                 )}
+                                 {whenNull(user.chargeday) && (
+                                    <p>
+                                       <span className="text-dark">
+                                          Día recargo:{" "}
+                                       </span>
+                                       {user.chargeday === 31
+                                          ? "Fin de Mes"
+                                          : user.chargeday}
+                                    </p>
+                                 )}
                               </>
                            )}
                         </div>

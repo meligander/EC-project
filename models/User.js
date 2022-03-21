@@ -22,8 +22,39 @@ const UserSchema = new mongoose.Schema({
    cel: {
       type: String,
    },
+   relatedCellphones: [
+      {
+         relation: {
+            type: String,
+            enum: [
+               "mother",
+               "father",
+               "grandmother",
+               "grandfather",
+               "aunt",
+               "uncle",
+               "sibling",
+               "other",
+            ],
+         },
+         name: {
+            type: String,
+         },
+         cel: {
+            type: String,
+         },
+      },
+   ],
    type: {
       type: String,
+      enum: [
+         "admin",
+         "admin&teacher",
+         "student",
+         "teacher",
+         "guardian",
+         "secretary",
+      ],
       required: true,
    },
    studentnumber: {

@@ -40,7 +40,13 @@ router.post("/list", auth, (req, res) => {
       <td>${item.lastname + ", " + item.name}</td>
       ${usersType === "student" ? `<td>${item.dni ? item.dni : ""}</td>` : ""}
       <td>${item.email ? item.email : ""}</td>
-      <td>${item.cel ? item.cel : ""}</td>
+      <td>${
+         item.cel
+            ? item.cel
+            : item.relatedCellphones.length > 0
+            ? `${item.relatedCellphones[0].cel} - ${item.relatedCellphones[0].name} (${item.relatedCellphones[0].relation})`
+            : ""
+      }</td>
       ${getTbody(usersType, item)}
    </tr>`
       )

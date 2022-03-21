@@ -348,7 +348,27 @@ router.put(
       check("lastname", "El apellido es necesario").not().isEmpty(),
    ],
    async (req, res) => {
-      const { type, children, active, img, discount } = req.body;
+      const {
+         tel,
+         cel,
+         relatedCellphones,
+         dni,
+         town,
+         neighbourhood,
+         address,
+         dob,
+         chargeday,
+         birthprov,
+         birthtown,
+         degree,
+         school,
+         salary,
+         type,
+         children,
+         active,
+         img,
+         discount,
+      } = req.body;
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -384,7 +404,24 @@ router.put(
 
          let data = {
             ...req.body,
-            ...(type === "guardian" && { children }),
+            ...((tel || user.tel) && { tel }),
+            ...((cel || user.cel) && { cel }),
+            ...((relatedCellphones || user.relatedCellphones) && {
+               relatedCellphones,
+            }),
+            ...((dni || user.dni) && { dni }),
+            ...((town || user.town) && { town }),
+            ...((neighbourhood || user.neighbourhood) && { neighbourhood }),
+            ...((address || user.address) && { address }),
+            ...((dob || user.dob) && { dob }),
+            ...((chargeday || user.chargeday) && { chargeday }),
+            ...((birthprov || user.birthprov) && { birthprov }),
+            ...((birthtown || user.birthtown) && { birthtown }),
+            ...((discount || user.discount) && { discount }),
+            ...((degree || user.degree) && { degree }),
+            ...((school || user.school) && { school }),
+            ...((salary || user.salary) && { salary }),
+            ...((children || user.children) && { children }),
             ...(imgObject.public_id !== "" && { img: imgObject }),
          };
 
@@ -493,7 +530,7 @@ router.put("/credentials/:id", auth, async (req, res) => {
       }
 
       let data = {
-         ...(email ? { email } : !email && user.email && { email: "" }),
+         ...((email || user.email) && { email }),
       };
 
       if (password || (!password && user.email === "")) {

@@ -8,6 +8,7 @@ import {
    FaUnlock,
    FaUserEdit,
    FaUserPlus,
+   FaPlus,
 } from "react-icons/fa";
 
 //Actions
@@ -94,6 +95,7 @@ const RegisterUser = ({
       degree: "",
       school: "",
       children: [],
+      relatedCellphones: [],
       discount: "",
       chargeday: "",
       img: {
@@ -123,6 +125,7 @@ const RegisterUser = ({
       school,
       salary,
       children,
+      relatedCellphones,
       img,
       discount,
       chargeday,
@@ -174,16 +177,26 @@ const RegisterUser = ({
       }
    }, [_id, loadUser, loadingUser, otherUser, userLogged, formData._id]);
 
-   const onChange = (e) => {
+   const onChange = (e, index) => {
       e.persist();
-      if (e.target.name !== "dni" || !isNaN(e.target.value)) {
-         setFormData({
-            ...formData,
-            [e.target.name]:
-               e.target.type === "checkbox" ? e.target.checked : e.target.value,
-            ...(e.target.name === "town" && { neighbourhood: "" }),
-         });
-         if (e.target.name === "town") loadNeighbourhoods(e.target.value, true);
+      if (e.target.id !== "relatedCellphones") {
+         if (e.target.name !== "dni" || !isNaN(e.target.value)) {
+            setFormData({
+               ...formData,
+               [e.target.name]:
+                  e.target.type === "checkbox"
+                     ? e.target.checked
+                     : e.target.value,
+               ...(e.target.name === "town" && { neighbourhood: "" }),
+            });
+            if (e.target.name === "town")
+               loadNeighbourhoods(e.target.value, true);
+         }
+      } else {
+         let newArray = [...relatedCellphones];
+         newArray[index][e.target.name] = e.target.value;
+
+         setFormData((prev) => ({ ...prev, relatedCellphones: newArray }));
       }
    };
 
@@ -224,6 +237,20 @@ const RegisterUser = ({
             });
          }
       }
+   };
+
+   const newCellphone = () => {
+      setFormData((prev) => ({
+         ...prev,
+         relatedCellphones: [
+            ...relatedCellphones,
+            {
+               relation: "",
+               name: "",
+               cel: "",
+            },
+         ],
+      }));
    };
 
    const changeType = () => {
@@ -289,11 +316,13 @@ const RegisterUser = ({
                   registerUpdateUser(
                      {
                         ...formData,
-                        children:
-                           type === "guardian"
-                              ? children.map((child) => child._id)
-                              : "",
+                        ...(type === "guardian" && {
+                           children: children.map((child) => child._id),
+                        }),
                         ...(selectedFile && { img: previewSource }),
+                        ...(relatedCellphones.length > 0 && {
+                           relatedCellphones,
+                        }),
                      },
                      userLogged._id
                   );
@@ -353,7 +382,7 @@ const RegisterUser = ({
                   }));
                   togglePopup("default");
                }}
-               className="form"
+               className="form register-user"
             >
                <h3 className="heading-tertiary text-lighter-primary">Datos:</h3>
                {isAdmin && (
@@ -495,7 +524,11 @@ const RegisterUser = ({
                            Teléfono
                         </label>
                      </div>
-                     <div className="form-group">
+                     <div
+                        className={`form-group${
+                           type === "student" ? "mb-0" : ""
+                        }`}
+                     >
                         <input
                            className="form-input"
                            type="tel"
@@ -503,12 +536,102 @@ const RegisterUser = ({
                            id="cel"
                            value={cel}
                            onChange={onChange}
-                           placeholder="Celular"
+                           placeholder={`Celular${
+                              type === "student" ? " Propio" : ""
+                           }`}
                         />
                         <label htmlFor="cel" className="form-label">
-                           Celular
+                           Celular{type === "student" ? " Propio" : ""}
                         </label>
                      </div>
+                     {type === "student" && (
+                        <div className="btn-right">
+                           <button
+                              className="btn btn-tertiary"
+                              type="button"
+                              onClick={newCellphone}
+                           >
+                              <FaPlus />
+                              <span className="hide-sm">&nbsp;Celular</span>
+                           </button>
+                        </div>
+                     )}
+                     {relatedCellphones.length > 0 &&
+                        relatedCellphones.map((item, index) => (
+                           <div className="border mt-1" key={index}>
+                              <div className="form-group">
+                                 <div className="two-in-row">
+                                    <select
+                                       className="form-input"
+                                       name="relation"
+                                       id="relatedCellphones"
+                                       value={item.relation}
+                                       onChange={(e) => onChange(e, index)}
+                                    >
+                                       <option value="">
+                                          * Seleccione la relación con el alumno
+                                       </option>
+                                       <option value="mother">Mamá</option>
+                                       <option value="father">Papá</option>
+                                       <option value="grandmother">
+                                          Abuela
+                                       </option>
+                                       <option value="grandfather">
+                                          Abuelo
+                                       </option>
+                                       <option value="aunt">Tía</option>
+                                       <option value="uncle">Tío</option>
+                                       <option value="sibling">
+                                          Hermano/a
+                                       </option>
+                                       <option value="other">Otro</option>
+                                    </select>
+                                    <input
+                                       className="form-input"
+                                       type="text"
+                                       name="name"
+                                       id="relatedCellphones"
+                                       value={item.name}
+                                       placeholder="Nombre"
+                                       onChange={(e) => onChange(e, index)}
+                                    />
+                                 </div>
+                                 <div className="two-in-row">
+                                    <label
+                                       className={`form-label ${
+                                          item.relation === "" ? "lbl" : ""
+                                       }`}
+                                    >
+                                       Relación
+                                    </label>
+                                    <label
+                                       className={`form-label ${
+                                          item.name === "" ? "lbl" : ""
+                                       }`}
+                                    >
+                                       Nombre
+                                    </label>
+                                 </div>
+                              </div>
+                              <div className="form-group mb-0">
+                                 <input
+                                    className="form-input"
+                                    type="text"
+                                    name="cel"
+                                    id="relatedCellphones"
+                                    onChange={(e) => onChange(e, index)}
+                                    value={item.cel}
+                                    placeholder="Celular"
+                                 />
+                                 <label
+                                    htmlFor="address"
+                                    className="form-label"
+                                 >
+                                    Celular
+                                 </label>
+                              </div>
+                           </div>
+                        ))}
                      <div className="form-group my-3">
                         <div className="radio-group" id="radio-group">
                            <input
@@ -573,7 +696,7 @@ const RegisterUser = ({
                            Dirección
                         </label>
                      </div>
-                     <div className="border mb-4">
+                     <div className={isOwner ? "border mb-4" : ""}>
                         <div className="form-group">
                            <select
                               className="form-input"
@@ -652,7 +775,7 @@ const RegisterUser = ({
                            </label>
                         </div>
                         {isOwner && (
-                           <div className="btn-right townNeigh">
+                           <div className="btn-right">
                               <div className="tooltip">
                                  <Link
                                     to="/user/towns-neighbourhoods/edit"
