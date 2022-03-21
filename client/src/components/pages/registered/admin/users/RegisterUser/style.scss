@@ -3,6 +3,11 @@
 form.register-user {
    .btn-right {
       margin-top: 0;
+
+      .btn-cancel {
+         margin-top: -1rem;
+         margin-right: 0;
+      }
    }
 
    .tooltip.form {

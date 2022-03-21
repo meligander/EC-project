@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/static/css/main.141c05a9.chunk.css",
-    "main.js": "/static/js/main.24374eaa.chunk.js",
-    "main.js.map": "/static/js/main.24374eaa.chunk.js.map",
+    "main.css": "/static/css/main.5bae50eb.chunk.css",
+    "main.js": "/static/js/main.4e27bc53.chunk.js",
+    "main.js.map": "/static/js/main.4e27bc53.chunk.js.map",
     "runtime-main.js": "/static/js/runtime-main.09b85ec0.js",
     "runtime-main.js.map": "/static/js/runtime-main.09b85ec0.js.map",
     "static/js/2.bf3ec6b3.chunk.js": "/static/js/2.bf3ec6b3.chunk.js",
     "static/js/2.bf3ec6b3.chunk.js.map": "/static/js/2.bf3ec6b3.chunk.js.map",
     "index.html": "/index.html",
-    "precache-manifest.f7a773260181aa4c0c0cea892aade871.js": "/precache-manifest.f7a773260181aa4c0c0cea892aade871.js",
+    "precache-manifest.2770d642acb866cf35bde1f41fb7f2b2.js": "/precache-manifest.2770d642acb866cf35bde1f41fb7f2b2.js",
     "service-worker.js": "/service-worker.js",
-    "static/css/main.141c05a9.chunk.css.map": "/static/css/main.141c05a9.chunk.css.map",
+    "static/css/main.5bae50eb.chunk.css.map": "/static/css/main.5bae50eb.chunk.css.map",
     "static/js/2.bf3ec6b3.chunk.js.LICENSE.txt": "/static/js/2.bf3ec6b3.chunk.js.LICENSE.txt",
     "static/media/style.scss": "/static/media/viejo.187af1cb.jpg",
     "static/media/cambridge.png": "/static/media/cambridge.53906724.png",
@@ -38,7 +38,7 @@
   "entrypoints": [
     "static/js/runtime-main.09b85ec0.js",
     "static/js/2.bf3ec6b3.chunk.js",
-    "static/css/main.141c05a9.chunk.css",
-    "static/js/main.24374eaa.chunk.js"
+    "static/css/main.5bae50eb.chunk.css",
+    "static/js/main.4e27bc53.chunk.js"
   ]
 }

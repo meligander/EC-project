@@ -9,6 +9,7 @@ import {
    FaUserEdit,
    FaUserPlus,
    FaPlus,
+   FaTimes,
 } from "react-icons/fa";
 
 //Actions
@@ -559,6 +560,23 @@ const RegisterUser = ({
                      {relatedCellphones.length > 0 &&
                         relatedCellphones.map((item, index) => (
                            <div className="border mt-1" key={index}>
+                              <div className="btn-right">
+                                 <button
+                                    className="btn btn-cancel"
+                                    type="button"
+                                    onClick={() => {
+                                       const newArray = [...relatedCellphones];
+                                       newArray.splice(index, 1);
+
+                                       setFormData((prev) => ({
+                                          ...prev,
+                                          relatedCellphones: newArray,
+                                       }));
+                                    }}
+                                 >
+                                    <FaTimes />
+                                 </button>
+                              </div>
                               <div className="form-group">
                                  <div className="two-in-row">
                                     <select
