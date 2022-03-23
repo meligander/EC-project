@@ -30,6 +30,16 @@
       right: 0.8rem;
    }
 
+   .paragraph {
+      margin: 1rem 3rem 0;
+      text-align: left;
+
+      @include respond(phone) {
+         margin: 1rem 1rem 0;
+         text-align: center;
+      }
+   }
+
    &-btn {
       margin-left: 2rem;
    }

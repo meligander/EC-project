@@ -51,7 +51,7 @@ const RestoreDB = ({ onChange, setAlert, createBackup }) => {
          <h3 className="heading-tertiary text-left m-0">
             Restaurar Base de Datos
          </h3>
-         <h5 className="paragraph text-dark mt-1">
+         <h5 className="paragraph text-dark">
             Seleccione el backup que desea restaurar o descargue el actual
          </h5>
          <div className="form">
