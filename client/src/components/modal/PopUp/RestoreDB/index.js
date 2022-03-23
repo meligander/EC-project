@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { FaCloudUploadAlt, FaTimes } from "react-icons/fa";
+import { FaCloudUploadAlt, FaCloudDownloadAlt, FaTimes } from "react-icons/fa";
 
 import "./style.scss";
 
-const RestoreDB = ({ onChange, setAlert }) => {
+const RestoreDB = ({ onChange, setAlert, createBackup }) => {
    const [adminValues, setAdminValues] = useState({
       fileIn: false,
       selectedFile: "",
@@ -12,7 +12,6 @@ const RestoreDB = ({ onChange, setAlert }) => {
    const { fileIn, selectedFile } = adminValues;
 
    const fileSelected = (e) => {
-      console.log("hola");
       e.persist();
       if (e.target.value) {
          const file = e.target.files[0];
@@ -48,47 +47,56 @@ const RestoreDB = ({ onChange, setAlert }) => {
    };
 
    return (
-      <div className="form restore">
+      <div className="restore">
          <h3 className="heading-tertiary text-left m-0">
             Restaurar Base de Datos
          </h3>
-         <h5 className="paragraph text-dark m-1">
-            Seleccione el backup que desea restaurar
+         <h5 className="paragraph text-dark mt-1">
+            Seleccione el backup que desea restaurar o descargue el actual
          </h5>
-         <p className="text-lighter-primary restore-file">
-            {selectedFile !== "" && (
-               <>
-                  {selectedFile.name}
-                  <button
-                     type="button"
-                     onClick={() =>
-                        setAdminValues((prev) => ({
-                           ...prev,
-                           selectedFile: "",
-                           fileIn: false,
-                        }))
-                     }
-                     className="btn-cancel"
-                  >
-                     <FaTimes />
-                  </button>
-               </>
-            )}
-         </p>
-         <div className="upl-img">
-            <div className={`fileUpload ${fileIn ? "success" : ""}`}>
-               <input
-                  id="fileInput"
-                  type="file"
-                  name="image"
-                  onChange={fileSelected}
-                  onClick={() => console.log("hola")}
-                  className="upload"
-               />
-               <span>
-                  <FaCloudUploadAlt />
-                  &nbsp;Subir Backup
-               </span>
+         <div className="form">
+            <p className="text-lighter-primary restore-file">
+               {selectedFile !== "" && (
+                  <>
+                     {selectedFile.name}
+                     <button
+                        type="button"
+                        onClick={() =>
+                           setAdminValues((prev) => ({
+                              ...prev,
+                              selectedFile: "",
+                              fileIn: false,
+                           }))
+                        }
+                        className="btn-cancel"
+                     >
+                        <FaTimes />
+                     </button>
+                  </>
+               )}
+            </p>
+            <div className="upl-img">
+               <div className={`fileUpload ${fileIn ? "success" : ""}`}>
+                  <input
+                     id="fileInput"
+                     type="file"
+                     name="image"
+                     onChange={fileSelected}
+                     className="upload"
+                  />
+                  <span>
+                     <FaCloudUploadAlt />
+                     &nbsp;Subir
+                  </span>
+               </div>
+               <button
+                  type="button"
+                  onClick={createBackup}
+                  className="btn btn-secondary restore-btn"
+               >
+                  <FaCloudDownloadAlt />
+                  &nbsp;Descargar
+               </button>
             </div>
          </div>
       </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { FaTimes } from "react-icons/fa";
 
-import { togglePopup } from "../../../actions/global";
+import { togglePopup, createBackup } from "../../../actions/global";
 import { setAlert } from "../../../actions/alert";
 
 import NewDate from "./NewDate";
@@ -18,6 +18,7 @@ import RestoreDB from "./RestoreDB";
 const PopUp = ({
    global: { popupType, popupToggle },
    togglePopup,
+   createBackup,
    setAlert,
    confirm,
    info,
@@ -150,7 +151,13 @@ const PopUp = ({
                <></>
             );
          case "backup":
-            return <RestoreDB onChange={onChangeBackup} setAlert={setAlert} />;
+            return (
+               <RestoreDB
+                  onChange={onChangeBackup}
+                  createBackup={createBackup}
+                  setAlert={setAlert}
+               />
+            );
          case "default":
             return typeof info === "string" ? (
                <div className="popup-text">
@@ -244,4 +251,8 @@ const mapStateToProps = (state) => ({
    global: state.global,
 });
 
-export default connect(mapStateToProps, { togglePopup, setAlert })(PopUp);
+export default connect(mapStateToProps, {
+   togglePopup,
+   setAlert,
+   createBackup,
+})(PopUp);

@@ -647,7 +647,10 @@ const inactivateUser = async (user_id, type, completeDeletion) => {
          break;
       case "teacher":
       case "admin&teacher":
-         const classes = await Class.find({ teacher: user_id });
+         const classes = await Class.find({
+            teacher: user_id,
+            year: { $gte: year },
+         });
 
          filter = { classroom: { $in: classes.map((item) => item._id) } };
 

@@ -1,6 +1,7 @@
 @import "../../../../style/abstract.scss";
 
 .restore {
+   padding: 1rem 4rem 0;
    .upl-img {
       justify-content: center !important;
       margin: 1.5rem 0 0;
@@ -27,5 +28,9 @@
       margin-right: 0;
       top: 0.8rem;
       right: 0.8rem;
+   }
+
+   &-btn {
+      margin-left: 2rem;
    }
 }
