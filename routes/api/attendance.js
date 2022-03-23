@@ -251,8 +251,6 @@ router.put("/:class_id/:period", auth, async (req, res) => {
 
    const { class_id: classroom, period } = req.params;
 
-   console.log(attendances);
-
    try {
       attendances = attendances
          .flat()
@@ -430,5 +428,17 @@ const sortByName = (array) => {
       if (a.student.name < b.student.name) return -1;
    });
 };
+
+Object.defineProperty(Array.prototype, "flat", {
+   value: function (depth = 1) {
+      return this.reduce(function (flat, toFlatten) {
+         return flat.concat(
+            Array.isArray(toFlatten) && depth > 1
+               ? toFlatten.flat(depth - 1)
+               : toFlatten
+         );
+      }, []);
+   },
+});
 
 module.exports = router;
