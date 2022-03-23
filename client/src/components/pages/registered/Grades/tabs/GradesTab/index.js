@@ -214,7 +214,7 @@ const GradesTab = ({
                                           setAdminValues((prev) => ({
                                              ...prev,
                                              popupType: "delete",
-                                             toDelete: row.gradetype,
+                                             toDelete: row.gradetype._id,
                                           }));
                                           togglePopup("default");
                                        }}
