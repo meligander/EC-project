@@ -58,8 +58,12 @@ export default function (state = initialState, action) {
             state.invoice.studentsD.some((item) => item === payload.student._id)
          )
             value =
-               payload.number > 2
+               payload.number > 2 && !payload.expired
                   ? payload.value - (payload.value * 10) / 100
+                  : payload.expired
+                  ? Math.round(
+                       (payload.value * 0.90909 + Number.EPSILON) * 100
+                    ) / 100
                   : payload.value;
 
          const detail = {
@@ -102,9 +106,14 @@ export default function (state = initialState, action) {
                   ? [...state.invoice.studentsD, payload]
                   : [payload],
                details: state.invoice.details.map((item) => {
+                  console.log(item.expired);
                   const value =
-                     item.number > 2
+                     item.number > 2 && !item.expired
                         ? item.value - (item.value * 10) / 100
+                        : item.expired
+                        ? Math.round(
+                             (item.value * 0.90909 + Number.EPSILON) * 100
+                          ) / 100
                         : item.value;
 
                   return item.student._id === payload

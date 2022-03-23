@@ -39,8 +39,7 @@ const InstallmentsSearchTab = ({
             if (
                (!invoice.studentsD ||
                   !invoice.studentsD.some((item) => item === x)) &&
-               students[x].length > 2 &&
-               students[x].every((item) => !item.expired)
+               students[x].filter((item) => !item.expired).length > 2
             )
                togglePopup("default");
          }

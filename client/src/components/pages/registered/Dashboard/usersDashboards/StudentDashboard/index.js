@@ -56,12 +56,12 @@ const StudentDashboard = ({
    }, [loadingBK, loadRelatives, user]);
 
    useEffect(() => {
-      if (user.active && allowedUsers && loadingClass)
+      if (allowedUsers && loadingClass)
          loadClass(!class_id ? user._id : class_id, class_id, !class_id);
    }, [allowedUsers, loadingClass, loadClass, user, class_id]);
 
    useEffect(() => {
-      if (user.active && allowedUsers && loadingInstallments)
+      if (allowedUsers && loadingInstallments)
          loadInstallments(
             { student: { _id: user._id } },
             false,
@@ -71,7 +71,7 @@ const StudentDashboard = ({
    }, [allowedUsers, loadingInstallments, loadInstallments, user]);
 
    useEffect(() => {
-      if (user.active && !loadingClass && classInfo && loadingGrades)
+      if (!loadingClass && classInfo && loadingGrades)
          loadGrades(classInfo._id, user._id);
    }, [loadingClass, loadingGrades, loadGrades, user, classInfo]);
 
@@ -81,12 +81,12 @@ const StudentDashboard = ({
    }, [loadEnrollments, user, loadingEnrollments, userLogged, allowedUsers]);
 
    useEffect(() => {
-      if (user.active && !loadingClass && classInfo && loadingObservations)
+      if (!loadingClass && classInfo && loadingObservations)
          loadObservations(classInfo._id, user._id, false);
    }, [user, loadObservations, loadingObservations, loadingClass, classInfo]);
 
    useEffect(() => {
-      if (user.active && !loadingClass && classInfo && loading)
+      if (!loadingClass && classInfo && loading)
          loadAttendances(classInfo._id, user._id);
    }, [loadingClass, loading, loadAttendances, user, classInfo]);
 
@@ -114,7 +114,7 @@ const StudentDashboard = ({
                </div>
             </div>
          )}
-         {!loadingClass && (
+         {!loadingClass && !(!classInfo && !user.active) && (
             <>
                <div
                   className={`class row ${
