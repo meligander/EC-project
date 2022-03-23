@@ -249,17 +249,19 @@ router.post(
 router.put("/:class_id/:period", auth, async (req, res) => {
    let attendances = req.body;
 
-   attendances = attendances
-      .flat()
-      .filter(
-         (item) =>
-            (item.inassistance && item._id === "") ||
-            (!item.inassistance && item._id !== "")
-      );
-
    const { class_id: classroom, period } = req.params;
 
+   console.log(attendances);
+
    try {
+      attendances = attendances
+         .flat()
+         .filter(
+            (item) =>
+               (item.inassistance && item._id === "") ||
+               (!item.inassistance && item._id !== "")
+         );
+
       for (let x = 0; x < attendances.length; x++) {
          const data = {
             student: attendances[x].student,
