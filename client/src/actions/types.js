@@ -1,5 +1,6 @@
 //Alerts
 export const ALERT_SETTED = "ALERT_SETTED";
+export const ALERT_REPLACED = "ALERT_REPLACED";
 export const ALERT_REMOVED = "ALERT_REMOVED";
 
 //Global
