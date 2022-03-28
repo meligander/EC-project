@@ -20,7 +20,7 @@ const createTransporter = async () => {
       client.getAccessToken((err, token) => {
          if (err) {
             reject(err.message);
-            console.log("Failed to create access token :(");
+            console.log("Failed to create access token: " + err.message);
          }
          resolve(token);
       });
@@ -29,8 +29,8 @@ const createTransporter = async () => {
    const transporter = nodemailer.createTransport({
       service: "gmail",
       port: 465,
-      // host: "smtp.gmail.com",
-      // secure: true,
+      host: "smtp.gmail.com",
+      secure: true,
       // auth: {
       //    user: process.env.EMAIL,
       //    pass: process.env.EMAIL_PASSWORD,
