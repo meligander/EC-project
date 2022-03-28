@@ -10,8 +10,6 @@ export const setAlert =
 
       const exists = store.getState().alert.find((item) => item.msg === msg);
 
-      console.log(store.getState().alert);
-
       if (exists) clearTimeout(exists.timer);
 
       const timer = setTimeout(

@@ -321,7 +321,8 @@ router.post(
          await user.save();
 
          //Send email
-         if (email) newUser(type, email);
+         if (email && process.env.NODE_ENV === "production")
+            newUser(type, email);
 
          user = await User.findOne({ _id: user._id })
             .select("-password")
@@ -550,7 +551,12 @@ router.put("/credentials/:id", auth, async (req, res) => {
       }
 
       //Send email
-      if (email && (password || email !== user.email))
+      if (
+         email &&
+         (password || email !== user.email) &&
+         (process.env.NODE_ENV === "production" ||
+            (process.env.NODE_ENV !== "production" && user.type === "admin"))
+      )
          await changeCredentials(email, password, user);
 
       user = await User.findOneAndUpdate(

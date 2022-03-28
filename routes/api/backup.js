@@ -27,8 +27,13 @@ const filePath = path.join(__dirname, "../../backup/backupFile.gz");
 //@desc     Get the backup zip
 //@access   Private
 router.get("/fetch", auth, async (req, res) => {
-   // res.sendFile(filePath);
-   const fileData = await fsPromise.stat(filePath);
+   const { local } = req.query;
+
+   const newFilePath = !local
+      ? filePath
+      : filePath.replace("backupFile", "backupFileLocal");
+
+   const fileData = await fsPromise.stat(newFilePath);
 
    res.writeHead(200, {
       "Content-Type": "application/x-gzip",
@@ -36,7 +41,7 @@ router.get("/fetch", auth, async (req, res) => {
       "Content-Disposition": 'attachment; filename="backupFile.gz"',
    });
 
-   const readStream = fs.createReadStream(filePath);
+   const readStream = fs.createReadStream(newFilePath);
 
    readStream.pipe(res);
 });
@@ -63,9 +68,13 @@ router.get("/check", [auth, adminAuth], async (req, res) => {
 //@desc     Generate a backup
 //@access   Private && Admin
 router.post("/", [auth, adminAuth], async (req, res) => {
+   const { local } = req.body;
+
    const backupProcess = spawn("mongodump", [
       "--db=vmec-db",
-      `--archive=${filePath}`,
+      `--archive=${
+         !local ? filePath : filePath.replace("backupFile", "backupFileLocal")
+      }`,
       "--gzip",
    ]);
 

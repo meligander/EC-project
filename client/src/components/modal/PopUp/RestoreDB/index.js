@@ -91,7 +91,7 @@ const RestoreDB = ({ onChange, setAlert, createBackup }) => {
                </div>
                <button
                   type="button"
-                  onClick={createBackup}
+                  onClick={() => createBackup(true)}
                   className="btn btn-secondary restore-btn"
                >
                   <FaCloudDownloadAlt />

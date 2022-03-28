@@ -53,7 +53,7 @@ router.post(
          //See if users exists
          const user = await User.findOne({ email });
 
-         if (!user) return res.status(400).json({ msg: "Email Inválido" });
+         if (!user) return res.status(400).json({ msg: "Email No Registrado" });
 
          const OKPassword = await user.comparePassword(password);
 

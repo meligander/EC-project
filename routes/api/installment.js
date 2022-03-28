@@ -327,7 +327,11 @@ router.put("/", auth, async (req, res) => {
             ? 30
             : 31;
 
-         if (chargeDay - 3 <= day && !installments[x].emailSent) {
+         if (
+            chargeDay - 3 <= day &&
+            !installments[x].emailSent &&
+            process.env.NODE_ENV === "production"
+         ) {
             const greeting =
                (hours >= 6 && hours < 12
                   ? "¡Buen día!"
@@ -351,6 +355,8 @@ router.put("/", auth, async (req, res) => {
                       ${student.lastname}, ${student.name} está proxima a su vencimiento.
                      <br/>
                      El día ${chargeDay} se le aplicará un recargo del ${penalty.percentage}%.
+                     <br/>
+                     Este es un mensaje automático. Si usted ya realizó dicho pago ignore este email.
                      <br/><br/>
                      Muchas gracias y disculpe las molestias.`
                   );

@@ -36,13 +36,13 @@ export const checkBackup = () => async (dispatch) => {
    }
 };
 
-export const createBackup = () => async (dispatch) => {
+export const createBackup = (local) => async (dispatch) => {
    let error = false;
    dispatch(updateLoadingSpinner(true));
    try {
-      const res = await api.post("/backup");
+      const res = await api.post("/backup", { local });
 
-      const blob = await api.get("/backup/fetch", {
+      const blob = await api.get(`/backup/fetch${local ? "?local=true" : ""}`, {
          responseType: "arraybuffer",
       });
 
@@ -55,6 +55,7 @@ export const createBackup = () => async (dispatch) => {
          type: BACKUP_GENERATED,
       });
 
+      if (local) dispatch(togglePopup("default"));
       dispatch(setAlert(res.data.msg, "success", "1"));
       window.scrollTo(0, 0);
    } catch (err) {
