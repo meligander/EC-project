@@ -1,6 +1,6 @@
 const User = require("../models/User");
 
-module.exports = async function (req, res, next) {
+module.exports = async (req, res, next) => {
    try {
       let user = await User.findOne({ _id: req.user.id });
 

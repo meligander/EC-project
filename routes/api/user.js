@@ -7,7 +7,7 @@ const { check, validationResult } = require("express-validator");
 const cloudinaryUploader = require("../../config/imageUploading");
 
 //Sending Email
-const { newUser, changeCredentials } = require("../../config/emailSender");
+const { newUser, changeCredentials } = require("../../other/emailSender");
 
 //Middleware
 const auth = require("../../middleware/auth");

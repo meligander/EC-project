@@ -2,7 +2,7 @@ const router = require("express").Router();
 const { check, validationResult } = require("express-validator");
 
 //Sending Email
-const { sendEmail } = require("../../config/emailSender");
+const { sendEmail } = require("../../other/emailSender");
 
 //Middleware
 const auth = require("../../middleware/auth");

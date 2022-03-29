@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const path = require("path");
 
-const generatePDF = require("../../../config/generatePDF");
+const generatePDF = require("../../../other/generatePDF");
 
 //PDF Templates
 const pdfTemplate = require("../../../templates/list");

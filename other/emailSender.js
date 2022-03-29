@@ -3,8 +3,6 @@ const path = require("path");
 const { google } = require("googleapis");
 const OAuth2 = google.auth.OAuth2;
 
-require("dotenv").config();
-
 const createTransporter = async () => {
    const client = new OAuth2(
       process.env.GOOGLE_CLIENTID,

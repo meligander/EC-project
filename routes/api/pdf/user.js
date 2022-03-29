@@ -2,7 +2,7 @@ const router = require("express").Router();
 const format = require("date-fns/format");
 const path = require("path");
 
-const generatePDF = require("../../../config/generatePDF");
+const generatePDF = require("../../../other/generatePDF");
 
 //Middleware
 const auth = require("../../../middleware/auth");

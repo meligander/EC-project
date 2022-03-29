@@ -5,6 +5,7 @@ const cors = require("cors");
 const apiRouter = require("./routes/api");
 
 require("dotenv").config({ path: path.resolve(__dirname, "./config/.env") });
+require("./other/functions");
 
 const app = express();
 
@@ -16,18 +17,6 @@ app.use(express.json({ limit: "50mb", extended: false }));
 app.use(express.urlencoded({ limit: "50mb", extended: false }));
 app.use(cors());
 app.use("/api", apiRouter);
-
-Object.defineProperty(Array.prototype, "flat", {
-   value: function (depth = 1) {
-      return this.reduce(function (flat, toFlatten) {
-         return flat.concat(
-            Array.isArray(toFlatten) && depth > 1
-               ? toFlatten.flat(depth - 1)
-               : toFlatten
-         );
-      }, []);
-   },
-});
 
 const PORT = process.env.PORT || 5000;
 
