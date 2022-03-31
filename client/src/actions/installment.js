@@ -15,6 +15,7 @@ import { clearSearch } from "./user";
 import {
    INSTALLMENT_LOADED,
    TOTALDEBT_LOADED,
+   ESTIMATEDPROFIT_LOADED,
    INSTALLMENTS_LOADED,
    INSTALLMENT_UPDATED,
    INSTALLMENT_REGISTERED,
@@ -51,6 +52,24 @@ export const getTotalDebt = () => async (dispatch) => {
 
       dispatch({
          type: TOTALDEBT_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      if (err.response.status !== 401) {
+         dispatch(setError(INSTALLMENTS_ERROR, err.response));
+         window.scroll(0, 0);
+      }
+   }
+};
+
+export const getEstimatedProfit = () => async (dispatch) => {
+   try {
+      let res = await api.get(
+         `/installment/profit/${new Date().getMonth() + 1}`
+      );
+
+      dispatch({
+         type: ESTIMATEDPROFIT_LOADED,
          payload: res.data,
       });
    } catch (err) {

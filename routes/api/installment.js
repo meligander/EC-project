@@ -148,6 +148,28 @@ router.get("/month/debts", [auth, adminAuth], async (req, res) => {
    }
 });
 
+//@route    GET /api/installment/profit/:month
+//@desc     get the profit for a specific month
+//@access   Private && Admin
+router.get("/profit/:month", [auth, adminAuth], async (req, res) => {
+   try {
+      const date = new Date();
+      const month = date.getMonth() <= 2 ? 3 : req.params.month;
+
+      const installments = await Installment.find({
+         year: date.getFullYear(),
+         number: month === 12 ? { $lte: 12 } : month + 1,
+      });
+
+      const money = installments.reduce((sum, item) => sum + item.value, 0);
+
+      res.json(money);
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: "Server Error" });
+   }
+});
+
 //@route    POST /api/installment
 //@desc     Add an installment
 //@access   Private && Admin

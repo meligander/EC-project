@@ -40,7 +40,7 @@ export const loadGrades = (class_id, user_id) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         if (!user_id) dispatch(setAlert(err.response.data.msg, "danger", "2"));
          dispatch(setError(GRADES_ERROR, err.response));
       }
    }

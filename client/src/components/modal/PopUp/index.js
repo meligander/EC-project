@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import { FaTimes } from "react-icons/fa";
 
 import { togglePopup, createBackup } from "../../../actions/global";
+import { clearInvoice } from "../../../actions/invoice";
 import { setAlert } from "../../../actions/alert";
 
 import NewDate from "./NewDate";
@@ -10,15 +11,17 @@ import PenaltyPercentage from "./PenaltyPercentage";
 import Certificate from "./Certificate";
 import NewGradeType from "./NewGradeType";
 import Alert from "../../pages/sharedComp/Alert";
+import RestoreDB from "./RestoreDB";
+import InvoiceList from "./InvoiceList";
 
 import logo from "../../../img/logoSinLetras.png";
 import "./style.scss";
-import RestoreDB from "./RestoreDB";
 
 const PopUp = ({
    global: { popupType, popupToggle },
    togglePopup,
    createBackup,
+   clearInvoice,
    setAlert,
    confirm,
    info,
@@ -158,6 +161,14 @@ const PopUp = ({
                   setAlert={setAlert}
                />
             );
+         case "invoices":
+            return (
+               <InvoiceList
+                  invoices={info}
+                  clearInvoice={clearInvoice}
+                  togglePopup={togglePopup}
+               />
+            );
          case "default":
             return typeof info === "string" ? (
                <div className="popup-text">
@@ -189,48 +200,51 @@ const PopUp = ({
             </div>
             <div className="mt-2">
                <Alert type="4" />
-               <div
-                  className={popupType === "certificate" ? "wrapper both" : ""}
-               >
-                  {chooseType(popupType)}
-               </div>
+               {chooseType(popupType)}
             </div>
             <div className="btn-center">
-               <button
-                  type="button"
-                  className="btn btn-success"
-                  onClick={(e) => {
-                     e.preventDefault();
-                     switch (popupType) {
-                        case "penalty":
-                           confirm(penaltyPercentage);
-                           setPenaltyPercentage("");
-                           break;
-                        case "certificate":
-                           confirm(certificate);
-                           setCertificate({ date: "", students: [] });
-                           break;
-                        case "new-date":
-                           confirm(newDate);
-                           setNewDate({ fromDate: "", toDate: "", date: "" });
-                           break;
-                        case "new-grade":
-                           confirm(newGradeType);
-                           setNewGradeType("");
-                           break;
-                        case "backup":
-                           confirm(backup);
-                           setBackup("");
-                           break;
-                        default:
-                           confirm();
-                           break;
-                     }
-                     if (!error) togglePopup("default");
-                  }}
-               >
-                  Aceptar
-               </button>
+               {popupType !== "invoices" && (
+                  <button
+                     type="button"
+                     className="btn btn-success"
+                     onClick={(e) => {
+                        e.preventDefault();
+                        switch (popupType) {
+                           case "penalty":
+                              confirm(penaltyPercentage);
+                              setPenaltyPercentage("");
+                              break;
+                           case "certificate":
+                              confirm(certificate);
+                              setCertificate({ date: "", students: [] });
+                              break;
+                           case "new-date":
+                              confirm(newDate);
+                              setNewDate({
+                                 fromDate: "",
+                                 toDate: "",
+                                 date: "",
+                              });
+                              break;
+                           case "new-grade":
+                              confirm(newGradeType);
+                              setNewGradeType("");
+                              break;
+                           case "backup":
+                              confirm(backup);
+                              setBackup("");
+                              break;
+                           default:
+                              confirm();
+                              break;
+                        }
+                        if (!error) togglePopup("default");
+                     }}
+                  >
+                     Aceptar
+                  </button>
+               )}
+
                <button
                   type="button"
                   className="btn btn-danger"
@@ -255,4 +269,5 @@ export default connect(mapStateToProps, {
    togglePopup,
    setAlert,
    createBackup,
+   clearInvoice,
 })(PopUp);

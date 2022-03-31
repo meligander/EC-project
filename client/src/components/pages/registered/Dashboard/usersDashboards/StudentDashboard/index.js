@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import format from "date-fns/format";
 import { Link, withRouter } from "react-router-dom";
+import { FaTimesCircle } from "react-icons/fa";
 
 import { loadGrades } from "../../../../../../actions/grade";
 import { loadAttendances } from "../../../../../../actions/attendance";
@@ -9,6 +10,7 @@ import { loadInstallments } from "../../../../../../actions/installment";
 import { loadObservations } from "../../../../../../actions/observation";
 import { loadEnrollments } from "../../../../../../actions/enrollment";
 import { clearProfile, loadRelatives } from "../../../../../../actions/user";
+import { togglePopup } from "../../../../../../actions/global";
 import { loadClass } from "../../../../../../actions/class";
 
 import RelativeDashboard from "../RelativeDashboard";
@@ -16,7 +18,6 @@ import StudentGradesTable from "../../../sharedComp/tables/StudentGradesTable";
 import InstallmentsTable from "../../../sharedComp/tables/InstallmentsTable";
 
 import "./style.scss";
-import { FaTimesCircle } from "react-icons/fa";
 
 const StudentDashboard = ({
    match,
@@ -36,6 +37,7 @@ const StudentDashboard = ({
    loadRelatives,
    loadObservations,
    loadEnrollments,
+   togglePopup,
    clearProfile,
 }) => {
    const class_id = match.params.class_id;
@@ -315,19 +317,27 @@ const StudentDashboard = ({
                )}
 
                {/* Installments */}
-               {!loadingInstallments && installments.length > 0 && (
-                  <div className="bg-white p-3">
-                     <h3 className="heading-tertiary text-primary p-1">
-                        Cuotas Pendientes
-                     </h3>
-                     <div className="pb-2">
+               <div className="bg-white p-3">
+                  <h3 className="heading-tertiary m-0 text-primary p-1">
+                     Cuotas Pendientes{" "}
+                  </h3>
+                  <button
+                     className="btn-text liner"
+                     onClick={() => togglePopup("invoices")}
+                  >
+                     Facturas Pagas
+                  </button>
+                  <div className="pb-2">
+                     {!loadingInstallments && installments.length > 0 ? (
                         <InstallmentsTable
                            installments={installments}
                            forAdmin={false}
                         />
-                     </div>
+                     ) : (
+                        <p className="heading-tertiary text-center">Al día</p>
+                     )}
                   </div>
-               )}
+               </div>
             </>
          )}
       </>
@@ -353,5 +363,6 @@ export default connect(mapStateToProps, {
    loadRelatives,
    loadObservations,
    loadEnrollments,
+   togglePopup,
    clearProfile,
 })(withRouter(StudentDashboard));

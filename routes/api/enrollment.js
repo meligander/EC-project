@@ -97,30 +97,6 @@ router.get("/", auth, async (req, res) => {
    }
 });
 
-//@route    GET /api/enrollment/money
-//@desc     get the money to earn per month
-//@access   Private && Admin
-router.get("/money", [auth, adminAuth], async (req, res) => {
-   try {
-      const enrollments = await Enrollment.find({
-         year: new Date().getFullYear(),
-      }).populate({
-         path: "category",
-         model: "category",
-      });
-
-      const money = enrollments.reduce(
-         (sum, item) => sum + item.category.value,
-         0
-      );
-
-      res.json(money);
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ msg: "Server Error" });
-   }
-});
-
 //@route    GET /api/enrollment/one/:id
 //@desc     get one enrollment
 //@access   Private && Admin

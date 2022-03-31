@@ -16,7 +16,6 @@ import {
    ENROLLMENT_LOADED,
    ENROLLMENTS_LOADED,
    YEARENROLLMENTS_LOADED,
-   ESTIMATEDPROFIT_LOADED,
    ENROLLMENT_REGISTERED,
    ENROLLMENT_UPDATED,
    ENROLLMENT_DELETED,
@@ -47,22 +46,6 @@ export const getYearEnrollments = () => async (dispatch) => {
 
       dispatch({
          type: YEARENROLLMENTS_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      if (err.response.status !== 401) {
-         dispatch(setError(ENROLLMENTS_ERROR, err.response));
-         window.scroll(0, 0);
-      }
-   }
-};
-
-export const getEstimatedProfit = () => async (dispatch) => {
-   try {
-      let res = await api.get("/enrollment/money");
-
-      dispatch({
-         type: ESTIMATEDPROFIT_LOADED,
          payload: res.data,
       });
    } catch (err) {

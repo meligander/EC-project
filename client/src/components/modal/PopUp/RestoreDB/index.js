@@ -47,7 +47,7 @@ const RestoreDB = ({ onChange, setAlert, createBackup }) => {
    };
 
    return (
-      <div className="restore">
+      <div className="popup-restore">
          <h3 className="heading-tertiary text-left m-0">
             Restaurar Base de Datos
          </h3>

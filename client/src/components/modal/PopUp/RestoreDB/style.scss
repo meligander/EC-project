@@ -1,7 +1,8 @@
 @import "../../../../style/abstract.scss";
 
-.restore {
+.popup-restore {
    padding: 1rem 4rem 0;
+
    .upl-img {
       justify-content: center !important;
       margin: 1.5rem 0 0;
@@ -40,7 +41,7 @@
       }
    }
 
-   &-btn {
+   .restore-btn {
       margin-left: 2rem;
    }
 }

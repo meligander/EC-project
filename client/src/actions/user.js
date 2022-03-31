@@ -18,6 +18,7 @@ import { logOut, updateAuthUser } from "./auth";
 import { clearClass } from "./class";
 import { clearObservations } from "./observation";
 import { clearEnrollments } from "./enrollment";
+import { clearInvoices } from "./invoice";
 
 import {
    USER_LOADED,
@@ -331,6 +332,8 @@ export const clearProfile = (sameUser) => (dispatch) => {
    dispatch(clearInstallments());
    dispatch(clearAttendances());
    dispatch(clearObservations());
+   dispatch(clearInvoices());
+
    if (!sameUser) {
       dispatch(clearEnrollments());
       dispatch({

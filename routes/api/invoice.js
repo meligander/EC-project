@@ -13,11 +13,13 @@ const Register = require("../../models/Register");
 //@route    GET /api/invoice
 //@desc     get all invoices || with filters
 //@access   Private && Admin
-router.get("/", [auth, adminAuth], async (req, res) => {
+router.get("/", [auth], async (req, res) => {
    try {
       let invoices = [];
 
-      const { startDate, endDate, name, lastname } = req.query;
+      const { startDate, endDate, name, lastname, studentId } = req.query;
+
+      const year = new Date("2022-01-01");
 
       if (Object.entries(req.query).length === 0) {
          invoices = await Invoice.find()
@@ -35,6 +37,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
                   ...(endDate && { $lte: new Date(endDate) }),
                },
             }),
+            ...(studentId && { date: { $gte: year } }),
          })
             .populate({
                path: "user.user_id",
@@ -48,6 +51,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
                   path: "student",
                   model: "user",
                   select: ["name", "lastname"],
+                  ...(studentId && { match: { _id: studentId } }),
                   ...((name || lastname) && {
                      match: {
                         ...(name && {
@@ -88,7 +92,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 //@route    GET /api/invoice/:id
 //@desc     get one invoice
 //@access   Private && Admin
-router.get("/:id", [auth, adminAuth], async (req, res) => {
+router.get("/:id", [auth], async (req, res) => {
    try {
       const invoice = await Invoice.findOne({ _id: req.params.id })
          .populate({

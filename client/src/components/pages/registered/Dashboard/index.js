@@ -19,6 +19,7 @@ import {
    restoreBackup,
    whenNull,
 } from "../../../../actions/global";
+import { loadInvoices } from "../../../../actions/invoice";
 
 import PopUp from "../../../modal/PopUp";
 import Alert from "../../sharedComp/Alert";
@@ -35,6 +36,7 @@ const Dashboard = ({
    auth: { userLogged },
    users: { user: otherUser, loadingUser },
    global: { popupType: popupRealType },
+   invoices: { invoices, loading },
    loadUser,
    clearTowns,
    clearSearch,
@@ -44,6 +46,7 @@ const Dashboard = ({
    deleteUser,
    togglePopup,
    createBackup,
+   loadInvoices,
    restoreBackup,
 }) => {
    const relationTypes = {
@@ -100,6 +103,11 @@ const Dashboard = ({
       }
    }, [loadUser, _id, loadingUser, otherUser, user, userLogged, clearProfile]);
 
+   useEffect(() => {
+      if (user && user.type === "student" && loading)
+         loadInvoices({ studentId: user._id }, false);
+   }, [user, loading, loadInvoices]);
+
    const dashboardType = () => {
       switch (user.type) {
          case "student":
@@ -136,7 +144,9 @@ const Dashboard = ({
                   }}
                   error={popupRealType === "backup"}
                   info={
-                     popupType === "delete"
+                     popupRealType === "invoices"
+                        ? invoices
+                        : popupType === "delete"
                         ? "¿Está seguro que desea eliminar el usuario?"
                         : "¿Desea guardar un backup de la base de datos?"
                   }
@@ -369,10 +379,12 @@ const mapStateToProps = (state) => ({
    auth: state.auth,
    users: state.users,
    global: state.global,
+   invoices: state.invoices,
 });
 
 export default connect(mapStateToProps, {
    loadUser,
+   loadInvoices,
    deleteUser,
    clearTowns,
    clearSearch,

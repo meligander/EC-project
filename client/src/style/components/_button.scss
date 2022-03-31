@@ -140,6 +140,7 @@
    }
 
    &-text {
+      &,
       &:link,
       &:visited {
          font-size: $default-font-size;
@@ -150,6 +151,9 @@
          padding: 0.5rem 1rem;
          transition: all 0.2s;
          backface-visibility: hidden;
+         border: none;
+         background-color: inherit;
+         cursor: pointer;
       }
 
       &:hover {

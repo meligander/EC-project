@@ -24,26 +24,28 @@ const Certificate = ({ onChange, date, students, period }) => {
             )}
 
             <h5>Alumnos</h5>
-            {students.map((student, i) => (
-               <div className="student" key={i}>
-                  <p className="name">{student.name}</p>
-                  <input
-                     className="form-checkbox"
-                     type="checkbox"
-                     checked={student.checked}
-                     onChange={(e) => onChange(e, i)}
-                     name="student"
-                     id={`cb${period}-${i}`}
-                  />
-                  <label
-                     className="checkbox-lbl"
-                     id="check"
-                     htmlFor={`cb${period}-${i}`}
-                  >
-                     {student.checked ? "Si" : "No"}
-                  </label>
-               </div>
-            ))}
+            <div className="wrapper both">
+               {students.map((student, i) => (
+                  <div className="student" key={i}>
+                     <p className="name">{student.name}</p>
+                     <input
+                        className="form-checkbox"
+                        type="checkbox"
+                        checked={student.checked}
+                        onChange={(e) => onChange(e, i)}
+                        name="student"
+                        id={`cb${period}-${i}`}
+                     />
+                     <label
+                        className="checkbox-lbl"
+                        id="check"
+                        htmlFor={`cb${period}-${i}`}
+                     >
+                        {student.checked ? "Si" : "No"}
+                     </label>
+                  </div>
+               ))}
+            </div>
          </div>
       </div>
    );

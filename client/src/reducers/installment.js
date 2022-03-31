@@ -7,6 +7,7 @@ import {
    INSTALLMENT_DELETED,
    EXPIREDINSTALLMENTS_UPDATED,
    INSTALLMENT_CLEARED,
+   ESTIMATEDPROFIT_LOADED,
    INSTALLMENTS_CLEARED,
    INSTALLMENTS_ERROR,
    INSTALLMENT_ERROR,
@@ -20,6 +21,7 @@ const initialState = {
    installment: null,
    otherValues: {
       totalDebt: "",
+      estimatedProfit: "",
    },
    error: {},
 };
@@ -75,6 +77,14 @@ export default function (state = initialState, action) {
             loading: false,
             error: {},
          };
+      case ESTIMATEDPROFIT_LOADED:
+         return {
+            ...state,
+            otherValues: {
+               ...state.otherValues,
+               estimatedProfit: payload,
+            },
+         };
       case EXPIREDINSTALLMENTS_UPDATED:
          return state;
       case INSTALLMENT_CLEARED:
@@ -91,7 +101,6 @@ export default function (state = initialState, action) {
             otherValues: {
                totalDebt: "",
                estimatedProfit: "",
-               monthlyDebt: "",
             },
          };
       case INSTALLMENTS_ERROR:

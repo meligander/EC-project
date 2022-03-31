@@ -7,7 +7,7 @@ import {
    loadInstallments,
    installmentsPDF,
 } from "../../../../../../actions/installment";
-import { getEstimatedProfit } from "../../../../../../actions/enrollment";
+import { getEstimatedProfit } from "../../../../../../actions/installment";
 import { formatNumber } from "../../../../../../actions/global";
 import { clearProfile } from "../../../../../../actions/user";
 
@@ -15,10 +15,11 @@ import ListButtons from "../sharedComp/ListButtons";
 import NameField from "../../../sharedComp/NameField";
 
 const InstallmentList = ({
-   enrollments: {
+   installments: {
+      installments,
+      loading,
       otherValues: { estimatedProfit },
    },
-   installments: { installments, loading },
    auth: { userLogged },
    loadInstallments,
    getEstimatedProfit,
@@ -27,7 +28,7 @@ const InstallmentList = ({
 }) => {
    const thisYear = new Date().getFullYear();
    const installmentName =
-      "Inscripción,,,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre".split(
+      "Inscripción,Clases Particulares,Examen Libre,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre".split(
          ","
       );
    const isAdmin =
@@ -221,7 +222,6 @@ const InstallmentList = ({
 
 const mapStatetoProps = (state) => ({
    installments: state.installments,
-   enrollments: state.enrollments,
    auth: state.auth,
 });
 

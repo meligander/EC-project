@@ -35,7 +35,7 @@ export const loadAttendances = (class_id, user_id) => async (dispatch) => {
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         if (!user_id) dispatch(setAlert(err.response.data.msg, "danger", "2"));
          dispatch(setError(ATTENDANCES_ERROR, err.response));
       }
    }

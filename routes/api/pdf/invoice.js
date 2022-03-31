@@ -33,7 +33,7 @@ const installment = [
 //@route    GET /api/pdf/invoice/fetch
 //@desc     Get the pdf of income
 //@access   Private && Admin
-router.get("/fetch", [auth, adminAuth], (req, res) => {
+router.get("/fetch", [auth], (req, res) => {
    res.sendFile(fileName);
 });
 
@@ -82,7 +82,7 @@ router.post("/list", [auth, adminAuth], (req, res) => {
 //@route    POST /api/pdf/invoice
 //@desc     Create a pdf of an invoice
 //@access   Private && Admin
-router.post("/", [auth, adminAuth], (req, res) => {
+router.post("/", [auth], (req, res) => {
    const { remaining, details, user, invoiceid, date, total } = req.body;
 
    const tbody = details
