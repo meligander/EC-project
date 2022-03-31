@@ -1,6 +1,7 @@
 import React from "react";
 import format from "date-fns/format";
 import { Link } from "react-router-dom";
+import { FaSearch } from "react-icons/fa";
 
 import { formatNumber } from "../../../../actions/global";
 
@@ -32,7 +33,7 @@ const InvoiceList = ({ invoices, clearInvoice, togglePopup }) => {
                                        }}
                                        className="btn-text"
                                     >
-                                       Ver más &rarr;
+                                       <FaSearch />
                                     </Link>
                                  </td>
                               </tr>

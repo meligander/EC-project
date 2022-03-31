@@ -332,6 +332,7 @@ const StudentDashboard = ({
                         <InstallmentsTable
                            installments={installments}
                            forAdmin={false}
+                           dash
                         />
                      ) : (
                         <p className="heading-tertiary text-center">Al día</p>

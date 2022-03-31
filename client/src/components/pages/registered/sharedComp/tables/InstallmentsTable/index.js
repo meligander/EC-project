@@ -16,6 +16,7 @@ const InstallmentsTable = ({
    clearEnrollments,
    loadInstallment,
    togglePopup,
+   dash,
 }) => {
    const installment = [
       "Inscripción",
@@ -42,7 +43,7 @@ const InstallmentsTable = ({
    return (
       <>
          <Alert type="3" />
-         {!addDetail && (
+         {!addDetail && !dash && (
             <PopUp
                confirm={() => deleteInstallment(toDelete)}
                info="¿Está seguro que desea eliminar la cuota?"
