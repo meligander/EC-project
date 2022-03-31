@@ -324,7 +324,7 @@ router.put("/", auth, async (req, res) => {
          ...(await Installment.find({
             year: { $lt: year },
             value: { $ne: 0 },
-            number: { $ne: 0 },
+            number: { $gte: 3 },
             expired: false,
          }).populate({
             path: "student",
@@ -391,34 +391,25 @@ router.put("/", auth, async (req, res) => {
          }
 
          if (
-            installments[x].year < year ||
-            installments[x].number < month ||
-            chargeDay < day
+            (installments[x].year < year ||
+               installments[x].number < month ||
+               chargeDay < day) &&
+            installments[x].value >= 1000 &&
+            !(installments[x].number === 3 && month === 3)
          ) {
-            if (installments[x].number === 3 && month === 3) {
-               if (!installments[x].debt) {
-                  await Installment.findOneAndUpdate(
-                     { _id: installments[x].id },
-                     { debt: true }
-                  );
-               }
-               continue;
-            }
-
-            let charge = 0;
-
-            if (student.discount === 10) {
-               charge = installments[x].value * 1.1112;
-            } else {
-               charge =
-                  (installments[x].value * penalty.percentage) / 100 +
-                  installments[x].value;
-            }
-            const value = Math.round(charge / 10) * 10;
-
             await Installment.findOneAndUpdate(
                { _id: installments[x].id },
-               { value, expired: true }
+               {
+                  value:
+                     Math.round(
+                        student.discount === 10
+                           ? installments[x].value * 1.1112
+                           : (installments[x].value * penalty.percentage) /
+                                100 +
+                                installments[x].value / 10
+                     ) * 10,
+                  expired: true,
+               }
             );
          } else {
             if (!installments[x].debt) {
