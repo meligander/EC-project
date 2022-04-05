@@ -56,7 +56,8 @@ router.get("/check", [auth, adminAuth], async (req, res) => {
 
       console.log(
          fileData,
-         Math.abs(differenceInWeeks(new Date(), fileData.birthtime)) > 1
+         Math.abs(differenceInWeeks(new Date(), fileData.birthtime)) > 1,
+         Math.abs(differenceInWeeks(new Date(), fileData.birthtime))
       );
 
       res.json(
