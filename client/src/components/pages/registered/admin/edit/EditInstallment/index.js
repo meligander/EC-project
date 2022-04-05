@@ -63,8 +63,7 @@ const EditInstallment = ({
                   }
                   return {
                      ...oldInstallment,
-                     number: installment.number,
-                     value: installment.value,
+                     updatable: installment.updatable,
                   };
                });
          }

@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const addDays = require("date-fns/addDays");
 const { check, validationResult } = require("express-validator");
 
 //Middleware
@@ -19,10 +20,12 @@ router.get("/", [auth], async (req, res) => {
 
       const { startDate, endDate, name, lastname, studentId } = req.query;
 
-      const year = new Date("2022-01-01");
+      const year = new Date().getFullYear();
 
       if (Object.entries(req.query).length === 0) {
-         invoices = await Invoice.find()
+         invoices = await Invoice.find({
+            date: { $gte: new Date(`${year}-01-01`) },
+         })
             .populate({
                path: "user.user_id",
                model: "user",
@@ -30,14 +33,20 @@ router.get("/", [auth], async (req, res) => {
             })
             .sort({ date: -1 });
       } else {
+         const date = {
+            $gte: new Date(startDate ? startDate : `${year}-1-1`),
+            ...(endDate && { $lte: addDays(new Date(endDate), 1) }),
+         };
+
          invoices = await Invoice.find({
-            ...((startDate || endDate) && {
-               date: {
-                  ...(startDate && { $gte: new Date(startDate) }),
-                  ...(endDate && { $lte: new Date(endDate) }),
-               },
-            }),
-            ...(studentId && { date: { $gte: year } }),
+            date:
+               startDate || endDate
+                  ? date
+                  : {
+                       $gte: studentId
+                          ? new Date("2022-01-01")
+                          : new Date(`${year}-01-01`),
+                    },
          })
             .populate({
                path: "user.user_id",

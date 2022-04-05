@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const { check, validationResult } = require("express-validator");
+const addDays = require("date-fns/addDays");
 
 //Middlewares
 const adminAuth = require("../../middleware/adminAuth");
@@ -8,7 +9,6 @@ const auth = require("../../middleware/auth");
 //Models
 const Expence = require("../../models/Expence");
 const Register = require("../../models/Register");
-const ExpenceType = require("../../models/ExpenceType");
 const Invoice = require("../../models/Invoice");
 
 //@route    GET /api/expence
@@ -18,25 +18,33 @@ router.get("/", [auth, adminAuth], async (req, res) => {
    try {
       let expences = [];
       let invoices = [];
+      const year = new Date().getFullYear();
 
       if (Object.entries(req.query).length === 0) {
-         expences = await Expence.find().populate("expencetype");
-         invoices = await Invoice.find().populate({
+         expences = await Expence.find({
+            date: { $gte: new Date(`${year}-01-01`) },
+         }).populate("expencetype");
+         invoices = await Invoice.find({
+            date: { $gte: new Date(`${year}-01-01`) },
+         }).populate({
             path: "user.user_id",
             model: "user",
             select: ["name", "lastname"],
          });
       } else {
-         const { transactionType, startDate, endDate } = req.query;
+         const { transactionType, startDate, endDate, isNotAdmin } = req.query;
 
          const date = {
-            ...(startDate && { $gte: new Date(startDate) }),
-            ...(endDate && { $lte: new Date(endDate) }),
+            $gte: new Date(startDate ? startDate : `${year}-01-01`),
+            ...(endDate && { $lte: addDays(new Date(endDate), 1) }),
          };
 
          if (!transactionType || transactionType === "income") {
             invoices = await Invoice.find({
-               ...((startDate || endDate) && { date }),
+               date:
+                  startDate || endDate
+                     ? date
+                     : { $gte: new Date(`${year}-01-01`) },
             }).populate({
                path: "user.user_id",
                model: "user",
@@ -45,11 +53,18 @@ router.get("/", [auth, adminAuth], async (req, res) => {
          }
          if (transactionType !== "income") {
             expences = await Expence.find({
-               ...((startDate || endDate) && { date }),
+               date:
+                  startDate || endDate
+                     ? date
+                     : { $gte: new Date(`${year}-01-01`) },
             }).populate({
                path: "expencetype",
-               ...(transactionType && {
-                  match: { type: transactionType },
+               ...((transactionType || isNotAdmin) && {
+                  match: {
+                     type: transactionType
+                        ? transactionType
+                        : isNotAdmin && { $ne: "withdrawal" },
+                  },
                }),
             });
          }
@@ -91,17 +106,16 @@ router.get("/withdrawal", [auth, adminAuth], async (req, res) => {
       } else {
          const { startDate, endDate, expencetype } = req.query;
 
+         const date = {
+            $gte: new Date(startDate ? startDate : `${year}-1-1`),
+            ...(endDate && { $lte: addDays(new Date(endDate), 1) }),
+         };
+
          withdrawals = await Expence.find({
-            ...((startDate || endDate) && {
-               date: {
-                  ...(startDate && {
-                     $gte: new Date(startDate).setHours(00, 00, 00),
-                  }),
-                  ...(endDate && {
-                     $lte: new Date(endDate).setHours(23, 59, 59),
-                  }),
-               },
-            }),
+            date:
+               startDate || endDate
+                  ? date
+                  : { $gte: new Date(`${year}-01-01`) },
          })
             .populate({
                path: "expencetype",

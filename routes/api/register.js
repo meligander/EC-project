@@ -22,13 +22,16 @@ router.get("/", [auth, adminAuth], async (req, res) => {
       } else {
          const { startDate, endDate } = req.query;
 
+         const date = {
+            $gte: new Date(startDate ? startDate : `${year}-1-1`),
+            ...(endDate && { $lte: addDays(new Date(endDate), 1) }),
+         };
+
          registers = await Register.find({
-            ...((startDate || endDate) && {
-               date: {
-                  ...(startDate && { $gte: new Date(startDate) }),
-                  ...(endDate && { $lte: new Date(endDate) }),
-               },
-            }),
+            date:
+               startDate || endDate
+                  ? date
+                  : { $gte: new Date(`${year}-01-01`) },
          }).sort({ date: -1 });
       }
       for (let x = 0; x < registers.length; x++)

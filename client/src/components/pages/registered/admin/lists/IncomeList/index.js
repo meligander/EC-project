@@ -22,6 +22,7 @@ import PopUp from "../../../../../modal/PopUp";
 import "./style.scss";
 
 const IncomeList = ({
+   auth: { userLogged },
    invoices: { loading, invoices },
    registers: { register, loadingRegister },
    loadInvoices,
@@ -41,14 +42,21 @@ const IncomeList = ({
    const [adminValues, setAdminValues] = useState({
       toDelete: "",
       page: 0,
+      total: 0,
    });
 
    const { startDate, endDate, name, lastname } = filterData;
-   const { toDelete, page } = adminValues;
+   const { toDelete, page, total } = adminValues;
 
    useEffect(() => {
       if (loading) loadInvoices({}, true);
-   }, [loading, loadInvoices]);
+      else {
+         setAdminValues((prev) => ({
+            ...prev,
+            total: invoices.reduce((sum, invoice) => sum + invoice.total, 0),
+         }));
+      }
+   }, [loading, loadInvoices, invoices]);
 
    useEffect(() => {
       if (loadingRegister) loadRegister(false);
@@ -80,6 +88,11 @@ const IncomeList = ({
             confirm={() => deleteInvoice(toDelete)}
          />
          <h2>Listado Ingresos</h2>
+         {userLogged.type !== "secretary" && total !== 0 && (
+            <p className="heading-tertiary text-moved-right">
+               Total: ${formatNumber(total)}
+            </p>
+         )}
          <form
             className="form bigger"
             onSubmit={(e) => {
@@ -200,6 +213,7 @@ const IncomeList = ({
 const mapStatetoProps = (state) => ({
    invoices: state.invoices,
    registers: state.registers,
+   auth: state.auth,
 });
 
 export default connect(mapStatetoProps, {

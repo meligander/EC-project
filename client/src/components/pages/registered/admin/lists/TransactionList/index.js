@@ -21,6 +21,7 @@ import PopUp from "../../../../../modal/PopUp";
 import "./style.scss";
 
 const TransactionList = ({
+   auth: { userLogged },
    expences: { transactions, loading },
    registers: { register, loadingRegister },
    loadTransactions,
@@ -30,6 +31,8 @@ const TransactionList = ({
    clearInvoice,
    transactionsPDF,
 }) => {
+   const isAdmin = userLogged.type !== "secretary";
+
    const expenceType = {
       withdrawal: {
          trClass: "bg-withdrawal",
@@ -61,8 +64,9 @@ const TransactionList = ({
    }, [loadingRegister, loadRegister]);
 
    useEffect(() => {
-      if (loading) loadTransactions({}, true);
-   }, [loading, loadTransactions]);
+      if (loading)
+         loadTransactions({ ...(!isAdmin && { isNotAdmin: !isAdmin }) }, true);
+   }, [loading, loadTransactions, isAdmin]);
 
    const onChange = (e) => {
       e.persist();
@@ -114,7 +118,7 @@ const TransactionList = ({
                   <option value="">Seleccione el tipo de movimiento</option>
                   <option value="income">Ingreso</option>
                   <option value="expence">Gasto</option>
-                  <option value="withdrawal">Retiro</option>
+                  {isAdmin && <option value="withdrawal">Retiro</option>}
                </select>
                <label
                   htmlFor="transactionType"
@@ -256,6 +260,7 @@ const TransactionList = ({
 const mapStatetoProps = (state) => ({
    expences: state.expences,
    registers: state.registers,
+   auth: state.auth,
 });
 
 export default connect(mapStatetoProps, {

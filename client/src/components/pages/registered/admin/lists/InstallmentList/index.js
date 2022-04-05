@@ -31,8 +31,8 @@ const InstallmentList = ({
       "Inscripción,Clases Particulares,Examen Libre,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre".split(
          ","
       );
-   const isAdmin =
-      userLogged.type === "admin" || userLogged.type === "admin&teacher";
+   const isAdmin = userLogged.type !== "secretary";
+
    const yearArray = new Array(6)
       .fill()
       .map((item, index) => thisYear + 1 - index);

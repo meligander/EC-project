@@ -22,6 +22,7 @@ import "./style.scss";
 
 const RegisterTab = ({
    registers: { register },
+   auth: { userLogged },
    closeRegister,
    createRegister,
    clearInvoices,
@@ -112,29 +113,33 @@ const RegisterTab = ({
                         </Link>
                      </td>
                   </tr>
-                  <tr>
-                     <td>Retiro de Dinero</td>
-                     <td>
-                        $
-                        {register && register.temporary && register.withdrawal
-                           ? formatNumber(register.withdrawal)
-                           : 0}
-                     </td>
-                     <td>
-                        <Link
-                           to="/register/withdrawal/list"
-                           onClick={() => {
-                              window.scroll(0, 0);
-                              clearTransactions();
-                              clearExpenceTypes();
-                           }}
-                           className="btn btn-light"
-                        >
-                           <IoIosListBox />
-                           <span className="hide-sm">&nbsp;Listado</span>
-                        </Link>
-                     </td>
-                  </tr>
+                  {userLogged.type !== "secretary" && (
+                     <tr>
+                        <td>Retiro de Dinero</td>
+                        <td>
+                           $
+                           {register &&
+                           register.temporary &&
+                           register.withdrawal
+                              ? formatNumber(register.withdrawal)
+                              : 0}
+                        </td>
+                        <td>
+                           <Link
+                              to="/register/withdrawal/list"
+                              onClick={() => {
+                                 window.scroll(0, 0);
+                                 clearTransactions();
+                                 clearExpenceTypes();
+                              }}
+                              className="btn btn-light"
+                           >
+                              <IoIosListBox />
+                              <span className="hide-sm">&nbsp;Listado</span>
+                           </Link>
+                        </td>
+                     </tr>
+                  )}
                   <tr>
                      <td>Plata Caja</td>
                      <td>

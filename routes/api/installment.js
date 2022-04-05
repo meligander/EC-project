@@ -154,7 +154,8 @@ router.get("/month/debts", [auth, adminAuth], async (req, res) => {
 router.get("/profit/:month", [auth, adminAuth], async (req, res) => {
    try {
       const date = new Date();
-      const month = date.getMonth() <= 2 ? 3 : req.params.month;
+      const month = date.getMonth() <= 2 ? 3 : Number(req.params.month);
+      console.log(month === 12 ? { $lte: 12 } : month + 1);
 
       const installments = await Installment.find({
          year: date.getFullYear(),
@@ -351,6 +352,7 @@ router.put("/", auth, async (req, res) => {
 
          if (
             chargeDay - 3 <= day &&
+            installments[x].value >= 1000 &&
             !installments[x].emailSent &&
             process.env.NODE_ENV === "production"
          ) {
@@ -401,12 +403,14 @@ router.put("/", auth, async (req, res) => {
                { _id: installments[x].id },
                {
                   value:
-                     Math.round(
-                        student.discount === 10
+                     Math.ceil(
+                        ((student.discount === 10
                            ? installments[x].value * 1.1112
                            : (installments[x].value * penalty.percentage) /
                                 100 +
-                                installments[x].value / 10
+                             installments[x].value) +
+                           Number.EPSILON) /
+                           10
                      ) * 10,
                   expired: true,
                }

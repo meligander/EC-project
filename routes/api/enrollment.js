@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const addDays = require("date-fns/addDays");
 const { check, validationResult } = require("express-validator");
 
 //Middlewares
@@ -18,9 +19,12 @@ const Category = require("../../models/Category");
 router.get("/", auth, async (req, res) => {
    try {
       let enrollments;
+      const year = new Date().getFullYear();
+
       if (Object.entries(req.query).length === 0) {
          enrollments = await Enrollment.find({
             year: new Date().getFullYear(),
+            date: { $gte: new Date(`${year}-01-01`) },
          })
             .populate({
                path: "student",
@@ -44,13 +48,16 @@ router.get("/", auth, async (req, res) => {
             classroom,
          } = req.query;
 
+         const date = {
+            $gte: new Date(startDate ? startDate : `${year}-01-01`),
+            ...(endDate && { $lte: addDays(new Date(endDate), 1) }),
+         };
+
          enrollments = await Enrollment.find({
-            ...((startDate || endDate) && {
-               date: {
-                  ...(startDate && { $gte: new Date(startDate) }),
-                  ...(endDate && { $lte: new Date(endDate) }),
-               },
-            }),
+            date:
+               startDate || endDate
+                  ? date
+                  : { $gte: new Date(`${year}-01-01`) },
             ...(category && { category: category }),
             ...(year && { year }),
             ...(student && { student: student }),
@@ -241,7 +248,10 @@ router.post(
                installment = new Installment({
                   ...data,
                   number,
-                  value: number === 3 ? half : value,
+                  value:
+                     Math.ceil(
+                        ((number === 3 ? half : value) + Number.EPSILON) / 10
+                     ) * 10,
                   enrollment: enrollment.id,
                });
                await installment.save();
