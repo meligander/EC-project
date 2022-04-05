@@ -54,15 +54,9 @@ router.get("/check", [auth, adminAuth], async (req, res) => {
       let fileData;
       if (fs.existsSync(filePath)) fileData = await fsPromise.stat(filePath);
 
-      console.log(
-         fileData,
-         Math.abs(differenceInWeeks(new Date(), fileData.birthtime)) > 1,
-         Math.abs(differenceInWeeks(new Date(), fileData.birthtime))
-      );
-
       res.json(
          !fileData ||
-            Math.abs(differenceInWeeks(new Date(), fileData.birthtime)) > 1
+            Math.abs(differenceInWeeks(new Date(), fileData.birthtime)) >= 1
       );
    } catch (err) {
       console.error(err.message);
