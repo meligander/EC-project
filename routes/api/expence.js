@@ -39,7 +39,10 @@ router.get("/", [auth, adminAuth], async (req, res) => {
             ...(endDate && { $lte: addDays(new Date(endDate), 1) }),
          };
 
-         if (!transactionType || transactionType === "income") {
+         if (
+            (!transactionType || transactionType === "income") &&
+            !isNotAdmin
+         ) {
             invoices = await Invoice.find({
                date:
                   startDate || endDate
@@ -63,7 +66,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
                   match: {
                      type: transactionType
                         ? transactionType
-                        : isNotAdmin && { $ne: "withdrawal" },
+                        : isNotAdmin && "expence",
                   },
                }),
             });
@@ -92,9 +95,12 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 router.get("/withdrawal", [auth, adminAuth], async (req, res) => {
    try {
       let withdrawals = [];
+      const year = new Date().getFullYear();
 
       if (Object.entries(req.query).length === 0) {
-         withdrawals = await Expence.find()
+         withdrawals = await Expence.find({
+            date: { $gte: new Date(`${year}-01-01`) },
+         })
             .populate({
                path: "expencetype",
                model: "expencetype",

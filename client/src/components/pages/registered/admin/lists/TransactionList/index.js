@@ -55,9 +55,10 @@ const TransactionList = ({
    const [adminValues, setAdminValues] = useState({
       toDelete: "",
       page: 0,
+      total: 0,
    });
 
-   const { toDelete, page } = adminValues;
+   const { toDelete, page, total } = adminValues;
 
    useEffect(() => {
       if (loadingRegister) loadRegister(false);
@@ -66,7 +67,20 @@ const TransactionList = ({
    useEffect(() => {
       if (loading)
          loadTransactions({ ...(!isAdmin && { isNotAdmin: !isAdmin }) }, true);
-   }, [loading, loadTransactions, isAdmin]);
+      else {
+         setAdminValues((prev) => ({
+            ...prev,
+            total: transactions.reduce(
+               (sum, item) =>
+                  !isAdmin || transactionType !== ""
+                     ? sum + (item.expencetype ? item.value : item.total)
+                     : sum + (item.expencetype ? -item.value : item.total),
+               0
+            ),
+         }));
+      }
+      // eslint-disable-next-line
+   }, [loading, loadTransactions, isAdmin, transactions]);
 
    const onChange = (e) => {
       e.persist();
@@ -89,11 +103,16 @@ const TransactionList = ({
 
    return (
       <>
-         <h2>Listado Movimientos</h2>
+         <h2>Listado {isAdmin ? "Movimientos" : "Egresos"}</h2>
          <PopUp
             info="¿Está seguro que desea eliminar el movimiento?"
             confirm={() => deleteExpence(toDelete)}
          />
+         {isAdmin && total !== 0 && (
+            <p className="heading-tertiary text-moved-right">
+               Total: ${formatNumber(total)}
+            </p>
+         )}
          <form
             className="form"
             onSubmit={(e) => {
@@ -107,28 +126,31 @@ const TransactionList = ({
                startDate={startDate}
                onChange={onChange}
             />
-            <div className="form-group">
-               <select
-                  className="form-input"
-                  id="transactionType"
-                  name="transactionType"
-                  onChange={onChange}
-                  value={transactionType}
-               >
-                  <option value="">Seleccione el tipo de movimiento</option>
-                  <option value="income">Ingreso</option>
-                  <option value="expence">Gasto</option>
-                  {isAdmin && <option value="withdrawal">Retiro</option>}
-               </select>
-               <label
-                  htmlFor="transactionType"
-                  className={`form-label ${
-                     transactionType === "" ? "lbl" : ""
-                  }`}
-               >
-                  Tipo de Movimiento
-               </label>
-            </div>
+            {isAdmin && (
+               <div className="form-group">
+                  <select
+                     className="form-input"
+                     id="transactionType"
+                     name="transactionType"
+                     onChange={onChange}
+                     value={transactionType}
+                  >
+                     <option value="">Seleccione el tipo de movimiento</option>
+                     <option value="income">Ingreso</option>
+                     <option value="expence">Gasto</option>
+                     <option value="withdrawal">Retiro</option>
+                  </select>
+                  <label
+                     htmlFor="transactionType"
+                     className={`form-label ${
+                        transactionType === "" ? "lbl" : ""
+                     }`}
+                  >
+                     Tipo de Movimiento
+                  </label>
+               </div>
+            )}
+
             <div className="btn-right mb-1">
                <button type="submit" className="btn btn-light">
                   <BiFilterAlt />

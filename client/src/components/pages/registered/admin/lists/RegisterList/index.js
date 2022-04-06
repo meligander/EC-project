@@ -2,36 +2,27 @@ import React, { useEffect, useState } from "react";
 import format from "date-fns/format";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { FaTrashAlt } from "react-icons/fa";
 import { IoIosListBox } from "react-icons/io";
 import { BiFilterAlt } from "react-icons/bi";
 
-import { formatNumber, togglePopup } from "../../../../../../actions/global";
+import { formatNumber } from "../../../../../../actions/global";
 import {
    loadRegisters,
    loadRegister,
-   deleteRegister,
    registerPDF,
    clearRegisters,
 } from "../../../../../../actions/register";
 
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
-import PopUp from "../../../../../modal/PopUp";
 
 const RegisterList = ({
-   auth: { userLogged },
    registers: { registers, loading, loadingRegister, register: last },
    loadRegisters,
    loadRegister,
-   deleteRegister,
    clearRegisters,
-   togglePopup,
    registerPDF,
 }) => {
-   const isAdmin =
-      userLogged.type === "admin" || userLogged.type === "admin&teacher";
-
    const [filterData, setFilterData] = useState({
       startDate: "",
       endDate: "",
@@ -64,26 +55,20 @@ const RegisterList = ({
 
    return (
       <>
-         <PopUp
-            confirm={() => deleteRegister(last._id)}
-            info="¿Está seguro que desea eliminar el cierre de caja?"
-         />
          <h2>Caja Diaria</h2>
-         {isAdmin && (
-            <div className="btn-right my-3">
-               <Link
-                  to="/register/monthly-list"
-                  onClick={() => {
-                     window.scroll(0, 0);
-                     clearRegisters();
-                  }}
-                  className="btn btn-light"
-               >
-                  <IoIosListBox />
-                  <span className="hide-sm">&nbsp;Listado</span>&nbsp;Mensual
-               </Link>
-            </div>
-         )}
+         <div className="btn-right mb-1">
+            <Link
+               to="/register/monthly-list"
+               onClick={() => {
+                  window.scroll(0, 0);
+                  clearRegisters();
+               }}
+               className="btn btn-light"
+            >
+               <IoIosListBox />
+               <span className="hide-sm">&nbsp;Listado</span>&nbsp;Mensual
+            </Link>
+         </div>
 
          <form
             className="form"
@@ -116,19 +101,16 @@ const RegisterList = ({
                      <th>Plata Caja</th>
                      <th>Diferencia</th>
                      <th>Detalles</th>
-                     {!loadingRegister && !last.temporary && <th>&nbsp;</th>}
                   </tr>
                </thead>
                <tbody>
                   {!loading &&
-                     registers[0] &&
-                     registers[0].temporary !== undefined &&
                      registers.map(
                         (register, i) =>
                            i >= page * 10 &&
                            i < (page + 1) * 10 &&
                            register &&
-                           !register.temporary && (
+                           register.temporary === false && (
                               <tr key={i}>
                                  <td>
                                     {format(
@@ -170,22 +152,6 @@ const RegisterList = ({
                                     {register.description &&
                                        register.description}
                                  </td>
-                                 {!loadingRegister && !last.temporary && (
-                                    <td>
-                                       {i === 0 && (
-                                          <button
-                                             type="button"
-                                             className="btn btn-danger"
-                                             onClick={(e) => {
-                                                e.preventDefault();
-                                                togglePopup("default");
-                                             }}
-                                          >
-                                             <FaTrashAlt />
-                                          </button>
-                                       )}
-                                    </td>
-                                 )}
                               </tr>
                            )
                      )}
@@ -215,8 +181,6 @@ const mapStatetoProps = (state) => ({
 export default connect(mapStatetoProps, {
    loadRegisters,
    loadRegister,
-   deleteRegister,
    clearRegisters,
-   togglePopup,
    registerPDF,
 })(RegisterList);

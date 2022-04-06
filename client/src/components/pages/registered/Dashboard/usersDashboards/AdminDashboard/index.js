@@ -89,8 +89,8 @@ const AdminDashboard = ({
    }, [activeUsers.activeStudents, getActiveUsers]);
 
    useEffect(() => {
-      if (totalDebt === "" && userLogged.type !== "secretary") getTotalDebt();
-   }, [totalDebt, getTotalDebt, userLogged]);
+      if (totalDebt === "" && isAdmin) getTotalDebt();
+   }, [totalDebt, getTotalDebt, isAdmin]);
 
    useEffect(() => {
       if (activeClasses === "") getActiveClasses();
@@ -288,7 +288,7 @@ const AdminDashboard = ({
                   &nbsp; Administración de Usuarios
                </h3>
                <div className="text-center mt-4">
-                  {totalDebt !== "" && (
+                  {totalDebt !== "" && isAdmin && (
                      <p className="heading-tertiary">
                         <span className="text-dark">Deuda: </span>$
                         {formatNumber(totalDebt)}

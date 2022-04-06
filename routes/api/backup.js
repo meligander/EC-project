@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const path = require("path");
-const differenceInWeeks = require("date-fns/differenceInWeeks");
+const differenceInDays = require("date-fns/differenceInDays");
 const fs = require("fs");
 const fsPromise = fs.promises;
 const spawn = require("child_process").spawn;
@@ -56,7 +56,7 @@ router.get("/check", [auth, adminAuth], async (req, res) => {
 
       res.json(
          !fileData ||
-            Math.abs(differenceInWeeks(new Date(), fileData.birthtime)) >= 1
+            Math.abs(differenceInDays(new Date(), fileData.birthtime)) >= 7
       );
    } catch (err) {
       console.error(err.message);

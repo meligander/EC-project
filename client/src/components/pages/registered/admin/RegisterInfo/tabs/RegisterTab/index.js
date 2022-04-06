@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { IoIosListBox } from "react-icons/io";
+import { FaTimes } from "react-icons/fa";
 import { FiSave } from "react-icons/fi";
 
 import {
    clearRegisters,
    closeRegister,
    createRegister,
+   deleteRegister,
 } from "../../../../../../../actions/register";
 import { clearInvoices } from "../../../../../../../actions/invoice";
 import {
@@ -29,14 +31,23 @@ const RegisterTab = ({
    clearTransactions,
    clearRegisters,
    clearExpenceTypes,
+   deleteRegister,
    togglePopup,
 }) => {
+   const isAdmin = userLogged.type !== "secretary";
+
    const [formData, setFormData] = useState({
       difference: "",
       description: "",
    });
 
+   const [adminValues, setAdminValues] = useState({
+      popupType: "",
+   });
+
    const { difference, description } = formData;
+
+   const { popupType } = adminValues;
 
    const onChange = (e) => {
       e.persist();
@@ -47,25 +58,22 @@ const RegisterTab = ({
       });
    };
 
-   const confirm = () => {
-      if (!register) createRegister({ difference, description });
-      else closeRegister(formData);
-   };
-
    return (
       <div className="register register-tab">
          <PopUp
-            confirm={confirm}
-            info="¿Está seguro que desea cerrar la caja?"
-         />
-         <form
-            className="form"
-            onSubmit={(e) => {
-               e.preventDefault();
-               if (!register || (register && register.temporary))
-                  togglePopup("default");
+            confirm={() => {
+               if (popupType === "close") {
+                  if (!register) createRegister({ difference, description });
+                  else closeRegister(formData);
+               } else {
+                  deleteRegister(register._id);
+               }
             }}
-         >
+            info={`¿Está seguro que desea ${
+               popupType === "close" ? "cerrar" : "reabrir"
+            } la caja?`}
+         />
+         <form className="form">
             <table>
                <tbody>
                   <tr>
@@ -113,53 +121,55 @@ const RegisterTab = ({
                         </Link>
                      </td>
                   </tr>
-                  {userLogged.type !== "secretary" && (
-                     <tr>
-                        <td>Retiro de Dinero</td>
-                        <td>
-                           $
-                           {register &&
-                           register.temporary &&
-                           register.withdrawal
-                              ? formatNumber(register.withdrawal)
-                              : 0}
-                        </td>
-                        <td>
-                           <Link
-                              to="/register/withdrawal/list"
-                              onClick={() => {
-                                 window.scroll(0, 0);
-                                 clearTransactions();
-                                 clearExpenceTypes();
-                              }}
-                              className="btn btn-light"
-                           >
-                              <IoIosListBox />
-                              <span className="hide-sm">&nbsp;Listado</span>
-                           </Link>
-                        </td>
-                     </tr>
+                  {isAdmin && (
+                     <>
+                        <tr>
+                           <td>Retiro de Dinero</td>
+                           <td>
+                              $
+                              {register &&
+                              register.temporary &&
+                              register.withdrawal
+                                 ? formatNumber(register.withdrawal)
+                                 : 0}
+                           </td>
+                           <td>
+                              <Link
+                                 to="/register/withdrawal/list"
+                                 onClick={() => {
+                                    window.scroll(0, 0);
+                                    clearTransactions();
+                                    clearExpenceTypes();
+                                 }}
+                                 className="btn btn-light"
+                              >
+                                 <IoIosListBox />
+                                 <span className="hide-sm">&nbsp;Listado</span>
+                              </Link>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td>Plata Caja</td>
+                           <td>
+                              $
+                              {register && formatNumber(register.registermoney)}
+                           </td>
+                           <td>
+                              <Link
+                                 to="/register/list"
+                                 onClick={() => {
+                                    window.scroll(0, 0);
+                                    clearRegisters();
+                                 }}
+                                 className="btn btn-light"
+                              >
+                                 <IoIosListBox />
+                                 <span className="hide-sm">&nbsp;Cierres</span>
+                              </Link>
+                           </td>
+                        </tr>
+                     </>
                   )}
-                  <tr>
-                     <td>Plata Caja</td>
-                     <td>
-                        ${register && formatNumber(register.registermoney)}
-                     </td>
-                     <td>
-                        <Link
-                           to="/register/list"
-                           onClick={() => {
-                              window.scroll(0, 0);
-                              clearRegisters();
-                           }}
-                           className="btn btn-light"
-                        >
-                           <IoIosListBox />
-                           <span className="hide-sm">&nbsp;Cierres</span>
-                        </Link>
-                     </td>
-                  </tr>
-
                   <tr>
                      <td>{!register ? "Dinero Inicial" : "Diferencia"}</td>
                      <td>
@@ -191,19 +201,39 @@ const RegisterTab = ({
                   </tr>
                </tbody>
             </table>
-            <div className="btn-center pt-3">
-               <button
-                  type="submit"
-                  disabled={!register || (register && !register.temporary)}
-                  className={`btn ${
-                     (register && !register.temporary) || !register
-                        ? "btn-black"
-                        : "btn-primary"
-                  }`}
-               >
-                  <FiSave />
-                  <span className="hide-sm">&nbsp; Cerrar Caja</span>
-               </button>
+            <div className="btn-center">
+               {register && !register.temporary ? (
+                  <button
+                     type="button"
+                     onClick={() => {
+                        setAdminValues((prev) => ({
+                           ...prev,
+                           popupType: "reopen",
+                        }));
+                        togglePopup("default");
+                     }}
+                     className="btn btn-secondary"
+                  >
+                     <FaTimes />
+                     <span className="hide-sm">&nbsp; Reabrir Caja</span>
+                  </button>
+               ) : (
+                  <button
+                     type="button"
+                     onClick={() => {
+                        setAdminValues((prev) => ({
+                           ...prev,
+                           popupType: "close",
+                        }));
+                        togglePopup("default");
+                     }}
+                     disabled={!register && difference === ""}
+                     className="btn btn-primary"
+                  >
+                     <FiSave />
+                     <span className="hide-sm">&nbsp; Cerrar Caja</span>
+                  </button>
+               )}
             </div>
          </form>
       </div>
@@ -221,5 +251,6 @@ export default connect(mapStateToProps, {
    clearTransactions,
    clearRegisters,
    clearExpenceTypes,
+   deleteRegister,
    togglePopup,
 })(RegisterTab);

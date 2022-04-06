@@ -27,8 +27,7 @@ const ExpenceTab = ({
    setAlert,
 }) => {
    const employeePaymentID = "5fe813b999e13c3f807a0d79";
-   const isAdmin =
-      userLogged.type === "admin" || userLogged.type === "admin&teacher";
+   const isAdmin = userLogged.type !== "secretary";
 
    const [formData, setFormData] = useState({
       expencetype: "",
@@ -139,12 +138,19 @@ const ExpenceTab = ({
          >
             <table>
                <tbody>
-                  <tr>
-                     <td>Dinero en Caja</td>
-                     <td>
-                        ${register ? formatNumber(register.registermoney) : 0}
-                     </td>
-                  </tr>
+                  {isAdmin ||
+                     (register && register.registermoney <= 50000 && (
+                        <tr>
+                           <td>Dinero en Caja</td>
+                           <td>
+                              $
+                              {register
+                                 ? formatNumber(register.registermoney)
+                                 : 0}
+                           </td>
+                        </tr>
+                     ))}
+
                   <tr>
                      <td>Tipo de Movimiento</td>
                      <td>

@@ -219,7 +219,7 @@ const Routes = ({ location, global: { navbar, footer } }) => {
             />
             <PrivateRoutes
                exact
-               types={["admin", "secretary", "admin&teacher"]}
+               types={["admin", "admin&teacher"]}
                path="/register/list"
                component={RegisterList}
             />
