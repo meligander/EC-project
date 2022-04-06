@@ -75,6 +75,8 @@ router.get("/check", [auth, adminAuth], async (req, res) => {
 router.post("/", [auth, adminAuth], async (req, res) => {
    const { local } = req.body;
 
+   console.log(local);
+
    const backupProcess = spawn("mongodump", [
       "--db=vmec-db",
       `--archive=${
