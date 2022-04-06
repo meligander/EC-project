@@ -2,7 +2,7 @@ import React from "react";
 
 import "./style.scss";
 
-const DateFilter = ({ startDate, endDate, onChange, max }) => {
+const DateFilter = ({ startDate, endDate, onChange }) => {
    return (
       <div className="date-filter">
          <div>
@@ -11,6 +11,7 @@ const DateFilter = ({ startDate, endDate, onChange, max }) => {
                type="date"
                name="startDate"
                value={startDate}
+               max={endDate !== "" ? endDate : ""}
                id="startDate"
                onChange={onChange}
             />
@@ -24,7 +25,7 @@ const DateFilter = ({ startDate, endDate, onChange, max }) => {
                type="date"
                name="endDate"
                value={endDate}
-               max={max}
+               min={startDate !== "" ? startDate : ""}
                onChange={onChange}
             />
             <label htmlFor="endDate" className="form-label-show">
