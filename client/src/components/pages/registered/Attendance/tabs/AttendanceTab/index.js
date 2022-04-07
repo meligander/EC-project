@@ -70,7 +70,7 @@ const AttendanceTab = ({
                      break;
                   case "delete":
                      deleteDate(
-                        toDelete.date,
+                        toDelete,
                         classInfo._id,
                         period,
                         periods[period] && header[period - 1].length === 1
@@ -125,38 +125,43 @@ const AttendanceTab = ({
                            {student._id &&
                               student.lastname + ", " + student.name}
                         </td>
-                        {newAttendances[i] &&
+                        {newAttendances.length > 0 &&
                            newAttendances[i].map((row, key) => (
                               <td key={key}>
-                                 {row.student ? (
-                                    <input
-                                       type="checkbox"
-                                       checked={!row.inassistance}
-                                       className="option-input"
-                                       name={row.name}
-                                       onChange={(e) => onChange(e, i, key)}
-                                    />
-                                 ) : (
-                                    <button
-                                       type="button"
-                                       className="btn btn-danger"
-                                       onClick={(e) => {
-                                          e.preventDefault();
-                                          setAdminValues({
-                                             ...adminValues,
-                                             popupType: "delete",
-                                             toDelete: row,
-                                          });
-                                          togglePopup("default");
-                                       }}
-                                    >
-                                       <FaTimes />
-                                    </button>
-                                 )}
+                                 <input
+                                    type="checkbox"
+                                    checked={!row.inassistance}
+                                    className="option-input"
+                                    name={row.name}
+                                    onChange={(e) => onChange(e, i, key)}
+                                 />
                               </td>
                            ))}
                      </tr>
                   ))}
+                  <tr className="sticky">
+                     <td></td>
+                     {newAttendances.length > 0 &&
+                        newAttendances[0].map((item, i) => (
+                           <td key={i}>
+                              <button
+                                 type="button"
+                                 className="btn btn-danger"
+                                 onClick={(e) => {
+                                    e.preventDefault();
+                                    setAdminValues({
+                                       ...adminValues,
+                                       popupType: "delete",
+                                       toDelete: item.date,
+                                    });
+                                    togglePopup("default");
+                                 }}
+                              >
+                                 <FaTimes />
+                              </button>
+                           </td>
+                        ))}
+                  </tr>
                </tbody>
             </table>
          </div>

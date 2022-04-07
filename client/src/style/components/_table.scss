@@ -151,6 +151,19 @@ table {
       }
    }
 
+   tr.sticky {
+      td:first-child {
+         z-index: 1800 !important;
+      }
+      td {
+         position: sticky;
+         bottom: 0;
+         left: 0;
+         z-index: 1000 !important;
+         background-color: inherit;
+      }
+   }
+
    tr:nth-child(odd) {
       background-color: lighten($secondary-color, 28%);
    }

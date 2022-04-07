@@ -60,7 +60,8 @@ const StudentTable = ({
                         <td className="hide-sm">
                            {type !== "class-students"
                               ? years
-                              : format(
+                              : user.dob &&
+                                format(
                                    new Date(user.dob.slice(0, -1)),
                                    "dd/MM/yy"
                                 )}
