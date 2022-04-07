@@ -138,21 +138,19 @@ const ExpenceTab = ({
          >
             <table>
                <tbody>
-                  {isAdmin ||
-                     (register && register.registermoney <= 50000 && (
-                        <tr>
-                           <td>Dinero en Caja</td>
-                           <td>
-                              $
-                              {register
-                                 ? formatNumber(register.registermoney)
-                                 : 0}
-                           </td>
-                        </tr>
-                     ))}
+                  {(isAdmin ||
+                     (register && register.registermoney <= 50000)) && (
+                     <tr>
+                        <td>Dinero en Caja</td>
+                        <td>
+                           $
+                           {register ? formatNumber(register.registermoney) : 0}
+                        </td>
+                     </tr>
+                  )}
 
                   <tr>
-                     <td>Tipo de Movimiento</td>
+                     <td>Tipo de {isAdmin ? "Movimiento" : "Gasto"}</td>
                      <td>
                         <select
                            name="expencetype"
@@ -160,17 +158,21 @@ const ExpenceTab = ({
                            onChange={onChange}
                         >
                            <option value="" name="">
-                              * Tipo de Movimiento
+                              * Tipo de {isAdmin ? "Movimiento" : "Gasto"}
                            </option>
-                           {expencetypes.map((expty) => (
-                              <option
-                                 key={expty._id}
-                                 name={expty.type}
-                                 value={expty._id}
-                              >
-                                 {expty.name}
-                              </option>
-                           ))}
+                           {expencetypes.map(
+                              (expty) =>
+                                 ((!isAdmin && expty.type === "expence") ||
+                                    isAdmin) && (
+                                    <option
+                                       key={expty._id}
+                                       name={expty.type}
+                                       value={expty._id}
+                                    >
+                                       {expty.name}
+                                    </option>
+                                 )
+                           )}
                         </select>
                      </td>
                   </tr>
