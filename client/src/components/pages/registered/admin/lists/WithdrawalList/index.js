@@ -58,6 +58,9 @@ const WithdrawalList = ({
    return (
       <>
          <h2>Listado Retiros de Dinero</h2>
+         <p className="heading-tertiary text-moved-right">
+            Total: ${formatNumber(total)}
+         </p>
          <form
             className="form"
             onSubmit={(e) => {
@@ -133,10 +136,6 @@ const WithdrawalList = ({
                </tbody>
             </table>
          </div>
-
-         <h4 className="m-1 heading-tertiary text-right">
-            Total: ${formatNumber(total)}
-         </h4>
          {!loading && (
             <ListButtons
                page={page}
