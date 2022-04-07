@@ -367,10 +367,7 @@ const buildClassTable = async (class_id) => {
    let periods = [];
 
    //Get the student's header
-   const students =
-      enrollments[0].year === new Date().getFullYear()
-         ? [...enrollments.map((user) => user.student), {}]
-         : enrollments.map((user) => user.student);
+   const students = enrollments.map((user) => user.student);
 
    //Divide all the periods in different object
    let allPeriods = grades.reduce((res, curr) => {

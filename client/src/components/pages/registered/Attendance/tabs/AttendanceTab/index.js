@@ -141,7 +141,8 @@ const AttendanceTab = ({
                   ))}
                   <tr className="sticky">
                      <td></td>
-                     {newAttendances.length > 0 &&
+                     {students.length > 0 &&
+                        newAttendances.length > 0 &&
                         newAttendances[0].map((item, i) => (
                            <td key={i}>
                               <button

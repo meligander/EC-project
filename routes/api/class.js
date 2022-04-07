@@ -353,7 +353,7 @@ const deleteInfoRelated = async (classroom, enrollmentsToDelete) => {
       attendances = [
          ...attendances,
          ...(await Attendance.find({
-            ...(classroom && { student: enrollments[x].student }),
+            student: enrollments[x].student,
             classroom: enrollments[x].classroom,
          })),
       ];
@@ -361,7 +361,7 @@ const deleteInfoRelated = async (classroom, enrollmentsToDelete) => {
       grades = [
          ...grades,
          ...(await Grade.find({
-            ...(classroom && { student: enrollments[x].student }),
+            student: enrollments[x].student,
             classroom: enrollments[x].classroom,
          })),
       ];

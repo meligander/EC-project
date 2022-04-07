@@ -193,39 +193,45 @@ const GradesTab = ({
                            {student._id &&
                               student.lastname + ", " + student.name}
                         </td>
-                        {newGrades[i] &&
+                        {newGrades.length > 0 &&
                            newGrades[i].map((row, key) => (
                               <td key={key}>
-                                 {row.student ? (
-                                    <input
-                                       type="text"
-                                       name={row.name}
-                                       onChange={(e) => onChange(e, i, key)}
-                                       value={row.value}
-                                       disabled={year !== classInfo.year}
-                                       placeholder="Nota"
-                                    />
-                                 ) : (
-                                    <button
-                                       type="button"
-                                       className="btn btn-danger"
-                                       onClick={(e) => {
-                                          e.preventDefault();
-                                          setAdminValues((prev) => ({
-                                             ...prev,
-                                             popupType: "delete",
-                                             toDelete: row.gradetype._id,
-                                          }));
-                                          togglePopup("default");
-                                       }}
-                                    >
-                                       <FaTimes />
-                                    </button>
-                                 )}
+                                 <input
+                                    type="text"
+                                    name={row.name}
+                                    onChange={(e) => onChange(e, i, key)}
+                                    value={row.value}
+                                    disabled={year !== classInfo.year}
+                                    placeholder="Nota"
+                                 />
                               </td>
                            ))}
                      </tr>
                   ))}
+                  <tr className="sticky">
+                     <td></td>
+                     {students.length > 0 &&
+                        newGrades.length > 0 &&
+                        newGrades[0].map((item, i) => (
+                           <td key={i}>
+                              <button
+                                 type="button"
+                                 className="btn btn-danger"
+                                 onClick={(e) => {
+                                    e.preventDefault();
+                                    setAdminValues((prev) => ({
+                                       ...prev,
+                                       popupType: "delete",
+                                       toDelete: item.gradetype._id,
+                                    }));
+                                    togglePopup("default");
+                                 }}
+                              >
+                                 <FaTimes />
+                              </button>
+                           </td>
+                        ))}
+                  </tr>
                </tbody>
             </table>
          </div>
