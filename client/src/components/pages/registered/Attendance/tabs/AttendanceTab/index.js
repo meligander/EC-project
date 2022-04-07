@@ -139,10 +139,11 @@ const AttendanceTab = ({
                            ))}
                      </tr>
                   ))}
+               </tbody>
+               <tbody>
                   <tr className="sticky">
                      <td></td>
-                     {students.length > 0 &&
-                        newAttendances.length > 0 &&
+                     {newAttendances.length > 0 &&
                         newAttendances[0].map((item, i) => (
                            <td key={i}>
                               <button
