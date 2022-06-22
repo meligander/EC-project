@@ -27,17 +27,6 @@ const InstallmentSchema = new mongoose.Schema({
       enum: ["valid", "debt", "warned", "expired"],
       required: true,
    },
-   expired: {
-      type: Boolean,
-      default: false,
-   },
-   emailSent: {
-      type: Boolean,
-   },
-   debt: {
-      type: Boolean,
-      default: false,
-   },
    updatable: {
       type: Boolean,
       default: true,
