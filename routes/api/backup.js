@@ -70,8 +70,6 @@ router.get("/check", [auth, adminAuth], async (req, res) => {
 router.post("/", [auth, adminAuth], async (req, res) => {
    const { local } = req.body;
 
-   console.log(local);
-
    const backupProcess = spawn("mongodump", [
       "--db=vmec-db",
       `--archive=${
@@ -84,7 +82,7 @@ router.post("/", [auth, adminAuth], async (req, res) => {
       if (!code && !signal) {
          res.json({ msg: "Back Up Generado" });
       } else {
-         if (code) console.log("Backup process exited with code ", code);
+         if (code) console.error("Backup process exited with code ", code);
          else console.error("Backup process was killed with singal ", signal);
          res.status(500).json({ msg: "Backup Error" });
       }
@@ -109,7 +107,7 @@ router.post(
             res.json({ msg: "Base de Datos Restaurada" });
          } else {
             if (code)
-               console.log("Restoration process exited with code ", code);
+               console.error("Restoration process exited with code ", code);
             else
                console.error(
                   "Restoration process was killed with singal ",

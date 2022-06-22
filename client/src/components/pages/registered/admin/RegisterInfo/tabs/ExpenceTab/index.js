@@ -8,11 +8,14 @@ import {
    clearExpenceTypes,
    registerExpence,
 } from "../../../../../../../actions/expence";
-import { setAlert } from "../../../../../../../actions/alert";
-import { formatNumber, togglePopup } from "../../../../../../../actions/global";
+import {
+   formatNumber,
+   togglePopup,
+   updateSalaries,
+} from "../../../../../../../actions/global";
+import { getTeacherHours } from "../../../../../../../actions/class";
 
 import PopUp from "../../../../../../modal/PopUp";
-import Alert from "../../../../../sharedComp/Alert";
 
 import "./style.scss";
 
@@ -21,10 +24,15 @@ const ExpenceTab = ({
    registers: { register },
    expences: { expencetypes },
    users: { users },
+   global: { salaries },
+   classes: {
+      otherValues: { teacherHours },
+   },
    clearExpenceTypes,
    registerExpence,
+   updateSalaries,
+   getTeacherHours,
    togglePopup,
-   setAlert,
 }) => {
    const employeePaymentID = "5fe813b999e13c3f807a0d79";
    const isAdmin = userLogged.type !== "secretary";
@@ -36,14 +44,16 @@ const ExpenceTab = ({
    });
 
    const [adminValues, setAdminValues] = useState({
-      hours: "",
+      highHours: "",
+      lowHours: "",
       teacher: {},
       type: "",
+      popupType: "",
    });
 
    const { expencetype, value, description } = formData;
 
-   const { hours, teacher, type } = adminValues;
+   const { highHours, lowHours, teacher, type, popupType } = adminValues;
 
    useEffect(() => {
       setFormData({
@@ -52,11 +62,40 @@ const ExpenceTab = ({
          description: "",
       });
       setAdminValues({
-         hours: "",
+         highHours: "",
+         lowHours: "",
          teacher: {},
          type: "",
       });
    }, [register]);
+
+   useEffect(() => {
+      if (teacher._id && teacher.type !== "secretary")
+         getTeacherHours(teacher._id);
+      else {
+         setAdminValues((prev) => ({
+            ...prev,
+            highHours: "",
+            lowHours: "",
+         }));
+         setFormData((prev) => ({ ...prev, value: "" }));
+      }
+   }, [teacher, getTeacherHours]);
+
+   useEffect(() => {
+      if (teacherHours.lowHours !== undefined) {
+         setAdminValues((prev) => {
+            for (const x in teacherHours) prev[x] = teacherHours[x];
+            return prev;
+         });
+         setFormData((prev) => ({
+            ...prev,
+            value:
+               teacherHours.lowHours * salaries.lowerSalary +
+               teacherHours.highHours * salaries.higherSalary,
+         }));
+      }
+   }, [teacherHours, salaries]);
 
    const onChange = (e) => {
       e.persist();
@@ -78,25 +117,31 @@ const ExpenceTab = ({
       setAdminValues((prev) => ({
          ...prev,
          [e.target.name]:
-            e.target.name === "teacher"
+            e.target.name !== "teacher"
+               ? e.target.value
+               : e.target.value !== ""
                ? users.find((user) => user._id === e.target.value)
-               : e.target.value,
+               : {},
       }));
 
-      if (e.target.name === "hours") {
-         if (teacher.salary && teacher.salary !== "") {
-            setFormData((prev) => ({
-               ...prev,
-               value: e.target.value * teacher.salary,
-            }));
-         } else {
-            window.scroll(0, 0);
-            setAlert(
-               "No está definido el salario del empleado seleccionado",
-               "danger",
-               "3"
-            );
+      if (e.target.name === "highHours" || e.target.name === "lowHours") {
+         let value = 0;
+         if (teacher.type === "secretary")
+            value = e.target.value * salaries.adminSalary;
+         else {
+            if (e.target.name === "highHours")
+               value =
+                  e.target.value * salaries.higherSalary +
+                  (lowHours !== "" ? lowHours * salaries.lowerSalary : 0);
+            else
+               value =
+                  e.target.value * salaries.lowerSalary +
+                  (highHours !== "" ? highHours * salaries.higherSalary : 0);
          }
+         setFormData((prev) => ({
+            ...prev,
+            value,
+         }));
       }
    };
 
@@ -105,11 +150,8 @@ const ExpenceTab = ({
          {
             expencetype,
             value,
-            description: `${
-               expencetype === employeePaymentID && teacher._id
-                  ? `Pago a ${teacher.lastname}, ${teacher.name}. `
-                  : ""
-            }${description}`,
+            teacher,
+            description,
          },
          register,
          type
@@ -118,10 +160,18 @@ const ExpenceTab = ({
 
    return (
       <>
-         <Alert type="3" />
          <PopUp
-            confirm={confirm}
-            info="¿Está seguro que desea registrar un nuevo movimiento?"
+            confirm={
+               popupType === "save"
+                  ? confirm
+                  : (allSalaries) => updateSalaries(allSalaries)
+            }
+            info={
+               popupType === "save"
+                  ? "¿Está seguro que desea registrar un nuevo movimiento?"
+                  : { salaries }
+            }
+            error={popupType === "salary"}
          />
          {!register && (
             <p className="bg-secondary paragraph mb-3 p-2">
@@ -129,11 +179,37 @@ const ExpenceTab = ({
                Movimiento
             </p>
          )}
+
+         {isAdmin && employeePaymentID === expencetype && (
+            <div className="btn-right">
+               <button
+                  onClick={() => {
+                     setAdminValues((prev) => ({
+                        ...prev,
+                        popupType: "salary",
+                     }));
+                     togglePopup("salary");
+                  }}
+                  className="btn btn-mix-secondary"
+                  type="button"
+               >
+                  <FaEdit /> &nbsp; Salarios
+               </button>
+            </div>
+         )}
+
          <form
             className="register income-tab"
             onSubmit={(e) => {
                e.preventDefault();
-               if (register) togglePopup("default");
+
+               if (register) {
+                  setAdminValues((prev) => ({
+                     ...prev,
+                     popupType: "save",
+                  }));
+                  togglePopup("default");
+               }
             }}
          >
             <table>
@@ -183,34 +259,55 @@ const ExpenceTab = ({
                            <td>
                               <select
                                  name="teacher"
-                                 value={teacher._id}
+                                 value={teacher._id ? teacher._id : ""}
                                  onChange={onChangeAdmin}
                               >
-                                 <option value={0}>* Empleado</option>
+                                 <option value="">* Empleado</option>
                                  {users.map((user) => (
                                     <React.Fragment key={user._id}>
-                                       {user.type !== "admin&teacher" && (
-                                          <option value={user._id}>
-                                             {user.lastname}, {user.name}
-                                          </option>
-                                       )}
+                                       <option value={user._id}>
+                                          {user.lastname}, {user.name}
+                                       </option>
                                     </React.Fragment>
                                  ))}
                               </select>
                            </td>
                         </tr>
                         <tr>
-                           <td>Horas</td>
+                           <td>
+                              Horas
+                              {teacher.type !== "secretary"
+                                 ? " Cursos Bajos"
+                                 : ""}
+                           </td>
                            <td>
                               <input
                                  type="number"
                                  onChange={onChangeAdmin}
-                                 placeholder="Horas"
-                                 value={hours}
-                                 name="hours"
+                                 placeholder={`Horas${
+                                    teacher.type !== "secretary"
+                                       ? " Cursos Bajos"
+                                       : ""
+                                 }`}
+                                 value={lowHours}
+                                 name="lowHours"
                               />
                            </td>
                         </tr>
+                        {teacher.type !== "secretary" && (
+                           <tr>
+                              <td>Horas Cursos Altos</td>
+                              <td>
+                                 <input
+                                    type="number"
+                                    onChange={onChangeAdmin}
+                                    placeholder="Horas Cursos Altos"
+                                    value={highHours}
+                                    name="highHours"
+                                 />
+                              </td>
+                           </tr>
+                        )}
                      </>
                   )}
                   <tr>
@@ -276,11 +373,14 @@ const mapStateToProps = (state) => ({
    registers: state.registers,
    expences: state.expences,
    users: state.users,
+   classes: state.classes,
+   global: state.global,
 });
 
 export default connect(mapStateToProps, {
    registerExpence,
    clearExpenceTypes,
-   setAlert,
    togglePopup,
+   updateSalaries,
+   getTeacherHours,
 })(ExpenceTab);

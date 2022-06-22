@@ -233,8 +233,6 @@ router.post(
 
          const attendancesTable = await buildTable(class_id);
 
-         console.log(attendancesTable.periods);
-
          res.json(attendancesTable);
       } catch (err) {
          console.error(err.message);

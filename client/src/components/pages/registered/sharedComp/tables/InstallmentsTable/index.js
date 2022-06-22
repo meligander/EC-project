@@ -80,7 +80,7 @@ const InstallmentsTable = ({
                               <td
                                  className={`${item.value === 0 ? "paid" : ""}${
                                     item.value !== 0 &&
-                                    item.expired &&
+                                    item.status === "expired" &&
                                     item.number !== 1
                                        ? "debt"
                                        : ""

@@ -211,10 +211,7 @@ const AttendanceTab = ({
                   onClick={(e) => {
                      e.preventDefault();
                      attendancesPDF(header[period - 1], periods[period - 1], {
-                        students:
-                           year === classInfo.year
-                              ? students.slice(0, -1)
-                              : students,
+                        students,
                         teacher:
                            classInfo.teacher.lastname +
                            ", " +
@@ -236,7 +233,7 @@ const AttendanceTab = ({
                      onClick={(e) => {
                         e.preventDefault();
                         attendancesPDF(header[period - 1], null, {
-                           students: students.slice(0, -1),
+                           students,
                            teacher:
                               classInfo.teacher.lastname +
                               ", " +

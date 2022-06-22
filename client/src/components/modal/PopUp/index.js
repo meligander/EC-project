@@ -16,6 +16,7 @@ import InvoiceList from "./InvoiceList";
 
 import logo from "../../../img/logoSinLetras.png";
 import "./style.scss";
+import Salaries from "./Salaries";
 
 const PopUp = ({
    global: { popupType, popupToggle },
@@ -40,22 +41,36 @@ const PopUp = ({
       students: [],
    });
 
+   const [salaries, setSalaries] = useState({
+      lowerSalary: "",
+      higherSalary: "",
+      adminSalary: "",
+   });
+
    const [penaltyPercentage, setPenaltyPercentage] = useState("");
 
    const [backup, setBackup] = useState("");
 
    useEffect(() => {
-      if (info && info.students)
-         setCertificate((prev) => ({
-            ...prev,
-            students: info.students.map((item) => {
-               return {
-                  ...item,
-                  name: item.lastname + ", " + item.name,
-                  checked: false,
-               };
-            }),
-         }));
+      if (info) {
+         if (info.students)
+            setCertificate((prev) => ({
+               ...prev,
+               students: info.students.map((item) => {
+                  return {
+                     ...item,
+                     name: item.lastname + ", " + item.name,
+                     checked: false,
+                  };
+               }),
+            }));
+         if (info.salaries) {
+            setSalaries((prev) => {
+               for (const x in info.salaries) prev[x] = info.salaries[x];
+               return prev;
+            });
+         }
+      }
    }, [info]);
 
    const onChangeCertificate = (e, i) => {
@@ -91,11 +106,17 @@ const PopUp = ({
 
    const onChangePenaltyPercentage = (e) => {
       e.persist();
-      setPenaltyPercentage(e.target.value);
+      if (!isNaN(e.target.value)) setPenaltyPercentage(e.target.value);
    };
 
    const onChangeBackup = (file) => {
       setBackup(file);
+   };
+
+   const onChangeSalary = (e) => {
+      e.persist();
+      if (!isNaN(e.target.value))
+         setSalaries((prev) => ({ ...prev, [e.target.name]: e.target.value }));
    };
 
    const chooseType = () => {
@@ -169,6 +190,8 @@ const PopUp = ({
                   togglePopup={togglePopup}
                />
             );
+         case "salary":
+            return <Salaries onChange={onChangeSalary} salaries={salaries} />;
          case "default":
             return typeof info === "string" ? (
                <div className="popup-text">
@@ -233,6 +256,14 @@ const PopUp = ({
                            case "backup":
                               confirm(backup);
                               setBackup("");
+                              break;
+                           case "salary":
+                              confirm(salaries);
+                              setSalaries({
+                                 lowerSalary: "",
+                                 higherSalary: "",
+                                 adminSalary: "",
+                              });
                               break;
                            default:
                               confirm();

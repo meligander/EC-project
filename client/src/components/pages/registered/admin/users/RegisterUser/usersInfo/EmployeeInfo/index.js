@@ -1,6 +1,14 @@
 import React from "react";
 
-const EmployeeInfo = ({ type, userType, salary, degree, school, onChange }) => {
+const EmployeeInfo = ({
+   type,
+   userType,
+   degree,
+   school,
+   cbvu,
+   alias,
+   onChange,
+}) => {
    const isOwner = userType === "admin" || userType === "admin&teacher";
    const isAdmin = userType === "secretary" || isOwner;
 
@@ -40,21 +48,38 @@ const EmployeeInfo = ({ type, userType, salary, degree, school, onChange }) => {
                </div>
             </>
          )}
-         {isOwner && (
-            <div className="form-group">
-               <input
-                  className="form-input"
-                  type="text"
-                  onChange={onChange}
-                  value={salary}
-                  name="salary"
-                  id="salary"
-                  placeholder="Salario por hora"
-               />
-               <label htmlFor="salary" className="form-label">
-                  Salario por hora
-               </label>
-            </div>
+         {isAdmin && (
+            <>
+               <div className="form-group">
+                  <input
+                     className="form-input"
+                     type="text"
+                     onChange={onChange}
+                     value={cbvu}
+                     name="cbvu"
+                     id="cbvu"
+                     placeholder="CBU/CVU"
+                  />
+                  <label htmlFor="cbvu" className="form-label">
+                     CBU/CVU
+                  </label>
+               </div>
+               <div className="form-group">
+                  <input
+                     className="form-input"
+                     type="text"
+                     name="alias"
+                     id="alias"
+                     disabled={!isAdmin}
+                     value={alias}
+                     onChange={onChange}
+                     placeholder="Alias"
+                  />
+                  <label htmlFor="degree" className="form-label">
+                     Alias
+                  </label>
+               </div>
+            </>
          )}
       </>
    );

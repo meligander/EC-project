@@ -351,8 +351,7 @@ const buildClassTable = async (class_id) => {
       .populate({
          path: "student",
          model: "user",
-      })
-      .sort({ gradetype: 1 });
+      });
 
    let enrollments = await Enrollment.find({
       classroom: class_id,

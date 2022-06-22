@@ -92,7 +92,8 @@ const RegisterUser = ({
       birthprov: "",
       birthtown: "",
       sex: "Femenino",
-      salary: "",
+      cbvu: "",
+      alias: "",
       degree: "",
       school: "",
       children: [],
@@ -124,7 +125,8 @@ const RegisterUser = ({
       sex,
       degree,
       school,
-      salary,
+      cbvu,
+      alias,
       children,
       relatedCellphones,
       img,
@@ -158,21 +160,16 @@ const RegisterUser = ({
          else {
             const user = userLogged._id !== _id ? otherUser : userLogged;
             setFormData((prev) => {
-               let oldUser = {};
-               for (const x in prev) {
-                  oldUser[x] = !user[x]
-                     ? prev[x]
-                     : x === "dob"
-                     ? format(new Date(user.dob.slice(0, -1)), "yyyy-MM-dd")
-                     : x === "town" || x === "neighbourhood"
-                     ? user[x]._id
-                     : user[x];
-               }
-               return {
-                  ...oldUser,
-                  discount: user.discount,
-                  active: user.active,
-               };
+               for (const x in prev)
+                  prev[x] =
+                     user[x] === undefined || user[x] === null
+                        ? prev[x]
+                        : x === "dob"
+                        ? format(new Date(user.dob.slice(0, -1)), "yyyy-MM-dd")
+                        : x === "town" || x === "neighbourhood"
+                        ? user[x]._id
+                        : user[x];
+               return prev;
             });
          }
       }
@@ -180,8 +177,12 @@ const RegisterUser = ({
 
    const onChange = (e, index) => {
       e.persist();
+
       if (e.target.id !== "relatedCellphones") {
-         if (e.target.name !== "dni" || !isNaN(e.target.value)) {
+         if (
+            !["cbvu", "dni"].includes(e.target.name) ||
+            !isNaN(e.target.value)
+         ) {
             setFormData({
                ...formData,
                [e.target.name]:
@@ -287,11 +288,22 @@ const RegisterUser = ({
                      type={type}
                      userType={userLogged.type}
                      degree={degree}
-                     salary={salary}
                      school={school}
+                     cbvu={cbvu}
+                     alias={alias}
                      onChange={onChange}
                   />
                </>
+            );
+         case "admin&teacher":
+            return (
+               <EmployeeInfo
+                  type={type}
+                  userType={userLogged.type}
+                  cbvu={cbvu}
+                  alias={alias}
+                  onChange={onChange}
+               />
             );
          case "guardian":
             return (

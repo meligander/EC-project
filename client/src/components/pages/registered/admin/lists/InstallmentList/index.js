@@ -194,7 +194,9 @@ const InstallmentList = ({
                                  <td>{installment.year}</td>
                                  <td
                                     className={
-                                       installment.expired ? "installment" : ""
+                                       installment.status === "expired"
+                                          ? "installment"
+                                          : ""
                                     }
                                  >
                                     {"$" + formatNumber(installment.value)}

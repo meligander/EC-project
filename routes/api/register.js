@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const addHours = require("date-fns/addHours");
 const { check, validationResult } = require("express-validator");
 
 //Middleware
@@ -23,8 +24,8 @@ router.get("/", [auth, adminAuth], async (req, res) => {
          const { startDate, endDate } = req.query;
 
          const date = {
-            $gte: new Date(startDate ? startDate : `${year}-1-1`),
-            ...(endDate && { $lte: addDays(new Date(endDate), 1) }),
+            ...(startDate && { $gte: addHours(new Date(startDate), 3) }),
+            ...(endDate && { $lt: addHours(new Date(endDate), 27) }),
          };
 
          registers = await Register.find({
@@ -215,7 +216,7 @@ router.put("/", [auth, adminAuth], async (req, res) => {
                   difference,
                   registermoney: value,
                }),
-               ...(description && description),
+               description,
                temporary: false,
                dateclose: new Date(),
             },

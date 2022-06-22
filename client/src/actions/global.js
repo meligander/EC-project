@@ -14,14 +14,42 @@ import {
    GLOBAL_ERROR,
    BACKUP_GENERATED,
    BD_RESTORED,
+   PENALTY_LOADED,
+   PENALTY_UPDATED,
+   GLOBAL_CLEARED,
+   SALARIES_LOADED,
+   SALARIES_UPDATED,
 } from "./types";
 import { logOut } from "./auth";
 
-export const updateLoadingSpinner = (bool) => (dispatch) => {
-   dispatch({
-      type: LOADINGSPINNER_UPDATED,
-      payload: bool,
-   });
+export const loadPenalty = () => async (dispatch) => {
+   try {
+      const res = await api.get("/global/penalty");
+      dispatch({
+         type: PENALTY_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      if (err.response.status !== 401) {
+         dispatch(setError(GLOBAL_ERROR, err.response));
+         window.scrollTo(0, 0);
+      }
+   }
+};
+
+export const loadSalaries = () => async (dispatch) => {
+   try {
+      const res = await api.get("/global/salaries");
+      dispatch({
+         type: SALARIES_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      if (err.response.status !== 401) {
+         dispatch(setError(GLOBAL_ERROR, err.response));
+         window.scrollTo(0, 0);
+      }
+   }
 };
 
 export const checkBackup = () => async (dispatch) => {
@@ -102,6 +130,75 @@ export const restoreBackup = (data) => async (dispatch) => {
    }
 
    if (!error) dispatch(updateLoadingSpinner(false));
+};
+
+export const updatePenalty = (penalty) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+   let error = false;
+
+   try {
+      const res = await api.post("/global/penalty", penalty);
+
+      dispatch({
+         type: PENALTY_UPDATED,
+         payload: res.data,
+      });
+
+      dispatch(setAlert("Recargo Modificado", "success", "2"));
+      dispatch(togglePopup("default"));
+   } catch (err) {
+      if (err.response.status !== 401) {
+         dispatch(setError(GLOBAL_ERROR, err.response));
+
+         if (err.response.data.errors)
+            err.response.data.errors.forEach((error) => {
+               dispatch(setAlert(error.msg, "danger", "4"));
+            });
+         else dispatch(setAlert(err.response.data.msg, "danger", "4"));
+      } else error = true;
+   }
+
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
+};
+
+export const updateSalaries = (formData) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+
+   const salaries = newObject(formData);
+
+   try {
+      const res = await api.post("/global/salaries", salaries);
+
+      dispatch({
+         type: SALARIES_UPDATED,
+         payload: res.data,
+      });
+
+      dispatch(setAlert("Salarios Modificados", "success", "2"));
+      dispatch(togglePopup("default"));
+   } catch (err) {
+      if (err.response.status !== 401)
+         dispatch(setError(GLOBAL_ERROR, err.response));
+   }
+
+   window.scrollTo(0, 0);
+   dispatch(updateLoadingSpinner(false));
+};
+
+export const clearGlobals = () => (dispatch) => {
+   dispatch({
+      type: GLOBAL_CLEARED,
+   });
+};
+
+export const updateLoadingSpinner = (bool) => (dispatch) => {
+   dispatch({
+      type: LOADINGSPINNER_UPDATED,
+      payload: bool,
+   });
 };
 
 export const toggleMenu = () => (dispatch) => {

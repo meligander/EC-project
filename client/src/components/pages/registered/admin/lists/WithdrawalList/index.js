@@ -67,6 +67,7 @@ const WithdrawalList = ({
                e.preventDefault();
                setAdminValues((prev) => ({ ...prev, page: 0 }));
                loadWithdrawals(filterData, true);
+               console.log(filterData);
             }}
          >
             <DateFilter

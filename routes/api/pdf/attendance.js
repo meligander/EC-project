@@ -43,11 +43,17 @@ router.post("/list", auth, (req, res) => {
       </tr>`;
 
    const tbody = info.students
-      .map(
-         (item, i) =>
-            `<tr><td>${
-               item.lastname.split(" ")[0] + ", " + item.name.split(" ")[0]
-            }</td>${
+      .map((item, i) => {
+         const lastname = item.lastname.split(" ");
+         const name = item.name.split(" ");
+
+         return `<tr><td>${lastname[0]}${lastname
+            .slice(1)
+            .map((item) => ` ${item.charAt(0)}`)}, ${name[0]}${name
+            .slice(1)
+            .map((item) => ` ${item.charAt(0)}`)}
+
+            </td>${
                attendances
                   ? attendances[i]
                        .map(
@@ -58,8 +64,8 @@ router.post("/list", auth, (req, res) => {
                        )
                        .join("")
                   : header.map(() => `<td></td>`).join("")
-            }</tr>`
-      )
+            }</tr>`;
+      })
       .join("");
 
    try {

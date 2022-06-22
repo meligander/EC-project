@@ -98,8 +98,11 @@ const UserSchema = new mongoose.Schema({
    school: {
       type: String,
    },
-   salary: {
-      type: Number,
+   cbvu: {
+      type: String,
+   },
+   alias: {
+      type: String,
    },
    children: [
       {

@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const addDays = require("date-fns/addDays");
+const addHours = require("date-fns/addHours");
 const { check, validationResult } = require("express-validator");
 
 //Middleware
@@ -34,8 +34,8 @@ router.get("/", [auth], async (req, res) => {
             .sort({ date: -1 });
       } else {
          const date = {
-            $gte: new Date(startDate ? startDate : `${year}-1-1`),
-            ...(endDate && { $lte: addDays(new Date(endDate), 1) }),
+            ...(startDate && { $gte: addHours(new Date(startDate), 3) }),
+            ...(endDate && { $lt: addHours(new Date(endDate), 27) }),
          };
 
          invoices = await Invoice.find({

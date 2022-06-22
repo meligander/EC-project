@@ -7,6 +7,7 @@ import es from "date-fns/locale/es";
 import { loadRegister } from "../../../../../actions/register";
 import { loadExpenceTypes } from "../../../../../actions/expence";
 import { loadUsers } from "../../../../../actions/user";
+import { loadSalaries } from "../../../../../actions/global";
 
 import Tabs from "../../sharedComp/Tabs";
 import RegisterTab from "./tabs/RegisterTab";
@@ -18,9 +19,11 @@ const RegisterInfo = ({
    registers: { register, loadingRegister },
    expences: { loadingET, expencetypes },
    users: { loading },
+   global: { loading: loadingSalaries },
    loadRegister,
    loadExpenceTypes,
    loadUsers,
+   loadSalaries,
 }) => {
    useEffect(() => {
       if (loadingET || expencetypes.length < 4) loadExpenceTypes(false, true);
@@ -34,10 +37,14 @@ const RegisterInfo = ({
       if (loading) loadUsers({ active: true, type: "team" }, false, true);
    }, [loading, loadUsers]);
 
+   useEffect(() => {
+      if (loadingSalaries) loadSalaries();
+   }, [loadingSalaries, loadSalaries]);
+
    return (
       <>
          <h1 className="text-center">Caja</h1>
-         {!loadingRegister && !loadingET && !loading && (
+         {!loadingRegister && !loadingET && !loading && !loadingSalaries && (
             <>
                <h3 className="heading-tertiary my-4 text-dark">
                   <FaCalendarDay />
@@ -62,10 +69,12 @@ const mapStateToProps = (state) => ({
    registers: state.registers,
    expences: state.expences,
    users: state.users,
+   global: state.global,
 });
 
 export default connect(mapStateToProps, {
    loadRegister,
    loadExpenceTypes,
    loadUsers,
+   loadSalaries,
 })(RegisterInfo);

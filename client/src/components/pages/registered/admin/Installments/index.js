@@ -9,7 +9,7 @@ import {
    clearInstallment,
    loadInstallments,
 } from "../../../../../actions/installment";
-import { loadPenalty, updatePenalty } from "../../../../../actions/penalty";
+import { loadPenalty, updatePenalty } from "../../../../../actions/global";
 import { clearUser } from "../../../../../actions/user";
 import { togglePopup } from "../../../../../actions/global";
 import { clearEnrollments } from "../../../../../actions/enrollment";
@@ -19,7 +19,7 @@ import PopUp from "../../../../modal/PopUp";
 
 const Installments = ({
    match,
-   penalties: { loading: loadingPenalty, penalty },
+   global: { loading: loadingPenalty, penalty },
    installments: { loading, installments },
    auth: { userLogged },
    clearInstallments,
@@ -68,7 +68,7 @@ const Installments = ({
             <h1>Cuotas</h1>
             {!loadingPenalty && (
                <PopUp
-                  confirm={(percentage) => updatePenalty({ percentage })}
+                  confirm={(number) => updatePenalty({ number })}
                   info={{ penalty }}
                   error
                />
@@ -135,7 +135,7 @@ const Installments = ({
 
 const mapStateToProps = (state) => ({
    installments: state.installments,
-   penalties: state.penalties,
+   global: state.global,
    auth: state.auth,
 });
 

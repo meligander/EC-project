@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const addDays = require("date-fns/addDays");
+const addHours = require("date-fns/addHours");
 const { check, validationResult } = require("express-validator");
 
 //Middlewares
@@ -49,8 +49,8 @@ router.get("/", auth, async (req, res) => {
          } = req.query;
 
          const date = {
-            $gte: new Date(startDate ? startDate : `${year}-01-01`),
-            ...(endDate && { $lte: addDays(new Date(endDate), 1) }),
+            ...(startDate && { $gte: addHours(new Date(startDate), 3) }),
+            ...(endDate && { $lt: addHours(new Date(endDate), 27) }),
          };
 
          enrollments = await Enrollment.find({
@@ -185,6 +185,9 @@ router.post(
          return res.status(400).json({ errors });
       }
 
+      const todayMonth = new Date().getMonth();
+      const todayYear = new Date().getFullYear();
+
       try {
          let data = { student, year };
 
@@ -224,7 +227,7 @@ router.post(
                number,
                value: enrollmentCategory.value,
                enrollment: enrollment._id,
-               debt: true,
+               status: "debt",
             });
             installment.save();
          }
@@ -252,6 +255,11 @@ router.post(
                      Math.ceil(
                         ((number === 3 ? half : value) + Number.EPSILON) / 10
                      ) * 10,
+                  status:
+                     todayYear > year ||
+                     (todayYear === year && todayMonth >= number)
+                        ? "debt"
+                        : "valid",
                   enrollment: enrollment.id,
                });
                await installment.save();
@@ -280,7 +288,7 @@ router.put(
       check("month", "El mes es necesario.").not().isEmpty(),
    ],
    async (req, res) => {
-      const { category, month } = req.body;
+      const { category, month, year } = req.body;
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -288,6 +296,9 @@ router.put(
          errors = errorsResult.array();
          return res.status(400).json({ errors });
       }
+
+      const todayMonth = new Date().getMonth();
+      const todayYear = new Date().getFullYear();
 
       let enrollment;
 
@@ -342,6 +353,11 @@ router.put(
                   number,
                   value: { $ne: 0 },
                   updatable: true,
+                  status:
+                     todayYear > year ||
+                     (todayYear === year && todayMonth >= number)
+                        ? "debt"
+                        : "valid",
                });
                if (installment)
                   await Installment.findOneAndUpdate(

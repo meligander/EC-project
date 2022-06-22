@@ -70,22 +70,19 @@ const NewClassTab = ({
             setAdminValues((prev) => ({ ...prev, sameSchedule: true }));
 
          setFormData((prev) => {
-            let oldClass = {};
-            for (const x in prev) {
-               oldClass[x] = !classInfo[x]
-                  ? prev[x]
-                  : x.substring(0, 4) === "hour"
-                  ? format(
-                       new Date(classInfo[x] && classInfo[x].slice(0, -1)),
-                       "HH:mm"
-                    )
-                  : x === "teacher"
-                  ? classInfo[x]._id
-                  : classInfo[x];
-            }
-            return {
-               ...oldClass,
-            };
+            for (const x in prev)
+               prev[x] =
+                  classInfo[x] === null || classInfo === undefined
+                     ? prev[x]
+                     : x.substring(0, 4) === "hour"
+                     ? format(
+                          new Date(classInfo[x] && classInfo[x].slice(0, -1)),
+                          "HH:mm"
+                       )
+                     : x === "teacher"
+                     ? classInfo[x]._id
+                     : classInfo[x];
+            return prev;
          });
       }
    }, [classInfo, loadingClass, _id]);

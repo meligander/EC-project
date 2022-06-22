@@ -113,7 +113,13 @@ const Dashboard = ({
          case "student":
             return <StudentDashboard user={user} />;
          case "teacher":
-            return <>{(isAdmin || !_id) && <TeacherDashboard user={user} />}</>;
+            return (
+               <>
+                  {(isAdmin || !_id) && user.active && (
+                     <TeacherDashboard user={user} />
+                  )}
+               </>
+            );
          case "guardian":
             return <RelativeDashboard user={user} />;
          case "secretary":
@@ -294,10 +300,18 @@ const Dashboard = ({
                                  )}
                               </>
                            )}
-                           {isOwner && whenNull(user.salary) && (
+
+                           {isOwner && whenNull(user.cbvu) && (
                               <p>
-                                 <span className="text-dark">Salario: </span>
-                                 {user.salary}
+                                 <span className="text-dark">CBU/CVU: </span>
+                                 {user.cbvu}
+                              </p>
+                           )}
+
+                           {isOwner && whenNull(user.alias) && (
+                              <p>
+                                 <span className="text-dark">CBU/CVU: </span>
+                                 {user.alias}
                               </p>
                            )}
 

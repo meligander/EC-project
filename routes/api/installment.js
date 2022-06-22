@@ -10,7 +10,7 @@ const adminAuth = require("../../middleware/adminAuth");
 
 //Models
 const Installment = require("../../models/Installment");
-const Penalty = require("../../models/Penalty");
+const Global = require("../../models/Global");
 const User = require("../../models/User");
 
 //@route    GET /api/installment
@@ -22,10 +22,26 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 
       const { year, number, name, lastname } = req.query;
 
+      // installments = await Installment.find({}).populate({
+      //    path: "student",
+      //    model: "user",
+      //    select: ["name", "lastname"],
+      // });
+
+      // installments.forEach(async (item) => {
+      //    const status = item.expired ? "expired" : item.debt ? "debt" : "valid";
+
+      //    await Installment.findOneAndUpdate(
+      //       { _id: item._id },
+      //       { status }
+      //       // { $unset: { debt: "", expired: "", emailSent: "" } }
+      //    );
+      // });
+
       if (Object.entries(req.query).length === 0) {
          installments = await Installment.find({
             value: { $ne: 0 },
-            debt: true,
+            status: { $ne: "valid" },
          }).populate({
             path: "student",
             model: "user",
@@ -34,7 +50,7 @@ router.get("/", [auth, adminAuth], async (req, res) => {
       } else {
          installments = await Installment.find({
             value: { $ne: 0 },
-            debt: true,
+            status: { $ne: "valid" },
             ...(year && { year }),
             ...(number && { number }),
          }).populate({
@@ -101,7 +117,7 @@ router.get("/student/:id/:type", auth, async (req, res) => {
 
       const installments = await Installment.find({
          student: id,
-         ...(type === "student" && { debt: true }),
+         ...(type === "student" && { status: { $ne: "valid" } }),
          ...(type !== "all" && { value: { $ne: 0 } }),
       })
          .sort({ year: -1, number: 1 })
@@ -138,7 +154,7 @@ router.get("/month/debts", [auth, adminAuth], async (req, res) => {
    try {
       const installments = await Installment.find({
          value: { $ne: 0 },
-         debt: true,
+         status: { $ne: "valid" },
       });
 
       res.json(installments.reduce((sum, item) => sum + item.value, 0));
@@ -155,7 +171,6 @@ router.get("/profit/:month", [auth, adminAuth], async (req, res) => {
    try {
       const date = new Date();
       const month = date.getMonth() <= 2 ? 3 : Number(req.params.month);
-      console.log(month === 12 ? { $lte: 12 } : month + 1);
 
       const installments = await Installment.find({
          year: date.getFullYear(),
@@ -183,6 +198,7 @@ router.post(
       check("student", "El alumno es necesario").not().isEmpty(),
       check("year", "El año es necesario").not().isEmpty(),
       check("value", "El valor es necesario").not().isEmpty(),
+      check("status", "El estado de la cuota es necesario").not().isEmpty(),
    ],
    async (req, res) => {
       const { number, year, enrollment, value } = req.body;
@@ -218,7 +234,6 @@ router.post(
                   ? Number(value.replace(/,/g, "."))
                   : value,
             ...(enrollment && { enrollment: enrollment.id }),
-            debt: number < 3,
          });
 
          await installment.save();
@@ -250,7 +265,12 @@ router.post(
 //@access   Private && Admin
 router.put(
    "/:id",
-   [auth, adminAuth, check("value", "El valor es necesario").not().isEmpty()],
+   [
+      auth,
+      adminAuth,
+      check("value", "El valor es necesario").not().isEmpty(),
+      check("status", "El estado de la cuota es necesario").not().isEmpty(),
+   ],
    async (req, res) => {
       const { value } = req.body;
 
@@ -307,13 +327,13 @@ router.put("/", auth, async (req, res) => {
       const day = date.getDate();
       const hours = date.getHours();
 
-      const lessDay = [4, 6, 9, 11].some((item) => item === month);
+      const lessDay = [4, 6, 9, 11].includes(month);
 
       let installments = await Installment.find({
          number: { $lte: month, $ne: 0 },
          year,
-         expired: false,
-         value: { $ne: 0 },
+         status: { $ne: "expired" },
+         value: { $gte: 1000 },
       }).populate({
          path: "student",
          model: "user",
@@ -324,18 +344,28 @@ router.put("/", auth, async (req, res) => {
          ...installments,
          ...(await Installment.find({
             year: { $lt: year },
-            value: { $ne: 0 },
+            value: { $gte: 1000 },
             number: { $gte: 3 },
-            expired: false,
+            status: { $ne: "expired" },
          }).populate({
             path: "student",
             model: "user",
             select: "-password",
          })),
+         ...(month >= 6 &&
+            (await Installment.find({
+               year: { $lte: year },
+               value: { $ne: 0 },
+               number: 0,
+               status: { $ne: "expired" },
+            }).populate({
+               path: "student",
+               model: "user",
+               select: "-password",
+            }))),
       ];
 
-      let penalty = await Penalty.find().sort({ $natural: -1 }).limit(1);
-      penalty = penalty[0];
+      const penalty = await Global.findOne({ type: "penalty" });
 
       if (!penalty)
          return res.status(400).json({
@@ -352,8 +382,7 @@ router.put("/", auth, async (req, res) => {
 
          if (
             chargeDay - 3 <= day &&
-            installments[x].value >= 1000 &&
-            !installments[x].emailSent &&
+            installments[x].status !== "warned" &&
             process.env.NODE_ENV === "production"
          ) {
             const greeting =
@@ -378,7 +407,7 @@ router.put("/", auth, async (req, res) => {
                      Le queríamos comunicar que la cuota del corriente mes del alumno
                       ${student.lastname}, ${student.name} está proxima a su vencimiento.
                      <br/>
-                     El día ${chargeDay} se le aplicará un recargo del ${penalty.percentage}%.
+                     El día ${chargeDay} se le aplicará un recargo del ${penalty.number}%.
                      <br/>
                      Este es un mensaje automático. Si usted ya realizó dicho pago ignore este email.
                      <br/><br/>
@@ -388,15 +417,15 @@ router.put("/", auth, async (req, res) => {
 
             await Installment.findOneAndUpdate(
                { _id: installments[x].id },
-               { emailSent: true }
+               { status: "warned" }
             );
          }
 
          if (
-            (installments[x].year < year ||
+            (installments[x].number === 0 ||
+               installments[x].year < year ||
                installments[x].number < month ||
                chargeDay < day) &&
-            installments[x].value >= 1000 &&
             !(installments[x].number === 3 && month === 3)
          ) {
             await Installment.findOneAndUpdate(
@@ -404,22 +433,22 @@ router.put("/", auth, async (req, res) => {
                {
                   value:
                      Math.ceil(
-                        ((student.discount === 10
-                           ? installments[x].value * 1.1112
-                           : (installments[x].value * penalty.percentage) /
-                                100 +
+                        ((student.discount === 10 &&
+                        installments[x].number !== 0
+                           ? installments[x].value * 1.11
+                           : (installments[x].value * penalty.number) / 100 +
                              installments[x].value) +
                            Number.EPSILON) /
                            10
                      ) * 10,
-                  expired: true,
+                  status: "expired",
                }
             );
          } else {
-            if (!installments[x].debt) {
+            if (installments[x].status === "valid") {
                await Installment.findOneAndUpdate(
                   { _id: installments[x].id },
-                  { debt: true }
+                  { status: "debt" }
                );
             }
          }

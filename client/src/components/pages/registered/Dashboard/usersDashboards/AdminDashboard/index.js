@@ -44,7 +44,11 @@ import {
 import { clearCategories } from "../../../../../../actions/category";
 import { clearAttendances } from "../../../../../../actions/attendance";
 import { clearGrades } from "../../../../../../actions/grade";
-import { formatNumber, togglePopup } from "../../../../../../actions/global";
+import {
+   formatNumber,
+   togglePopup,
+   clearGlobals,
+} from "../../../../../../actions/global";
 
 import "./style.scss";
 
@@ -70,6 +74,7 @@ const AdminDashboard = ({
    clearInvoice,
    clearAttendances,
    clearEnrollments,
+   clearGlobals,
    clearGrades,
    togglePopup,
 }) => {
@@ -133,6 +138,7 @@ const AdminDashboard = ({
                         onClick={() => {
                            clearSearch();
                            clearInstallments();
+                           clearGlobals();
                            window.scroll(0, 0);
                         }}
                         className="side-nav-link"
@@ -165,6 +171,7 @@ const AdminDashboard = ({
                         onClick={() => {
                            clearRegister();
                            clearUsers();
+                           clearGlobals();
                            window.scroll(0, 0);
                         }}
                      >
@@ -370,5 +377,6 @@ export default connect(mapStateToProps, {
    clearAttendances,
    clearGrades,
    clearEnrollments,
+   clearGlobals,
    togglePopup,
 })(AdminDashboard);

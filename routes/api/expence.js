@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { check, validationResult } = require("express-validator");
-const addDays = require("date-fns/addDays");
+const addHours = require("date-fns/addHours");
 
 //Middlewares
 const adminAuth = require("../../middleware/adminAuth");
@@ -10,6 +10,8 @@ const auth = require("../../middleware/auth");
 const Expence = require("../../models/Expence");
 const Register = require("../../models/Register");
 const Invoice = require("../../models/Invoice");
+
+const employeePaymentID = "5fe813b999e13c3f807a0d79";
 
 //@route    GET /api/expence
 //@desc     get all expences || with filter
@@ -35,8 +37,8 @@ router.get("/", [auth, adminAuth], async (req, res) => {
          const { transactionType, startDate, endDate, isNotAdmin } = req.query;
 
          const date = {
-            $gte: new Date(startDate ? startDate : `${year}-01-01`),
-            ...(endDate && { $lte: addDays(new Date(endDate), 1) }),
+            ...(startDate && { $gte: addHours(new Date(startDate), 3) }),
+            ...(endDate && { $lt: addHours(new Date(endDate), 27) }),
          };
 
          if (
@@ -113,8 +115,8 @@ router.get("/withdrawal", [auth, adminAuth], async (req, res) => {
          const { startDate, endDate, expencetype } = req.query;
 
          const date = {
-            $gte: new Date(startDate ? startDate : `${year}-1-1`),
-            ...(endDate && { $lte: addDays(new Date(endDate), 1) }),
+            ...(startDate && { $gte: addHours(new Date(startDate), 3) }),
+            ...(endDate && { $lt: addHours(new Date(endDate), 27) }),
          };
 
          withdrawals = await Expence.find({
@@ -161,7 +163,7 @@ router.post(
       check("expencetype", "El tipo de gasto es necesario").not().isEmpty(),
    ],
    async (req, res) => {
-      let { value } = req.body;
+      let { value, teacher, description, expencetype } = req.body;
 
       if (typeof value === "string") value = Number(value.replace(/,/g, "."));
 
@@ -169,6 +171,19 @@ router.post(
          return res.status(400).json({
             msg: "Ingrese un número válido",
          });
+
+      if (expencetype === employeePaymentID) {
+         if (teacher._id === undefined)
+            return res.status(400).json({
+               msg: "Debe seleccionar un empleado",
+            });
+         else
+            description = `${
+               expencetype === employeePaymentID && teacher._id
+                  ? `Pago a ${teacher.lastname}, ${teacher.name}. `
+                  : ""
+            }${description}`;
+      }
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -208,6 +223,7 @@ router.post(
 
          const expence = new Expence({
             ...req.body,
+            description,
             value,
             register: register._id,
          });

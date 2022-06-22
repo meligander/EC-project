@@ -14,7 +14,6 @@ import expences from "./expence";
 import global from "./global";
 import invoices from "./invoice";
 import enrollments from "./enrollment";
-import penalties from "./penalty";
 import observations from "./observation";
 
 export default combineReducers({
@@ -31,7 +30,6 @@ export default combineReducers({
    global,
    neighbourhoods,
    observations,
-   penalties,
    registers,
    towns,
    users: user,

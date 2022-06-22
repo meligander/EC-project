@@ -14,8 +14,17 @@ const InstallmentSchema = new mongoose.Schema({
       ref: "user",
       required: true,
    },
+   enrollment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "enrollment",
+   },
    value: {
       type: Number,
+      required: true,
+   },
+   status: {
+      type: String,
+      enum: ["valid", "debt", "warned", "expired"],
       required: true,
    },
    expired: {
@@ -24,10 +33,6 @@ const InstallmentSchema = new mongoose.Schema({
    },
    emailSent: {
       type: Boolean,
-   },
-   enrollment: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "enrollment",
    },
    debt: {
       type: Boolean,

@@ -13,7 +13,6 @@ const createTransporter = async () => {
    client.setCredentials({
       refresh_token: process.env.REFRESH_TOKEN,
    });
-
    const accessToken = await new Promise((resolve, reject) => {
       client.getAccessToken((err, token) => {
          if (err) {
@@ -40,9 +39,6 @@ const createTransporter = async () => {
          clientId: process.env.GOOGLE_CLIENTID,
          clientSecret: process.env.GOOGLE_SECRET,
          refreshToken: process.env.REFRESH_TOKEN,
-      },
-      tls: {
-         rejectUnauthorized: false,
       },
    });
 

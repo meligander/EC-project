@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const diffMinutes = require("date-fns/differenceInMinutes");
 const { check, validationResult } = require("express-validator");
 
 //Middlewares
@@ -10,6 +11,7 @@ const Class = require("../../models/Class");
 const Enrollment = require("../../models/Enrollment");
 const Attendance = require("../../models/Attendance");
 const Grade = require("../../models/Grade");
+const User = require("../../models/User");
 
 //@route    GET /api/class
 //@desc     Get all classes || with filter
@@ -156,6 +158,51 @@ router.get("/student/:id", auth, async (req, res) => {
          });
 
       res.json({ ...classinfo.toJSON(), students });
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: "Server Error" });
+   }
+});
+
+//@route    GET /api/class/teacher/:id
+//@desc     Get a teacher's hours
+//@access   Private && Admin
+router.get("/teacher/:id", [auth, adminAuth], async (req, res) => {
+   const highClasses = ["4° Año", "5° Año", "6° Año", "CAE", "Proficiency"];
+   const year = new Date().getFullYear();
+
+   try {
+      const user = await User.findOne({ _id: req.params.id });
+
+      if (!user || (user.type !== "teacher" && user.type !== "admin&teacher"))
+         return res.status(400).json({
+            msg: `El usuario ${user.lastname}, ${user.name} no es un profesor.`,
+         });
+
+      const classes = await Class.find({
+         teacher: req.params.id,
+         year,
+      }).populate("category", ["name"]);
+
+      if (classes.length === 0)
+         return res.status(400).json({
+            msg: `El usuario ${user.lastname}, ${user.name} no tiene clases asignadas.`,
+         });
+
+      const hours = classes.reduce(
+         (res, curr) => {
+            res[
+               highClasses.includes(curr.category.name)
+                  ? "highHours"
+                  : "lowHours"
+            ] += (diffMinutes(curr.hourout1, curr.hourin1) / 60) * 2;
+
+            return res;
+         },
+         { highHours: 0, lowHours: 0 }
+      );
+
+      res.json(hours);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });

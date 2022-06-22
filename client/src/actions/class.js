@@ -28,6 +28,7 @@ import {
    CLASSES_ERROR,
    CLASSCATEGORY_UPDATED,
    CLASSES_PDF_ERROR,
+   TEACHERHOURS_LOADED,
 } from "./types";
 
 export const loadClass = (_id, spinner, user) => async (dispatch) => {
@@ -63,6 +64,26 @@ export const getActiveClasses = () => async (dispatch) => {
          window.scroll(0, 0);
       }
    }
+};
+
+export const getTeacherHours = (teacher_id) => async (dispatch) => {
+   try {
+      dispatch(updateLoadingSpinner(true));
+
+      const res = await api.get("/class/teacher/" + teacher_id);
+
+      dispatch({
+         type: TEACHERHOURS_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      if (err.response.status !== 401) {
+         dispatch(setError(CLASSES_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         window.scroll(0, 0);
+      }
+   }
+   dispatch(updateLoadingSpinner(false));
 };
 
 export const loadClasses = (formData, spinner) => async (dispatch) => {

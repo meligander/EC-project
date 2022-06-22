@@ -5,9 +5,18 @@ import {
    CURRENTNAV_CHANGED,
    MENU_TOGGLED,
    POPUP_TOGGLED,
+   GLOBAL_CLEARED,
+   PENALTY_LOADED,
+   SALARIES_LOADED,
+   PENALTY_UPDATED,
+   SALARIES_UPDATED,
+   GLOBAL_ERROR,
 } from "../actions/types";
 
 const initialState = {
+   penalty: "",
+   salaries: {},
+   loading: true,
    loadingSpinner: false,
    currentNav: "",
    menuToggle: false,
@@ -15,11 +24,40 @@ const initialState = {
    popupType: "",
    footer: 0,
    navbar: 0,
+   error: {},
 };
 
 export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
+      case PENALTY_LOADED:
+         return {
+            ...state,
+            loading: false,
+            penalty: payload,
+            error: {},
+         };
+      case SALARIES_LOADED:
+         return {
+            ...state,
+            loading: false,
+            salaries: payload,
+            error: {},
+         };
+      case PENALTY_UPDATED:
+         return {
+            ...state,
+            penalty: payload,
+            loading: false,
+            error: {},
+         };
+      case SALARIES_UPDATED:
+         return {
+            ...state,
+            salaries: payload,
+            loading: false,
+            error: {},
+         };
       case CURRENTNAV_CHANGED:
          return {
             ...state,
@@ -51,6 +89,20 @@ export default function (state = initialState, action) {
          return {
             ...state,
             footer: payload,
+         };
+      case GLOBAL_CLEARED:
+         return {
+            ...state,
+            loading: true,
+            penalty: "",
+            salaries: {},
+            error: {},
+         };
+      case GLOBAL_ERROR:
+         return {
+            ...state,
+            loading: false,
+            error: payload,
          };
       default:
          return state;

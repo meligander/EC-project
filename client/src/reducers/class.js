@@ -13,6 +13,7 @@ import {
    CLASSES_ERROR,
    CLASSCATEGORY_UPDATED,
    CLASSES_PDF_ERROR,
+   TEACHERHOURS_LOADED,
 } from "../actions/types";
 
 const initialState = {
@@ -22,6 +23,7 @@ const initialState = {
    loading: true,
    otherValues: {
       activeClasses: "",
+      teacherHours: {},
    },
    error: {},
 };
@@ -48,7 +50,16 @@ export default function (state = initialState, action) {
          return {
             ...state,
             otherValues: {
+               ...state.otherValues,
                activeClasses: payload,
+            },
+         };
+      case TEACHERHOURS_LOADED:
+         return {
+            ...state,
+            otherValues: {
+               ...state.otherValues,
+               teacherHours: payload,
             },
          };
       case CLASS_REGISTERED:
@@ -125,6 +136,7 @@ export default function (state = initialState, action) {
             error: {},
             otherValues: {
                activeClasses: "",
+               teacherHours: {},
             },
          };
       case CLASS_ERROR:
@@ -142,6 +154,7 @@ export default function (state = initialState, action) {
             error: payload,
             otherValues: {
                activeClasses: 0,
+               teacherHours: {},
             },
          };
       case CLASSES_PDF_ERROR:

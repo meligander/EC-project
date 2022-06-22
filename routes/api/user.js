@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
-const cloudinary = require("cloudinary");
+const cloudinary = require("cloudinary").v2;
 const { check, validationResult } = require("express-validator");
 
 //Uploading Img
@@ -273,11 +273,8 @@ router.post(
    async (req, res) => {
       let user = {};
 
-      let { email, type, dni, studentnumber, discount, children, salary } =
+      let { email, type, dni, studentnumber, discount, children, cbvu } =
          req.body;
-
-      if (salary && typeof salary === "string")
-         salary = Number(salary.replace(/,/g, "."));
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -291,6 +288,9 @@ router.post(
 
       if (dni && dni.toString().length < 8)
          return res.status(400).json({ msg: "El DNI es inválido" });
+
+      if (cbvu && cbvu.toString().length !== 22)
+         return res.status(400).json({ msg: "El CBU/CVU es inválido" });
 
       try {
          //See if users exists
@@ -313,7 +313,6 @@ router.post(
                  }
                : { studentnumber: undefined }),
             ...(type === "guardian" && { children }),
-            ...(salary && { salary }),
          };
 
          user = new User(data);
@@ -363,8 +362,9 @@ router.put(
          birthtown,
          degree,
          school,
-         salary,
          type,
+         cbvu,
+         alias,
          children,
          active,
          img,
@@ -377,6 +377,12 @@ router.put(
          errors = errorsResult.array();
          return res.status(400).json({ errors });
       }
+      if (cbvu && cbvu.toString().length !== 22)
+         return res.status(400).json({
+            msg:
+               "El CBU/CVU debe contener 22 carácteres y contiene " +
+               cbvu.toString().length,
+         });
 
       try {
          let imgObject = {
@@ -421,7 +427,8 @@ router.put(
             ...((discount || user.discount) && { discount }),
             ...((degree || user.degree) && { degree }),
             ...((school || user.school) && { school }),
-            ...((salary || user.salary) && { salary }),
+            ...((cbvu || user.cbvu) && { cbvu }),
+            ...((alias || user.alias) && { alias }),
             ...((children || user.children) && { children }),
             ...(imgObject.public_id !== "" && { img: imgObject }),
          };
@@ -610,7 +617,7 @@ router.delete("/:id/:type", [auth, adminAuth], async (req, res) => {
 
 //@desc Function to delete an img from the cloud
 const deletePictures = (img) => {
-   cloudinary.v2.uploader.destroy(img.public_id, function (error, result) {
+   cloudinary.uploader.destroy(img.public_id, function (error, result) {
       if (error) {
          return result.status(400).json(error);
       }
@@ -623,12 +630,12 @@ const inactivateUser = async (user_id, type, completeDeletion) => {
    let filter;
    let enrollments = [];
 
+   const date = new Date();
+   const month = date.getMonth() + 1;
+   const year = date.getFullYear();
+
    switch (type) {
       case "student":
-         const date = new Date();
-         const month = date.getMonth() + 1;
-         const year = date.getFullYear();
-
          enrollments = await Enrollment.find({
             student: user_id,
             ...(!completeDeletion && { year: { $gte: year } }),

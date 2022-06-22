@@ -104,8 +104,10 @@ router.put(
 
             await Category.findOneAndUpdate({ _id: category._id }, { value });
 
+            let installments = [];
+
             if (category.name === "Inscripción") {
-               const installments = await Installment.find({
+               installments = await Installment.find({
                   number: 0,
                   year: { $gte: year },
                   value: { $ne: 0 },
@@ -116,11 +118,12 @@ router.put(
                   async (inst) =>
                      await Installment.findOneAndUpdate(
                         { _id: inst._id },
-                        { $set: { value } }
+                        { $set: { value, status: "debt" } }
                      )
                );
             } else {
-               let installments = await Installment.find({
+               installments = await Installment.find({
+                  number: { $ne: 0 },
                   year: { $gte: year },
                   value: { $ne: 0 },
                   updatable: true,
@@ -160,7 +163,16 @@ router.put(
 
                      await Installment.findOneAndUpdate(
                         { _id: inst._id },
-                        { $set: { value: newValue, expired: false } }
+                        {
+                           $set: {
+                              value: newValue,
+                              status:
+                                 year > inst.year ||
+                                 (year === inst.year && month >= inst.number)
+                                    ? "debt"
+                                    : "valid",
+                           },
+                        }
                      );
                   }
                });

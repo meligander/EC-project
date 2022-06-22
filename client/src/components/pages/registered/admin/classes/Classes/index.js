@@ -87,7 +87,7 @@ const Classes = ({
                      {!loadingUsers &&
                         users.map((user) => (
                            <option key={user._id} value={user._id}>
-                              {user.lastname + " " + user.name}
+                              {user.lastname + ", " + user.name}
                            </option>
                         ))}
                   </select>

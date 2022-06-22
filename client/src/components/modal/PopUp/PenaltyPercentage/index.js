@@ -16,7 +16,7 @@ const PenaltyPercentage = ({ onChange, penalty, percentage }) => {
          <h3>Actualización de Recargo</h3>
 
          <div className="pt-2">
-            <h4> Recargo Actual: {penalty && penalty.percentage}%</h4>
+            <h4> Recargo Actual: {penalty && penalty.number}%</h4>
 
             {!penalty && (
                <h5 className="paragraph text-danger text-center">

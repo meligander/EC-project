@@ -37,13 +37,13 @@ const EditInstallment = ({
       year: "",
       number: "",
       value: "",
-      expired: false,
+      status: "",
       student: null,
       updatable: true,
       enrollment: "",
    });
 
-   const { year, number, value, expired, student, updatable, enrollment } =
+   const { year, number, value, status, student, updatable, enrollment } =
       formData;
 
    useEffect(() => {
@@ -55,16 +55,12 @@ const EditInstallment = ({
          else {
             if (installment)
                setformData((prev) => {
-                  let oldInstallment = {};
-                  for (const x in prev) {
-                     oldInstallment[x] = !installment[x]
-                        ? prev[x]
-                        : installment[x];
-                  }
-                  return {
-                     ...oldInstallment,
-                     updatable: installment.updatable,
-                  };
+                  for (const x in prev)
+                     prev[x] =
+                        installment[x] === undefined || installment[x] === null
+                           ? prev[x]
+                           : installment[x];
+                  return prev;
                });
          }
       }
@@ -121,10 +117,11 @@ const EditInstallment = ({
                   {
                      ...formData,
                      ...(type === "new" && { student: student._id }),
-                     ...((number === "1" || number === "2") && {
-                        expired: true,
-                        updatable: false,
-                     }),
+                     ...(number === 1 ||
+                        (number === 2 && {
+                           status: "expired",
+                           updatable: false,
+                        })),
                   },
                   installments.length > 0
                );
@@ -228,16 +225,23 @@ const EditInstallment = ({
             {number !== 1 && number !== 2 && (
                <>
                   <div className="form-group">
-                     <input
-                        className="form-checkbox"
-                        type="checkbox"
-                        checked={expired}
+                     <select
+                        className="form-input"
+                        value={status}
+                        name="status"
+                        id="status"
                         onChange={onChange}
-                        name="expired"
-                        id="expired"
-                     />
-                     <label className="checkbox-lbl" htmlFor="expired">
-                        {expired ? "Vencida" : "Vigente"}
+                     >
+                        <option value="">* Estado de la cuota</option>
+                        <option value="valid">Válida</option>
+                        <option value="debt">Deuda</option>
+                        <option value="expired">Vencida</option>
+                     </select>
+                     <label
+                        htmlFor="status"
+                        className={`form-label ${status === "" ? "lbl" : ""}`}
+                     >
+                        Estado de la cuota
                      </label>
                   </div>
                   <div className="form-group">
