@@ -301,16 +301,16 @@ const Dashboard = ({
                               </>
                            )}
 
-                           {isOwner && whenNull(user.cbvu) && (
+                           {isAdmin && whenNull(user.cbvu) && (
                               <p>
                                  <span className="text-dark">CBU/CVU: </span>
                                  {user.cbvu}
                               </p>
                            )}
 
-                           {isOwner && whenNull(user.alias) && (
+                           {isAdmin && whenNull(user.alias) && (
                               <p>
-                                 <span className="text-dark">CBU/CVU: </span>
+                                 <span className="text-dark">Alias: </span>
                                  {user.alias}
                               </p>
                            )}

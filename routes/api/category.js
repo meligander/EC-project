@@ -74,8 +74,11 @@ router.put(
       //An array of categories
       const { categories, date } = req.body;
 
-      const month = new Date(date).getMonth() + 1;
+      const month = new Date(date).getMonth() + 2;
       const year = new Date(date).getFullYear();
+
+      const thisYear = new Date().getFullYear();
+      const thisMonth = new Date().getMonth();
 
       let errors = [];
       const errorsResult = validationResult(req);
@@ -144,7 +147,8 @@ router.put(
                await installments.forEach(async (inst) => {
                   if (
                      inst.enrollment &&
-                     (inst.year > year || inst.number >= month)
+                     (inst.year > year ||
+                        (inst.year === year && inst.number >= month))
                   ) {
                      const discount = inst.student.discount;
                      let newValue =
@@ -167,8 +171,9 @@ router.put(
                            $set: {
                               value: newValue,
                               status:
-                                 year > inst.year ||
-                                 (year === inst.year && month >= inst.number)
+                                 thisYear > inst.year ||
+                                 (thisYear === inst.year &&
+                                    thisMonth >= inst.number)
                                     ? "debt"
                                     : "valid",
                            },

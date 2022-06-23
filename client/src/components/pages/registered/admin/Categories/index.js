@@ -22,7 +22,7 @@ const Categories = ({
    updateCategories,
    categoriesPDF,
 }) => {
-   const min = format(addMonths(new Date(), 1), "yyyy-MM");
+   const min = format(new Date(), "yyyy-MM");
    const max = format(addMonths(new Date(), 4), "yyyy-MM");
 
    const [formData, setFormData] = useState([]);

@@ -48,12 +48,14 @@ router.post("/list", [auth, adminAuth], (req, res) => {
          <td>${item.student.lastname + ", " + item.student.name}</td>
          <td>${installments[item.number]}</td>
          <td>${item.year}</td>
-         <td>${new Intl.NumberFormat("de-DE").format(item.value)}</td>
+         <td>${item.enrollment && item.enrollment.category.name}</td>
+         <td>$ ${new Intl.NumberFormat("de-DE").format(item.value)}</td>
       </tr>`
       )
       .join("");
 
-   const thead = "<th>Nombre</th> <th>Cuota</th> <th>Año</th> <th>Valor</th>";
+   const thead =
+      "<th>Nombre</th> <th>Cuota</th> <th>Año</th> <th>Categoría</th> <th>Valor</th>";
 
    try {
       generatePDF(

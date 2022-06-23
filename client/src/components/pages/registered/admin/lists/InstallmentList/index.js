@@ -166,6 +166,7 @@ const InstallmentList = ({
                      <th>Nombre</th>
                      <th>Cuota</th>
                      <th>Año</th>
+                     <th>Categoría</th>
                      <th>Valor</th>
                   </tr>
                </thead>
@@ -192,6 +193,10 @@ const InstallmentList = ({
                                  </td>
                                  <td>{installmentName[installment.number]}</td>
                                  <td>{installment.year}</td>
+                                 <td>
+                                    {installment.enrollment &&
+                                       installment.enrollment.category.name}
+                                 </td>
                                  <td
                                     className={
                                        installment.status === "expired"

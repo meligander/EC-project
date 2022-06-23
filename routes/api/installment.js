@@ -22,53 +22,53 @@ router.get("/", [auth, adminAuth], async (req, res) => {
 
       const { year, number, name, lastname } = req.query;
 
-      // installments = await Installment.find({}).populate({
-      //    path: "student",
-      //    model: "user",
-      //    select: ["name", "lastname"],
-      // });
-
-      // installments.forEach(async (item) => {
-      //    const status = item.expired ? "expired" : item.debt ? "debt" : "valid";
-
-      //    await Installment.findOneAndUpdate(
-      //       { _id: item._id },
-      //       { status }
-      //       // { $unset: { debt: "", expired: "", emailSent: "" } }
-      //    );
-      // });
-
       if (Object.entries(req.query).length === 0) {
          installments = await Installment.find({
             value: { $ne: 0 },
             status: { $ne: "valid" },
-         }).populate({
-            path: "student",
-            model: "user",
-            select: ["name", "lastname"],
-         });
+         })
+            .populate({
+               path: "student",
+               model: "user",
+               select: ["name", "lastname"],
+            })
+            .populate({
+               path: "enrollment",
+               select: ["category"],
+               populate: {
+                  path: "category",
+               },
+            });
       } else {
          installments = await Installment.find({
             value: { $ne: 0 },
             status: { $ne: "valid" },
             ...(year && { year }),
             ...(number && { number }),
-         }).populate({
-            path: "student",
-            model: "user",
-            select: ["name", "lastname"],
-            match: {
-               ...(name && {
-                  name: { $regex: `.*${name}.*`, $options: "i" },
-               }),
-               ...(lastname && {
-                  lastname: {
-                     $regex: `.*${lastname}.*`,
-                     $options: "i",
-                  },
-               }),
-            },
-         });
+         })
+            .populate({
+               path: "student",
+               model: "user",
+               select: ["name", "lastname"],
+               match: {
+                  ...(name && {
+                     name: { $regex: `.*${name}.*`, $options: "i" },
+                  }),
+                  ...(lastname && {
+                     lastname: {
+                        $regex: `.*${lastname}.*`,
+                        $options: "i",
+                     },
+                  }),
+               },
+            })
+            .populate({
+               path: "enrollment",
+               select: ["category"],
+               populate: {
+                  path: "category",
+               },
+            });
 
          installments = installments.filter((item) => item.student);
       }
