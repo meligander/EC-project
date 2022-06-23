@@ -15,7 +15,7 @@ import { clearInstallments } from "./installment";
 import { clearAttendances } from "./attendance";
 import { clearGrades } from "./grade";
 import { logOut, updateAuthUser } from "./auth";
-import { clearClass } from "./class";
+import { clearClass, clearClasses } from "./class";
 import { clearObservations } from "./observation";
 import { clearEnrollments } from "./enrollment";
 import { clearInvoices } from "./invoice";
@@ -328,6 +328,7 @@ export const clearProfile = (sameUser) => (dispatch) => {
       type: USER_CLEARED,
    });
    dispatch(clearClass());
+   dispatch(clearClasses());
    dispatch(clearGrades());
    dispatch(clearInstallments());
    dispatch(clearAttendances());
