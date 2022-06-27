@@ -1,45 +1,48 @@
 const nodemailer = require("nodemailer");
 const path = require("path");
-const { google } = require("googleapis");
-const OAuth2 = google.auth.OAuth2;
+// const { google } = require("googleapis");
+// const OAuth2 = google.auth.OAuth2;
 
 const createTransporter = async () => {
-   const client = new OAuth2(
-      process.env.GOOGLE_CLIENTID,
-      process.env.GOOGLE_SECRET,
-      "https://developers.google.com/oauthplayground"
-   );
+   // const client = new OAuth2(
+   //    process.env.GOOGLE_CLIENTID,
+   //    process.env.GOOGLE_SECRET,
+   //    "https://developers.google.com/oauthplayground"
+   // );
 
-   client.setCredentials({
-      refresh_token: process.env.REFRESH_TOKEN,
-   });
-   const accessToken = await new Promise((resolve, reject) => {
-      client.getAccessToken((err, token) => {
-         if (err) {
-            reject(err.message);
-            console.log("Failed to create access token: " + err.message);
-         }
-         resolve(token);
-      });
-   });
+   // client.setCredentials({
+   //    refresh_token: process.env.REFRESH_TOKEN,
+   // });
+   // const accessToken = await new Promise((resolve, reject) => {
+   //    client.getAccessToken((err, token) => {
+   //       if (err) {
+   //          reject(err.message);
+   //          console.log("Failed to create access token: " + err.message);
+   //       }
+   //       resolve(token);
+   //    });
+   // });
 
    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      port: 465,
-      host: "smtp.gmail.com",
-      secure: true,
-      // auth: {
-      //    user: process.env.EMAIL,
-      //    pass: process.env.EMAIL_PASSWORD,
-      // },
+      host: "SMTP.office365.com",
+      port: "587",
+      secure: false,
       auth: {
-         type: "OAuth2",
          user: process.env.EMAIL,
-         accessToken,
-         clientId: process.env.GOOGLE_CLIENTID,
-         clientSecret: process.env.GOOGLE_SECRET,
-         refreshToken: process.env.REFRESH_TOKEN,
+         pass: process.env.EMAIL_PASSWORD,
       },
+      // service: "gmail",
+      // port: 465,
+      // host: "smtp.gmail.com",
+      // secure: true,
+      // auth: {
+      //    type: "OAuth2",
+      //    user: process.env.EMAIL,
+      //    accessToken,
+      //    clientId: process.env.GOOGLE_CLIENTID,
+      //    clientSecret: process.env.GOOGLE_SECRET,
+      //    refreshToken: process.env.REFRESH_TOKEN,
+      // },
    });
 
    return transporter;
