@@ -35,10 +35,10 @@ table {
    font-size: 90%;
 }
 table.small {
-   width: 60%;
+   width: 95%;
    margin: 0 auto;
-   margin-top: 8rem;
-   font-size: 2rem;
+   margin-top: 15rem;
+   font-size: 1.8rem;
 }
 table thead {
    display: table-header-group;

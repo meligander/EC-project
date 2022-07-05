@@ -26,15 +26,25 @@ router.post("/list", [auth, adminAuth], (req, res) => {
    const category = req.body;
 
    const tbody = category
-      .map(
-         (item) =>
-            `<tr><td>${item.name}</td><td>$${new Intl.NumberFormat(
-               "de-DE"
-            ).format(item.value)}</td></tr>`
-      )
+      .map((item) => {
+         const march = item.value / 2;
+         const values = [item.value, item.value * 0.9, march, march * 0.9];
+         return `<tr>
+               <td>${item.name}</td>
+               ${values
+                  .map(
+                     (subitem) =>
+                        `<td>$${new Intl.NumberFormat("de-DE").format(
+                           Math.ceil((subitem + Number.EPSILON) / 10) * 10
+                        )}</td>`
+                  )
+                  .join("")} 
+            </tr>`;
+      })
       .join("");
 
-   const thead = "<th>Nombre</th> <th>Valor</th>";
+   const thead =
+      "<th>Nombre</th> <th>Cuota</th> <th>Dto Hnos</th> <th>Marzo</th> <th>Dto Marzo</th>";
 
    try {
       generatePDF(
