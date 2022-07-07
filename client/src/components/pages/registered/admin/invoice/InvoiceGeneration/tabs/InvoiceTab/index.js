@@ -46,7 +46,7 @@ const InvoiceTab = ({
    });
 
    const installment =
-      "Insc,Cl Pa,Ex Li,Mar,Abr,May,Jun,Jul,Agto,Sept,Oct,Nov,Dic".split(",");
+      "Insc,Part,Libre,Mar,Abr,May,Jun,Jul,Agto,Sept,Oct,Nov,Dic".split(",");
 
    const { details, total, user } = formData;
 

@@ -21,7 +21,7 @@ const InstallmentsTable = ({
    const installment = [
       "Inscripción",
       "Clase Particular",
-      "",
+      "Examen Libre",
       "Marzo",
       "Abril",
       "Mayo",
