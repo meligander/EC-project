@@ -281,10 +281,7 @@ const GradesTab = ({
                   onClick={(e) => {
                      e.preventDefault();
                      gradesPDF(header[period - 1], periods[period - 1], {
-                        students:
-                           year === classInfo.year
-                              ? students.slice(0, -1)
-                              : students,
+                        students,
                         teacher:
                            classInfo.teacher.lastname +
                            ", " +

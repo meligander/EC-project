@@ -27,7 +27,6 @@ const Grades = ({
    gradesPDF,
 }) => {
    const _id = match.params.class_id;
-   const year = new Date().getFullYear();
 
    useEffect(() => {
       if (loading) loadGrades(_id, false);
@@ -122,10 +121,7 @@ const Grades = ({
                                  ? periods.slice(0, -1)
                                  : periods,
                               {
-                                 students:
-                                    year === classInfo.year
-                                       ? students.slice(0, -1)
-                                       : students,
+                                 students,
                                  teacher:
                                     classInfo.teacher.lastname +
                                     ", " +

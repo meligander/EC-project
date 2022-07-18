@@ -219,25 +219,32 @@ router.put("/:class_id/:period", auth, async (req, res) => {
 
    try {
       for (let x = 0; x < grades.length; x++) {
-         const data = {
-            student: grades[x].student,
-            gradetype: grades[x].gradetype,
-            classroom,
-            period,
-            ...(grades[x].value !== "" && {
-               value:
-                  typeof grades[x].value === "string"
-                     ? Number(grades[x].value.replace(/,/g, "."))
-                     : grades[x].value,
-            }),
-         };
          if (grades[x]._id === "") {
-            const grade = new Grade(data);
+            const grade = new Grade({
+               student: grades[x].student,
+               gradetype: grades[x].gradetype,
+               classroom,
+               period,
+               ...(grades[x].value !== "" && {
+                  value:
+                     typeof grades[x].value === "string"
+                        ? Number(grades[x].value.replace(/,/g, "."))
+                        : grades[x].value,
+               }),
+            });
             grade.save();
          } else {
-            if (data.value)
-               await Grade.findOneAndUpdate({ _id: grades[x]._id }, data);
-            else await Grade.findOneAndRemove(data);
+            if (grades[x].value && grades[x].value !== "")
+               await Grade.findOneAndUpdate(
+                  { _id: grades[x]._id },
+                  {
+                     value:
+                        typeof grades[x].value === "string"
+                           ? Number(grades[x].value.replace(/,/g, "."))
+                           : grades[x].value,
+                  }
+               );
+            else await Grade.findOneAndRemove({ _id: grades[x]._id });
          }
       }
 

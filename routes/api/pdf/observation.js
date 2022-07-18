@@ -15,7 +15,7 @@ const Attendance = require("../../../models/Attendance");
 
 const fileName = path.join(__dirname, "../../../reports/reportCard.pdf");
 
-const highDegree = ["6° Año", "CAE", "Proficency"];
+const highDegree = ["6° Año", "CAE", "Proficiency"];
 
 //@route    GET /api/pdf/observation/fetch
 //@desc     Get the pdf of observation
@@ -83,13 +83,11 @@ router.post("/report-card", auth, async (req, res) => {
       });
 
    grades = grades.reduce((res, curr) => {
-      if (res[curr.gradetype.name]) {
-         res[curr.gradetype.name].push(curr);
-      } else Object.assign(res, { [curr.gradetype.name]: [curr] });
+      if (!res[curr.gradetype.name])
+         Object.assign(res, { [curr.gradetype.name]: new Array(4).fill({}) });
+      res[curr.gradetype.name][curr.period - 1] = curr;
       return res;
    }, []);
-
-   for (const x in grades) while (grades[x].length < 4) grades[x].push({});
 
    const gradesTable = Object.keys(grades)
       .map(
@@ -148,7 +146,16 @@ router.post("/report-card", auth, async (req, res) => {
 
    const attendancesTable = `<tbody>
         ${Object.keys(attendances)
-           .map((key) => `<td>${attendances[key].length}</td>`)
+           .map(
+              (key) =>
+                 `<td>${
+                    key > period
+                       ? ""
+                       : attendances[key].length > 0
+                       ? attendances[key].length
+                       : "-"
+                 }</td>`
+           )
            .join("")}
         <td>${totalAttendances}</td>
    </tbody>`;
