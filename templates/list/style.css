@@ -57,6 +57,10 @@ table th.blank {
    border-left: none;
 }
 
+table th.small {
+   width: 20%;
+}
+
 table td {
    padding: 0.5rem 1rem;
 }

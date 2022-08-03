@@ -71,6 +71,7 @@ router.put("/:class_id/:period", auth, async (req, res) => {
             student: observations[x].student,
             description: observations[x].description,
          };
+
          if (data.description === "") {
             if (_id !== 0) await Observation.findOneAndRemove({ _id });
          } else {

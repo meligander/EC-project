@@ -13,6 +13,8 @@ import {
    DISCOUNT_ADDED,
 } from "../actions/types";
 
+const month = new Date().getMonth() + 1;
+
 const initialState = {
    invoice: null,
    loadingInvoice: true,
@@ -58,7 +60,9 @@ export default function (state = initialState, action) {
             state.invoice.studentsD.some((item) => item === payload.student._id)
          )
             value =
-               payload.number > 2 && payload.status !== "expired"
+               payload.number > 2 &&
+               payload.status !== "expired" &&
+               payload.number > month
                   ? payload.value - (payload.value * 10) / 100
                   : payload.status === "expired"
                   ? Math.round(
@@ -107,7 +111,9 @@ export default function (state = initialState, action) {
                   : [payload],
                details: state.invoice.details.map((item) => {
                   const value =
-                     item.number > 2 && item.status !== "expired"
+                     item.number > 2 &&
+                     item.status !== "expired" &&
+                     item.number > month
                         ? item.value - (item.value * 10) / 100
                         : item.status === "expired"
                         ? Math.round(

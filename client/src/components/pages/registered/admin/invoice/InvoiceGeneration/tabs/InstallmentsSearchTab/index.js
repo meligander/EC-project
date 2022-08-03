@@ -12,6 +12,8 @@ const InstallmentsSearchTab = ({
    addDiscount,
    togglePopup,
 }) => {
+   const month = new Date().getMonth() + 1;
+
    const [adminValues, setAdminValues] = useState({
       student: null,
    });
@@ -39,13 +41,14 @@ const InstallmentsSearchTab = ({
             if (
                (!invoice.studentsD ||
                   !invoice.studentsD.some((item) => item === x)) &&
-               students[x].filter((item) => !item.status === "expired").length >
-                  2
+               students[x].filter(
+                  (item) => item.status !== "expired" && item.number > month
+               ).length > 2
             )
                togglePopup("default");
          }
       }
-   }, [invoice, togglePopup]);
+   }, [invoice, togglePopup, month]);
 
    return (
       <div className="mt-4">

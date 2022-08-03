@@ -40,7 +40,7 @@ const TransactionList = ({
       },
       expence: {
          trClass: "bg-expence",
-         nameType: "Gasto",
+         nameType: "Egreso",
       },
    };
 
@@ -137,7 +137,7 @@ const TransactionList = ({
                   >
                      <option value="">Seleccione el tipo de movimiento</option>
                      <option value="income">Ingreso</option>
-                     <option value="expence">Gasto</option>
+                     <option value="expence">Egreso</option>
                      <option value="withdrawal">Retiro</option>
                   </select>
                   <label
@@ -272,7 +272,7 @@ const TransactionList = ({
                changePage={(page) =>
                   setAdminValues((prev) => ({ ...prev, page }))
                }
-               pdfGenerator={() => transactionsPDF(transactions)}
+               pdfGenerator={() => transactionsPDF(transactions, "list")}
             />
          )}
       </>

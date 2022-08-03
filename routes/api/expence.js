@@ -8,10 +8,26 @@ const auth = require("../../middleware/auth");
 
 //Models
 const Expence = require("../../models/Expence");
+const ExpenceType = require("../../models/ExpenceType");
 const Register = require("../../models/Register");
 const Invoice = require("../../models/Invoice");
 
 const employeePaymentID = "5fe813b999e13c3f807a0d79";
+
+const months = [
+   "Enero",
+   "Febrero",
+   "Marzo",
+   "Abril",
+   "Mayo",
+   "Junio",
+   "Julio",
+   "Agosto",
+   "Septiembre",
+   "Octubre",
+   "Noviembre",
+   "Diciembre",
+];
 
 //@route    GET /api/expence
 //@desc     get all expences || with filter
@@ -145,6 +161,62 @@ router.get("/withdrawal", [auth, adminAuth], async (req, res) => {
       }
 
       res.json(withdrawals);
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: "Server Error" });
+   }
+});
+
+//@route    GET /api/expence/withdrawal/bymonth
+//@desc     get money collected every month
+//@access   Private && Admin
+router.get("/withdrawal/bymonth", [auth, adminAuth], async (req, res) => {
+   try {
+      const { year } = req.query;
+
+      const expencetypes = await ExpenceType.find({ type: "withdrawal" }).sort({
+         name: 1,
+      });
+
+      const withdrawals = await Expence.find({
+         date: {
+            $gte: new Date(year ? year : new Date().getFullYear(), 0, 1),
+            $lte: new Date(year ? year : new Date().getFullYear(), 11, 1),
+         },
+      })
+         .populate({
+            path: "expencetype",
+            model: "expencetype",
+            match: {
+               type: "withdrawal",
+            },
+         })
+         .sort({ date: -1 });
+
+      const totals = { month: "Total" };
+      expencetypes.forEach((type) => (totals[type.name] = 0));
+
+      const allMonths = withdrawals
+         .filter((item) => item.expencetype)
+         .reduce(
+            (res, curr) => {
+               res[new Date(curr.date).getMonth()][curr.expencetype.name] +=
+                  curr.value;
+               totals[curr.expencetype.name] += curr.value;
+               return res;
+            },
+            Array.from(Array(months.length), (item, index) => {
+               const items = {
+                  month: months[index],
+               };
+               expencetypes.forEach((type) => (items[type.name] = 0));
+               return items;
+            })
+         );
+
+      allMonths.push(totals);
+
+      res.json(allMonths);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });

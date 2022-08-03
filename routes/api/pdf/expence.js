@@ -97,8 +97,58 @@ router.post("/withdrawal-list", [auth, adminAuth], (req, res) => {
             table: { thead, tbody },
             total: formatNumber(total),
          },
-         "Retiros",
          "portrait",
+         "Retiros",
+         res
+      );
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: "PDF Error" });
+   }
+});
+
+//@route    POST /api/pdf/expence/withdrawal-yearly
+//@desc     Create a pdf of withdrawals in a year
+//@access   Private && Admin
+router.post("/withdrawal-yearly", [auth, adminAuth], (req, res) => {
+   const { transactions } = req.body;
+
+   const tbody = transactions
+      .map(
+         (transaction) => `
+   <tr>
+      ${Object.keys(transaction)
+         .map((item, index) =>
+            index === 0
+               ? `<th>${transaction[item]}</th>`
+               : `<td>
+                  ${
+                     transaction[item] === 0
+                        ? "-"
+                        : `$${formatNumber(transaction[item])}`
+                  }
+               </td>`
+         )
+         .join("")}
+   </tr>`
+      )
+      .join("");
+
+   const thead = `<th class='blank small'></th> ${Object.keys(transactions[0])
+      .map((item) => (item !== "month" ? `<th>${item}</th>` : ""))
+      .join("")}`;
+
+   try {
+      generatePDF(
+         fileName,
+         pdfTemplate,
+         "list",
+         {
+            title: "Retiros",
+            table: { thead, tbody },
+         },
+         "portrait",
+         "Retiros Por Año",
          res
       );
    } catch (err) {
@@ -111,7 +161,7 @@ router.post("/withdrawal-list", [auth, adminAuth], (req, res) => {
 const getType = (type) => {
    switch (type) {
       case "expence":
-         return "Gasto";
+         return "Egreso";
       case "withdrawal":
          return "Retiro";
       default:

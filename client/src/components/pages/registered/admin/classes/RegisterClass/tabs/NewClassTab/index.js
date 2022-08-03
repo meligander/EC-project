@@ -62,12 +62,12 @@ const NewClassTab = ({
             classInfo.hourin2 &&
             classInfo.hourout1 &&
             classInfo.hourout2 &&
-            format(new Date(classInfo.hourin1), "HH:mm") ===
-               format(new Date(classInfo.hourin2), "HH:mm") &&
-            format(new Date(classInfo.hourout1), "HH:mm") ===
-               format(new Date(classInfo.hourout2), "HH:mm")
+            (format(new Date(classInfo.hourin1), "HH:mm") !==
+               format(new Date(classInfo.hourin2), "HH:mm") ||
+               format(new Date(classInfo.hourout1), "HH:mm") !==
+                  format(new Date(classInfo.hourout2), "HH:mm"))
          )
-            setAdminValues((prev) => ({ ...prev, sameSchedule: true }));
+            setAdminValues((prev) => ({ ...prev, sameSchedule: false }));
 
          setFormData((prev) => {
             for (const x in prev)

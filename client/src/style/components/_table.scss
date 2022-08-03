@@ -140,6 +140,10 @@ table {
          background-color: $white-color;
          opacity: 1;
       }
+
+      &.small {
+         width: 20%;
+      }
    }
 
    td {

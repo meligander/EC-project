@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import format from "date-fns/format";
+import { Link } from "react-router-dom";
 import { BiFilterAlt } from "react-icons/bi";
+import { IoIosListBox } from "react-icons/io";
 
 import {
    loadWithdrawals,
    loadExpenceTypes,
    transactionsPDF,
+   clearTransactions,
 } from "../../../../../../actions/expence";
 import { formatNumber } from "../../../../../../actions/global";
 
@@ -17,6 +20,7 @@ const WithdrawalList = ({
    expences: { transactions, loading, expencetypes, loadingET },
    loadWithdrawals,
    loadExpenceTypes,
+   clearTransactions,
    transactionsPDF,
 }) => {
    const [filterData, setFilterData] = useState({
@@ -39,7 +43,8 @@ const WithdrawalList = ({
    }, [loadingET, loadExpenceTypes]);
 
    useEffect(() => {
-      if (loading) loadWithdrawals({}, true);
+      if (loading || (transactions[0] && transactions[0].month))
+         loadWithdrawals({}, true, false);
       else
          setAdminValues((prev) => ({
             ...prev,
@@ -61,12 +66,25 @@ const WithdrawalList = ({
          <p className="heading-tertiary text-moved-right">
             Total: ${formatNumber(total)}
          </p>
+         <div className="btn-right mb-1">
+            <Link
+               to="/register/withdrawal/monthly-list"
+               onClick={() => {
+                  window.scroll(0, 0);
+                  clearTransactions();
+               }}
+               className="btn btn-light"
+            >
+               <IoIosListBox />
+               <span className="hide-sm">&nbsp;Listado</span>&nbsp;Mensual
+            </Link>
+         </div>
          <form
             className="form"
             onSubmit={(e) => {
                e.preventDefault();
                setAdminValues((prev) => ({ ...prev, page: 0 }));
-               loadWithdrawals(filterData, true);
+               loadWithdrawals(filterData, true, false);
                console.log(filterData);
             }}
          >
@@ -117,6 +135,8 @@ const WithdrawalList = ({
                </thead>
                <tbody>
                   {!loading &&
+                     transactions[0] &&
+                     transactions[0].month === undefined &&
                      transactions.map(
                         (transaction, i) =>
                            i >= page * 10 &&
@@ -145,7 +165,9 @@ const WithdrawalList = ({
                changePage={(page) =>
                   setAdminValues((prev) => ({ ...prev, page }))
                }
-               pdfGenerator={() => transactionsPDF(transactions, total)}
+               pdfGenerator={() =>
+                  transactionsPDF(transactions, "withdrawal", total)
+               }
             />
          )}
       </>
@@ -160,4 +182,5 @@ export default connect(mapStatetoProps, {
    loadExpenceTypes,
    loadWithdrawals,
    transactionsPDF,
+   clearTransactions,
 })(WithdrawalList);

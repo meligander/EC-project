@@ -47,7 +47,6 @@ router.post("/list", [auth, adminAuth], (req, res) => {
                   ? `<td>$${formatNumber(item.registermoney)}</td>`
                   : ""
             }
-            
             <td>${
                item.difference !== 0
                   ? `${item.difference > 0 ? "+" : "-"}$${formatNumber(

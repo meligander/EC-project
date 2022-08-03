@@ -36,6 +36,7 @@ import RegisterList from "../../pages/registered/admin/lists/RegisterList";
 import MentionList from "../../pages/registered/admin/lists/MentionList";
 import WithdrawalList from "../../pages/registered/admin/lists/WithdrawalList";
 import RegisterByMonth from "../../pages/registered/admin/lists/RegisterByMonth";
+import WithdrawalXMonthList from "../../pages/registered/admin/lists/WithdrawalXMonthList";
 
 import PrivateRoutes from "../PrivateRoutes";
 import PublicRoutes from "../PublicRoutes";
@@ -240,6 +241,12 @@ const Routes = ({ location, global: { navbar, footer } }) => {
                types={["admin", "secretary", "admin&teacher"]}
                path="/register/withdrawal/list"
                component={WithdrawalList}
+            />
+            <PrivateRoutes
+               exact
+               types={["admin", "admin&teacher"]}
+               path="/register/withdrawal/monthly-list"
+               component={WithdrawalXMonthList}
             />
             <Route component={NotFound} />
          </Switch>

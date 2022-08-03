@@ -226,7 +226,7 @@ const ExpenceTab = ({
                   )}
 
                   <tr>
-                     <td>Tipo de {isAdmin ? "Movimiento" : "Gasto"}</td>
+                     <td>Tipo de {isAdmin ? "Movimiento" : "Egreso"}</td>
                      <td>
                         <select
                            name="expencetype"
@@ -234,7 +234,7 @@ const ExpenceTab = ({
                            onChange={onChange}
                         >
                            <option value="" name="">
-                              * Tipo de {isAdmin ? "Movimiento" : "Gasto"}
+                              * Tipo de {isAdmin ? "Movimiento" : "Egreso"}
                            </option>
                            {expencetypes.map(
                               (expty) =>

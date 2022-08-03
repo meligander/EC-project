@@ -76,14 +76,16 @@ const EditInstallment = ({
    ]);
 
    useEffect(() => {
-      if (student && year !== "" && loading) {
+      if (
+         student &&
+         year !== "" &&
+         (loading || (enrollments[0] && enrollments[0].year !== year))
+      )
          loadEnrollments(
             { student: student._id ? student._id : student, year },
             false
          );
-      }
-      // eslint-disable-next-line
-   }, [loadEnrollments, year, loading]);
+   }, [loadEnrollments, year, loading, student, enrollments]);
 
    const onChange = (e) => {
       e.persist();

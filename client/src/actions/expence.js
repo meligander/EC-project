@@ -48,26 +48,32 @@ export const loadTransactions = (formData, spinner) => async (dispatch) => {
    if (!error && spinner) dispatch(updateLoadingSpinner(false));
 };
 
-export const loadWithdrawals = (formData, spinner) => async (dispatch) => {
-   if (spinner) dispatch(updateLoadingSpinner(true));
-   let error = false;
+export const loadWithdrawals =
+   (formData, spinner, byMonth) => async (dispatch) => {
+      if (spinner) dispatch(updateLoadingSpinner(true));
+      let error = false;
 
-   try {
-      const res = await api.get(`/expence/withdrawal?${filterData(formData)}`);
-      dispatch({
-         type: TRANSACTIONS_LOADED,
-         payload: res.data,
-      });
-   } catch (err) {
-      if (err.response.status !== 401) {
-         dispatch(setError(TRANSACTIONS_ERROR, err.response));
-         if (spinner) dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         window.scroll(0, 0);
-      } else error = true;
-   }
+      try {
+         const res = await api.get(
+            byMonth
+               ? `/expence/withdrawal/bymonth?${filterData(formData)}`
+               : `/expence/withdrawal?${filterData(formData)}`
+         );
+         dispatch({
+            type: TRANSACTIONS_LOADED,
+            payload: res.data,
+         });
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setError(TRANSACTIONS_ERROR, err.response));
+            if (spinner)
+               dispatch(setAlert(err.response.data.msg, "danger", "2"));
+            window.scroll(0, 0);
+         } else error = true;
+      }
 
-   if (!error && spinner) dispatch(updateLoadingSpinner(false));
-};
+      if (!error && spinner) dispatch(updateLoadingSpinner(false));
+   };
 
 export const loadExpenceTypes = (spinner, expenceType) => async (dispatch) => {
    if (spinner) dispatch(updateLoadingSpinner(true));
@@ -121,7 +127,7 @@ export const registerExpence =
             },
          });
 
-         dispatch(setAlert("Gasto/Ingreso Registrado", "success", "2"));
+         dispatch(setAlert("Egreso/Ingreso Registrado", "success", "2"));
       } catch (err) {
          if (err.response.status !== 401) {
             dispatch(setError(EXPENCE_ERROR, err.response));
@@ -206,7 +212,7 @@ export const deleteExpenceType = (toDelete) => async (dispatch) => {
          payload: toDelete,
       });
 
-      dispatch(setAlert("Tipo de Gasto Eliminado", "success", "2"));
+      dispatch(setAlert("Tipo de Egreso Eliminado", "success", "2"));
    } catch (err) {
       if (err.response.status !== 401) {
          dispatch(setError(EXPENCE_ERROR, err.response));
@@ -220,39 +226,43 @@ export const deleteExpenceType = (toDelete) => async (dispatch) => {
    }
 };
 
-export const transactionsPDF = (transactions, total) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-   let error = false;
+export const transactionsPDF =
+   (transactions, type, total) => async (dispatch) => {
+      dispatch(updateLoadingSpinner(true));
+      let error = false;
 
-   try {
-      if (total)
-         await api.post("/pdf/expence/withdrawal-list", {
-            transactions,
-            total,
+      try {
+         if (type === "withdrawal")
+            await api.post(
+               `/pdf/expence/withdrawal-${total ? "list" : "yearly"}`,
+               {
+                  transactions,
+                  total,
+               }
+            );
+         else await api.post("/pdf/expence/list", transactions);
+
+         const pdf = await api.get("/pdf/expence/fetch", {
+            responseType: "blob",
          });
-      else await api.post("/pdf/expence/list", transactions);
 
-      const pdf = await api.get("/pdf/expence/fetch", {
-         responseType: "blob",
-      });
+         const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-      const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
+         saveAs(pdfBlob, `Movimientos ${format(new Date(), "dd-MM-yy")}.pdf`);
 
-      saveAs(pdfBlob, `Movimientos ${format(new Date(), "dd-MM-yy")}.pdf`);
+         dispatch(setAlert("PDF Generado", "success", "2"));
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setError(EXPENCE_ERROR, err.response));
+            dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         } else error = true;
+      }
 
-      dispatch(setAlert("PDF Generado", "success", "2"));
-   } catch (err) {
-      if (err.response.status !== 401) {
-         dispatch(setError(EXPENCE_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      } else error = true;
-   }
-
-   if (!error) {
-      window.scrollTo(0, 0);
-      dispatch(updateLoadingSpinner(false));
-   }
-};
+      if (!error) {
+         window.scrollTo(0, 0);
+         dispatch(updateLoadingSpinner(false));
+      }
+   };
 
 export const clearExpenceTypes = () => (dispatch) => {
    dispatch({ type: EXPENCETYPES_CLEARED });

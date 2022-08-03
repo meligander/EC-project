@@ -95,7 +95,7 @@ const EditExpenceType = ({
                               <option value="">
                                  Seleccione el tipo de movimiento
                               </option>
-                              <option value="expence">Gasto</option>
+                              <option value="expence">Egreso</option>
                               <option value="withdrawal">Retiro</option>
                            </select>
                         </td>
@@ -137,7 +137,7 @@ const EditExpenceType = ({
                });
                setFormData(newFormData);
             }}
-            type="Tipo de Gasto"
+            type="Tipo de Egreso"
          />
       </>
    );
