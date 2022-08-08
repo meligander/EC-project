@@ -70,10 +70,12 @@ const NewClassTab = ({
             setAdminValues((prev) => ({ ...prev, sameSchedule: false }));
 
          setFormData((prev) => {
-            for (const x in prev)
-               prev[x] =
-                  classInfo[x] === null || classInfo === undefined
-                     ? prev[x]
+            let newClass = prev;
+
+            for (const x in classInfo) {
+               newClass[x] =
+                  classInfo[x] === null || classInfo[x] === undefined
+                     ? newClass[x]
                      : x.substring(0, 4) === "hour"
                      ? format(
                           new Date(classInfo[x] && classInfo[x].slice(0, -1)),
@@ -82,7 +84,8 @@ const NewClassTab = ({
                      : x === "teacher"
                      ? classInfo[x]._id
                      : classInfo[x];
-            return prev;
+            }
+            return newClass;
          });
       }
    }, [classInfo, loadingClass, _id]);
