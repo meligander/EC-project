@@ -29,6 +29,26 @@ const Team = ({ users: { loading, users }, loadUsers }) => {
       }
    };
 
+   const name = (type, sex) => {
+      switch (type) {
+         case "admin&teacher":
+            return `Director${sex === "Femenino" ? "a" : ""} y Profesor${
+               sex === "Femenino" ? "a" : ""
+            }`;
+         case "teacher":
+            return `Profesor${sex === "Femenino" ? "a" : ""}`;
+         case "secretary":
+            return `Secretari${sex === "Femenino" ? "a" : "o"}`;
+         case "classManager":
+            return `Coordinador${sex === "Femenino" ? "a" : ""} Pedagógic${
+               sex === "Femenino" ? "a" : "o"
+            }`;
+
+         default:
+            return "";
+      }
+   };
+
    return (
       <section className="section-team">
          {/* <div className="bg-video">
@@ -98,19 +118,7 @@ const Team = ({ users: { loading, users }, loadUsers }) => {
                            users[teamNumber].lastname}
                      </h2>
                      <h3 className="heading-tertiary">
-                        {users[teamNumber].type === "admin&teacher"
-                           ? `Director${
-                                users[teamNumber].sex === "Femenino" ? "a" : ""
-                             } y Profesor${
-                                users[teamNumber].sex === "Femenino" ? "a" : ""
-                             }`
-                           : users[teamNumber].type === "teacher"
-                           ? `Profesor${
-                                users[teamNumber].sex === "Femenino" ? "a" : ""
-                             }`
-                           : `Secretari${
-                                users[teamNumber].sex === "Femenino" ? "a" : "o"
-                             }`}
+                        {name(users[teamNumber].type, users[teamNumber].sex)}
                      </h3>
                   </div>
                </div>
