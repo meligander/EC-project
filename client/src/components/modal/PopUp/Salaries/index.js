@@ -50,6 +50,19 @@ const Salaries = ({ onChange, salaries }) => {
                         />
                      </td>
                   </tr>
+                  <tr>
+                     <td>Coordinador/a:</td>
+                     <td>
+                        <input
+                           id="classManagerSalary"
+                           type="text"
+                           name="classManagerSalary"
+                           placeholder="Coordinador/a"
+                           value={salaries.classManagerSalary}
+                           onChange={onChange}
+                        />
+                     </td>
+                  </tr>
                </tbody>
             </table>
          </div>

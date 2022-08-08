@@ -45,6 +45,7 @@ const PopUp = ({
       lowerSalary: "",
       higherSalary: "",
       adminSalary: "",
+      classManagerSalary: "",
    });
 
    const [penaltyPercentage, setPenaltyPercentage] = useState("");
@@ -235,35 +236,21 @@ const PopUp = ({
                         switch (popupType) {
                            case "penalty":
                               confirm(penaltyPercentage);
-                              setPenaltyPercentage("");
                               break;
                            case "certificate":
                               confirm(certificate);
-                              setCertificate({ date: "", students: [] });
                               break;
                            case "new-date":
                               confirm(newDate);
-                              setNewDate({
-                                 fromDate: "",
-                                 toDate: "",
-                                 date: "",
-                              });
                               break;
                            case "new-grade":
                               confirm(newGradeType);
-                              setNewGradeType("");
                               break;
                            case "backup":
                               confirm(backup);
-                              setBackup("");
                               break;
                            case "salary":
                               confirm(salaries);
-                              setSalaries({
-                                 lowerSalary: "",
-                                 higherSalary: "",
-                                 adminSalary: "",
-                              });
                               break;
                            default:
                               confirm();

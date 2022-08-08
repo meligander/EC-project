@@ -16,6 +16,7 @@ const RestTable = ({
       secretary: "Secretaria",
       admin: "Administrador",
       "admin&teacher": "Admin y Profesor",
+      classManager: "Coordinador",
    };
 
    return (

@@ -48,12 +48,14 @@ const ExpenceTab = ({
       lowHours: "",
       teacher: {},
       type: "",
+      isTeacher: "",
       popupType: "",
    });
 
    const { expencetype, value, description } = formData;
 
-   const { highHours, lowHours, teacher, type, popupType } = adminValues;
+   const { highHours, lowHours, teacher, type, popupType, isTeacher } =
+      adminValues;
 
    useEffect(() => {
       setFormData({
@@ -70,8 +72,7 @@ const ExpenceTab = ({
    }, [register]);
 
    useEffect(() => {
-      if (teacher._id && teacher.type !== "secretary")
-         getTeacherHours(teacher._id);
+      if (teacher._id && isTeacher) getTeacherHours(teacher._id);
       else {
          setAdminValues((prev) => ({
             ...prev,
@@ -80,7 +81,7 @@ const ExpenceTab = ({
          }));
          setFormData((prev) => ({ ...prev, value: "" }));
       }
-   }, [teacher, getTeacherHours]);
+   }, [teacher, getTeacherHours, isTeacher]);
 
    useEffect(() => {
       if (teacherHours.lowHours !== undefined) {
@@ -114,29 +115,44 @@ const ExpenceTab = ({
    const onChangeAdmin = (e) => {
       e.persist();
 
+      let newTeacher = users.find((user) => user._id === e.target.value);
+
       setAdminValues((prev) => ({
          ...prev,
          [e.target.name]:
             e.target.name !== "teacher"
                ? e.target.value
                : e.target.value !== ""
-               ? users.find((user) => user._id === e.target.value)
+               ? newTeacher
                : {},
+         ...(newTeacher && {
+            isTeacher:
+               newTeacher.type !== "secretary" &&
+               newTeacher.type !== "classManager",
+         }),
       }));
 
       if (e.target.name === "highHours" || e.target.name === "lowHours") {
          let value = 0;
-         if (teacher.type === "secretary")
-            value = e.target.value * salaries.adminSalary;
-         else {
-            if (e.target.name === "highHours")
+         switch (teacher.type) {
+            case "secretary":
+               value = e.target.value * salaries.adminSalary;
+               break;
+            case "classManager":
+               value = e.target.value * salaries.classManagerSalary;
+               break;
+            case "highHours":
                value =
                   e.target.value * salaries.higherSalary +
                   (lowHours !== "" ? lowHours * salaries.lowerSalary : 0);
-            else
+               break;
+            case "lowHours":
                value =
                   e.target.value * salaries.lowerSalary +
                   (highHours !== "" ? highHours * salaries.higherSalary : 0);
+               break;
+            default:
+               break;
          }
          setFormData((prev) => ({
             ...prev,
@@ -276,25 +292,21 @@ const ExpenceTab = ({
                         <tr>
                            <td>
                               Horas
-                              {teacher.type !== "secretary"
-                                 ? " Cursos Bajos"
-                                 : ""}
+                              {isTeacher ? " Cursos Bajos" : ""}
                            </td>
                            <td>
                               <input
                                  type="number"
                                  onChange={onChangeAdmin}
                                  placeholder={`Horas${
-                                    teacher.type !== "secretary"
-                                       ? " Cursos Bajos"
-                                       : ""
+                                    isTeacher ? " Cursos Bajos" : ""
                                  }`}
                                  value={lowHours}
                                  name="lowHours"
                               />
                            </td>
                         </tr>
-                        {teacher.type !== "secretary" && (
+                        {isTeacher && (
                            <tr>
                               <td>Horas Cursos Altos</td>
                               <td>

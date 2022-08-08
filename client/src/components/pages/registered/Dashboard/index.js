@@ -80,6 +80,7 @@ const Dashboard = ({
       secretary: "Secretaria",
       admin: "Administrador",
       "admin&teacher": "Administrador y Profesor",
+      classManager: "Coordinador",
    };
    const _id = match.params.user_id !== "0" ? match.params.user_id : null;
 

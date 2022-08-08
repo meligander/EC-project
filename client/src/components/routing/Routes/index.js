@@ -82,7 +82,13 @@ const Routes = ({ location, global: { navbar, footer } }) => {
             />
             <PrivateRoutes
                exact
-               types={["admin", "secretary", "teacher", "admin&teacher"]}
+               types={[
+                  "admin",
+                  "secretary",
+                  "teacher",
+                  "admin&teacher",
+                  "classManager",
+               ]}
                path="/user/search"
                component={Search}
             />
@@ -130,7 +136,13 @@ const Routes = ({ location, global: { navbar, footer } }) => {
             />
             <PrivateRoutes
                exact
-               types={["admin", "secretary", "teacher", "admin&teacher"]}
+               types={[
+                  "admin",
+                  "secretary",
+                  "teacher",
+                  "admin&teacher",
+                  "classManager",
+               ]}
                path="/class/all"
                component={Classes}
             />
@@ -142,25 +154,49 @@ const Routes = ({ location, global: { navbar, footer } }) => {
             />
             <PrivateRoutes
                exact
-               types={["admin", "secretary", "admin&teacher"]}
+               types={[
+                  "admin",
+                  "secretary",
+                  "admin&teacher",
+                  "student",
+                  "guardian",
+               ]}
                path="/invoice/single/:invoice_id"
                component={Invoice}
             />
             <PrivateRoutes
                exact
-               types={["admin", "secretary", "teacher", "admin&teacher"]}
+               types={[
+                  "admin",
+                  "secretary",
+                  "teacher",
+                  "admin&teacher",
+                  "classManager",
+               ]}
                path="/class/attendances/:class_id"
                component={Attendance}
             />
             <PrivateRoutes
                exact
-               types={["admin", "secretary", "teacher", "admin&teacher"]}
+               types={[
+                  "admin",
+                  "secretary",
+                  "teacher",
+                  "admin&teacher",
+                  "classManager",
+               ]}
                path="/class/grades/:class_id"
                component={Grades}
             />
             <PrivateRoutes
                exact
-               types={["admin", "secretary", "teacher", "admin&teacher"]}
+               types={[
+                  "admin",
+                  "secretary",
+                  "teacher",
+                  "admin&teacher",
+                  "classManager",
+               ]}
                path="/class/observations/:class_id"
                component={Observations}
             />

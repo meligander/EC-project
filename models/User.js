@@ -54,6 +54,7 @@ const UserSchema = new mongoose.Schema({
          "teacher",
          "guardian",
          "secretary",
+         "classManager",
       ],
       required: true,
    },

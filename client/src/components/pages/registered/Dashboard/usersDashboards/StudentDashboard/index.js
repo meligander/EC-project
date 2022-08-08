@@ -45,7 +45,8 @@ const StudentDashboard = ({
    const isAdmin =
       userLogged.type === "secretary" ||
       userLogged.type === "admin&teacher" ||
-      userLogged.type === "admin";
+      userLogged.type === "admin" ||
+      userLogged.type === "classManager";
 
    const allowedUsers =
       isAdmin ||
@@ -317,28 +318,32 @@ const StudentDashboard = ({
                )}
 
                {/* Installments */}
-               <div className="bg-white p-3">
-                  <h3 className="heading-tertiary m-0 text-primary p-1">
-                     Cuotas Pendientes{" "}
-                  </h3>
-                  <button
-                     className="btn-text liner"
-                     onClick={() => togglePopup("invoices")}
-                  >
-                     Facturas Pagas
-                  </button>
-                  <div className="pb-2">
-                     {!loadingInstallments && installments.length > 0 ? (
-                        <InstallmentsTable
-                           installments={installments}
-                           forAdmin={false}
-                           dash
-                        />
-                     ) : (
-                        <p className="heading-tertiary text-center">Al día</p>
-                     )}
+               {userLogged.type !== "classManager" && (
+                  <div className="bg-white p-3">
+                     <h3 className="heading-tertiary m-0 text-primary p-1">
+                        Cuotas Pendientes{" "}
+                     </h3>
+                     <button
+                        className="btn-text liner"
+                        onClick={() => togglePopup("invoices")}
+                     >
+                        Facturas Pagas
+                     </button>
+                     <div className="pb-2">
+                        {!loadingInstallments && installments.length > 0 ? (
+                           <InstallmentsTable
+                              installments={installments}
+                              forAdmin={false}
+                              dash
+                           />
+                        ) : (
+                           <p className="heading-tertiary text-center">
+                              Al día
+                           </p>
+                        )}
+                     </div>
                   </div>
-               </div>
+               )}
             </>
          )}
       </>

@@ -16,7 +16,7 @@ const TeacherNavbar = ({
       <>
          <li
             className={`nav-item${menuToggle ? " show" : ""}${
-               currentNav === "search" ? " current" : ""
+               currentNav === "user" ? " current" : ""
             }`}
          >
             <Link
@@ -34,7 +34,7 @@ const TeacherNavbar = ({
          </li>
          <li
             className={`nav-item${menuToggle ? " show" : ""}${
-               currentNav === "classes" ? " current" : ""
+               currentNav === "class" ? " current" : ""
             }`}
          >
             <Link

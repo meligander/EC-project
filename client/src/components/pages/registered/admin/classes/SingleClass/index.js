@@ -218,49 +218,52 @@ const SingleClass = ({
                               </span>
                            </div>
 
-                           {userLogged.type !== "teacher" && (
-                              <>
-                                 <div className="tooltip">
-                                    <Link
-                                       to={
-                                          classInfo.year === year
-                                             ? `/class/edit/${classInfo._id}`
-                                             : "#"
-                                       }
-                                       className={`btn ${
-                                          classInfo.year === year
-                                             ? "btn-mix-secondary"
-                                             : "btn-black"
-                                       }`}
-                                       onClick={() => {
-                                          if (classInfo.year === year) {
-                                             window.scroll(0, 0);
-                                             clearSearch();
+                           {userLogged.type !== "teacher" &&
+                              userLogged.type !== "classManager" && (
+                                 <>
+                                    <div className="tooltip">
+                                       <Link
+                                          to={
+                                             classInfo.year === year
+                                                ? `/class/edit/${classInfo._id}`
+                                                : "#"
                                           }
-                                       }}
-                                    >
-                                       <FaEdit />
-                                    </Link>
-                                    <span className="tooltiptext">Editar</span>
-                                 </div>
+                                          className={`btn ${
+                                             classInfo.year === year
+                                                ? "btn-mix-secondary"
+                                                : "btn-black"
+                                          }`}
+                                          onClick={() => {
+                                             if (classInfo.year === year) {
+                                                window.scroll(0, 0);
+                                                clearSearch();
+                                             }
+                                          }}
+                                       >
+                                          <FaEdit />
+                                       </Link>
+                                       <span className="tooltiptext">
+                                          Editar
+                                       </span>
+                                    </div>
 
-                                 <div className="tooltip">
-                                    <button
-                                       type="button"
-                                       className="btn btn-danger"
-                                       onClick={(e) => {
-                                          e.preventDefault();
-                                          togglePopup("default");
-                                       }}
-                                    >
-                                       <FaTrashAlt />
-                                    </button>
-                                    <span className="tooltiptext">
-                                       Eliminar
-                                    </span>
-                                 </div>
-                              </>
-                           )}
+                                    <div className="tooltip">
+                                       <button
+                                          type="button"
+                                          className="btn btn-danger"
+                                          onClick={(e) => {
+                                             e.preventDefault();
+                                             togglePopup("default");
+                                          }}
+                                       >
+                                          <FaTrashAlt />
+                                       </button>
+                                       <span className="tooltiptext">
+                                          Eliminar
+                                       </span>
+                                    </div>
+                                 </>
+                              )}
                         </div>
                      )}
                   </>

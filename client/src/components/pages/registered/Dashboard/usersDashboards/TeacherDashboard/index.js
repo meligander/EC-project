@@ -14,8 +14,12 @@ const TeacherDashboard = ({
    clearSearch,
 }) => {
    useEffect(() => {
-      if (loading) loadClasses({ teacher: user._id }, false);
-   }, [user._id, loadClasses, loading]);
+      if (loading)
+         loadClasses(
+            { ...(user.type === "teacher" && { teacher: user._id }) },
+            false
+         );
+   }, [user._id, loadClasses, loading, user]);
 
    return (
       <div className="p-4 bg-white">
@@ -25,7 +29,7 @@ const TeacherDashboard = ({
                {classes.length > 0 ? (
                   <ClassesTable
                      classes={classes}
-                     all={false}
+                     all={user.type !== "teacher"}
                      clearClass={clearClass}
                      clearSearch={clearSearch}
                   />

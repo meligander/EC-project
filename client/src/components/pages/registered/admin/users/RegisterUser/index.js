@@ -276,6 +276,7 @@ const RegisterUser = ({
             );
          case "teacher":
          case "secretary":
+         case "classManager":
             return (
                <>
                   <StateInfo
@@ -416,6 +417,7 @@ const RegisterUser = ({
                            <option value="guardian">Tutor</option>
                            <option value="teacher">Profesor</option>
                            <option value="secretary">Secretaria</option>
+                           <option value="classManager">Coordinador</option>
                            {isOwner && (
                               <>
                                  <option value="admin">Administrador</option>

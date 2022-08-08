@@ -165,24 +165,25 @@ const Classes = ({
          </div>
 
          <div className="btn-right">
-            {userLogged.type !== "teacher" && (
-               <Link
-                  to={users.length !== 0 ? "/class/register" : "#"}
-                  onClick={() => {
-                     if (users.length !== 0) {
-                        window.scroll(0, 0);
-                        clearClass();
-                        clearSearch();
-                     }
-                  }}
-                  className={`btn ${
-                     users.length !== 0 ? "btn-dark" : "btn-black"
-                  }`}
-               >
-                  <FaPlus />
-                  &nbsp;Nueva Clase
-               </Link>
-            )}
+            {userLogged.type !== "teacher" &&
+               userLogged.type !== "classManager" && (
+                  <Link
+                     to={users.length !== 0 ? "/class/register" : "#"}
+                     onClick={() => {
+                        if (users.length !== 0) {
+                           window.scroll(0, 0);
+                           clearClass();
+                           clearSearch();
+                        }
+                     }}
+                     className={`btn ${
+                        users.length !== 0 ? "btn-dark" : "btn-black"
+                     }`}
+                  >
+                     <FaPlus />
+                     &nbsp;Nueva Clase
+                  </Link>
+               )}
             <div className="tooltip">
                <button
                   type="button"

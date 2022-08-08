@@ -45,38 +45,42 @@ const Navbar = ({
       if (userLogged) {
          const path = location.pathname.split("/");
 
-         let currentNav = path[1];
+         let current = path[1];
 
          if (path[2] === "dashboard") {
-            switch (userLogged.type) {
-               case "guardian":
-                  if (path[3] !== "0")
-                     currentNav =
+            if (path[3] === "0")
+               current = userLogged.type === "student" ? "class-0" : "index";
+            else
+               switch (userLogged.type) {
+                  case "guardian":
+                     current =
                         "child" +
                         userLogged.children.findIndex(
                            (item) => item._id === path[3]
                         );
-                  break;
-               case "student":
-                  if (enrollments.length > 0) {
-                     if (path[3] === "0") currentNav = "class-" + 0;
-                     else {
+                     break;
+                  case "student":
+                     if (enrollments.length > 0) {
                         const index = enrollments.findIndex(
                            (item) => path[4] === item.classroom
                         );
-                        currentNav = "class-" + index;
-                     }
-                  } else currentNav = "index";
-                  break;
-               default:
-                  currentNav = "user";
-                  break;
-            }
+                        current = "class-" + index;
+                     } else current = "index";
+                     break;
+                  default:
+                     current = "user";
+                     break;
+               }
          }
-
-         updateCurrentNav(currentNav, false);
+         if (current !== currentNav) updateCurrentNav(current, false);
       }
-   }, [userLogged, updateCurrentNav, location.pathname, enrollments]);
+   }, [
+      userLogged,
+      updateCurrentNav,
+      currentNav,
+      location.pathname,
+      enrollments,
+   ]);
 
    useEffect(() => {
       setTimeout(() => {
@@ -89,6 +93,7 @@ const Navbar = ({
          case "student":
             return <StudentNavbar />;
          case "teacher":
+         case "classManager":
             return <TeacherNavbar />;
          case "guardian":
             return <GuardianNavbar />;

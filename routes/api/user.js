@@ -151,7 +151,12 @@ router.get("/", async (req, res) => {
                   break;
                case "admin":
                   filter.type = {
-                     $in: ["admin", "secretary", "admin&teacher"],
+                     $in: [
+                        "admin",
+                        "secretary",
+                        "admin&teacher",
+                        "classManager",
+                     ],
                   };
                   break;
                case "teacher":
@@ -162,7 +167,12 @@ router.get("/", async (req, res) => {
                   break;
                case "team":
                   filter.type = {
-                     $in: ["admin&teacher", "teacher", "secretary"],
+                     $in: [
+                        "admin&teacher",
+                        "teacher",
+                        "secretary",
+                        "classManager",
+                     ],
                   };
                   break;
                default:
@@ -180,6 +190,13 @@ router.get("/", async (req, res) => {
                })
                .sort({ lastname: 1, name: 1 });
       }
+
+      if (type === "team")
+         users.sort((a, b) => {
+            if (a.type < b.type) return -1;
+            if (a.type > b.type) return 1;
+            return 0;
+         });
 
       if (users.length === 0) {
          return res.status(400).json({

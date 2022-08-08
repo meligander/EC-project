@@ -7,7 +7,13 @@ const GlobalSchema = new mongoose.Schema({
    },
    type: {
       type: String,
-      enum: ["penalty", "lowerSalary", "higherSalary", "adminSalary"],
+      enum: [
+         "penalty",
+         "lowerSalary",
+         "higherSalary",
+         "adminSalary",
+         "classManagerSalary",
+      ],
       required: true,
    },
    date: {
