@@ -34,7 +34,7 @@ const sendEmail = async (user_email, subject, text) => {
             <div style='font-size: 14px;'>
                <p>Dir: Coronel Mercau 783</p>
                <p>Tel: (02656) 476-661</p>
-               <p>Whatsapp: (266) 529-5429</p>
+               <p>WA: (266) 529-5429</p>
                <a href="https://vmenglishcentre.com.ar">www.vmenglishcentre.com.ar</a>
             </div>
          </div>
