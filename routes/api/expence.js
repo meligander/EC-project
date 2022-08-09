@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const { check, validationResult } = require("express-validator");
 const addHours = require("date-fns/addHours");
+const subHours = require("date-fns/subHours");
 
 //Middlewares
 const adminAuth = require("../../middleware/adminAuth");
@@ -201,7 +202,7 @@ router.get("/withdrawal/bymonth", [auth, adminAuth], async (req, res) => {
          .reduce(
             (res, curr) => {
                console.log(
-                  `Original: ${curr.date}\nDia: ${addHours(
+                  `Original: ${curr.date}\nDia: ${subHours(
                      new Date(curr.date),
                      3
                   )}\nMes: ${new Date(curr.date).getMonth()}\n`
