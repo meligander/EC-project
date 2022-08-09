@@ -201,8 +201,9 @@ router.get("/withdrawal/bymonth", [auth, adminAuth], async (req, res) => {
          .reduce(
             (res, curr) => {
                console.log(
-                  `Original: ${curr.date}\nDia: ${new Date(
-                     curr.date
+                  `Original: ${curr.date}\nDia: ${addHours(
+                     new Date(curr.date),
+                     3
                   )}\nMes: ${new Date(curr.date).getMonth()}\n`
                );
                res[new Date(curr.date).getMonth()][curr.expencetype.name] +=
