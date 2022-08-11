@@ -134,6 +134,7 @@ const ExpenceTab = ({
 
       if (e.target.name === "highHours" || e.target.name === "lowHours") {
          let value = 0;
+
          switch (teacher.type) {
             case "secretary":
                value = e.target.value * salaries.adminSalary;
@@ -141,15 +142,16 @@ const ExpenceTab = ({
             case "classManager":
                value = e.target.value * salaries.classManagerSalary;
                break;
-            case "highHours":
-               value =
-                  e.target.value * salaries.higherSalary +
-                  (lowHours !== "" ? lowHours * salaries.lowerSalary : 0);
-               break;
-            case "lowHours":
-               value =
-                  e.target.value * salaries.lowerSalary +
-                  (highHours !== "" ? highHours * salaries.higherSalary : 0);
+            case "teacher":
+            case "admin&teacher":
+               if (e.target.name === "highHours")
+                  value =
+                     e.target.value * salaries.higherSalary +
+                     (lowHours !== "" ? lowHours * salaries.lowerSalary : 0);
+               else
+                  value =
+                     e.target.value * salaries.lowerSalary +
+                     (highHours !== "" ? highHours * salaries.higherSalary : 0);
                break;
             default:
                break;
