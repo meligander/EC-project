@@ -36,13 +36,17 @@ const generatePDF = (
          }),
    };
 
-   pdf.create(template({ ...data, style: { img, css } }), options).toFile(
-      fileName,
-      (err) => {
-         if (err) res.send(Promise.reject());
-         else res.send(Promise.resolve());
-      }
-   );
+   try {
+      pdf.create(template({ ...data, style: { img, css } }), options).toFile(
+         fileName,
+         (err) => {
+            if (err) res.send(Promise.reject());
+            else res.send(Promise.resolve());
+         }
+      );
+   } catch (err) {
+      console.error(err.message);
+   }
 };
 
 module.exports = generatePDF;
