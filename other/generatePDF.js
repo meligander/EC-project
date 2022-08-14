@@ -19,6 +19,7 @@ const generatePDF = (
 
    const options = {
       format: "A4",
+      phantomPath: "./node_modules/phantomjs-prebuilt/bin/phantomjs",
       ...(cssFile !== "certificate" &&
          cssFile !== "cambridgeCertificate" && {
             orientation,
