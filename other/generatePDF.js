@@ -19,7 +19,6 @@ const generatePDF = (
 
    const options = {
       format: "A4",
-      phantomPath: "./node_modules/phantomjs-prebuilt/bin/phantomjs",
       ...(cssFile !== "certificate" &&
          cssFile !== "cambridgeCertificate" && {
             orientation,
@@ -36,17 +35,13 @@ const generatePDF = (
          }),
    };
 
-   try {
-      pdf.create(template({ ...data, style: { img, css } }), options).toFile(
-         fileName,
-         (err) => {
-            if (err) res.send(Promise.reject());
-            else res.send(Promise.resolve());
-         }
-      );
-   } catch (err) {
-      console.error(err.message);
-   }
+   pdf.create(template({ ...data, style: { img, css } }), options).toFile(
+      fileName,
+      (err) => {
+         if (err) res.send(Promise.reject());
+         else res.send(Promise.resolve());
+      }
+   );
 };
 
 module.exports = generatePDF;
