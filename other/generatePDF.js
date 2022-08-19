@@ -8,7 +8,7 @@ const path = require("path");
 //    return options.inverse(this);
 // });
 
-const generatePDF = async (fileName, data, landscape) => {
+const generatePDF = async (fileName, data, loadImg, margin, landscape) => {
    const browser = await puppeteer.launch({
       executablePath:
          process.env.LOCATION === "localhost"
@@ -17,9 +17,12 @@ const generatePDF = async (fileName, data, landscape) => {
    });
    const page = await browser.newPage();
 
-   const content = await compile(data.style, data);
+   let img;
+   if (loadImg) img = loadImgs(loadImg);
 
-   await page.setContent(content, { waitUntil: "networkidle0" });
+   const content = await compile(data.style, data, img);
+
+   await page.setContent(content);
    await page.addStyleTag({ path: getFilePath("css", data.style) });
 
    await page.emulateMediaFeatures("screen");
@@ -31,10 +34,21 @@ const generatePDF = async (fileName, data, landscape) => {
       landscape,
       ...(["cert", "cert-cdg", "inv"].indexOf(data.style) === -1 && {
          displayHeaderFooter: true,
-         headerTemplate: "<div></div>",
-         footerTemplate: `<footer style='font-size: 10px !important; width: 100% !important; color: grey; display: flex; align-items:center; justify-content: space-between; margin: 0 20px -5px;'><span>Villa de Merlo English Center  -  Lista de ${data.title}</span><span><span class="pageNumber"></span>/<span class="totalPages"></span></span></footer>`,
+         headerTemplate: margin
+            ? `
+         <div style='width: 100% !important; margin: -15px 20px 0; display: flex; align-items: center; justify-content: space-between'>
+            <img style='width: 30px; height:30px;' src="data:image/jpeg;base64,${img}" alt="logo">
+            <p style='font-size: 15px !important'>Villa de Merlo English Center</p>
+            <img style='width: 30px; height:30px;' src="data:image/jpeg;base64,${img}" alt="logo">
+        </div>`
+            : "<div></div>",
+         footerTemplate: `
+         <footer style='font-size: 10px !important; width: 100% !important; color: grey; display: flex; align-items:center; justify-content: space-between; margin: 0 20px -5px;'>
+            <span>Villa de Merlo English Center  -  Lista de ${data.title}</span>
+            <span><span class="pageNumber"></span>/<span class="totalPages"></span></span>
+        </footer>`,
          margin: {
-            top: "45px",
+            top: margin ? "55px" : "45px",
             bottom: "45px",
             right: "45px",
             left: "45px",
@@ -47,12 +61,25 @@ const generatePDF = async (fileName, data, landscape) => {
    await browser.close();
 };
 
-const compile = async (fileType, data) => {
-   const html = await fs.readFile(getFilePath("hbs", fileType), "utf-8");
+const loadImgs = (type) => {
+   if (type === "logo")
+      return fs.readFileSync(getFilePath("assets", "logo")).toString("base64");
+   else
+      return {
+         logo: fs
+            .readFileSync(getFilePath("assets", "logo"))
+            .toString("base64"),
+         gray: fs
+            .readFileSync(getFilePath("assets", "grayLogo"))
+            .toString("base64"),
+         halfHalf: fs
+            .readFileSync(getFilePath("assets", "halfAndHalf"))
+            .toString("base64"),
+      };
+};
 
-   const img = fs
-      .readFileSync(getFilePath("assets", "logo"))
-      .toString("base64");
+const compile = async (fileType, data, img) => {
+   const html = await fs.readFile(getFilePath("hbs", fileType), "utf-8");
 
    return hbs.compile(html)({ ...data, img });
 };

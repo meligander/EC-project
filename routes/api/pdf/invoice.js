@@ -60,6 +60,8 @@ router.post("/list", [auth, adminAuth], async (req, res) => {
             title: "Ingresos",
             style: "list",
          },
+         "logo",
+         true,
          false
       );
       res.json({ msg: "PDF generated" });
