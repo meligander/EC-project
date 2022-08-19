@@ -23,53 +23,47 @@ router.get("/fetch", auth, (req, res) => {
 //@route    POST /api/pdf/class/list
 //@desc     Create a pdf of classes
 //@access   Private
-router.post("/list", auth, (req, res) => {
+router.post("/list", auth, async (req, res) => {
    const classes = req.body;
 
-   const tbody = classes
-      .map(
-         (item) => `<tr>
-      <td>${item.teacher.lastname + ", " + item.teacher.name}</td>
-      <td>${item.category.name}</td>
-      <td>${item.day1 ? item.day1 : ""}</td>
-      <td>${
-         item.hourin1
-            ? format(new Date(item.hourin1.slice(0, -1)), "HH:mm")
-            : ""
-      }</td>
-      <td>${
-         item.hourout1
-            ? format(new Date(item.hourout1.slice(0, -1)), "HH:mm")
-            : ""
-      }</td>
-      <td>${item.day2 ? item.day2 : ""}</td>
-      <td>${
-         item.hourin2
-            ? format(new Date(item.hourin2.slice(0, -1)), "HH:mm")
-            : ""
-      }</td>
-      <td>${
-         item.hourout2
-            ? format(new Date(item.hourout2.slice(0, -1)), "HH:mm")
-            : ""
-      }</td>
-   </tr>`
-      )
-      .join("");
+   const head = [
+      "Profesor",
+      "Categoría",
+      "Día 1",
+      "Entrada",
+      "Salida",
+      "Día 2",
+      "Entrada",
+      "Salida",
+   ];
 
-   const thead =
-      "<th>Profesor</th> <th>Categoría</th> <th>Día 1</th> <th>Entrada</th> <th>Salida</th> <th>Día 2</th> <th>Entrada</th> <th>Salida</th>";
+   const body = classes.map((item) => [
+      item.teacher.lastname + ", " + item.teacher.name,
+      item.category.name,
+      item.day1 ? item.day1 : "",
+      item.hourin1 ? format(new Date(item.hourin1.slice(0, -1)), "HH:mm") : "",
+      item.hourout1
+         ? format(new Date(item.hourout1.slice(0, -1)), "HH:mm")
+         : "",
+      item.day2 ? item.day2 : "",
+      item.hourin2 ? format(new Date(item.hourin2.slice(0, -1)), "HH:mm") : "",
+      item.hourout2
+         ? format(new Date(item.hourout2.slice(0, -1)), "HH:mm")
+         : "",
+   ]);
 
    try {
-      generatePDF(
+      await generatePDF(
          fileName,
-         pdfTemplate,
-         "list",
-         { title: "Clases", table: { thead, tbody }, small: false },
-         "landscape",
-         "Clases",
-         res
+         {
+            head,
+            body,
+            title: "Clases",
+            style: "list",
+         },
+         true
       );
+      res.json({ msg: "PDF generated" });
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });

@@ -3,9 +3,6 @@ const path = require("path");
 
 const generatePDF = require("../../../other/generatePDF");
 
-//PDF Templates
-const pdfTemplate = require("../../../templates/list");
-
 //Middlewares
 const adminAuth = require("../../../middleware/adminAuth");
 const auth = require("../../../middleware/auth");
@@ -22,54 +19,41 @@ router.get("/fetch", [auth, adminAuth], (req, res) => {
 //@route    POST api/pdf/category/list
 //@desc     Create a pdf of categories
 //@access   Private && Admin
-router.post("/list", [auth, adminAuth], (req, res) => {
+router.post("/list", [auth, adminAuth], async (req, res) => {
    const category = req.body;
 
-   const tbody = category
-      .map((item, index) => {
-         const march = item.value / 2;
-         const values = [item.value, item.value * 0.9, march, march * 0.9];
-         return `<tr>
-               <td>${item.name}</td>
-               ${values
-                  .map(
-                     (subitem, subindex) =>
-                        `<td>${
-                           index === 0 && subindex !== 0
-                              ? "-"
-                              : "$" +
-                                new Intl.NumberFormat("de-DE").format(
-                                   Math.ceil((subitem + Number.EPSILON) / 10) *
-                                      10
-                                )
-                        }</td>`
-                  )
-                  .join("")} 
-            </tr>`;
-      })
-      .join("");
+   const head = ["Nombre", "Valor", "Dto Hnos", "Marzo", "Dto Marzo"];
 
-   const thead =
-      "<th>Nombre</th> <th>Valor</th> <th>Dto Hnos</th> <th>Marzo</th> <th>Dto Marzo</th>";
+   const body = category.map((item, index) => [
+      item.name,
+      "$" + formatNumber(item.value),
+      index === 0 ? "-" : "$" + formatNumber(item.value * 0.9),
+      index === 0 ? "-" : "$" + formatNumber(item.value / 2),
+      index === 0 ? "-" : "$" + formatNumber((item.value / 2) * 0.9),
+   ]);
 
    try {
-      generatePDF(
+      await generatePDF(
          fileName,
-         pdfTemplate,
-         "list",
          {
+            head,
+            body,
             title: "Categorías",
-            table: { thead, tbody },
+            style: "list",
             small: true,
          },
-         "portrait",
-         null,
-         res
+         false
       );
+      res.json({ msg: "PDF generated" });
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });
    }
 });
+
+const formatNumber = (value) =>
+   new Intl.NumberFormat("de-DE").format(
+      Math.ceil((value + Number.EPSILON) / 10) * 10
+   );
 
 module.exports = router;

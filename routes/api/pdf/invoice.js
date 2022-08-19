@@ -5,7 +5,6 @@ const path = require("path");
 const generatePDF = require("../../../other/generatePDF");
 
 //PDF Templates
-const pdfTemplate = require("../../../templates/list");
 const pdfTemplate2 = require("../../../templates/invoice");
 
 //Middleware
@@ -40,39 +39,30 @@ router.get("/fetch", [auth], (req, res) => {
 //@route    POST /api/pdf/invoice/list
 //@desc     Create a pdf list of income
 //@access   Private && Admin
-router.post("/list", [auth, adminAuth], (req, res) => {
+router.post("/list", [auth, adminAuth], async (req, res) => {
    const invoices = req.body;
 
-   const total = invoices.reduce((accum, item) => accum + item.total, 0);
+   const body = invoices.map((item) => [
+      format(new Date(item.date), "dd/MM/yy"),
+      formatNumber(item.invoiceid),
+      setName(item.user),
+      "$" + formatNumber(item.total),
+   ]);
 
-   const tbody = invoices
-      .map(
-         (item) => `<tr>
-      <td>${format(new Date(item.date), "dd/MM/yy")}</td>
-      <td>${item.invoiceid}</td>
-      <td>${setName(item.user)}</td>
-      <td>$${formatNumber(item.total)}</td>
-   </tr>`
-      )
-      .join("");
-
-   const thead =
-      "<th>Fecha</th> <th>N° Factura</th> <th>Nombre</th> <th>Total</th>";
+   const head = ["Fecha", "N° Factura", "Nombre", "Total"];
 
    try {
-      generatePDF(
+      await generatePDF(
          fileName,
-         pdfTemplate,
-         "list",
          {
+            head,
+            body,
             title: "Ingresos",
-            table: { thead, tbody },
-            total: formatNumber(total),
+            style: "list",
          },
-         "portrait",
-         "Facturas",
-         res
+         false
       );
+      res.json({ msg: "PDF generated" });
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });
@@ -82,7 +72,7 @@ router.post("/list", [auth, adminAuth], (req, res) => {
 //@route    POST /api/pdf/invoice
 //@desc     Create a pdf of an invoice
 //@access   Private && Admin
-router.post("/", [auth], (req, res) => {
+router.post("/", [auth], async (req, res) => {
    const { remaining, details, user, invoiceid, date, total } = req.body;
 
    const tbody = details
@@ -100,7 +90,7 @@ router.post("/", [auth], (req, res) => {
       .join("");
 
    try {
-      generatePDF(
+      await generatePDF(
          fileName,
          pdfTemplate2,
          "invoice",

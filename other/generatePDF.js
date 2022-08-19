@@ -1,47 +1,61 @@
-const pdf = require("html-pdf");
+const puppeteer = require("puppeteer");
+const fs = require("fs-extra");
+const hbs = require("handlebars");
 const path = require("path");
 
-const generatePDF = (
-   fileName,
-   template,
-   cssFile,
-   data,
-   orientation,
-   footer,
-   res
-) => {
-   const img = path.join("file://", __dirname, "../templates/assets/logo.png");
-   const css = path.join(
-      "file://",
-      __dirname,
-      `../templates/${cssFile}/style.css`
-   );
+// hbs.registerHelper("ifCond", (v1, v2, options) => {
+//    if (v1 === v2) return options.fn(this);
+//    return options.inverse(this);
+// });
 
-   const options = {
+const generatePDF = async (fileName, data, landscape) => {
+   const browser = await puppeteer.launch();
+   const page = await browser.newPage();
+
+   const content = await compile(data.style, data);
+
+   await page.setContent(content, { waitUntil: "networkidle0" });
+   await page.addStyleTag({ path: getFilePath("css", data.style) });
+
+   await page.emulateMediaFeatures("screen");
+
+   await page.pdf({
+      path: fileName,
       format: "A4",
-      ...(cssFile !== "certificate" &&
-         cssFile !== "cambridgeCertificate" && {
-            orientation,
-            header: {
-               height: "15mm",
-               contents: `<div></div>`,
-            },
-            ...(footer !== null && {
-               footer: {
-                  height: "17mm",
-                  contents: `<footer class="footer">Villa de Merlo English Center - ${footer}<span class="pages">{{page}}/{{pages}}</span></footer>`,
-               },
-            }),
-         }),
-   };
+      printBackground: true,
+      landscape,
+      ...(["cert", "cert-cdg", "inv"].indexOf(data.style) === -1 && {
+         displayHeaderFooter: true,
+         headerTemplate: "<div></div>",
+         footerTemplate: `<footer style='font-size: 10px !important; width: 100% !important; color: grey; display: flex; align-items:center; justify-content: space-between; margin: 0 20px -5px;'><span>Villa de Merlo English Center  -  Lista de ${data.title}</span><span><span class="pageNumber"></span>/<span class="totalPages"></span></span></footer>`,
+         margin: {
+            top: "45px",
+            bottom: "45px",
+            right: "45px",
+            left: "45px",
+         },
+      }),
+   });
 
-   pdf.create(template({ ...data, style: { img, css } }), options).toFile(
-      fileName,
-      (err) => {
-         if (err) res.send(Promise.reject());
-         else res.send(Promise.resolve());
-      }
-   );
+   console.log("PDF done");
+
+   await browser.close();
 };
+
+const compile = async (fileType, data) => {
+   const html = await fs.readFile(getFilePath("hbs", fileType), "utf-8");
+
+   const img = fs
+      .readFileSync(getFilePath("assets", "logo"))
+      .toString("base64");
+
+   return hbs.compile(html)({ ...data, img });
+};
+
+const getFilePath = (type, fileType) =>
+   path.join(
+      __dirname,
+      `../templates/${type}/${fileType}.${type === "assets" ? "png" : type}`
+   );
 
 module.exports = generatePDF;

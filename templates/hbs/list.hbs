@@ -1,0 +1,47 @@
+<html>
+   <head>
+      <style>
+         @import url("https://fonts.googleapis.com/css2?family=Courgette&family=Tinos:ital@1&display=swap");
+         body {
+            font-family: "Tinos", sans-serif;
+         }
+         .title {
+            font-family: "Courgette", cursive;
+            font-weight: 100;
+         }
+      </style>
+      <meta charset="utf-8">
+      <title>Lista de {{title}}</title>
+   </head>
+   <body>
+      <div class="header">
+         <img class='header-img' src="data:image/jpeg;base64,{{img}}" alt="logo">
+      </div>
+      <div class='container'>
+         {{#if title}}
+            <h2 {{#if small}} class="title big" {{else}} class="title" {{/if}} >Lista de {{title}}</h2>
+         {{/if}}
+         <table {{#if small}} class="small" {{/if}} >
+            <thead>
+               <tr>
+                  {{#each head as |item|}}
+                     <th>{{item}}</th>
+                  {{/each}}
+               </tr>
+            </thead>
+            <tbody>
+               {{#each body as |row|}}
+                  <tr>
+                     {{#each row as |td|}}
+                        <td>{{td}}</td>
+                     {{/each}}
+                  </tr>
+               {{/each}}
+            </tbody>
+         </table>
+         {{#if total}}
+            <p>{{total}}</p>
+         {{/if}}
+      </div>
+   </body>
+</html>

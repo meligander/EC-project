@@ -196,10 +196,10 @@ export const invoicesPDF = (formData, type) => async (dispatch) => {
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-      const date = format(
-         new Date(type === "list" ? null : formData.date),
-         "dd-MM-yy"
-      );
+      const date =
+         type === "list"
+            ? format(new Date(), "dd-MM-yy")
+            : format(new Date(formData.date), "dd-MM-yy");
 
       saveAs(
          pdfBlob,
