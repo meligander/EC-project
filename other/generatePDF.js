@@ -1,4 +1,4 @@
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
 const fs = require("fs-extra");
 const hbs = require("handlebars");
 const path = require("path");
@@ -9,7 +9,12 @@ const path = require("path");
 // });
 
 const generatePDF = async (fileName, data, landscape) => {
-   const browser = await puppeteer.launch();
+   const browser = await puppeteer.launch({
+      executablePath:
+         process.env.LOCATION === "localhost"
+            ? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+            : "/usr/bin/chromium-browser",
+   });
    const page = await browser.newPage();
 
    const content = await compile(data.style, data);
