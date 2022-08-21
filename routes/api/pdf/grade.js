@@ -7,7 +7,6 @@ const generatePDF = require("../../../other/generatePDF");
 const pdfTemplateAssitanceGrades = require("../../../templates/assistanceGrades");
 const pdfTemplateCertificate = require("../../../templates/certificate");
 const pdfTemplateCambridgeCertificate = require("../../../templates/cambridgeCertificate");
-const pdfTemplateList = require("../../../templates/list");
 
 //Middlewares
 const auth = require("../../../middleware/auth");
@@ -40,13 +39,6 @@ const imgHalfAndHalf = path.join(
 );
 
 const fileName = path.join(__dirname, "../../../reports/grades.pdf");
-
-//@route    GET /api/pdf/grade/fetch
-//@desc     Get the pdf of the class grades during a period
-//@access   Private
-router.get("/fetch", auth, (req, res) => {
-   res.sendFile(fileName);
-});
 
 //@route    POST /api/pdf/grade/period-list
 //@desc     Create a pdf of the class grades during a period
@@ -357,7 +349,7 @@ router.post("/cambridge", auth, (req, res) => {
 //@route    POST /api/pdf/grade/best
 //@desc     Create a pdf of the students' averages
 //@access   Private && Admin
-router.post("/best", [auth, adminAuth], (req, res) => {
+router.post("/best", [auth, adminAuth], async (req, res) => {
    const { grades } = req.body;
 
    if (grades.length === 0)
@@ -365,33 +357,26 @@ router.post("/best", [auth, adminAuth], (req, res) => {
          .status(400)
          .json({ msg: "Primero debe realizar una búsqueda" });
 
-   const tbody = grades
-      .map(
-         (item) => `<tr>
-      <td>${item.student.studentnumber}</td>
-      <td>${item.student.lastname + ", " + item.student.name}</td>
-      <td>${item.category.name}</td>
-      <td>${item.average}</td>
-   </tr>`
-      )
-      .join("");
+   const head = ["Legajo", "Nombre", "Categoría", "Promedio"];
 
-   const thead =
-      "<th>Legajo</th> <th>Nombre</th> <th>Categoría</th> <th>Promedio</th>";
+   const body = grades.map((item) => [
+      item.student.studentnumber,
+      item.student.lastname + ", " + item.student.name,
+      item.category.name,
+      item.average,
+   ]);
 
    try {
-      generatePDF(
+      await generatePDF(
          fileName,
-         pdfTemplateList,
-         "list",
          {
+            head,
+            body,
             title: "Mejores Promedios",
-            table: { thead, tbody },
          },
-         "portrait",
-         "Mejores Promedios",
-         res
+         { type: "list", img: "logo", margin: true, landscape: false }
       );
+      res.sendFile(fileName);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });

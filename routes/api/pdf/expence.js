@@ -4,63 +4,49 @@ const format = require("date-fns/format");
 
 const generatePDF = require("../../../other/generatePDF");
 
-//PDF Templates
-const pdfTemplate = require("../../../templates/list");
-
 //Middlewares
 const adminAuth = require("../../../middleware/adminAuth");
 const auth = require("../../../middleware/auth");
 
 const fileName = path.join(__dirname, "../../../reports/transactions.pdf");
 
-//@route    GET /api/pdf/expence/fetch
-//@desc     Get the pdf of transactions
-//@access   Private && Admin
-router.get("/fetch", [auth, adminAuth], (req, res) => {
-   res.sendFile(fileName);
-});
-
 //@route    POST /api/pdf/expence/list
 //@desc     Create a pdf of transactions
 //@access   Private && Admin
-router.post("/list", [auth, adminAuth], (req, res) => {
-   const transactions = req.body;
+router.post("/list", [auth, adminAuth], async (req, res) => {
+   const { transactions } = req.body;
 
-   const tbody = transactions
-      .map(
-         (item) => `<tr>
-      <td>${format(new Date(item.date), "dd/MM/yy")}</td>
-      ${
-         item.expencetype
-            ? `<td>${getType(item.expencetype.type)}</td>
-               <td>${formatNumber(item.value)}</td>
-               <td>${item.expencetype.name}${
-                 item.description ? "" + item.description : ""
-              }</td>`
-            : `<td>Ingreso</td>
-               <td>${formatNumber(item.total)}</td>
-               <td>Factura ${setName(item.user)}</td>`
-      }
-   </tr>`
-      )
-      .join("");
+   const head = ["Fecha", "Tipo", "Importe", "Descripción"];
 
-   const thead =
-      "<th>Fecha</th> <th>Tipo</th> <th>Importe</th> <th>Descripción</th>";
+   const body = transactions.map((item) =>
+      item.expencetype
+         ? [
+              format(new Date(item.date), "dd/MM/yy"),
+              getType(item.expencetype.type),
+              "$" + formatNumber(item.value),
+              `${item.expencetype.name}${
+                 item.description ? ": " + item.description : ""
+              }`,
+           ]
+         : [
+              format(new Date(item.date), "dd/MM/yy"),
+              "Ingreso",
+              formatNumber(item.total),
+              `Factura ${setName(item.user)}`,
+           ]
+   );
 
    try {
-      generatePDF(
+      await generatePDF(
          fileName,
-         pdfTemplate,
-         "list",
          {
+            head,
+            body,
             title: "Trasacciones",
-            table: { thead, tbody },
          },
-         "portrait",
-         "Transacciones",
-         res
+         { type: "list", img: "logo", margin: true, landscape: false }
       );
+      res.sendFile(fileName);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });
@@ -70,37 +56,30 @@ router.post("/list", [auth, adminAuth], (req, res) => {
 //@route    POST /api/pdf/expence/withdrawal-list
 //@desc     Create a pdf of withdrawals
 //@access   Private && Admin
-router.post("/withdrawal-list", [auth, adminAuth], (req, res) => {
+router.post("/withdrawal-list", [auth, adminAuth], async (req, res) => {
    const { transactions, total } = req.body;
 
-   const tbody = transactions
-      .map(
-         (item) => `<tr>
-      <td>${format(new Date(item.date), "dd/MM/yy")}</td>
-      <td>${item.expencetype.name}</td>
-      <td>$${formatNumber(item.value)}</td>
-      <td>${item.description ? item.description : ""}</td>
-   </tr>`
-      )
-      .join("");
+   const head = ["Fecha", "Tipo", "Importe", "Descripción"];
 
-   const thead =
-      "<th>Fecha</th> <th>Tipo</th> <th>Importe</th> <th>Descripción</th>";
+   const body = transactions.map((item) => [
+      format(new Date(item.date), "dd/MM/yy"),
+      item.expencetype.name,
+      "$" + formatNumber(item.value),
+      item.description ? item.description : "",
+   ]);
 
    try {
-      generatePDF(
+      await generatePDF(
          fileName,
-         pdfTemplate,
-         "list",
          {
+            head,
+            body,
             title: "Retiros",
-            table: { thead, tbody },
             total: formatNumber(total),
          },
-         "portrait",
-         "Retiros",
-         res
+         { type: "list", img: "logo", margin: true, landscape: false }
       );
+      res.sendFile(fileName);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });
@@ -110,47 +89,38 @@ router.post("/withdrawal-list", [auth, adminAuth], (req, res) => {
 //@route    POST /api/pdf/expence/withdrawal-yearly
 //@desc     Create a pdf of withdrawals in a year
 //@access   Private && Admin
-router.post("/withdrawal-yearly", [auth, adminAuth], (req, res) => {
+router.post("/withdrawal-yearly", [auth, adminAuth], async (req, res) => {
    const { transactions } = req.body;
 
-   const tbody = transactions
-      .map(
-         (transaction) => `
-   <tr>
-      ${Object.keys(transaction)
-         .map((item, index) =>
-            index === 0
-               ? `<th>${transaction[item]}</th>`
-               : `<td>
-                  ${
-                     transaction[item] === 0
-                        ? "-"
-                        : `$${formatNumber(transaction[item])}`
-                  }
-               </td>`
-         )
-         .join("")}
-   </tr>`
-      )
-      .join("");
+   const head = [
+      "",
+      ...Object.keys(transactions[0]).filter((item) => item !== "month"),
+   ];
 
-   const thead = `<th class='blank small'></th> ${Object.keys(transactions[0])
-      .map((item) => (item !== "month" ? `<th>${item}</th>` : ""))
-      .join("")}`;
+   const body = transactions.map((trans) =>
+      Object.keys(trans).map((item, index) =>
+         index === 0
+            ? trans[item]
+            : trans[item] === 0
+            ? "-"
+            : "$" + formatNumber(trans[item])
+      )
+   );
 
    try {
-      generatePDF(
+      await generatePDF(
          fileName,
-         pdfTemplate,
-         "list",
          {
+            head,
+            body,
             title: "Retiros",
-            table: { thead, tbody },
+            blank: true,
+            firstth: true,
+            small: true,
          },
-         "portrait",
-         "Retiros Por Año",
-         res
+         { type: "list", img: "logo", margin: true, landscape: false }
       );
+      res.sendFile(fileName);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });

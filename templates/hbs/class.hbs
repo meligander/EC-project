@@ -1,0 +1,56 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>Clase de {{teacher}}</title>
+   </head>
+   <body>
+      <h2 class="category">Curso: {{category}}</h2>
+      <h3 class="teacher">Profesor: {{teacher}}</h3>
+      <table class="schedule">
+         <tbody>
+            <tr>
+               <td>
+                  <p>Día 1: {{day1}}</p>
+                  <p>
+                     <span class="space">
+                        Entrada:
+                        {{hourin1}}
+                     </span>
+                     Salida:
+                     {{hourout1}}
+                  </p>
+               </td>
+               <td>
+                  <p>Día 1: {{day2}}</p>
+                  <p>
+                     <span class="space">
+                        Entrada:
+                        {{hourin2}}
+                     </span>
+                     Salida:
+                     {{hourout2}}
+                  </p>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+      <table>
+         <thead>
+            <tr>
+               {{#each head as |item|}}
+                  <th>{{item}}</th>
+               {{/each}}
+            </tr>
+         </thead>
+         <tbody>
+            {{#each body as |row|}}
+               <tr>
+                  {{#each row as |td|}}
+                     <td>{{td}}</td>
+                  {{/each}}
+               </tr>
+            {{/each}}
+         </tbody>
+      </table>
+   </body>
+</html>

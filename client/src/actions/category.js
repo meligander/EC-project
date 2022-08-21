@@ -69,9 +69,7 @@ export const categoriesPDF = (categories) => async (dispatch) => {
    let error = false;
 
    try {
-      await api.post("/pdf/category/list", categories);
-
-      const pdf = await api.get("/pdf/category/fetch", {
+      const pdf = await api.post("/pdf/category/list", categories, {
          responseType: "blob",
       });
 

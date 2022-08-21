@@ -4,9 +4,6 @@ const path = require("path");
 
 const generatePDF = require("../../../other/generatePDF");
 
-//PDF Templates
-const pdfTemplate2 = require("../../../templates/invoice");
-
 //Middleware
 const auth = require("../../../middleware/auth");
 const adminAuth = require("../../../middleware/adminAuth");
@@ -29,27 +26,20 @@ const installment = [
    "Dic",
 ];
 
-//@route    GET /api/pdf/invoice/fetch
-//@desc     Get the pdf of income
-//@access   Private && Admin
-router.get("/fetch", [auth], (req, res) => {
-   res.sendFile(fileName);
-});
-
 //@route    POST /api/pdf/invoice/list
 //@desc     Create a pdf list of income
 //@access   Private && Admin
 router.post("/list", [auth, adminAuth], async (req, res) => {
    const invoices = req.body;
 
+   const head = ["Fecha", "N° Factura", "Nombre", "Total"];
+
    const body = invoices.map((item) => [
       format(new Date(item.date), "dd/MM/yy"),
-      formatNumber(item.invoiceid),
+      item.invoiceid,
       setName(item.user),
       "$" + formatNumber(item.total),
    ]);
-
-   const head = ["Fecha", "N° Factura", "Nombre", "Total"];
 
    try {
       await generatePDF(
@@ -58,13 +48,10 @@ router.post("/list", [auth, adminAuth], async (req, res) => {
             head,
             body,
             title: "Ingresos",
-            style: "list",
          },
-         "logo",
-         true,
-         false
+         { type: "list", img: "logo", margin: true, landscape: false }
       );
-      res.json({ msg: "PDF generated" });
+      res.sendFile(fileName);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });
@@ -77,41 +64,28 @@ router.post("/list", [auth, adminAuth], async (req, res) => {
 router.post("/", [auth], async (req, res) => {
    const { remaining, details, user, invoiceid, date, total } = req.body;
 
-   const tbody = details
-      .map(
-         (item) => `<tr>
-      <td>${item.installment.student.lastname}, ${
-            item.installment.student.name
-         }</td>
-      <td>${installment[item.installment.number]}</td>
-      <td>${item.installment.year}</td>
-      <td>$${formatNumber(item.value)}</td>
-      <td>$${formatNumber(item.payment)}</td>
-   </tr>`
-      )
-      .join("");
+   const body = details.map((item) => [
+      `${item.installment.student.lastname}, ${item.installment.student.name}`,
+      installment[item.installment.number],
+      item.installment.year,
+      "$" + formatNumber(item.value),
+      "$" + formatNumber(item.payment),
+   ]);
 
    try {
       await generatePDF(
          fileName,
-         pdfTemplate2,
-         "invoice",
          {
-            info: {
-               user,
-               invoiceid: invoiceid,
-               date: format(new Date(date), "dd/MM/yy"),
-               total: formatNumber(total),
-               remaining: formatNumber(remaining),
-            },
-            table: {
-               tbody,
-            },
+            body,
+            user,
+            invoiceid,
+            date: format(new Date(date), "dd/MM/yy"),
+            total: formatNumber(total),
+            remaining: formatNumber(remaining),
          },
-         "portrait",
-         null,
-         res
+         { type: "invoice", img: "logo", margin: false, landscape: false }
       );
+      res.sendFile(fileName);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });

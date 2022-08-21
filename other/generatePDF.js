@@ -3,12 +3,12 @@ const fs = require("fs-extra");
 const hbs = require("handlebars");
 const path = require("path");
 
-// hbs.registerHelper("ifCond", (v1, v2, options) => {
-//    if (v1 === v2) return options.fn(this);
-//    return options.inverse(this);
-// });
+hbs.registerHelper("ifAnd", (v1, v2, options) => {
+   if (v1 && v2) return options.fn(this);
+   return options.inverse(this);
+});
 
-const generatePDF = async (fileName, data, loadImg, margin, landscape) => {
+const generatePDF = async (fileName, data, style) => {
    const browser = await puppeteer.launch({
       executablePath:
          process.env.LOCATION === "localhost"
@@ -18,12 +18,13 @@ const generatePDF = async (fileName, data, loadImg, margin, landscape) => {
    const page = await browser.newPage();
 
    let img;
-   if (loadImg) img = loadImgs(loadImg);
+   if (style.img) img = loadImg(style.img);
 
-   const content = await compile(data.style, data, img);
+   const content = await compile(style.type, data, img);
 
    await page.setContent(content);
-   await page.addStyleTag({ path: getFilePath("css", data.style) });
+
+   await page.addStyleTag({ path: getFilePath("css", style.type) });
 
    await page.emulateMediaFeatures("screen");
 
@@ -31,24 +32,24 @@ const generatePDF = async (fileName, data, loadImg, margin, landscape) => {
       path: fileName,
       format: "A4",
       printBackground: true,
-      landscape,
-      ...(["cert", "cert-cdg", "inv"].indexOf(data.style) === -1 && {
+      landscape: style.landscape,
+      ...(["cert", "cert-cdg", "invoice"].indexOf(style.type) === -1 && {
          displayHeaderFooter: true,
-         headerTemplate: margin
+         headerTemplate: style.margin
             ? `
-         <div style='width: 100% !important; margin: -15px 20px 0; display: flex; align-items: center; justify-content: space-between'>
-            <img style='width: 30px; height:30px;' src="data:image/jpeg;base64,${img}" alt="logo">
-            <p style='font-size: 15px !important'>Villa de Merlo English Center</p>
-            <img style='width: 30px; height:30px;' src="data:image/jpeg;base64,${img}" alt="logo">
+         <div style='width: 100% !important; margin: -6px 20px 0; display: flex; align-items: center; justify-content: space-between'>
+            <img style='width: 40px; height:40px;' src="data:image/jpeg;base64,${img}" alt="logo">
+            <p style='font-size: 13px !important; font-family: "Courgette", cursive; font-weight: 100; color: lightgray;'>Villa de Merlo English Center</p>
+            <img style='width: 40px; height:40px;' src="data:image/jpeg;base64,${img}" alt="logo">
         </div>`
             : "<div></div>",
          footerTemplate: `
-         <footer style='font-size: 10px !important; width: 100% !important; color: grey; display: flex; align-items:center; justify-content: space-between; margin: 0 20px -5px;'>
-            <span>Villa de Merlo English Center  -  Lista de ${data.title}</span>
+         <footer style='font-size: 10px !important; width: 100% !important; color: lightgray; font-family: "Courgette", cursive; font-weight: 100; display: flex; align-items:center; justify-content: space-between; margin: 0 20px -5px;'>
+            <span>Lista de ${data.title}</span>
             <span><span class="pageNumber"></span>/<span class="totalPages"></span></span>
         </footer>`,
          margin: {
-            top: margin ? "55px" : "45px",
+            top: style.margin ? "80px" : "45px",
             bottom: "45px",
             right: "45px",
             left: "45px",
@@ -61,7 +62,7 @@ const generatePDF = async (fileName, data, loadImg, margin, landscape) => {
    await browser.close();
 };
 
-const loadImgs = (type) => {
+const loadImg = (type) => {
    if (type === "logo")
       return fs.readFileSync(getFilePath("assets", "logo")).toString("base64");
    else

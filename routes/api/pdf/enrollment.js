@@ -4,26 +4,16 @@ const format = require("date-fns/format");
 
 const generatePDF = require("../../../other/generatePDF");
 
-//PDF Templates
-const pdfTemplate = require("../../../templates/list");
-
 //Middlewares
 const adminAuth = require("../../../middleware/adminAuth");
 const auth = require("../../../middleware/auth");
 
 const fileName = path.join(__dirname, "../../../reports/enrollments.pdf");
 
-//@route    GET /api/pdf/enrollment/fetch
-//@desc     Get the pdf of enrollments
-//@access   Private && Admin
-router.get("/fetch", [auth, adminAuth], (req, res) => {
-   res.sendFile(fileName);
-});
-
 //@route    POST /api/pdf/enrollment/list
 //@desc     Create a pdf of enrollments
 //@access   Private && Admin
-router.post("/list", [auth, adminAuth], (req, res) => {
+router.post("/list", [auth, adminAuth], async (req, res) => {
    const enrollments = req.body;
 
    if (enrollments.length === 0)
@@ -31,34 +21,27 @@ router.post("/list", [auth, adminAuth], (req, res) => {
          .status(400)
          .json({ msg: "Primero debe realizar una búsqueda" });
 
-   const tbody = enrollments
-      .map(
-         (item) => `<tr>
-      <td>${format(new Date(item.date), "dd/MM/yy")}</td>
-      <td>${item.student.studentnumber}</td>
-      <td>${item.student.lastname + ", " + item.student.name}</td>
-      <td>${item.category.name}</td>
-      <td>${item.year}</td>
-   </tr>`
-      )
-      .join("");
+   const head = ["Fecha", "Legajo", "Nombre", "Categoría", "Año"];
 
-   const thead =
-      "<th>Fecha</th><th>Legajo</th><th>Nombre</th><th>Categoría</th><th>Año</th>";
+   const body = enrollments.map((item) => [
+      format(new Date(item.date), "dd/MM/yy"),
+      item.student.studentnumber,
+      item.student.lastname + ", " + item.student.name,
+      item.category.name,
+      item.year,
+   ]);
 
    try {
-      generatePDF(
+      await generatePDF(
          fileName,
-         pdfTemplate,
-         "list",
          {
+            head,
+            body,
             title: "Inscripciones",
-            table: { thead, tbody },
          },
-         "portrait",
-         "Inscripciones",
-         res
+         { type: "list", img: "logo", margin: true, landscape: false }
       );
+      res.sendFile(fileName);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });

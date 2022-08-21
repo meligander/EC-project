@@ -1,29 +1,20 @@
 body {
    font-family: "Tinos", serif;
+   text-align: center;
 }
 .title {
    font-family: "Courgette", cursive;
    font-weight: 100;
-}
-.header {
-   text-align: end;
-   margin: -0.7rem -0.5rem -5.5rem 0;
-   z-index: 1000;
-}
-.header-img {
-   width: 6rem;
-   height: 6rem;
-}
-.container {
-   text-align: center;
-}
-.title {
-   font-size: 2.5rem;
+   font-size: 2.8rem;
    text-decoration: underline 1px;
-   margin-bottom: 2rem;
+   margin: -1rem 0 2rem;
 }
 .title.big {
    font-size: 3.3rem;
+}
+.subtitle {
+   text-align: start;
+   font-family: "Courgette", cursive;
 }
 table {
    border-collapse: collapse;
@@ -50,11 +41,46 @@ table th.blank {
    border-top: none;
    border-left: none;
 }
+table th.small {
+   width: 20%;
+}
 table td {
    padding: 0.5rem 1rem;
+}
+table.attendance th {
+   padding: 1rem;
+}
+table.attendance th:not(:first-child),
+table.attendance td:not(:first-child) {
+   font-size: 1.2rem;
+   padding: 0.5rem 0;
+}
+table.all-grades {
+   margin-top: 3rem !important;
+}
+
+table.all-grades th,
+table.all-grades td:not(:first-child) {
+   padding: 0.7rem;
 }
 .total {
    text-align: end;
    font-size: 2rem;
    margin-top: 3rem;
+}
+.border {
+   border: 3px solid #333;
+   border-bottom: 2px solid #333;
+}
+
+.border-right {
+   border-right: 3px solid #333 !important;
+}
+
+.border-bottom {
+   border-bottom: 3px solid #333;
+}
+
+.no-border {
+   border: none;
 }

@@ -1,0 +1,38 @@
+body {
+   font-family: "Courgette", cursive;
+   margin: 3.5rem 3.8rem;
+   padding: 2rem;
+   border: 1px solid black;
+   position: relative;
+}
+table {
+   border-collapse: collapse;
+   width: 100%;
+}
+.business {
+   font-size: 2rem;
+   font-family: "Dancing Script", cursive;
+   margin-bottom: 0rem;
+}
+.text-right {
+   text-align: right;
+}
+.logo {
+   width: 11rem;
+   height: 11rem;
+}
+table.invoice-info {
+   position: relative;
+}
+table.invoice-info td.invoice-info {
+   position: absolute;
+   bottom: 0;
+   right: 3rem;
+}
+table.invoice-info tr.blank {
+   height: 2rem;
+}
+table.details {
+   text-align: center;
+   margin-top: 2rem;
+}

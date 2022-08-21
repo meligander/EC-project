@@ -187,12 +187,13 @@ export const invoicesPDF = (formData, type) => async (dispatch) => {
    let error = false;
 
    try {
-      if (type === "list") await api.post("/pdf/invoice/list", formData);
-      else await api.post("/pdf/invoice", formData);
-
-      const pdf = await api.get("/pdf/invoice/fetch", {
-         responseType: "blob",
-      });
+      const pdf = await api.post(
+         `/pdf/invoice${type === "list" ? "/list" : ""}`,
+         formData,
+         {
+            responseType: "blob",
+         }
+      );
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 

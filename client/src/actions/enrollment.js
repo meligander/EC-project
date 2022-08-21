@@ -158,9 +158,7 @@ export const enrollmentsPDF = (enrollments) => async (dispatch) => {
    let error = false;
 
    try {
-      await api.post("/pdf/enrollment/list", enrollments);
-
-      const pdf = await api.get("/pdf/enrollment/fetch", {
+      const pdf = await api.post("/pdf/enrollment/list", enrollments, {
          responseType: "blob",
       });
 

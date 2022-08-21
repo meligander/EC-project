@@ -221,9 +221,7 @@ export const installmentsPDF = (installments) => async (dispatch) => {
    let error = false;
 
    try {
-      await api.post("/pdf/installment/list", installments);
-
-      const pdf = await api.get("/pdf/installment/fetch", {
+      const pdf = await api.post("/pdf/installment/list", installments, {
          responseType: "blob",
       });
 

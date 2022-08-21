@@ -232,19 +232,20 @@ export const transactionsPDF =
       let error = false;
 
       try {
-         if (type === "withdrawal")
-            await api.post(
-               `/pdf/expence/withdrawal-${total ? "list" : "yearly"}`,
-               {
-                  transactions,
-                  total,
-               }
-            );
-         else await api.post("/pdf/expence/list", transactions);
-
-         const pdf = await api.get("/pdf/expence/fetch", {
-            responseType: "blob",
-         });
+         const pdf = await api.post(
+            `/pdf/expence/${
+               type === "withdrawal"
+                  ? `withdrawal-${total ? "list" : "yearly"}`
+                  : "list"
+            }`,
+            {
+               transactions,
+               total,
+            },
+            {
+               responseType: "blob",
+            }
+         );
 
          const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 

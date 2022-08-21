@@ -5,20 +5,12 @@ const format = require("date-fns/format");
 const generatePDF = require("../../../other/generatePDF");
 
 //PDF Templates
-const pdfTemplate = require("../../../templates/list");
 const pdfTemplate2 = require("../../../templates/classInfo");
 
 //Middlewares
 const auth = require("../../../middleware/auth");
 
 const fileName = path.join(__dirname, "../../../reports/classes.pdf");
-
-//@route    GET /api/pdf/class/fetch
-//@desc     Get the pdf of classes
-//@access   Private
-router.get("/fetch", auth, (req, res) => {
-   res.sendFile(fileName);
-});
 
 //@route    POST /api/pdf/class/list
 //@desc     Create a pdf of classes
@@ -59,11 +51,10 @@ router.post("/list", auth, async (req, res) => {
             head,
             body,
             title: "Clases",
-            style: "list",
          },
-         true
+         { type: "list", img: "logo", margin: true, landscape: false }
       );
-      res.json({ msg: "PDF generated" });
+      res.sendFile(fileName);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });
@@ -73,45 +64,52 @@ router.post("/list", auth, async (req, res) => {
 //@route    POST /api/pdf/class/one
 //@desc     Create a pdf of a class
 //@access   Private
-router.post("/one", auth, (req, res) => {
-   const info = req.body;
+router.post("/one", auth, async (req, res) => {
+   const {
+      students,
+      category,
+      teacher,
+      hourin1,
+      hourin2,
+      hourout1,
+      hourout2,
+      day1,
+      day2,
+   } = req.body;
 
-   const tbody = info.students
-      .map(
-         (item) => `<tr>
-      <td>${item.studentnumber}</td>
-      <td>${item.lastname + ", " + item.name}</td>
-      <td>${
-         item.dob ? format(new Date(item.dob.slice(0, -1)), "dd/MM/yy") : ""
-      }</td>
-      <td>${
-         item.dni ? new Intl.NumberFormat("de-DE").format(item.dni) : ""
-      }</td>
-      <td>${
-         item.cel
-            ? item.cel
-            : item.relatedCellphones.length > 0
-            ? `${item.relatedCellphones[0].cel} - ${item.relatedCellphones[0].name} (${item.relatedCellphones[0].relation})`
-            : ""
-      }</td>
-   </tr>`
-      )
-      .join("");
+   const head = ["Legajo", "Nombre", "Fecha de Nacimiento", "DNI", "Celular"];
+
+   const body = students.map((item) => [
+      item.studentnumber,
+      item.lastname + ", " + item.name,
+      item.dob ? format(new Date(item.dob.slice(0, -1)), "dd/MM/yy") : "",
+      item.dni ? new Intl.NumberFormat("de-DE").format(item.dni) : "",
+      item.cel
+         ? item.cel
+         : item.relatedCellphones.length > 0
+         ? `${item.relatedCellphones[0].cel} - ${item.relatedCellphones[0].name} (${item.relatedCellphones[0].relation})`
+         : "",
+   ]);
 
    try {
-      generatePDF(
+      await generatePDF(
          fileName,
-         pdfTemplate2,
-         "classInfo",
          {
-            title: "Alumnos",
-            table: { tbody },
-            info,
+            head,
+            body,
+            title: `Alumnos ${category} de ${teacher}`,
+            category,
+            teacher,
+            day1,
+            hourin1,
+            hourout1,
+            day2,
+            hourin2,
+            hourout2,
          },
-         "portrait",
-         ` - Alumnos ${info.category} de ${info.teacher}`,
-         res
+         { type: "class", img: "logo", margin: true, landscape: false }
       );
+      res.sendFile(fileName);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });

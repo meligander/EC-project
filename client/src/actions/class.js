@@ -222,27 +222,18 @@ export const classPDF = (info, type) => async (dispatch) => {
    let error = false;
 
    try {
-      let pdf;
-      let name = "";
+      const pdf = await api.post(
+         `/pdf/class/${type === "class" ? "one" : "list"}`,
+         info,
+         {
+            responseType: "blob",
+         }
+      );
 
-      switch (type) {
-         case "classes":
-            await api.post("/pdf/class/list", info);
-
-            name = "Clases";
-            break;
-         case "class":
-            await api.post("/pdf/class/one", info);
-
-            name = `Clase ${info.category} de ${info.teacher}`;
-            break;
-         default:
-            break;
-      }
-
-      pdf = await api.get("/pdf/class/fetch", {
-         responseType: "blob",
-      });
+      const name =
+         type === "class"
+            ? `Clase ${info.category} de ${info.teacher}`
+            : "Clases";
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 

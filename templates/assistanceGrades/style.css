@@ -17,7 +17,6 @@
    font-size: 1.5rem;
    margin-top: -1.5rem;
 }
-
 table.attendance th {
    padding: 1rem;
 }
@@ -28,7 +27,7 @@ table.attendance td:not(:first-child) {
    padding: 0.5rem 0;
 }
 
-.all-grades {
+table.all-grades {
    margin-top: 3rem !important;
 }
 

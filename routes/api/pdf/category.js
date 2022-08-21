@@ -9,13 +9,6 @@ const auth = require("../../../middleware/auth");
 
 const fileName = path.join(__dirname, "../../../reports/categories.pdf");
 
-//@route    GET /api/pdf/category/fetch
-//@desc     Get the pdf of categories
-//@access   Private && Admin
-router.get("/fetch", [auth, adminAuth], (req, res) => {
-   res.sendFile(fileName);
-});
-
 //@route    POST api/pdf/category/list
 //@desc     Create a pdf of categories
 //@access   Private && Admin
@@ -39,12 +32,11 @@ router.post("/list", [auth, adminAuth], async (req, res) => {
             head,
             body,
             title: "Categorías",
-            style: "list",
             small: true,
          },
-         false
+         { type: "list", img: "logo", margin: true, landscape: false }
       );
-      res.json({ msg: "PDF generated" });
+      res.sendFile(fileName);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });

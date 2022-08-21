@@ -184,15 +184,17 @@ export const attendancesPDF =
       let error = false;
 
       try {
-         await api.post(`/pdf/attendance/${header ? "list" : "best"}`, {
-            header,
-            attendances,
-            info,
-         });
-
-         const pdf = await api.get("/pdf/attendance/fetch", {
-            responseType: "blob",
-         });
+         const pdf = await api.post(
+            `/pdf/attendance/${header ? "list" : "best"}`,
+            {
+               header,
+               attendances,
+               info,
+            },
+            {
+               responseType: "blob",
+            }
+         );
 
          const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 

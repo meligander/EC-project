@@ -250,12 +250,19 @@ export const gradesPDF = (header, grades, info) => async (dispatch) => {
 
    const data = { header, grades, info };
    try {
-      if (!header) await api.post("/pdf/grade/best", { grades });
-      else {
-         if (info.period !== undefined)
-            await api.post("/pdf/grade/period-list", data);
-         else await api.post("/pdf/grade/list", data);
-      }
+      const pdf = await api.post(
+         `/pdf/grade/${
+            !header
+               ? "best"
+               : info.period !== undefined
+               ? "period-list"
+               : "list"
+         }`,
+         !header ? { grades } : data,
+         {
+            responseType: "blob",
+         }
+      );
 
       const name = !header
          ? `Mejores Asistencias ${info.year}`
@@ -263,10 +270,6 @@ export const gradesPDF = (header, grades, info) => async (dispatch) => {
               new Date(),
               "dd-MM-yy"
            )}`;
-
-      const pdf = await api.get("/pdf/grade/fetch", {
-         responseType: "blob",
-      });
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 

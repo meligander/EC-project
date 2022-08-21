@@ -280,11 +280,13 @@ export const userPDF = (users, userSearchType) => async (dispatch) => {
    let error = false;
 
    try {
-      await api.post("/pdf/user/list", { users, usersType: userSearchType });
-
-      const pdf = await api.get("/pdf/user/fetch", {
-         responseType: "blob",
-      });
+      const pdf = await api.post(
+         "/pdf/user/list",
+         { users, usersType: userSearchType },
+         {
+            responseType: "blob",
+         }
+      );
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 

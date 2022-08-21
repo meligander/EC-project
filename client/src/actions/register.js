@@ -160,9 +160,7 @@ export const registerPDF = (registers) => async (dispatch) => {
    let error = false;
 
    try {
-      await api.post("/pdf/register/list", registers);
-
-      const pdf = await api.get("/pdf/register/fetch", {
+      const pdf = await api.post("/pdf/register/list", registers, {
          responseType: "blob",
       });
 

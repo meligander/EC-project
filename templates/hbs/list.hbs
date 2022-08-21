@@ -1,37 +1,56 @@
 <html>
    <head>
       <meta charset="utf-8">
-      <title>Lista de {{title}}</title>
+      <title>
+         {{#if category}}
+            Curso de {{category}}
+         {{else}}
+            Lista de {{title}}
+         {{/if}}
+      </title>
    </head>
    <body>
-      {{!-- <div class="header">
-         <img class='header-img' src="data:image/jpeg;base64,{{img}}" alt="logo">
-      </div> --}}
-      <div class='container'>
-         {{#if title}}
-            <h2 {{#if small}} class="title big" {{else}} class="title" {{/if}} >Lista de {{title}}</h2>
-         {{/if}}
-         <table {{#if small}} class="small" {{/if}} >
-            <thead>
-               <tr>
-                  {{#each head as |item|}}
+      {{#if title}}
+         <h2 {{#if small}} class="title big" {{else}} class="title" {{/if}} >Lista de {{title}}</h2>
+      {{/if}}
+      {{#if teacher}}
+         <div class="subtitle">
+            <h3 class="teacher">
+               Profesor: {{teacher}}
+            </h3>
+            <h4 class="category">
+               {{category}}
+            </h4>
+         </div>
+      {{/if}}
+      <table {{#if small}} class="small" {{/if}} {{#if type}} class={{type}} {{/if}}>
+         <thead>
+            <tr>
+               {{#each head as |item|}}
+                  {{#ifAnd ../blank @first}}
+                     <th class="blank">{{item}}</th>
+                  {{else}}
                      <th>{{item}}</th>
+                  {{/ifAnd}}
+               {{/each}}
+            </tr>
+         </thead>
+         <tbody>
+            {{#each body as |row|}}
+               <tr>
+                  {{#each row as |td|}}
+                     {{#ifAnd ../../firstth @first}}
+                        <th class="small">{{td}}</th>
+                     {{else}}
+                        <td>{{td}}</td>
+                     {{/ifAnd}}
                   {{/each}}
                </tr>
-            </thead>
-            <tbody>
-               {{#each body as |row|}}
-                  <tr>
-                     {{#each row as |td|}}
-                        <td>{{td}}</td>
-                     {{/each}}
-                  </tr>
-               {{/each}}
-            </tbody>
-         </table>
-         {{#if total}}
-            <p>{{total}}</p>
-         {{/if}}
-      </div>
+            {{/each}}
+         </tbody>
+      </table>
+      {{#if total}}
+         <p class="total">Total: ${{total}}</p>
+      {{/if}}
    </body>
 </html>

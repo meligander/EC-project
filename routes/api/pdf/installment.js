@@ -28,48 +28,33 @@ const installments = [
    "Diciembre",
 ];
 
-//@route    GET /api/pdf/installment/fetch
-//@desc     Get the pdf of installments
-//@access   Private && Admin
-router.get("/fetch", [auth, adminAuth], (req, res) => {
-   res.sendFile(fileName);
-});
-
 //@route    POST /api/installment/list
 //@desc     Create a pdf of installments
 //@access   Private && Admin
-router.post("/list", [auth, adminAuth], (req, res) => {
+router.post("/list", [auth, adminAuth], async (req, res) => {
    const debts = req.body;
 
-   const tbody = debts
-      .map(
-         (item) => `
-      <tr>
-         <td>${item.student.lastname + ", " + item.student.name}</td>
-         <td>${installments[item.number]}</td>
-         <td>${item.year}</td>
-         <td>${item.enrollment && item.enrollment.category.name}</td>
-         <td>$ ${new Intl.NumberFormat("de-DE").format(item.value)}</td>
-      </tr>`
-      )
-      .join("");
+   const head = ["Nombre", "Cuota", "Año", "Categoría", "Valor"];
 
-   const thead =
-      "<th>Nombre</th> <th>Cuota</th> <th>Año</th> <th>Categoría</th> <th>Valor</th>";
+   const body = debts.map((item) => [
+      item.student.lastname + ", " + item.student.name,
+      installments[item.number],
+      item.year,
+      item.enrollment && item.enrollment.category.name,
+      new Intl.NumberFormat("de-DE").format(item.value),
+   ]);
 
    try {
-      generatePDF(
+      await generatePDF(
          fileName,
-         pdfTemplate,
-         "list",
          {
+            head,
+            body,
             title: "Deudas",
-            table: { thead, tbody },
          },
-         "portrait",
-         "Deudas",
-         res
+         { type: "list", img: "logo", margin: true, landscape: false }
       );
+      res.sendFile(fileName);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });

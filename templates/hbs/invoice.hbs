@@ -1,0 +1,76 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>Factura</title>
+   </head>
+   <body>
+      <table class="invoice-info">
+         <tbody>
+            <tr>
+               <td>
+                  <h3 class="business">
+                     Villa de Merlo English Centre
+                  </h3>
+                  <p>Coronel Mercau 783</p>
+                  <p>Villa de Merlo, San Luis, Argentina</p>
+                  <p>(266) 5295429</p>
+               </td>
+               <td class="text-right">
+                  <img
+                     class="logo"
+                     src="data:image/jpeg;base64,{{img}}"
+                     alt="logo"
+                  />
+               </td>
+            </tr>
+            <tr class="blank"></tr>
+            <tr>
+               <td>
+                  <p>Cliente:</p>
+                  <p>{{user.name}}</p>
+                  {{#if user.email}}
+                     <p>{{user.email}}</p>
+                  {{/if}}
+                  {{#if user.cel}}
+                     <p>{{user.cel}}</p>
+                  {{/if}}
+               </td>
+               <td class="invoice-info text-right">
+                  <p>N° Factura: {{invoiceid}}</p>
+                  <p>Fecha: {{date}}</p>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+      <table class="details">
+         <thead>
+            <tr>
+               <th>Nombre</th>
+               <th>Cuota</th>
+               <th>Año</th>
+               <th>Importe</th>
+               <th>Pago</th>
+            </tr>
+         </thead>
+         <tbody>
+            {{#each body as |row|}}
+               <tr>
+                  {{#each row as |td|}}
+                     <td>{{td}}</td>
+                  {{/each}}
+               </tr>
+            {{/each}}
+         </tbody>
+      </table>
+      <div class="text-right summary">
+         <div>
+            <p class="title">Saldo: </p>
+            <p class="value">${{remaining}}</p>
+         </div>
+         <div>
+            <p class="title">Total: </p>
+            <p class="value">${{total}}</p>
+         </div>
+      </div>
+   </body>
+</html>

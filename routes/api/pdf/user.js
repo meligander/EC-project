@@ -7,22 +7,12 @@ const generatePDF = require("../../../other/generatePDF");
 //Middleware
 const auth = require("../../../middleware/auth");
 
-//PDF Templates
-const pdfTemplate = require("../../../templates/list");
-
 const fileName = path.join(__dirname, "../../../reports/users.pdf");
-
-//@route    GET /api/pdf/user/fetch
-//@desc     Get the pdf of users
-//@access   Private
-router.get("/fetch", auth, (req, res) => {
-   res.sendFile(fileName);
-});
 
 //@route    POST /api/pdf/user/list
 //@desc     Create a pdf of users
 //@access   Private
-router.post("/list", auth, (req, res) => {
+router.post("/list", auth, async (req, res) => {
    const { users, usersType } = req.body;
 
    if (users.length === 0)
@@ -31,40 +21,62 @@ router.post("/list", auth, (req, res) => {
       });
 
    const title = getType(usersType);
-   const thead = getTHead(usersType);
+   const head = getTHead(usersType);
 
-   const tbody = users
-      .map(
-         (item) => `<tr>
-      ${usersType === "student" ? `<td>${item.studentnumber}</td>` : ""}
-      <td>${item.lastname + ", " + item.name}</td>
-      ${usersType === "student" ? `<td>${item.dni ? item.dni : ""}</td>` : ""}
-      <td>${item.email ? item.email : ""}</td>
-      <td>${
-         item.cel
-            ? item.cel
-            : item.relatedCellphones.length > 0
-            ? `${item.relatedCellphones[0].cel} - ${item.relatedCellphones[0].name} (${item.relatedCellphones[0].relation})`
-            : ""
-      }</td>
-      ${getTbody(usersType, item)}
-   </tr>`
-      )
-      .join("");
+   const body = users.map((item) => {
+      if (usersType === "student")
+         return [
+            item.studentnumber,
+            item.lastname + ", " + item.name,
+            item.dni ? item.dni : "",
+            item.email ? item.email : "",
+            item.cel
+               ? item.cel
+               : item.relatedCellphones.length > 0
+               ? `${item.relatedCellphones[0].cel} - ${item.relatedCellphones[0].name} (${item.relatedCellphones[0].relation})`
+               : "",
+            format(new Date(item.dob.slice(0, -1)), "dd/MM/yy"),
+            item.category ? item.category : "",
+         ];
+      else {
+         const array = [
+            item.lastname + ", " + item.name,
+            item.email ? item.email : "",
+            item.cel ? item.cel : "",
+         ];
+
+         if (usersType === "guardian")
+            array.push(
+               item.children.length > 0
+                  ? item.children[0].lastname + ", " + item.children[0].name
+                  : ""
+            );
+         else {
+            array.push(format(new Date(item.dob.slice(0, -1)), "dd/MM"));
+            if (usersType === "admin")
+               array.push(
+                  item.type === "admin"
+                     ? "Administrador"
+                     : item.type === "admin&teacher"
+                     ? "Profesor y Admin"
+                     : "Secretari@"
+               );
+         }
+         return array;
+      }
+   });
 
    try {
-      generatePDF(
+      await generatePDF(
          fileName,
-         pdfTemplate,
-         "list",
          {
+            head,
+            body,
             title,
-            table: { thead, tbody },
          },
-         "landscape",
-         title,
-         res
+         { type: "list", img: "logo", margin: true, landscape: true }
       );
+      res.sendFile(fileName);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });
@@ -75,13 +87,21 @@ router.post("/list", auth, (req, res) => {
 const getTHead = (type) => {
    switch (type) {
       case "student":
-         return "<th>Legajo</th><th>Nombre</th><th>DNI</th><th>Email</th><th>Celular</th><th>Fecha Nacimiento</th><th>Categoría</th>";
+         return [
+            "Legajo",
+            "Nombre",
+            "DNI",
+            "Email",
+            "Celular",
+            "Fecha Nacimiento",
+            "Categoría",
+         ];
       case "guardian":
-         return "<th>Nombre</th><th>Email</th><th>Celular</th><th>Nombre Alumno</th>";
+         return ["Nombre", "Email", "Celular", "Nombre Alumno"];
       case "teacher":
-         return "<th>Nombre</th><th>Email</th><th>Celular</th><th>Fecha Nacimiento</th>";
+         return ["Nombre", "Email", "Celular", "Fecha Nacimiento"];
       case "admin":
-         return "<th>Nombre</th><th>Email</th><th>Celular</th><th>Fecha Nacimiento</th><th>Rol</th>";
+         return ["Nombre", "Email", "Celular", "Fecha Nacimiento", "Rol"];
       default:
          return "";
    }
@@ -98,33 +118,6 @@ const getType = (type) => {
          return "Profesores";
       case "admin":
          return "Administradores";
-      default:
-         return "";
-   }
-};
-
-//@desc Function to get the body
-const getTbody = (type, item) => {
-   switch (type) {
-      case "student":
-         return `<td>${format(new Date(item.dob.slice(0, -1)), "dd/MM/yy")}</td>
-         <td>${item.category ? item.category : ""}</td>`;
-      case "guardian":
-         if (item.children.length > 0)
-            return `<td>${
-               item.children[0].lastname + ", " + item.children[0].name
-            }</td>`;
-      case "teacher":
-         return `<td>${format(new Date(item.dob.slice(0, -1)), "dd/MM")}</td>`;
-      case "admin":
-         const typeName =
-            item.type === "admin"
-               ? "Administrador"
-               : item.type === "admin&teacher"
-               ? "Profesor y Admin"
-               : "Secretari@";
-         return `<td>${format(new Date(item.dob.slice(0, -1)), "dd/MM")}</td>
-               <td>${typeName}</td>`;
       default:
          return "";
    }
