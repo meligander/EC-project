@@ -10,29 +10,62 @@ table {
    width: 100%;
 }
 .business {
-   font-size: 2rem;
+   font-size: 1.8rem;
    font-family: "Dancing Script", cursive;
-   margin-bottom: 0rem;
+   margin: -2rem 0 0;
 }
 .text-right {
    text-align: right;
 }
 .logo {
-   width: 11rem;
-   height: 11rem;
+   width: 12rem;
+   height: 12rem;
 }
 table.invoice-info {
    position: relative;
 }
 table.invoice-info td.invoice-info {
    position: absolute;
-   bottom: 0;
-   right: 3rem;
+   bottom: -1rem;
+   right: 2rem;
 }
 table.invoice-info tr.blank {
-   height: 2rem;
+   height: 1rem;
 }
 table.details {
    text-align: center;
    margin-top: 2rem;
+}
+
+table.details thead {
+   display: table-header-group;
+   background-color: #dadddd;
+}
+table.details th,
+table.details td {
+   border: 1px solid #333;
+}
+table.details th {
+   padding: 0.8rem 1.5rem;
+}
+table.details td {
+   font-weight: 300;
+   padding: 0.5rem 1rem;
+}
+.summary {
+   position: absolute;
+   bottom: 2rem;
+   right: 1.3rem;
+}
+.title,
+.value {
+   display: inline-block;
+   padding: 0.8rem 1.5rem;
+   margin: 0;
+}
+.title {
+   font-size: 1.4rem;
+}
+.value {
+   width: 5rem;
 }

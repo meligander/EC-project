@@ -296,12 +296,14 @@ export const gradesPDF = (header, grades, info) => async (dispatch) => {
 };
 
 export const certificatePDF =
-   (header, grades, date, info, last) => async (dispatch) => {
+   (grades, date, info, last) => async (dispatch) => {
       dispatch(updateLoadingSpinner(true));
       let error = false;
 
       try {
-         if (last || !date || !info.students.some((item) => item.checked)) {
+         info.students = info.students.filter((item) => item.checked);
+
+         if (last || !date || info.students.length === 0) {
             const errorMessage = {
                response: {
                   status: 402,
@@ -317,39 +319,37 @@ export const certificatePDF =
             throw errorMessage;
          }
 
-         let newInfo = {
-            header,
-            info,
-            date,
-         };
-
          for (let x = 0; x < info.students.length; x++) {
-            if (info.students[x].checked) {
-               newInfo = {
-                  ...newInfo,
-                  student: info.students[x],
-                  grades: grades[x],
-               };
+            const newInfo = {
+               info,
+               date,
+               student: info.students[x],
+               grades: grades.find(
+                  (item) => item[0].student._id === info.students[x]._id
+               ),
+               keepOpen: x + 1 !== info.students.length,
+            };
 
-               if (info.period === 5)
-                  await api.post("/pdf/grade/cambridge", newInfo);
-               else await api.post("/pdf/grade/certificate", newInfo);
-
-               const pdf = await api.get("/pdf/grade/fetch", {
+            const pdf = await api.post(
+               info.period === 5
+                  ? "/pdf/grade/cambridge"
+                  : "/pdf/grade/certificate",
+               newInfo,
+               {
                   responseType: "blob",
-               });
+               }
+            );
 
-               const pdfBlob = new Blob([pdf.data], {
-                  type: "application/pdf",
-               });
+            const pdfBlob = new Blob([pdf.data], {
+               type: "application/pdf",
+            });
 
-               saveAs(
-                  pdfBlob,
-                  `Certificado ${info.category} ${
-                     info.period === 6 ? "Cambridge" : ""
-                  } ${info.students[x].name}.pdf`
-               );
-            }
+            saveAs(
+               pdfBlob,
+               `Certificado ${info.category} ${
+                  info.period === 6 ? "Cambridge" : ""
+               } ${info.students[x].name}.pdf`
+            );
          }
 
          dispatch(togglePopup("default"));

@@ -3,9 +3,6 @@ const path = require("path");
 
 const generatePDF = require("../../../other/generatePDF");
 
-//PDF Templates
-const pdfTemplate = require("../../../templates/list");
-
 //Middleware
 const auth = require("../../../middleware/auth");
 const adminAuth = require("../../../middleware/adminAuth");

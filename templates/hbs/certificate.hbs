@@ -1,0 +1,79 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>Certificado fin de año</title>
+   </head>
+   <body>
+      <table class="header">
+         <tbody>
+            <tr>
+               <td class="logo">
+                  <img
+                     class="logo-img"
+                     src="data:image/jpeg;base64,{{img}}"
+                     alt="logo"
+                  />
+               </td>
+               <td class="business">
+                  <h4>
+                     De Lilia Cristina Anderlini
+                  </h4>
+                  <p>Profesora de inglés</p>
+                  <p>Universidad Nacional de Córdoba</p>
+                  <p>Coronel Mercau 783 Tel: (266) 529-5429</p>
+                  <p>Villa de Merlo, San Luis, Argentina</p>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+      <div class="main">
+         <div class="student">
+            <p>Se extiende el presente CERTIFICADO a favor de:</p>
+            <h2 class="text-center capital">{{student}}</h2>
+            <h3 class="text-right"><span class="lighter">DNI:</span>&nbsp;
+               {{dni}}
+            </h3>
+         </div>
+         <div class="class {{#if high}}high{{/if}} {{#if mention}}mention{{/if}}">
+            {{#if pass}}
+                {{#if high}}
+                    <p>Quien ha culminado el curso de inglés conforme al plan de estudios,</p>
+                    <p>correspondiente a<span class="category-name capital">&nbsp;{{category}}&nbsp;</span>a nivel <span class="capital">&nbsp;{{title}}</span></p>
+                    <p>con las siguientes calificaciones:</p>
+               {{else}}
+                    <p class="category">Quien ha rendido los exámenes correspondientes a: <span class="category-name capital">{{category}}</span></p>
+                    <p>con las siguientes calificaciones: </p>
+               {{/if}}
+            {{else}}
+               <p class="category">Quien ha cursado durante el año el curso de inglés denominado: <span class="category-name capital">{{category}}</span></p>
+               {{#if mention}}
+                  <p class="mention">Mención:&nbsp;<span class="title">&nbsp;{{mention}}</span></p>
+               {{/if}}
+            {{/if}}
+         </div>
+         {{#if pass}}
+            <table class="grades {{#if high}} full {{/if}}">
+                {{#each finals as |row|}}
+                    <tr>
+                        {{#if_even @index}}
+                            {{#each  row as |grade|}}
+                                <th>{{grade}}</th>
+                            {{/each}}
+                        {{else}}
+                            {{#each  row as |grade|}}
+                                <td>{{grade}}</td>
+                            {{/each}}
+                        {{/if_even}}
+                    </tr>
+                {{/each}}
+            </table>
+         {{/if}}
+         <p class="date">Villa de Merlo, SL, {{date}}</p>
+         <div class="signature">
+            <p class="line"></p>
+            <p>Directora</p>
+            <p>Lilia Cristina Anderlini</p>
+         </div>
+      </div>
+   </body>
+</html>

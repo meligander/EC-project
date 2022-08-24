@@ -1,0 +1,57 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>Certificado fin de año</title>
+   </head>
+   <body>
+      <div class="header text-center">
+         <img
+            class="logo"
+            src="data:image/jpeg;base64,{{img.logo}}"
+            alt="logo"
+         />
+         <h4>De Lilia Cristina Anderlini</h4>
+      </div>
+      <div class="main">
+         <div class="student">
+            <p>Se extiende el presente CERTIFICADO a favor de:</p>
+            <h2 class="text-center capital">{{student}}</h2>
+            <h3 class="text-right"><span class="lighter">DNI:</span>&nbsp;
+               {{dni}}</h3>
+         </div>
+         <div class="grades">
+            <p>Quien ha rendido el exámen de Inglés equivalente a :</p>
+            <h3 class="capital text-center">Cambridge -Young Learners-</h3>
+            <p class="level">
+                <span class="level-title">Nivel:</span>
+                <span class="level capital">{{level}}</span>
+                <span>con las siguientes calificaciones:</span>
+            </p>
+            <table>
+               {{#each grades as |grade|}}
+                  <tr>
+                     <td class="name">{{grade.name}}</td>
+                     {{#each grade.imgs as |img|}}
+                        <td><img
+                              class="grades-logo"
+                              src="data:image/jpeg;base64,{{#if_img ../value img ../../img}}{{/if_img}}"
+                              alt="logo"
+                           /></td>
+                     {{/each}}
+                     <td class="percentage">{{grade.average}}</td>
+                  </tr>
+               {{/each}}
+            </table>
+            <p class="average"><span class="capital">Promedio:</span>
+               &nbsp;
+               {{average}}%</p>
+         </div>
+         <p class="date">Villa de Merlo, SL, {{date}}</p>
+         <div class="signature">
+            <p class="line"></p>
+            <p>Directora</p>
+            <p>Lilia Cristina Anderlini</p>
+         </div>
+      </div>
+   </body>
+</html>

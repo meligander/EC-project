@@ -129,7 +129,6 @@ const GradesTab = ({
                      break;
                   case "certificate":
                      certificatePDF(
-                        header[period - 1],
                         periods[period - 1],
                         formInfo.date !== ""
                            ? format(

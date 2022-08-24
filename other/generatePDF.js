@@ -3,12 +3,28 @@ const fs = require("fs-extra");
 const hbs = require("handlebars");
 const path = require("path");
 
-hbs.registerHelper("ifAnd", (v1, v2, options) => {
+hbs.registerHelper("if_and", (v1, v2, options) => {
    if (v1 && v2) return options.fn(this);
    return options.inverse(this);
 });
 
-const generatePDF = async (fileName, data, style) => {
+hbs.registerHelper("if_even", (conditional, options) => {
+   if (conditional % 2 == 0) return options.fn(this);
+   else return options.inverse(this);
+});
+
+hbs.registerHelper("if_or", (v1, v2, options) => {
+   if (v1 || v2) return options.fn(this);
+   else return options.inverse(this);
+});
+
+hbs.registerHelper("if_img", (average, value, imgs) => {
+   if (average >= value) return imgs.logo;
+   if (average > value - 20 && average < value) return imgs.halfHalf;
+   return imgs.gray;
+});
+
+const generatePDF = async (fileName, data, style, keepOpen) => {
    const browser = await puppeteer.launch({
       executablePath:
          process.env.LOCATION === "localhost"
@@ -33,7 +49,7 @@ const generatePDF = async (fileName, data, style) => {
       format: "A4",
       printBackground: true,
       landscape: style.landscape,
-      ...(["cert", "cert-cdg", "invoice"].indexOf(style.type) === -1 && {
+      ...(["list", "class", "allGrades"].indexOf(style.type) !== -1 && {
          displayHeaderFooter: true,
          headerTemplate: style.margin
             ? `
@@ -59,7 +75,7 @@ const generatePDF = async (fileName, data, style) => {
 
    console.log("PDF done");
 
-   await browser.close();
+   if (!keepOpen) await browser.close();
 };
 
 const loadImg = (type) => {

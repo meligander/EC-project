@@ -3,7 +3,7 @@ import { saveAs } from "file-saver";
 import history from "../utils/history";
 
 import { setAlert } from "./alert";
-import { updateLoadingSpinner, setError } from "./global";
+import { updateLoadingSpinner, setError, togglePopup } from "./global";
 
 import {
    OBSERVATIONS_CLEARED,
@@ -60,6 +60,8 @@ export const reportcardPDF = (students, info) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
    try {
+      students = students.filter((item) => item.checked);
+
       if (students.length === 0) {
          const errorMessage = {
             response: {
@@ -71,36 +73,33 @@ export const reportcardPDF = (students, info) => async (dispatch) => {
          };
          throw errorMessage;
       }
+
       for (let x = 0; x < students.length; x++) {
-         if (students[x].checked) {
-            await api.post("/pdf/observation/report-card", {
+         const pdf = await api.post(
+            "/pdf/observation/report-card",
+            {
                student: students[x],
                info,
-            });
-
-            const pdf = await api.get("/pdf/observation/fetch", {
+               keepOpen: x + 1 !== students.length,
+            },
+            {
                responseType: "blob",
-            });
+            }
+         );
 
-            const pdfBlob = new Blob([pdf.data], {
-               type: "application/pdf",
-            });
+         const pdfBlob = new Blob([pdf.data], {
+            type: "application/pdf",
+         });
 
-            saveAs(
-               pdfBlob,
-               `Certificado ${info.category} ${
-                  info.period === 6 ? "Cambridge" : ""
-               }  ${students[x].name}.pdf`
-            );
-         }
+         saveAs(pdfBlob, `Libreta ${students[x].name} ${info.category}.pdf`);
       }
 
+      dispatch(togglePopup("default"));
       dispatch(setAlert("Libretas Generadas", "success", "2"));
    } catch (err) {
-      console.log(err);
       if (err.response.status !== 401) {
          dispatch(setError(OBSERVATIONS_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         dispatch(setAlert(err.response.data.msg, "danger", "4"));
       } else error = true;
    }
 

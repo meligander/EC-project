@@ -7,14 +7,20 @@ body {
    font-weight: 100;
    font-size: 2.8rem;
    text-decoration: underline 1px;
-   margin: -1rem 0 2rem;
+   margin: -0.7rem 0 2rem;
 }
 .title.big {
    font-size: 3.3rem;
 }
 .subtitle {
    text-align: start;
+   font-size: 1.2rem;
+   margin: -0.7rem 0 1.5rem;
+}
+.subtitle h3 {
+   margin: 0.8rem 0 0;
    font-family: "Courgette", cursive;
+   font-weight: 100;
 }
 table {
    border-collapse: collapse;
@@ -50,37 +56,12 @@ table td {
 table.attendance th {
    padding: 1rem;
 }
-table.attendance th:not(:first-child),
-table.attendance td:not(:first-child) {
-   font-size: 1.2rem;
-   padding: 0.5rem 0;
-}
-table.all-grades {
-   margin-top: 3rem !important;
-}
-
-table.all-grades th,
-table.all-grades td:not(:first-child) {
-   padding: 0.7rem;
+table.attendance th:not(:first-child) {
+   padding: 0.5rem 0.2rem;
+   font-size: 0.9rem;
 }
 .total {
    text-align: end;
    font-size: 2rem;
    margin-top: 3rem;
-}
-.border {
-   border: 3px solid #333;
-   border-bottom: 2px solid #333;
-}
-
-.border-right {
-   border-right: 3px solid #333 !important;
-}
-
-.border-bottom {
-   border-bottom: 3px solid #333;
-}
-
-.no-border {
-   border: none;
 }

@@ -11,27 +11,27 @@
    </head>
    <body>
       {{#if title}}
-         <h2 {{#if small}} class="title big" {{else}} class="title" {{/if}} >Lista de {{title}}</h2>
+         <h2 class="title{{#if small}} big{{/if}}">Lista de {{title}}</h2>
       {{/if}}
       {{#if teacher}}
          <div class="subtitle">
-            <h3 class="teacher">
+            <h3>
                Profesor: {{teacher}}
             </h3>
-            <h4 class="category">
-               {{category}}
-            </h4>
+            <h3>
+               Curso: {{category}}
+            </h3>
          </div>
       {{/if}}
-      <table {{#if small}} class="small" {{/if}} {{#if type}} class={{type}} {{/if}}>
+      <table class="{{#if small}}small {{/if}}{{#if type}}type{{/if}}">
          <thead>
             <tr>
                {{#each head as |item|}}
-                  {{#ifAnd ../blank @first}}
+                  {{#if_and ../blank @first}}
                      <th class="blank">{{item}}</th>
                   {{else}}
                      <th>{{item}}</th>
-                  {{/ifAnd}}
+                  {{/if_and}}
                {{/each}}
             </tr>
          </thead>
@@ -39,11 +39,11 @@
             {{#each body as |row|}}
                <tr>
                   {{#each row as |td|}}
-                     {{#ifAnd ../../firstth @first}}
+                     {{#if_and ../../firstth @first}}
                         <th class="small">{{td}}</th>
                      {{else}}
                         <td>{{td}}</td>
-                     {{/ifAnd}}
+                     {{/if_and}}
                   {{/each}}
                </tr>
             {{/each}}

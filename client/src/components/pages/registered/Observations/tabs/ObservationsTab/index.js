@@ -66,6 +66,7 @@ const ObservationsTab = ({
                   ? "¿Está seguro que desea guardar los cambios"
                   : { students: observations[period - 1], period }
             }
+            error
          />
          <div className="wrapper both mt-2">
             <table className="stick">

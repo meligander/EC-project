@@ -1,0 +1,122 @@
+body {
+   font-family: "Tinos", serif;
+   margin: 3.5rem 3.8rem;
+   border: 2.5px solid #333;
+}
+.text-right {
+   text-align: right;
+}
+.text-center {
+   text-align: center;
+}
+.lighter {
+   font-weight: lighter;
+}
+table {
+   border-collapse: collapse;
+   text-align: center;
+}
+table.header {
+   width: 100%;
+}
+table.header td {
+   border-bottom: 2.5px solid black;
+}
+table.header .logo {
+   border-right: 2.5px solid black;
+   width: 35%;
+}
+table.header .logo-img {
+   height: 13rem;
+   width: 13rem;
+}
+table.header .business {
+   font-size: 1.2rem;
+   padding: 1.5rem;
+}
+.main {
+   padding: 3rem 1rem 2rem;
+   font-size: 1.2rem;
+}
+.capital {
+   text-transform: uppercase;
+   font-weight: bold;
+}
+.student * {
+   padding: 0.4rem 0;
+}
+.student h2 {
+   font-size: 1.6rem;
+}
+.student h3 {
+   font-size: 1.3rem;
+}
+.category {
+   display: flex;
+   justify-content: space-between;
+}
+.category-name {
+   font-size: 1.3rem;
+}
+.certificate {
+   margin: 2.5rem 1.5rem;
+}
+.certificate-name {
+   font-size: 1.25rem;
+}
+.class {
+   margin-top: 3rem;
+}
+.class p {
+   margin: 0.7rem 0;
+}
+.class.high p {
+   margin: 0.6rem 0;
+}
+.class.mention {
+   margin-top: 3.5rem;
+}
+.class .mention {
+   text-transform: uppercase;
+   text-align: right;
+   font-size: 1.5rem;
+   margin: 6rem 1rem 0 0;
+}
+.class .mention .title {
+   font-size: 1.8rem;
+   font-weight: bold;
+}
+table.grades {
+   margin: 2.5rem auto 0;
+   width: 75%;
+   font-size: 1.2rem;
+   table-layout: fixed;
+}
+table.grades th,
+table.grades td {
+   border: 3px solid black;
+   padding: 0.4rem 0;
+}
+table.full {
+   width: 100% !important;
+}
+.date {
+   font-size: 1rem;
+   position: absolute;
+   bottom: 11.5rem;
+}
+.signature {
+   position: absolute;
+   font-size: 0.9rem;
+   bottom: 4.5rem;
+   left: 38%;
+   text-align: center;
+}
+.signature .line {
+   border-top: 1px solid black;
+   width: 13rem;
+}
+.signature * {
+   padding: 0.2rem 0;
+   margin: 0;
+}

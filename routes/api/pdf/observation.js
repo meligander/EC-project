@@ -3,11 +3,7 @@ const path = require("path");
 
 const generatePDF = require("../../../other/generatePDF");
 
-//PDF Templates
-const pdfTemplate = require("../../../templates/reportCard");
-
 //Middlewares
-const adminAuth = require("../../../middleware/adminAuth");
 const auth = require("../../../middleware/auth");
 
 const Grade = require("../../../models/Grade");
@@ -17,13 +13,6 @@ const fileName = path.join(__dirname, "../../../reports/reportCard.pdf");
 
 const highDegree = ["6° Año", "CAE", "Proficiency"];
 
-//@route    GET /api/pdf/observation/fetch
-//@desc     Get the pdf of observation
-//@access   Private && Admin
-router.get("/fetch", [auth, adminAuth], (req, res) => {
-   res.sendFile(fileName);
-});
-
 //@route    POST /api/observation/report-card
 //@desc     Create a pdf of student's report card
 //@access   Private
@@ -31,6 +20,7 @@ router.post("/report-card", auth, async (req, res) => {
    const {
       student,
       info: { period, classroom, teacher, category },
+      keepOpen,
    } = req.body;
 
    const high = highDegree.some((item) => item === category);
@@ -38,6 +28,7 @@ router.post("/report-card", auth, async (req, res) => {
    let grades = [];
    let attendances = [];
    let finalGrades = [];
+   let finals = [];
    let totalAttendances = 0;
 
    try {
@@ -89,94 +80,80 @@ router.post("/report-card", auth, async (req, res) => {
       return res;
    }, []);
 
-   const gradesTable = Object.keys(grades)
-      .map(
-         (key) => `
-   <tr>
-        <td>${key}</td>
-        ${grades[key]
-           .map(
-              (item) => `<td>${item.value ? getGrade(item, category) : ""}</td>`
-           )
-           .join("")}
-   </tr>`
-      )
-      .join("");
+   const gradesTable = Object.keys(grades).map((key) => [
+      key,
+      ...grades[key].map((item) =>
+         item.value ? getGrade(item, category) : ""
+      ),
+   ]);
 
-   let finalTable = "";
+   const average = high
+      ? Math.round(
+           ((finalGrades.reduce((accum, item) => accum + item.value, 0) /
+              finalGrades.length) *
+              10 +
+              Number.EPSILON) *
+              100
+        ) / 100
+      : 0;
 
    if (finalGrades.length > 0 && period === 4) {
-      let fHeader = "";
-      let fBody = "";
-      let average =
-         finalGrades.reduce((accum, item) => accum + item.value, 0) /
-         finalGrades.length;
+      let headers = [];
+      let body = [];
 
       for (let x = 0; x < finalGrades.length; x++) {
-         fHeader += `<th>${finalGrades[x].gradetype.name}</th>`;
-         fBody += `<td>${getGrade(finalGrades[x], category, false)}</td>`;
+         headers.push(finalGrades[x].gradetype.name);
+         body.push(getGrade(finalGrades[x], category));
 
-         if (x + 1 === finalGrades.length) {
-            if (high) {
-               average =
-                  Math.round((average * 10 + Number.EPSILON) * 100) / 100;
-
-               fBody += `<td>${average}%</td>`;
-               fHeader += "<th>Promedio</th>";
-               finalTable +=
-                  "<tr>" + fHeader + "</tr><tr>" + fBody + "</tr></table>";
-            } else {
-               if (fHeader !== "")
-                  finalTable +=
-                     "<tr>" + fHeader + "</tr><tr>" + fBody + "</tr></table>";
-               else finalTable += "</table>";
-            }
-         } else {
-            if ((high && (x + 1) % 3 === 0) || (!high && (x + 1) % 2 === 0)) {
-               finalTable += "<tr>" + fHeader + "</tr><tr>" + fBody + "</tr>";
-               fHeader = "";
-               fBody = "";
-            }
+         if (
+            (high && (x + 1) % 3 === 0) ||
+            (!high && (x + 1) % 2 === 0) ||
+            (high && x + 1 === finalGrades.length)
+         ) {
+            finals.push(
+               high && x + 1 === finalGrades.length
+                  ? [...headers, "Promedio"]
+                  : headers
+            );
+            finals.push(
+               high && x + 1 === finalGrades.length
+                  ? [...body, average + "%"]
+                  : body
+            );
+            headers = [];
+            body = [];
          }
       }
-
-      finalTable = `<h4 class='center grade-title'>Exámen Final</h4>
-    <table class='final-grades' ${!high ? "small" : ""}${finalTable}</table>`;
    }
 
-   const attendancesTable = `<tbody>
-        ${Object.keys(attendances)
-           .map(
-              (key) =>
-                 `<td>${
-                    key > period
-                       ? ""
-                       : attendances[key].length > 0
-                       ? attendances[key].length
-                       : "-"
-                 }</td>`
-           )
-           .join("")}
-        <td>${totalAttendances}</td>
-   </tbody>`;
+   const attendancesTable = [
+      ...Object.keys(attendances).map((key) =>
+         key > period
+            ? ""
+            : attendances[key].length > 0
+            ? attendances[key].length
+            : "-"
+      ),
+      totalAttendances,
+   ];
 
    try {
-      generatePDF(
+      await generatePDF(
          fileName,
-         pdfTemplate,
-         "reportCard",
          {
-            student,
-            category,
+            student: student.name,
             teacher,
+            high,
+            category,
+            allGrades: gradesTable,
+            finals,
             attendances: attendancesTable,
-            finalTable,
-            gradesTable,
+            observation: student.observation.description,
          },
-         null,
-         null,
-         res
+         { type: "reportCard", img: "logo", margin: false, landscape: false },
+         keepOpen
       );
+      res.sendFile(fileName);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "PDF Error" });

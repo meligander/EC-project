@@ -1,0 +1,88 @@
+body {
+   font-family: "Tinos", serif;
+   margin: 3.5rem 3.8rem;
+   border: 2.5px solid #333;
+   padding: 1rem;
+   font-size: 1.2rem;
+}
+.text-right {
+   text-align: right;
+}
+.text-center {
+   text-align: center;
+}
+.header h4 {
+   margin-top: 0;
+}
+.header img.logo {
+   width: 13rem;
+   height: 13rem;
+}
+.main {
+   margin-top: 2.5rem;
+}
+.lighter {
+   font-weight: lighter;
+}
+.capital {
+   text-transform: uppercase;
+   font-weight: bold;
+}
+.level {
+   display: flex;
+   justify-content: space-between;
+}
+.level-title {
+   font-size: 1.3rem;
+   font-weight: bold;
+}
+.level .level {
+   font-size: 1.3rem;
+}
+.grades {
+   margin-top: -0.5rem;
+}
+.grades-logo {
+   width: 4.1rem;
+   height: 4.1rem;
+}
+table {
+   margin-top: 2rem;
+   border-collapse: collapse;
+   text-align: center;
+   font-size: 1.2rem;
+}
+table td {
+   padding: 0.2rem;
+}
+table td.name {
+   width: 20%;
+}
+table td.percentage {
+   width: 15%;
+   text-align: center;
+}
+.average {
+   text-align: right;
+   margin-right: 1.2rem;
+}
+.date {
+   font-size: 1rem;
+   position: absolute;
+   bottom: 11.5rem;
+}
+.signature {
+   position: absolute;
+   font-size: 0.9rem;
+   bottom: 4.5rem;
+   left: 38%;
+   text-align: center;
+}
+.signature .line {
+   border-top: 1px solid black;
+   width: 13rem;
+}
+.signature * {
+   padding: 0.2rem 0;
+   margin: 0;
+}

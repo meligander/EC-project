@@ -4,9 +4,6 @@ const format = require("date-fns/format");
 
 const generatePDF = require("../../../other/generatePDF");
 
-//PDF Templates
-const pdfTemplate2 = require("../../../templates/classInfo");
-
 //Middlewares
 const auth = require("../../../middleware/auth");
 

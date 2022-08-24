@@ -50,11 +50,12 @@ router.post("/list", auth, async (req, res) => {
       await generatePDF(
          fileName,
          {
+            type: "attendance",
+            title: `Asistencias ${periodName[info.period]}`,
             head,
             body,
             teacher: info.teacher,
-            type: "attendance",
-            title: `Asistencias ${periodName[info.period]} ${info.category}`,
+            category: info.category,
          },
          { type: "list", img: "logo", margin: true, landscape: true }
       );

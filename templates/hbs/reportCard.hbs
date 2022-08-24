@@ -1,0 +1,87 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Libreta de {{student}}</title>
+    </head>
+    <body>
+        <div class="header">
+            <img class="logo" src="data:image/jpeg;base64,{{img}}" alt="logo">
+            <h2 class="student">{{student}}</h2>
+            <img class="logo" src="data:image/jpeg;base64,{{img}}" alt="logo">
+        </div>
+        <h4>
+            Profesor: <span class="style">{{teacher}}</span>
+        </h4>
+        <h4>
+            Curso: <span class="style">{{category}}</span>
+        </h4>
+        <h5>Notas:</h5>
+        <table class='grades'>
+            <thead>
+                <th class='blank'></th>
+                <th>1° Bimestre</th>
+                <th>2° Bimestre</th>
+                <th>3° Bimestre</th>
+                <th>4° Bimestre</th>
+            </thead>
+            <tbody>
+                {{#each allGrades as |rows|}}
+                    <tr>
+                        {{#each rows as |grade|}}
+                            {{#if @first}}
+                                <th>{{grade}}</th>
+                            {{else}}
+                                <td>{{grade}}</td>
+                            {{/if}}
+                        {{/each}}
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        {{#if finals}}
+            <h5 class='final-title'>Exámen Final</h5>
+            <table class="final-grades{{#if high}}{{else}} small{{/if}}">
+                {{#each finals as |row|}}
+                    <tr>
+                        {{#if_even @index}}
+                            {{#each  row as |grade|}}
+                                <th>{{grade}}</th>
+                            {{/each}}
+                        {{else}}
+                            {{#each  row as |grade|}}
+                                <td>{{grade}}</td>
+                            {{/each}}
+                        {{/if_even}}
+                    </tr>
+                {{/each}}
+            </table>
+        {{/if}}
+        <h5>Inasistencias:</h5>
+        <table>
+            <thead>
+                <th>1° Bimestre</th>
+                <th>2° Bimestre</th>
+                <th>3° Bimestre</th>
+                <th>4° Bimestre</th>
+                <th>Total</th>
+            </thead>
+            <tbody>
+                {{#each attendances as |att|}}
+                    <td>{{att}}</td>
+                {{/each}}
+            </tbody>
+        </table>
+        <h5>Observaciones:</h5>
+        <p>{{observation}}</p>
+        <div class='signatures'>
+            <div>
+                <p class="line"></p>
+                <p>Profesor(a)</p>
+            </div>
+            <div>
+                <p class="line"></p>
+                <p>Padre, madre o tutor</p>
+            </div>
+        </div>
+    </body>
+</html>
