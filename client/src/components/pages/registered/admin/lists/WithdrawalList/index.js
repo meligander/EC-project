@@ -8,8 +8,8 @@ import { IoIosListBox } from "react-icons/io";
 import {
    loadWithdrawals,
    loadExpenceTypes,
-   transactionsPDF,
-   clearTransactions,
+   expencesPDF,
+   clearExpences,
 } from "../../../../../../actions/expence";
 import { formatNumber } from "../../../../../../actions/global";
 
@@ -17,11 +17,11 @@ import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
 
 const WithdrawalList = ({
-   expences: { transactions, loading, expencetypes, loadingET },
+   expences: { expences, loading, expencetypes, loadingET },
    loadWithdrawals,
    loadExpenceTypes,
-   clearTransactions,
-   transactionsPDF,
+   clearExpences,
+   expencesPDF,
 }) => {
    const [filterData, setFilterData] = useState({
       startDate: "",
@@ -43,14 +43,14 @@ const WithdrawalList = ({
    }, [loadingET, loadExpenceTypes]);
 
    useEffect(() => {
-      if (loading || (transactions[0] && transactions[0].month))
+      if (loading || (expences[0] && expences[0].month))
          loadWithdrawals({}, true, false);
       else
          setAdminValues((prev) => ({
             ...prev,
-            total: transactions.reduce((sum, item) => sum + item.value, 0),
+            total: expences.reduce((sum, item) => sum + item.value, 0),
          }));
-   }, [loading, loadWithdrawals, transactions]);
+   }, [loading, loadWithdrawals, expences]);
 
    const onChange = (e) => {
       e.persist();
@@ -71,7 +71,7 @@ const WithdrawalList = ({
                to="/register/withdrawal/monthly-list"
                onClick={() => {
                   window.scroll(0, 0);
-                  clearTransactions();
+                  clearExpences();
                }}
                className="btn btn-light"
             >
@@ -109,7 +109,7 @@ const WithdrawalList = ({
                      ))}
                </select>
                <label
-                  htmlFor="transactionType"
+                  htmlFor="expencetype"
                   className={`form-label ${expencetype === "" ? "lbl" : ""}`}
                >
                   Tipo de Retiro
@@ -134,22 +134,19 @@ const WithdrawalList = ({
                </thead>
                <tbody>
                   {!loading &&
-                     transactions[0] &&
-                     transactions[0].month === undefined &&
-                     transactions.map(
-                        (transaction, i) =>
+                     expences[0] &&
+                     expences[0].month === undefined &&
+                     expences.map(
+                        (expence, i) =>
                            i >= page * 10 &&
                            i < (page + 1) * 10 && (
-                              <tr key={transaction._id}>
+                              <tr key={expence._id}>
                                  <td>
-                                    {format(
-                                       new Date(transaction.date),
-                                       "dd/MM/yy"
-                                    )}
+                                    {format(new Date(expence.date), "dd/MM/yy")}
                                  </td>
-                                 <td>{transaction.expencetype.name}</td>
-                                 <td>${formatNumber(transaction.value)}</td>
-                                 <td>{transaction.description}</td>
+                                 <td>{expence.expencetype.name}</td>
+                                 <td>${formatNumber(expence.value)}</td>
+                                 <td>{expence.description}</td>
                               </tr>
                            )
                      )}
@@ -160,13 +157,11 @@ const WithdrawalList = ({
             <ListButtons
                page={page}
                type="transacciones"
-               items={transactions}
+               items={expences}
                changePage={(page) =>
                   setAdminValues((prev) => ({ ...prev, page }))
                }
-               pdfGenerator={() =>
-                  transactionsPDF(transactions, "withdrawal", total)
-               }
+               pdfGenerator={() => expencesPDF(expences, "withdrawal", total)}
             />
          )}
       </>
@@ -180,6 +175,6 @@ const mapStatetoProps = (state) => ({
 export default connect(mapStatetoProps, {
    loadExpenceTypes,
    loadWithdrawals,
-   transactionsPDF,
-   clearTransactions,
+   expencesPDF,
+   clearExpences,
 })(WithdrawalList);

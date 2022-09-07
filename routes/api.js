@@ -18,6 +18,7 @@ const apiObservationRouter = require("./api/observation");
 const apiRegisterRouter = require("./api/register");
 const apiTownRouter = require("./api/town");
 const apiGlobalRouter = require("./api/global");
+const apiDailyRouter = require("./api/daily");
 
 const apiPdfRouter = require("./api/pdf");
 
@@ -39,6 +40,7 @@ router.use("/observation", apiObservationRouter);
 router.use("/register", apiRegisterRouter);
 router.use("/town", apiTownRouter);
 router.use("/global", apiGlobalRouter);
+router.use("/daily", apiDailyRouter);
 
 router.use("/pdf", apiPdfRouter);
 

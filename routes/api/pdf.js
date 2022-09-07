@@ -11,11 +11,13 @@ const apiInsallmentRouter = require("./pdf/installment");
 const apiInvoiceRouter = require("./pdf/invoice");
 const apiObservationRouter = require("./pdf/observation");
 const apiRegisterRouter = require("./pdf/register");
+const apiDailyRouter = require("./pdf/daily");
 
 router.use("/user", apiUserRouter);
 router.use("/attendance", apiAttendanceRouter);
 router.use("/category", apiCategoryRouter);
 router.use("/class", apiClassRouter);
+router.use("/daily", apiDailyRouter);
 router.use("/enrollment", apiEnrollmentRouter);
 router.use("/expence", apiExpenceRouter);
 router.use("/grade", apiGradeRouter);

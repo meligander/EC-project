@@ -11,9 +11,10 @@ import {
    createRegister,
    deleteRegister,
 } from "../../../../../../../actions/register";
+import { clearDailies } from "../../../../../../../actions/daily";
 import { clearInvoices } from "../../../../../../../actions/invoice";
 import {
-   clearTransactions,
+   clearExpences,
    clearExpenceTypes,
 } from "../../../../../../../actions/expence";
 import { formatNumber, togglePopup } from "../../../../../../../actions/global";
@@ -28,7 +29,7 @@ const RegisterTab = ({
    closeRegister,
    createRegister,
    clearInvoices,
-   clearTransactions,
+   clearExpences,
    clearRegisters,
    clearExpenceTypes,
    deleteRegister,
@@ -111,10 +112,10 @@ const RegisterTab = ({
                            className="btn btn-light"
                            onClick={() => {
                               window.scroll(0, 0);
-                              clearTransactions();
+                              clearExpences();
                               clearExpenceTypes();
                            }}
-                           to="/register/transaction/list"
+                           to="/register/expence/list"
                         >
                            <IoIosListBox />
                            <span className="hide-sm">&nbsp;Listado</span>
@@ -138,7 +139,7 @@ const RegisterTab = ({
                                  to="/register/withdrawal/list"
                                  onClick={() => {
                                     window.scroll(0, 0);
-                                    clearTransactions();
+                                    clearExpences();
                                     clearExpenceTypes();
                                  }}
                                  className="btn btn-light"
@@ -156,15 +157,15 @@ const RegisterTab = ({
                            </td>
                            <td>
                               <Link
-                                 to="/register/list"
+                                 to="/register/daily"
                                  onClick={() => {
                                     window.scroll(0, 0);
-                                    clearRegisters();
+                                    clearDailies();
                                  }}
                                  className="btn btn-light"
                               >
                                  <IoIosListBox />
-                                 <span className="hide-sm">&nbsp;Cierres</span>
+                                 <span className="hide-sm">&nbsp;Cierre</span>
                               </Link>
                            </td>
                         </tr>
@@ -234,6 +235,19 @@ const RegisterTab = ({
                      <span className="hide-sm">&nbsp; Cerrar Caja</span>
                   </button>
                )}
+               {isAdmin && (
+                  <Link
+                     to="/register/list"
+                     onClick={() => {
+                        window.scroll(0, 0);
+                        clearRegisters();
+                     }}
+                     className="btn btn-light"
+                  >
+                     <IoIosListBox />
+                     <span className="hide-sm">&nbsp;Listado</span>
+                  </Link>
+               )}
             </div>
          </form>
       </div>
@@ -248,9 +262,10 @@ export default connect(mapStateToProps, {
    closeRegister,
    createRegister,
    clearInvoices,
-   clearTransactions,
+   clearExpences,
    clearRegisters,
    clearExpenceTypes,
+   clearDailies,
    deleteRegister,
    togglePopup,
 })(RegisterTab);

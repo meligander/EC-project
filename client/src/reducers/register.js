@@ -61,7 +61,6 @@ export default function (state = initialState, action) {
       case REGISTER_ERROR:
          return {
             ...state,
-            register: null,
             loadingRegister: false,
             error: payload,
          };

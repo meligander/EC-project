@@ -10,6 +10,7 @@ const adminAuth = require("../../middleware/adminAuth");
 const Register = require("../../models/Register");
 const Invoice = require("../../models/Invoice");
 const Expence = require("../../models/Expence");
+const Daily = require("../../models/Daily");
 
 //@route    GET /api/register
 //@desc     get all cashier register || with filter
@@ -242,6 +243,15 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
             .status(400)
             .json({ msg: "La caja no se ha cerrado todavía" });
       }
+
+      const daily = await Daily.findOne({ register: req.params.id });
+
+      if (daily)
+         return res
+            .status(400)
+            .json({
+               msg: "Debe eliminar el conteo de caja para poder reabrirla",
+            });
 
       await Register.findOneAndUpdate(
          { _id: req.params.id },

@@ -36,72 +36,49 @@ const months = [
 router.get("/", [auth, adminAuth], async (req, res) => {
    try {
       let expences = [];
-      let invoices = [];
       const year = new Date().getFullYear();
 
       if (Object.entries(req.query).length === 0) {
          expences = await Expence.find({
             date: { $gte: new Date(`${year}-01-01`) },
-         }).populate("expencetype");
-         invoices = await Invoice.find({
-            date: { $gte: new Date(`${year}-01-01`) },
-         }).populate({
-            path: "user.user_id",
-            model: "user",
-            select: ["name", "lastname"],
-         });
+         })
+            .populate("expencetype")
+            .sort({ date: -1 });
       } else {
-         const { transactionType, startDate, endDate, isNotAdmin } = req.query;
+         const { expencetype, startDate, endDate } = req.query;
 
          const date = {
             ...(startDate && { $gte: addHours(new Date(startDate), 3) }),
             ...(endDate && { $lt: addHours(new Date(endDate), 27) }),
          };
 
-         if (
-            (!transactionType || transactionType === "income") &&
-            !isNotAdmin
-         ) {
-            invoices = await Invoice.find({
-               date:
-                  startDate || endDate
-                     ? date
-                     : { $gte: new Date(`${year}-01-01`) },
-            }).populate({
-               path: "user.user_id",
-               model: "user",
-               select: ["name", "lastname"],
-            });
-         }
-         if (transactionType !== "income") {
-            expences = await Expence.find({
-               date:
-                  startDate || endDate
-                     ? date
-                     : { $gte: new Date(`${year}-01-01`) },
-            }).populate({
+         expences = await Expence.find({
+            date:
+               startDate || endDate
+                  ? date
+                  : { $gte: new Date(`${year}-01-01`) },
+         })
+            .populate({
                path: "expencetype",
-               ...((transactionType || isNotAdmin) && {
+               ...(expencetype && {
                   match: {
-                     type: transactionType
-                        ? transactionType
-                        : isNotAdmin && "expence",
+                     type: expencetype,
                   },
                }),
-            });
-         }
-         expences = expences.filter((item) => item.expencetype);
+            })
+            .sort({ date: -1 });
+
+         if (expencetype)
+            expences = expences.filter((item) => item.expencetype);
       }
 
-      const total = sortArray([...invoices, ...expences]);
-
-      if (total.length === 0) {
+      if (expences.length === 0) {
          return res.status(400).json({
             msg: "No se encontraron movimientos con dichas descripciones",
          });
       }
 
-      res.json(total);
+      res.json(expences);
    } catch (err) {
       console.error(err.message);
       res.status(500).json({ msg: "Server Error" });

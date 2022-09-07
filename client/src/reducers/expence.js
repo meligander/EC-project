@@ -1,22 +1,22 @@
 import {
-   TRANSACTIONS_LOADED,
+   EXPENCES_LOADED,
    EXPENCETYPES_LOADED,
    EXPENCE_REGISTERED,
    EXPENCE_DELETED,
    EXPENCETYPES_UPDATED,
    EXPENCETYPE_DELETED,
-   TRANSACTIONS_CLEARED,
+   EXPENCES_CLEARED,
    EXPENCE_CLEARED,
    EXPENCETYPES_CLEARED,
    EXPENCE_ERROR,
    EXPENCETYPE_ERROR,
-   TRANSACTIONS_ERROR,
+   EXPENCES_ERROR,
 } from "../actions/types";
 
 const initialState = {
-   loadingExpence: true,
    expence: null,
-   transactions: [],
+   loadingExpence: true,
+   expences: [],
    loading: true,
    expencetypes: [],
    loadingET: true,
@@ -26,10 +26,10 @@ const initialState = {
 export default function (state = initialState, action) {
    const { type, payload } = action;
    switch (type) {
-      case TRANSACTIONS_LOADED:
+      case EXPENCES_LOADED:
          return {
             ...state,
-            transactions: payload,
+            expences: payload,
             loading: false,
             error: {},
          };
@@ -51,10 +51,10 @@ export default function (state = initialState, action) {
       case EXPENCE_DELETED:
          return {
             ...state,
-            transactions: state.transactions.filter(
+            expences: state.expences.filter(
                (expence) => expence._id !== payload
             ),
-            loadingTransactions: false,
+            loading: false,
          };
       case EXPENCETYPE_DELETED:
          return {
@@ -71,10 +71,10 @@ export default function (state = initialState, action) {
             expence: null,
             error: {},
          };
-      case TRANSACTIONS_CLEARED:
+      case EXPENCES_CLEARED:
          return {
             ...state,
-            transactions: [],
+            expences: [],
             loading: true,
          };
       case EXPENCETYPES_CLEARED:
@@ -90,10 +90,10 @@ export default function (state = initialState, action) {
             loadingExpence: false,
             error: payload,
          };
-      case TRANSACTIONS_ERROR:
+      case EXPENCES_ERROR:
          return {
             ...state,
-            transactions: [],
+            expences: [],
             loading: false,
             error: payload,
          };

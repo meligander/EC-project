@@ -12,34 +12,34 @@ import { clearRegister } from "./register";
 import { setAlert } from "./alert";
 
 import {
-   TRANSACTIONS_LOADED,
+   EXPENCES_LOADED,
    EXPENCETYPES_LOADED,
    EXPENCE_REGISTERED,
    EXPENCE_DELETED,
    EXPENCETYPES_UPDATED,
    EXPENCETYPE_DELETED,
-   TRANSACTIONS_CLEARED,
+   EXPENCES_CLEARED,
    EXPENCE_CLEARED,
    EXPENCETYPES_CLEARED,
    EXPENCE_ERROR,
    EXPENCETYPE_ERROR,
-   TRANSACTIONS_ERROR,
+   EXPENCES_ERROR,
    REGISTER_LOADED,
 } from "./types";
 
-export const loadTransactions = (formData, spinner) => async (dispatch) => {
+export const loadExpences = (formData, spinner) => async (dispatch) => {
    if (spinner) dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
       const res = await api.get(`/expence?${filterData(formData)}`);
       dispatch({
-         type: TRANSACTIONS_LOADED,
+         type: EXPENCES_LOADED,
          payload: res.data,
       });
    } catch (err) {
       if (err.response.status !== 401) {
-         dispatch(setError(TRANSACTIONS_ERROR, err.response));
+         dispatch(setError(EXPENCES_ERROR, err.response));
          if (spinner) dispatch(setAlert(err.response.data.msg, "danger", "2"));
          window.scroll(0, 0);
       } else error = true;
@@ -60,12 +60,12 @@ export const loadWithdrawals =
                : `/expence/withdrawal?${filterData(formData)}`
          );
          dispatch({
-            type: TRANSACTIONS_LOADED,
+            type: EXPENCES_LOADED,
             payload: res.data,
          });
       } catch (err) {
          if (err.response.status !== 401) {
-            dispatch(setError(TRANSACTIONS_ERROR, err.response));
+            dispatch(setError(EXPENCES_ERROR, err.response));
             if (spinner)
                dispatch(setAlert(err.response.data.msg, "danger", "2"));
             window.scroll(0, 0);
@@ -226,44 +226,43 @@ export const deleteExpenceType = (toDelete) => async (dispatch) => {
    }
 };
 
-export const transactionsPDF =
-   (transactions, type, total) => async (dispatch) => {
-      dispatch(updateLoadingSpinner(true));
-      let error = false;
+export const expencesPDF = (expences, type, total) => async (dispatch) => {
+   dispatch(updateLoadingSpinner(true));
+   let error = false;
 
-      try {
-         const pdf = await api.post(
-            `/pdf/expence/${
-               type === "withdrawal"
-                  ? `withdrawal-${total ? "list" : "yearly"}`
-                  : "list"
-            }`,
-            {
-               transactions,
-               total,
-            },
-            {
-               responseType: "blob",
-            }
-         );
+   try {
+      const pdf = await api.post(
+         `/pdf/expence/${
+            type === "withdrawal"
+               ? `withdrawal-${total ? "list" : "yearly"}`
+               : "list"
+         }`,
+         {
+            expences,
+            total,
+         },
+         {
+            responseType: "blob",
+         }
+      );
 
-         const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
+      const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-         saveAs(pdfBlob, `Movimientos ${format(new Date(), "dd-MM-yy")}.pdf`);
+      saveAs(pdfBlob, `Movimientos ${format(new Date(), "dd-MM-yy")}.pdf`);
 
-         dispatch(setAlert("PDF Generado", "success", "2"));
-      } catch (err) {
-         if (err.response.status !== 401) {
-            dispatch(setError(EXPENCE_ERROR, err.response));
-            dispatch(setAlert(err.response.data.msg, "danger", "2"));
-         } else error = true;
-      }
+      dispatch(setAlert("PDF Generado", "success", "2"));
+   } catch (err) {
+      if (err.response.status !== 401) {
+         dispatch(setError(EXPENCE_ERROR, err.response));
+         dispatch(setAlert(err.response.data.msg, "danger", "2"));
+      } else error = true;
+   }
 
-      if (!error) {
-         window.scrollTo(0, 0);
-         dispatch(updateLoadingSpinner(false));
-      }
-   };
+   if (!error) {
+      window.scrollTo(0, 0);
+      dispatch(updateLoadingSpinner(false));
+   }
+};
 
 export const clearExpenceTypes = () => (dispatch) => {
    dispatch({ type: EXPENCETYPES_CLEARED });
@@ -273,6 +272,6 @@ export const clearExpence = () => (dispatch) => {
    dispatch({ type: EXPENCE_CLEARED });
 };
 
-export const clearTransactions = () => (dispatch) => {
-   dispatch({ type: TRANSACTIONS_CLEARED });
+export const clearExpences = () => (dispatch) => {
+   dispatch({ type: EXPENCES_CLEARED });
 };

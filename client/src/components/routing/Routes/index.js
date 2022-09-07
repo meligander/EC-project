@@ -30,13 +30,14 @@ import EditExpenceType from "../../pages/registered/admin/edit/EditExpenceType";
 import EditGradeType from "../../pages/registered/admin/edit/EditGradeType";
 import EnrollmentList from "../../pages/registered/admin/lists/EnrollmentList";
 import IncomeList from "../../pages/registered/admin/lists/IncomeList";
-import TransactionList from "../../pages/registered/admin/lists/TransactionList";
+import ExpenceList from "../../pages/registered/admin/lists/ExpenceList";
 import InstallmentList from "../../pages/registered/admin/lists/InstallmentList";
 import RegisterList from "../../pages/registered/admin/lists/RegisterList";
 import MentionList from "../../pages/registered/admin/lists/MentionList";
 import WithdrawalList from "../../pages/registered/admin/lists/WithdrawalList";
 import RegisterByMonth from "../../pages/registered/admin/lists/RegisterByMonth";
 import WithdrawalXMonthList from "../../pages/registered/admin/lists/WithdrawalXMonthList";
+import DailyList from "../../pages/registered/admin/lists/DailyList";
 
 import PrivateRoutes from "../PrivateRoutes";
 import PublicRoutes from "../PublicRoutes";
@@ -245,8 +246,14 @@ const Routes = ({ location, global: { navbar, footer } }) => {
             <PrivateRoutes
                exact
                types={["admin", "secretary", "admin&teacher"]}
-               path="/register/transaction/list"
-               component={TransactionList}
+               path="/register/expence/list"
+               component={ExpenceList}
+            />
+            <PrivateRoutes
+               exact
+               types={["admin", "admin&teacher"]}
+               path="/register/daily"
+               component={DailyList}
             />
             <PrivateRoutes
                exact

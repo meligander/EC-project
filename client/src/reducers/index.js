@@ -7,6 +7,7 @@ import grades from "./grade";
 import attendances from "./attendance";
 import installments from "./installment";
 import towns from "./town";
+import dailies from "./daily";
 import neighbourhoods from "./neighbourhood";
 import registers from "./register";
 import categories from "./category";
@@ -22,6 +23,7 @@ export default combineReducers({
    auth,
    categories,
    classes,
+   dailies,
    installments,
    enrollments,
    expences,

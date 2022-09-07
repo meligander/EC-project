@@ -8,17 +8,17 @@ const generatePDF = require("../../../other/generatePDF");
 const adminAuth = require("../../../middleware/adminAuth");
 const auth = require("../../../middleware/auth");
 
-const fileName = path.join(__dirname, "../../../reports/transactions.pdf");
+const fileName = path.join(__dirname, "../../../reports/expences.pdf");
 
 //@route    POST /api/pdf/expence/list
-//@desc     Create a pdf of transactions
+//@desc     Create a pdf of expences
 //@access   Private && Admin
 router.post("/list", [auth, adminAuth], async (req, res) => {
-   const { transactions } = req.body;
+   const { expences } = req.body;
 
    const head = ["Fecha", "Tipo", "Importe", "Descripción"];
 
-   const body = transactions.map((item) =>
+   const body = expences.map((item) =>
       item.expencetype
          ? [
               format(new Date(item.date), "dd/MM/yy"),
@@ -57,11 +57,11 @@ router.post("/list", [auth, adminAuth], async (req, res) => {
 //@desc     Create a pdf of withdrawals
 //@access   Private && Admin
 router.post("/withdrawal-list", [auth, adminAuth], async (req, res) => {
-   const { transactions, total } = req.body;
+   const { expences, total } = req.body;
 
    const head = ["Fecha", "Tipo", "Importe", "Descripción"];
 
-   const body = transactions.map((item) => [
+   const body = expences.map((item) => [
       format(new Date(item.date), "dd/MM/yy"),
       item.expencetype.name,
       "$" + formatNumber(item.value),
@@ -90,14 +90,14 @@ router.post("/withdrawal-list", [auth, adminAuth], async (req, res) => {
 //@desc     Create a pdf of withdrawals in a year
 //@access   Private && Admin
 router.post("/withdrawal-yearly", [auth, adminAuth], async (req, res) => {
-   const { transactions } = req.body;
+   const { expences } = req.body;
 
    const head = [
       "",
-      ...Object.keys(transactions[0]).filter((item) => item !== "month"),
+      ...Object.keys(expences[0]).filter((item) => item !== "month"),
    ];
 
-   const body = transactions.map((trans) =>
+   const body = expences.map((trans) =>
       Object.keys(trans).map((item, index) =>
          index === 0
             ? trans[item]

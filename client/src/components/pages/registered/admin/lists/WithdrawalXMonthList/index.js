@@ -5,14 +5,14 @@ import { BiFilterAlt } from "react-icons/bi";
 
 import {
    loadWithdrawals,
-   transactionsPDF,
+   expencesPDF,
 } from "../../../../../../actions/expence";
 import { formatNumber } from "../../../../../../actions/global";
 
 const WithdrawalXMonthList = ({
-   expences: { transactions, loading },
+   expences: { expences, loading },
    loadWithdrawals,
-   transactionsPDF,
+   expencesPDF,
 }) => {
    const thisYear = new Date().getFullYear();
    const yearArray = new Array(3).fill().map((item, index) => thisYear - index);
@@ -82,8 +82,8 @@ const WithdrawalXMonthList = ({
                   <tr>
                      <th className="blank"></th>
                      {!loading &&
-                        typeof transactions[0] === "object" &&
-                        Object.keys(transactions[0]).map(
+                        typeof expences[0] === "object" &&
+                        Object.keys(expences[0]).map(
                            (item, index) =>
                               item !== "month" && <th key={index}>{item}</th>
                         )}
@@ -91,18 +91,18 @@ const WithdrawalXMonthList = ({
                </thead>
                <tbody>
                   {!loading &&
-                     transactions.map((transaction, index1) => (
+                     expences.map((expence, index1) => (
                         <tr key={index1}>
-                           {Object.keys(transaction).map((item, index) =>
+                           {Object.keys(expence).map((item, index) =>
                               index === 0 ? (
                                  <th key={index} className="small">
-                                    {transaction[item]}
+                                    {expence[item]}
                                  </th>
                               ) : (
                                  <td key={index}>
-                                    {transaction[item] === 0
+                                    {expence[item] === 0
                                        ? "-"
-                                       : "$" + formatNumber(transaction[item])}
+                                       : "$" + formatNumber(expence[item])}
                                  </td>
                               )
                            )}
@@ -119,7 +119,7 @@ const WithdrawalXMonthList = ({
                      className="btn btn-secondary tooltip"
                      onClick={(e) => {
                         e.preventDefault();
-                        transactionsPDF(transactions, "withdrawal");
+                        expencesPDF(expences, "withdrawal");
                      }}
                   >
                      <ImFilePdf />
@@ -138,5 +138,5 @@ const mapStatetoProps = (state) => ({
 
 export default connect(mapStatetoProps, {
    loadWithdrawals,
-   transactionsPDF,
+   expencesPDF,
 })(WithdrawalXMonthList);
