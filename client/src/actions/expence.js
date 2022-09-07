@@ -226,17 +226,13 @@ export const deleteExpenceType = (toDelete) => async (dispatch) => {
    }
 };
 
-export const expencesPDF = (expences, type, total) => async (dispatch) => {
+export const expencesPDF = (expences, total) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
       const pdf = await api.post(
-         `/pdf/expence/${
-            type === "withdrawal"
-               ? `withdrawal-${total ? "list" : "yearly"}`
-               : "list"
-         }`,
+         `/pdf/expence/${total === null ? "withdrawal" : "list"}`,
          {
             expences,
             total,

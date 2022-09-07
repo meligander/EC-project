@@ -119,7 +119,7 @@ const WithdrawalXMonthList = ({
                      className="btn btn-secondary tooltip"
                      onClick={(e) => {
                         e.preventDefault();
-                        expencesPDF(expences, "withdrawal");
+                        expencesPDF(expences, null);
                      }}
                   >
                      <ImFilePdf />

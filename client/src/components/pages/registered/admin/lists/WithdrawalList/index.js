@@ -3,23 +3,31 @@ import { connect } from "react-redux";
 import format from "date-fns/format";
 import { Link } from "react-router-dom";
 import { BiFilterAlt } from "react-icons/bi";
+import { FaTrashAlt } from "react-icons/fa";
 import { IoIosListBox } from "react-icons/io";
 
 import {
    loadWithdrawals,
    loadExpenceTypes,
    expencesPDF,
+   deleteExpence,
    clearExpences,
 } from "../../../../../../actions/expence";
-import { formatNumber } from "../../../../../../actions/global";
+import { formatNumber, togglePopup } from "../../../../../../actions/global";
+import { loadRegister } from "../../../../../../actions/register";
 
 import ListButtons from "../sharedComp/ListButtons";
 import DateFilter from "../sharedComp/DateFilter";
+import PopUp from "../../../../../modal/PopUp";
 
 const WithdrawalList = ({
    expences: { expences, loading, expencetypes, loadingET },
+   registers: { register, loadingRegister },
    loadWithdrawals,
    loadExpenceTypes,
+   loadRegister,
+   deleteExpence,
+   togglePopup,
    clearExpences,
    expencesPDF,
 }) => {
@@ -34,13 +42,18 @@ const WithdrawalList = ({
    const [adminValues, setAdminValues] = useState({
       total: 0,
       page: 0,
+      toDelete: "",
    });
 
-   const { total, page } = adminValues;
+   const { total, page, toDelete } = adminValues;
 
    useEffect(() => {
       if (loadingET) loadExpenceTypes(false, false);
    }, [loadingET, loadExpenceTypes]);
+
+   useEffect(() => {
+      if (loadingRegister) loadRegister(false);
+   }, [loadRegister, loadingRegister]);
 
    useEffect(() => {
       if (loading || (expences[0] && expences[0].month))
@@ -63,6 +76,10 @@ const WithdrawalList = ({
    return (
       <>
          <h2>Listado Retiros de Dinero</h2>
+         <PopUp
+            info="¿Está seguro que desea eliminar el retiro?"
+            confirm={() => deleteExpence(toDelete)}
+         />
          <p className="heading-tertiary text-moved-right">
             Total: ${formatNumber(total)}
          </p>
@@ -123,35 +140,70 @@ const WithdrawalList = ({
             </div>
          </form>
          <div className="wrapper my-2">
-            <table>
-               <thead>
-                  <tr>
-                     <th>Fecha</th>
-                     <th>Tipo</th>
-                     <th>Importe</th>
-                     <th>Descripción</th>
-                  </tr>
-               </thead>
-               <tbody>
-                  {!loading &&
-                     expences[0] &&
-                     expences[0].month === undefined &&
-                     expences.map(
-                        (expence, i) =>
-                           i >= page * 10 &&
-                           i < (page + 1) * 10 && (
-                              <tr key={expence._id}>
-                                 <td>
-                                    {format(new Date(expence.date), "dd/MM/yy")}
-                                 </td>
-                                 <td>{expence.expencetype.name}</td>
-                                 <td>${formatNumber(expence.value)}</td>
-                                 <td>{expence.description}</td>
-                              </tr>
-                           )
-                     )}
-               </tbody>
-            </table>
+            {!loading &&
+               !loadingRegister &&
+               expences[0] &&
+               expences[0].month === undefined && (
+                  <table>
+                     <thead>
+                        <tr>
+                           <th>Fecha</th>
+                           <th>Tipo</th>
+                           <th>Importe</th>
+                           <th>Descripción</th>
+                           {expences[0].register &&
+                              expences[0].register === register._id &&
+                              register.temporary && <th>&nbsp;</th>}
+                        </tr>
+                     </thead>
+                     <tbody>
+                        {expences.map(
+                           (expence, i) =>
+                              i >= page * 10 &&
+                              i < (page + 1) * 10 && (
+                                 <tr key={expence._id}>
+                                    <td>
+                                       {format(
+                                          new Date(expence.date),
+                                          "dd/MM/yy"
+                                       )}
+                                    </td>
+                                    <td>{expence.expencetype.name}</td>
+                                    <td>${formatNumber(expence.value)}</td>
+                                    <td>{expence.description}</td>
+                                    {expences[0].register &&
+                                       expences[0].register === register._id &&
+                                       register.temporary && (
+                                          <td>
+                                             {expence.register &&
+                                                expence.register ===
+                                                   register._id && (
+                                                   <button
+                                                      type="button"
+                                                      onClick={(e) => {
+                                                         e.preventDefault();
+                                                         setAdminValues(
+                                                            (prev) => ({
+                                                               ...prev,
+                                                               toDelete:
+                                                                  expence._id,
+                                                            })
+                                                         );
+                                                         togglePopup("default");
+                                                      }}
+                                                      className="btn btn-danger"
+                                                   >
+                                                      <FaTrashAlt />
+                                                   </button>
+                                                )}
+                                          </td>
+                                       )}
+                                 </tr>
+                              )
+                        )}
+                     </tbody>
+                  </table>
+               )}
          </div>
          {!loading && (
             <ListButtons
@@ -161,7 +213,7 @@ const WithdrawalList = ({
                changePage={(page) =>
                   setAdminValues((prev) => ({ ...prev, page }))
                }
-               pdfGenerator={() => expencesPDF(expences, "withdrawal", total)}
+               pdfGenerator={() => expencesPDF(expences, total)}
             />
          )}
       </>
@@ -170,11 +222,15 @@ const WithdrawalList = ({
 
 const mapStatetoProps = (state) => ({
    expences: state.expences,
+   registers: state.registers,
 });
 
 export default connect(mapStatetoProps, {
    loadExpenceTypes,
    loadWithdrawals,
+   loadRegister,
    expencesPDF,
    clearExpences,
+   togglePopup,
+   deleteExpence,
 })(WithdrawalList);

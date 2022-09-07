@@ -31,6 +31,7 @@ const generatePDF = async (fileName, data, style, keepOpen) => {
             ? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
             : "/usr/bin/chromium-browser",
    });
+
    const page = await browser.newPage();
 
    let img;

@@ -109,8 +109,8 @@ const ExpenceList = ({
                   <tr>
                      <th>Fecha</th>
                      <th>Tipo</th>
-                     <th>Importe</th>
                      <th>Descripción</th>
+                     <th>Importe</th>
                      <th>&nbsp;</th>
                   </tr>
                </thead>
@@ -130,8 +130,8 @@ const ExpenceList = ({
                                        )}
                                     </td>
                                     <td>{expence.expencetype.name}</td>
-                                    <td>${formatNumber(expence.value)}</td>
                                     <td>{expence.description}</td>
+                                    <td>${formatNumber(expence.value)}</td>
                                     <td>
                                        {expence.register === register._id &&
                                           register.temporary && (
@@ -165,7 +165,7 @@ const ExpenceList = ({
                changePage={(page) =>
                   setAdminValues((prev) => ({ ...prev, page }))
                }
-               pdfGenerator={() => expencesPDF(expences, "list")}
+               pdfGenerator={() => expencesPDF(expences)}
             />
          )}
       </>

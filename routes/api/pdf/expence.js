@@ -14,58 +14,15 @@ const fileName = path.join(__dirname, "../../../reports/expences.pdf");
 //@desc     Create a pdf of expences
 //@access   Private && Admin
 router.post("/list", [auth, adminAuth], async (req, res) => {
-   const { expences } = req.body;
-
-   const head = ["Fecha", "Tipo", "Importe", "Descripción"];
-
-   const body = expences.map((item) =>
-      item.expencetype
-         ? [
-              format(new Date(item.date), "dd/MM/yy"),
-              getType(item.expencetype.type),
-              "$" + formatNumber(item.value),
-              `${item.expencetype.name}${
-                 item.description ? ": " + item.description : ""
-              }`,
-           ]
-         : [
-              format(new Date(item.date), "dd/MM/yy"),
-              "Ingreso",
-              formatNumber(item.total),
-              `Factura ${setName(item.user)}`,
-           ]
-   );
-
-   try {
-      await generatePDF(
-         fileName,
-         {
-            head,
-            body,
-            title: "Trasacciones",
-         },
-         { type: "list", img: "logo", margin: true, landscape: false }
-      );
-      res.sendFile(fileName);
-   } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ msg: "PDF Error" });
-   }
-});
-
-//@route    POST /api/pdf/expence/withdrawal-list
-//@desc     Create a pdf of withdrawals
-//@access   Private && Admin
-router.post("/withdrawal-list", [auth, adminAuth], async (req, res) => {
    const { expences, total } = req.body;
 
-   const head = ["Fecha", "Tipo", "Importe", "Descripción"];
+   const head = ["Fecha", "Tipo", "Descripción", "Importe"];
 
    const body = expences.map((item) => [
       format(new Date(item.date), "dd/MM/yy"),
       item.expencetype.name,
-      "$" + formatNumber(item.value),
       item.description ? item.description : "",
+      "$" + formatNumber(item.value),
    ]);
 
    try {
@@ -74,8 +31,8 @@ router.post("/withdrawal-list", [auth, adminAuth], async (req, res) => {
          {
             head,
             body,
-            title: "Retiros",
-            total: formatNumber(total),
+            title: total ? "Retiros" : "Egresos",
+            ...(total && { total: formatNumber(total) }),
          },
          { type: "list", img: "logo", margin: true, landscape: false }
       );
@@ -86,10 +43,10 @@ router.post("/withdrawal-list", [auth, adminAuth], async (req, res) => {
    }
 });
 
-//@route    POST /api/pdf/expence/withdrawal-yearly
+//@route    POST /api/pdf/expence/withdrawal
 //@desc     Create a pdf of withdrawals in a year
 //@access   Private && Admin
-router.post("/withdrawal-yearly", [auth, adminAuth], async (req, res) => {
+router.post("/withdrawal", [auth, adminAuth], async (req, res) => {
    const { expences } = req.body;
 
    const head = [
@@ -126,30 +83,6 @@ router.post("/withdrawal-yearly", [auth, adminAuth], async (req, res) => {
       res.status(500).json({ msg: "PDF Error" });
    }
 });
-
-//@desc Function to get the type of expence
-const getType = (type) => {
-   switch (type) {
-      case "expence":
-         return "Egreso";
-      case "withdrawal":
-         return "Retiro";
-      default:
-         return "";
-   }
-};
-
-//@desc Function to get the user name
-const setName = (user) => {
-   if (user.user_id === null) return "Usuario Eliminado";
-
-   const lastname = user.user_id ? user.user_id.lastname : user.lastname;
-   const name = user.user_id ? user.user_id.name : user.name;
-
-   return `${lastname ? `${lastname}${name ? ", " : ""}` : ""}${
-      name ? name : ""
-   }`;
-};
 
 //@desc Function to format a number
 const formatNumber = (number) => {
