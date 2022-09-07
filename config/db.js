@@ -10,7 +10,14 @@ const connectDB = async () => {
             useCreateIndex: true,
             useFindAndModify: false,
          },
-         () => console.log("MongoDB connected")
+         (err) => {
+            if (err) {
+               console.error("Failed to connect to MongoDB");
+               console.error(err);
+            } else {
+               console.log("MongoDB connected");
+            }
+         }
       );
    } catch (err) {
       console.error(err.message);
