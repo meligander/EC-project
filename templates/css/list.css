@@ -53,11 +53,8 @@ table th.small {
 table td {
    padding: 0.4rem 1rem;
 }
-table.attendance th {
-   padding: 1rem;
-}
 table.attendance th:not(:first-child) {
-   padding: 0.5rem 0.2rem;
+   padding: 0.7rem 0.2rem;
    font-size: 0.9rem;
 }
 .total {
