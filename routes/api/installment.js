@@ -352,7 +352,7 @@ router.put("/", auth, async (req, res) => {
             model: "user",
             select: "-password",
          })),
-         await Installment.find({
+         ...(await Installment.find({
             year: { $lte: year },
             value: { $ne: 0 },
             number: 0,
@@ -367,7 +367,7 @@ router.put("/", auth, async (req, res) => {
             path: "student",
             model: "user",
             select: "-password",
-         }),
+         })),
       ];
 
       const penalty = await Global.findOne({ type: "penalty" });
