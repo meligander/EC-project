@@ -116,25 +116,23 @@ const ObservationsTab = ({
                <FiSave />
                <span className="hide-md">&nbsp;Guardar</span>
             </button>
-            {userLogged.type !== "teacher" && (
-               <div className="tooltip">
-                  <button
-                     type="button"
-                     className="btn btn-secondary"
-                     onClick={(e) => {
-                        e.preventDefault();
-                        setAdminValues((prev) => ({
-                           ...prev,
-                           popupType: "certificate",
-                        }));
-                        togglePopup("certificate");
-                     }}
-                  >
-                     <FaAddressCard />
-                  </button>
-                  <span className="tooltiptext">PDF libretas</span>
-               </div>
-            )}
+            <div className="tooltip">
+               <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={(e) => {
+                     e.preventDefault();
+                     setAdminValues((prev) => ({
+                        ...prev,
+                        popupType: "certificate",
+                     }));
+                     togglePopup("certificate");
+                  }}
+               >
+                  <FaAddressCard />
+               </button>
+               <span className="tooltiptext">PDF libretas</span>
+            </div>
          </div>
       </>
    );

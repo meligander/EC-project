@@ -352,17 +352,22 @@ router.put("/", auth, async (req, res) => {
             model: "user",
             select: "-password",
          })),
-         ...(month >= 6 &&
-            (await Installment.find({
-               year: { $lte: year },
-               value: { $ne: 0 },
-               number: 0,
-               status: { $ne: "expired" },
-            }).populate({
-               path: "student",
-               model: "user",
-               select: "-password",
-            }))),
+         await Installment.find({
+            year: { $lte: year },
+            value: { $ne: 0 },
+            number: 0,
+            status: { $ne: "expired" },
+            $expr: {
+               $gt: [
+                  { $subtract: ["$$NOW", "$date"] },
+                  1000 * 60 * 60 * 24 * 90,
+               ],
+            },
+         }).populate({
+            path: "student",
+            model: "user",
+            select: "-password",
+         }),
       ];
 
       const penalty = await Global.findOne({ type: "penalty" });

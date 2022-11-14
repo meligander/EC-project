@@ -31,6 +31,10 @@ const InstallmentSchema = new mongoose.Schema({
       type: Boolean,
       default: true,
    },
+   date: {
+      type: Date,
+      default: Date.now,
+   },
 });
 
 const Installment = mongoose.model("installment", InstallmentSchema);

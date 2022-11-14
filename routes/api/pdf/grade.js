@@ -15,7 +15,7 @@ const periodName = [
    "Final",
 ];
 
-const highDegree = ["6° Año", "CAE", "Proficency"];
+const highDegree = ["6° Año", "CAE", "Proficiency"];
 
 const fileName = path.join(__dirname, "../../../reports/grades.pdf");
 
@@ -362,11 +362,11 @@ const getCertificateTitle = (category) => {
       case "Junior":
          return "Flyers";
       case "6° Año":
-         return "First Certificate in English";
+         return "First Certificate in English (B2)";
       case "CAE":
-         return "Certificate of Advanced English";
-      case "Proficency":
-         return "Certificate of Proficiency in English";
+         return "Certificate of Advanced English (C1)";
+      case "Proficiency":
+         return "Certificate of Proficiency in English (C2)";
       default:
          return "";
    }

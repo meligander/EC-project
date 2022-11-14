@@ -160,7 +160,9 @@ router.get("/", async (req, res) => {
                   };
                   break;
                case "teacher":
-                  filter.type = { $in: ["teacher", "admin&teacher"] };
+                  filter.type = {
+                     $in: ["teacher", "admin&teacher", "classManager"],
+                  };
                   break;
                case "guardian/student":
                   filter.type = { $in: ["student", "guardian"] };

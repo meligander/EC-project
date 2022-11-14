@@ -89,8 +89,7 @@ const GradesTab = ({
             };
          case "certificate":
             return {
-               students:
-                  year === classInfo.year ? students.slice(0, -1) : students,
+               students,
             };
          default:
             break;
