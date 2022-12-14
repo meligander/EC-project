@@ -63,9 +63,12 @@ router.post("/period-list", auth, async (req, res) => {
 router.post("/list", auth, async (req, res) => {
    const { header, grades, info } = req.body;
 
-   const periodName = ["Infantil A", "Infantil B", "Junior"].includes(
-      info.category
-   )
+   const periodName = [
+      "Infantil A",
+      "Infantil B",
+      "Junior",
+      "Preparatorio",
+   ].includes(info.category)
       ? ["1° B", "2° B", "3° B", "4° B", "Final", "Cambridge"]
       : ["1° B", "2° B", "3° B", "4° B", "Final"];
 
