@@ -5,6 +5,8 @@ import { FaSearch } from "react-icons/fa";
 
 import { formatNumber } from "../../../../actions/global";
 
+import "./style.scss";
+
 const InvoiceList = ({ invoices, clearInvoice, togglePopup }) => {
    return (
       <div className="popup-invoices">

@@ -63,7 +63,11 @@ router.post("/period-list", auth, async (req, res) => {
 router.post("/list", auth, async (req, res) => {
    const { header, grades, info } = req.body;
 
-   const periodName = ["1° B", "2° B", "3° B", "4° B", "Final"];
+   const periodName = ["Infantil A", "Infantil B", "Junior"].includes(
+      info.category
+   )
+      ? ["1° B", "2° B", "3° B", "4° B", "Final", "Cambridge"]
+      : ["1° B", "2° B", "3° B", "4° B", "Final"];
 
    const headArray = [];
    const body = [];
@@ -167,7 +171,7 @@ router.post("/certificate", auth, async (req, res) => {
 
    const high = highDegree.some((cat) => cat === info.category);
 
-   if (average > 60 && info.category !== "kinder" && grades.length > 0) {
+   if (average >= 60 && info.category !== "Kinder" && grades.length > 0) {
       let headers = [];
       let body = [];
 
@@ -198,11 +202,11 @@ router.post("/certificate", auth, async (req, res) => {
       await generatePDF(
          fileName,
          {
-            date,
+            date: date.replace("º ", " "),
             student: student.name,
             dni: new Intl.NumberFormat("de-DE").format(student.dni),
             high,
-            pass: average > 60 && info.category !== "Kinder",
+            pass: average >= 60 && info.category !== "Kinder",
             category: info.category,
             title: getCertificateTitle(info.category),
             mention: info.category === "Kinder" && kinderGraden(average),
@@ -256,7 +260,7 @@ router.post("/cambridge", auth, async (req, res) => {
       await generatePDF(
          fileName,
          {
-            date,
+            date: date.replace("º ", " "),
             student: student.name,
             dni: new Intl.NumberFormat("de-DE").format(student.dni),
             level: getCertificateTitle(info.category),

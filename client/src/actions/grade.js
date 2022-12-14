@@ -265,7 +265,7 @@ export const gradesPDF = (header, grades, info) => async (dispatch) => {
       );
 
       const name = !header
-         ? `Mejores Asistencias ${info.year}`
+         ? `Mejores Promedios ${info.year}`
          : `Notas de ${info.category} de ${info.teacher} ${format(
               new Date(),
               "dd-MM-yy"
