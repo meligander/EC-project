@@ -34,10 +34,11 @@ const Invoice = ({
 
    const [adminValues, setAdminValues] = useState({
       remaining: 0,
+      discount: 0,
       user: {},
    });
 
-   const { remaining, user } = adminValues;
+   const { remaining, user, discount } = adminValues;
 
    useEffect(() => {
       if (loadingInvoice) loadInvoice(match.params.invoice_id, true);
@@ -73,6 +74,11 @@ const Invoice = ({
             ...prev,
             remaining: invoice.details.reduce(
                (sum, detail) => sum + (detail.value - detail.payment),
+               0
+            ),
+            discount: invoice.details.reduce(
+               (sum, detail) =>
+                  detail.discount ? +detail.discount + sum : sum,
                0
             ),
             user: {
@@ -127,6 +133,12 @@ const Invoice = ({
                            <th>Cuota</th>
                            <th>Año</th>
                            <th>Importe</th>
+                           {discount !== 0 && (
+                              <>
+                                 <th>Descuento</th>
+                                 <th>A Pagar</th>
+                              </>
+                           )}
                            <th>Pago</th>
                         </tr>
                      </thead>
@@ -150,7 +162,27 @@ const Invoice = ({
                                     ? invoice.installment.year
                                     : "Indefinido"}
                               </td>
-                              <td>${formatNumber(invoice.value)}</td>
+                              <td>
+                                 $
+                                 {formatNumber(
+                                    invoice.discount
+                                       ? invoice.discount + invoice.value
+                                       : invoice.value
+                                 )}
+                              </td>
+                              {discount !== 0 && (
+                                 <>
+                                    <td>
+                                       $
+                                       {formatNumber(
+                                          invoice.discount
+                                             ? invoice.discount
+                                             : 0
+                                       )}
+                                    </td>
+                                    <td>${formatNumber(invoice.value)}</td>
+                                 </>
+                              )}
                               <td>${formatNumber(invoice.payment)}</td>
                            </tr>
                         ))}
@@ -158,14 +190,31 @@ const Invoice = ({
                   </table>
                </div>
                <div className="text-right mt-3">
-                  <p>
-                     <span className="heading-tertiary text-dark">Saldo:</span>
-                     <input
-                        className="value paragraph"
-                        value={`$${formatNumber(remaining)}`}
-                        disabled
-                     />
-                  </p>
+                  {discount !== 0 && (
+                     <p>
+                        <span className="heading-tertiary text-dark">
+                           Descuento Total:
+                        </span>
+                        <input
+                           className="value paragraph"
+                           value={`$${formatNumber(discount)}`}
+                           disabled
+                        />
+                     </p>
+                  )}
+                  {remaining !== 0 && (
+                     <p>
+                        <span className="heading-tertiary text-dark">
+                           Saldo:
+                        </span>
+                        <input
+                           className="value paragraph"
+                           value={`$${formatNumber(remaining)}`}
+                           disabled
+                        />
+                     </p>
+                  )}
+
                   <p>
                      <span className="heading-tertiary text-dark">Total:</span>
 
@@ -183,7 +232,10 @@ const Invoice = ({
                   className="btn btn-secondary"
                   onClick={(e) => {
                      e.preventDefault();
-                     invoicesPDF({ ...invoice, user, remaining }, "invoice");
+                     invoicesPDF(
+                        { ...invoice, user, remaining, discount },
+                        "invoice"
+                     );
                   }}
                >
                   <ImFilePdf />

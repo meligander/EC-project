@@ -1,7 +1,7 @@
 body {
    font-family: "Courgette", cursive;
-   margin: 3.5rem 3.8rem;
-   padding: 2rem;
+   /* margin: 3.5rem 3.8rem; */
+   padding: 1.8rem;
    border: 1px solid black;
    position: relative;
 }
@@ -35,8 +35,12 @@ table.invoice-info tr.blank {
 table.details {
    text-align: center;
    margin-top: 2rem;
+   font-size: 0.95rem;
+   margin-bottom: 2rem;
 }
-
+.details-block {
+   min-height: 55vh;
+}
 table.details thead {
    display: table-header-group;
    background-color: #dadddd;
@@ -44,19 +48,16 @@ table.details thead {
 table.details th,
 table.details td {
    border: 1px solid #333;
-}
-table.details th {
-   padding: 0.8rem 1.5rem;
+   padding: 0.5rem 0.8rem;
 }
 table.details td {
    font-weight: 300;
-   padding: 0.5rem 1rem;
 }
-.summary {
+/* .summary {
    position: absolute;
    bottom: 2rem;
    right: 1.3rem;
-}
+} */
 .title,
 .value {
    display: inline-block;

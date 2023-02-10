@@ -126,12 +126,25 @@ const Categories = ({
                   className="btn btn-secondary"
                   onClick={(e) => {
                      e.preventDefault();
-                     categoriesPDF(categories);
+                     categoriesPDF(categories, "all");
                   }}
                >
                   <ImFilePdf />
                </button>
                <span className="tooltiptext">PDF con categorías y precios</span>
+            </div>
+            <div className="tooltip">
+               <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={(e) => {
+                     e.preventDefault();
+                     categoriesPDF(categories, "march");
+                  }}
+               >
+                  <ImFilePdf />
+               </button>
+               <span className="tooltiptext">PDF con precios de marzo</span>
             </div>
          </div>
       </>

@@ -31,14 +31,19 @@ const installments = [
 router.post("/list", [auth, adminAuth], async (req, res) => {
    const debts = req.body;
 
-   const head = ["Nombre", "Cuota", "Año", "Categoría", "Valor"];
+   const head = ["Nombre", "Cuota", "Año", "Categoría", "Valor", "Ctdo"];
 
    const body = debts.map((item) => [
       item.student.lastname + ", " + item.student.name,
       installments[item.number],
       item.year,
       item.enrollment && item.enrollment.category.name,
-      new Intl.NumberFormat("de-DE").format(item.value),
+      "$" + new Intl.NumberFormat("de-DE").format(item.value),
+      "$" +
+         new Intl.NumberFormat("de-DE").format(
+            //Descuento efectivo
+            Math.ceil((item.value * 0.9 + Number.EPSILON) / 100) * 100
+         ),
    ]);
 
    try {

@@ -444,8 +444,8 @@ router.put("/", auth, async (req, res) => {
                            : (installments[x].value * penalty.number) / 100 +
                              installments[x].value) +
                            Number.EPSILON) /
-                           10
-                     ) * 10,
+                           100
+                     ) * 100,
                   status: "expired",
                }
             );

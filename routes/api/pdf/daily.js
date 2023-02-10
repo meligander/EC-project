@@ -58,7 +58,7 @@ router.post("/list", [auth, adminAuth], async (req, res) => {
 
 const formatNumber = (value) =>
    new Intl.NumberFormat("de-DE").format(
-      Math.ceil((value + Number.EPSILON) / 10) * 10
+      Math.ceil((value + Number.EPSILON) / 100) * 100
    );
 
 module.exports = router;

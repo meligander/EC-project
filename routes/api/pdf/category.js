@@ -15,15 +15,29 @@ const fileName = path.join(__dirname, "../../../reports/categories.pdf");
 router.post("/list", [auth, adminAuth], async (req, res) => {
    const category = req.body;
 
-   const head = ["Nombre", "Valor", "Dto Hnos", "Marzo", "Dto Marzo"];
+   const type = req.query.type;
 
-   const body = category.map((item, index) => [
-      item.name,
-      "$" + formatNumber(item.value),
-      index === 0 ? "-" : "$" + formatNumber(item.value * 0.9),
-      index === 0 ? "-" : "$" + formatNumber(item.value / 2),
-      index === 0 ? "-" : "$" + formatNumber((item.value / 2) * 0.9),
-   ]);
+   const head = ["Nombre", "Valor", "Dto Hnos/Ctdo", "Ctdo c/ Dto"];
+
+   const body = category.map(
+      (item, index) =>
+         (index !== 0 || (index === 0 && type !== "march")) && [
+            item.name,
+            "$" + formatNumber(type !== "march" ? item.value : item.value / 2),
+            "$" +
+               formatNumber(
+                  //Descuento efectivo
+                  (type !== "march" ? item.value : item.value / 2) * 0.9
+               ),
+            index === 0
+               ? "-"
+               : "$" +
+                 formatNumber(
+                    //Descuento efectivo
+                    (type !== "march" ? item.value : item.value / 2) * 0.9 * 0.9
+                 ),
+         ]
+   );
 
    try {
       await generatePDF(
@@ -31,7 +45,7 @@ router.post("/list", [auth, adminAuth], async (req, res) => {
          {
             head,
             body,
-            title: "Categorías",
+            title: "Categorías" + (type === "march" ? " (Marzo)" : ""),
             small: true,
          },
          { type: "list", img: "logo", margin: true, landscape: false }
@@ -45,7 +59,7 @@ router.post("/list", [auth, adminAuth], async (req, res) => {
 
 const formatNumber = (value) =>
    new Intl.NumberFormat("de-DE").format(
-      Math.ceil((value + Number.EPSILON) / 10) * 10
+      Math.ceil((value + Number.EPSILON) / 100) * 100
    );
 
 module.exports = router;

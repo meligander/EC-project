@@ -253,8 +253,8 @@ router.post(
                   number,
                   value:
                      Math.ceil(
-                        ((number === 3 ? half : value) + Number.EPSILON) / 10
-                     ) * 10,
+                        ((number === 3 ? half : value) + Number.EPSILON) / 100
+                     ) * 100,
                   status:
                      todayYear > year ||
                      (todayYear === year && todayMonth >= number)

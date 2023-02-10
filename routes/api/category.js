@@ -162,8 +162,8 @@ router.put(
                         Math.ceil(
                            ((inst.number === 3 ? newValue / 2 : newValue) +
                               Number.EPSILON) /
-                              10
-                        ) * 10;
+                              100
+                        ) * 100;
 
                      await Installment.findOneAndUpdate(
                         { _id: inst._id },

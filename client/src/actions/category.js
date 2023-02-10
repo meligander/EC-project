@@ -64,14 +64,18 @@ export const updateCategories = (formData) => async (dispatch) => {
    }
 };
 
-export const categoriesPDF = (categories) => async (dispatch) => {
+export const categoriesPDF = (categories, type) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
-      const pdf = await api.post("/pdf/category/list", categories, {
-         responseType: "blob",
-      });
+      const pdf = await api.post(
+         "/pdf/category/list?type=" + type,
+         categories,
+         {
+            responseType: "blob",
+         }
+      );
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 

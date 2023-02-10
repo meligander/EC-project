@@ -42,31 +42,45 @@
             </tr>
          </tbody>
       </table>
-      <table class="details">
-         <thead>
-            <tr>
-               <th>Nombre</th>
-               <th>Cuota</th>
-               <th>Año</th>
-               <th>Importe</th>
-               <th>Pago</th>
-            </tr>
-         </thead>
-         <tbody>
-            {{#each body as |row|}}
+      <div class="details-block">
+         <table class="details">
+            <thead>
                <tr>
-                  {{#each row as |td|}}
-                     <td>{{td}}</td>
-                  {{/each}}
+                  <th>Nombre</th>
+                  <th>Cuota</th>
+                  <th>Año</th>
+                  <th>Importe</th>
+                  {{#if discount}}
+                     <th>Dto</th>
+                     <th>A Pagar</th>
+                  {{/if}}
+                  <th>Pago</th>
                </tr>
-            {{/each}}
-         </tbody>
-      </table>
+            </thead>
+            <tbody>
+               {{#each body as |row|}}
+                  <tr>
+                     {{#each row as |td|}}
+                        <td>{{td}}</td>
+                     {{/each}}
+                  </tr>
+               {{/each}}
+            </tbody>
+         </table>
+      </div>
       <div class="text-right summary">
-         <div>
-            <p class="title">Saldo: </p>
-            <p class="value">${{remaining}}</p>
-         </div>
+         {{#if discount}}
+            <div>
+               <p class="title">Descuento Total: </p>
+               <p class="value">${{discount}}</p>
+            </div>
+         {{/if}}
+         {{#if remaining}}
+            <div>
+               <p class="title">Saldo: </p>
+               <p class="value">${{remaining}}</p>
+            </div>
+         {{/if}}
          <div>
             <p class="title">Total: </p>
             <p class="value">${{total}}</p>

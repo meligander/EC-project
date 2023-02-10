@@ -28,6 +28,8 @@ import {
    INSTALLMENT_DELETED,
    INSTALLMENT_ADDED,
    DISCOUNT_ADDED,
+   PAY_CASH,
+   PAY_TRANSFER,
 } from "./types";
 
 export const loadInvoice = (invoice_id, spinner) => async (dispatch) => {
@@ -125,7 +127,11 @@ export const registerInvoice = (formData) => async (dispatch) => {
 
       await dispatch(
          invoicesPDF(
-            { ...res.data, user: { name: fullName, email, cel } },
+            {
+               ...res.data,
+               discount: invoice.discount,
+               user: { name: fullName, email, cel },
+            },
             "invoice"
          )
       );
@@ -239,6 +245,14 @@ export const addDetail = (detail) => (dispatch) => {
 
 export const addDiscount = (student) => (dispatch) => {
    dispatch({ type: DISCOUNT_ADDED, payload: student });
+};
+
+export const payCash = () => (dispatch) => {
+   dispatch({ type: PAY_CASH });
+};
+
+export const payTransfer = () => (dispatch) => {
+   dispatch({ type: PAY_TRANSFER });
 };
 
 export const removeDetail = (item) => (dispatch) => {

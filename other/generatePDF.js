@@ -50,6 +50,14 @@ const generatePDF = async (fileName, data, style, keepOpen) => {
       format: "A4",
       printBackground: true,
       landscape: style.landscape,
+      ...(style.type === "invoice" && {
+         margin: {
+            top: "50px",
+            bottom: "50px",
+            right: "50px",
+            left: "50px",
+         },
+      }),
       ...(["list", "class", "allGrades"].indexOf(style.type) !== -1 && {
          displayHeaderFooter: true,
          headerTemplate: style.margin

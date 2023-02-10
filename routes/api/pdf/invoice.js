@@ -62,15 +62,32 @@ router.post("/list", [auth, adminAuth], async (req, res) => {
 //@desc     Create a pdf of an invoice
 //@access   Private && Admin
 router.post("/", [auth], async (req, res) => {
-   const { remaining, details, user, invoiceid, date, total } = req.body;
+   const { remaining, discount, details, user, invoiceid, date, total } =
+      req.body;
 
-   const body = details.map((item) => [
-      `${item.installment.student.lastname}, ${item.installment.student.name}`,
-      installment[item.installment.number],
-      item.installment.year,
-      "$" + formatNumber(item.value),
-      "$" + formatNumber(item.payment),
-   ]);
+   const body = details.map((item) => {
+      if (discount !== 0)
+         return [
+            `${item.installment.student.lastname}, ${item.installment.student.name}`,
+            installment[item.installment.number],
+            item.installment.year,
+            "$" +
+               formatNumber(
+                  item.discount ? item.value + item.discount : item.value
+               ),
+            "$" + (item.discount ? formatNumber(item.discount) : 0),
+            "$" + formatNumber(item.value),
+            "$" + formatNumber(item.payment),
+         ];
+      else
+         return [
+            `${item.installment.student.lastname}, ${item.installment.student.name}`,
+            installment[item.installment.number],
+            item.installment.year,
+            "$" + formatNumber(item.value),
+            "$" + formatNumber(item.payment),
+         ];
+   });
 
    try {
       await generatePDF(
@@ -81,7 +98,8 @@ router.post("/", [auth], async (req, res) => {
             invoiceid,
             date: format(new Date(date), "dd/MM/yy"),
             total: formatNumber(total),
-            remaining: formatNumber(remaining),
+            ...(remaining !== 0 && { remaining: formatNumber(remaining) }),
+            ...(discount !== 0 && { discount: formatNumber(discount) }),
          },
          { type: "invoice", img: "logo", margin: false, landscape: false }
       );

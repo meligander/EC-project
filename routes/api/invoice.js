@@ -244,7 +244,10 @@ router.post(
             details: details.map((item) => {
                return {
                   installment: item.installment,
-                  value: item.value,
+                  value:
+                     item.discount && item.value !== +item.payment
+                        ? item.value + +item.discount
+                        : item.value,
                   payment: item.payment,
                   ...(item.discount && { discount: item.discount }),
                };

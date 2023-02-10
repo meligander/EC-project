@@ -4,6 +4,8 @@ import format from "date-fns/format";
 import { FaFileInvoiceDollar, FaTrashAlt } from "react-icons/fa";
 
 import {
+   payCash,
+   payTransfer,
    registerInvoice,
    removeDetail,
 } from "../../../../../../../../actions/invoice";
@@ -26,11 +28,15 @@ const InvoiceTab = ({
    togglePopup,
    registerInvoice,
    removeDetail,
+   payCash,
+   payTransfer,
 }) => {
    const day = format(new Date(), "dd/MM/yyyy");
 
    const [adminValues, setAdminValues] = useState({
       installmentTotal: 0,
+      totalDiscount: 0,
+      cash: false,
    });
 
    const [formData, setFormData] = useState({
@@ -50,7 +56,7 @@ const InvoiceTab = ({
 
    const { details, total, user } = formData;
 
-   const { installmentTotal } = adminValues;
+   const { installmentTotal, totalDiscount, cash } = adminValues;
 
    useEffect(() => {
       if (invoice) {
@@ -69,6 +75,11 @@ const InvoiceTab = ({
             ...prev,
             installmentTotal: invoice.details.reduce(
                (sum, detail) => sum + detail.value,
+               0
+            ),
+            totalDiscount: invoice.details.reduce(
+               (sum, detail) =>
+                  detail.discount ? +detail.discount + sum : sum,
                0
             ),
          }));
@@ -100,8 +111,18 @@ const InvoiceTab = ({
                     [e.target.name]: e.target.value,
                  },
               }
-            : { [e.target.name]: e.target.value }),
+            : {
+                 [e.target.name]: e.target.value,
+              }),
       }));
+   };
+
+   const onChangeAdmin = (e) => {
+      e.persist();
+      setAdminValues((prev) => ({ ...prev, cash: e.target.checked }));
+
+      if (e.target.checked) payCash();
+      else payTransfer();
    };
 
    const onChangeValue = (e) => {
@@ -139,6 +160,7 @@ const InvoiceTab = ({
                registerInvoice({
                   ...formData,
                   remaining: installmentTotal - total,
+                  discount: totalDiscount,
                   details: details.map((item) => {
                      return {
                         ...item,
@@ -228,9 +250,25 @@ const InvoiceTab = ({
             <h3 className="text-primary heading-tertiary">
                Detalle de Factura
             </h3>
+            {invoice && invoice.added === undefined && (
+               <div className="text-right mt--1">
+                  <input
+                     className="form-checkbox"
+                     onChange={(e) => onChangeAdmin(e)}
+                     type="checkbox"
+                     name="cash"
+                     value={cash}
+                     id="cash"
+                  />
+
+                  <label className="checkbox-lbl" htmlFor="cash">
+                     {cash ? "Contado" : "Transferencia"}
+                  </label>
+               </div>
+            )}
             <Alert type="5" />
             {details.length > 0 && (
-               <div className="wrapper">
+               <div className="wrapper mt-2">
                   <table>
                      <thead>
                         <tr>
@@ -238,7 +276,15 @@ const InvoiceTab = ({
                            <th>Cuota</th>
                            <th>Año</th>
                            <th>Importe</th>
-                           <th>A Pagar</th>
+                           {(cash || invoice.added) && (
+                              <>
+                                 <th>Dto</th>
+                                 <th>A Pagar</th>
+                              </>
+                           )}
+                           {!invoice.added && (
+                              <th> {!cash ? "A Pagar" : "Efectivo"} </th>
+                           )}
                            <th>&nbsp;</th>
                         </tr>
                      </thead>
@@ -254,19 +300,36 @@ const InvoiceTab = ({
                                     </td>
                                     <td>{installment[install.number]}</td>
                                     <td>{install.year}</td>
-                                    <td>${formatNumber(install.value)}</td>
                                     <td>
-                                       <input
-                                          type="text"
-                                          onChange={onChangeValue}
-                                          id={index}
-                                          disabled={
-                                             install.discount !== undefined
-                                          }
-                                          placeholder="Monto"
-                                          value={install.payment}
-                                       />
+                                       $
+                                       {formatNumber(
+                                          install.discount
+                                             ? +install.discount + install.value
+                                             : install.value
+                                       )}
                                     </td>
+                                    {(cash || invoice.added) && (
+                                       <>
+                                          <td>
+                                             ${formatNumber(install.discount)}
+                                          </td>
+                                          <td>
+                                             ${formatNumber(install.value)}
+                                          </td>
+                                       </>
+                                    )}
+                                    {!invoice.added && (
+                                       <td>
+                                          <input
+                                             type="text"
+                                             onChange={onChangeValue}
+                                             id={index}
+                                             placeholder="Monto"
+                                             value={install.payment}
+                                          />
+                                       </td>
+                                    )}
+
                                     <td>
                                        <button
                                           type="button"
@@ -287,15 +350,28 @@ const InvoiceTab = ({
                </div>
             )}
             <div className="text-right mt-3">
-               <div className="invoice-detail">
-                  <label htmlFor="remaining">Saldo</label>
-                  <input
-                     type="number"
-                     value={installmentTotal - total}
-                     disabled
-                     name="remaining"
-                  />
-               </div>
+               {totalDiscount !== 0 && (
+                  <div className="invoice-detail">
+                     <label htmlFor="total">Descuento Total</label>
+                     <input
+                        type="number"
+                        name="totalDiscount"
+                        value={totalDiscount}
+                        disabled
+                     />
+                  </div>
+               )}
+               {invoice && !invoice.added && (
+                  <div className="invoice-detail">
+                     <label htmlFor="remaining">Saldo</label>
+                     <input
+                        type="number"
+                        value={installmentTotal - total}
+                        disabled
+                        name="remaining"
+                     />
+                  </div>
+               )}
                <div className="invoice-detail">
                   <label htmlFor="total">Total a Pagar</label>
                   <input type="number" name="total" value={total} disabled />
@@ -321,4 +397,6 @@ export default connect(mapStateToProps, {
    registerInvoice,
    removeDetail,
    togglePopup,
+   payCash,
+   payTransfer,
 })(InvoiceTab);

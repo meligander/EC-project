@@ -11,6 +11,8 @@ import {
    INVOICEDETAIL_ADDED,
    INVOICEDETAIL_REMOVED,
    DISCOUNT_ADDED,
+   PAY_CASH,
+   PAY_TRANSFER,
 } from "../actions/types";
 
 const month = new Date().getMonth() + 1;
@@ -53,6 +55,13 @@ export default function (state = initialState, action) {
       case INVOICE_REGISTERED:
          return state;
       case INVOICEDETAIL_ADDED:
+         if (
+            state.invoice &&
+            state.invoice.details.some(
+               (item) => item.installment === payload._id
+            )
+         )
+            return state;
          let value;
          if (
             state.invoice &&
@@ -106,6 +115,7 @@ export default function (state = initialState, action) {
             ...state,
             invoice: {
                ...state.invoice,
+               added: true,
                studentsD: state.invoice.studentsD
                   ? [...state.invoice.studentsD, payload]
                   : [payload],
@@ -129,6 +139,38 @@ export default function (state = initialState, action) {
                           discount: item.number > 2 ? item.value - value : 0,
                        }
                      : item;
+               }),
+            },
+         };
+      case PAY_CASH:
+         return {
+            ...state,
+            invoice: {
+               ...state.invoice,
+               details: state.invoice.details.map((item) => {
+                  //Descuento efectivo
+                  const discount = new Intl.NumberFormat("de-DE").format(
+                     Math.floor((item.value * 0.1 + Number.EPSILON) / 100) * 100
+                  );
+                  return {
+                     ...item,
+                     value: item.value - discount,
+                     discount,
+                  };
+               }),
+            },
+         };
+      case PAY_TRANSFER:
+         return {
+            ...state,
+            invoice: {
+               ...state.invoice,
+               details: state.invoice.details.map((item) => {
+                  return {
+                     ...item,
+                     value: item.value + +item.discount,
+                     discount: null,
+                  };
                }),
             },
          };
