@@ -42,7 +42,7 @@ router.post("/list", [auth, adminAuth], async (req, res) => {
       "$" +
          new Intl.NumberFormat("de-DE").format(
             //Descuento efectivo
-            Math.ceil((item.value * 0.9 + Number.EPSILON) / 100) * 100
+            Math.ceil((item.value * 0.93 + Number.EPSILON) / 100) * 100
          ),
    ]);
 

@@ -150,7 +150,8 @@ export default function (state = initialState, action) {
                details: state.invoice.details.map((item) => {
                   //Descuento efectivo
                   const discount = new Intl.NumberFormat("de-DE").format(
-                     Math.floor((item.value * 0.1 + Number.EPSILON) / 100) * 100
+                     Math.floor((item.value * 0.07 + Number.EPSILON) / 100) *
+                        100
                   );
                   return {
                      ...item,

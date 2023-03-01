@@ -27,14 +27,16 @@ router.post("/list", [auth, adminAuth], async (req, res) => {
             "$" +
                formatNumber(
                   //Descuento efectivo
-                  (type !== "march" ? item.value : item.value / 2) * 0.9
+                  (type !== "march" ? item.value : item.value / 2) * 0.93
                ),
             index === 0
                ? "-"
                : "$" +
                  formatNumber(
                     //Descuento efectivo
-                    (type !== "march" ? item.value : item.value / 2) * 0.9 * 0.9
+                    (type !== "march" ? item.value : item.value / 2) *
+                       0.9 *
+                       0.93
                  ),
          ]
    );
