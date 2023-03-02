@@ -17,13 +17,20 @@ router.post("/list", [auth, adminAuth], async (req, res) => {
 
    const type = req.query.type;
 
-   const head = ["Nombre", "Valor", "Dto Hnos/Ctdo", "Ctdo c/ Dto"];
+   const head = ["Nombre", "Valor", "Dto Hnos", "Ctdo", "Ctdo c/ Dto"];
 
    const body = category.map(
       (item, index) =>
          (index !== 0 || (index === 0 && type !== "march")) && [
             item.name,
             "$" + formatNumber(type !== "march" ? item.value : item.value / 2),
+            index === 0
+               ? "-"
+               : "$" +
+                 formatNumber(
+                    //Descuento efectivo
+                    (type !== "march" ? item.value : item.value / 2) * 0.9
+                 ),
             "$" +
                formatNumber(
                   //Descuento efectivo

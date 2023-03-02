@@ -157,7 +157,11 @@ router.put(
                         (inst.number !== 3 || discount !== 50)
                            ? value - (value * discount) / 100
                            : value;
-
+                     console.log(
+                        inst.number === 3 ? newValue : "",
+                        inst.number,
+                        month
+                     );
                      newValue =
                         Math.ceil(
                            ((inst.number === 3 ? newValue / 2 : newValue) +
