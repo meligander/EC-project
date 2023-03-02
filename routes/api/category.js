@@ -74,9 +74,7 @@ router.put(
       //An array of categories
       const { categories, date } = req.body;
 
-      console.log(date, new Date(date).getMonth());
-
-      const month = new Date(date).getMonth() + 2;
+      const month = +date.slice(-2);
       const year = new Date(date).getFullYear();
 
       const thisYear = new Date().getFullYear();
