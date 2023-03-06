@@ -24,7 +24,7 @@ router.get("/", auth, async (req, res) => {
       if (Object.entries(req.query).length === 0) {
          enrollments = await Enrollment.find({
             year: new Date().getFullYear(),
-            date: { $gte: new Date(`${year}-01-01`) },
+            date: { $gte: new Date(`${year - 1}-10-01`) },
          })
             .populate({
                path: "student",
