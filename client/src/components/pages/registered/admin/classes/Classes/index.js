@@ -134,6 +134,7 @@ const Classes = ({
                      value={year}
                   >
                      <option value="">* Seleccione el Año</option>
+                     <option value="2022">2023</option>
                      <option value="2022">2022</option>
                      <option value="2021">2021</option>
                   </select>

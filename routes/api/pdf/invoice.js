@@ -75,7 +75,7 @@ router.post("/", [auth], async (req, res) => {
                formatNumber(
                   item.discount ? item.value + item.discount : item.value
                ),
-            "$" + (item.discount ? formatNumber(item.discount) : 0),
+            item.discount ? "$" + formatNumber(item.discount) : "-",
             "$" + formatNumber(item.value),
             "$" + formatNumber(item.payment),
          ];
@@ -100,6 +100,12 @@ router.post("/", [auth], async (req, res) => {
             total: formatNumber(total),
             ...(remaining !== 0 && { remaining: formatNumber(remaining) }),
             ...(discount !== 0 && { discount: formatNumber(discount) }),
+            spaces:
+               remaining !== 0 && discount !== 0
+                  ? 3
+                  : remaining !== 0 || discount !== 0
+                  ? 2
+                  : 1,
          },
          { type: "invoice", img: "logo", margin: false, landscape: false }
       );

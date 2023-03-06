@@ -156,22 +156,41 @@ const InvoiceTab = ({
    return (
       <div className="invoice-tab">
          <PopUp
-            confirm={() =>
+            confirm={() => {
+               let fullDiscount = 0;
+               let fullTotal = 0;
+               const newDetails = details.map((item) => {
+                  const payment = Number(item.payment.replace(/,/g, "."));
+                  let discount = 0;
+                  let value = item.value;
+
+                  if (item.discount)
+                     if (item.value === payment) {
+                        discount = +item.discount;
+                        fullDiscount += discount;
+                     } else {
+                        discount = null;
+                        value = item.value + +item.discount;
+                     }
+
+                  fullTotal += value;
+                  return {
+                     ...item,
+                     payment,
+                     ...(discount !== 0 && {
+                        discount,
+                        value,
+                     }),
+                  };
+               });
+
                registerInvoice({
                   ...formData,
-                  remaining: installmentTotal - total,
-                  discount: totalDiscount,
-                  details: details.map((item) => {
-                     return {
-                        ...item,
-                        payment:
-                           typeof item.payment === "number"
-                              ? item.payment
-                              : Number(item.payment.replace(/,/g, ".")),
-                     };
-                  }),
-               })
-            }
+                  remaining: fullTotal - total,
+                  discount: fullDiscount,
+                  details: newDetails,
+               });
+            }}
             info="¿Está seguro que la factura es correcta?"
          />
          <form

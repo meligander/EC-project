@@ -38,8 +38,14 @@ table.details {
    font-size: 0.95rem;
    margin-bottom: 2rem;
 }
-.details-block {
-   min-height: 55vh;
+.spaces-1 {
+   min-height: 58vh;
+}
+.spaces-2 {
+   min-height: 53vh;
+}
+.spaces-3 {
+   min-height: 48vh;
 }
 table.details thead {
    display: table-header-group;
