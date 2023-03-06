@@ -173,12 +173,9 @@ const Invoice = ({
                               {discount !== 0 && (
                                  <>
                                     <td>
-                                       $
-                                       {formatNumber(
-                                          invoice.discount
-                                             ? invoice.discount
-                                             : 0
-                                       )}
+                                       {invoice.discount
+                                          ? "$" + formatNumber(invoice.discount)
+                                          : "-"}
                                     </td>
                                     <td>${formatNumber(invoice.value)}</td>
                                  </>
