@@ -269,22 +269,20 @@ const InvoiceTab = ({
             <h3 className="text-primary heading-tertiary">
                Detalle de Factura
             </h3>
-            {invoice && invoice.added === undefined && (
-               <div className="text-right mt--1">
-                  <input
-                     className="form-checkbox"
-                     onChange={(e) => onChangeAdmin(e)}
-                     type="checkbox"
-                     name="cash"
-                     value={cash}
-                     id="cash"
-                  />
+            <div className="text-right mt--1">
+               <input
+                  className="form-checkbox"
+                  onChange={(e) => onChangeAdmin(e)}
+                  type="checkbox"
+                  name="cash"
+                  value={cash}
+                  id="cash"
+               />
 
-                  <label className="checkbox-lbl" htmlFor="cash">
-                     {cash ? "Contado" : "Transferencia"}
-                  </label>
-               </div>
-            )}
+               <label className="checkbox-lbl" htmlFor="cash">
+                  {cash ? "Contado" : "Transferencia"}
+               </label>
+            </div>
             <Alert type="5" />
             {details.length > 0 && (
                <div className="wrapper mt-2">

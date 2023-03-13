@@ -386,6 +386,7 @@ router.put("/", auth, async (req, res) => {
             : 31;
 
          if (
+            !(installments[x].number === 3 && month === 3) &&
             chargeDay - 3 <= day &&
             installments[x].status !== "warned" &&
             process.env.NODE_ENV === "production"

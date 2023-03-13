@@ -98,7 +98,6 @@ export default function (state = initialState, action) {
       case ENROLLMENT_ERROR:
          return {
             ...state,
-            enrollment: null,
             loadingEnrollment: false,
             error: payload,
          };

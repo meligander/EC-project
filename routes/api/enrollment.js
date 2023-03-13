@@ -57,7 +57,7 @@ router.get("/", auth, async (req, res) => {
             date:
                startDate || endDate
                   ? date
-                  : { $gte: new Date(`${year}-01-01`) },
+                  : { $gte: new Date(`${year - 1}-10-01`) },
             ...(category && { category: category }),
             ...(year && { year }),
             ...(student && { student: student }),

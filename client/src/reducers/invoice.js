@@ -72,7 +72,12 @@ export default function (state = initialState, action) {
                payload.number > 2 &&
                payload.status !== "expired" &&
                payload.number > month
-                  ? payload.value - (payload.value * 10) / 100
+                  ? payload.value -
+                    new Intl.NumberFormat("de-DE").format(
+                       Math.floor(
+                          (payload.value * 0.1 + Number.EPSILON) / 100
+                       ) * 100
+                    )
                   : payload.status === "expired"
                   ? Math.round(
                        (payload.value * 0.90909 + Number.EPSILON) * 100
@@ -124,13 +129,18 @@ export default function (state = initialState, action) {
                      item.number > 2 &&
                      item.status !== "expired" &&
                      item.number > month
-                        ? item.value - (item.value * 10) / 100
+                        ? item.value -
+                          new Intl.NumberFormat("de-DE").format(
+                             Math.floor(
+                                (item.value * 0.1 + Number.EPSILON) / 100
+                             ) * 100
+                          )
                         : item.status === "expired"
                         ? Math.round(
                              (item.value * 0.90909 + Number.EPSILON) * 100
                           ) / 100
                         : item.value;
-
+                  console.log(value);
                   return item.student._id === payload
                      ? {
                           ...item,
@@ -155,8 +165,10 @@ export default function (state = initialState, action) {
                   );
                   return {
                      ...item,
-                     value: item.value - discount,
-                     discount,
+                     value: item.value - +discount,
+                     discount: item.discount
+                        ? item.discount + +discount
+                        : discount,
                   };
                }),
             },

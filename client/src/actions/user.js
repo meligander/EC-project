@@ -165,6 +165,9 @@ export const registerUpdateUser = (formData, auth_id) => async (dispatch) => {
          if (!user._id) dispatch(clearInstallments());
       }
 
+      // if(user._id && user.pdf)
+      // dispatch()
+
       if (user._id === auth_id) dispatch(updateAuthUser(res.data));
       else
          dispatch({
