@@ -707,6 +707,65 @@ const Help = () => {
                pantalla emergente.
             </li>
          </ul>
+         <p className="heading-tertiary">Agregar/Modificar un TIPO de nota</p>
+         <ul>
+            <li>
+               Esto se utiliza en el caso de que se quiera modificar el nombre,
+               agregar un tipo de nota nuevo para agregar en la clase o
+               modificar a que curso ese tipo de nota se puede agregar.
+            </li>
+            <li>
+               Desde la página principal ir a "Clases" en el menú de la
+               izquierda o en el menú de la barra superior de color azul (tres
+               líneas) que se encuentra arriba a la derecha.
+            </li>
+            <li>
+               Ubique cualquier clase y haga click en "Ver"{" "}
+               <button className="btn-text">Ver &rarr;</button> que se encuentra
+               a la derecha de esta. (Si no encuentra la palabra ver, vaya al
+               final de la página y corra la lista hacia la derecha con la barra
+               celeste que está debajo de la lista y busque nuevamente la
+               clase).
+            </li>
+            <li>
+               Vaya al final de la página y haga click en el botón "Notas"{" "}
+               <button className="btn btn-primar">
+                  <FaPenFancy />
+                  &nbsp; Notas
+               </button>{" "}
+               que está al final a la izquierda.
+            </li>
+            <li>
+               Haga click en el botón editar{" "}
+               <button className="btn btn-mix-secondary">
+                  <FaEdit />
+               </button>{" "}
+               que está a la derecha de donde se selecciona el tipo de nota.
+            </li>
+            <li>
+               Modifique el nombre o los cursos a las que se le puede agregar
+               agregando/sacando el tick correspondiente.
+            </li>
+            <li>
+               Si desea agregar un tipo de nota nuevo, vaya al final de la
+               página y haga click en el botón "Agregar Tipo de Nota"{" "}
+               <button className="btn btn-primary">
+                  <FaPlus />
+                  &nbsp; Agregar Tipo de Nota
+               </button>
+               .
+            </li>
+            <li>Ingrese los datos necesarios.</li>
+            <li>
+               Haga click en el botón "Guardar"{" "}
+               <button className="btn btn-primary">
+                  <FiSave />
+                  &nbsp;Guardar
+               </button>
+               que se encuentra al final de la página y en "Aceptar" en la
+               pantalla emergente.
+            </li>
+         </ul>
          <p className="heading-tertiary">
             Modificar inasistencias en una clase
          </p>
@@ -741,13 +800,204 @@ const Help = () => {
                   <IoCheckmarkCircleSharp />
                   &nbsp; Inasistencias
                </button>{" "}
-               que está al final a la izquierda.
+               que está al final entre el botón de "Notas" y "Observaciones".
             </li>
             <li>
                Seleccione la pestaña correspondiente según las inasistencias del
                bimestre que desea cargar.
             </li>
-            <li></li>
+            <li>
+               Si no están cargadas las fechas del bimestre:
+               <ul>
+                  <li>
+                     Haga click en el botón "+ Día"{" "}
+                     <button className="btn btn-dark">
+                        <FaPlus />
+                        &nbsp; Día
+                     </button>{" "}
+                     que está al final entre medio de los botones de "Guardar" y
+                     de generar el pdf.
+                  </li>
+                  <li>
+                     Seleccione la fecha desde cuando comienza el bimestre y
+                     cuando finaliza.
+                  </li>
+                  <li>Haga click en "Aceptar".</li>
+               </ul>
+            </li>
+            <li>
+               Si desea cargar una fecha que no está en el listado de días:
+               <ul>
+                  <li>
+                     Haga click en el botón "+ Día"{" "}
+                     <button className="btn btn-dark">
+                        <FaPlus />
+                        &nbsp; Día
+                     </button>{" "}
+                     que está al final entre medio de los botones de "Guardar" y
+                     de generar el pdf.
+                  </li>
+                  <li>Seleccione la fecha que desea cargar.</li>
+                  <li>Haga click en "Aceptar".</li>
+               </ul>
+            </li>
+            <li>Deseleccione los alumnos en los días correspondientes.</li>
+            <li>
+               Haga click en el botón "Guardar"{" "}
+               <button className="btn btn-primary">
+                  <FiSave />
+                  &nbsp;Guardar
+               </button>
+               que se encuentra al final de la página y en "Aceptar" en la
+               pantalla emergente.
+            </li>
+         </ul>
+         <p className="heading-tertiary">
+            Agregar/Modificar observaciones de los alumnos de una clase (para la
+            libreta)
+         </p>
+         <ul>
+            <li>
+               Desde la página principal ir a "Clases" en el menú de la
+               izquierda o en el menú de la barra superior de color azul (tres
+               líneas) que se encuentra arriba a la derecha.
+            </li>
+            <li>
+               Si no encuentra la clase fácilmente, rellene los campos del
+               filtro necesarios en la sección superior y haga click en el botón
+               "Buscar"
+               <button className="btn btn-light">
+                  <BiFilterAlt />
+                  &nbsp;Buscar
+               </button>
+               .
+            </li>
+            <li>
+               Ubique la clase a la que desea agregar/modificar las notas y haga
+               click en "Ver" <button className="btn-text">Ver &rarr;</button>{" "}
+               que se encuentra a la derecha de dicha clase (Si no encuentra la
+               palabra ver, vaya al final de la página y corra la lista hacia la
+               derecha con la barra celeste que está debajo de la lista y busque
+               nuevamente la clase).
+            </li>
+            <li>
+               Vaya al final de la página y haga click en el botón
+               "Observaciones"{" "}
+               <button className="btn btn-primary">
+                  <CgNotes />
+                  &nbsp; Observaciones
+               </button>{" "}
+               que está al final a la derecha.
+            </li>
+            <li>
+               Seleccione la pestaña correspondiente según las observaciones del
+               bimestre que desea cargar.
+            </li>
+            <li>
+               Escriba las observaciones en los lugares correspondientes al lado
+               del alumnos.
+            </li>
+            <li>
+               Haga click en el botón "Guardar"{" "}
+               <button className="btn btn-primary">
+                  <FiSave />
+                  &nbsp;Guardar
+               </button>
+               que se encuentra al final de la página y en "Aceptar" en la
+               pantalla emergente.
+            </li>
+         </ul>
+         <p className="heading-tertiary">
+            Agregar/Modificar una cuota de un alumno
+         </p>
+         <ul>
+            <li>
+               (Solo utilizar para agregar una cuota a un alumno si no se
+               realiza la inscripción o es una cuota especial como "Clases
+               Particulares" o "Exámen Libre".
+            </li>
+            <li>
+               Desde la página principal ir a "Cuotas" en el menú de la
+               izquierda.
+            </li>
+            <li>
+               En la sección "Búsqueda de alumnos" ingrese el apellido y/o
+               nombre y seleccione el alumno al que le desea agregar/modificar
+               una cuota.
+            </li>
+            <li>
+               Haga click en el botón "Ver Cuotas"
+               <button className="btn btn-dark">
+                  <FaMoneyCheckAlt />
+                  &nbsp; Ver Cuotas
+               </button>
+               .
+            </li>
+            <li>
+               Si desea agregar una cuota nueva ir al final de la página y hacer
+               click en el botón "Agregar Cuota"{" "}
+               <button className="btn btn-primary">
+                  <FaPlus />
+                  &nbsp;Agregar cuota
+               </button>
+               .
+            </li>
+            <li>
+               Si desea modificar una cuota hcer click en el botón editar{" "}
+               <button className="btn btn-success">
+                  <FaEdit />
+               </button>{" "}
+               que está a la izquierda de la misma.
+            </li>
+            <li>
+               Agregar/Modificar los datos de la misma. El botón "Permitir
+               Actualizar" se debe sacar y dejarlo en "No Actualizar" en el caso
+               de que no quiere que se modifique cuando se hace el recargo por
+               no pago o con la actualización de precios.
+            </li>
+            <li>
+               En "Estado de la Cuota" es "Válida" si se quiere crear pero que
+               no se considere "Deuda" todavía (Son deudas las cuotas del mes
+               corriente y vencidas las de meses anteriores).
+            </li>
+            <li>
+               Haga click en el botón "Guardar"{" "}
+               <button className="btn btn-primary">
+                  <FiSave />
+                  &nbsp;Guardar
+               </button>
+               que se encuentra al final de la página y en "Aceptar" en la
+               pantalla emergente.
+            </li>
+         </ul>
+         <p className="heading-tertiary">Eliminar una cuota de un alumno</p>
+         <ul>
+            <li>
+               Desde la página principal ir a "Cuotas" en el menú de la
+               izquierda.
+            </li>
+            <li>
+               En la sección "Búsqueda de alumnos" ingrese el apellido y/o
+               nombre y seleccione el alumno al que le desea agregar/modificar
+               una cuota.
+            </li>
+            <li>
+               Haga click en el botón "Ver Cuotas"
+               <button className="btn btn-dark">
+                  <FaMoneyCheckAlt />
+                  &nbsp; Ver Cuotas
+               </button>
+               .
+            </li>
+            <li>
+               Localizar la cuota en la lista de abajo y hacer click en el botón
+               eliminar{" "}
+               <button className="btn btn-danger">
+                  <FaTrashAlt />
+               </button>{" "}
+               que se encuentra a la derecha del mismo y hacer click en el botón
+               "Aceptar" en la ventana emergente
+            </li>
          </ul>
       </div>
    );

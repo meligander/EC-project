@@ -19,34 +19,23 @@ router.post("/list", [auth, adminAuth], async (req, res) => {
 
    const head = ["Nombre", "Valor", "Dto Hnos", "Ctdo", "Ctdo c/ Dto"];
 
-   const body = category.map(
-      (item, index) =>
-         (index !== 0 || (index === 0 && type !== "march")) && [
+   const body = category.map((item, index) => {
+      const value = type !== "march" ? item.value : item.value / 2;
+      const brotherDisc = Math.ceil((value * 0.9 + Number.EPSILON) / 100) * 100;
+
+      if (index !== 0 || (index === 0 && type !== "march"))
+         return [
             item.name,
-            "$" + formatNumber(type !== "march" ? item.value : item.value / 2),
-            index === 0
-               ? "-"
-               : "$" +
-                 formatNumber(
-                    //Descuento efectivo
-                    (type !== "march" ? item.value : item.value / 2) * 0.9
-                 ),
+            "$" + formatNumber(value),
+            index === 0 ? "-" : "$" + formatNumber(brotherDisc),
             "$" +
                formatNumber(
                   //Descuento efectivo
-                  (type !== "march" ? item.value : item.value / 2) * 0.93
+                  value * 0.93
                ),
-            index === 0
-               ? "-"
-               : "$" +
-                 formatNumber(
-                    //Descuento efectivo
-                    (type !== "march" ? item.value : item.value / 2) *
-                       0.9 *
-                       0.93
-                 ),
-         ]
-   );
+            index === 0 ? "-" : "$" + formatNumber(brotherDisc * 0.93),
+         ];
+   });
 
    try {
       await generatePDF(

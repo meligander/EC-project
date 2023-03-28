@@ -327,15 +327,6 @@ router.put("/", auth, async (req, res) => {
       const day = date.getDate();
       const hours = date.getHours();
 
-      console.log(
-         hours,
-         hours >= 6 && hours < 12
-            ? "¡Buen día!"
-            : hours >= 12 && hours < 19
-            ? "¡Buenas tardes!"
-            : "¡Buenas noches!"
-      );
-
       const lessDay = [4, 6, 9, 11].includes(month);
 
       let installments = await Installment.find({

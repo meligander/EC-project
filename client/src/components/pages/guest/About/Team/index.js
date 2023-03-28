@@ -101,7 +101,7 @@ const Team = ({ users: { loading, users }, loadUsers }) => {
                      <img
                         src={
                            users[teamNumber].img.url === ""
-                              ? "https://pngimage.net/wp-content/uploads/2018/06/no-user-image-png-3-300x200.png"
+                              ? "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
                               : users[teamNumber].img.url
                         }
                         alt={
