@@ -97,6 +97,12 @@ router.post("/", [auth], async (req, res) => {
             user,
             invoiceid,
             date: format(new Date(date), "dd/MM/yy"),
+            userInfo: !(
+               user.email &&
+               user.email !== "" &&
+               user.cel &&
+               user.cel !== ""
+            ),
             total: formatNumber(total),
             ...(remaining !== 0 && { remaining: formatNumber(remaining) }),
             ...(discount !== 0 && { discount: formatNumber(discount) }),

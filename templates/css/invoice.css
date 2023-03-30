@@ -29,23 +29,23 @@ table.invoice-info td.invoice-info {
    bottom: -1rem;
    right: 2rem;
 }
-table.invoice-info tr.blank {
-   height: 1rem;
-}
 table.details {
    text-align: center;
    margin-top: 2rem;
    font-size: 0.95rem;
    margin-bottom: 2rem;
 }
+.room {
+   height: 2.2rem;
+}
 .spaces-1 {
-   min-height: 55vh;
+   min-height: 53vh;
 }
 .spaces-2 {
-   min-height: 50vh;
+   min-height: 48vh;
 }
 .spaces-3 {
-   min-height: 48vh;
+   min-height: 42vh;
 }
 table.details thead {
    display: table-header-group;
