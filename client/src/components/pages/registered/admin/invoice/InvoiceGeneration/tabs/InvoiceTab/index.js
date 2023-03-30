@@ -160,7 +160,9 @@ const InvoiceTab = ({
                let fullDiscount = 0;
                let fullTotal = 0;
                const newDetails = details.map((item) => {
-                  const payment = Number(item.payment.replace(/,/g, "."));
+                  const payment = Number(
+                     item.payment.toString().replace(/,/g, ".")
+                  );
                   let discount = 0;
                   let value = item.value;
 
