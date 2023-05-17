@@ -9,6 +9,7 @@ const GlobalSchema = new mongoose.Schema({
       type: String,
       enum: [
          "penalty",
+         "discount",
          "lowerSalary",
          "higherSalary",
          "adminSalary",

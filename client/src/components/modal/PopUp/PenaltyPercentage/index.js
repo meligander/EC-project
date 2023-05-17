@@ -3,35 +3,58 @@ import format from "date-fns/format";
 
 import "./style.scss";
 
-const PenaltyPercentage = ({ onChange, penalty, percentage }) => {
+const PenaltyPercentage = ({ onChange, oldPenalty, oldDiscount, values }) => {
    return (
       <>
-         {penalty && (
+         <h3>Actualización de Recargo y/o Descuento</h3>
+
+         {oldPenalty && (
             <p className="posted-date">
                Última Actualización:{" "}
-               {format(new Date(penalty.date), "dd/MM/yy")}
+               {format(new Date(oldPenalty.date), "dd/MM/yy")}
             </p>
          )}
+         <h4> Recargo Actual: {oldPenalty && oldPenalty.number} %</h4>
 
-         <h3>Actualización de Recargo</h3>
-
-         <div className="pt-2">
-            <h4> Recargo Actual: {penalty && penalty.number}%</h4>
-
-            {!penalty && (
-               <h5 className="paragraph text-danger text-center">
-                  No hay ningún recargo registrado
-               </h5>
-            )}
-         </div>
+         {!oldPenalty && (
+            <h5 className="paragraph text-danger text-center">
+               No hay ningún recargo registrado
+            </h5>
+         )}
 
          <h4>
             <input
-               id="percentage"
+               id="penalty"
                type="text"
-               name="percentage"
+               name="penalty"
                placeholder="Nuevo Recargo"
-               value={percentage}
+               value={values.penalty}
+               onChange={onChange}
+            />
+            %
+         </h4>
+
+         {oldDiscount && (
+            <p className="posted-date">
+               Última Actualización:{" "}
+               {format(new Date(oldDiscount.date), "dd/MM/yy")}
+            </p>
+         )}
+         <h4> Descuento Actual: {oldDiscount && oldDiscount.number} %</h4>
+
+         {!oldDiscount && (
+            <h5 className="paragraph text-danger text-center">
+               No hay ningún descuento registrado
+            </h5>
+         )}
+
+         <h4>
+            <input
+               id="discount"
+               type="text"
+               name="discount"
+               placeholder="Nuevo Descuento"
+               value={values.discount}
                onChange={onChange}
             />
             %

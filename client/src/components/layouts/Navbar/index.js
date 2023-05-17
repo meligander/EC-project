@@ -3,6 +3,7 @@ import { Link, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { BsClock } from "react-icons/bs";
 import { GoHome } from "react-icons/go";
+import { BiHelpCircle } from "react-icons/bi";
 import { RiLogoutCircleRLine } from "react-icons/ri";
 
 import {
@@ -200,6 +201,25 @@ const Navbar = ({
                      )}
 
                      {type()}
+                     {!isAdmin && (
+                        <li
+                           className={`nav-item${menuToggle ? " show" : ""}${
+                              currentNav === "help" ? " current" : ""
+                           }`}
+                        >
+                           <Link
+                              className="nav-link"
+                              to="/help"
+                              onClick={() => {
+                                 window.scroll(0, 0);
+                                 updateCurrentNav("help", true);
+                              }}
+                           >
+                              <BiHelpCircle />
+                              <span className="hide-md">&nbsp;Ayuda</span>
+                           </Link>
+                        </li>
+                     )}
                      <li
                         className={`nav-item${isAdmin ? " smaller" : ""}${
                            menuToggle ? " show" : ""

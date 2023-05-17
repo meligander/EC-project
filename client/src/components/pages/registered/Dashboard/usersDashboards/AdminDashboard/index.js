@@ -14,6 +14,7 @@ import {
    FaChalkboardTeacher,
    FaGraduationCap,
 } from "react-icons/fa";
+import { BiHelpCircle } from "react-icons/bi";
 import { ImSearch } from "react-icons/im";
 
 import {
@@ -123,6 +124,7 @@ const AdminDashboard = ({
                            getInvoiceNumber();
                            clearSearch();
                            clearInvoice();
+                           clearGlobals();
                            window.scroll(0, 0);
                         }}
                      >
@@ -154,6 +156,7 @@ const AdminDashboard = ({
                         to="/index/categories"
                         onClick={() => {
                            clearCategories();
+                           clearGlobals();
                            window.scroll(0, 0);
                         }}
                         className="side-nav-link"
@@ -269,22 +272,37 @@ const AdminDashboard = ({
                         <span className="hide-sm">Inscripción</span>
                      </Link>
                   </li>
-
+                  <span className="hide-sm">
+                     <li className="side-nav-item">
+                        <Link
+                           to="/index/mentions-list"
+                           onClick={() => {
+                              clearSearch();
+                              clearAttendances();
+                              clearGrades();
+                              window.scroll(0, 0);
+                           }}
+                           className="side-nav-link"
+                        >
+                           <span className="side-nav-icon">
+                              <FaGraduationCap />
+                           </span>
+                           Menciones
+                        </Link>
+                     </li>
+                  </span>
                   <li className="side-nav-item">
                      <Link
-                        to="/index/mentions-list"
+                        to="/index/help"
                         onClick={() => {
-                           clearSearch();
-                           clearAttendances();
-                           clearGrades();
                            window.scroll(0, 0);
                         }}
                         className="side-nav-link"
                      >
                         <span className="side-nav-icon">
-                           <FaGraduationCap />
+                           <BiHelpCircle />
                         </span>
-                        <span className="hide-sm">Menciones</span>
+                        <span className="hide-sm">Ayuda</span>
                      </Link>
                   </li>
                </ul>

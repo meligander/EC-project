@@ -64,36 +64,37 @@ export const updateCategories = (formData) => async (dispatch) => {
    }
 };
 
-export const categoriesPDF = (categories, type) => async (dispatch) => {
-   dispatch(updateLoadingSpinner(true));
-   let error = false;
+export const categoriesPDF =
+   (categories, discount, type) => async (dispatch) => {
+      dispatch(updateLoadingSpinner(true));
+      let error = false;
 
-   try {
-      const pdf = await api.post(
-         "/pdf/category/list?type=" + type,
-         categories,
-         {
-            responseType: "blob",
-         }
-      );
+      try {
+         const pdf = await api.post(
+            "/pdf/category/list?type=" + type,
+            { categories, discount },
+            {
+               responseType: "blob",
+            }
+         );
 
-      const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
+         const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
-      saveAs(pdfBlob, `Categorías ${format(new Date(), "dd-MM-yy")}.pdf`);
+         saveAs(pdfBlob, `Categorías ${format(new Date(), "dd-MM-yy")}.pdf`);
 
-      dispatch(setAlert("PDF Generado", "success", "2"));
-   } catch (err) {
-      if (err.response.status !== 401) {
-         dispatch(setError(CATEGORIES_ERROR, err.response));
-         dispatch(setAlert(err.response.data.msg, "danger", "2"));
-      } else error = true;
-   }
+         dispatch(setAlert("PDF Generado", "success", "2"));
+      } catch (err) {
+         if (err.response.status !== 401) {
+            dispatch(setError(CATEGORIES_ERROR, err.response));
+            dispatch(setAlert(err.response.data.msg, "danger", "2"));
+         } else error = true;
+      }
 
-   if (!error) {
-      window.scrollTo(0, 0);
-      dispatch(updateLoadingSpinner(false));
-   }
-};
+      if (!error) {
+         window.scrollTo(0, 0);
+         dispatch(updateLoadingSpinner(false));
+      }
+   };
 
 export const clearCategories = () => (dispatch) => {
    dispatch({ type: CATEGORIES_CLEARED });

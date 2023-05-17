@@ -8,7 +8,7 @@ import {
    installmentsPDF,
 } from "../../../../../../actions/installment";
 import { getEstimatedProfit } from "../../../../../../actions/installment";
-import { formatNumber } from "../../../../../../actions/global";
+import { formatNumber, loadDiscount } from "../../../../../../actions/global";
 import { clearProfile } from "../../../../../../actions/user";
 
 import ListButtons from "../sharedComp/ListButtons";
@@ -20,8 +20,10 @@ const InstallmentList = ({
       loading,
       otherValues: { estimatedProfit },
    },
+   global: { discount, loading: loadingDiscount },
    auth: { userLogged },
    loadInstallments,
+   loadDiscount,
    getEstimatedProfit,
    clearProfile,
    installmentsPDF,
@@ -70,6 +72,10 @@ const InstallmentList = ({
    useEffect(() => {
       if (estimatedProfit === "" && isAdmin) getEstimatedProfit();
    }, [estimatedProfit, getEstimatedProfit, isAdmin]);
+
+   useEffect(() => {
+      if (loadingDiscount) loadDiscount();
+   }, [loadingDiscount, loadDiscount]);
 
    const onChange = (e) => {
       e.persist();
@@ -220,7 +226,9 @@ const InstallmentList = ({
                   setAdminValues((prev) => ({ ...prev, page }))
                }
                items={installments}
-               pdfGenerator={() => installmentsPDF(installments)}
+               pdfGenerator={() =>
+                  installmentsPDF(installments, discount.number)
+               }
             />
          )}
       </>
@@ -229,11 +237,13 @@ const InstallmentList = ({
 
 const mapStatetoProps = (state) => ({
    installments: state.installments,
+   global: state.global,
    auth: state.auth,
 });
 
 export default connect(mapStatetoProps, {
    loadInstallments,
+   loadDiscount,
    getEstimatedProfit,
    installmentsPDF,
    clearProfile,

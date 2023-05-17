@@ -25,6 +25,8 @@ const InvoiceTab = ({
       invoice,
       otherValues: { invoiceNumber },
    },
+   global: { discount },
+   categories: { categories },
    togglePopup,
    registerInvoice,
    removeDetail,
@@ -121,7 +123,7 @@ const InvoiceTab = ({
       e.persist();
       setAdminValues((prev) => ({ ...prev, cash: e.target.checked }));
 
-      if (e.target.checked) payCash();
+      if (e.target.checked) payCash(discount.number, categories[0].value);
       else payTransfer();
    };
 
@@ -410,6 +412,8 @@ const InvoiceTab = ({
 const mapStateToProps = (state) => ({
    invoices: state.invoices,
    auth: state.auth,
+   global: state.global,
+   categories: state.categories,
 });
 
 export default connect(mapStateToProps, {

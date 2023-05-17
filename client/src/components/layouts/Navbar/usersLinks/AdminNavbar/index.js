@@ -15,7 +15,7 @@ import { clearInstallments } from "../../../../../actions/installment";
 import { clearRegister } from "../../../../../actions/register";
 import { clearSearch, clearUsers } from "../../../../../actions/user";
 import { clearClasses } from "../../../../../actions/class";
-import { updateCurrentNav } from "../../../../../actions/global";
+import { clearGlobals, updateCurrentNav } from "../../../../../actions/global";
 
 import "./style.scss";
 
@@ -27,6 +27,7 @@ const AdminNavbar = ({
    clearSearch,
    clearClasses,
    clearUsers,
+   clearGlobals,
    clearInvoice,
    clearEnrollments,
    updateCurrentNav,
@@ -103,6 +104,7 @@ const AdminNavbar = ({
                   getInvoiceNumber();
                   clearSearch();
                   clearInvoice();
+                  clearGlobals();
                   window.scroll(0, 0);
                }}
             >
@@ -145,6 +147,7 @@ export default connect(mapStateToProps, {
    clearClasses,
    clearInvoice,
    clearUsers,
+   clearGlobals,
    clearEnrollments,
    updateCurrentNav,
 })(AdminNavbar);

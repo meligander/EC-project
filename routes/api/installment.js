@@ -379,11 +379,10 @@ router.put("/", auth, async (req, res) => {
 
       for (let x = 0; x < installments.length; x++) {
          const student = installments[x].student;
-         const chargeDay = student.chargeday
-            ? student.chargeday - (lessDay ? 1 : 0)
-            : lessDay
-            ? 30
-            : 31;
+         const chargeDay =
+            !student.chargeday || student.chargeDay === 31
+               ? 31 - (lessDay ? 1 : 0)
+               : student.chargeDay;
 
          if (
             !(installments[x].number === 3 && month === 3) &&
@@ -411,9 +410,13 @@ router.put("/", auth, async (req, res) => {
                      "Cuota por vencer",
                      `${greeting}
                      Le queríamos comunicar que la cuota del corriente mes del alumno
-                      ${student.lastname}, ${student.name} está proxima a su vencimiento.
+                      ${student.lastname}, ${
+                        student.name
+                     } está proxima a su vencimiento.
                      <br/>
-                     El día ${chargeDay} se le aplicará un recargo del ${penalty.number}%.
+                     El día ${
+                        month === 3 ? 1 : chargeDay
+                     } se le aplicará un recargo del ${penalty.number}%.
                      <br/>
                      Este es un mensaje automático. Si usted ya realizó dicho pago ignore este email.
                      <br/><br/>

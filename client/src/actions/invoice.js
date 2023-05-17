@@ -247,8 +247,8 @@ export const addDiscount = (student) => (dispatch) => {
    dispatch({ type: DISCOUNT_ADDED, payload: student });
 };
 
-export const payCash = () => (dispatch) => {
-   dispatch({ type: PAY_CASH });
+export const payCash = (discount, enrollment) => (dispatch) => {
+   dispatch({ type: PAY_CASH, payload: { discount, enrollment } });
 };
 
 export const payTransfer = () => (dispatch) => {

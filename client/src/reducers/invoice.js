@@ -159,10 +159,15 @@ export default function (state = initialState, action) {
                ...state.invoice,
                details: state.invoice.details.map((item) => {
                   //Descuento efectivo
-                  const discount = new Intl.NumberFormat("de-DE").format(
-                     Math.floor((item.value * 0.07 + Number.EPSILON) / 100) *
-                        100
-                  );
+                  const discount =
+                     (item.number !== 0 || item.value === payload.enrollment) &&
+                     new Intl.NumberFormat("de-DE").format(
+                        Math.floor(
+                           (item.value * (payload.discount / 100) +
+                              Number.EPSILON) /
+                              100
+                        ) * 100
+                     );
                   return {
                      ...item,
                      value: item.value - +discount,

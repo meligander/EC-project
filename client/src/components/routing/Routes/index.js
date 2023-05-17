@@ -12,6 +12,7 @@ import SingleClass from "../../pages/registered/admin/classes/SingleClass";
 import Attendance from "../../pages/registered/Attendance";
 import Grades from "../../pages/registered/Grades";
 import Observations from "../../pages/registered/Observations";
+import Help from "../../pages/registered/Help";
 
 //Admin Pages
 import RegisterUser from "../../pages/registered/admin/users/RegisterUser";
@@ -200,6 +201,18 @@ const Routes = ({ location, global: { navbar, footer } }) => {
                ]}
                path="/class/observations/:class_id"
                component={Observations}
+            />
+            <PrivateRoutes
+               exact
+               types={["admin", "secretary", "admin&teacher"]}
+               path="/index/help"
+               component={Help}
+            />
+            <PrivateRoutes
+               exact
+               types={["guardian", "student", "teacher", "classManager"]}
+               path="/help"
+               component={Help}
             />
             <PrivateRoutes
                exact

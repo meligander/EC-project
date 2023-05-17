@@ -9,7 +9,7 @@ import {
    updateCategories,
    categoriesPDF,
 } from "../../../../../actions/category";
-import { togglePopup } from "../../../../../actions/global";
+import { togglePopup, loadDiscount } from "../../../../../actions/global";
 
 import PopUp from "../../../../modal/PopUp";
 
@@ -17,8 +17,10 @@ import "./style.scss";
 
 const Categories = ({
    categories: { categories, loading },
+   global: { loading: loadingDiscount, discount },
    togglePopup,
    loadCategories,
+   loadDiscount,
    updateCategories,
    categoriesPDF,
 }) => {
@@ -36,6 +38,10 @@ const Categories = ({
       if (loading) loadCategories(true);
       else setFormData(categories);
    }, [loadCategories, loading, categories]);
+
+   useEffect(() => {
+      if (loadingDiscount) loadDiscount();
+   }, [loadDiscount, loadingDiscount]);
 
    const onChange = (e, index) => {
       e.persist();
@@ -126,7 +132,7 @@ const Categories = ({
                   className="btn btn-secondary"
                   onClick={(e) => {
                      e.preventDefault();
-                     categoriesPDF(categories, "all");
+                     categoriesPDF(categories, discount.number, "all");
                   }}
                >
                   <ImFilePdf />
@@ -139,7 +145,7 @@ const Categories = ({
                   className="btn btn-secondary"
                   onClick={(e) => {
                      e.preventDefault();
-                     categoriesPDF(categories, "march");
+                     categoriesPDF(categories, discount.number, "march");
                   }}
                >
                   <ImFilePdf />
@@ -153,10 +159,12 @@ const Categories = ({
 
 const mapStatetoProps = (state) => ({
    categories: state.categories,
+   global: state.global,
 });
 
 export default connect(mapStatetoProps, {
    loadCategories,
+   loadDiscount,
    updateCategories,
    togglePopup,
    categoriesPDF,

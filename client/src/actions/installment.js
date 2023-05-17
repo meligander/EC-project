@@ -216,14 +216,20 @@ export const deleteInstallment = (_id) => async (dispatch) => {
    }
 };
 
-export const installmentsPDF = (installments) => async (dispatch) => {
+export const installmentsPDF = (installments, discount) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
+   console.log(discount);
+
    try {
-      const pdf = await api.post("/pdf/installment/list", installments, {
-         responseType: "blob",
-      });
+      const pdf = await api.post(
+         "/pdf/installment/list",
+         { installments, discount },
+         {
+            responseType: "blob",
+         }
+      );
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 

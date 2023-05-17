@@ -48,7 +48,10 @@ const PopUp = ({
       classManagerSalary: "",
    });
 
-   const [penaltyPercentage, setPenaltyPercentage] = useState("");
+   const [values, setValues] = useState({
+      penalty: "",
+      discount: "",
+   });
 
    const [backup, setBackup] = useState("");
 
@@ -105,9 +108,10 @@ const PopUp = ({
       setNewGradeType(e.target.value);
    };
 
-   const onChangePenaltyPercentage = (e) => {
+   const onChangeValues = (e) => {
       e.persist();
-      if (!isNaN(e.target.value)) setPenaltyPercentage(e.target.value);
+      if (!isNaN(e.target.value))
+         setValues((prev) => ({ ...prev, [e.target.name]: e.target.value }));
    };
 
    const onChangeBackup = (file) => {
@@ -122,14 +126,15 @@ const PopUp = ({
 
    const chooseType = () => {
       switch (popupType) {
-         case "penalty":
+         case "values":
             return (
                <div className="popup-penalty">
                   {
                      <PenaltyPercentage
-                        onChange={onChangePenaltyPercentage}
-                        penalty={info.penalty}
-                        percentage={penaltyPercentage}
+                        onChange={onChangeValues}
+                        oldPenalty={info.penalty}
+                        oldDiscount={info.discount}
+                        values={values}
                      />
                   }
                </div>
@@ -234,8 +239,9 @@ const PopUp = ({
                      onClick={(e) => {
                         e.preventDefault();
                         switch (popupType) {
-                           case "penalty":
-                              confirm(penaltyPercentage);
+                           case "values":
+                              confirm(values);
+                              setValues({ penalty: "", discount: "" });
                               break;
                            case "certificate":
                               confirm(certificate);

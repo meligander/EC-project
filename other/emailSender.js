@@ -48,17 +48,17 @@ const sendEmail = async (user_email, subject, text) => {
       ],
    };
 
-   return new Promise((resolve, reject) => {
-      emailTransporter.sendMail(mailOptions, (error, info) => {
-         if (error) {
-            console.error(error.message);
-            reject({ message: "Something went wrong..." });
-         } else {
-            console.log("Email sent: " + info.response);
-            resolve(true);
-         }
-      });
-   });
+   // return new Promise((resolve, reject) => {
+   //    emailTransporter.sendMail(mailOptions, (error, info) => {
+   //       if (error) {
+   //          console.error(error.message);
+   //          reject({ message: "Something went wrong..." });
+   //       } else {
+   //          console.log("Email sent: " + info.response);
+   //          resolve(true);
+   //       }
+   //    });
+   // });
 };
 
 const changeCredentials = async (email, password, user) => {

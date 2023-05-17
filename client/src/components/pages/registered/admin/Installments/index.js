@@ -9,7 +9,11 @@ import {
    clearInstallment,
    loadInstallments,
 } from "../../../../../actions/installment";
-import { loadPenalty, updatePenalty } from "../../../../../actions/global";
+import {
+   loadPenalty,
+   updateValues,
+   loadDiscount,
+} from "../../../../../actions/global";
 import { clearUser } from "../../../../../actions/user";
 import { togglePopup } from "../../../../../actions/global";
 import { clearEnrollments } from "../../../../../actions/enrollment";
@@ -19,14 +23,15 @@ import PopUp from "../../../../modal/PopUp";
 
 const Installments = ({
    match,
-   global: { loading: loadingPenalty, penalty },
+   global: { loading: loadingPenalty, penalty, discount },
    installments: { loading, installments },
    auth: { userLogged },
    clearInstallments,
    clearInstallment,
    clearUser,
    clearEnrollments,
-   updatePenalty,
+   updateValues,
+   loadDiscount,
    loadPenalty,
    loadInstallments,
    togglePopup,
@@ -41,8 +46,11 @@ const Installments = ({
    const { student } = adminValues;
 
    useEffect(() => {
-      if (loadingPenalty) loadPenalty();
-   }, [loadingPenalty, loadPenalty]);
+      if (loadingPenalty) {
+         loadPenalty();
+         loadDiscount();
+      }
+   }, [loadingPenalty, loadPenalty, loadDiscount]);
 
    useEffect(() => {
       if (_id !== "0") {
@@ -68,8 +76,8 @@ const Installments = ({
             <h1>Cuotas</h1>
             {!loadingPenalty && (
                <PopUp
-                  confirm={(number) => updatePenalty({ number })}
-                  info={{ penalty }}
+                  confirm={(values) => updateValues(values)}
+                  info={{ penalty, discount }}
                   error
                />
             )}
@@ -82,11 +90,11 @@ const Installments = ({
                      disabled={loadingPenalty}
                      onClick={(e) => {
                         e.preventDefault();
-                        togglePopup("penalty");
+                        togglePopup("values");
                      }}
                   >
                      <FaDollarSign />
-                     &nbsp;Recargo
+                     &nbsp;<span className="hide-sm">Recargo/Descuento</span>
                   </button>
                )}
                <Link
@@ -145,7 +153,8 @@ export default connect(mapStateToProps, {
    loadPenalty,
    clearUser,
    clearEnrollments,
-   updatePenalty,
+   updateValues,
+   loadDiscount,
    loadInstallments,
    togglePopup,
 })(Installments);

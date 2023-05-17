@@ -1,0 +1,134 @@
+@import "../../../../style/abstract.scss";
+.help {
+   .btn,
+   .btn-text {
+      font-size: 1rem;
+      padding: 0.3rem 0.9rem;
+      display: inline-block;
+      cursor: auto;
+      pointer-events: none;
+      svg {
+         font-size: 1rem;
+      }
+   }
+   .form {
+      margin: 0;
+      display: inline-block;
+      width: fit-content;
+      .upl-img {
+         display: inline-block;
+         .fileUpload {
+            font-size: 1rem;
+            padding: 0.8rem 0.9rem;
+            svg {
+               font-size: 1rem;
+            }
+         }
+      }
+      .checkbox-lbl {
+         margin: 0;
+         padding-right: 0;
+         cursor: auto;
+      }
+   }
+   .liner {
+      margin: 0;
+   }
+   .pointer {
+      position: absolute;
+      bottom: -0.3rem;
+
+      &:hover {
+         color: lighten($dark-color, 15%);
+      }
+   }
+   .list-first {
+      padding-left: 2rem;
+      margin: 0 0 1rem;
+
+      .pointer {
+         left: -4rem;
+      }
+
+      &-heading {
+         position: relative;
+         font-size: 3rem;
+         margin: 0.5rem;
+         margin-left: 2rem;
+         cursor: pointer;
+
+         &-title {
+            padding: 0.1rem 0.7rem;
+            border-radius: 10%;
+            background-color: lighten($light-color, 10%);
+            width: fit-content;
+            @include easeOut;
+
+            &:hover {
+               background-color: $light-color;
+            }
+         }
+      }
+   }
+
+   .list-second {
+      padding-left: 4rem;
+
+      .pointer {
+         left: -3rem;
+      }
+
+      &-heading {
+         position: relative;
+         font-size: 2rem;
+         cursor: pointer;
+
+         &-title {
+            @include easeOut;
+
+            &:hover {
+               text-decoration: underline 0.2rem dotted $dark-color;
+            }
+         }
+      }
+   }
+
+   ul {
+      padding-left: 1rem;
+
+      li {
+         position: relative;
+         margin: 0.8rem;
+         padding: 0.5rem 0.9rem;
+         background-color: lighten($secondary-color, 25%);
+
+         &::after {
+            position: absolute;
+            content: "•";
+            top: -0.7rem;
+            font-size: 3rem;
+            color: $primary-color;
+            left: -2.5rem;
+         }
+      }
+   }
+
+   .list-inside {
+      margin-left: 2rem;
+
+      p {
+         position: relative;
+         padding: 0.2rem 0.5rem;
+         background-color: lighten($secondary-color, 30%);
+         margin: 0.5rem 0;
+
+         &::after {
+            position: absolute;
+            content: "∞";
+            font-size: 2rem;
+            top: -0.5rem;
+            left: -2rem;
+         }
+      }
+   }
+}

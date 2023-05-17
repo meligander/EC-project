@@ -15,10 +15,11 @@ import {
    BACKUP_GENERATED,
    BD_RESTORED,
    PENALTY_LOADED,
-   PENALTY_UPDATED,
+   VALUES_UPDATED,
    GLOBAL_CLEARED,
    SALARIES_LOADED,
    SALARIES_UPDATED,
+   DISCOUNT_LOADED,
 } from "./types";
 import { logOut } from "./auth";
 
@@ -27,6 +28,21 @@ export const loadPenalty = () => async (dispatch) => {
       const res = await api.get("/global/penalty");
       dispatch({
          type: PENALTY_LOADED,
+         payload: res.data,
+      });
+   } catch (err) {
+      if (err.response.status !== 401) {
+         dispatch(setError(GLOBAL_ERROR, err.response));
+         window.scrollTo(0, 0);
+      }
+   }
+};
+
+export const loadDiscount = () => async (dispatch) => {
+   try {
+      const res = await api.get("/global/discount");
+      dispatch({
+         type: DISCOUNT_LOADED,
          payload: res.data,
       });
    } catch (err) {
@@ -132,19 +148,21 @@ export const restoreBackup = (data) => async (dispatch) => {
    if (!error) dispatch(updateLoadingSpinner(false));
 };
 
-export const updatePenalty = (penalty) => async (dispatch) => {
+export const updateValues = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
    try {
-      const res = await api.post("/global/penalty", penalty);
+      const values = newObject(formData);
+
+      const res = await api.post("/global/values", values);
 
       dispatch({
-         type: PENALTY_UPDATED,
+         type: VALUES_UPDATED,
          payload: res.data,
       });
 
-      dispatch(setAlert("Recargo Modificado", "success", "2"));
+      dispatch(setAlert("Recargo/Descuento Modificado", "success", "2"));
       dispatch(togglePopup("default"));
    } catch (err) {
       if (err.response.status !== 401) {

@@ -8,13 +8,15 @@ import {
    GLOBAL_CLEARED,
    PENALTY_LOADED,
    SALARIES_LOADED,
-   PENALTY_UPDATED,
+   VALUES_UPDATED,
    SALARIES_UPDATED,
    GLOBAL_ERROR,
+   DISCOUNT_LOADED,
 } from "../actions/types";
 
 const initialState = {
    penalty: "",
+   discount: "",
    salaries: {},
    loading: true,
    loadingSpinner: false,
@@ -37,6 +39,13 @@ export default function (state = initialState, action) {
             penalty: payload,
             error: {},
          };
+      case DISCOUNT_LOADED:
+         return {
+            ...state,
+            loading: false,
+            discount: payload,
+            error: {},
+         };
       case SALARIES_LOADED:
          return {
             ...state,
@@ -44,10 +53,11 @@ export default function (state = initialState, action) {
             salaries: payload,
             error: {},
          };
-      case PENALTY_UPDATED:
+      case VALUES_UPDATED:
          return {
             ...state,
-            penalty: payload,
+            penalty: payload.penalty,
+            discount: payload.discount,
             loading: false,
             error: {},
          };
