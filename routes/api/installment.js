@@ -340,6 +340,8 @@ router.put("/", auth, async (req, res) => {
          select: "-password",
       });
 
+      console.log(installments);
+
       installments = [
          ...installments,
          ...(await Installment.find({
@@ -380,10 +382,9 @@ router.put("/", auth, async (req, res) => {
       for (let x = 0; x < installments.length; x++) {
          const student = installments[x].student;
          const chargeDay =
-            !student.chargeday || student.chargeDay === 31
+            !student.chargeday || student.chargeday === 31
                ? 31 - (lessDay ? 1 : 0)
-               : student.chargeDay;
-
+               : student.chargeday;
          if (
             !(installments[x].number === 3 && month === 3) &&
             chargeDay - 3 <= day &&
@@ -409,14 +410,25 @@ router.put("/", auth, async (req, res) => {
                      users[x].email,
                      "Cuota por vencer",
                      `${greeting}
-                     Le queríamos comunicar que la cuota del corriente mes del alumno
-                      ${student.lastname}, ${
-                        student.name
-                     } está proxima a su vencimiento.
                      <br/>
-                     El día ${
-                        month === 3 ? 1 : chargeDay
-                     } se le aplicará un recargo del ${penalty.number}%.
+                     Le queríamos comunicar que ${
+                        day > chargeDay ? "a " : ""
+                     }la cuota del corriente mes del alumno
+                     ${student.lastname}, ${student.name}
+                     ${
+                        day > chargeDay
+                           ? ` se le ha aplicado un recargo del ${
+                                penalty.number
+                             }% el día ${
+                                month === 3 ? 1 : chargeDay
+                             } debido a la falta de pago. Le pedimos por favor si puede abonarlo a la mayor brevedad posible.`
+                           : ` está proxima a su vencimiento.
+                    <br/>
+                    El día ${
+                       month === 3 ? 1 : chargeDay
+                    } se le aplicará un recargo del ${penalty.number}%.`
+                     }
+                     Si tiene alguna duda al respecto, por favor comuníquese al (266) 529 5429.
                      <br/>
                      Este es un mensaje automático. Si usted ya realizó dicho pago ignore este email.
                      <br/><br/>
