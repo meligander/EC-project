@@ -408,7 +408,7 @@ router.put("/", auth, async (req, res) => {
                if (users[x].email)
                   await sendEmail(
                      users[x].email,
-                     "Cuota por vencer",
+                     day > chargeDay ? "Cuota vencida" : "Cuota por vencer",
                      `${greeting}
                      <br/>
                      Le queríamos comunicar que ${
