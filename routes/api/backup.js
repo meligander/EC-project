@@ -76,8 +76,8 @@ router.post("/", [auth, adminAuth], async (req, res) => {
          !local ? filePath : filePath.replace("backupFile", "backupFileLocal")
       }`,
       "--gzip",
-      process.env.NODE_ENV ? "--username=" + process.env.MONGO_USERNAME : "",
-      process.env.NODE_ENV ? "--password=" + process.env.MONGO_PASSWORD : "",
+      // process.env.NODE_ENV ? "--username=" + process.env.MONGO_USERNAME : "",
+      // process.env.NODE_ENV ? "--password=" + process.env.MONGO_PASSWORD : "",
    ]);
 
    backupProcess.on("exit", (code, signal) => {
