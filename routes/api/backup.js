@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const path = require("path");
-const differenceInDays = require("date-fns/differenceInDays");
+const { differenceInDays } = require("date-fns");
 const fs = require("fs");
 const fsPromise = fs.promises;
 const spawn = require("child_process").spawn;
@@ -107,7 +107,6 @@ router.post(
          process.env.NODE_ENV ? "--password=" + process.env.MONGO_PASSWORD : "",
       ]);
 
-      console.log(path.join(__dirname, `../../${req.file.path}`));
       backupProcess.on("exit", (code, signal) => {
          if (!code && !signal) {
             res.json({ msg: "Base de Datos Restaurada" });

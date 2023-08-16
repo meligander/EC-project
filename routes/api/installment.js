@@ -385,62 +385,62 @@ router.put("/", auth, async (req, res) => {
             !student.chargeday || student.chargeday === 31
                ? 31 - (lessDay ? 1 : 0)
                : student.chargeday;
-         if (
-            !(installments[x].number === 3 && month === 3) &&
-            chargeDay - 3 <= day &&
-            installments[x].status !== "warned" &&
-            process.env.NODE_ENV === "production"
-         ) {
-            const greeting =
-               (hours >= 6 && hours < 12
-                  ? "¡Buen día!"
-                  : hours >= 12 && hours < 19
-                  ? "¡Buenas tardes!"
-                  : "¡Buenas noches!") + "<br/>";
+         // if (
+         //    !(installments[x].number === 3 && month === 3) &&
+         //    chargeDay - 3 <= day &&
+         //    installments[x].status !== "warned" &&
+         //    process.env.NODE_ENV === "production"
+         // ) {
+         //    const greeting =
+         //       (hours >= 6 && hours < 12
+         //          ? "¡Buen día!"
+         //          : hours >= 12 && hours < 19
+         //          ? "¡Buenas tardes!"
+         //          : "¡Buenas noches!") + "<br/>";
 
-            let users = await User.find({
-               children: student._id,
-            }).select("-password");
+         //    let users = await User.find({
+         //       children: student._id,
+         //    }).select("-password");
 
-            users.push(student);
+         //    users.push(student);
 
-            for (let x = 0; x < users.length; x++) {
-               if (users[x].email)
-                  await sendEmail(
-                     users[x].email,
-                     day > chargeDay ? "Cuota vencida" : "Cuota por vencer",
-                     `${greeting}
-                     <br/>
-                     Le queríamos comunicar que ${
-                        day > chargeDay ? "a " : ""
-                     }la cuota del corriente mes del alumno
-                     ${student.lastname}, ${student.name}
-                     ${
-                        day > chargeDay
-                           ? ` se le ha aplicado un recargo del ${
-                                penalty.number
-                             }% el día ${
-                                month === 3 ? 1 : chargeDay
-                             } debido a la falta de pago. Le pedimos por favor si puede abonarlo a la mayor brevedad posible.`
-                           : ` está proxima a su vencimiento.
-                    <br/>
-                    El día ${
-                       month === 3 ? 1 : chargeDay
-                    } se le aplicará un recargo del ${penalty.number}%.`
-                     }
-                     Si tiene alguna duda al respecto, por favor comuníquese al (266) 529 5429.
-                     <br/>
-                     Este es un mensaje automático. Si usted ya realizó dicho pago ignore este email.
-                     <br/><br/>
-                     Muchas gracias y disculpe las molestias.`
-                  );
-            }
+         //    for (let x = 0; x < users.length; x++) {
+         //       if (users[x].email)
+         //          await sendEmail(
+         //             users[x].email,
+         //             day > chargeDay ? "Cuota vencida" : "Cuota por vencer",
+         //             `${greeting}
+         //             <br/>
+         //             Le queríamos comunicar que ${
+         //                day > chargeDay ? "a " : ""
+         //             }la cuota del corriente mes del alumno
+         //             ${student.lastname}, ${student.name}
+         //             ${
+         //                day > chargeDay
+         //                   ? ` se le ha aplicado un recargo del ${
+         //                        penalty.number
+         //                     }% el día ${
+         //                        month === 3 ? 1 : chargeDay
+         //                     } debido a la falta de pago. Le pedimos por favor si puede abonarlo a la mayor brevedad posible.`
+         //                   : ` está proxima a su vencimiento.
+         //            <br/>
+         //            El día ${
+         //               month === 3 ? 1 : chargeDay
+         //            } se le aplicará un recargo del ${penalty.number}%.`
+         //             }
+         //             Si tiene alguna duda al respecto, por favor comuníquese al (266) 529 5429.
+         //             <br/>
+         //             Este es un mensaje automático. Si usted ya realizó dicho pago ignore este email.
+         //             <br/><br/>
+         //             Muchas gracias y disculpe las molestias.`
+         //          );
+         //    }
 
-            await Installment.findOneAndUpdate(
-               { _id: installments[x].id },
-               { status: "warned" }
-            );
-         }
+         //    await Installment.findOneAndUpdate(
+         //       { _id: installments[x].id },
+         //       { status: "warned" }
+         //    );
+         // }
 
          if (
             (installments[x].number === 0 ||
