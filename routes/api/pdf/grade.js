@@ -149,7 +149,7 @@ router.post("/list", auth, async (req, res) => {
 //@desc     Create a certificate for the class
 //@access   Private
 router.post("/certificate", auth, async (req, res) => {
-   const { student, grades, info, date, keepOpen } = req.body;
+   const { student, grades, info, date } = req.body;
 
    const finals = [];
 
@@ -215,8 +215,7 @@ router.post("/certificate", auth, async (req, res) => {
             mention: info.category === "Kinder" && kinderGraden(average),
             finals,
          },
-         { type: "certificate", img: "logo", margin: false, landscape: false },
-         keepOpen
+         { type: "certificate", img: "logo", margin: false, landscape: false }
       );
       res.sendFile(fileName);
    } catch (err) {
@@ -229,7 +228,7 @@ router.post("/certificate", auth, async (req, res) => {
 //@desc     Create all cambridge certificate pdfs of the class (starter, movers, flyers)
 //@access   Private
 router.post("/cambridge", auth, async (req, res) => {
-   const { student, grades, info, date, keepOpen } = req.body;
+   const { student, grades, info, date } = req.body;
 
    if (!student.dni)
       return res.status(400).json({
@@ -270,8 +269,7 @@ router.post("/cambridge", auth, async (req, res) => {
             average,
             grades: body,
          },
-         { type: "cambridge", img: "all", margin: false, landscape: false },
-         keepOpen
+         { type: "cambridge", img: "all", margin: false, landscape: false }
       );
       res.sendFile(fileName);
    } catch (err) {

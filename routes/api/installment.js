@@ -340,8 +340,6 @@ router.put("/", auth, async (req, res) => {
          select: "-password",
       });
 
-      console.log(installments);
-
       installments = [
          ...installments,
          ...(await Installment.find({

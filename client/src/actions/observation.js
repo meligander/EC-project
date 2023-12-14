@@ -80,7 +80,6 @@ export const reportcardPDF = (students, info) => async (dispatch) => {
             {
                student: students[x],
                info,
-               keepOpen: x + 1 !== students.length,
             },
             {
                responseType: "blob",

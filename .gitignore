@@ -2,6 +2,7 @@ node_modules/
 client/node_modules
 
 config/.env
+jsconfig.json
 
 reports/
 backup/backupFile.gz

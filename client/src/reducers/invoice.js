@@ -140,7 +140,6 @@ export default function (state = initialState, action) {
                              (item.value * 0.90909 + Number.EPSILON) * 100
                           ) / 100
                         : item.value;
-                  console.log(value);
                   return item.student._id === payload
                      ? {
                           ...item,

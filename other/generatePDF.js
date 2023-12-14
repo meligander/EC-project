@@ -24,7 +24,7 @@ hbs.registerHelper("if_img", (average, value, imgs) => {
    return imgs.gray;
 });
 
-const generatePDF = async (fileName, data, style, keepOpen) => {
+const generatePDF = async (fileName, data, style) => {
    const browser = await puppeteer.launch({
       executablePath:
          process.env.LOCATION === "localhost"
@@ -43,7 +43,7 @@ const generatePDF = async (fileName, data, style, keepOpen) => {
 
    await page.addStyleTag({ path: getFilePath("css", style.type) });
 
-   await page.emulateMediaFeatures("screen");
+   await page.emulateMediaFeatures();
 
    await page.pdf({
       path: fileName,
@@ -84,7 +84,7 @@ const generatePDF = async (fileName, data, style, keepOpen) => {
 
    console.log("PDF done");
 
-   if (!keepOpen) await browser.close();
+   await browser.close();
 };
 
 const loadImg = (type) => {

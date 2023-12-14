@@ -20,7 +20,6 @@ router.post("/report-card", auth, async (req, res) => {
    const {
       student,
       info: { period, classroom, teacher, category },
-      keepOpen,
    } = req.body;
 
    const high = highDegree.some((item) => item === category);
@@ -150,8 +149,7 @@ router.post("/report-card", auth, async (req, res) => {
             attendances: attendancesTable,
             observation: student.observation.description,
          },
-         { type: "reportCard", img: "logo", margin: false, landscape: false },
-         keepOpen
+         { type: "reportCard", img: "logo", margin: false, landscape: false }
       );
       res.sendFile(fileName);
    } catch (err) {

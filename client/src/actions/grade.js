@@ -327,7 +327,6 @@ export const certificatePDF =
                grades: grades.find(
                   (item) => item[0].student._id === info.students[x]._id
                ),
-               keepOpen: x + 1 !== info.students.length,
             };
 
             const pdf = await api.post(

@@ -220,8 +220,6 @@ export const installmentsPDF = (installments, discount) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
-   console.log(discount);
-
    try {
       const pdf = await api.post(
          "/pdf/installment/list",
