@@ -20,7 +20,6 @@ router.get("/", auth, async (req, res) => {
    try {
       const { teacher, category, year } = req.query;
       let classes;
-
       let filter = {
          ...(teacher && { teacher }),
          ...(category && { category }),
@@ -428,7 +427,7 @@ const getTime = (time) => {
    const hour = time.substring(0, 2);
    const minute = time.substring(3);
 
-   return new Date(Date.UTC(2000, 0, 01, hour, minute, 0, 0));
+   return new Date(Date.UTC(2000, 0, 1, hour, minute, 0, 0));
 };
 
 module.exports = router;
