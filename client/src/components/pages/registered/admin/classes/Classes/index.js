@@ -42,6 +42,10 @@ const Classes = ({
 
    const { teacher, category, year } = filterForm;
 
+   const years = new Array(year - 2020)
+      .fill()
+      .map((item, index) => year - index);
+
    useEffect(() => {
       if (userLogged.type !== "teacher" && loadingUsers)
          loadUsers({ type: "teacher", active: true }, false, true);
@@ -134,10 +138,11 @@ const Classes = ({
                      value={year}
                   >
                      <option value="">* Seleccione el Año</option>
-                     <option value="2024">2024</option>
-                     <option value="2023">2023</option>
-                     <option value="2022">2022</option>
-                     <option value="2021">2021</option>
+                     {years.map((item) => (
+                        <option key={item} value={item}>
+                           {item}
+                        </option>
+                     ))}
                   </select>
                   <label
                      htmlFor="year"

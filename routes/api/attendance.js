@@ -24,7 +24,7 @@ router.get("/best", [auth, adminAuth], async (req, res) => {
       const attendances = await Attendance.find({
          student: { $exists: true },
          date: {
-            $gte: new Date(Date.UTC(year ? year : thisYear, 0, 01, 0, 0, 0)),
+            $gte: new Date(Date.UTC(year ? year : thisYear, 0, 1, 0, 0, 0)),
             $lte: new Date(Date.UTC(year ? year : thisYear, 11, 31, 0, 0, 0)),
          },
       })
@@ -59,31 +59,29 @@ router.get("/best", [auth, adminAuth], async (req, res) => {
             model: "category",
          });
 
-      if (quantity > 0) {
-         const students = attendances
-            .filter((item) => item.classroom)
-            .reduce((res, curr) => {
-               if (res[curr.student]) res[curr.student].push(curr);
-               else {
-                  Object.assign(res, { [curr.student]: [curr] });
-                  enrollments = enrollments.filter(
-                     (enroll) =>
-                        enroll.student._id.toString() !==
-                        curr.student._id.toString()
-                  );
-               }
+      const students = attendances
+         .filter((item) => item.classroom)
+         .reduce((res, curr) => {
+            if (res[curr.student]) res[curr.student].push(curr);
+            else {
+               Object.assign(res, { [curr.student]: [curr] });
+               enrollments = enrollments.filter(
+                  (enroll) =>
+                     enroll.student._id.toString() !==
+                     curr.student._id.toString()
+               );
+            }
 
-               return res;
-            }, {});
+            return res;
+         }, {});
 
-         for (const x in students) {
-            if (students[x].length <= quantity)
-               totalAtt.push({
-                  student: students[x][0].student,
-                  category: students[x][0].classroom.category,
-                  quantity: students[x].length,
-               });
-         }
+      for (const x in students) {
+         if (students[x].length <= quantity)
+            totalAtt.push({
+               student: students[x][0].student,
+               category: students[x][0].classroom.category,
+               quantity: students[x].length,
+            });
       }
 
       totalAtt = [

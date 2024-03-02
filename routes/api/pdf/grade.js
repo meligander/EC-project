@@ -212,7 +212,7 @@ router.post("/certificate", auth, async (req, res) => {
             pass: average >= 60 && info.category !== "Kinder",
             category: info.category,
             title: getCertificateTitle(info.category),
-            mention: info.category === "Kinder" && kinderGraden(average),
+            mention: info.category === "Kinder" && kinderGraden(average / 10),
             finals,
          },
          { type: "certificate", img: "logo", margin: false, landscape: false }
@@ -320,15 +320,15 @@ const kinderGraden = (grade) => {
    switch (true) {
       case grade === "":
          return "";
-      case grade < 40:
+      case grade < 4:
          return "Malo";
-      case grade >= 40 && grade < 60:
+      case grade >= 4 && grade < 6:
          return "Regular";
-      case grade >= 60 && grade < 75:
+      case grade >= 6 && grade < 7.5:
          return "Bueno";
-      case grade >= 75 && grade < 90:
+      case grade >= 7.5 && grade < 9:
          return "Muy Bueno";
-      case grade >= 90 && grade <= 100:
+      case grade >= 9 && grade <= 10:
          return "Sobresaliente";
       default:
          return "";
