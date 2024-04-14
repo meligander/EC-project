@@ -160,13 +160,11 @@ export default function (state = initialState, action) {
                   //Descuento efectivo
                   const discount =
                      (item.number !== 0 || item.value === payload.enrollment) &&
-                     new Intl.NumberFormat("de-DE").format(
-                        Math.floor(
-                           (item.value * (payload.discount / 100) +
-                              Number.EPSILON) /
-                              100
-                        ) * 100
-                     );
+                     Math.floor(
+                        (item.value * (payload.discount / 100) +
+                           Number.EPSILON) /
+                           100
+                     ) * 100;
                   return {
                      ...item,
                      value: item.value - +discount,
