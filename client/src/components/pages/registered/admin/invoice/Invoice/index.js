@@ -43,48 +43,27 @@ const Invoice = ({
    useEffect(() => {
       if (loadingInvoice) loadInvoice(match.params.invoice_id, true);
       else {
-         let fullName = "";
-         if (invoice.user.user_id === null) fullName = "Usuario Eliminado";
-         else {
-            const lastname = invoice.user.user_id
-               ? invoice.user.user_id.lastname
-               : invoice.user.lastname;
-            const name = invoice.user.user_id
-               ? invoice.user.user_id.name
-               : invoice.user.name;
-            fullName = `${lastname ? `${lastname}${name ? ", " : ""}` : ""}${
-               name ? name : ""
-            }`;
-         }
+         const userData = invoice.user.user_id ||
+            invoice.user || { lastname: "Usuario eliminado", name: "" };
 
-         const email =
-            invoice.user.user_id && invoice.user.user_id.email !== undefined
-               ? invoice.user.user_id.email
-               : invoice.user.email !== undefined
-               ? invoice.user.email
-               : "";
-         const cel =
-            invoice.user.user_id && invoice.user.user_id.cel !== undefined
-               ? invoice.user.user_id.cel
-               : invoice.user.cel !== undefined
-               ? invoice.user.cel
-               : "";
+         const fullName = [userData.lastname, userData.name]
+            .filter(Boolean)
+            .join(", ");
 
          setAdminValues((prev) => ({
             ...prev,
             remaining: invoice.details.reduce(
-               (sum, detail) => sum + (detail.value - detail.payment),
-               0
+               (accum, item) => accum + item.value,
+               0 - invoice.total
             ),
             discount: invoice.details.reduce(
-               (sum, detail) =>
-                  detail.discount ? +detail.discount + sum : sum,
+               (sum, detail) => (detail.discount ?? 0) + sum,
                0
             ),
             user: {
                name: fullName,
-               email,
-               cel,
+               email: userData.email || "",
+               cel: userData.cel || "",
             },
          }));
       }
@@ -132,14 +111,14 @@ const Invoice = ({
                            <th>Nombre</th>
                            <th>Cuota</th>
                            <th>Año</th>
-                           <th>Importe</th>
+                           <th>{discount !== 0 ? "Subtotal" : "Total"}</th>
                            {discount !== 0 && (
                               <>
-                                 <th>Descuento</th>
-                                 <th>A Pagar</th>
+                                 <th>Dto</th>
+                                 <th>Total</th>
                               </>
                            )}
-                           <th>Pago</th>
+                           <th>Abonado</th>
                         </tr>
                      </thead>
                      <tbody>
@@ -165,9 +144,7 @@ const Invoice = ({
                               <td>
                                  $
                                  {formatNumber(
-                                    invoice.discount
-                                       ? invoice.discount + invoice.value
-                                       : invoice.value
+                                    (invoice.discount ?? 0) + invoice.value
                                  )}
                               </td>
                               {discount !== 0 && (
@@ -190,7 +167,7 @@ const Invoice = ({
                   {discount !== 0 && (
                      <p>
                         <span className="heading-tertiary text-dark">
-                           Descuento Total:
+                           Descuento:
                         </span>
                         <input
                            className="value paragraph"
@@ -229,10 +206,7 @@ const Invoice = ({
                   className="btn btn-secondary"
                   onClick={(e) => {
                      e.preventDefault();
-                     invoicesPDF(
-                        { ...invoice, user, remaining, discount },
-                        "invoice"
-                     );
+                     invoicesPDF(invoice, "invoice");
                   }}
                >
                   <ImFilePdf />
