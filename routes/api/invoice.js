@@ -153,132 +153,117 @@ router.get("/last/invoiceid", [auth, adminAuth], async (req, res) => {
 //@route    POST /api/invoice
 //@desc     Register an invoice
 //@access   Private && Admin
-router.post(
-   "/",
-   [
-      auth,
-      adminAuth,
-      check("total", "Debe ingresar el pago de todas las cuotas agregadas")
-         .not()
-         .isEmpty(),
-   ],
-   async (req, res) => {
-      let { user, total, details } = req.body;
+router.post("/", [auth, adminAuth], async (req, res) => {
+   let { user, details } = req.body;
 
-      const { _id, name, lastname, email } = user;
+   const { _id, name, lastname, email } = user;
 
-      if (total) total = Number(total);
-
-      let errors = [];
-      const errorsResult = validationResult(req);
-      if (!errorsResult.isEmpty()) {
-         errors = errorsResult.array();
-         return res.status(400).json({ errors });
-      }
-
-      if (
-         details.some((item) => item.payment > item.value || item.payment <= 0)
-      )
-         return res.status(400).json({
-            msg: "El pago no puede ser mayor al valor de la cuota o un número negativo",
-         });
-
-      if (details.some((item) => item.payment === ""))
-         return res.status(400).json({
-            msg: "Debe ingresar el pago de todas las cuotas agregadas",
-         });
-
-      if (!_id && name === "" && lastname === "")
-         return res.status(400).json({
-            msg: "Debe ingresar el usuario que paga la factura",
-         });
-
-      try {
-         let last = await Register.find().sort({ $natural: -1 }).limit(1);
-         last = last[0];
-
-         if (!last)
-            return res.status(400).json({
-               msg: "Antes de realizar cualquier transacción debe ingresar dinero en la caja",
-            });
-
-         for (let x = 0; x < details.length; x++) {
-            const newValue = details[x].value - details[x].payment;
-
-            await Installment.findOneAndUpdate(
-               { _id: details[x].installment },
-               { value: newValue, ...(newValue !== 0 && { updatable: false }) }
-            );
-         }
-
-         const plusvalue = Math.round((last.registermoney + total) * 100) / 100;
-
-         if (last.temporary) {
-            await Register.findOneAndUpdate(
-               { _id: last._id },
-               {
-                  registermoney: plusvalue,
-               }
-            );
-         } else {
-            last = new Register({
-               registermoney: plusvalue,
-               temporary: true,
-               difference: 0,
-            });
-
-            await last.save();
-         }
-
-         let invoice = new Invoice({
-            ...req.body,
-            user: {
-               ...(_id
-                  ? { user_id: _id }
-                  : {
-                       ...(name !== "" && { name }),
-                       ...(lastname !== "" && { lastname }),
-                       ...(email !== "" && { email }),
-                    }),
-            },
-            details: details.map((item) => {
-               return {
-                  installment: item.installment,
-                  value: item.value,
-                  payment: item.payment,
-                  ...(item.discount && {
-                     discount: item.discount,
-                  }),
-               };
-            }),
-            register: last._id,
-         });
-
-         await invoice.save();
-
-         invoice = await Invoice.findOne({ _id: invoice._id })
-            .populate({
-               path: "user.user_id",
-               model: "user",
-               select: ["name", "lastname", "email"],
-            })
-            .populate({
-               path: "details.installment",
-               model: "installment",
-               populate: {
-                  path: "student",
-                  model: "user",
-                  select: ["name", "lastname"],
-               },
-            });
-
-         res.json(invoice);
-      } catch (err) {
-         console.error(err.message);
-         res.status(500).json({ msg: "Server Error" });
-      }
+   let errors = [];
+   const errorsResult = validationResult(req);
+   if (!errorsResult.isEmpty()) {
+      errors = errorsResult.array();
+      return res.status(400).json({ errors });
    }
-);
+
+   if (details.some((item) => item.payment === 0))
+      return res.status(400).json({
+         msg: "Debe ingresar un importe a todas las cuotas agregadas",
+      });
+
+   if (details.some((item) => item.payment > item.value || item.payment < 0))
+      return res.status(400).json({
+         msg: "El pago no puede ser mayor al valor de la cuota o un número negativo",
+      });
+
+   if (!_id && name === "" && lastname === "")
+      return res.status(400).json({
+         msg: "Debe ingresar el usuario que paga la factura",
+      });
+
+   try {
+      let last = await Register.find().sort({ $natural: -1 }).limit(1);
+      last = last[0];
+
+      if (!last)
+         return res.status(400).json({
+            msg: "Antes de realizar cualquier transacción debe ingresar dinero en la caja",
+         });
+
+      let total = 0;
+
+      for (const detail of details) {
+         total += detail.payment;
+         const newValue = detail.value - detail.payment;
+
+         //Para que no modifique el valor de la cuota cuando se hacen actualizaciones de precios
+         await Installment.findOneAndUpdate(
+            { _id: detail.installment },
+            {
+               value: newValue,
+               ...(newValue !== 0 && { updatable: false }),
+            }
+         );
+      }
+
+      const plusvalue = Math.round((last.registermoney + total) * 100) / 100;
+
+      if (last.temporary) {
+         await Register.findOneAndUpdate(
+            { _id: last._id },
+            {
+               registermoney: plusvalue,
+            }
+         );
+      } else {
+         last = new Register({
+            registermoney: plusvalue,
+            temporary: true,
+            difference: 0,
+         });
+
+         await last.save();
+      }
+
+      let invoice = new Invoice({
+         ...req.body,
+         user: {
+            ...(_id
+               ? { user_id: _id }
+               : {
+                    name,
+                    lastname,
+                    email,
+                 }),
+         },
+         details,
+         register: last._id,
+         total,
+      });
+
+      await invoice.save();
+
+      invoice = await Invoice.findOne({ _id: invoice._id })
+         .populate({
+            path: "user.user_id",
+            model: "user",
+            select: ["name", "lastname", "email"],
+         })
+         .populate({
+            path: "details.installment",
+            model: "installment",
+            populate: {
+               path: "student",
+               model: "user",
+               select: ["name", "lastname"],
+            },
+         });
+
+      res.json(invoice);
+   } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: "Server Error" });
+   }
+});
 
 //@route    DELETE /api/invoice/:id
 //@desc     Delete an invoice
@@ -296,6 +281,11 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
             model: "register",
          });
 
+      const total = invoice.details.reduce(
+         (accum, item) => accum + item.payment,
+         0
+      );
+
       for (let x = 0; x < invoice.details.length; x++)
          await Installment.findOneAndUpdate(
             { _id: invoice.details[x].installment._id },
@@ -304,16 +294,13 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
                   value:
                      invoice.details[x].installment.value +
                      invoice.details[x].payment +
-                     (invoice.details[x].discount
-                        ? invoice.details[x].discount
-                        : 0),
+                     (invoice.details[x].discount ?? 0),
                },
             }
          );
 
       const minusvalue =
-         Math.floor((invoice.register.registermoney - invoice.total) * 100) /
-         100;
+         Math.floor((invoice.register.registermoney - total) * 100) / 100;
 
       await Register.findOneAndUpdate(
          { _id: invoice.register._id },

@@ -143,8 +143,18 @@
       padding-top: 0.35rem;
    }
 
+   &-checkbox:disabled + .checkbox-lbl {
+      opacity: 0.5;
+      cursor: not-allowed;
+   }
+
    &-radio + .radio-lbl::before {
       border-radius: 1em;
+   }
+
+   &-radio:disabled + .radio-lbl {
+      opacity: 0.5;
+      cursor: not-allowed;
    }
 
    &-radio:checked + .radio-lbl,

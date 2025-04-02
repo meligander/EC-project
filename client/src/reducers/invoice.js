@@ -13,6 +13,7 @@ import {
    DISCOUNT_ADDED,
    PAY_CASH,
    PAY_TRANSFER,
+   DISCOUNT_REMOVED,
 } from "../actions/types";
 
 const month = new Date().getMonth() + 1;
@@ -55,51 +56,26 @@ export default function (state = initialState, action) {
       case INVOICE_REGISTERED:
          return state;
       case INVOICEDETAIL_ADDED:
+         //Si se la intenta agregar dos veces, no deja
          if (
-            state.invoice &&
-            state.invoice.details.some(
+            state.invoice?.details.some(
                (item) => item.installment === payload._id
             )
          )
             return state;
-         let value;
-         if (
-            state.invoice &&
-            state.invoice.studentsD &&
-            state.invoice.studentsD.some((item) => item === payload.student._id)
-         )
-            value =
-               payload.number > 2 &&
-               payload.status !== "expired" &&
-               payload.number > month
-                  ? payload.value -
-                    new Intl.NumberFormat("de-DE").format(
-                       Math.floor(
-                          (payload.value * 0.1 + Number.EPSILON) / 100
-                       ) * 100
-                    )
-                  : payload.status === "expired"
-                  ? Math.round(
-                       (payload.value * 0.90909 + Number.EPSILON) * 100
-                    ) / 100
-                  : payload.value;
 
          const detail = {
             ...payload,
-            _id: "",
             installment: payload._id,
             payment: "",
-            ...(value && {
-               value,
-               discount: payload.value - value,
-               payment: value,
-            }),
          };
 
          return {
             ...state,
             invoice: {
-               ...(state.invoice && state.invoice),
+               ...(state.invoice
+                  ? state.invoice
+                  : { cashDiscount: false, extraDiscount: false }),
                details: state.invoice
                   ? [...state.invoice.details, detail]
                   : [detail],
@@ -109,7 +85,7 @@ export default function (state = initialState, action) {
          return {
             ...state,
             invoice: {
-               ...(state.invoice && state.invoice),
+               ...state.invoice,
                details: state.invoice.details.filter(
                   (item) => item.installment !== payload
                ),
@@ -120,34 +96,44 @@ export default function (state = initialState, action) {
             ...state,
             invoice: {
                ...state.invoice,
-               added: true,
-               studentsD: state.invoice.studentsD
-                  ? [...state.invoice.studentsD, payload]
-                  : [payload],
+               extraDiscount: true,
                details: state.invoice.details.map((item) => {
-                  const value =
-                     item.number > 2 &&
+                  const discount =
+                     item.number > month &&
                      item.status !== "expired" &&
-                     item.number > month
-                        ? item.value -
-                          new Intl.NumberFormat("de-DE").format(
-                             Math.floor(
-                                (item.value * 0.1 + Number.EPSILON) / 100
-                             ) * 100
-                          )
-                        : item.status === "expired"
-                        ? Math.round(
-                             (item.value * 0.90909 + Number.EPSILON) * 100
-                          ) / 100
-                        : item.value;
-                  return item.student._id === payload
-                     ? {
-                          ...item,
-                          value,
-                          payment: value,
-                          discount: item.number > 2 ? item.value - value : 0,
-                       }
-                     : item;
+                     item.value > 1000
+                        ? Math.floor(
+                             (item.value * 0.1 + Number.EPSILON) / 100
+                          ) * 100
+                        : 0;
+                  const value = item.value - discount;
+
+                  return {
+                     ...item,
+                     value,
+                     payment: value,
+                     extraDiscount: discount,
+                     discount: (item.discount ?? 0) + discount,
+                  };
+               }),
+            },
+         };
+      case DISCOUNT_REMOVED:
+         return {
+            ...state,
+            invoice: {
+               ...state.invoice,
+               extraDiscount: false,
+               details: state.invoice.details.map((item) => {
+                  return {
+                     ...item,
+                     value: item.value + item.extraDiscount,
+                     payment: "",
+                     extraDiscount: null,
+                     discount: Math.abs(
+                        (item.discount ?? 0) - (item.extraDiscount ?? 0)
+                     ),
+                  };
                }),
             },
          };
@@ -156,21 +142,23 @@ export default function (state = initialState, action) {
             ...state,
             invoice: {
                ...state.invoice,
+               cashDiscount: true,
                details: state.invoice.details.map((item) => {
-                  //Descuento efectivo
                   const discount =
-                     (item.number !== 0 || item.value === payload.enrollment) &&
-                     Math.floor(
-                        (item.value * (payload.discount / 100) +
-                           Number.EPSILON) /
-                           100
-                     ) * 100;
+                     item.number !== 0 && item.value > 1000
+                        ? Math.floor(
+                             (item.value * (payload / 100) + Number.EPSILON) /
+                                100
+                          ) * 100
+                        : 0;
+                  const value = item.value - discount;
+
                   return {
                      ...item,
-                     value: item.value - +discount,
-                     discount: item.discount
-                        ? item.discount + +discount
-                        : discount,
+                     value,
+                     cashDiscount: discount,
+                     discount: (item.discount ?? 0) + discount,
+                     payment: state.invoice.extraDiscount ? value : "",
                   };
                }),
             },
@@ -180,11 +168,17 @@ export default function (state = initialState, action) {
             ...state,
             invoice: {
                ...state.invoice,
+               cashDiscount: false,
                details: state.invoice.details.map((item) => {
+                  const value = item.value + item.cashDiscount;
                   return {
                      ...item,
-                     value: item.value + +item.discount,
-                     discount: null,
+                     value,
+                     cashDiscount: null,
+                     discount: Math.abs(
+                        (item.discount ?? 0) - (item.cashDiscount ?? 0)
+                     ),
+                     payment: state.invoice.extraDiscount ? value : "",
                   };
                }),
             },

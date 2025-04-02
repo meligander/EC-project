@@ -24,9 +24,6 @@ const InvoiceSchema = new mongoose.Schema({
       type: Date,
       default: Date.now,
    },
-   remaining: {
-      type: Number,
-   },
    total: {
       type: Number,
       required: true,

@@ -10,7 +10,7 @@ const adminAuth = require("../../../middleware/adminAuth");
 
 const fileName = path.join(__dirname, "../../../reports/invoices.pdf");
 
-const installment = [
+const installmentName = [
    "Insc",
    "Clases Particulares",
    "Examen Libre",
@@ -62,32 +62,52 @@ router.post("/list", [auth, adminAuth], async (req, res) => {
 //@desc     Create a pdf of an invoice
 //@access   Private && Admin
 router.post("/", [auth], async (req, res) => {
-   const { remaining, discount, details, user, invoiceid, date, total } =
-      req.body;
+   const { invoiceid, user: userPlain, date, details, total } = req.body;
+
+   const user = userPlain.user_id ||
+      userPlain || { lastname: "Usuario eliminado", name: "" };
+
+   user.name = [user.lastname, user.name].filter(Boolean).join(", ");
+
+   const isDiscounted = details.some((item) => item.discount !== undefined);
+
+   let totalDiscount = 0;
+   let totalPayed = 0;
+   let invoiceTotal = 0;
 
    const body = details.map((item) => {
-      if (discount !== 0)
-         return [
-            `${item.installment.student.lastname}, ${item.installment.student.name}`,
-            installment[item.installment.number],
-            item.installment.year,
-            "$" +
-               formatNumber(
-                  item.discount ? item.value + item.discount : item.value
-               ),
-            item.discount ? "$" + formatNumber(item.discount) : "-",
-            "$" + formatNumber(item.value),
-            "$" + formatNumber(item.payment),
-         ];
-      else
-         return [
-            `${item.installment.student.lastname}, ${item.installment.student.name}`,
-            installment[item.installment.number],
-            item.installment.year,
-            "$" + formatNumber(item.value),
-            "$" + formatNumber(item.payment),
-         ];
+      const { installment, value, discount, payment } = item;
+
+      const studentName = `${installment.student.lastname}, ${installment.student.name}`;
+      const formattedSubTotal =
+         "$" + formatNumber(discount ? value + discount : value);
+      const formattedDiscount = discount ? "$" + formatNumber(discount) : "-";
+      const formattedTotal = "$" + formatNumber(value);
+      const formattedPayment = "$" + formatNumber(payment);
+
+      totalDiscount += discount ?? 0;
+      invoiceTotal += value;
+
+      return isDiscounted
+         ? [
+              studentName,
+              installmentName[installment.number],
+              installment.year,
+              formattedSubTotal,
+              formattedDiscount,
+              formattedTotal,
+              formattedPayment,
+           ]
+         : [
+              studentName,
+              installmentName[item.installment.number],
+              installment.year,
+              formattedTotal,
+              formattedPayment,
+           ];
    });
+
+   const remaining = invoiceTotal - total;
 
    try {
       await generatePDF(
@@ -97,19 +117,16 @@ router.post("/", [auth], async (req, res) => {
             user,
             invoiceid,
             date: format(new Date(date), "dd/MM/yy"),
-            userInfo: !(
-               user.email &&
-               user.email !== "" &&
-               user.cel &&
-               user.cel !== ""
-            ),
+            summary: details.length < 6,
             total: formatNumber(total),
             ...(remaining !== 0 && { remaining: formatNumber(remaining) }),
-            ...(discount !== 0 && { discount: formatNumber(discount) }),
+            ...(totalDiscount !== 0 && {
+               discount: formatNumber(totalDiscount),
+            }),
             spaces:
-               remaining !== 0 && discount !== 0
+               remaining !== 0 && totalDiscount !== 0
                   ? 3
-                  : remaining !== 0 || discount !== 0
+                  : remaining !== 0 || totalDiscount !== 0
                   ? 2
                   : 1,
          },
@@ -126,12 +143,9 @@ router.post("/", [auth], async (req, res) => {
 const setName = (user) => {
    if (user.user_id === null) return "Usuario Eliminado";
 
-   const lastname = user.user_id ? user.user_id.lastname : user.lastname;
-   const name = user.user_id ? user.user_id.name : user.name;
+   const { name, lastname } = user.user_id || user;
 
-   return `${lastname ? `${lastname}${name ? ", " : ""}` : ""}${
-      name ? name : ""
-   }`;
+   return [lastname, name].filter(Boolean).join(", ");
 };
 
 //@desc Function to format a number

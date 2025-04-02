@@ -8,6 +8,8 @@ import {
    payTransfer,
    registerInvoice,
    removeDetail,
+   addDiscount,
+   removeDiscount,
 } from "../../../../../../../../actions/invoice";
 import {
    formatNumber,
@@ -26,19 +28,21 @@ const InvoiceTab = ({
       otherValues: { invoiceNumber },
    },
    global: { discount },
-   categories: { categories },
+   auth: { userLogged },
    togglePopup,
    registerInvoice,
    removeDetail,
    payCash,
    payTransfer,
+   addDiscount,
+   removeDiscount,
 }) => {
    const day = format(new Date(), "dd/MM/yyyy");
+   const month = new Date().getMonth() + 1;
 
    const [adminValues, setAdminValues] = useState({
-      installmentTotal: 0,
-      totalDiscount: 0,
       cash: false,
+      total: 0,
    });
 
    const [formData, setFormData] = useState({
@@ -49,58 +53,33 @@ const InvoiceTab = ({
          email: "",
       },
       invoiceid: invoiceNumber,
-      total: 0,
       details: [],
    });
 
    const installment =
       "Insc,Part,Libre,Mar,Abr,May,Jun,Jul,Agto,Sept,Oct,Nov,Dic".split(",");
 
-   const { details, total, user } = formData;
+   const { details, user } = formData;
 
-   const { installmentTotal, totalDiscount, cash } = adminValues;
+   const { cash, total } = adminValues;
 
    useEffect(() => {
       if (invoice) {
          setFormData((prev) => ({
             ...prev,
             details: invoice.details,
-            ...(invoice.studentsD && {
-               total: invoice.details.reduce(
-                  (sum, detail) =>
-                     detail.discount !== undefined ? sum + detail.value : sum,
-                  0
-               ),
-            }),
          }));
          setAdminValues((prev) => ({
             ...prev,
-            installmentTotal: invoice.details.reduce(
-               (sum, detail) => sum + detail.value,
-               0
-            ),
-            totalDiscount: invoice.details.reduce(
-               (sum, detail) =>
-                  detail.discount ? +detail.discount + sum : sum,
-               0
-            ),
+            total: invoice.extraDiscount
+               ? invoice.details.reduce(
+                    (accum, item) => accum + +item.payment,
+                    0
+                 )
+               : 0,
          }));
-      } else {
-         setFormData((prev) => ({
-            ...prev,
-            details: [],
-            total: 0,
-            user: {
-               _id: null,
-               lastname: "",
-               name: "",
-               email: "",
-            },
-            invoiceid: invoiceNumber,
-         }));
-         setAdminValues((prev) => ({ ...prev, installmentTotal: 0 }));
       }
-   }, [invoice, invoiceNumber]);
+   }, [invoice]);
 
    const onChange = (e) => {
       e.persist();
@@ -119,36 +98,47 @@ const InvoiceTab = ({
       }));
    };
 
-   const onChangeAdmin = (e) => {
+   const onChangePaymentMethod = (e) => {
       e.persist();
-      setAdminValues((prev) => ({ ...prev, cash: e.target.checked }));
+      const isCash = e.target.value === "cash";
 
-      if (e.target.checked) payCash(discount.number, categories[0].value);
+      if (isCash) payCash(discount.number);
       else payTransfer();
+
+      setAdminValues((prev) => ({ ...prev, cash: isCash }));
    };
 
    const onChangeValue = (e) => {
       e.persist();
-      let newDetails = [...details];
+
+      const newValue = e.target.value;
+      const newDetails = [...details];
+
+      // Permitir solo números, comas y puntos
+      if (!/^[0-9.,]*$/.test(newValue)) return;
+
+      //Para verificar que hayan solo dos decimales
+      const decimal = newValue.replace(/,/g, ".").split(".");
 
       if (
-         newDetails[e.target.id].value >=
-         Number(e.target.value.replace(/,/g, "."))
+         newDetails === "" ||
+         (newDetails[e.target.id].value >=
+            Number(newValue.replace(/,/g, ".")) &&
+            (!decimal[1] || decimal[1].length < 3))
       ) {
          newDetails[e.target.id] = {
             ...newDetails[e.target.id],
-            payment: e.target.value,
+            payment: newValue,
          };
 
          setFormData((prev) => ({
             ...prev,
             details: newDetails,
+         }));
+         setAdminValues((prev) => ({
+            ...prev,
             total: newDetails.reduce(
-               (accum, item) =>
-                  accum +
-                  (typeof item.payment === "number"
-                     ? item.payment
-                     : Number(item.payment.replace(/,/g, "."))),
+               (accum, item) => accum + Number(item.payment.replace(/,/g, ".")),
                0
             ),
          }));
@@ -159,39 +149,24 @@ const InvoiceTab = ({
       <div className="invoice-tab">
          <PopUp
             confirm={() => {
-               let fullDiscount = 0;
-               let fullTotal = 0;
                const newDetails = details.map((item) => {
                   const payment = Number(
                      item.payment.toString().replace(/,/g, ".")
                   );
-                  let discount = 0;
-                  let value = item.value;
-
-                  if (item.discount)
-                     if (item.value === payment) {
-                        discount = +item.discount;
-                        fullDiscount += discount;
-                     } else {
-                        discount = null;
-                        value = item.value + +item.discount;
-                     }
-
-                  fullTotal += value;
                   return {
                      ...item,
                      payment,
-                     ...(discount !== 0 && {
-                        discount,
-                        value,
-                     }),
+                     //Si no se paga completo se saca el descuento
+                     ...(item.discount !== undefined &&
+                        (item.value !== payment || item.discount === 0) && {
+                           discount: undefined,
+                           value: item.value + item.discount,
+                        }),
                   };
                });
 
                registerInvoice({
                   ...formData,
-                  remaining: fullTotal - total,
-                  discount: fullDiscount,
                   details: newDetails,
                });
             }}
@@ -225,68 +200,109 @@ const InvoiceTab = ({
                   <label className="form-label">Fecha</label>
                </div>
             </div>
-            <div className="mb-2">
-               <UsersSearch
-                  primary={false}
-                  selectUser={(user) =>
-                     setFormData((prev) => ({ ...prev, user }))
-                  }
-                  usersType="guardian/student"
-                  onChangeForm={onChange}
-                  autoComplete="new-password"
-                  restore={() =>
-                     setFormData((prev) => ({
-                        ...prev,
-                        user: {
-                           _id: null,
-                           lastname: "",
-                           name: "",
-                           email: "",
-                        },
-                     }))
-                  }
-               />
-               <div className="form-group">
-                  <input
-                     className={`form-input ${
-                        user._id && !user.email ? "text-danger" : ""
-                     }`}
-                     type="email"
-                     name="email"
-                     id="user"
-                     onChange={onChange}
-                     disabled={user._id}
-                     value={
-                        !user._id
-                           ? user.email
-                           : user.email
-                           ? user.email
-                           : "No tiene email registrado"
-                     }
-                     placeholder="Email"
-                  />
-                  <label htmlFor="user" className="form-label">
-                     Email
-                  </label>
-               </div>
-            </div>
-            <h3 className="text-primary heading-tertiary">
-               Detalle de Factura
-            </h3>
-            <div className="text-right mt--1">
+            <UsersSearch
+               primary={false}
+               selectUser={(user) => setFormData((prev) => ({ ...prev, user }))}
+               usersType="guardian/student"
+               onChangeForm={onChange}
+               autoComplete="new-password"
+               restore={() =>
+                  setFormData((prev) => ({
+                     ...prev,
+                     user: {
+                        _id: null,
+                        lastname: "",
+                        name: "",
+                        email: "",
+                     },
+                  }))
+               }
+            />
+            <div className="form-group">
                <input
-                  className="form-checkbox"
-                  onChange={(e) => onChangeAdmin(e)}
-                  type="checkbox"
-                  name="cash"
-                  value={cash}
-                  id="cash"
+                  className={`form-input ${
+                     user._id && !user.email ? "text-danger" : ""
+                  }`}
+                  type="email"
+                  name="email"
+                  id="user"
+                  onChange={onChange}
+                  disabled={user._id}
+                  value={
+                     user._id
+                        ? user.email || "No tiene email registrado"
+                        : user.email
+                  }
+                  placeholder="Email"
                />
-
-               <label className="checkbox-lbl" htmlFor="cash">
-                  {cash ? "Contado" : "Transferencia"}
+               <label htmlFor="user" className="form-label">
+                  Email
                </label>
             </div>
+            <h3 className={"paragraph text-primary"}>Forma de Pago</h3>
+            <div className="radio-group" id="radio-group">
+               <input
+                  className="form-radio"
+                  type="radio"
+                  disabled={!invoice}
+                  value="transfer"
+                  checked={!cash}
+                  onChange={onChangePaymentMethod}
+                  id="rbt"
+               />
+               <label className="radio-lbl" htmlFor="rbt">
+                  Transferencia
+               </label>
+               <input
+                  className="form-radio"
+                  type="radio"
+                  disabled={!invoice}
+                  value="cash"
+                  checked={cash}
+                  onChange={onChangePaymentMethod}
+                  id="rbc"
+               />
+               <label className="radio-lbl" htmlFor="rbc">
+                  Efectivo
+               </label>
+            </div>
+            {(userLogged.type === "admin" ||
+               userLogged.type === "admin&teacher") && (
+               <div className="form-group">
+                  <input
+                     className="form-checkbox"
+                     onChange={(e) =>
+                        e.target.checked ? addDiscount() : removeDiscount()
+                     }
+                     type="checkbox"
+                     name="extraDiscount"
+                     disabled={
+                        details.filter(
+                           (item) =>
+                              item.status !== "expired" &&
+                              item.student._id === details[0].student._id &&
+                              item.number > month &&
+                              item.value > 5000
+                        ).length < 3
+                     }
+                     id="extraDiscount"
+                  />
+
+                  <label
+                     className="checkbox-lbl tooltip"
+                     htmlFor="extraDiscount"
+                  >
+                     Descuento Extra
+                     <span className="tooltiptext">
+                        Para cuando se pagan 3 o más cuotas de un mismo alumno
+                     </span>
+                  </label>
+               </div>
+            )}
+
+            <h3 className="text-primary heading-tertiary mt-3">
+               Detalle de Factura
+            </h3>
             <Alert type="5" />
             {details.length > 0 && (
                <div className="wrapper mt-2">
@@ -296,16 +312,18 @@ const InvoiceTab = ({
                            <th>Nombre</th>
                            <th>Cuota</th>
                            <th>Año</th>
-                           <th>Importe</th>
-                           {(cash || invoice.added) && (
+                           <th>
+                              {invoice.cashDiscount || invoice.extraDiscount
+                                 ? "Subtotal"
+                                 : "Total"}
+                           </th>
+                           {(invoice.cashDiscount || invoice.extraDiscount) && (
                               <>
                                  <th>Dto</th>
-                                 <th>A Pagar</th>
+                                 <th>Total</th>
                               </>
                            )}
-                           {!invoice.added && (
-                              <th> {!cash ? "A Pagar" : "Efectivo"} </th>
-                           )}
+                           <th>Abonado</th>
                            <th>&nbsp;</th>
                         </tr>
                      </thead>
@@ -329,28 +347,37 @@ const InvoiceTab = ({
                                              : install.value
                                        )}
                                     </td>
-                                    {(cash || invoice.added) && (
+                                    {(invoice.cashDiscount ||
+                                       invoice.extraDiscount) && (
                                        <>
                                           <td>
-                                             ${formatNumber(install.discount)}
+                                             {install.discount > 0 ? (
+                                                <>
+                                                   $
+                                                   {formatNumber(
+                                                      install.discount
+                                                   )}
+                                                </>
+                                             ) : (
+                                                <>-</>
+                                             )}
                                           </td>
                                           <td>
                                              ${formatNumber(install.value)}
                                           </td>
                                        </>
                                     )}
-                                    {!invoice.added && (
-                                       <td>
-                                          <input
-                                             type="text"
-                                             onChange={onChangeValue}
-                                             id={index}
-                                             placeholder="Monto"
-                                             value={install.payment}
-                                          />
-                                       </td>
-                                    )}
-
+                                    <td>
+                                       <input
+                                          type="text"
+                                          onChange={onChangeValue}
+                                          id={index}
+                                          disabled={invoice.extraDiscount}
+                                          autoComplete="off"
+                                          placeholder="Monto"
+                                          value={install.payment}
+                                       />
+                                    </td>
                                     <td>
                                        <button
                                           type="button"
@@ -371,31 +398,37 @@ const InvoiceTab = ({
                </div>
             )}
             <div className="text-right mt-3">
-               {totalDiscount !== 0 && (
+               {(invoice?.extraDiscount || invoice?.cashDiscount) && (
                   <div className="invoice-detail">
-                     <label htmlFor="total">Descuento Total</label>
+                     <label>Descuento</label>
                      <input
-                        type="number"
-                        name="totalDiscount"
-                        value={totalDiscount}
+                        value={formatNumber(
+                           details.reduce(
+                              (accum, item) => accum + item.discount,
+                              0
+                           )
+                        )}
                         disabled
                      />
                   </div>
                )}
-               {invoice && !invoice.added && (
+               {!invoice?.extraDiscount && (
                   <div className="invoice-detail">
-                     <label htmlFor="remaining">Saldo</label>
+                     <label>Saldo</label>
                      <input
-                        type="number"
-                        value={installmentTotal - total}
+                        value={formatNumber(
+                           details.reduce(
+                              (accum, item) => accum + item.value,
+                              0 - total
+                           )
+                        )}
                         disabled
-                        name="remaining"
                      />
                   </div>
                )}
                <div className="invoice-detail">
-                  <label htmlFor="total">Total a Pagar</label>
-                  <input type="number" name="total" value={total} disabled />
+                  <label>Total</label>
+                  <input value={formatNumber(total)} disabled />
                </div>
                <div className="btn-center">
                   <button type="submit" className="btn btn-primary">
@@ -413,7 +446,6 @@ const mapStateToProps = (state) => ({
    invoices: state.invoices,
    auth: state.auth,
    global: state.global,
-   categories: state.categories,
 });
 
 export default connect(mapStateToProps, {
@@ -422,4 +454,6 @@ export default connect(mapStateToProps, {
    togglePopup,
    payCash,
    payTransfer,
+   addDiscount,
+   removeDiscount,
 })(InvoiceTab);

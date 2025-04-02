@@ -48,12 +48,12 @@
                   <th>Nombre</th>
                   <th>Cuota</th>
                   <th>Año</th>
-                  <th>Importe</th>
                   {{#if discount}}
+                     <th>Subtotal</th>
                      <th>Dto</th>
-                     <th>A Pagar</th>
                   {{/if}}
-                  <th>Pago</th>
+                  <th>Total</th>
+                  <th>Abonado</th>
                </tr>
             </thead>
             <tbody>
@@ -67,11 +67,10 @@
             </tbody>
          </table>
       </div>
-      <div class="{{#if userInfo}} userInfo {{/if}}"></div>
-      <div class="text-right summary">
+      <div class="text-right {{#if summary}} summary {{/if}}">
          {{#if discount}}
             <div>
-               <p class="title">Descuento Total: </p>
+               <p class="title">Descuento: </p>
                <p class="value">${{discount}}</p>
             </div>
          {{/if}}

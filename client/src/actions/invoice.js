@@ -30,6 +30,7 @@ import {
    DISCOUNT_ADDED,
    PAY_CASH,
    PAY_TRANSFER,
+   DISCOUNT_REMOVED,
 } from "./types";
 
 export const loadInvoice = (invoice_id, spinner) => async (dispatch) => {
@@ -91,7 +92,7 @@ export const registerInvoice = (formData) => async (dispatch) => {
    dispatch(updateLoadingSpinner(true));
    let error = false;
 
-   let invoice = newObject(formData);
+   const invoice = newObject(formData);
 
    try {
       const res = await api.post("/invoice", invoice);
@@ -100,41 +101,7 @@ export const registerInvoice = (formData) => async (dispatch) => {
          type: INVOICE_REGISTERED,
       });
 
-      let fullName = "";
-      if (invoice.user.user_id === null) fullName = "Usuario Eliminado";
-      else {
-         const lastname = invoice.user.user_id
-            ? invoice.user.user_id.lastname
-            : invoice.user.lastname;
-         const name = invoice.user.user_id
-            ? invoice.user.user_id.name
-            : invoice.user.name;
-         fullName = `${lastname ? `${lastname}${name ? ", " : ""}` : ""}${
-            name ? name : ""
-         }`;
-      }
-
-      const email = invoice.user.user_id
-         ? invoice.user.user_id.email
-         : invoice.user.email
-         ? invoice.user.email
-         : "";
-      const cel = invoice.user.user_id
-         ? invoice.user.user_id.cel
-         : invoice.user.cel
-         ? invoice.user.cel
-         : "";
-
-      await dispatch(
-         invoicesPDF(
-            {
-               ...res.data,
-               discount: invoice.discount,
-               user: { name: fullName, email, cel },
-            },
-            "invoice"
-         )
-      );
+      await dispatch(invoicesPDF(res.data, "invoice"));
 
       dispatch(getTotalDebt());
       dispatch(clearRegister());
@@ -203,6 +170,13 @@ export const invoicesPDF = (formData, type) => async (dispatch) => {
 
       const pdfBlob = new Blob([pdf.data], { type: "application/pdf" });
 
+      const userData = formData.user.user_id ||
+         formData.user || { lastname: "Usuario eliminado", name: "" };
+
+      const fullName = [userData.lastname, userData.name]
+         .filter(Boolean)
+         .join(", ");
+
       const date =
          type === "list"
             ? format(new Date(), "dd-MM-yy")
@@ -212,7 +186,7 @@ export const invoicesPDF = (formData, type) => async (dispatch) => {
          pdfBlob,
          type === "list"
             ? `Ingresos ${date}.pdf`
-            : `Factura ${formData.user.name} ${date}.pdf`
+            : `Factura ${fullName} ${date}.pdf`
       );
 
       dispatch(setAlert("PDF Generado", "success", "2"));
@@ -243,12 +217,16 @@ export const addDetail = (detail) => (dispatch) => {
    dispatch({ type: INSTALLMENT_DELETED, payload: detail._id });
 };
 
-export const addDiscount = (student) => (dispatch) => {
-   dispatch({ type: DISCOUNT_ADDED, payload: student });
+export const addDiscount = () => (dispatch) => {
+   dispatch({ type: DISCOUNT_ADDED });
 };
 
-export const payCash = (discount, enrollment) => (dispatch) => {
-   dispatch({ type: PAY_CASH, payload: { discount, enrollment } });
+export const removeDiscount = (student) => (dispatch) => {
+   dispatch({ type: DISCOUNT_REMOVED });
+};
+
+export const payCash = (discount) => (dispatch) => {
+   dispatch({ type: PAY_CASH, payload: discount });
 };
 
 export const payTransfer = () => (dispatch) => {
