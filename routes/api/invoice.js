@@ -294,7 +294,7 @@ router.delete("/:id", [auth, adminAuth], async (req, res) => {
                   value:
                      invoice.details[x].installment.value +
                      invoice.details[x].payment +
-                     (invoice.details[x].discount ?? 0),
+                     (invoice.details[x].discount || 0),
                },
             }
          );

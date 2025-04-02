@@ -113,7 +113,7 @@ export default function (state = initialState, action) {
                      value,
                      payment: value,
                      extraDiscount: discount,
-                     discount: (item.discount ?? 0) + discount,
+                     discount: (item.discount || 0) + discount,
                   };
                }),
             },
@@ -131,7 +131,7 @@ export default function (state = initialState, action) {
                      payment: "",
                      extraDiscount: null,
                      discount: Math.abs(
-                        (item.discount ?? 0) - (item.extraDiscount ?? 0)
+                        (item.discount || 0) - (item.extraDiscount || 0)
                      ),
                   };
                }),
@@ -157,7 +157,7 @@ export default function (state = initialState, action) {
                      ...item,
                      value,
                      cashDiscount: discount,
-                     discount: (item.discount ?? 0) + discount,
+                     discount: (item.discount || 0) + discount,
                      payment: state.invoice.extraDiscount ? value : "",
                   };
                }),
@@ -176,7 +176,7 @@ export default function (state = initialState, action) {
                      value,
                      cashDiscount: null,
                      discount: Math.abs(
-                        (item.discount ?? 0) - (item.cashDiscount ?? 0)
+                        (item.discount || 0) - (item.cashDiscount || 0)
                      ),
                      payment: state.invoice.extraDiscount ? value : "",
                   };

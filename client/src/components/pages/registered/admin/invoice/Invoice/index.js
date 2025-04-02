@@ -57,7 +57,7 @@ const Invoice = ({
                0 - invoice.total
             ),
             discount: invoice.details.reduce(
-               (sum, detail) => (detail.discount ?? 0) + sum,
+               (sum, detail) => (detail.discount || 0) + sum,
                0
             ),
             user: {
@@ -144,7 +144,7 @@ const Invoice = ({
                               <td>
                                  $
                                  {formatNumber(
-                                    (invoice.discount ?? 0) + invoice.value
+                                    (invoice.discount || 0) + invoice.value
                                  )}
                               </td>
                               {discount !== 0 && (

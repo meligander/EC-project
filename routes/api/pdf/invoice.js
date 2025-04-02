@@ -85,7 +85,7 @@ router.post("/", [auth], async (req, res) => {
       const formattedTotal = "$" + formatNumber(value);
       const formattedPayment = "$" + formatNumber(payment);
 
-      totalDiscount += discount ?? 0;
+      totalDiscount += discount || 0;
       invoiceTotal += value;
 
       return isDiscounted
