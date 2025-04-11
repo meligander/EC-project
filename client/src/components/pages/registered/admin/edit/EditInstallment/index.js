@@ -119,11 +119,10 @@ const EditInstallment = ({
                   {
                      ...formData,
                      ...(type === "new" && { student: student._id }),
-                     ...(number === 1 ||
-                        (number === 2 && {
-                           status: "expired",
-                           updatable: false,
-                        })),
+                     ...((number === 1 || number === 2) && {
+                        status: "debt",
+                        updatable: false,
+                     }),
                   },
                   installments.length > 0
                );
